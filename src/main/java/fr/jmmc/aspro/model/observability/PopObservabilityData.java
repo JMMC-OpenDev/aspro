@@ -35,14 +35,14 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
    * @param popCombination pop combination
    * @param rangesBL list of HA ranges per BL
    * @param nValid number of ranges to consider a point is valid
-   * @param obsCtx observability context (temporary data) having rise/set intervals + night limits in HA
+   * @param bpObsCtxLocal observability context (temporary data) having rise/set intervals + night limits in HA
    * @param estimator best PoPs estimator
    * @param doSkipDL skip pop combination if any DL is unobservable (useful for performance and detailed output)
    * @param clearRangesBL true to free rangesBL; false otherwise
    * @return PopObservabilityData instance or null if intersection is empty (unobservable)
    */
   public static PopObservabilityData estimate(final String targetName, final PopCombination popCombination, final List<List<Range>> rangesBL,
-          final int nValid, final BestPoPsObservabilityContext obsCtx, final BestPopsEstimator estimator,
+          final int nValid, final BestPoPsObservabilityContext bpObsCtxLocal, final BestPopsEstimator estimator,
           final boolean doSkipDL, final boolean clearRangesBL) {
 
     // Estimate data first:
@@ -52,18 +52,18 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
     for (int i = 0, size = rangesBL.size(); i < size; i++) {
       ranges = rangesBL.get(i);
       if (!ranges.isEmpty()) {
-        obsCtx.addInFlatRangeLimits(ranges);
+        bpObsCtxLocal.addInFlatRangeLimits(ranges);
       }
     }
 
     if (clearRangesBL) {
       // recycle memory (to avoid GC):
-      obsCtx.recycleAll(rangesBL);
+      bpObsCtxLocal.recycleAll(rangesBL);
     }
 
     // clear and get merged ranges (temporary use) = empty list with 3 buckets
     // Merge HA ranges (BL) with HA Rise/set ranges (and optionally night limits):
-    final List<Range> mergeRanges = obsCtx.intersectAndGetMergeRanges(nValid);
+    final List<Range> mergeRanges = bpObsCtxLocal.intersectAndGetMergeRanges(nValid);
 
     // find the maximum length of HA observable intervals:
     Range maxRange = null;
@@ -90,7 +90,7 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
             estimator.compute(maxRange), maxRange.getLength());
 
     // recycle memory (to avoid GC):
-    obsCtx.recycleRanges(mergeRanges);
+    bpObsCtxLocal.recycleRanges(mergeRanges);
 
     return popData;
   }
@@ -117,6 +117,7 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
    * @param other pop observability data
    * @return Double.compare(maxLength1, maxLength2)
    */
+  @Override
   public int compareTo(final PopObservabilityData other) {
     return Double.compare(this.getEstimation(), other.getEstimation());
   }

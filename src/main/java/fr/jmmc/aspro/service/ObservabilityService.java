@@ -14,9 +14,9 @@ import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.HorizonShape;
-import fr.jmmc.aspro.model.ObservabilityContext;
+import fr.jmmc.aspro.model.BestPoPsObservabilityContext;
 import fr.jmmc.aspro.model.Range;
-import fr.jmmc.aspro.model.RangeFactory;
+import fr.jmmc.aspro.model.ObservabilityContext;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.GroupedPopObservabilityData;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
@@ -95,14 +95,14 @@ public final class ObservabilityService {
     private static final Logger logger = LoggerFactory.getLogger(ObservabilityService.class.getName());
     /** Class logger */
     private static final Logger loggerTasks = LoggerFactory.getLogger(ObservabilityService.class.getName() + "Tasks");
-    /** flag to slow down the service to detect concurrency problems */
-    private final static boolean DEBUG_SLOW_SERVICE = false;
     /** flag to show range factory statistics */
     private final static boolean SHOW_RANGE_FACTORY_STATS = false;
     /** flag to show best pops statistics */
     private final static boolean SHOW_BEST_POPS_STATS = false;
     /** flag to show task statistics */
     private final static boolean SHOW_TASK_STATS = false;
+    /** flag to slow down the service to detect concurrency problems */
+    private final static boolean DEBUG_SLOW_SERVICE = false;
     /** number of best Pops displayed in warnings */
     private final static int MAX_POPS_IN_WARNING = 15;
     /** jd step = 1 minute */
@@ -113,8 +113,6 @@ public final class ObservabilityService {
     private static final ParallelJobExecutor jobExecutor = ParallelJobExecutor.getInstance();
     /** shared cache of Pop combinations keyed by 'interferometer_nBL' */
     private static final Map<String, List<SharedPopCombination>> popCombinationCache = new HashMap<String, List<SharedPopCombination>>(16);
-    /** simple RangeFactory (stateless) */
-    private static final RangeFactory defaultRangeFactory = new SimpleRangeFactory();
     /** shared InterruptedJobException instance */
     private static final InterruptedJobException ije = new InterruptedJobException("ObservabilityService.compute: interrupted");
 
@@ -123,6 +121,12 @@ public final class ObservabilityService {
     private final boolean isLogDebug = logger.isDebugEnabled();
     /** reused string buffer instance */
     private final StringBuffer shared_sb = new StringBuffer(128);
+    /** temporary list of ranges to merge */
+    private ArrayList<Range> tmpRanges = null;
+    /** main observability context (RangeFactory) */
+    private final ObservabilityContext obsCtx = new ObservabilityContext(15); // 6T
+    /** observability context dedicated to best Pops estimators (temporary variables) */
+    private BestPoPsObservabilityContext bpObsCtx = null;
 
     /* output */
     /** observability data */
@@ -195,8 +199,6 @@ public final class ObservabilityService {
     private List<PopCombination> popCombinations = null;
     /** flag to disable the observability restriction due to the night */
     private boolean ignoreUseNightLimit = false;
-    /** estimate the observability context (temporary variables) */
-    private ObservabilityContext obsCtx = null;
     /** azimuth expressed in [0; 360 deg] */
     private Double windAzimuth = null;
     /** discarded azimuth ranges due to wind direction */
@@ -302,8 +304,6 @@ public final class ObservabilityService {
         // Start the computations :
         final long start = System.nanoTime();
 
-        defaultRangeFactory.reset();
-
         // Get interferometer / instrument :
         prepareObservation();
 
@@ -373,7 +373,7 @@ public final class ObservabilityService {
         logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         if (SHOW_RANGE_FACTORY_STATS) {
-            defaultRangeFactory.dumpStats();
+            obsCtx.dumpStats();
         }
 
         return this.data;
@@ -469,7 +469,7 @@ public final class ObservabilityService {
             obsMoonRanges.addAll(this.nightOnlyRanges);
             obsMoonRanges.addAll(moonRiseRanges);
 
-            final List<Range> moonRanges = Range.intersectRanges(obsMoonRanges, 2, defaultRangeFactory);
+            final List<Range> moonRanges = Range.intersectRanges(obsMoonRanges, 2, obsCtx);
 
             if (isLogDebug) {
                 logger.debug("moonRanges: {}", moonRanges);
@@ -481,6 +481,10 @@ public final class ObservabilityService {
             final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
 
             this.data.setMoonIllumPercent(100d * moonIllum);
+
+            // recycle ranges & lists:
+            obsCtx.recycleRangesAndList(moonRanges);
+            obsCtx.recycleRangesAndList(moonRiseRanges);
 
             if (isLogDebug) {
                 logger.debug("moon illum: {}", moonIllum);
@@ -536,7 +540,7 @@ public final class ObservabilityService {
                     // no Pop compatible:
                     this.popCombinations.clear();
 
-                    this.obsCtx.setPopCombs(new PopCombination[0]);
+                    this.bpObsCtx.setPopCombs(new PopCombination[0]);
 
                 } else {
                     this.data.setBestPops(bestPopCombination);
@@ -546,8 +550,8 @@ public final class ObservabilityService {
                     this.popCombinations.add(bestPopCombination);
 
                     // Use arrays instead of List for performance:
-                    this.obsCtx.setPopCombs(new PopCombination[1]);
-                    this.popCombinations.toArray(this.obsCtx.getPopCombs());
+                    this.bpObsCtx.setPopCombs(new PopCombination[1]);
+                    this.popCombinations.toArray(this.bpObsCtx.getPopCombs());
                 }
             }
         }
@@ -634,15 +638,15 @@ public final class ObservabilityService {
         }
 
         // Prepare thread context variables:
-        final ObservabilityContext[] obsCtxThreads = new ObservabilityContext[nTh];
+        final BestPoPsObservabilityContext[] bpObsCtxThreads = new BestPoPsObservabilityContext[nTh];
         final int[][] nTaskThreads = (SHOW_BEST_POPS_STATS) ? new int[nTh][16] : null; // cache line padding
 
         for (int t = 0; t < nTh; t++) {
-            obsCtxThreads[t] = (t == 0) ? this.obsCtx : new ObservabilityContext(this.obsCtx);
+            bpObsCtxThreads[t] = (t == 0) ? this.bpObsCtx : new BestPoPsObservabilityContext(this.bpObsCtx);
         }
 
         // chunks:
-    /*
+        /*
          * 3T:   125 => 1 chunk
          * 4T:   625 => 1 chunk
          * 5T:  3125 => 1 chunk per thread
@@ -694,14 +698,14 @@ public final class ObservabilityService {
                         // If new threads are created, array access may be a problem (thread conflicts):
                         // ConcurrentLinkedQueue could be used to provide obs context switchs !!
                         // or thread local but initialization / cleanup is not simple
-                        final ObservabilityContext obsCtxLocal = obsCtxThreads[threadIndex];
+                        final BestPoPsObservabilityContext bpObsCtxLocal = bpObsCtxThreads[threadIndex];
 
                         final Target target = riseTargets.get(targetIndex);
                         final double[] info = infoTargets.get(targetIndex); // Ra, Dec, HaElev
 
                         // data partitioning so no synchronization required:
                         final List<PopObservabilityData> popDataList = findPoPsForTargetObservability(
-                                target, obsCtxLocal, info[0], info[1], info[2], fromCb, endCb);
+                                target, bpObsCtxLocal, info[0], info[1], info[2], fromCb, endCb);
 
                         // fast interrupt (multi threading):
                         if (Thread.currentThread().isInterrupted()) {
@@ -729,7 +733,7 @@ public final class ObservabilityService {
                 }
 
                 if (SHOW_RANGE_FACTORY_STATS) {
-                    obsCtxThreads[t].dumpStats();
+                    bpObsCtxThreads[t].dumpStats();
                 }
             }
         }
@@ -893,7 +897,7 @@ public final class ObservabilityService {
      * wMin and wMax are given by wRanges.
      *
      * @param target target to use
-     * @param obsCtxLocal observability context (local context ie thread)
+     * @param bpObsCtxLocal observability context (local context ie thread)
      * @param precRA precessed RA in degrees
      * @param precDEC precessed DEC in degrees
      * @param haElev rise/set ha
@@ -903,7 +907,7 @@ public final class ObservabilityService {
      * @return list of Pop observability data
      */
     private List<PopObservabilityData> findPoPsForTargetObservability(final Target target,
-                                                                      final ObservabilityContext obsCtxLocal,
+                                                                      final BestPoPsObservabilityContext bpObsCtxLocal,
                                                                       final double precRA, final double precDEC, final double haElev,
                                                                       final int fromCb, final int endCb) {
 
@@ -915,29 +919,28 @@ public final class ObservabilityService {
         // target rise :
         if (haElev > 0d) {
             // HA Min/Max range:
-            final Range haLimits = getTargetHALimits(target);
+            final Range haLimits = getTargetHALimits(target, bpObsCtxLocal);
 
             // rise/set range RESTRICTED by HA Min/Max constraints:
-            final Range rangeHARiseSet = new Range(checkHA(haLimits.getMin(), haElev), checkHA(haLimits.getMax(), haElev));
+            final Range rangeHARiseSet = bpObsCtxLocal.valueOf(checkHA(haLimits.getMin(), haElev), checkHA(haLimits.getMax(), haElev));
 
             // update pop estimator related to target:
-            obsCtxLocal.setPopEstimator(getBestPopsEstimator(target, haElev));
+            bpObsCtxLocal.setPopEstimator(getBestPopsEstimator(target, haElev, bpObsCtxLocal));
 
-            final List<Range> rangesTarget = new ArrayList<Range>(4);
+            final List<Range> rangesTarget = bpObsCtxLocal.getList();
             rangesTarget.add(rangeHARiseSet);
 
             if (this.useNightLimit) {
-                final List<Range> haNightLimits = new ArrayList<Range>(2);
-
-                this.sc.convertJDToHARanges(this.nightLimits, haNightLimits, precRA);
-
-                if (isLogDebug) {
-                    logger.debug("HA night limits: {}", haNightLimits);
-                }
-                rangesTarget.addAll(haNightLimits);
+                this.sc.convertJDToHARanges(this.nightLimits, rangesTarget, precRA);
             }
 
-            popDataList = getPopObservabilityData(target.getName(), FastMath.toRadians(precDEC), rangesTarget, true, obsCtxLocal, true, fromCb, endCb);
+            popDataList = getPopObservabilityData(target.getName(), FastMath.toRadians(precDEC), rangesTarget, true,
+                    bpObsCtxLocal, true, fromCb, endCb);
+
+            // recycle ranges & lists:
+            bpObsCtxLocal.recycleRangesAndList(rangesTarget);
+            // recycle range:
+            bpObsCtxLocal.recycleRange(haLimits);
 
         } else {
             if (isLogDebug) {
@@ -1000,15 +1003,17 @@ public final class ObservabilityService {
 
         // target rise :
         if (haElev > 0d) {
+            final ObservabilityContext ctx = obsCtx;
+
             // rise/set range WITHOUT HA Min/Max constraints:
-            final Range rangeHARiseSet = new Range(-haElev, haElev);
+            final Range rangeHARiseSet = ctx.valueOf(-haElev, haElev);
 
             if (isLogDebug) {
                 logger.debug("rangeHARiseSet: {}", rangeHARiseSet);
             }
 
             // HA intervals for every base line:
-            final List<List<Range>> rangesHABaseLines;
+            List<List<Range>> rangesHABaseLines;
 
             // VLTI: VCM restrictions:
             final List<DelayLineRestriction> delayLineRestrictions = this.interferometer.getDelayLineRestrictions();
@@ -1017,37 +1022,43 @@ public final class ObservabilityService {
             // HA intervals for every base line taking into account the custom maximum throw in switchyard (ie per station ~ VLTI VCM limits):
             boolean checkDLMaxThrow = false;
             List<List<Range>> rangesHABaseLinesVcm;
-            final List<List<List<Range>>> rangesHABaseLinesVcms
-                                          = (this.hasSwitchyardDelayLineMaxThrow) ? new ArrayList<List<List<Range>>>(nDLRestrictions) : null;
+            final List<List<List<Range>>> rangesHABaseLinesVcms = (this.hasSwitchyardDelayLineMaxThrow)
+                    ? new ArrayList<List<List<Range>>>(nDLRestrictions) : null;
 
             if (this.hasPops) {
-
                 // update pop estimator related to target:
-                this.obsCtx.setPopEstimator(getBestPopsEstimator(target, haElev));
+                this.bpObsCtx.setPopEstimator(getBestPopsEstimator(target, haElev, ctx));
 
                 // handle here all possible combinations for POPs :
                 // keep only the POPs that maximize the DL+rise intersection ...
-                final List<Range> rangesTarget = new ArrayList<Range>(4);
+                final List<Range> rangesTarget = ctx.getList();
                 rangesTarget.add(rangeHARiseSet);
 
+                List<Range> nightsLimitsHA = null;
                 if (this.useNightLimit) {
-                    final List<Range> haNightLimits = new ArrayList<Range>(2);
-
-                    this.sc.convertJDToHARanges(this.nightLimits, haNightLimits, precRA);
-
-                    if (isLogDebug) {
-                        logger.debug("HA night limits: {}", haNightLimits);
-                    }
-                    rangesTarget.addAll(haNightLimits);
+                    nightsLimitsHA = ctx.getList();
+                    this.sc.convertJDToHARanges(this.nightLimits, nightsLimitsHA, precRA);
+                    rangesTarget.addAll(nightsLimitsHA);
                 }
 
                 rangesHABaseLines = findHAIntervalsWithPops(FastMath.toRadians(precDEC), rangesTarget, starObs);
-
-                /* TODO: handle Pupil handling limits (DL / VCM) for CHARA ? */
+                // recycle ranges & lists:
+                if (nightsLimitsHA != null) {
+                    ctx.recycleRangesAndList(nightsLimitsHA);
+                }
+                ctx.recycleList(rangesTarget);
+                /* 
+                 * TODO: handle Pupil handling limits (DL / VCM) for CHARA ? 
+                 */
             } else {
+
+                final double[] w = ctx.getW();
+                final double[] ha = ctx.getHa();
+                final double[] haValues = ctx.getHaValues();
+
                 // Get intervals (HA) compatible with all base lines:
                 rangesHABaseLines = DelayLineService.findHAIntervals(FastMath.toRadians(precDEC),
-                        this.baseLines, this.wRanges, defaultRangeFactory);
+                        this.baseLines, this.wRanges, ha, haValues, w, ctx);
 
                 // rangesHABaseLines can be null if the thread was interrupted :
                 checkInterrupted();
@@ -1062,11 +1073,13 @@ public final class ObservabilityService {
                         if (!wRangesVcm.isEmpty()) {
                             // Get intervals (HA) compatible with all base lines using the DL throw for this VCM limit:
                             rangesHABaseLinesVcm = DelayLineService.findHAIntervals(FastMath.toRadians(precDEC),
-                                    this.baseLines, wRangesVcm, defaultRangeFactory);
+                                    this.baseLines, wRangesVcm, ha, haValues, w, ctx);
 
                             // rangesHABaseLinesVcm can be null if the thread was interrupted :
                             checkInterrupted();
                         }
+
+                        rangesHABaseLinesVcms.add(rangesHABaseLinesVcm);
 
                         if (!checkDLMaxThrow) {
                             boolean doWarn = (wRangesVcm.isEmpty());
@@ -1089,12 +1102,12 @@ public final class ObservabilityService {
                             if (doWarn) {
                                 checkDLMaxThrow = true;
 
-                                this.addWarning("Pupil correction problem: "
-                                        + delayLineRestrictions.get(k).getDescription() + " pressure limit is exceeded.");
+                                final StringBuffer sb = getBuffer();
+                                sb.append("Pupil correction problem: ").append(delayLineRestrictions.get(k).getDescription());
+                                sb.append(" pressure limit is exceeded.");
+                                this.addWarning(sb.toString());
                             }
                         }
-
-                        rangesHABaseLinesVcms.add(rangesHABaseLinesVcm);
                     }
                 }
             }
@@ -1103,11 +1116,13 @@ public final class ObservabilityService {
             checkInterrupted();
 
             // convert HA range to JD range in range [LST0 - 12; LST0 + 36]
-            final Range rangeJDRiseSet = this.sc.convertHAToJDRange(rangeHARiseSet, precRA);
+            final Range rangeJDRiseSet = this.sc.convertHAToJDRange(rangeHARiseSet, precRA, ctx);
             // rise/set range as list:
-            final List<Range> rangesJDRiseSet = Arrays.asList(new Range[]{rangeJDRiseSet});
+            final List<Range> rangesJDRiseSet = ctx.getList();
+            rangesJDRiseSet.add(rangeJDRiseSet);
 
             // For now : only VLTI/CHARA has horizon profiles :
+            boolean checkJDHorizon = false;
             List<Range> rangesJDHorizon = null;
             if (this.hasHorizon) {
                 // check horizon profiles inside rise/set range :
@@ -1119,6 +1134,13 @@ public final class ObservabilityService {
 
                 // fast interrupt:
                 checkInterrupted();
+
+                if (rangesJDHorizon == null) {
+                    // means JD Rise/Set:
+                    rangesJDHorizon = rangesJDRiseSet;
+                } else {
+                    checkJDHorizon = true;
+                }
             }
 
             // Check Moon restriction
@@ -1165,7 +1187,11 @@ public final class ObservabilityService {
             }
 
             // observable ranges (jd) :
-            final List<Range> obsRanges = new ArrayList<Range>(13);
+            if (tmpRanges == null) {
+                tmpRanges = new ArrayList<Range>(sizeBL * 2 + 5);
+            }
+            final ArrayList<Range> obsRanges = tmpRanges;
+            int nValid;
 
             if (this.doDetailedOutput) {
                 // Add Rise/Set :
@@ -1215,12 +1241,21 @@ public final class ObservabilityService {
                     BaseLine baseLine;
                     List<Range> ranges;
                     StarObservabilityData soBl;
+                    final List<Range> jdRangesBL = ctx.getList();
+                    final List<Range> jdRangesVcm = ctx.getList();
+                    List<String> vcmLimits;
+                    List<List<DateTimeInterval>> visibleVcmLimits;
+                    List<Range> vcmCompatibleRanges, vcmComplementRanges;
 
                     for (int i = 0; i < sizeBL; i++) {
                         baseLine = this.baseLines.get(i);
                         ranges = rangesHABaseLines.get(i);
 
-                        this.sc.convertHAToJDRanges(ranges, obsRanges, precRA);
+                        obsRanges.clear();
+                        jdRangesBL.clear();
+                        this.sc.convertHAToJDRanges(ranges, jdRangesBL, precRA, ctx);
+                        obsRanges.addAll(jdRangesBL);
+
                         if (isLogDebug) {
                             logger.debug("baseLine: {}", baseLine);
                             logger.debug("JD ranges: {}", obsRanges);
@@ -1238,14 +1273,13 @@ public final class ObservabilityService {
                             logger.debug("Date ranges: {}", soBl.getVisible());
                         }
 
-                        obsRanges.clear();
-
+                        // Show VCM limits as overlay:
                         if (checkDLMaxThrow) {
-                            for (int k = 0; k < nDLRestrictions; k++) {
-                                soBl = new StarObservabilityData(targetName, baseLine.getName() + " ["
-                                        + delayLineRestrictions.get(k).getDescription() + ']', StarObservabilityData.TYPE_BASE_LINE + i);
+                            visibleVcmLimits = new ArrayList<List<DateTimeInterval>>(3);
+                            vcmLimits = new ArrayList<String>(3);
 
-                                starVisList.add(soBl);
+                            for (int k = 0; k < nDLRestrictions; k++) {
+                                vcmCompatibleRanges = null;
 
                                 // Get Vcm ranges per baseline:
                                 rangesHABaseLinesVcm = rangesHABaseLinesVcms.get(k);
@@ -1254,47 +1288,94 @@ public final class ObservabilityService {
                                 if (rangesHABaseLinesVcm != null) {
                                     ranges = rangesHABaseLinesVcm.get(i);
 
-                                    this.sc.convertHAToJDRanges(ranges, obsRanges, precRA);
-                                    if (isLogDebug) {
-                                        logger.debug("baseLine: {}", baseLine);
-                                        logger.debug("JD ranges: {}", obsRanges);
-                                    }
+                                    // Restrict observability ranges:
+                                    nValid = 1;
+                                    obsRanges.clear();
+                                    obsRanges.addAll(jdRangesBL);
+
+                                    // flatten and convert HA ranges to JD range:
+                                    jdRangesVcm.clear();
+                                    this.sc.convertHAToJDRanges(ranges, jdRangesVcm, precRA, ctx);
+                                    obsRanges.addAll(jdRangesVcm);
+                                    nValid += 1;
+
+                                    vcmCompatibleRanges = ctx.intersectRanges(obsRanges, nValid);
+                                    // recycle ranges:
+                                    ctx.recycleRanges(jdRangesVcm);
+                                }
+                                if (isLogDebug) {
+                                    logger.debug("vcmCompatibleRanges: {}", vcmCompatibleRanges);
+                                }
+
+                                if (vcmCompatibleRanges != null) {
+                                    // Find observability complement ie substract vcm ranges to observability ranges:
+                                    nValid = 1;
+                                    obsRanges.clear();
+                                    obsRanges.addAll(jdRangesBL);
+                                    obsRanges.addAll(vcmCompatibleRanges);
+
+                                    // may be null if no complement ie vcm ranges = observability ranges:
+                                    vcmComplementRanges = ctx.intersectRanges(obsRanges, nValid);
+                                    // recycle ranges:
+                                    ctx.recycleRangesAndList(vcmCompatibleRanges);
+                                } else {
+                                    // no compatible range ie use full ranges:
+                                    vcmComplementRanges = jdRangesBL;
+                                }
+                                if (isLogDebug) {
+                                    logger.debug("vcmComplementRanges: {}", vcmComplementRanges);
+                                }
+
+                                if (vcmComplementRanges != null) {
+                                    // Keep observability ranges with VCM Low restrictions:
 
                                     // get target position (ha, az, el) at range boundaries:
-                                    getTargetPosition(soBl, obsRanges, precRA, precDEC, false);
+                                    getTargetPosition(soBl, vcmComplementRanges, precRA, precDEC, false);
 
                                     // convert JD ranges to date ranges :
-                                    convertRangesToDateIntervals(obsRanges, soBl.getVisible());
+                                    final List<DateTimeInterval> visibleVcmLowLimits = new ArrayList<DateTimeInterval>(3);
+                                    convertRangesToDateIntervals(vcmComplementRanges, visibleVcmLowLimits);
 
-                                    if (isLogDebug) {
-                                        logger.debug("Date ranges: {}", soBl.getVisible());
+                                    // recycle ranges:
+                                    if (vcmComplementRanges != jdRangesBL) {
+                                        ctx.recycleRangesAndList(vcmComplementRanges);
                                     }
 
-                                    obsRanges.clear();
+                                    vcmLimits.add(delayLineRestrictions.get(k).getDescription());
+                                    visibleVcmLimits.add(visibleVcmLowLimits);
                                 }
                             }
+
+                            if (!vcmLimits.isEmpty()) {
+                                soBl.setVisibleVcmLimits(vcmLimits, visibleVcmLimits);
+                            }
                         }
+                        // recycle ranges:
+                        ctx.recycleRanges(jdRangesBL);
                     }
+                    // recycle ranges & lists:
+                    ctx.recycleList(jdRangesBL);
+                    ctx.recycleList(jdRangesVcm);
                 }
             }
 
-            int nValid;
             final List<Range> finalRangesHardLimits;
-            
-            if (!rangesHABaseLines.isEmpty()) {
+
+            if (rangesHABaseLines.isEmpty()) {
+                finalRangesHardLimits = null;
+            } else {
                 // Merge then all JD intervals :
                 // nValid = nBL [dl] + 1 [rise or horizon] + 1 if night limits
                 nValid = sizeBL + 1;
+                obsRanges.clear();
 
                 // flatten and convert HA ranges to JD range :
-                this.sc.convertHAToJDRangesList(rangesHABaseLines, obsRanges, precRA);
+                final List<Range> rangesJDBaseLines = ctx.getList();
+                this.sc.convertHAToJDRangesList(rangesHABaseLines, rangesJDBaseLines, precRA, ctx);
+                obsRanges.addAll(rangesJDBaseLines);
 
-                if (rangesJDHorizon != null) {
-                    obsRanges.addAll(rangesJDHorizon);
-                } else {
-                    // Check Shadowing for every stations ?
-                    obsRanges.add(rangeJDRiseSet);
-                }
+                // add horizon (including rise/set):
+                obsRanges.addAll(rangesJDHorizon);
 
                 // Intersect with night limits:
                 if (this.useNightLimit) {
@@ -1310,10 +1391,15 @@ public final class ObservabilityService {
                 checkInterrupted();
 
                 // finally : merge intervals :
-                finalRangesHardLimits = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
-                
-            } else {
-                finalRangesHardLimits = null;
+                finalRangesHardLimits = ctx.intersectRanges(obsRanges, nValid);
+                // recycle ranges & lists:
+                ctx.recycleRangesAndList(rangesJDBaseLines);
+            }
+
+            // recycle ranges:
+            ctx.recycleAll(rangesHABaseLines);
+            if (checkJDHorizon) {
+                ctx.recycleRangesAndList(rangesJDHorizon);
             }
 
             if (isLogDebug) {
@@ -1325,7 +1411,9 @@ public final class ObservabilityService {
 
                 // Show VCM limits as overlay:
                 if (checkDLMaxThrow) {
+                    final List<Range> jdRangesVcm = ctx.getList();
                     final List<List<DateTimeInterval>> visibleVcmLimits = new ArrayList<List<DateTimeInterval>>(3);
+                    final List<String> vcmLimits = new ArrayList<String>(3);
 
                     List<Range> vcmCompatibleRanges, vcmComplementRanges;
 
@@ -1343,10 +1431,14 @@ public final class ObservabilityService {
                             obsRanges.addAll(finalRangesHardLimits);
 
                             // flatten and convert HA ranges to JD range:
-                            this.sc.convertHAToJDRangesList(rangesHABaseLinesVcm, obsRanges, precRA);
+                            jdRangesVcm.clear();
+                            this.sc.convertHAToJDRangesList(rangesHABaseLinesVcm, jdRangesVcm, precRA, ctx);
+                            obsRanges.addAll(jdRangesVcm);
                             nValid += sizeBL;
 
-                            vcmCompatibleRanges = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
+                            vcmCompatibleRanges = ctx.intersectRanges(obsRanges, nValid);
+                            // recycle ranges:
+                            ctx.recycleRanges(jdRangesVcm);
                         }
                         if (isLogDebug) {
                             logger.debug("vcmCompatibleRanges: {}", vcmCompatibleRanges);
@@ -1360,7 +1452,10 @@ public final class ObservabilityService {
                             obsRanges.addAll(vcmCompatibleRanges);
 
                             // may be null if no complement ie vcm ranges = observability ranges:
-                            vcmComplementRanges = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
+                            vcmComplementRanges = ctx.intersectRanges(obsRanges, nValid);
+                            // recycle ranges & list:
+                            ctx.recycleRangesAndList(vcmCompatibleRanges);
+
                         } else {
                             // no compatible range ie use full ranges:
                             vcmComplementRanges = finalRangesHardLimits;
@@ -1371,23 +1466,37 @@ public final class ObservabilityService {
 
                         if (vcmComplementRanges != null) {
                             // Keep observability ranges with VCM Low restrictions:
+
+                            // get target position (ha, az, el) at range boundaries:
+                            getTargetPosition(starObs, vcmComplementRanges, precRA, precDEC, false);
+
                             final List<DateTimeInterval> visibleVcmLowLimits = new ArrayList<DateTimeInterval>(3);
 
                             // convert JD ranges to date ranges :
                             convertRangesToDateIntervals(vcmComplementRanges, visibleVcmLowLimits);
+                            // recycle ranges & list:
+                            if (vcmComplementRanges != finalRangesHardLimits) {
+                                ctx.recycleRangesAndList(vcmComplementRanges);
+                            }
 
+                            vcmLimits.add(delayLineRestrictions.get(k).getDescription());
                             visibleVcmLimits.add(visibleVcmLowLimits);
                         }
                     }
 
-                    starObs.setVisibleVcmLimits(visibleVcmLimits);
+                    if (!vcmLimits.isEmpty()) {
+                        starObs.setVisibleVcmLimits(vcmLimits, visibleVcmLimits);
+                    }
+
+                    // recycle ranges & lists:
+                    ctx.recycleList(jdRangesVcm);
                 }
 
                 // fast interrupt:
                 checkInterrupted();
 
                 // rise/set range WITHOUT HA Min/Max constraints:
-                final Range haLimits = getTargetHALimits(target);
+                final Range haLimits = getTargetHALimits(target, ctx);
 
                 final boolean doSoftLimits = checkJDMoon || checkJDWind || rangeHARiseSet.contains(haLimits.getMin()) || rangeHARiseSet.contains(haLimits.getMax());
 
@@ -1406,7 +1515,7 @@ public final class ObservabilityService {
                     obsRanges.addAll(finalRangesHardLimits);
 
                     // convert HA Limits to JD range in range [LST0 - 12; LST0 + 36]
-                    final Range rangeJDHALimits = this.sc.convertHAToJDRange(haLimits, precRA);
+                    final Range rangeJDHALimits = this.sc.convertHAToJDRange(haLimits, precRA, ctx);
                     obsRanges.add(rangeJDHALimits);
                     nValid++;
 
@@ -1425,20 +1534,26 @@ public final class ObservabilityService {
                     // fast interrupt:
                     checkInterrupted();
 
-                    final List<Range> restrictedRanges = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
-
+                    final List<Range> restrictedRanges = ctx.intersectRanges(obsRanges, nValid);
                     if (isLogDebug) {
                         logger.debug("restrictedRanges: {}", restrictedRanges);
                     }
+                    // recycle range:
+                    ctx.recycleRange(rangeJDHALimits);
 
                     if (Range.equals(finalRangesHardLimits, restrictedRanges)) {
                         finalRanges = finalRangesHardLimits;
+                        // recycle ranges & list:
+                        ctx.recycleRangesAndList(restrictedRanges);
                     } else {
                         if (restrictedRanges == null) {
-                            finalRanges = Collections.emptyList();
+                            finalRanges = DelayLineService.EMPTY_RANGE_LIST;
                         } else {
                             finalRanges = restrictedRanges;
                         }
+
+                        // get target position (ha, az, el) at range boundaries:
+                        getTargetPosition(starObs, finalRangesHardLimits, precRA, precDEC, false);
 
                         // Keep observability ranges without HA restrictions:
                         final List<DateTimeInterval> visibleNoSoftLimits = new ArrayList<DateTimeInterval>(3);
@@ -1446,12 +1561,15 @@ public final class ObservabilityService {
                         // convert JD ranges to date ranges :
                         convertRangesToDateIntervals(finalRangesHardLimits, visibleNoSoftLimits);
 
+                        // TODO: define soft limit description (moon, wind or HA limits)
                         starObs.setVisibleNoSoftLimits(visibleNoSoftLimits);
                     }
 
                 } else {
                     finalRanges = finalRangesHardLimits;
                 }
+                // recycle range:
+                ctx.recycleRange(haLimits);
 
                 // fast interrupt:
                 checkInterrupted();
@@ -1464,15 +1582,20 @@ public final class ObservabilityService {
 
                 // update Star Data :
                 final List<Range> haObsRanges = new ArrayList<Range>(2);
-
                 this.sc.convertJDToHARanges(finalRanges, haObsRanges, precRA);
-
                 if (isLogDebug) {
                     logger.debug("HA observability: {}", haObsRanges);
                 }
                 if (!haObsRanges.isEmpty()) {
                     starData.setObsRangesHA(haObsRanges);
                 }
+
+                // recycle ranges & lists:
+                if (finalRanges != finalRangesHardLimits) {
+                    ctx.recycleRangesAndList(finalRanges);
+                }
+                ctx.recycleRangesAndList(finalRangesHardLimits);
+
             } else {
                 if (isLogDebug) {
                     logger.debug("Target not observable: {}", target);
@@ -1480,6 +1603,22 @@ public final class ObservabilityService {
                 final StringBuffer sb = getBuffer();
                 sb.append("Target [").append(targetName).append("] is not observable");
                 addInformation(sb.toString());
+            }
+
+            // recycle ranges:
+            ctx.recycleRange(rangeHARiseSet);
+            // recycle ranges & lists:
+            if (checkJDMoon) {
+                ctx.recycleRangesAndList(rangesJDMoon);
+            }
+            if (checkJDWind) {
+                ctx.recycleRangesAndList(rangesJDWind);
+            }
+            ctx.recycleRangesAndList(rangesJDRiseSet);
+            if (rangesHABaseLinesVcms != null) {
+                for (int k = 0; k < nDLRestrictions; k++) {
+                    ctx.recycleAll(rangesHABaseLinesVcms.get(k));
+                }
             }
 
         } else {
@@ -1516,7 +1655,7 @@ public final class ObservabilityService {
         // First Pass :
         // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
         // list of observability data associated to a pop combination :
-        final List<PopObservabilityData> popDataList = getPopObservabilityData(starObs.getTargetName(), dec, rangesTarget, doSkipDL, this.obsCtx, false);
+        final List<PopObservabilityData> popDataList = getPopObservabilityData(starObs.getTargetName(), dec, rangesTarget, doSkipDL, this.bpObsCtx, false);
 
         // Current pop observability :
         PopObservabilityData popData;
@@ -1596,7 +1735,7 @@ public final class ObservabilityService {
      * @return list of Pop Observability Data or null if thread interrupted
      */
     private List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget,
-                                                               final boolean doSkipDL, final ObservabilityContext obsCtxLocal, final boolean clearRangesBL) {
+                                                               final boolean doSkipDL, final BestPoPsObservabilityContext obsCtxLocal, final boolean clearRangesBL) {
         return getPopObservabilityData(targetName, dec, rangesTarget, doSkipDL, obsCtxLocal, clearRangesBL, 0, obsCtxLocal.getPopCombs().length);
     }
 
@@ -1612,14 +1751,14 @@ public final class ObservabilityService {
      * @param dec target declination (rad)
      * @param rangesTarget HA ranges for target rise/set and night limits
      * @param doSkipDL skip pop combination if any DL is unobservable (useful for performance and detailed output)
-     * @param obsCtxLocal observability context (local context ie thread)
+     * @param bpObsCtxLocal observability context (local context ie thread)
      * @param clearRangesBL true to free rangesBL; false otherwise
      * @param fromCb index of the first PopCombination to evaluate (inclusive)
      * @param endCb index of the last PopCombination to evaluate (exclusive)
      * @return list of Pop Observability Data or null if thread interrupted
      */
     private List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget,
-                                                               final boolean doSkipDL, final ObservabilityContext obsCtxLocal, final boolean clearRangesBL,
+                                                               final boolean doSkipDL, final BestPoPsObservabilityContext bpObsCtxLocal, final boolean clearRangesBL,
                                                                final int fromCb, final int endCb) {
 
         // Note: this method can be called by multiple threads (so ensure thread safety and interruption)
@@ -1628,34 +1767,35 @@ public final class ObservabilityService {
         // local vars for performance:
         final boolean isDebug = isLogDebug;
         final Thread currentTh = Thread.currentThread(); // multi threading
-        final BestPopsEstimator estimator = obsCtxLocal.getPopEstimator();
+        final BestPopsEstimator estimator = bpObsCtxLocal.getPopEstimator();
         // list of observability data associated to a pop combination :
-        final List<PopObservabilityData> popDataList = obsCtxLocal.getPopDataList();
+        final List<PopObservabilityData> popDataList = bpObsCtxLocal.getPopDataList();
 
         final double cosDec = FastMath.cos(dec);
         final double sinDec = FastMath.sin(dec);
 
         // Use arrays instead of List for performance:
-        final PopCombination[] popCombs = obsCtxLocal.getPopCombs();
-        final BaseLine[] bls = obsCtxLocal.getBaseLines();
-        final Range[] wRangeArray = obsCtxLocal.getWRanges();
+        final PopCombination[] popCombs = bpObsCtxLocal.getPopCombs();
+        final BaseLine[] bls = bpObsCtxLocal.getBaseLines();
+        final Range[] wRangeArray = bpObsCtxLocal.getWRanges();
 
         final int sizeBL = bls.length;
 
         // precompute W extrema per baseline:
+        final double[] w = bpObsCtxLocal.getW();
         final double[][] wExtremas = new double[sizeBL][2];
 
         // For every Base Line :
         for (int i = 0; i < sizeBL; i++) {
             final BaseLine bl = bls[i];
 
-            final double[] wExtrema = DelayLineService.findWExtrema(cosDec, sinDec, bl);
+            final double[] wExtrema = DelayLineService.findWExtrema(cosDec, sinDec, bl, w);
 
             if (isDebug) {
                 logger.debug("wExtrema[{}] = {}", bl.getName(), Arrays.toString(wExtrema));
             }
 
-            wExtremas[i] = wExtrema;
+            wExtremas[i] = (wExtrema != null) ? Arrays.copyOf(wExtrema, 2) : null;
         }
 
         // fast interrupt (multi threading):
@@ -1676,8 +1816,8 @@ public final class ObservabilityService {
         // w range using the pop offset for a given base line :
         final Range wRangeWithOffset = new Range();
 
-        final double[] ha = new double[2];
-        final double[] haValues = new double[6];
+        final double[] ha = bpObsCtxLocal.getHa();
+        final double[] haValues = bpObsCtxLocal.getHaValues();
 
         PopCombination popComb;
         Range wRange;
@@ -1711,7 +1851,7 @@ public final class ObservabilityService {
                 // adjust w range with the current pop combination's Offset :
                 wRangeWithOffset.set(wRange.getMin() + offset, wRange.getMax() + offset);
 
-                ranges = DelayLineService.findHAIntervalsForBaseLine(cosDec, sinDec, bls[i], wExtremas[i], wRangeWithOffset, ha, haValues, obsCtxLocal);
+                ranges = DelayLineService.findHAIntervalsForBaseLine(cosDec, sinDec, bls[i], wExtremas[i], wRangeWithOffset, ha, haValues, bpObsCtxLocal);
 
                 if (ranges.isEmpty() && doSkipDL) {
                     // this base line is incompatible with that W range :
@@ -1724,19 +1864,18 @@ public final class ObservabilityService {
             if (skip) {
                 if (!rangesBL.isEmpty()) {
                     // recycle memory (to avoid GC):
-                    obsCtxLocal.recycleAll(rangesBL);
+                    bpObsCtxLocal.recycleAll(rangesBL);
                 }
             } else {
-
                 if (SHOW_BEST_POPS_STATS) {
                     nIter++;
                 }
 
                 // note : rangesTarget contains both rise/set intervals + night limits in HA
-                obsCtxLocal.resetAndAddInFlatRangeLimits(rangesTarget);
+                bpObsCtxLocal.resetAndAddInFlatRangeLimits(rangesTarget);
 
                 // merge the baseline ranges with the target intervals to estimate observability:
-                popData = PopObservabilityData.estimate(targetName, popComb, rangesBL, nValid, obsCtxLocal, estimator, doSkipDL, clearRangesBL);
+                popData = PopObservabilityData.estimate(targetName, popComb, rangesBL, nValid, bpObsCtxLocal, estimator, doSkipDL, clearRangesBL);
 
                 if (popData != null) {
                     // skip pop solutions outside Rise/Set HA range:
@@ -1775,7 +1914,8 @@ public final class ObservabilityService {
         final boolean isDebug = isLogDebug; // local var
 
         // output :
-        final List<Range> ranges = new ArrayList<Range>(3);
+        final ObservabilityContext ctx = obsCtx;
+        List<Range> ranges = ctx.getList();
 
         // Prepare profiles :
         final HorizonService hs = HorizonService.getInstance();
@@ -1801,7 +1941,7 @@ public final class ObservabilityService {
         boolean visible;
         boolean last = false;
 
-        Range range = new Range();
+        Range range = ctx.valueOf(0d, 0d);
 
         for (double jd = jdMin, jdIn; jd < jdMax; jd += JD_STEP) {
 
@@ -1845,7 +1985,7 @@ public final class ObservabilityService {
                     // end point
                     range.setMax(jd);
                     ranges.add(range);
-                    range = new Range();
+                    range = ctx.valueOf(0d, 0d);
                 }
             }
         } // jd
@@ -1854,6 +1994,19 @@ public final class ObservabilityService {
         if (range.getMin() > 0d) {
             range.setMax(jdMax);
             ranges.add(range);
+        } else {
+            // recycle range:
+            ctx.recycleRange(range);
+        }
+        if (ranges.isEmpty()) {
+            // recycle list:
+            ctx.recycleList(ranges);
+            ranges = DelayLineService.EMPTY_RANGE_LIST;
+        } else if (ranges.size() == 1 && jdRiseSet.equals(ranges.get(0))) {
+            // recycle ranges & list:
+            ctx.recycleRangesAndList(ranges);
+            // no restriction:
+            return null;
         }
 
         return ranges;
@@ -1870,7 +2023,8 @@ public final class ObservabilityService {
         // Note: as JD ranges are in [LST0 -12; LST0 + 36], sampled jds are fixed by getJDInLstRange(jd) 
         // in LST range [0; 24] in order to have accurate target position
         // output :
-        final List<Range> ranges = new ArrayList<Range>(2);
+        final ObservabilityContext ctx = obsCtx;
+        List<Range> ranges = ctx.getList();
 
         // prepare cosDec/sinDec:
         final double dec = FastMath.toRadians(precDEC);
@@ -1884,7 +2038,7 @@ public final class ObservabilityService {
         boolean visible;
         boolean last = false;
 
-        Range range = new Range();
+        Range range = ctx.valueOf(0d, 0d);
 
         for (double jd = jdMin, jdIn; jd < jdMax; jd += JD_STEP) {
 
@@ -1921,7 +2075,7 @@ public final class ObservabilityService {
                     // end point
                     range.setMax(jd);
                     ranges.add(range);
-                    range = new Range();
+                    range = ctx.valueOf(0d, 0d);
                 }
             }
         } // jd
@@ -1930,9 +2084,17 @@ public final class ObservabilityService {
         if (range.getMin() > 0d) {
             range.setMax(jdMax);
             ranges.add(range);
+        } else {
+            // recycle range:
+            ctx.recycleRange(range);
         }
-
-        if (ranges.size() == 1 && ranges.get(0).equals(jdRiseSet)) {
+        if (ranges.isEmpty()) {
+            // recycle list:
+            ctx.recycleList(ranges);
+            ranges = DelayLineService.EMPTY_RANGE_LIST;
+        } else if (ranges.size() == 1 && jdRiseSet.equals(ranges.get(0))) {
+            // recycle ranges:
+            ctx.recycleRangesAndList(ranges);
             // no restriction:
             return null;
         }
@@ -1959,7 +2121,7 @@ public final class ObservabilityService {
         final double testThreshold = warningThreshold * 1.05d;
 
         // output :
-        final List<Range> ranges;
+        List<Range> ranges;
 
         // prepare cosDec/sinDec:
         final double dec = FastMath.toRadians(precDEC);
@@ -1997,7 +2159,6 @@ public final class ObservabilityService {
         }
 
         if (doCheck) {
-
             // keep only the applicable rule: test fli (global) then flux (target related)
             MoonRestriction appliedRule = null;
 
@@ -2055,7 +2216,8 @@ public final class ObservabilityService {
             logger.debug("appliedRule: {}", appliedRule);
 
             // Process Rise/Set HA range:
-            ranges = new ArrayList<Range>(2);
+            final ObservabilityContext ctx = obsCtx;
+            ranges = ctx.getList();
 
             double minSeparation = Double.POSITIVE_INFINITY;
             double minJd = 0d;
@@ -2063,7 +2225,7 @@ public final class ObservabilityService {
             boolean visible;
             boolean last = false;
 
-            Range range = new Range();
+            Range range = ctx.valueOf(0d, 0d);
 
             for (double jd = jdMin; jd < jdMax; jd += JD_STEP) {
 
@@ -2101,7 +2263,7 @@ public final class ObservabilityService {
                         // end point
                         range.setMax(jd);
                         ranges.add(range);
-                        range = new Range();
+                        range = ctx.valueOf(0d, 0d);
                     }
                 }
             } // jd
@@ -2110,6 +2272,14 @@ public final class ObservabilityService {
             if (range.getMin() > 0d) {
                 range.setMax(jdMax);
                 ranges.add(range);
+            } else {
+                // recycle range:
+                ctx.recycleRange(range);
+            }
+            if (ranges.isEmpty()) {
+                // recycle list:
+                ctx.recycleList(ranges);
+                ranges = DelayLineService.EMPTY_RANGE_LIST;
             }
 
             // check again the true warning threshold:
@@ -2649,18 +2819,18 @@ public final class ObservabilityService {
         this.popCombinations = popCombs;
 
         // Prepare observability context:
-        this.obsCtx = prepareContext();
+        this.bpObsCtx = prepareContext();
     }
 
     /**
      * Prepare the observability context
      * @return new observability context
      */
-    private ObservabilityContext prepareContext() {
+    private BestPoPsObservabilityContext prepareContext() {
         final int sizeBL = this.baseLines.size();
 
         // Prepare observability context:
-        final ObservabilityContext ctx = new ObservabilityContext(sizeBL);
+        final BestPoPsObservabilityContext ctx = new BestPoPsObservabilityContext(sizeBL);
 
         // Use arrays instead of List for performance:
         ctx.setPopCombs(new PopCombination[this.popCombinations.size()]);
@@ -2722,6 +2892,7 @@ public final class ObservabilityService {
             this.wRangesVcms = null;
         }
 
+        final StringBuffer sb = getBuffer();
         Beam b1, b2;
         Position3D pos1, pos2;
         final boolean[] ignoreRestrictions = new boolean[nDLRestrictions];
@@ -2743,7 +2914,9 @@ public final class ObservabilityService {
                 z = pos1.getPosZ() - pos2.getPosZ();
 
                 // a Base line defines only the geometry:
-                bl = new BaseLine(b1, b2, x, y, z);
+                sb.setLength(0);
+                sb.append(b1.getStation().getName()).append('-').append(b2.getStation().getName());
+                bl = new BaseLine(sb.toString(), b1, b2, x, y, z);
                 this.baseLines.add(bl);
 
                 // optical path difference:
@@ -2936,8 +3109,8 @@ public final class ObservabilityService {
      */
     private void convertRangesToDateIntervals(final List<Range> rangesJD, final List<DateTimeInterval> intervals) {
         if (rangesJD != null) {
-            for (Range range : rangesJD) {
-                convertRangeToDateInterval(range, intervals);
+            for (int i = 0, len = rangesJD.size(); i < len; i++) {
+                convertRangeToDateInterval(rangesJD.get(i), intervals);
             }
             if (intervals.size() > 1) {
                 // merge contiguous date ranges :
@@ -3140,12 +3313,12 @@ public final class ObservabilityService {
                     if (haElev > 0d) {
                         jd = this.sc.convertHAToJD(-haElev, precRA);
                         if (Range.contains(obsRangeJD, jd)) {
-                            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+                            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
                         }
 
                         jd = this.sc.convertHAToJD(haElev, precRA);
                         if (Range.contains(obsRangeJD, jd)) {
-                            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+                            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
                         }
                     }
                 }
@@ -3154,17 +3327,18 @@ public final class ObservabilityService {
             // tick for transit :
             jd = this.sc.convertHAToJD(0d, precRA);
             if (Range.contains(obsRangeJD, jd)) {
-                addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+                addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
             }
         }
 
         // ticks for observability intervals (limits):
-        for (Range range : obsRangeJD) {
+        for (int i = 0, len = obsRangeJD.size(); i < len; i++) {
+            Range range = obsRangeJD.get(i);
             jd = range.getMin();
-            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
 
             jd = range.getMax();
-            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
         }
 
         if (isLogDebug) {
@@ -3179,13 +3353,22 @@ public final class ObservabilityService {
      * @param sinDec sinus of target declination
      * @param azEl AzEl instance
      * @param jd julian date
+     * @param showTicks true to show ticks at this date
      */
-    private void addTargetPosition(final Map<Date, TargetPositionDate> targetPositions, final double cosDec, final double sinDec, final AzEl azEl, final double jd) {
+    private void addTargetPosition(final Map<Date, TargetPositionDate> targetPositions,
+                                   final double cosDec, final double sinDec,
+                                   final AzEl azEl, final double jd,
+                                   final boolean showTicks) {
+
         // fix JD in LST range [0; 24] in order to have accurate target position:
         final double jdIn = getJDInLstRange(jd);
         final double ha = this.sco.getTargetPosition(cosDec, sinDec, jdIn, azEl);
         final Date date = jdToDateInDateRange(jdIn);
-        targetPositions.put(date, new TargetPositionDate(date, ha, (int) Math.round(azEl.getAzimuth()), (int) Math.round(azEl.getElevation())));
+
+        if (showTicks || !targetPositions.containsKey(date)) {
+            targetPositions.put(date, new TargetPositionDate(date, ha,
+                    (int) Math.round(azEl.getAzimuth()), (int) Math.round(azEl.getElevation()), showTicks));
+        }
     }
 
     /**
@@ -3204,7 +3387,7 @@ public final class ObservabilityService {
         if (ranges != null) {
             final List<Range> jdRanges = new ArrayList<Range>(ranges.size());
             for (Range range : ranges) {
-                jdRanges.add(this.sc.convertHAToJDRange(range, precRA));
+                jdRanges.add(this.sc.convertHAToJDRange(range, precRA, obsCtx));
             }
 
             final List<DateTimeInterval> dateIntervals = new ArrayList<DateTimeInterval>(jdRanges.size() + 2);
@@ -3281,9 +3464,10 @@ public final class ObservabilityService {
     /**
      * Return the target HA min/max limits
      * @param target target to use
+     * @param obsCtxLocal observability context (local context ie thread)
      * @return HA range
      */
-    private Range getTargetHALimits(final Target target) {
+    private Range getTargetHALimits(final Target target, final ObservabilityContext obsCtxLocal) {
         /** HA min in decimal hours */
         double haMin = AsproConstants.HA_MIN;
         /** HA max in decimal hours */
@@ -3304,7 +3488,7 @@ public final class ObservabilityService {
             logger.debug("ha max: {}", haMax);
         }
 
-        return new Range(haMin, haMax);
+        return obsCtxLocal.valueOf(haMin, haMax);
     }
 
     /**
@@ -3327,9 +3511,10 @@ public final class ObservabilityService {
      * Return new best PoPs estimator according to user preferences and given target
      * @param target target to use (HA Limits estimator)
      * @param haElev rise/set ha
+     * @param bpObsCtxLocal observability context (local context ie thread)
      * @return new best PoPs estimator
      */
-    private BestPopsEstimator getBestPopsEstimator(final Target target, final double haElev) {
+    private BestPopsEstimator getBestPopsEstimator(final Target target, final double haElev, final ObservabilityContext bpObsCtxLocal) {
         // update pop estimator related to target:
         final BestPopsEstimator bestPopsEstimator;
         switch (this.bestPopsAlgorithm) {
@@ -3341,13 +3526,14 @@ public final class ObservabilityService {
                 bestPopsEstimator = BestPopsEstimatorFactory.getTransitEstimator(this.bestPopEstimatorCriteriaSigma, this.bestPopEstimatorCriteriaAverageWeight);
                 break;
             case HALimits:
-                final Range haLimits = getTargetHALimits(target);
+                final Range haLimits = getTargetHALimits(target, bpObsCtxLocal);
                 // keep haCenter in [-haElev; haElev] range:
                 final double haCenter = checkHA(haLimits.getCenter(), haElev);
-
                 if (isLogDebug) {
                     logger.debug("haCenter: {} - haElev: {} - haLimits: {}", haCenter, haElev, haLimits);
                 }
+                // recycle range:
+                bpObsCtxLocal.recycleRange(haLimits);
 
                 bestPopsEstimator = BestPopsEstimatorFactory.getHALimitsEstimator(haCenter, this.bestPopEstimatorCriteriaSigma, this.bestPopEstimatorCriteriaAverageWeight);
                 break;
@@ -3379,55 +3565,5 @@ public final class ObservabilityService {
         final StringBuffer sb = this.shared_sb;
         sb.setLength(0);
         return sb;
-    }
-
-    /**
-     * Simple RangeFactory implementation that estimate new Range or List[Range] instances
-     */
-    private final static class SimpleRangeFactory implements RangeFactory {
-
-        /** created range instances */
-        private int createdRanges = 0;
-        /** created List[Range] instances */
-        private int createdRangeLists = 0;
-
-        /**
-         * Return a Range instance with given minimum and maximum value
-         * @param min minimum value
-         * @param max maximum value
-         * @return Range instance
-         */
-        @Override
-        public Range valueOf(final double min, final double max) {
-            ++createdRanges;
-            return new Range(min, max);
-        }
-
-        /**
-         * Return a List[Range] instance
-         * @return List[Range] instance
-         */
-        @Override
-        public List<Range> getList() {
-            ++createdRangeLists;
-            return new ArrayList<Range>(3); // max 3 intervals per BL
-        }
-
-        /**
-         * Reset the factory state
-         */
-        @Override
-        public void reset() {
-            createdRanges = 0;
-            createdRangeLists = 0;
-        }
-
-        /**
-         * Dump the factory statistics
-         */
-        @Override
-        public void dumpStats() {
-            logger.info("RangeFactory: {} created ranges - {} created lists.", createdRanges, createdRangeLists);
-        }
     }
 }
