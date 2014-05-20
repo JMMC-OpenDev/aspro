@@ -6,6 +6,7 @@ package edu.dartmouth;
 import edu.dartmouth.AstroAlmanacTime.AlmanacType;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.Range;
+import fr.jmmc.aspro.model.RangeFactory;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.util.AngleUtils;
 import java.util.ArrayList;
@@ -597,11 +598,13 @@ public final class AstroSkyCalc {
      * @param ranges HA range list to convert
      * @param destRanges JD range list to append into
      * @param precRA precessed target right ascension in decimal hours
+     * @param rangeFactory Factory used to create Range instances
      */
-    public void convertHAToJDRanges(final List<Range> ranges, final List<Range> destRanges, final double precRA) {
+    public void convertHAToJDRanges(final List<Range> ranges, final List<Range> destRanges, final double precRA,
+                                        final RangeFactory rangeFactory) {
         if (ranges != null) {
             for (int i = 0, size = ranges.size(); i < size; i++) {
-                destRanges.add(convertHAToJDRange(ranges.get(i), precRA));
+                destRanges.add(convertHAToJDRange(ranges.get(i), precRA, rangeFactory));
             }
         }
     }
@@ -611,11 +614,13 @@ public final class AstroSkyCalc {
      * @param rangesList list of HA ranges list to convert
      * @param destRanges JD range list to append into
      * @param precRA precessed target right ascension in decimal hours
+     * @param rangeFactory Factory used to create Range instances
      */
-    public void convertHAToJDRangesList(final List<List<Range>> rangesList, final List<Range> destRanges, final double precRA) {
+    public void convertHAToJDRangesList(final List<List<Range>> rangesList, final List<Range> destRanges, final double precRA,
+                                        final RangeFactory rangeFactory) {
         if (rangesList != null) {
             for (int i = 0, size = rangesList.size(); i < size; i++) {
-                convertHAToJDRanges(rangesList.get(i), destRanges, precRA);
+                convertHAToJDRanges(rangesList.get(i), destRanges, precRA, rangeFactory);
             }
         }
     }
@@ -626,9 +631,10 @@ public final class AstroSkyCalc {
      *
      * @param rangeHA given in hour angle (dec hours)
      * @param precRA precessed target right ascension in decimal hours
+     * @param rangeFactory Factory used to create Range instances
      * @return JD range
      */
-    public Range convertHAToJDRange(final Range rangeHA, final double precRA) {
+    public Range convertHAToJDRange(final Range rangeHA, final double precRA, final RangeFactory rangeFactory) {
         final double ha1 = rangeHA.getMin();
         final double ha2 = rangeHA.getMax();
 
@@ -645,7 +651,7 @@ public final class AstroSkyCalc {
             logger.trace("jd2 = {}", toDateLST(jd2));
         }
 
-        return new Range(jd1, jd2);
+        return rangeFactory.valueOf(jd1, jd2);
     }
 
     /**
