@@ -61,7 +61,6 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
-import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
@@ -85,7 +84,7 @@ import org.jfree.util.PublicCloneable;
  * the arrow tip being drawn at a corresponding point on the inner circle.
  *
  */
-public final class XYTickAnnotation extends XYTextAnnotation
+public final class XYTickAnnotation extends ExtendedXYTextAnnotation
         implements Cloneable, PublicCloneable, Serializable {
 
     /** For serialization. */

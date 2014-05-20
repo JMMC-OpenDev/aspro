@@ -7,7 +7,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
-import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotRenderingInfo;
@@ -19,7 +18,7 @@ import org.jfree.util.PublicCloneable;
  * Custom XYTextAnnotation that adjust font size to respect sizing constraints
  * @author bourgesl
  */
-public final class FitXYTextAnnotation extends XYTextAnnotation
+public final class FitXYTextAnnotation extends ExtendedXYTextAnnotation
         implements Cloneable, PublicCloneable, Serializable {
 
     /** For serialization. */
