@@ -53,10 +53,14 @@ public final class DelayLineService {
      * @param dec target declination (rad)
      * @param baseLines base line list
      * @param wRanges [wMin - wMax] ranges per base line
+     * @param ha double[2] array to avoid array allocations
+     * @param haValues double[6] array to avoid array allocations
+     * @param w double[2] array to avoid array allocations
      * @param rangeFactory Factory used to create Range and List[Range] instances
      * @return intervals (hour angles)
      */
     public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges,
+                                                    final double[] ha, final double[] haValues, final double[] w,
                                                     final RangeFactory rangeFactory) {
 
         final double cosDec = FastMath.cos(dec);
@@ -66,9 +70,6 @@ public final class DelayLineService {
 
         final List<List<Range>> rangesBL = new ArrayList<List<Range>>(size);
 
-        final double[] ha = new double[2];
-        final double[] haValues = new double[6];
-
         BaseLine bl;
         Range wRange;
         double[] wExtrema;
@@ -77,7 +78,7 @@ public final class DelayLineService {
             wRange = wRanges.get(i);
 
             // First check the W limits :
-            wExtrema = findWExtrema(cosDec, sinDec, bl);
+            wExtrema = findWExtrema(cosDec, sinDec, bl, w);
 
             rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRange, ha, haValues, rangeFactory));
         }
@@ -139,7 +140,6 @@ public final class DelayLineService {
         }
 
         // haValues[6] = list of hour angles (rad) in [-PI;PI] range :
-
         // define ha limits :
         haValues[0] = MINUS_PI;
         haValues[1] = PI;
@@ -283,17 +283,17 @@ public final class DelayLineService {
      * @param cosDec cosinus of target declination
      * @param sinDec sinus of target declination
      * @param baseLine used base line
+     * @param w double[2] array to avoid array allocations
      * @return 2 W extrema or null
      */
-    public static double[] findWExtrema(final double cosDec, final double sinDec, final BaseLine baseLine) {
+    public static double[] findWExtrema(final double cosDec, final double sinDec, final BaseLine baseLine,
+                                        final double[] w) {
         // A = Y
         final double a = baseLine.getY();
         // B = (2 Y)
         final double b = -2d * baseLine.getX();
         // C = (C - X)
         final double c = -baseLine.getY();
-
-        final double[] w = new double[2];
 
         // note: w contains ha solutions:
         if (solveWEquation(a, b, c, w)) {
