@@ -24,14 +24,15 @@ public final class BaseLine {
 
   /**
    * BaseLine constructor
+   * @param name baseline name
    * @param beam1 beam 1
    * @param beam2 beam 2
    * @param x relative position of stations in local equatorial plane
    * @param y relative position of stations in local equatorial plane
    * @param z relative position of stations Z toward North
    */
-  public BaseLine(final Beam beam1, final Beam beam2, final double x, final double y, final double z) {
-    this.name = beam1.getStation().getName() + "-" + beam2.getStation().getName();
+  public BaseLine(final String name, final Beam beam1, final Beam beam2, final double x, final double y, final double z) {
+    this.name = name;
     this.beam1 = beam1;
     this.beam2 = beam2;
     this.x = x;
