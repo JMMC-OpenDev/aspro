@@ -7,6 +7,7 @@ import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.Range;
+import fr.jmmc.aspro.model.ObservabilityContext;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
@@ -142,6 +143,8 @@ public final class LSTTest {
     double jdLower, jdUpper, jdMidnight;
     Date dateMin, dateMax;
     double len;
+    
+    final ObservabilityContext ctx = new ObservabilityContext(15); // 6T
 
     try {
       do {
@@ -218,7 +221,7 @@ public final class LSTTest {
 
         // Test fake targets :
         // fake target at RA=00:00:
-        jdRange = sc.convertHAToJDRange(haRangeLimits, 0d);
+        jdRange = sc.convertHAToJDRange(haRangeLimits, 0d, ctx);
 
         visible.clear();
         convertRangeToDateInterval(jdRange, visible, dateMin, dateMax, jdLower, jdUpper, useLst, sc);
@@ -242,7 +245,7 @@ public final class LSTTest {
         }
 
         // fake target at RA=12:00:
-        jdRange = sc.convertHAToJDRange(haRangeLimits, 12d);
+        jdRange = sc.convertHAToJDRange(haRangeLimits, 12d, ctx);
 
         visible.clear();
         convertRangeToDateInterval(jdRange, visible, dateMin, dateMax, jdLower, jdUpper, useLst, sc);
@@ -266,7 +269,7 @@ public final class LSTTest {
         }
 
         // fake target at RA=24:00:
-        jdRange = sc.convertHAToJDRange(haRangeLimits, 24d);
+        jdRange = sc.convertHAToJDRange(haRangeLimits, 24d, ctx);
 
         visible.clear();
         convertRangeToDateInterval(jdRange, visible, dateMin, dateMax, jdLower, jdUpper, useLst, sc);
