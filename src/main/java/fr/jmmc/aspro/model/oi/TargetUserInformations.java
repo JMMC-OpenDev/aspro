@@ -134,12 +134,22 @@ public class TargetUserInformations
    * @return display name
    */
   public final String getTargetDisplayName(final Target target) {
-    String sValue = target.getName();
+      return getTargetDisplayName(target, new StringBuilder(target.getName().length() + 8)).toString();
+  }
+
+  /**
+   * Return the display name of the given target using the format 'name' ( ' (cal)')
+   * @param target target to use
+   * @param sb string buffer to append into
+   * @return display name
+   */
+  public final StringBuilder getTargetDisplayName(final Target target, final StringBuilder sb) {
+      sb.append(target.getName());
 
     if (isCalibrator(target)) {
-      sValue += fr.jmmc.aspro.AsproConstants.CAL_SUFFIX;
+      sb.append(fr.jmmc.aspro.AsproConstants.CAL_SUFFIX);
     }
-    return sValue;
+    return sb;
   }
 
   /**
@@ -190,7 +200,9 @@ public class TargetUserInformations
    * @see #getOrCreateTargetInformation(Target)
    */
   public final TargetInformation getTargetInformation(final Target target) {
-    for (TargetInformation targetInfo : getTargetInfos()) {
+    final List<TargetInformation> _targetInfos = getTargetInfos();
+    for (int i = 0, len = _targetInfos.size(); i < len; i++) {
+      TargetInformation targetInfo = _targetInfos.get(i);
       if (targetInfo.getTargetRef().equals(target)) {
         return targetInfo;
       }
