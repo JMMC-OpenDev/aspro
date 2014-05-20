@@ -9,7 +9,9 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
+import fr.jmmc.aspro.gui.chart.EnhancedXYBarRenderer;
 import fr.jmmc.aspro.gui.chart.EnhancedXYBoxAnnotation;
+import fr.jmmc.aspro.gui.chart.FitXYTextAnnotation;
 import fr.jmmc.aspro.gui.chart.ObservabilityPlotContext;
 import fr.jmmc.aspro.gui.chart.SlidingXYPlotAdapter;
 import fr.jmmc.aspro.gui.chart.SlidingXYPlotState;
@@ -1256,7 +1258,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         String legendLabel;
         Color paint;
 
-        final StringBuilder sb = new StringBuilder(4);
+        final StringBuilder sb = new StringBuilder(32);
 
         ObservabilityData obsData;
         // current StarObservabilityData used in loops :
@@ -1314,14 +1316,15 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             name = so.getTargetName();
                             // note: targetlist is null in such case
                         } else {
-                            // TODO: compute name (outside loops)
-                            // display name :
-                            name = targetUserInfos.getTargetDisplayName(target);
+                            // compute display name:
+                            targetUserInfos.getTargetDisplayName(target, sb);
 
                             // add information character:
                             if (targetUserInfos.getDescription(target) != null) {
-                                name += SUFFIX_INFO;
+                                sb.append(SUFFIX_INFO);
                             }
+                            name = sb.toString();
+                            sb.setLength(0); // recycle buffer
 
                             targetList.add(target);
                         }
@@ -1388,19 +1391,25 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 for (DateTimeInterval interval : so.getVisibleNoSoftLimits()) {
                                     addAnnotation(annotations, pos,
                                             new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
-                                                    ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint));
+                                                    ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint, Layer.BACKGROUND, 
+                                                    this.slidingXYPlotAdapter.generateToolTip(target, legendLabel, "Moon, Wind, HA", so, interval.getStartDate(), interval.getEndDate())));
                                 }
                             }
 
                             // Observable range limits with VCM restrictions:
                             if (so.getVisibleVcmLimits() != null) {
-                                // iteratively overlap annotations to mimic a gradient:
-                                for (List<DateTimeInterval> visibleVcmLimits : so.getVisibleVcmLimits()) {
-                                    for (DateTimeInterval interval : visibleVcmLimits) {
+                                final List<String> vcmLimits = so.getVcmLimits();
+                                final List<List<DateTimeInterval>> visibleVcmLimits = so.getVisibleVcmLimits();
+                                for (int k = 0, len = visibleVcmLimits.size(); k < len; k++) {
+                                    final String vcmLimit = vcmLimits.get(k);
+                                    final List<DateTimeInterval> visibleVcmIntervals = visibleVcmLimits.get(k);
+
+                                    // iteratively overlap annotations to mimic a gradient:
+                                    for (DateTimeInterval interval : visibleVcmIntervals) {
                                         addAnnotation(annotations, pos,
                                                 new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
-                                                        ChartUtils.DEFAULT_STROKE, null, VCM_OVERLAY_COLOR, Layer.FOREGROUND)); /* no outline (transparent) */
-
+                                                        ChartUtils.DEFAULT_STROKE, null, VCM_OVERLAY_COLOR, Layer.FOREGROUND,  /* no outline (transparent) */
+                                                        this.slidingXYPlotAdapter.generateToolTip(target, legendLabel, vcmLimit, so, interval.getStartDate(), interval.getEndDate())));
                                     }
                                 }
                             }
@@ -1423,19 +1432,25 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 for (DateTimeInterval interval : so.getVisibleNoSoftLimits()) {
                                     addAnnotation(annotations, pos,
                                             new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
-                                                    ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint));
+                                                    ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint, Layer.BACKGROUND,
+                                                    this.slidingXYPlotAdapter.generateToolTip(target, legendLabel, "Moon, Wind, HA", so, interval.getStartDate(), interval.getEndDate())));
                                 }
                             }
 
                             // Observable range limits with VCM restrictions:
                             if (so.getVisibleVcmLimits() != null) {
-                                // iteratively overlap annotations to mimic a gradient:
-                                for (List<DateTimeInterval> visibleVcmLimits : so.getVisibleVcmLimits()) {
-                                    for (DateTimeInterval interval : visibleVcmLimits) {
+                                final List<String> vcmLimits = so.getVcmLimits();
+                                final List<List<DateTimeInterval>> visibleVcmLimits = so.getVisibleVcmLimits();
+                                for (int k = 0, len = visibleVcmLimits.size(); k < len; k++) {
+                                    final String vcmLimit = vcmLimits.get(k);
+                                    final List<DateTimeInterval> visibleVcmIntervals = visibleVcmLimits.get(k);
+
+                                    // iteratively overlap annotations to mimic a gradient:
+                                    for (DateTimeInterval interval : visibleVcmIntervals) {
                                         addAnnotation(annotations, pos,
                                                 new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
-                                                        ChartUtils.DEFAULT_STROKE, null, VCM_OVERLAY_COLOR, Layer.FOREGROUND)); /* no outline (transparent) */
-
+                                                        ChartUtils.DEFAULT_STROKE, null, VCM_OVERLAY_COLOR, Layer.FOREGROUND,  /* no outline (transparent) */
+                                                        this.slidingXYPlotAdapter.generateToolTip(target, legendLabel, vcmLimit, so, interval.getStartDate(), interval.getEndDate())));
                                     }
                                 }
                             }
@@ -1447,7 +1462,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 // azimuth and elevation ticks:
                                 XYTickAnnotation a;
                                 for (TargetPositionDate ed : so.getTargetPositions().values()) {
-                                    if (checkDateAxisLimits(ed.getDate(), min, max)) {
+                                    if (ed.isShowTicks() && checkDateAxisLimits(ed.getDate(), min, max)) {
                                         a = AsproChartUtils.createXYTickAnnotation(Integer.toString(ed.getAzimuth()), n, ed.getDate().getTime(), 0d, -1d);
                                         a.setTextAnchor(TextAnchor.BOTTOM_CENTER);
                                         a.setRotationAnchor(TextAnchor.BOTTOM_CENTER);
@@ -1460,17 +1475,34 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                     }
                                 }
                             }
+                            // Observable range limits without HA restrictions (background):
+                            if (so.getVisibleNoSoftLimits() != null) {
+                                // time annotations at range boundaries:
+                                for (DateTimeInterval interval : so.getVisibleNoSoftLimits()) {
+                                    if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
+                                        final FitXYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getStartDate()), n, interval.getStartDate().getTime());
+                                        aStart.setRotationAngle(HALF_PI);
+                                        addAnnotation(annotations, pos, aStart);
+                                    }
 
+                                    if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
+                                        final FitXYTextAnnotation aEnd = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getEndDate()), n, interval.getEndDate().getTime());
+                                        aEnd.setRotationAngle(HALF_PI);
+                                        addAnnotation(annotations, pos, aEnd);
+                                    }
+                                }
+                            }
+                            
                             // time annotations at range boundaries:
                             for (DateTimeInterval interval : so.getVisible()) {
                                 if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
-                                    final XYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getStartDate()), n, interval.getStartDate().getTime());
+                                    final FitXYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getStartDate()), n, interval.getStartDate().getTime());
                                     aStart.setRotationAngle(HALF_PI);
                                     addAnnotation(annotations, pos, aStart);
                                 }
 
                                 if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
-                                    final XYTextAnnotation aEnd = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getEndDate()), n, interval.getEndDate().getTime());
+                                    final FitXYTextAnnotation aEnd = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getEndDate()), n, interval.getEndDate().getTime());
                                     aEnd.setRotationAngle(HALF_PI);
                                     addAnnotation(annotations, pos, aEnd);
                                 }
@@ -1482,13 +1514,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 for (List<DateTimeInterval> visibleVcmLimits : so.getVisibleVcmLimits()) {
                                     for (DateTimeInterval interval : visibleVcmLimits) {
                                         if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
-                                            final XYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getStartDate()), n, interval.getStartDate().getTime());
+                                            final FitXYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getStartDate()), n, interval.getStartDate().getTime());
                                             aStart.setRotationAngle(HALF_PI);
                                             addAnnotation(annotations, pos, aStart);
                                         }
 
                                         if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
-                                            final XYTextAnnotation aEnd = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getEndDate()), n, interval.getEndDate().getTime());
+                                            final FitXYTextAnnotation aEnd = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getEndDate()), n, interval.getEndDate().getTime());
                                             aEnd.setRotationAngle(HALF_PI);
                                             addAnnotation(annotations, pos, aEnd);
                                         }
