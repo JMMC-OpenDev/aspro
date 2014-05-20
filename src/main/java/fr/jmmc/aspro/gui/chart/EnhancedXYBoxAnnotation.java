@@ -40,6 +40,7 @@
  */
 package fr.jmmc.aspro.gui.chart;
 
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -138,7 +139,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      */
     public EnhancedXYBoxAnnotation(final double x0, final double y0, final double x1, final double y1,
                                    final BasicStroke stroke, final Paint outlinePaint, final Paint fillPaint) {
-        this(x0, y0, x1, y1, stroke, outlinePaint, fillPaint, Layer.BACKGROUND);
+        this(x0, y0, x1, y1, stroke, outlinePaint, fillPaint, Layer.BACKGROUND, null);
     }
 
     /**
@@ -153,9 +154,11 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * @param fillPaint  the paint used to fill the shape (<code>null</code>
      *                   permitted).
      * @param layer layer to draw this annotation = foreground or background (default)
+     * @param tooltipText optional tooltip text
      */
     public EnhancedXYBoxAnnotation(final double x0, final double y0, final double x1, final double y1,
-                                   final BasicStroke stroke, final Paint outlinePaint, final Paint fillPaint, final Layer layer) {
+                                   final BasicStroke stroke, final Paint outlinePaint, final Paint fillPaint, 
+                                   final Layer layer, final String tooltipText) {
         this.x0 = x0;
         this.y0 = y0;
         this.x1 = x1;
@@ -164,6 +167,9 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
         this.outlinePaint = outlinePaint;
         this.fillPaint = fillPaint;
         this.layer = layer;
+        if (!StringUtils.isEmpty(tooltipText)) {
+            this.setToolTipText(tooltipText);
+        }
     }
 
     /**
