@@ -1104,7 +1104,7 @@ public final class ObservabilityService {
 
                                 final StringBuffer sb = getBuffer();
                                 sb.append("Pupil correction problem: ").append(delayLineRestrictions.get(k).getDescription());
-                                sb.append(" pressure limit is exceeded.");
+                                sb.append(" pressure limit exceeded.");
                                 this.addWarning(sb.toString());
                             }
                         }
