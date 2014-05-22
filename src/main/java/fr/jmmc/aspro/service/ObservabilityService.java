@@ -3263,7 +3263,12 @@ public final class ObservabilityService {
             t = new Target();
 
             // delta = n (deg)
-            sb.append(SpecialChars.DELTA_UPPER).append(" = ").append(i);
+            sb.append(SpecialChars.DELTA_UPPER).append(" = ");
+            if (i >= 0) {
+                /* always print sign '+' as DEC is typically within range [-90; 90] */
+                sb.append('+');
+            }
+            sb.append(i);
             t.setName(sb.toString());
             sb.setLength(0); // recycle 
 
