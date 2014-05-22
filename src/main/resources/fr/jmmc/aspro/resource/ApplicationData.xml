@@ -186,9 +186,10 @@
 
     <releasenotes>
         <release version="0.9.6">
-            <pubDate>Thu, 22 May 2014 13:00:00 GMT</pubDate>
+            <pubDate>Thu, 22 May 2014 15:00:00 GMT</pubDate>
             <prerelease version="0.9.6 beta 9">
                 <change type="FEATURE">Added tooltips for baseline limits on the Observability plot</change>
+                <change type="FEATURE">Enhanced mouse wheel support on the Observability plot to zoom in/out when the scroll bar is disabled</change>
             </prerelease>
             <prerelease version="0.9.6 beta 8">
                 <change type="FEATURE">Added tooltips on unobservable ranges (soft or vcm limits) on the Observability plot</change>
