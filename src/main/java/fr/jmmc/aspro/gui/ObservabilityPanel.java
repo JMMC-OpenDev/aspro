@@ -2060,8 +2060,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     private void updateMouseWheelHandler(final boolean scrollable) {
-        logger.info("updateMouseWheelHandler: {}", scrollable);
-
         // Note: buggy code in ChartPanel.setMouseWheelEnabled(boolean) v1.0.13
         if (scrollable) {
             if (this.chartPanel.isMouseWheelEnabled()) {
