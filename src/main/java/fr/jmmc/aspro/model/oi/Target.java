@@ -898,24 +898,29 @@ public class Target
    */
   public final void toHtml(final StringBuffer sb, final boolean full) {
     sb.append("<b>Name: ").append(getName());
-    sb.append("</b><br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
-    if (full && getPMRA() != null && getPMDEC() != null) {
-      sb.append("<br><b>Proper motion</b> (mas/yr): ").append(getPMRA()).append(' ').append(getPMDEC());
+    if (getRA() != null && getDEC() != null) {
+        // note: generated targets for baseline limits do not have RA/DEC as string (useless):
+        sb.append("</b><br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
     }
-    if (full && getPARALLAX() != null && getPARAERR() != null) {
-      sb.append("<br><b>Parallax</b> (mas): ").append(getPARALLAX()).append(" [").append(getPARAERR()).append(']');
-    }
-    if (full && getSYSVEL() != null) {
-      sb.append("<br><b>Radial Velocity</b> (km/s): ").append(getSYSVEL());
-      if (getVELTYP() != null) {
-        sb.append(" (").append(getVELTYP()).append(')');
-      }
-    }
-    if (full && getOBJTYP() != null && getOBJTYP().length() > 0) {
-      sb.append("<br><b>Object types</b>: ").append(getOBJTYP());
-    }
-    if (full && getSPECTYP() != null && getSPECTYP().length() > 0) {
-      sb.append("<br><b>Spectral types</b>: ").append(getSPECTYP());
+    if (full) {
+        if (getPMRA() != null && getPMDEC() != null) {
+          sb.append("<br><b>Proper motion</b> (mas/yr): ").append(getPMRA()).append(' ').append(getPMDEC());
+        }
+        if (getPARALLAX() != null && getPARAERR() != null) {
+          sb.append("<br><b>Parallax</b> (mas): ").append(getPARALLAX()).append(" [").append(getPARAERR()).append(']');
+        }
+        if (getSYSVEL() != null) {
+          sb.append("<br><b>Radial Velocity</b> (km/s): ").append(getSYSVEL());
+          if (getVELTYP() != null) {
+            sb.append(" (").append(getVELTYP()).append(')');
+          }
+        }
+        if (getOBJTYP() != null && getOBJTYP().length() > 0) {
+          sb.append("<br><b>Object types</b>: ").append(getOBJTYP());
+        }
+        if (getSPECTYP() != null && getSPECTYP().length() > 0) {
+          sb.append("<br><b>Spectral types</b>: ").append(getSPECTYP());
+        }
     }
     // Fluxes :
     sb.append("<br>");
