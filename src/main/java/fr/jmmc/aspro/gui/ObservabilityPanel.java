@@ -213,6 +213,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private XYTextAnnotation aJMMC = null;
     /** sliding adapter to display a subset of targets */
     private SlidingXYPlotAdapter slidingXYPlotAdapter = null;
+    /** custom mouse wheel handler instance */
+    private ScrollMouseWheelHandler scrollerMouseWheelHandler = null;
     /** plot rendering context */
     private final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
     /** height (in pixels) corresponding to non data area (title / axis / legend) */
@@ -311,8 +313,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         this.chartPanel.setDomainZoomable(true);
         // date axis :
         this.chartPanel.setRangeZoomable(true);
-        // disable mouse wheel as it is already used when scrolling view:
-        this.chartPanel.setMouseWheelEnabled(false);
 
         this.add(this.chartPanel, BorderLayout.CENTER);
 
@@ -331,23 +331,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             }
         });
 
-        // add the mouse wheel listener to the complete observability panel :
-        this.addMouseWheelListener(new MouseWheelListener() {
-            @Override
-            public void mouseWheelMoved(final MouseWheelEvent e) {
-                if (scroller.isEnabled()) {
-                    logger.debug("mouseWheelMoved: {}", e);
-
-                    final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) scroller.getModel();
-
-                    final int clicks = e.getWheelRotation();
-                    if (clicks != 0) {
-                        // update value in min (0) / max (size - max viewed items) range:
-                        model.setValue(model.getValue() + clicks);
-                    }
-                }
-            }
-        });
+        // update mouse wheel handler:
+        updateMouseWheelHandler(false);
 
         // Use a panel to define custom margin arround the scroll bar:
         this.scrollerPanel = new JPanel(new BorderLayout());
@@ -1385,7 +1370,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
                         // add legend to tooltip:
                         labelList.add(legendLabel);
-                        
+
                         // get potential vcm limits:
                         visibleVcmLimits = so.getVisibleVcmLimits();
 
@@ -1608,6 +1593,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             this.scroller.setEnabled(true);
             useSubset = true;
         }
+        // update mouse wheel handler:
+        updateMouseWheelHandler(this.scroller.isEnabled());
 
         // update selected target (target may have different position now):
         updateSelectedTarget();
@@ -2070,6 +2057,60 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      */
     private void setCurrentTargetName(final String targetName) {
         this.currentTargetName = targetName;
+    }
+
+    private void updateMouseWheelHandler(final boolean scrollable) {
+        logger.info("updateMouseWheelHandler: {}", scrollable);
+
+        // Note: buggy code in ChartPanel.setMouseWheelEnabled(boolean) v1.0.13
+        if (scrollable) {
+            if (this.chartPanel.isMouseWheelEnabled()) {
+                // disable mouse wheel as it is already used when scrolling view:
+                this.chartPanel.setMouseWheelEnabled(false);
+            }
+            if (this.scrollerMouseWheelHandler == null) {
+                // add the mouse wheel listener to the observability panel:
+                this.scrollerMouseWheelHandler = new ScrollMouseWheelHandler(this.scroller);
+                this.addMouseWheelListener(this.scrollerMouseWheelHandler);
+            }
+        } else {
+            if (this.scrollerMouseWheelHandler != null) {
+                // remove the mouse wheel listener from the observability panel:
+                this.removeMouseWheelListener(this.scrollerMouseWheelHandler);
+                this.scrollerMouseWheelHandler = null;
+            }
+            if (!this.chartPanel.isMouseWheelEnabled()) {
+                // enable mouse wheel as scrolling view disabled:
+                this.chartPanel.setMouseWheelEnabled(true);
+            }
+        }
+    }
+
+    /**
+     * Custom MouseWheelListener that acts on given JScrollBar
+     */
+    private static final class ScrollMouseWheelHandler implements MouseWheelListener {
+
+        private final JScrollBar scroller;
+
+        ScrollMouseWheelHandler(final JScrollBar scroller) {
+            this.scroller = scroller;
+        }
+
+        @Override
+        public void mouseWheelMoved(final MouseWheelEvent e) {
+            if (this.scroller.isEnabled()) {
+                logger.debug("mouseWheelMoved: {}", e);
+
+                final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) this.scroller.getModel();
+
+                final int clicks = e.getWheelRotation();
+                if (clicks != 0) {
+                    // update value in min (0) / max (size - max viewed items) range:
+                    model.setValue(model.getValue() + clicks);
+                }
+            }
+        }
     }
 
     /**
