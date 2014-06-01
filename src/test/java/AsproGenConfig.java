@@ -18,9 +18,11 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.SwitchYard;
 import fr.jmmc.aspro.service.GeocentricCoords;
+import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.ResourceUtils;
 import fr.jmmc.jmcs.util.jaxb.JAXBFactory;
+import fr.jmmc.oitools.util.CombUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -32,7 +34,10 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -673,6 +678,230 @@ public final class AsproGenConfig {
                 }
             } // line
 
+            // AT Relocation:
+            // Generate new baselines derived from PIONIER quadruplets:
+            InterferometerConfiguration icRelocate = null;
+            for (InterferometerConfiguration ic : confToProcess) {
+                if ("AT Relocation".equals(ic.getVersion())) {
+                    icRelocate = ic;
+                    break;
+                }
+            }
+            if (icRelocate != null) {
+                FocalInstrumentConfiguration insConfPionier = null;
+                for (FocalInstrumentConfiguration insConf : icRelocate.getInstruments()) {
+                    if ("PIONIER".equals(insConf.getFocalInstrument().getName())) {
+                        insConfPionier = insConf;
+                        break;
+                    }
+                }
+                if (insConfPionier != null) {
+                    final int maxTel = insConfPionier.getFocalInstrument().getNumberChannels();
+
+                    final List<List<int[]>> combsList = new ArrayList<List<int[]>>(maxTel - 2);
+                    for (int i = maxTel - 1; i > 1; i--) {
+                        combsList.add(CombUtils.generateCombinations(maxTel, i));
+                    }
+
+                    final Comparator<Station> cmp = new Comparator<Station>() {
+
+                        @Override
+                        public int compare(final Station s1, final Station s2) {
+                            return s1.getName().compareTo(s2.getName());
+                        }
+
+                    };
+
+                    final List<Station> confSta = new ArrayList<Station>(maxTel);
+                    final List<Station> ordSta = new ArrayList<Station>(maxTel);
+                    final List<Station> ordStaOther = new ArrayList<Station>(maxTel);
+
+                    final List<Channel> confCh = new ArrayList<Channel>(maxTel);
+                    final List<DelayLine> confDL = new ArrayList<DelayLine>(maxTel);
+
+                    for (FocalInstrumentConfigurationItem conf : insConfPionier.getConfigurations()) {
+                        // for all 2T / 3T ...
+                        for (List<int[]> combs : combsList) {
+                            // Generate all combinations:
+
+                            for (int[] cb : combs) {
+                                confSta.clear();
+                                confCh.clear();
+                                confDL.clear();
+
+                                nTel = cb.length;
+
+                                for (int i = 0; i < nTel; i++) {
+                                    idx = cb[i];
+
+                                    confSta.add(conf.getStations().get(idx));
+                                    // Suppose we have channels & delay lines:
+                                    confCh.add(conf.getChannels().get(idx));
+                                    confDL.add(conf.getDelayLines().get(idx));
+                                }
+                                logger.debug("generated {}T conf: {} {} {}", nTel, confSta, confCh, confDL);
+
+                                // Sort stations:
+                                ordSta.clear();
+                                ordSta.addAll(confSta);
+                                Collections.sort(ordSta, cmp);
+
+                                logger.debug("sorted {}T conf: {}", nTel, ordSta);
+
+                                for (FocalInstrumentConfiguration insConf : icRelocate.getInstruments()) {
+                                    if (nTel == insConf.getFocalInstrument().getNumberChannels()) {
+
+                                        // check duplicates:
+                                        boolean found = false;
+                                        for (FocalInstrumentConfigurationItem confOther : insConf.getConfigurations()) {
+                                            // Sort stations:
+                                            ordStaOther.clear();
+                                            ordStaOther.addAll(confOther.getStations());
+                                            Collections.sort(ordStaOther, cmp);
+
+                                            logger.debug("sorted other {}T conf: {}", nTel, ordStaOther);
+
+                                            if (ordSta.equals(ordStaOther)) {
+                                                found = true;
+                                                break;
+                                            }
+                                        }
+
+                                        if (!found) {
+                                            logger.info("AT Relocation: added new {}T configuration: {}", nTel, confSta);
+
+                                            final FocalInstrumentConfigurationItem confItem = new FocalInstrumentConfigurationItem();
+                                            confItem.getStations().addAll(confSta);
+                                            confItem.getChannels().addAll(confCh);
+                                            confItem.getDelayLines().addAll(confDL);
+
+                                            insConf.getConfigurations().add(confItem);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Check that every configuration has valid Stattion / DL / IP mapping
+            int nErrors = 0;
+            final Set<Station> usedStations = new HashSet<Station>(8);
+            final Set<Channel> usedChannels = new HashSet<Channel>(8);
+            final Set<DelayLine> usedDelayLines = new HashSet<DelayLine>(8);
+
+            for (InterferometerConfiguration ic : confToProcess) {
+                logger.debug("checking configuration {}", ic.getVersion());
+                for (FocalInstrumentConfiguration insConf : ic.getInstruments()) {
+                    logger.debug("checking instrument {}", insConf.getFocalInstrument());
+                    for (FocalInstrumentConfigurationItem conf : insConf.getConfigurations()) {
+
+                        final int len = conf.getStations().size();
+
+                        if (len != insConf.getFocalInstrument().getNumberChannels()) {
+                            logger.error("invalid configuration for the instrument: {} {} : {} {} {}", ic.getVersion(),
+                                    insConf.getFocalInstrument().getName(),
+                                    conf.getStations(), conf.getChannels(), conf.getDelayLines());
+                            nErrors++;
+                            continue;
+                        }
+
+                        final boolean hasCh = !conf.getChannels().isEmpty();
+                        final boolean hasDL = !conf.getDelayLines().isEmpty();
+
+                        logger.debug("checking Station/Channel/DL: {} {} {}",
+                                conf.getStations(), conf.getChannels(), conf.getDelayLines());
+
+                        if (hasCh || hasDL) {
+                            // check channels & DL:
+                            if ((len != conf.getChannels().size()) || (len != conf.getDelayLines().size())) {
+                                logger.error("invalid Station/Channel/DL for configuration: {} {} : {} {} {}", ic.getVersion(),
+                                        insConf.getFocalInstrument().getName(),
+                                        conf.getStations(), conf.getChannels(), conf.getDelayLines());
+                                nErrors++;
+                                continue;
+                            }
+                        }
+
+                        usedStations.clear();
+                        usedChannels.clear();
+                        usedDelayLines.clear();
+
+                        for (pos = 0; pos < len; pos++) {
+                            Station sta = conf.getStations().get(pos);
+                            ch = (hasCh) ? conf.getChannels().get(pos) : null;
+                            dl = (hasDL) ? conf.getDelayLines().get(pos) : null;
+
+                            // Check duplicates:
+                            if (usedStations.contains(sta)) {
+                                logger.error("duplicate stations for configuration: {} {} : {} {} {}", ic.getVersion(),
+                                        insConf.getFocalInstrument().getName(),
+                                        conf.getStations(), conf.getChannels(), conf.getDelayLines());
+                                nErrors++;
+                                break;
+                            }
+                            usedStations.add(sta);
+
+                            if (hasCh) {
+                                if (usedChannels.contains(ch)) {
+                                    logger.error("duplicate channels for configuration: {} {} : {} {} {}", ic.getVersion(),
+                                            insConf.getFocalInstrument().getName(),
+                                            conf.getStations(), conf.getChannels(), conf.getDelayLines());
+                                    nErrors++;
+                                    break;
+                                }
+                                usedChannels.add(ch);
+                            }
+                            if (hasDL) {
+                                if (usedDelayLines.contains(dl)) {
+                                    logger.error("duplicate DLs for configuration: {} {} : {} {} {}", ic.getVersion(),
+                                            insConf.getFocalInstrument().getName(),
+                                            conf.getStations(), conf.getChannels(), conf.getDelayLines());
+                                    nErrors++;
+                                    break;
+                                }
+                                usedDelayLines.add(dl);
+                            }
+
+                            // check switchyard:
+                            boolean found = false;
+                            for (StationLinks sl : sw.getStationLinks()) {
+                                if (sl.getStation().getName().equalsIgnoreCase(sta.getName())) {
+                                    // station found in switchyard:
+                                    if (!hasCh) {
+                                        found = true;
+                                        break;
+                                    } else {
+                                        for (ChannelLink cl : sl.getChannelLinks()) {
+                                            if (cl.getChannel().equals(ch)) {
+                                                found = true;
+                                                if ((cl.getDelayLine() != null) && (!cl.getDelayLine().equals(dl))) {
+                                                    found = false;
+                                                }
+                                                if (found) {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (!found) {
+                                logger.error("invalid Station/Channel/DL for configuration: {} {}: {} {} {}", ic.getVersion(),
+                                        insConf.getFocalInstrument().getName(),
+                                        sta, ch, dl);
+                                nErrors++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (nErrors != 0) {
+                throw new IllegalStateException("Errors detected in VLTI configuration !");
+            }
+
             if (match) {
                 // Dump updated VLTI configuration with channels:
                 try {
@@ -1164,12 +1393,12 @@ public final class AsproGenConfig {
             if (az.length != el.length) {
                 throw new IllegalStateException("Inconsistent length for azimuth and elevation arrays !");
             }
-            final int len = az.length -1;
+            final int len = az.length - 1;
             // check az=0 and az=360:
             if (az[0] != 0d || az[len] != 360d) {
                 throw new IllegalStateException("Invalid azimuth array [except 0 and 360 range] !");
             }
-            
+
             // Fix start and end of az/el arrays (ie use max(elevation) for az=0 and az=360:
             int a = 0;
             for (int i = 0; i <= len; i++) {
@@ -1181,7 +1410,7 @@ public final class AsproGenConfig {
                 }
             }
             System.out.println("a = " + Arrays.toString(Arrays.copyOfRange(az, 0, a + 1)));
-            
+
             int b = 0;
             for (int i = len; i >= 0; i--) {
                 if (az[i] == 360d) {
@@ -1192,8 +1421,7 @@ public final class AsproGenConfig {
                 }
             }
             System.out.println("b = " + Arrays.toString(Arrays.copyOfRange(az, b, len + 1)));
-            
-            
+
             // Fix elevation for az=0 and az=360 ie take max:
             double max = 0d;
             for (int i = 0; i <= a; i++) {
@@ -1770,11 +1998,15 @@ public final class AsproGenConfig {
      * @param args unused
      */
     public static void main(final String[] args) {
+
+        // invoke Bootstrapper method to initialize logback now:
+        Bootstrapper.getState();
+
         final String userHome = SystemUtils.USER_HOME;
         final String aspro1Path = userHome + "/dev/aspro1/etc/";
         final String asproTestPath = userHome + "/dev/aspro/src/test/resources/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.CHARA;
+        final INTERFEROMETER selected = INTERFEROMETER.VLTI;
 
         switch (selected) {
             case VLTI:
