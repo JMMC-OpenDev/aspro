@@ -81,6 +81,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import net.jafama.FastMath;
 import fr.jmmc.jmcs.util.CollectionUtils;
 import fr.jmmc.jmcs.util.FormatterUtils;
+import fr.jmmc.jmcs.util.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -2471,7 +2472,7 @@ public final class ObservabilityService {
         if (useRelatedDLs && nBeams != nRelDLs) {
             throw new IllegalStateException("The number of associated delay lines does not match the station list : " + stations + " <> " + relatedDLs);
         }
-
+        
         this.beams = new ArrayList<Beam>(nBeams);
 
         // used delay lines:
@@ -2533,14 +2534,29 @@ public final class ObservabilityService {
             // 1- Associate a channel / DL to the beam :
             StationLinks sl;
             for (Beam b : this.beams) {
-
                 // for each station, get the possible channels in the switchyard configuration:
                 sl = ConfigurationManager.getInstance().getStationLinks(this.interferometer, b.getStation());
 
                 // VLTI : find an available channel for every station:
+                if (useRelatedChannels && b.getDelayLine() != null) {
+                    // check that the switchyard contains a channel link for the combination [channel | DL]:
+                    boolean matchDl = false;
+                    for (ChannelLink cl : sl.getChannelLinks()) {
+                        if (ObjectUtils.areEquals(b.getChannel(), cl.getChannel()) && b.getDelayLine().equals(cl.getDelayLine())) {
+                            matchDl = true;
+                            break;
+                        }
+                    }
+                    if (!matchDl) {
+                        logger.warn("Invalid DL for station {} / channel {} / delay line {}", b.getStation(), b.getChannel(), b.getDelayLine());
+                        dlSet.remove(b.getDelayLine());
+                        b.setDelayLine(null);
+                        channelSet.remove(b.getChannel());
+                        b.setChannel(null);
+                    }
+                }
                 if (!useRelatedChannels || b.getChannel() == null) {
                     for (ChannelLink cl : sl.getChannelLinks()) {
-
                         if (!channelSet.contains(cl.getChannel())) {
                             // check that optional associated DL is not used:
                             if ((cl.getDelayLine() == null)
@@ -2567,9 +2583,7 @@ public final class ObservabilityService {
 
                 // Use the channel link corresponding to the beam channel:
                 for (ChannelLink cl : sl.getChannelLinks()) {
-
                     if (cl.getChannel().equals(b.getChannel())) {
-
                         if ((cl.getDelayLine() != null) && (!cl.getDelayLine().equals(b.getDelayLine()))) {
                             // DL does not match, try another channel link:
                             continue;
