@@ -67,6 +67,9 @@ public final class DelayLineService {
         final double sinDec = FastMath.sin(dec);
 
         final int size = baseLines.size();
+        if (size == 0) {
+            return Collections.EMPTY_LIST;
+        }
 
         final List<List<Range>> rangesBL = new ArrayList<List<Range>>(size);
 

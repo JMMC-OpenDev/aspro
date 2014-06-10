@@ -1362,7 +1362,7 @@ public final class ObservabilityService {
 
             final List<Range> finalRangesHardLimits;
 
-            if (rangesHABaseLines.isEmpty()) {
+            if ((sizeBL != 0) && rangesHABaseLines.isEmpty()) {
                 finalRangesHardLimits = null;
             } else {
                 // Merge then all JD intervals :
@@ -2472,7 +2472,7 @@ public final class ObservabilityService {
         if (useRelatedDLs && nBeams != nRelDLs) {
             throw new IllegalStateException("The number of associated delay lines does not match the station list : " + stations + " <> " + relatedDLs);
         }
-        
+
         this.beams = new ArrayList<Beam>(nBeams);
 
         // used delay lines:
@@ -2674,18 +2674,18 @@ public final class ObservabilityService {
             // Use only the fixed offset of the station :
             int i = 0;
             for (Beam b : this.beams) {
-
                 if (i < nDelayLines) {
                     b.setDelayLine(delayLines.get(i));
-                    if (b.getStation().getDelayLineFixedOffset() == null) {
-                        throw new IllegalStateException("Missing fixed offset for station [" + b.getStation() + "].");
+                    if (nBeams > 1) {
+                        if (b.getStation().getDelayLineFixedOffset() == null) {
+                            throw new IllegalStateException("Missing fixed offset for station [" + b.getStation() + "].");
+                        }
+                        b.addToOpticalPathLength(b.getStation().getDelayLineFixedOffset());
                     }
-                    b.addToOpticalPathLength(b.getStation().getDelayLineFixedOffset());
                 } else {
                     // no delay line ?
                     throw new IllegalStateException("Impossible to associate a delay line to the beam [" + b + "].");
                 }
-
                 i++;
             }
         }
