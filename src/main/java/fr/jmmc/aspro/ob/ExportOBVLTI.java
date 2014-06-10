@@ -143,7 +143,7 @@ public class ExportOBVLTI {
         ExportOBAmber.generate(file, observation, os, target);
       } else if (AsproConstants.INS_MIDI.equals(instrumentName)) {
         ExportOBMidi.generate(file, observation, os, target);
-      } else if (AsproConstants.INS_PIONIER.equals(instrumentName)) {
+      } else if (instrumentName.startsWith(AsproConstants.INS_PIONIER)) {
         ExportOBPionier.generate(file, observation, os, target);
       } else {
         throw new IllegalArgumentException("Aspro 2 can not generate an Observing Block for this instrument [" + instrumentName + "] !");

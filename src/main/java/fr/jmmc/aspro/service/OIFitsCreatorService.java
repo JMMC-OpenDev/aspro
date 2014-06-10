@@ -589,7 +589,7 @@ public final class OIFitsCreatorService {
         this.visComplex = null;
 
         // remove the OI_VIS table for instruments that do not produce such results (PIONIER):
-        if (AsproConstants.INS_PIONIER.equals(this.instrumentName)) {
+        if (this.instrumentName.startsWith(AsproConstants.INS_PIONIER)) {
             // Remove OI_VIS table if instrument is PIONIER:
             final OIVis vis = this.oiFitsFile.getOiVis()[0];
 

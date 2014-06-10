@@ -189,7 +189,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     /** jFreeChart instance */
     private JFreeChart chart;
     /** xy plot instance */
-    protected SquareXYPlot xyPlot;
+    private SquareXYPlot xyPlot;
     /** JMMC annotation */
     private XYTextAnnotation aJMMC = null;
     /** uv map image scale legend */
@@ -632,7 +632,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         if (AsproConstants.INS_AMBER.equals(insName)
                 || AsproConstants.INS_MIDI.equals(insName)
-                || AsproConstants.INS_PIONIER.equals(insName)) {
+                || insName.startsWith(AsproConstants.INS_PIONIER)) {
 
             // set the source with this instance :
             evt.setSource(this);
