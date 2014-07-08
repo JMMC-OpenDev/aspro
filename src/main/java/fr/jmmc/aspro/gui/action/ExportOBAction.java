@@ -20,39 +20,37 @@ import org.slf4j.LoggerFactory;
  */
 public final class ExportOBAction extends RegisteredAction {
 
-  /** default serial UID for Serializable interface */
-  private static final long serialVersionUID = 1;
-  /** Class name. This name is used to register to the ActionRegistrar */
-  private final static String className = ExportOBAction.class.getName();
-  /** Action name. This name is used to register to the ActionRegistrar */
-  public final static String actionName = "exportOB";
-  /** Class logger */
-  private static final Logger logger = LoggerFactory.getLogger(className);
+    /** default serial UID for Serializable interface */
+    private static final long serialVersionUID = 1;
+    /** Class name. This name is used to register to the ActionRegistrar */
+    private final static String className = ExportOBAction.class.getName();
+    /** Action name. This name is used to register to the ActionRegistrar */
+    public final static String actionName = "exportOB";
+    /** Class logger */
+    private static final Logger logger = LoggerFactory.getLogger(className);
 
-  /**
-   * Public constructor that automatically register the action in RegisteredAction.
-   */
-  public ExportOBAction() {
-    super(className, actionName);
-  }
-
-  /**
-   * Handle the action event
-   * @param evt action event
-   */
-  @Override
-  public void actionPerformed(final ActionEvent evt) {
-    logger.debug("actionPerformed");
-
-    final UVCoveragePanel uvCoveragePanel = Aspro2.getInstance().getSettingPanel().getUVCoveragePanel();
-
-    // note : there is at least one target :
-    if (uvCoveragePanel != null) {
-
-      uvCoveragePanel.performOBAction(evt, ExportOBMode.SINGLE);
-
-    } else {
-      MessagePane.showMessage("Please enter first a target to export it as an Observing block.");
+    /**
+     * Public constructor that automatically register the action in RegisteredAction.
+     */
+    public ExportOBAction() {
+        super(className, actionName);
     }
-  }
+
+    /**
+     * Handle the action event
+     * @param evt action event
+     */
+    @Override
+    public void actionPerformed(final ActionEvent evt) {
+        logger.debug("actionPerformed");
+
+        final UVCoveragePanel uvCoveragePanel = Aspro2.getInstance().getSettingPanel().getUVCoveragePanel();
+
+        // note : there is at least one target :
+        if (uvCoveragePanel != null) {
+            uvCoveragePanel.performOBAction(evt, ExportOBMode.SINGLE);
+        } else {
+            MessagePane.showMessage("Please enter first a target to export it as an Observing block.");
+        }
+    }
 }
