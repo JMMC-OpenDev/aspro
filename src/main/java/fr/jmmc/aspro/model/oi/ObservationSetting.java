@@ -422,6 +422,26 @@ public class ObservationSetting
   public final fr.jmmc.aspro.model.ObservationVersion getVersion() {
     return this.version;
   }
+  
+  /** selected target name (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  String selectedTargetName = null;
+  
+  /**
+   * Return the selected target name
+   * @return selected target name
+   */
+  public final String getSelectedTargetName() {
+    return this.selectedTargetName;
+  }
+  
+  /**
+   * Define the selected target name
+   * @param selectedTargetName selected target name (may be null)
+   */
+  public final void setSelectedTargetName(final String selectedTargetName) {
+    this.selectedTargetName = selectedTargetName;
+  }
 
   @Override
   public final String toString() {
@@ -440,7 +460,7 @@ public class ObservationSetting
 
     // copy version :
     copy.version = new fr.jmmc.aspro.model.ObservationVersion(copy.version);
-
+    
     // clear observation variants :
     copy.variants = null;
 
