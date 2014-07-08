@@ -14,7 +14,7 @@ public enum ObservationEventType {
   TARGET_CHANGED,
   /** target selection changed */
   TARGET_SELECTION_CHANGED,
-  /** ask listeners to save thier swing state into the main observation */
+  /** ask listeners to save their swing state into the main observation */
   DO_UPDATE,
   /** one or more general attribute(s) changed */
   REFRESH,
