@@ -430,12 +430,33 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      *
      * Listeners : UVCoveragePanel
      *
-     * @param target selected target
+     * @param target selected target (may be null)
      */
     public void fireTargetSelectionChanged(final Target target) {
         logger.debug("fireTargetSelectionChange: {}", target);
 
+        final String targetName = (target != null) ? target.getName() : null;
+
+        // store the selected target using its name (not instance):
+        getMainObservation().setSelectedTargetName(targetName);
+
         fireEvent(new TargetSelectionEvent(target));
+    }
+
+    /**
+     * This fires a target selection changed event to the given listener.
+     *
+     * Listeners : UVCoveragePanel
+     *
+     * @param listener which listener to call
+     */
+    public void fireTargetSelectionChanged(final ObservationListener listener) {
+        final ObservationSetting observation = getMainObservation();
+
+        // retrieve the selected target from its name:
+        final Target target = observation.getTarget(observation.getSelectedTargetName());
+
+        fireEvent(new TargetSelectionEvent(target), listener);
     }
 
     /**
@@ -597,7 +618,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     /**
      * Send an event to the registered listeners.
-     * Note : any new listener registered during the processing of this event, will not be called
+     * Note : new registered listeners may not be called during the processing of this event (no guaranty)
      * @param event event
      */
     private void fireEvent(final ObservationEvent event) {
@@ -617,9 +638,39 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
         final long start = System.nanoTime();
 
-        for (final ObservationListener listener : this.listeners) {
-            listener.onProcess(event);
+        // use explicitely size() and get(int) methods to use the up-to-date state of the listener array: 
+        for (int i = 0; i < this.listeners.size(); i++) {
+            this.listeners.get(i).onProcess(event);
         }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("fireEvent: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        }
+    }
+
+    /**
+     * Send an event to the given listener.
+     * @param event event
+     * @param listener listener to call
+     */
+    private void fireEvent(final ObservationEvent event, final ObservationListener listener) {
+        // ensure events are fired by Swing EDT :
+        if (!SwingUtils.isEDT()) {
+            logger.warn("invalid thread : use EDT", new Throwable());
+        }
+        if (DEBUG_FIRE_EVENT) {
+            if (event.getVersion() != null) {
+                logger.warn("FIRE {} on version = {}", event, event.getVersion(), new Throwable());
+            } else {
+                logger.warn("FIRE {}", event, new Throwable());
+            }
+        }
+
+        logger.debug("fireEvent: {}", event);
+
+        final long start = System.nanoTime();
+
+        listener.onProcess(event);
 
         if (logger.isDebugEnabled()) {
             logger.debug("fireEvent: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
@@ -988,7 +1039,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
              Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
              Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
              */
-
             // coordinates (deg) :
             t.setRA(star.getPropertyAsString(Star.Property.RA).replace(' ', ':'));
             t.setDEC(star.getPropertyAsString(Star.Property.DEC).replace(' ', ':'));
@@ -1320,9 +1370,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         logger.debug("setOIFitsList: {}", oiFitsList);
 
         // TODO: use a new class OIFitsData (version / File / Target) ...
-
         // Use OIFitsCollectionManager ?
-
         this.oiFitsList = (oiFitsList == null || oiFitsList.isEmpty()) ? null : oiFitsList;
 
         // Fire OIFitsDone event to inform panels to be updated anyway:
@@ -1480,7 +1528,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         }
 
         // TODO: get correct value in the UVCoveragePanel instead ...
-
         // use default value for UVMax slider (see UVCoveragePanel):
         double uvMax = 1.05d * maxBaseLine;
 
