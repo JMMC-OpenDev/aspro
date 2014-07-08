@@ -98,7 +98,9 @@ public final class AsproGenConfig {
         /**
          * MROI (future)
          */
-        MROI
+        MROI,
+        /* 1T sites */
+        SINGLE_DISH
     };
 
     /**
@@ -1985,6 +1987,26 @@ public final class AsproGenConfig {
         logger.info("Generated NPOI Configuration : " + sb.length() + "\n" + sb.toString());
     }
 
+    private static void SingleDishes() {
+
+        // SAAO Sutherland:
+        /* 32°22'47.9"S 20°48'39.3"E
+          -32.379979, 20.810921
+         */
+        final StringBuilder sb = new StringBuilder(128);
+
+        final double lonDeg = +(20.0 + 48.0 / 60.0 + 39.3 / 3600.0);
+        logger.info("Sutherland longitude (deg) : " + lonDeg);
+
+        final double latDeg = -(32.0 + 22.0 / 60.0 + 47.9 / 3600.0);
+        logger.info("Sutherland  latitude (deg) : " + latDeg);
+
+        final double alt = 1798.0;
+        computeInterferometerPosition(lonDeg, latDeg, alt, sb);
+
+        logger.info("Generated Sutherland position:\n" + sb.toString());
+    }
+
     static double trimTo4Digits(final double value) {
         if (Double.isNaN(value)) {
             return value;
@@ -2006,7 +2028,7 @@ public final class AsproGenConfig {
         final String aspro1Path = userHome + "/dev/aspro1/etc/";
         final String asproTestPath = userHome + "/dev/aspro/src/test/resources/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.VLTI;
+        final INTERFEROMETER selected = INTERFEROMETER.SINGLE_DISH;
 
         switch (selected) {
             case VLTI:
@@ -2047,6 +2069,9 @@ public final class AsproGenConfig {
                 MROIposition();
 
                 convertStationFile(aspro1Path + "MROI.stations");
+                break;
+            case SINGLE_DISH:
+                SingleDishes();
                 break;
 
             default:
