@@ -95,4 +95,30 @@ public class OIBase implements Cloneable {
     public static final boolean areEquals(final Object o1, final Object o2) {
         return (o1 == o2) || ((o1 != null) && o1.equals(o2));
     }
+
+    /**
+     * @param value value to check
+     * @return true if the given value is NaN
+     */
+    public static final boolean isNaN(final Float value) {
+        return (value != null && Float.isNaN(value));
+    }
+
+    /**
+     * @param value value to check
+     * @return true if the given value is NaN
+     */
+    public static final boolean isNaN(final Double value) {
+        return (value != null && Double.isNaN(value));
+    }
+    
+    /**
+     * Test if value is empty (no chars)
+     * 
+     * @param value string value
+     * @return true if value is empty (null or no chars)
+     */
+    public static boolean isEmpty(final String value) {
+        return value != null && value.isEmpty();
+    }
 }
