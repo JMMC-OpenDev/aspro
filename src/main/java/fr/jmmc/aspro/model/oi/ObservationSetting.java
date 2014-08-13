@@ -514,6 +514,10 @@ public class ObservationSetting
    * For now it checks target ID/IDREF consistency (targetUserInformations...)
    */
   public void checkReferences() {
+    // check targets:
+    for (Target target : getTargets()) {
+        target.checkValues();
+    }
     // check target user infos :
     if (this.targetUserInfos != null) {
       logger.debug("checkReferences = {}", this.targetUserInfos);

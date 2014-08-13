@@ -1403,7 +1403,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
                 try {
                     // update the data model and fire change events :
-                    om.addTarget(Target.formatName(star.getName()), star);
+                    om.addTarget(star);
                 } catch (IllegalArgumentException iae) {
                     logger.info("addTarget failed: {}", iae.getMessage());
 
@@ -1872,7 +1872,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         };
 
         final Target defTarget = new Target();
-        defTarget.setName("HIP 1234");
+        defTarget.updateNameAndIdentifier("HIP 1234");
 
         // Useful to define the empty list width and height :
         list.setPrototypeCellValue(defTarget);

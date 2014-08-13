@@ -32,9 +32,7 @@ import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.UserModelService;
-import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.Band;
-import fr.jmmc.jmal.CoordUtils;
 import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.model.targetmodel.Parameter;
@@ -43,7 +41,7 @@ import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.service.RecentFilesManager;
 import fr.jmmc.jmcs.util.FileUtils;
-import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.nom.tam.fits.FitsException;
 import java.io.File;
@@ -70,8 +68,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     private static final Logger logger = LoggerFactory.getLogger(ObservationManager.class.getName());
     /** flag to log a stack trace in method fireEvent() to debug events */
     private final static boolean DEBUG_FIRE_EVENT = false;
-    /** distance in degrees to consider same targets */
-    private final static double SAME_TARGET_DISTANCE = 5d * ALX.ARCSEC_IN_DEGREES;
     /** configuration manager */
     private static final ConfigurationManager cm = ConfigurationManager.getInstance();
     /** singleton pattern */
@@ -1018,91 +1014,70 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     }
 
     /**
-     * Add a target given its unique name and
-     * fires a target change and an observation change event
-     * Note : it does not check anything on coordinates (cross matching)
-     * @param name target name
+     * Add a target given a star and fires a target change and an observation change event
      * @param star object to create the target object
      * @throws IllegalArgumentException if the target already exists (identifier or coordinates)
      */
-    public void addTarget(final String name, final Star star) throws IllegalArgumentException {
-        if (name != null && name.length() > 0) {
-            if (getTarget(name) != null) {
-                throw new IllegalArgumentException("Target[" + name + "] already defined.");
-            }
-            logger.trace("addTarget : {}", name);
-
-            final Target t = new Target();
-            t.setName(name);
-
-            /*
+    public void addTarget(final Star star) throws IllegalArgumentException {
+        if (star != null && !StringUtils.isEmpty(star.getName())) {
+            /* 
+             Star data:
              Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
              Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
              */
-            // coordinates (deg) :
-            t.setRA(star.getPropertyAsString(Star.Property.RA).replace(' ', ':'));
-            t.setDEC(star.getPropertyAsString(Star.Property.DEC).replace(' ', ':'));
-            t.setEQUINOX(AsproConstants.EPOCH_J2000);
+            final Target newTarget = new Target();
+            // format the target name:
+            newTarget.updateNameAndIdentifier(star.getName());
+
+            // coordinates (deg) (mandatory):
+            newTarget.setRA(star.getPropertyAsString(Star.Property.RA).replace(' ', ':'));
+            newTarget.setDEC(star.getPropertyAsString(Star.Property.DEC).replace(' ', ':'));
+            newTarget.setEQUINOX(AsproConstants.EPOCH_J2000);
+
+            // Find any target (id + position) within 5 arcsecs:
+            // throws IllegalArgumentException
+            Target.matchTarget(newTarget, getTargets(), true);
+
+            if (logger.isTraceEnabled()) {
+                logger.trace("addTarget : {}", newTarget.getName());
+            }
 
             // Proper motion (mas/yr) (optional) :
-            t.setPMRA(star.getPropertyAsDouble(Star.Property.PROPERMOTION_RA));
-            t.setPMDEC(star.getPropertyAsDouble(Star.Property.PROPERMOTION_DEC));
+            newTarget.setPMRA(star.getPropertyAsDouble(Star.Property.PROPERMOTION_RA));
+            newTarget.setPMDEC(star.getPropertyAsDouble(Star.Property.PROPERMOTION_DEC));
 
             // Parallax (mas) (optional) :
-            t.setPARALLAX(star.getPropertyAsDouble(Star.Property.PARALLAX));
-            t.setPARAERR(star.getPropertyAsDouble(Star.Property.PARALLAX_err));
+            newTarget.setPARALLAX(star.getPropertyAsDouble(Star.Property.PARALLAX));
+            newTarget.setPARAERR(star.getPropertyAsDouble(Star.Property.PARALLAX_err));
 
             // Magnitudes (optional) :
-            t.setFLUXV(star.getPropertyAsDouble(Star.Property.FLUX_V));
-            t.setFLUXI(star.getPropertyAsDouble(Star.Property.FLUX_I));
-            t.setFLUXJ(star.getPropertyAsDouble(Star.Property.FLUX_J));
-            t.setFLUXH(star.getPropertyAsDouble(Star.Property.FLUX_H));
-            t.setFLUXK(star.getPropertyAsDouble(Star.Property.FLUX_K));
-            t.setFLUXN(star.getPropertyAsDouble(Star.Property.FLUX_N));
+            newTarget.setFLUXV(star.getPropertyAsDouble(Star.Property.FLUX_V));
+            newTarget.setFLUXI(star.getPropertyAsDouble(Star.Property.FLUX_I));
+            newTarget.setFLUXJ(star.getPropertyAsDouble(Star.Property.FLUX_J));
+            newTarget.setFLUXH(star.getPropertyAsDouble(Star.Property.FLUX_H));
+            newTarget.setFLUXK(star.getPropertyAsDouble(Star.Property.FLUX_K));
+            newTarget.setFLUXN(star.getPropertyAsDouble(Star.Property.FLUX_N));
 
             // Spectral types :
-            t.setSPECTYP(star.getPropertyAsString(Star.Property.SPECTRALTYPES));
+            newTarget.setSPECTYP(star.getPropertyAsString(Star.Property.SPECTRALTYPES));
 
             // Object types :
-            t.setOBJTYP(star.getPropertyAsString(Star.Property.OTYPELIST));
+            newTarget.setOBJTYP(star.getPropertyAsString(Star.Property.OTYPELIST));
 
             // Radial velocity (km/s) (optional) :
-            t.setSYSVEL(star.getPropertyAsDouble(Star.Property.RV));
-            t.setVELTYP(star.getPropertyAsString(Star.Property.RV_DEF));
+            newTarget.setSYSVEL(star.getPropertyAsDouble(Star.Property.RV));
+            newTarget.setVELTYP(star.getPropertyAsString(Star.Property.RV_DEF));
 
             // Identifiers :
-            t.setIDS(star.getPropertyAsString(Star.Property.IDS));
+            newTarget.setIDS(star.getPropertyAsString(Star.Property.IDS));
 
-            // check target coordinates (different identifiers or targets too close):
-            checkTargetCoordinates(t, getTargets());
-
-            getTargets().add(t);
+            // fix NaN / null values:
+            newTarget.checkValues();
+            
+            getTargets().add(newTarget);
 
             // fire change events :
             this.fireTargetChangedEvents();
-        }
-    }
-
-    /**
-     * Check the distance between the given source target and the given list of targets
-     * @param source source target
-     * @param targets list of targets
-     * @throws IllegalArgumentException if the target is too close to another target present in the given list of targets
-     */
-    private void checkTargetCoordinates(final Target source, final List<Target> targets) throws IllegalArgumentException {
-        final double srcRaDeg = source.getRADeg();
-        final double srcDecDeg = source.getDECDeg();
-
-        double distance;
-
-        for (Target target : targets) {
-            distance = CoordUtils.computeDistanceInDegrees(srcRaDeg, srcDecDeg, target.getRADeg(), target.getDECDeg());
-
-            if (distance < SAME_TARGET_DISTANCE) {
-                throw new IllegalArgumentException("Target[" + source.getName() + "](" + source.getRA() + ", " + source.getDEC()
-                        + ") too close to Target[" + target.getName() + "](" + target.getRA() + ", " + target.getDEC()
-                        + "): " + NumberUtils.trimTo3Digits(distance * ALX.DEG_IN_ARCSEC) + " arcsec !");
-            }
         }
     }
 

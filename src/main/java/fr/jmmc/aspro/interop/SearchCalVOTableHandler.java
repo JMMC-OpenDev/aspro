@@ -86,8 +86,8 @@ public final class SearchCalVOTableHandler {
                 // first target is the science target (partial information only):
                 scienceTarget = calibrators.remove(0);
 
-                // fix target name:
-                scienceTarget.updateNameAndIdentifier(Target.formatName(scienceTarget.getName()));
+                // format the target name:
+                scienceTarget.updateNameAndIdentifier();
 
                 logger.debug("science target: {}", scienceTarget);
 
@@ -99,7 +99,6 @@ public final class SearchCalVOTableHandler {
                 }
 
                 // Mimic SearchCal science object detection distance preference ("query.SCIENCE_DETECTION_DISTANCE")
-
                 // @note SCIENCE_DISTANCE_CHECK : filter science target if distance is less than science object detection distance preference (1 arcsec):
                 for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
                     final Target cal = it.next();
@@ -174,16 +173,17 @@ public final class SearchCalVOTableHandler {
                         }
                     }
 
-                    final String targetName = scienceTarget.getName();
+                    // Find any target (id + position) within 5 arcsecs:
+                    Target currentScienceTarget = Target.matchTarget(scienceTarget, editTargets);
 
-                    // check that science target is present :
-                    if (om.getTarget(targetName) == null) {
-                        logger.info("Target '{}' not found in targets; adding it (partial information).", targetName);
+                    if (currentScienceTarget == null) {
+                        logger.info("Target '{}' not found in targets; adding it (partial information).", scienceTarget.getName());
 
                         editTargets.add(scienceTarget);
+                        currentScienceTarget = scienceTarget;
                     }
 
-                    final String report = mergeTargets(editTargets, editTargetUserInfos, targetName, calibrators);
+                    final String report = mergeTargets(editTargets, editTargetUserInfos, currentScienceTarget, calibrators);
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("updated targets:");
@@ -221,85 +221,84 @@ public final class SearchCalVOTableHandler {
      * Merge targets and calibrators
      * @param editTargets edited list of targets
      * @param editTargetUserInfos edited target user informations
-     * @param targetName science target name
+     * @param scienceTarget science target
      * @param calibrators list of calibrators for the science target
      * @return merge operation report
      */
     private static String mergeTargets(final List<Target> editTargets, final TargetUserInformations editTargetUserInfos,
-            final String targetName, final List<Target> calibrators) {
+                                       final Target scienceTarget, final List<Target> calibrators) {
         // report buffer :
         final StringBuilder sb = new StringBuilder(512);
-        sb.append("Import SearchCal calibrators to target [").append(targetName).append("]\n\n");
+        sb.append("Import SearchCal calibrators to target [").append(scienceTarget.getName()).append("]\n\n");
 
-        final Target scienceTarget = Target.getTarget(targetName, editTargets);
+        String calName;
+        Target oldCal;
 
-        if (scienceTarget != null) {
-            String calName;
-            Target oldCal;
+        for (Target newCal : calibrators) {
+            // format the target name:
+            newCal.updateNameAndIdentifier();
+            calName = newCal.getName();
 
-            for (Target newCal : calibrators) {
-                calName = Target.formatName(newCal.getName());
+            newCal.setOrigin(AsproConstants.SEARCHCAL_SAMP_NAME);
 
-                // update target name :
-                newCal.setName(calName);
-                newCal.setOrigin(AsproConstants.SEARCHCAL_SAMP_NAME);
+            // Find any target (id + position) within 5 arcsecs:
+            // note: SearchCal considers internally duplicates within 10 arcsecs (and discard all of them)
+            oldCal = Target.matchTarget(newCal, editTargets);
 
-                oldCal = Target.getTarget(calName, editTargets);
+            if (oldCal == null) {
 
-                if (oldCal == null) {
+                // append the missing target :
+                editTargets.add(newCal);
 
-                    // append the missing target :
-                    editTargets.add(newCal);
+                // define it as a calibrator :
+                editTargetUserInfos.addCalibrator(newCal);
 
+                // associate it to the science target :
+                editTargetUserInfos.addCalibratorToTarget(scienceTarget, newCal);
+
+                // report message :
+                sb.append(calName).append(" added as a calibrator\n");
+
+            } else {
+                // target already exist : always replace old target by the SearchCal calibrator (gilles)
+                
+                // copy non empty values into new calibrator:
+                Target.mergeTarget(newCal, oldCal);
+
+                // check if the existing target had calibrators :
+                if (editTargetUserInfos.hasCalibrators(oldCal)) {
+                    final List<Target> oldCalibrators = editTargetUserInfos.getCalibrators(oldCal);
+
+                    // report message :
+                    sb.append("WARNING : ").append(calName).append(" had calibrators that were removed : ");
+                    for (Target cal : oldCalibrators) {
+                        sb.append(cal.getName()).append(' ');
+                    }
+                    sb.append('\n');
+
+                    // remove calibrators related to the calibrator target :
+                    oldCalibrators.clear();
+                }
+
+                // note : oldCal and newCal are equals() so following operations are possible :
+                if (!editTargetUserInfos.isCalibrator(oldCal)) {
                     // define it as a calibrator :
                     editTargetUserInfos.addCalibrator(newCal);
 
-                    // associate it to the science target :
-                    editTargetUserInfos.addCalibratorToTarget(scienceTarget, newCal);
-
                     // report message :
-                    sb.append(calName).append(" added as a calibrator\n");
-
+                    sb.append(calName).append(" updated and flagged as a calibrator\n");
                 } else {
-                    // target already exist : always replace old target by the SearchCal calibrator (gilles)
-                    // even if the old target was modified by the user ...
-
-                    // check if the existing target had calibrators :
-                    if (editTargetUserInfos.hasCalibrators(oldCal)) {
-                        final List<Target> oldCalibrators = editTargetUserInfos.getCalibrators(oldCal);
-
-                        // report message :
-                        sb.append("WARNING : ").append(calName).append(" had calibrators that were removed : ");
-                        for (Target cal : oldCalibrators) {
-                            sb.append(cal.getName()).append(' ');
-                        }
-                        sb.append('\n');
-
-                        // remove calibrators related to the calibrator target :
-                        oldCalibrators.clear();
-                    }
-
-                    // note : oldCal and newCal are equals() so following operations are possible :
-
-                    if (!editTargetUserInfos.isCalibrator(oldCal)) {
-                        // define it as a calibrator :
-                        editTargetUserInfos.addCalibrator(newCal);
-
-                        // report message :
-                        sb.append(calName).append(" updated and flagged as a calibrator\n");
-                    } else {
-                        // report message :
-                        sb.append(calName).append(" updated\n");
-                    }
-
-                    // associate it to the science target :
-                    editTargetUserInfos.addCalibratorToTarget(scienceTarget, newCal);
-
-                    // replace the old target by the new calibrator :
-                    // note : the position of the target is not the same :
-                    editTargets.remove(oldCal);
-                    editTargets.add(newCal);
+                    // report message :
+                    sb.append(calName).append(" updated\n");
                 }
+
+                // associate it to the science target :
+                editTargetUserInfos.addCalibratorToTarget(scienceTarget, newCal);
+
+                // replace the old target by the new calibrator :
+                // note : the position of the target is not the same :
+                editTargets.remove(oldCal);
+                editTargets.add(newCal);
             }
         }
         return sb.toString();

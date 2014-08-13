@@ -75,7 +75,7 @@ public final class AnyVOTableHandler {
                 }
 
                 // Use invokeLater to avoid concurrency and ensure that 
-                // data model is modified and fire eventsarg using Swing EDT :
+                // data model is modified and fire events using Swing EDT :
                 SwingUtils.invokeLaterEDT(new Runnable() {
                     @Override
                     public void run() {
@@ -167,27 +167,30 @@ public final class AnyVOTableHandler {
         Target oldTarget;
 
         for (Target newTarget : targets) {
-            targetName = Target.formatName(newTarget.getName());
+            // format the target name:
+            newTarget.updateNameAndIdentifier();
+            targetName = newTarget.getName();
 
-            // update target name :
-            newTarget.setName(targetName);
             newTarget.setOrigin("VOTable");
 
-            oldTarget = Target.getTarget(targetName, editTargets);
+            // Find any target (id + position) within 5 arcsecs:
+            oldTarget = Target.matchTarget(newTarget, editTargets);
 
             if (oldTarget == null) {
-
-                // append the missing target :
+                // append the missing target:
                 editTargets.add(newTarget);
 
                 // report message :
                 sb.append(targetName).append(" added\n");
 
             } else {
-                // target already exist : skip it as the old target may be modified by the user ...
+                // target already exist
+
+                // copy non empty values into old target:
+                Target.mergeTarget(oldTarget, newTarget);
 
                 // report message :
-                sb.append(targetName).append(" skipped\n");
+                sb.append(targetName).append(" updated\n");
             }
         }
         return sb.toString();

@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
+import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.jmal.model.targetmodel.Model;
 
 
@@ -829,14 +830,23 @@ public class Target
   }
 
   /**
-   * Update the name and identifier.
+   * Format and update the (internal) name and identifier.
+   * Warning: this modified identifier is not updated in relationships
+   */
+  public final void updateNameAndIdentifier() {
+      updateNameAndIdentifier(getName());
+  }
+
+  /**
+   * Format and update the name and identifier.
    * Warning: this modified identifier is not updated in relationships
    * @param name target name
    */
   public final void updateNameAndIdentifier(final String name) {
+    this.setName(formatName(name));
+    // reset and recompute identifier:
     this.id = null;
-    setName(name);
-    getIdentifier();
+    this.getIdentifier();
   }
 
   /**
@@ -1090,6 +1100,37 @@ public class Target
   }
 
   /**
+   * Check if the given target list contains the given target: same identifier or coordinates (crossmatch)
+   * @param srcTarget target to look for
+   * @param targets list of targets
+   * @return target or null if the target was not found
+   */
+  public static Target matchTarget(final Target srcTarget, final List<Target> targets) {
+      return matchTarget(srcTarget, targets, false);
+  }
+  
+  /**
+   * Check if the given target list contains the given target: same identifier or coordinates (crossmatch)
+   * @param srcTarget target to look for
+   * @param targets list of targets
+   * @param throwException true indicates to throw an IllegalArgumentException if the target is found (giving distance and coordinates)
+   * @return target or null if the target was not found
+   * @throws IllegalArgumentException if the target is too close to another target present in the given list of targets
+   */
+  public static Target matchTarget(final Target srcTarget, final List<Target> targets,
+                                   final boolean throwException) throws IllegalArgumentException {
+      
+    Target t = getTargetById(srcTarget.getIdentifier(), targets);
+    if (t != null) {
+      if (throwException) {
+        throw new IllegalArgumentException("Target[" + srcTarget.getName() + "] already defined.");
+      }
+      return t;
+    }
+    return TargetUtils.matchTargetCoordinates(srcTarget, targets, throwException);
+  }
+  
+  /**
    * Return the target of the given name in the given list of targets
    * @param name target name
    * @param targets list of targets
@@ -1129,8 +1170,8 @@ public class Target
    * @return target name
    */
   public static String formatName(final String name) {
-    // trim and upper case :
-    return name.trim().toUpperCase();
+    // trim and remove redudant white spaces :
+    return fr.jmmc.jmcs.util.StringUtils.cleanWhiteSpaces(name);
   }
 
   /**
@@ -1192,6 +1233,59 @@ public class Target
       target.setFLUXN(source.getFLUXN());
     }
   }
-//--simple--preserve
 
+ /**
+  * Check values:
+  * - optional number values: replace NaN by null values
+  * - string values: replace "" by null values
+  */
+  public void checkValues() {
+    if (isEmpty(veltyp)) {
+        veltyp = null;
+    }
+    if (isEmpty(ids)) {
+        ids = null;
+    }
+    if (isEmpty(objtyp)) {
+        objtyp = null;
+    }
+    if (isEmpty(spectyp)) {
+        spectyp = null;
+    }
+    if (isNaN(sysvel)) {
+        sysvel = null;
+    }
+    if (isNaN(pmra)) {
+        pmra = null;
+    }
+    if (isNaN(pmdec)) {
+        pmdec = null;
+    }
+    if (isNaN(parallax)) {
+        parallax = null;
+    }
+    if (isNaN(paraerr)) {
+        paraerr = null;
+    }
+    if (isNaN(fluxv)) {
+        fluxv = null;
+    }
+    if (isNaN(fluxi)) {
+        fluxi = null;
+    }
+    if (isNaN(fluxj)) {
+        fluxj = null;
+    }
+    if (isNaN(fluxh)) {
+        fluxh = null;
+    }
+    if (isNaN(fluxk)) {
+        fluxk = null;
+    }
+    if (isNaN(fluxn)) {
+        fluxn = null;
+    }
+  }
+  
+//--simple--preserve
 }
