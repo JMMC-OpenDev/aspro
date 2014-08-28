@@ -69,8 +69,8 @@ public final class AnyVOTableHandler {
 
                 if (logger.isDebugEnabled()) {
                     logger.debug("targets:");
-                    for (Target cal : targets) {
-                        logger.debug(cal.toString());
+                    for (Target t : targets) {
+                        logger.debug(t.toString());
                     }
                 }
 
@@ -172,6 +172,10 @@ public final class AnyVOTableHandler {
             targetName = newTarget.getName();
 
             newTarget.setOrigin("VOTable");
+
+            // fix RA/DEC deg vs HMS/DMS formats
+            // note: should check for invalid values ?
+            newTarget.fixCoords();
 
             // Find any target (id + position) within 5 arcsecs:
             oldTarget = Target.matchTarget(newTarget, editTargets);

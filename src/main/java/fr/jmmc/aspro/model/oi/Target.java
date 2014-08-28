@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
-import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.jmal.model.targetmodel.Model;
 
 
@@ -772,6 +771,19 @@ public class Target
     }
     
 //--simple--preserve
+  
+  /**
+   * Fix coordinates RA and DEC (HMS / DMS formats)
+  */
+  public final void fixCoords() {
+      setRA(fr.jmmc.aspro.model.util.TargetUtils.fixRA(getRA()));
+      setDEC(fr.jmmc.aspro.model.util.TargetUtils.fixDEC(getDEC()));
+      // reset any cached RA/DEC as degrees:
+      setRADeg(Double.NaN);
+      setDECDeg(Double.NaN);
+  }
+    
+    
   /** computed RA in degrees */
   @javax.xml.bind.annotation.XmlTransient
   private double raDeg = Double.NaN;
@@ -782,7 +794,7 @@ public class Target
    */
   public final double getRADeg() {
     if (Double.isNaN(this.raDeg)) {
-      this.raDeg = fr.jmmc.jmal.ALX.parseHMS(getRA());
+      setRADeg(fr.jmmc.jmal.ALX.parseHMS(getRA()));
     }
     return this.raDeg;
   }
@@ -794,6 +806,7 @@ public class Target
   public final void setRADeg(final double raDeg) {
     this.raDeg = raDeg;
   }
+  
   /** computed DEC in degrees */
   @javax.xml.bind.annotation.XmlTransient
   private double decDeg = Double.NaN;
@@ -804,7 +817,7 @@ public class Target
    */
   public final double getDECDeg() {
     if (Double.isNaN(this.decDeg)) {
-      this.decDeg = fr.jmmc.jmal.ALX.parseDEC(getDEC());
+      setDECDeg(fr.jmmc.jmal.ALX.parseDEC(getDEC()));
     }
     return this.decDeg;
   }
@@ -1127,7 +1140,7 @@ public class Target
       }
       return t;
     }
-    return TargetUtils.matchTargetCoordinates(srcTarget, targets, throwException);
+    return fr.jmmc.aspro.model.util.TargetUtils.matchTargetCoordinates(srcTarget, targets, throwException);
   }
   
   /**

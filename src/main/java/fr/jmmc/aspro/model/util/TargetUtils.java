@@ -26,6 +26,23 @@ public final class TargetUtils {
     }
 
     /**
+     * Fix RA: parse given value as HMS and re-format to HMS (normalization)
+     * @param ra right ascension as HMS
+     * @return right ascension as HMS
+     */
+    public static String fixRA(final String ra) {
+        return ALX.toHMS(ALX.parseHMS(ra));
+    }
+    /**
+     * Fix DEC: parse given value as DMS and re-format to DMS (normalization)
+     * @param dec declination as DMS
+     * @return declination as DMS
+     */
+    public static String fixDEC(final String dec) {
+        return ALX.toDMS(ALX.parseDEC(dec));
+    }
+
+    /**
      * Check the distance between the given source target and the given list of targets (5 arcesecs)
      * @param srcTarget source target
      * @param targets list of targets
