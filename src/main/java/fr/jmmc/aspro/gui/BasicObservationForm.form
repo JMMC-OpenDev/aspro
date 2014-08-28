@@ -55,6 +55,9 @@
             <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;Enter targets here :&lt;br&gt;&#xa;Target identifier (CDS Simbad service)&lt;br&gt;&#xa;or RA / DEC coordinates (J2000) with optional star name:&lt;br&gt;&#xa;&apos;H:M:S [+/-]D:M:S [star name]&apos;&#xa;&lt;/html&gt;"/>
             <Property name="name" type="java.lang.String" value="starSearchField" noResource="true"/>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new EditableStarResolverWidget(true)"/>
+          </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
               <GridBagConstraints gridX="1" gridY="0" gridWidth="3" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="4" insetsRight="0" anchor="10" weightX="0.8" weightY="0.0"/>

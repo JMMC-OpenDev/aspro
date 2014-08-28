@@ -35,7 +35,10 @@ import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.jmal.star.EditableStarResolverWidget;
 import fr.jmmc.jmal.star.Star;
+import fr.jmmc.jmal.star.StarResolverListener;
+import fr.jmmc.jmal.star.StarResolverResult;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.SearchPanel;
@@ -59,11 +62,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Vector;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -86,7 +88,8 @@ import org.slf4j.LoggerFactory;
  * This form allows the user to select main observation settings : date, interferometer, configuration, stations and targets ...
  * @author bourgesl
  */
-public final class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener, Observer, ObservationListener {
+public final class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener,
+                                                                              StarResolverListener, ObservationListener {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -144,7 +147,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         jPanelTargets = new javax.swing.JPanel();
         jPanelTargetsLeft = new javax.swing.JPanel();
-        starSearchField = new fr.jmmc.jmal.star.EditableStarResolverWidget();
+        starSearchField = new EditableStarResolverWidget(true);
         jScrollPaneTargets = new javax.swing.JScrollPane();
         jListTargets = createTargetList();
         jButtonDeleteTarget = new javax.swing.JButton();
@@ -633,9 +636,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private void jButtonDeleteTargetActionPerformed(java.awt.event.ActionEvent evt) {
 
         // TODO : multi selection of targets to delete multiple targets at the same time :
-
         // see TargetForm#jButtonDeleteTargetActionPerformed():
-
         final Target selectedTarget = getSelectedTarget();
 
         if (selectedTarget != null) {
@@ -738,14 +739,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * Finally update the observation according to the form state
      */
     private void postInit() {
-
-        Preferences.getInstance().addObserver(this);
-
         // Search Panel
         _searchPanel = new SearchPanel(new TargetListSearchPanelDelegate(jListTargets));
 
-        // add observer to the StarResolverWidget :
-        starSearchField.getStar().addObserver(this);
+        // register the StarResolverListener:
+        starSearchField.setListener(this);
 
         // update component models :
         final DateEditor de = (DateEditor) jDateSpinner.getEditor();
@@ -994,7 +992,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             currentTarget = getSelectedTarget();
 
             // handle single selection :
-
             if (logger.isDebugEnabled()) {
                 logger.debug("Selected Target changed: {}", getSelectedTarget());
             }
@@ -1385,29 +1382,53 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     /**
-     * Observer implementation used for the StarResolver (called by EDT)
-     * Create a new Target object with the retrieved data from Simbad and
-     * fire an observation change event
-     * @param o Observable instance i.e. Star instance
-     * @param arg Star.Notification instance
+     * Handle the star resolver result (EDT) to 
+     * create new Target(s) object with the retrieved data from Simbad and
+     * fire a single ObservationTargetsChanged event
+     * @param result star resolver result
      */
     @Override
-    public void update(final Observable o, final Object arg) {
-        if (o instanceof Star) {
-            final Star star = (Star) o;
+    public void handleResult(final StarResolverResult result) {
+        logger.debug("star resolver result:\n{}", result);
+        if (!result.isEmpty()) {
+            // get names (read only):
+            List<String> validNames = result.getNames();
 
-            final Star.Notification notification = (Star.Notification) arg;
+            // Handle multiple matches per identifier:
+            if (result.isMultipleMatches()) {
+                // clone names:
+                validNames = new ArrayList<String>(validNames);
+                // Remove all identifiers having multiple matches:
+                validNames.removeAll(result.getNamesForMultipleMatches());
+            }
 
-            if (notification == Star.Notification.QUERY_COMPLETE) {
-                logger.debug("Star resolved: \n{}", star);
-
+            if (!validNames.isEmpty()) {
+                final StringBuilder sb = new StringBuilder(64);
+                boolean isTargetChanged = false;
                 try {
-                    // update the data model and fire change events :
-                    om.addTarget(star);
-                } catch (IllegalArgumentException iae) {
-                    logger.info("addTarget failed: {}", iae.getMessage());
+                    for (String name : validNames) {
+                        final Star star = result.getSingleStar(name);
+                        if (star != null) {
+                            try {
+                                // update the data model and fire change events :
+                                om.addTarget(star);
+                                isTargetChanged = true;
 
-                    MessagePane.showWarning(iae.getMessage());
+                            } catch (IllegalArgumentException iae) {
+                                logger.info("addTarget failed: {}", iae.getMessage());
+                                // Append warnings:
+                                sb.append(iae.getMessage()).append('\n');
+                            }
+                        }
+                    }
+                } finally {
+                    if (isTargetChanged) {
+                        // fire change events :
+                        om.fireTargetChangedEvents();
+                    }
+                    if (sb.length() != 0) {
+                        MessagePane.showWarning(sb.toString());
+                    }
                 }
             }
         }
@@ -1469,7 +1490,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             makePopsEditable(isPopsEditable());
 
             // observation :
-
             // update the interferometer and interferometer configuration :
             final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
 

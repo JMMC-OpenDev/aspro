@@ -1029,7 +1029,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             // format the target name:
             newTarget.updateNameAndIdentifier(star.getName());
 
-            // coordinates (deg) (mandatory):
+            // coordinates (HMS / DMS) (mandatory):
             newTarget.setRA(star.getPropertyAsString(Star.Property.RA).replace(' ', ':'));
             newTarget.setDEC(star.getPropertyAsString(Star.Property.DEC).replace(' ', ':'));
             newTarget.setEQUINOX(AsproConstants.EPOCH_J2000);
@@ -1075,9 +1075,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             newTarget.checkValues();
             
             getTargets().add(newTarget);
-
-            // fire change events :
-            this.fireTargetChangedEvents();
         }
     }
 
@@ -1243,7 +1240,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     /**
      * This fires a target change and an observation change event to all registered listeners.
      */
-    private void fireTargetChangedEvents() {
+    public void fireTargetChangedEvents() {
 
         // force clear display target cache :
         getMainObservation().clearCacheTargets();
