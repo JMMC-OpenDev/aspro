@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.6 beta 9"/>
-    <compilation date="22/05/2014" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.6 beta 10"/>
+    <compilation date="28/08/2014" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -186,7 +186,16 @@
 
     <releasenotes>
         <release version="0.9.6">
-            <pubDate>Thu, 22 May 2014 15:00:00 GMT</pubDate>
+            <pubDate>Thu, 28 Aug 2014 15:00:00 GMT</pubDate>
+            <prerelease version="0.9.6 beta 10">
+                <change type="FEATURE">Improved Star resolver: support multiple identifiers (or coordinates) separated by ';',
+                    improved copy/paste to replace the new line character by ';',
+                    cancellation support: click on the [x] button to interrupt the SIMBAD query,
+                    better error handling: report ambiguous matches (more than 1 object per identifier),
+                    use HTTP POST with SIMBAD script interface (large queries),
+                    better timeout settings (3s for connection)
+                </change>
+            </prerelease>
             <prerelease version="0.9.6 beta 9">
                 <change type="FEATURE">Added tooltips for baseline limits on the Observability plot</change>
                 <change type="FEATURE">Enhanced mouse wheel support on the Observability plot to zoom in/out when the scroll bar is disabled</change>
