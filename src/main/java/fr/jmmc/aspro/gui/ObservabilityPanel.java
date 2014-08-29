@@ -1637,6 +1637,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // update selected target:
         this.selectedTargetName = targetName;
         updateSelectedTarget();
+        
+        // repaint the plot:
+        if (!this.scroller.isEnabled()) {
+            this.slidingXYPlotAdapter.setUseSubset(false);
+        }
     }
 
     /**
