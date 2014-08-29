@@ -40,6 +40,7 @@ import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.service.RecentFilesManager;
+import fr.jmmc.jmcs.util.CollectionUtils;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -121,7 +122,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (this.useFastUserModel != newFastUserModel) {
             this.useFastUserModel = newFastUserModel;
 
-            logger.info("ObservationManager.update: checkAndLoadFileReferences ...");
+            logger.debug("ObservationManager.update: checkAndLoadFileReferences ...");
 
             // reload user models (to prepare and validate again):
             final String message = checkAndLoadFileReferences(getMainObservation());
@@ -129,7 +130,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             if (message != null) {
                 MessagePane.showMessage(message);
             }
-            logger.info("ObservationManager.update: done.");
+            logger.debug("ObservationManager.update: done.");
 
             // fire change events :
             this.fireTargetChangedEvents();
@@ -1073,7 +1074,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
             // fix NaN / null values:
             newTarget.checkValues();
-            
+
             getTargets().add(newTarget);
         }
     }
@@ -1084,17 +1085,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param target science target to remove
      */
     public void removeTarget(final Target target) {
-        if (target != null) {
-
-            // remove calibrators related to the science target :
-            getTargetUserInfos().getCalibrators(target).clear();
-
-            if (getTargets().remove(target)) {
-                logger.trace("removeTarget: {}", target);
-
-                // fire change events :
-                this.fireTargetChangedEvents();
-            }
+        if (Target.removeTarget(target, getTargets(), getTargetUserInfos())) {
+            logger.trace("removeTarget: {}", target);
+            // fire change events :
+            this.fireTargetChangedEvents();
         }
     }
 
@@ -1105,16 +1099,58 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      */
     public void removeCalibrator(final Target calibrator) {
         if (calibrator != null) {
-
+            final List<Target> targets = getTargets();
             final TargetUserInformations targetUserInfos = getTargetUserInfos();
 
-            for (Target target : getTargets()) {
-                targetUserInfos.removeCalibratorFromTarget(target, calibrator);
-            }
-            targetUserInfos.removeCalibrator(calibrator);
+            Target.removeCalibratorReferences(calibrator, targets, targetUserInfos);
 
-            // remove calibrator from target list that fires change events :
-            removeTarget(calibrator);
+            if (Target.removeTarget(calibrator, targets, targetUserInfos)) {
+                logger.trace("removeCalibrator: {}", calibrator);
+                // fire change events :
+                this.fireTargetChangedEvents();
+            }
+        }
+    }
+
+    /**
+     * Remove the given targets (science and calibrators) from the target list
+     * and fires a target change and an observation change event
+     * @param removeTargets targets to remove
+     */
+    public void removeTargetAndCalibrators(final List<Target> removeTargets) {
+        if (!CollectionUtils.isEmpty(removeTargets)) {
+
+            final List<Target> targets = getTargets();
+            final TargetUserInformations targetUserInfos = getTargetUserInfos();
+
+            boolean changed = false;
+
+            // Remove first science targets:
+            for (Target target : removeTargets) {
+                if (!isCalibrator(target)) {
+                    if (Target.removeTarget(target, targets, targetUserInfos)) {
+                        logger.trace("removeTarget: {}", target);
+                        changed = true;
+                    }
+                }
+            }
+
+            // Remove calibrator targets:
+            for (Target calibrator : removeTargets) {
+                if (isCalibrator(calibrator)) {
+                    Target.removeCalibratorReferences(calibrator, targets, targetUserInfos);
+
+                    if (Target.removeTarget(calibrator, targets, targetUserInfos)) {
+                        logger.trace("removeCalibrator: {}", calibrator);
+                        changed = true;
+                    }
+                }
+            }
+
+            if (changed) {
+                // fire change events :
+                this.fireTargetChangedEvents();
+            }
         }
     }
 
@@ -1241,7 +1277,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * This fires a target change and an observation change event to all registered listeners.
      */
     public void fireTargetChangedEvents() {
-
         // force clear display target cache :
         getMainObservation().clearCacheTargets();
 
@@ -1445,7 +1480,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (userModel != null) {
             final String filePath = userModel.getFile();
 
-            logger.info("checking file path [{}]", filePath);
+            logger.debug("checking file path [{}]", filePath);
 
             final File file = FileUtils.getFile(filePath);
 
