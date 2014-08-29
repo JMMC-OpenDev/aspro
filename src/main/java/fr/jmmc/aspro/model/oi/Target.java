@@ -1176,6 +1176,40 @@ public class Target
     }
     return null;
   }
+  
+    /**
+     * Remove the given science target from the given target list and user informations
+     * @param target science target to remove
+     * @param targets target list to modify
+     * @param targetUserInfos target user informations to modify
+     * @return true if the target was removed
+     */
+    public static boolean removeTarget(final Target target, final List<Target> targets, final TargetUserInformations targetUserInfos) {
+        if (target != null) {
+            // remove calibrators related to the science target :
+            targetUserInfos.getCalibrators(target).clear();
+
+            if (targets.remove(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Remove the given calibrator target from the given target list and user informations
+     * @param calibrator calibrator target to remove its references
+     * @param targets target list to check
+     * @param targetUserInfos target user informations to modify
+     */
+    public static void removeCalibratorReferences(final Target calibrator, final List<Target> targets, final TargetUserInformations targetUserInfos) {
+        if (calibrator != null) {
+            for (Target target : targets) {
+                targetUserInfos.removeCalibratorFromTarget(target, calibrator);
+            }
+            targetUserInfos.removeCalibrator(calibrator);
+        }
+    }
 
   /**
    * Format the given star name to become a valid target name (identifier)
