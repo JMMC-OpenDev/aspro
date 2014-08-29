@@ -283,7 +283,7 @@ public final class TargetTransferHandler extends TransferHandler {
    *               if the action is <code>NONE</code>.
    * @return TargetTransferable or null
    */
-  private final TargetTransferable extractData(final Transferable data) {
+  private TargetTransferable extractData(final Transferable data) {
     TargetTransferable transfer = null;
     try {
       transfer = (TargetTransferable) data.getTransferData(TargetTransferable.TargetIdentifiersDataFlavor);
@@ -302,7 +302,7 @@ public final class TargetTransferHandler extends TransferHandler {
    * @param target target to use
    * @return true if the given target is a calibrator
    */
-  private final boolean isCalibrator(final Target target) {
+  private boolean isCalibrator(final Target target) {
     return this.editTargetUserInfos.isCalibrator(target);
   }
 
@@ -311,7 +311,7 @@ public final class TargetTransferHandler extends TransferHandler {
    * @param id target identifier
    * @return target or null if the target was not found
    */
-  private final Target getTargetById(final String id) {
+  private Target getTargetById(final String id) {
     return Target.getTargetById(id, this.editTargets);
   }
 }
