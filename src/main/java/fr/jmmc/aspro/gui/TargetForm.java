@@ -119,7 +119,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         this.jListCalibrators.setCellRenderer(new TargetListRenderer(renderer));
 
         // add property change listener to editable fields :
-
         // radial velocity :
         this.jFieldSysVel.addPropertyChangeListener("value", this);
 
@@ -466,7 +465,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
             }
 
             // update the target :
-
             // note : we could use introspection to avoid such if/else cascade ...
             if (field == this.jFieldSysVel) {
                 this.currentTarget.setSYSVEL(value);
@@ -1182,7 +1180,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     private void jButtonDeleteTargetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteTargetActionPerformed
 
         // see BasicObservationForm#jButtonDeleteTargetActionPerformed():
-
         final Target selectedTarget = getCurrentTarget();
 
         if (selectedTarget != null) {
@@ -1451,12 +1448,9 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
      */
     private void deleteCalibrator(final Target calibrator) {
         if (calibrator != null) {
-            for (Target target : this.editTargets) {
-                this.editTargetUserInfos.removeCalibratorFromTarget(target, calibrator);
-            }
-            this.editTargetUserInfos.removeCalibrator(calibrator);
+            Target.removeCalibratorReferences(calibrator, this.editTargets, this.editTargetUserInfos);
 
-            // remove calibrator from target list that fires change events :
+            // remove calibrator from the edited target list:
             deleteTarget(calibrator);
         }
     }
@@ -1468,10 +1462,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
      */
     public void deleteTarget(final Target target) {
         if (target != null) {
-            // remove calibrators related to the science target :
-            this.editTargetUserInfos.getCalibrators(target).clear();
-
-            if (this.editTargets.remove(target)) {
+            if (Target.removeTarget(target, this.editTargets, this.editTargetUserInfos)) {
                 logger.trace("removeTarget: {}", target);
             }
 
