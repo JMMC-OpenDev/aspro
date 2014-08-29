@@ -54,6 +54,7 @@ public final class TargetTransferable implements Serializable, Transferable {
    * for providing the data (from most richly descriptive to least descriptive).
    * @return an array of data flavors in which this data can be transferred
    */
+  @Override
   public DataFlavor[] getTransferDataFlavors() {
     return supportedDataFlavors;
   }
@@ -64,6 +65,7 @@ public final class TargetTransferable implements Serializable, Transferable {
    * @param flavor the requested flavor for the data
    * @return boolean indicating whether or not the data flavor is supported
    */
+  @Override
   public boolean isDataFlavorSupported(final DataFlavor flavor) {
     return (flavor.getRepresentationClass() == supportedDataFlavors[0].getRepresentationClass());
   }
@@ -80,6 +82,7 @@ public final class TargetTransferable implements Serializable, Transferable {
    * @exception UnsupportedFlavorException if the requested data flavor is
    *              not supported.
    */
+  @Override
   public Object getTransferData(final DataFlavor flavor) throws UnsupportedFlavorException, IOException {
     // return this instance as it is serializable (two immutable strings)
     return this;
