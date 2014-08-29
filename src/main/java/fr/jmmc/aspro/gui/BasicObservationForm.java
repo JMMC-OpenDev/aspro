@@ -64,6 +64,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -200,7 +201,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.weightx = 0.1;
         jPanelTargets.add(jPanelTargetsLeft, gridBagConstraints);
 
-        starSearchField.setToolTipText("<html>\nEnter targets here :<br>\nTarget identifier (CDS Simbad service)<br>\nor RA / DEC coordinates (J2000) with optional star name:<br>\n'H:M:S [+/-]D:M:S [star name]'\n</html>");
+        starSearchField.setToolTipText("<html>\nEnter targets here :<br>\nTarget identifier (CDS Simbad service)<br>\nor RA / DEC coordinates (J2000) with an optional identifier:<br>\n'H:M:S [+/-]D:M:S [identifier]'<br>\n<b>Use the semicolon separator ';' for multiple targets</b>\n</html>");
         starSearchField.setName("starSearchField"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -216,7 +217,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
-        jListTargets.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jListTargets.setToolTipText("Target list : use the Simbad field to enter your targets\n");
         jListTargets.setName("jListTargets"); // NOI18N
         jListTargets.setVisibleRowCount(2);
@@ -238,7 +238,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jPanelTargets.add(jScrollPaneTargets, gridBagConstraints);
 
         jButtonDeleteTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
-        jButtonDeleteTarget.setToolTipText("delete the selected target");
+        jButtonDeleteTarget.setToolTipText("delete the selected target(s)");
         jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
         jButtonDeleteTarget.setName("jButtonDeleteTarget"); // NOI18N
         jButtonDeleteTarget.addActionListener(new java.awt.event.ActionListener() {
@@ -635,24 +635,44 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     private void jButtonDeleteTargetActionPerformed(java.awt.event.ActionEvent evt) {
 
-        // TODO : multi selection of targets to delete multiple targets at the same time :
-        // see TargetForm#jButtonDeleteTargetActionPerformed():
-        final Target selectedTarget = getSelectedTarget();
+        final List<Target> selectedTargets = getSelectedTargets();
+        final int size = selectedTargets.size();
 
-        if (selectedTarget != null) {
+        if (size != 0) {
+            // Single selection mode:
+            if (size == 1) {
+                final Target selectedTarget = selectedTargets.get(0);
 
-            if (om.isCalibrator(selectedTarget)) {
-                if (MessagePane.showConfirmMessage(jButtonDeleteTarget,
-                        "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
+                if (om.isCalibrator(selectedTarget)) {
+                    if (MessagePane.showConfirmMessage(jButtonDeleteTarget,
+                            "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
+
+                        // update the data model and fire change events :
+                        om.removeCalibrator(selectedTarget);
+                    }
+                } else if (MessagePane.showConfirmMessage(jButtonDeleteTarget,
+                        "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
 
                     // update the data model and fire change events :
-                    om.removeCalibrator(selectedTarget);
+                    om.removeTarget(selectedTarget);
                 }
-            } else if (MessagePane.showConfirmMessage(jButtonDeleteTarget,
-                    "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
+            } else {
+                // Count calibrators:
+                int calibrators = 0;
+                for (Target selectedTarget : selectedTargets) {
+                    if (om.isCalibrator(selectedTarget)) {
+                        calibrators++;
+                    }
+                }
 
-                // update the data model and fire change events :
-                om.removeTarget(selectedTarget);
+                if (MessagePane.showConfirmMessage(jButtonDeleteTarget,
+                        (calibrators == size) ? "Do you want to delete all selected calibrator targets and associations ?"
+                        : ((calibrators != 0) ? "Do you want to delete all selected science & calibrator targets and associations ?"
+                        : "Do you want to delete all selected science targets ?"))) {
+
+                    // update the data model and fire change events :
+                    om.removeTargetAndCalibrators(selectedTargets);
+                }
             }
         }
     }
@@ -966,8 +986,31 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * @return target
      */
     public Target getSelectedTarget() {
-        // TODO : multi selection of targets to delete multiple targets at the same time :
-        return (Target) jListTargets.getSelectedValue();
+        return currentTarget;
+    }
+
+    /**
+     * Return the currently selected targets
+     * @return target list
+     */
+    public List<Target> getSelectedTargets() {
+        final ListSelectionModel lsm = jListTargets.getSelectionModel();
+
+        final int iMin = lsm.getMinSelectionIndex();
+        final int iMax = lsm.getMaxSelectionIndex();
+
+        if ((iMin < 0) || (iMax < 0)) {
+            return Collections.emptyList();
+        }
+
+        final ListModel model = jListTargets.getModel();
+        final List<Target> selectedItems = new ArrayList<Target>(iMax - iMin);
+        for (int i = iMin; i <= iMax; i++) {
+            if (lsm.isSelectedIndex(i)) {
+                selectedItems.add((Target) model.getElementAt(i));
+            }
+        }
+        return selectedItems;
     }
 
     /**
@@ -980,24 +1023,26 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             return;
         }
 
+        final List<Target> selectedTargets = getSelectedTargets();
+
         // ensure at least one item is selected :
-        if (jListTargets.getSelectionModel().isSelectionEmpty()) {
+        if (selectedTargets.isEmpty()) {
             checkTargetSelection();
             return;
         }
 
-        // check if selection changes :
-        if (currentTarget == null || currentTarget != getSelectedTarget()) {
-            // memorize the selected item :
-            currentTarget = getSelectedTarget();
+        logger.debug("Selected targets: {}", selectedTargets);
+
+        // check if the current selected target changed:
+        if (currentTarget == null || !selectedTargets.contains(currentTarget)) {
+            // memorize the first selected item :
+            currentTarget = selectedTargets.get(0);
 
             // handle single selection :
-            if (logger.isDebugEnabled()) {
-                logger.debug("Selected Target changed: {}", getSelectedTarget());
-            }
+            logger.debug("Selected Target changed: {}", currentTarget);
 
             // update observation :
-            fireTargetSelectionChangeEvent();
+            fireTargetSelectionChangeEvent(currentTarget);
         }
     }
 
@@ -1453,11 +1498,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     /**
      * Fire a Target Selection Change event when the target selection changes.
+     * @param selected first selected target
      */
-    private void fireTargetSelectionChangeEvent() {
-
-        final Target selected = getSelectedTarget();
-
+    private void fireTargetSelectionChangeEvent(final Target selected) {
         logger.debug("fireTargetSelectionChangeEvent : target = {}", selected);
 
         ObservationManager.getInstance().fireTargetSelectionChanged(selected);
