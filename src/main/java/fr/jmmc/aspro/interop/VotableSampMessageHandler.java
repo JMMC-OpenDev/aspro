@@ -64,7 +64,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
             throw new SampException("Can not get the url of the votable");
         }
 
-        final URI voTableURI;
+        URI voTableURI;
         try {
             voTableURI = new URI(voTableURL);
         } catch (URISyntaxException use) {
@@ -79,7 +79,26 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
             final String scheme = voTableURI.getScheme();
 
             if (scheme.equalsIgnoreCase("file")) {
-                voTableFile = new File(voTableURI);
+                try {
+                    voTableFile = new File(voTableURI);
+                } catch (IllegalArgumentException iae) {
+                    logger.debug("Invalid URI: {}", voTableURL, iae);
+
+                    // Try fixing the file URI:
+                    // aladin bug: URI has an authority component
+                    try {
+                        voTableURI = new URI(scheme, voTableURI.getPath(), null);
+                    } catch (URISyntaxException use) {
+                        logger.error("invalid URI", use);
+
+                        throw new SampException("Can not read the votable : " + voTableURL, use);
+                    }
+                }
+                try {
+                    voTableFile = new File(voTableURI);
+                } catch (IllegalArgumentException iae) {
+                    logger.info("Invalid URI: {}", voTableURL, iae);
+                }
 
             } else if (scheme.equalsIgnoreCase("http")) {
                 final File file = FileUtils.getTempFile("votable-", ".vot");
@@ -102,7 +121,6 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
             // Note: Getting SearchCal version in sender meta data is not robust:
             // do not work with AppLauncher as senderMetadata corresponds to AppLauncher.metadata and not SearchCal !
             // TODO: use VOTABLE information instead !
-
             // Note: can be null if the client map is not up to date or the client disconnected:
             final Metadata senderMetadata = SampManager.getMetaData(senderId);
 
