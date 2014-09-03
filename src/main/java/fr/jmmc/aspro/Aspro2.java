@@ -159,23 +159,38 @@ public final class Aspro2 extends App {
     public boolean canBeTerminatedNow() {
         logger.debug("Aspro2.canBeTerminatedNow() handler called.");
 
+        return checkAndConfirmSaveChanges("closing");
+    }
+
+    /**
+     * Check if the current observation was changed; if true, the user is asked to save changes
+     *
+     * @param beforeMessage part of the message inserted after 'before ' ?
+     * @return should return true if the application can continue, false otherwise to cancel any operation.
+     */
+    public boolean checkAndConfirmSaveChanges(final String beforeMessage) {
+        final boolean changed = ObservationManager.getInstance().isMainObservationChanged();
+        if (logger.isDebugEnabled()) {
+            logger.debug("changed: {}", changed);
+        }
+
         // Ask the user if he wants to save modifications
-        final ConfirmSaveChanges result = MessagePane.showConfirmSaveChangesBeforeClosing();
+        final ConfirmSaveChanges result = (changed) ? MessagePane.showConfirmSaveChanges(beforeMessage) : ConfirmSaveChanges.Ignore;
 
         // Handle user choice
         switch (result) {
-            // If the user clicked the "Save" button, save and exit
+            // If the user clicked the "Save" button, save and continue
             case Save:
                 if (this.saveAction != null) {
                     return this.saveAction.save();
                 }
                 break;
 
-            // If the user clicked the "Don't Save" button, exit
+            // If the user clicked the "Don't Save" button, continue
             case Ignore:
                 break;
 
-            // If the user clicked the "Cancel" button or pressed 'esc' key, don't exit
+            // If the user clicked the "Cancel" button or pressed 'esc' key, don't continue
             case Cancel:
             default: // Any other case
                 return false;
@@ -241,6 +256,7 @@ public final class Aspro2 extends App {
 
     /**
      * Create the main content i.e. the setting panel
+     * @param container frame's panel
      */
     private void createContent(final Container container) {
         this.settingPanel = new SettingPanel();
@@ -288,6 +304,9 @@ public final class Aspro2 extends App {
         // Send OIFits (SAMP) :
         new SendOIFitsAction();
 
+        // Send VOTable (SAMP) :
+//        new SendVOTableAction();
+
         // Help menu:
         new ShowReleaseNotesAction("showConf", "Aspro2 Configuration " + ConfigurationManager.getInstance().getConfDescription().getProgramVersion(), ConfigurationManager.getInstance().getConfDescription());
     }
@@ -297,7 +316,7 @@ public final class Aspro2 extends App {
      */
     @Override
     protected void declareInteroperability() {
-        // Add handler to load searchCal votable and get calibrators
+        // Add handler to load votable (any target list or calibrators)
         new VotableSampMessageHandler();
     }
 
