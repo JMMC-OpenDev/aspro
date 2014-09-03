@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.6 beta 10"/>
-    <compilation date="29/08/2014" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.6 beta 11"/>
+    <compilation date="03/09/2014" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -176,6 +176,11 @@
                   description="send back the star list to PIVOT (SAMP)"/>
             <menu label="Send OIFits data" classpath="fr.jmmc.aspro.interop.SendOIFitsAction" action="sendOIFitsAction"
                   description="send simulated OIFits data file(s) to OIFitsExplorer or other VO Tools (SAMP)"/>
+            <!--
+                        <menu/>
+                        <menu label="Send targets as VOTable" classpath="fr.jmmc.aspro.interop.SendVOTableAction" action="sendVOTableAction"
+                              description="send your targets to any VOTable application (SAMP)"/>
+            -->
         </menu>
 
         <menu label="Help">
@@ -186,7 +191,12 @@
 
     <releasenotes>
         <release version="0.9.6">
-            <pubDate>Thu, 28 Aug 2014 15:00:00 GMT</pubDate>
+            <pubDate>Mon, 03 Sep 2014 17:00:00 GMT</pubDate>
+            <prerelease version="0.9.6 beta 11">
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/628">Properly detect observation changes
+                    before showing the confirmation dialog 'Do you want to save changes... ?' (New, Load and Exit actions)</change>
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/610">Fixed incorrect VOTable URL for incoming SAMP 'load.votable' messages</change>
+            </prerelease>
             <prerelease version="0.9.6 beta 10">
                 <change type="FEATURE">Added the multiple selection support to the target list to remove multiple targets at once</change>
                 <change type="FEATURE">Improved Star resolver: support multiple identifiers (or coordinates) separated by ';',
