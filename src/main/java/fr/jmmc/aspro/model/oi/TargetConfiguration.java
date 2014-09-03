@@ -121,4 +121,19 @@ public class TargetConfiguration
         this.fringeTrackerMode = value;
     }
 
+//--simple--preserve
+
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final TargetConfiguration other = (TargetConfiguration)o;
+        return (areEquals(this.haMin, other.getHAMin())
+                && areEquals(this.haMax, other.getHAMax())
+                && areEquals(this.fringeTrackerMode, other.getFringeTrackerMode()));
+    }
+    
+//--simple--preserve
+
 }

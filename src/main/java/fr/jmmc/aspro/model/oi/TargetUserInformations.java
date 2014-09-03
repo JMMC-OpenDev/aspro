@@ -307,6 +307,17 @@ public class TargetUserInformations
     return copy;
   }
 
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final TargetUserInformations other = (TargetUserInformations)o;
+        return (areEqualsStrict(getCalibrators(), other.getCalibrators()) // just identifiers, may create lists
+                && TargetInformation.areEquals(getTargetInfos(), other.getTargetInfos()) // may create lists
+        );
+    }
+    
   /**
    * Check bad references and update target references in this instance using the given Map<ID, Target> index
    * @param mapIDTargets Map<ID, Target> index

@@ -207,6 +207,18 @@ public class TargetInformation
     return copy;
   }
 
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final TargetInformation other = (TargetInformation)o;
+        return (areEqualsStrict(this.targetRef, other.getTargetRef()) // just identifiers
+                && areEquals(this.description, other.getDescription())
+                && areEqualsStrict(getCalibrators(), other.getCalibrators()) // just identifiers, may create lists
+        );
+    }
+
   /**
    * Check bad references and update target references 
    * and check if referenced calibrators are present in the given mapIDCalibrators

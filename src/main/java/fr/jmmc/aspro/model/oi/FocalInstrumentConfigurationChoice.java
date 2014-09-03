@@ -282,6 +282,20 @@ public class FocalInstrumentConfigurationChoice
   public final void setFocalInstrumentMode(final FocalInstrumentMode focalInstrumentMode) {
     this.focalInstrumentMode = focalInstrumentMode;
   }
+    
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final FocalInstrumentConfigurationChoice other = (FocalInstrumentConfigurationChoice)o;
+        return (areEquals(this.name, other.getName())
+                && areEquals(this.stations, other.getStations())
+                && areEquals(this.pops, other.getPops())
+                && areEquals(this.instrumentMode, other.getInstrumentMode())
+                && areEquals(this.samplingPeriod, other.getSamplingPeriod())
+                && areEquals(this.acquisitionTime, other.getAcquisitionTime()));
+    }
   
 //--simple--preserve
 

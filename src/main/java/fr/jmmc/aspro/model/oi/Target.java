@@ -1,4 +1,3 @@
-
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -14,7 +13,6 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
 import fr.jmmc.jmal.model.targetmodel.Model;
-
 
 /**
  * 
@@ -93,8 +91,7 @@ import fr.jmmc.jmal.model.targetmodel.Model;
     "calibratorInfos"
 })
 public class Target
-    extends OIBase
-{
+        extends OIBase {
 
     @XmlElement(required = true)
     protected String name;
@@ -769,414 +766,447 @@ public class Target
     public void setId(String value) {
         this.id = value;
     }
-    
+
 //--simple--preserve
-  
-  /**
-   * Fix coordinates RA and DEC (HMS / DMS formats)
-  */
-  public final void fixCoords() {
-      setRA(fr.jmmc.aspro.model.util.TargetUtils.fixRA(getRA()));
-      setDEC(fr.jmmc.aspro.model.util.TargetUtils.fixDEC(getDEC()));
-      // reset any cached RA/DEC as degrees:
-      setRADeg(Double.NaN);
-      setDECDeg(Double.NaN);
-  }
-    
-    
-  /** computed RA in degrees */
-  @javax.xml.bind.annotation.XmlTransient
-  private double raDeg = Double.NaN;
-
-  /**
-   * Return the right ascension (RA) in degrees
-   * @return right ascension (RA) in degrees
-   */
-  public final double getRADeg() {
-    if (Double.isNaN(this.raDeg)) {
-      setRADeg(fr.jmmc.jmal.ALX.parseHMS(getRA()));
+    /**
+     * Fix coordinates RA and DEC (HMS / DMS formats)
+     */
+    public final void fixCoords() {
+        setRA(fr.jmmc.aspro.model.util.TargetUtils.fixRA(getRA()));
+        setDEC(fr.jmmc.aspro.model.util.TargetUtils.fixDEC(getDEC()));
+        // reset any cached RA/DEC as degrees:
+        setRADeg(Double.NaN);
+        setDECDeg(Double.NaN);
     }
-    return this.raDeg;
-  }
 
-  /**
-   * Define the right ascension (RA) in degrees (read only)
-   * @param raDeg right ascension (RA) in degrees
-   */
-  public final void setRADeg(final double raDeg) {
-    this.raDeg = raDeg;
-  }
-  
-  /** computed DEC in degrees */
-  @javax.xml.bind.annotation.XmlTransient
-  private double decDeg = Double.NaN;
+    /** computed RA in degrees */
+    @javax.xml.bind.annotation.XmlTransient
+    private double raDeg = Double.NaN;
 
-  /**
-   * Return the declination (DEC) in degrees
-   * @return declination (DEC) in degrees
-   */
-  public final double getDECDeg() {
-    if (Double.isNaN(this.decDeg)) {
-      setDECDeg(fr.jmmc.jmal.ALX.parseDEC(getDEC()));
-    }
-    return this.decDeg;
-  }
-
-  /**
-   * Define the declination (DEC) in degrees (read only)
-   * @param decDeg declination (DEC) in degrees
-   */
-  public final void setDECDeg(final double decDeg) {
-    this.decDeg = decDeg;
-  }
-
-  /**
-   * This method returns the target identifier.
-   * If it is missing, it generates a new identifier from the name field.
-   * @return target identifier
-   */
-  public final String getIdentifier() {
-    if (this.id == null) {
-      setId(fr.jmmc.aspro.model.util.XmlIdUtils.convert(getName()));
-    }
-    return this.id;
-  }
-
-  /**
-   * Format and update the (internal) name and identifier.
-   * Warning: this modified identifier is not updated in relationships
-   */
-  public final void updateNameAndIdentifier() {
-      updateNameAndIdentifier(getName());
-  }
-
-  /**
-   * Format and update the name and identifier.
-   * Warning: this modified identifier is not updated in relationships
-   * @param name target name
-   */
-  public final void updateNameAndIdentifier(final String name) {
-    this.setName(formatName(name));
-    // reset and recompute identifier:
-    this.id = null;
-    this.getIdentifier();
-  }
-
-  /**
-   * This equals method uses the identifier equality
-   * @param obj other object (target)
-   * @return true if the identifiers are equals
-   */
-  @Override
-  public final boolean equals(final Object obj) {
-    if (obj == null) {
-      return false;
-    }
-    // identity comparison :
-    if (this == obj) {
-      return true;
-    }
-    // class check :
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    final Target other = (Target) obj;
-
-    return areEquals(this.getIdentifier(), other.getIdentifier());
-  }
-
-  /**
-   * This hashcode implementation uses only the id field
-   * @return hashcode
-   */
-  @Override
-  public final int hashCode() {
-    int hash = 3;
-    hash = 71 * hash + (this.getIdentifier() != null ? this.getIdentifier().hashCode() : 0);
-    return hash;
-  }
-
-  @Override
-  public final String toString() {
-    return "Target [" + ((this.getName() != null) ? this.getName() : "undefined") + "]" + " RA = " + getRA() + " DEC = " + getDEC();
-  }
-
-  /**
-   * Return an HTML representation of the target used by tooltips (full information)
-   * @param sb string buffer to use (cleared)
-   * @return HTML representation as String
-   */
-  public final String toHtml(final StringBuffer sb) {
-    sb.setLength(0); // clear
-    sb.append("<html>");
-    toHtml(sb, true);
-    sb.append("</html>");
-    return sb.toString();
-  }
-
-  /**
-   * Return an HTML representation of the target used by tooltips in the given string buffer
-   * @param sb string buffer to fill
-   * @param full flag to display full information
-   */
-  public final void toHtml(final StringBuffer sb, final boolean full) {
-    sb.append("<b>Name: ").append(getName());
-    if (getRA() != null && getDEC() != null) {
-        // note: generated targets for baseline limits do not have RA/DEC as string (useless):
-        sb.append("</b><br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
-    }
-    if (full) {
-        if (getPMRA() != null && getPMDEC() != null) {
-          sb.append("<br><b>Proper motion</b> (mas/yr): ").append(getPMRA()).append(' ').append(getPMDEC());
+    /**
+     * Return the right ascension (RA) in degrees
+     * @return right ascension (RA) in degrees
+     */
+    public final double getRADeg() {
+        if (Double.isNaN(this.raDeg)) {
+            setRADeg(fr.jmmc.jmal.ALX.parseHMS(getRA()));
         }
-        if (getPARALLAX() != null && getPARAERR() != null) {
-          sb.append("<br><b>Parallax</b> (mas): ").append(getPARALLAX()).append(" [").append(getPARAERR()).append(']');
+        return this.raDeg;
+    }
+
+    /**
+     * Define the right ascension (RA) in degrees (read only)
+     * @param raDeg right ascension (RA) in degrees
+     */
+    public final void setRADeg(final double raDeg) {
+        this.raDeg = raDeg;
+    }
+
+    /** computed DEC in degrees */
+    @javax.xml.bind.annotation.XmlTransient
+    private double decDeg = Double.NaN;
+
+    /**
+     * Return the declination (DEC) in degrees
+     * @return declination (DEC) in degrees
+     */
+    public final double getDECDeg() {
+        if (Double.isNaN(this.decDeg)) {
+            setDECDeg(fr.jmmc.jmal.ALX.parseDEC(getDEC()));
         }
-        if (getSYSVEL() != null) {
-          sb.append("<br><b>Radial Velocity</b> (km/s): ").append(getSYSVEL());
-          if (getVELTYP() != null) {
-            sb.append(" (").append(getVELTYP()).append(')');
-          }
+        return this.decDeg;
+    }
+
+    /**
+     * Define the declination (DEC) in degrees (read only)
+     * @param decDeg declination (DEC) in degrees
+     */
+    public final void setDECDeg(final double decDeg) {
+        this.decDeg = decDeg;
+    }
+
+    /**
+     * This method returns the target identifier.
+     * If it is missing, it generates a new identifier from the name field.
+     * @return target identifier
+     */
+    public final String getIdentifier() {
+        if (this.id == null) {
+            setId(fr.jmmc.aspro.model.util.XmlIdUtils.convert(getName()));
         }
-        if (getOBJTYP() != null && getOBJTYP().length() > 0) {
-          sb.append("<br><b>Object types</b>: ").append(getOBJTYP());
+        return this.id;
+    }
+
+    /**
+     * Format and update the (internal) name and identifier.
+     * Warning: this modified identifier is not updated in relationships
+     */
+    public final void updateNameAndIdentifier() {
+        updateNameAndIdentifier(getName());
+    }
+
+    /**
+     * Format and update the name and identifier.
+     * Warning: this modified identifier is not updated in relationships
+     * @param name target name
+     */
+    public final void updateNameAndIdentifier(final String name) {
+        this.setName(formatName(name));
+        // reset and recompute identifier:
+        this.id = null;
+        this.getIdentifier();
+    }
+
+    /**
+     * This equals method uses the identifier equality
+     * @param obj other object (target)
+     * @return true if the identifiers are equals
+     */
+    @Override
+    public final boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
         }
-        if (getSPECTYP() != null && getSPECTYP().length() > 0) {
-          sb.append("<br><b>Spectral types</b>: ").append(getSPECTYP());
+        // identity comparison :
+        if (this == obj) {
+            return true;
+        }
+        // class check :
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Target other = (Target) obj;
+
+        return areEquals(this.getIdentifier(), other.getIdentifier());
+    }
+
+    /**
+     * This hashcode implementation uses only the id field
+     * @return hashcode
+     */
+    @Override
+    public final int hashCode() {
+        int hash = 3;
+        hash = 71 * hash + (this.getIdentifier() != null ? this.getIdentifier().hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public final String toString() {
+        return "Target [" + ((this.getName() != null) ? this.getName() : "undefined") + "]" + " RA = " + getRA() + " DEC = " + getDEC();
+    }
+
+    /**
+     * Return an HTML representation of the target used by tooltips (full information)
+     * @param sb string buffer to use (cleared)
+     * @return HTML representation as String
+     */
+    public final String toHtml(final StringBuffer sb) {
+        sb.setLength(0); // clear
+        sb.append("<html>");
+        toHtml(sb, true);
+        sb.append("</html>");
+        return sb.toString();
+    }
+
+    /**
+     * Return an HTML representation of the target used by tooltips in the given string buffer
+     * @param sb string buffer to fill
+     * @param full flag to display full information
+     */
+    public final void toHtml(final StringBuffer sb, final boolean full) {
+        sb.append("<b>Name: ").append(getName());
+        if (getRA() != null && getDEC() != null) {
+            // note: generated targets for baseline limits do not have RA/DEC as string (useless):
+            sb.append("</b><br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
+        }
+        if (full) {
+            if (getPMRA() != null && getPMDEC() != null) {
+                sb.append("<br><b>Proper motion</b> (mas/yr): ").append(getPMRA()).append(' ').append(getPMDEC());
+            }
+            if (getPARALLAX() != null && getPARAERR() != null) {
+                sb.append("<br><b>Parallax</b> (mas): ").append(getPARALLAX()).append(" [").append(getPARAERR()).append(']');
+            }
+            if (getSYSVEL() != null) {
+                sb.append("<br><b>Radial Velocity</b> (km/s): ").append(getSYSVEL());
+                if (getVELTYP() != null) {
+                    sb.append(" (").append(getVELTYP()).append(')');
+                }
+            }
+            if (getOBJTYP() != null && getOBJTYP().length() > 0) {
+                sb.append("<br><b>Object types</b>: ").append(getOBJTYP());
+            }
+            if (getSPECTYP() != null && getSPECTYP().length() > 0) {
+                sb.append("<br><b>Spectral types</b>: ").append(getSPECTYP());
+            }
+        }
+        // Fluxes :
+        sb.append("<br>");
+        int n = 0;
+        Double flux;
+        for (SpectralBand b : SpectralBand.values()) {
+            if (b != SpectralBand.R) {
+                flux = getFlux(b);
+                if (flux != null) {
+                    if (n != 0 && n <= 3) {
+                        sb.append(" - ");
+                    }
+
+                    sb.append("<b>").append(b.value()).append("</b>: ").append(flux);
+
+                    n++;
+
+                    if (n > 3) {
+                        sb.append("<br>");
+                        n = 0;
+                    }
+                }
+            }
+        }
+        // Ids ?
+    }
+
+    /**
+     * Return the star identifier corresponding to the catalog identifier
+     * @param catalogIdentifier complete catalog identifier (like 'HD' or 'HIP' ...)
+     * @return star identifier (HD 31964) or null
+     */
+    public final String getIdentifier(final String catalogIdentifier) {
+        String res = null;
+        if (getIDS() != null) {
+            final String cat = catalogIdentifier + " ";
+            final String[] idArray = getIDS().split(",");
+            for (String catEntry : idArray) {
+                if (catEntry.startsWith(cat)) {
+                    res = catEntry;
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Return the flux in the given band
+     * @param band spectral band
+     * @return flux in the given band or null if undefined
+     */
+    public final Double getFlux(final SpectralBand band) {
+        if (band != null) {
+            switch (band) {
+                case V:
+                    return getFLUXV();
+                case R:
+                    // missing flux R : return V
+                    return getFLUXV();
+                case I:
+                    return getFLUXI();
+                case J:
+                    return getFLUXJ();
+                case H:
+                    return getFLUXH();
+                case K:
+                    return getFLUXK();
+                case N:
+                    return getFLUXN();
+                default:
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return the uniform disk diameter from calibrator informations (SearchCal):
+     * use first UD_<band>, then alternate diameters UD, LD, UDDK, DIA12 (in order of priority)
+     * @param band instrumental band
+     * @return uniform disk diameter in the given band or null if undefined
+     */
+    public final Double getDiameter(final SpectralBand band) {
+        final CalibratorInformations calInfos = getCalibratorInfos();
+        if (band != null && calInfos != null) {
+            // if UD_<band> diameter is missing, use other values ...
+            final Double udBand = calInfos.getUDDiameter(band);
+
+            if (udBand != null) {
+                return udBand;
+
+            } else {
+                // use alternate diameter UD, LD, UDDK, DIA12 (in order of priority) :
+                final BaseValue diam = getCalibratorInfos().getAlternateDiameter();
+
+                if (diam != null) {
+                    return diam.getNumber();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return a deep "copy" of this instance
+     * @return deep "copy" of this instance
+     */
+    @Override
+    public final Object clone() {
+        final Target copy = (Target) super.clone();
+
+        // Deep copy of models :
+        if (copy.models != null) {
+            copy.models = Target.cloneModels(copy.models);
+        }
+        if (copy.userModel != null) {
+            copy.userModel = (UserModel) copy.userModel.clone();
+        }
+
+        // Deep copy of target configuration :
+        if (copy.configuration != null) {
+            copy.configuration = (TargetConfiguration) copy.configuration.clone();
+        }
+        // note: calibrator informations are not cloned at all
+
+        return copy;
+    }
+
+    /**
+     * Return true if the model is an analytical model; false an user model
+     * @return true if the model is an analytical model; false an user model
+     */
+    public final boolean hasAnalyticalModel() {
+        return (this.useAnalyticalModel == null) ? true : this.useAnalyticalModel.booleanValue();
+    }
+
+    /**
+     * Return true if this target has one model (analytical models or an user model)
+     * @return true if this target has one model
+     */
+    public final boolean hasModel() {
+        if (hasAnalyticalModel()) {
+            return (this.models != null && !this.models.isEmpty());
+        } else {
+            return (this.userModel != null && this.userModel.isFileValid());
         }
     }
-    // Fluxes :
-    sb.append("<br>");
-    int n = 0;
-    Double flux;
-    for (SpectralBand b : SpectralBand.values()) {
-      if (b != SpectralBand.R) {
-        flux = getFlux(b);
-        if (flux != null) {
-          if (n != 0 && n <= 3) {
-            sb.append(" - ");
-          }
 
-          sb.append("<b>").append(b.value()).append("</b>: ").append(flux);
-
-          n++;
-
-          if (n > 3) {
-            sb.append("<br>");
-            n = 0;
-          }
+    /**
+     * Get or create a new User Model
+     * @return User Model
+     */
+    public final UserModel getOrCreateUserModel() {
+        if (this.userModel == null) {
+            this.userModel = new UserModel();
         }
-      }
+        return this.userModel;
     }
-    // Ids ?
-  }
 
-  /**
-   * Return the star identifier corresponding to the catalog identifier
-   * @param catalogIdentifier complete catalog identifier (like 'HD' or 'HIP' ...)
-   * @return star identifier (HD 31964) or null
-   */
-  public final String getIdentifier(final String catalogIdentifier) {
-    String res = null;
-    if (getIDS() != null) {
-      final String cat = catalogIdentifier + " ";
-      final String[] idArray = getIDS().split(",");
-      for (String catEntry : idArray) {
-        if (catEntry.startsWith(cat)) {
-          res = catEntry;
-          break;
+    /* static helper methods */
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
         }
-      }
+        final Target other = (Target) o;
+        return (areEquals(this.id, other.getId())
+                && areEquals(this.name, other.getName())
+                && areEquals(this.origin, other.getOrigin())
+                && areEquals(this.ra, other.getRA())
+                && areEquals(this.dec, other.getDEC())
+                && areEquals(this.equinox, other.getEQUINOX())
+                && areEquals(this.sysvel, other.getSYSVEL())
+                && areEquals(this.veltyp, other.getVELTYP())
+                && areEquals(this.pmra, other.getPMRA())
+                && areEquals(this.pmdec, other.getPMDEC())
+                && areEquals(this.parallax, other.getPARALLAX())
+                && areEquals(this.paraerr, other.getPARAERR())
+                && areEquals(this.ids, other.getIDS())
+                && areEquals(this.objtyp, other.getOBJTYP())
+                && areEquals(this.spectyp, other.getSPECTYP())
+                && areEquals(this.fluxv, other.getFLUXV())
+                && areEquals(this.fluxi, other.getFLUXI())
+                && areEquals(this.fluxj, other.getFLUXJ())
+                && areEquals(this.fluxh, other.getFLUXH())
+                && areEquals(this.fluxk, other.getFLUXK())
+                && areEquals(this.fluxn, other.getFLUXN())
+                && areEquals(this.useAnalyticalModel, other.isUseAnalyticalModel())
+                && areEquals(this.getModels(), other.getModels()) // Strict equals(), may create lists
+                && areEquals(this.userModel, other.getUserModel())
+                && areEquals(this.configuration, other.getConfiguration())
+                && areEquals(this.calibratorInfos, other.getCalibratorInfos()));
     }
-    return res;
-  }
 
-  /**
-   * Return the flux in the given band
-   * @param band spectral band
-   * @return flux in the given band or null if undefined
-   */
-  public final Double getFlux(final SpectralBand band) {
-    if (band != null) {
-      switch (band) {
-        case V:
-          return getFLUXV();
-        case R:
-          // missing flux R : return V
-          return getFLUXV();
-        case I:
-          return getFLUXI();
-        case J:
-          return getFLUXJ();
-        case H:
-          return getFLUXH();
-        case K:
-          return getFLUXK();
-        case N:
-          return getFLUXN();
-        default:
-      }
+    /**
+     * Return a deep "copy" of the list of models
+     * @param models list of models to clone
+     * @return cloned model list
+     */
+    public static List<Model> cloneModels(final List<Model> models) {
+        return fr.jmmc.jmal.model.CloneableObject.deepCopyList(models);
     }
-    return null;
-  }
 
-  /**
-   * Return the uniform disk diameter from calibrator informations (SearchCal):
-   * use first UD_<band>, then alternate diameters UD, LD, UDDK, DIA12 (in order of priority)
-   * @param band instrumental band
-   * @return uniform disk diameter in the given band or null if undefined
-   */
-  public final Double getDiameter(final SpectralBand band) {
-    final CalibratorInformations calInfos = getCalibratorInfos();
-    if (band != null && calInfos != null) {
-      // if UD_<band> diameter is missing, use other values ...
-      final Double udBand = calInfos.getUDDiameter(band);
+    /**
+     * Check if the given target list contains the given target: same identifier or coordinates (crossmatch)
+     * @param srcTarget target to look for
+     * @param targets list of targets
+     * @return target or null if the target was not found
+     */
+    public static Target matchTarget(final Target srcTarget, final List<Target> targets) {
+        return matchTarget(srcTarget, targets, false);
+    }
 
-      if (udBand != null) {
-        return udBand;
+    /**
+     * Check if the given target list contains the given target: same identifier or coordinates (crossmatch)
+     * @param srcTarget target to look for
+     * @param targets list of targets
+     * @param throwException true indicates to throw an IllegalArgumentException if the target is found (giving distance and coordinates)
+     * @return target or null if the target was not found
+     * @throws IllegalArgumentException if the target is too close to another target present in the given list of targets
+     */
+    public static Target matchTarget(final Target srcTarget, final List<Target> targets,
+                                     final boolean throwException) throws IllegalArgumentException {
 
-      } else {
-        // use alternate diameter UD, LD, UDDK, DIA12 (in order of priority) :
-        final BaseValue diam = getCalibratorInfos().getAlternateDiameter();
-
-        if (diam != null) {
-          return diam.getNumber();
+        Target t = getTargetById(srcTarget.getIdentifier(), targets);
+        if (t != null) {
+            if (throwException) {
+                throw new IllegalArgumentException("Target[" + srcTarget.getName() + "] already defined.");
+            }
+            return t;
         }
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Return a deep "copy" of this instance
-   * @return deep "copy" of this instance
-   */
-  @Override
-  public final Object clone() {
-    final Target copy = (Target) super.clone();
-
-    // Deep copy of models :
-    if (copy.models != null) {
-      copy.models = Target.cloneModels(copy.models);
-    }
-    if (copy.userModel != null) {
-      copy.userModel = (UserModel) copy.userModel.clone();
+        return fr.jmmc.aspro.model.util.TargetUtils.matchTargetCoordinates(srcTarget, targets, throwException);
     }
 
-    // Deep copy of target configuration :
-    if (copy.configuration != null) {
-      copy.configuration = (TargetConfiguration) copy.configuration.clone();
-    }
-
-    return copy;
-  }
-
-  /**
-   * Return true if the model is an analytical model; false an user model
-   * @return true if the model is an analytical model; false an user model
-   */
-  public final boolean hasAnalyticalModel() {
-    return (this.useAnalyticalModel == null) ? true : this.useAnalyticalModel.booleanValue();
-  }
-
-  /**
-   * Return true if this target has one model (analytical models or an user model)
-   * @return true if this target has one model
-   */
-  public final boolean hasModel() {
-    if (hasAnalyticalModel()) {
-      return (this.models != null && !this.models.isEmpty());
-    } else {
-      return (this.userModel != null && this.userModel.isFileValid());
-    }
-  }
-
-  /**
-   * Get or create a new User Model
-   * @return User Model
-   */
-  public final UserModel getOrCreateUserModel() {
-    if (this.userModel == null) {
-      this.userModel = new UserModel();
-    }
-    return this.userModel;
-  }
-
-  /* static helper methods */
-  /**
-   * Return a deep "copy" of the list of models
-   * @param models list of models to clone
-   * @return cloned model list
-   */
-  public static List<Model> cloneModels(final List<Model> models) {
-    return fr.jmmc.jmal.model.CloneableObject.deepCopyList(models);
-  }
-
-  /**
-   * Check if the given target list contains the given target: same identifier or coordinates (crossmatch)
-   * @param srcTarget target to look for
-   * @param targets list of targets
-   * @return target or null if the target was not found
-   */
-  public static Target matchTarget(final Target srcTarget, final List<Target> targets) {
-      return matchTarget(srcTarget, targets, false);
-  }
-  
-  /**
-   * Check if the given target list contains the given target: same identifier or coordinates (crossmatch)
-   * @param srcTarget target to look for
-   * @param targets list of targets
-   * @param throwException true indicates to throw an IllegalArgumentException if the target is found (giving distance and coordinates)
-   * @return target or null if the target was not found
-   * @throws IllegalArgumentException if the target is too close to another target present in the given list of targets
-   */
-  public static Target matchTarget(final Target srcTarget, final List<Target> targets,
-                                   final boolean throwException) throws IllegalArgumentException {
-      
-    Target t = getTargetById(srcTarget.getIdentifier(), targets);
-    if (t != null) {
-      if (throwException) {
-        throw new IllegalArgumentException("Target[" + srcTarget.getName() + "] already defined.");
-      }
-      return t;
-    }
-    return fr.jmmc.aspro.model.util.TargetUtils.matchTargetCoordinates(srcTarget, targets, throwException);
-  }
-  
-  /**
-   * Return the target of the given name in the given list of targets
-   * @param name target name
-   * @param targets list of targets
-   * @return target or null if the target was not found
-   */
-  public static Target getTarget(final String name, final List<Target> targets) {
-    if (name != null) {
-      for (Target t : targets) {
-        if (t.getName().equals(name)) {
-          return t;
+    /**
+     * Return the target of the given name in the given list of targets
+     * @param name target name
+     * @param targets list of targets
+     * @return target or null if the target was not found
+     */
+    public static Target getTarget(final String name, final List<Target> targets) {
+        if (name != null) {
+            for (Target t : targets) {
+                if (t.getName().equals(name)) {
+                    return t;
+                }
+            }
         }
-      }
+        return null;
     }
-    return null;
-  }
 
-  /**
-   * Return the target of the given identifier in the given list of targets
-   * @param id target identifier
-   * @param targets list of targets
-   * @return target or null if the target was not found
-   */
-  public static Target getTargetById(final String id, final List<Target> targets) {
-    if (id != null) {
-      for (Target t : targets) {
-        if (t.getIdentifier().equals(id)) {
-          return t;
+    /**
+     * Return the target of the given identifier in the given list of targets
+     * @param id target identifier
+     * @param targets list of targets
+     * @return target or null if the target was not found
+     */
+    public static Target getTargetById(final String id, final List<Target> targets) {
+        if (id != null) {
+            for (Target t : targets) {
+                if (t.getIdentifier().equals(id)) {
+                    return t;
+                }
+            }
         }
-      }
+        return null;
     }
-    return null;
-  }
-  
+
     /**
      * Remove the given science target from the given target list and user informations
      * @param target science target to remove
@@ -1195,7 +1225,7 @@ public class Target
         }
         return false;
     }
-    
+
     /**
      * Remove the given calibrator target from the given target list and user informations
      * @param calibrator calibrator target to remove its references
@@ -1211,128 +1241,128 @@ public class Target
         }
     }
 
-  /**
-   * Format the given star name to become a valid target name (identifier)
-   * @param name any star name (not null)
-   * @return target name
-   */
-  public static String formatName(final String name) {
-    // trim and remove redudant white spaces :
-    return fr.jmmc.jmcs.util.StringUtils.cleanWhiteSpaces(name);
-  }
-
-  /**
-   * Merge target information on the given target with information from the source target
-   * @param target target to update
-   * @param source target where information comes from
-   */
-  public static void mergeTarget(final Target target, final Target source) {
-    if (target.getEQUINOX() == 0f && source.getEQUINOX() != 0f) {
-      target.setEQUINOX(source.getEQUINOX());
-    }
-    if (target.getSYSVEL() == null && source.getSYSVEL() != null) {
-      target.setSYSVEL(source.getSYSVEL());
-    }
-    if (target.getVELTYP() == null && source.getVELTYP() != null) {
-      target.setVELTYP(source.getVELTYP());
+    /**
+     * Format the given star name to become a valid target name (identifier)
+     * @param name any star name (not null)
+     * @return target name
+     */
+    public static String formatName(final String name) {
+        // trim and remove redudant white spaces :
+        return fr.jmmc.jmcs.util.StringUtils.cleanWhiteSpaces(name);
     }
 
-    if (target.getPMRA() == null && source.getPMRA() != null) {
-      target.setPMRA(source.getPMRA());
-    }
-    if (target.getPMDEC() == null && source.getPMDEC() != null) {
-      target.setPMDEC(source.getPMDEC());
+    /**
+     * Merge target information on the given target with information from the source target
+     * @param target target to update
+     * @param source target where information comes from
+     */
+    public static void mergeTarget(final Target target, final Target source) {
+        if (target.getEQUINOX() == 0f && source.getEQUINOX() != 0f) {
+            target.setEQUINOX(source.getEQUINOX());
+        }
+        if (target.getSYSVEL() == null && source.getSYSVEL() != null) {
+            target.setSYSVEL(source.getSYSVEL());
+        }
+        if (target.getVELTYP() == null && source.getVELTYP() != null) {
+            target.setVELTYP(source.getVELTYP());
+        }
+
+        if (target.getPMRA() == null && source.getPMRA() != null) {
+            target.setPMRA(source.getPMRA());
+        }
+        if (target.getPMDEC() == null && source.getPMDEC() != null) {
+            target.setPMDEC(source.getPMDEC());
+        }
+
+        if (target.getPARALLAX() == null && source.getPARALLAX() != null) {
+            target.setPARALLAX(source.getPARALLAX());
+        }
+        if (target.getPARAERR() == null && source.getPARAERR() != null) {
+            target.setPARAERR(source.getPARAERR());
+        }
+
+        if (target.getIDS() == null && source.getIDS() != null) {
+            target.setIDS(source.getIDS());
+        }
+        if (target.getOBJTYP() == null && source.getOBJTYP() != null) {
+            target.setOBJTYP(source.getOBJTYP());
+        }
+        if (target.getSPECTYP() == null && source.getSPECTYP() != null) {
+            target.setSPECTYP(source.getSPECTYP());
+        }
+
+        if (target.getFLUXV() == null && source.getFLUXV() != null) {
+            target.setFLUXV(source.getFLUXV());
+        }
+        if (target.getFLUXI() == null && source.getFLUXI() != null) {
+            target.setFLUXI(source.getFLUXI());
+        }
+        if (target.getFLUXJ() == null && source.getFLUXJ() != null) {
+            target.setFLUXJ(source.getFLUXJ());
+        }
+        if (target.getFLUXH() == null && source.getFLUXH() != null) {
+            target.setFLUXH(source.getFLUXH());
+        }
+        if (target.getFLUXK() == null && source.getFLUXK() != null) {
+            target.setFLUXK(source.getFLUXK());
+        }
+        if (target.getFLUXN() == null && source.getFLUXN() != null) {
+            target.setFLUXN(source.getFLUXN());
+        }
     }
 
-    if (target.getPARALLAX() == null && source.getPARALLAX() != null) {
-      target.setPARALLAX(source.getPARALLAX());
-    }
-    if (target.getPARAERR() == null && source.getPARAERR() != null) {
-      target.setPARAERR(source.getPARAERR());
+    /**
+     * Check values:
+     * - optional number values: replace NaN by null values
+     * - string values: replace "" by null values
+     */
+    public void checkValues() {
+        if (isEmpty(veltyp)) {
+            veltyp = null;
+        }
+        if (isEmpty(ids)) {
+            ids = null;
+        }
+        if (isEmpty(objtyp)) {
+            objtyp = null;
+        }
+        if (isEmpty(spectyp)) {
+            spectyp = null;
+        }
+        if (isNaN(sysvel)) {
+            sysvel = null;
+        }
+        if (isNaN(pmra)) {
+            pmra = null;
+        }
+        if (isNaN(pmdec)) {
+            pmdec = null;
+        }
+        if (isNaN(parallax)) {
+            parallax = null;
+        }
+        if (isNaN(paraerr)) {
+            paraerr = null;
+        }
+        if (isNaN(fluxv)) {
+            fluxv = null;
+        }
+        if (isNaN(fluxi)) {
+            fluxi = null;
+        }
+        if (isNaN(fluxj)) {
+            fluxj = null;
+        }
+        if (isNaN(fluxh)) {
+            fluxh = null;
+        }
+        if (isNaN(fluxk)) {
+            fluxk = null;
+        }
+        if (isNaN(fluxn)) {
+            fluxn = null;
+        }
     }
 
-    if (target.getIDS() == null && source.getIDS() != null) {
-      target.setIDS(source.getIDS());
-    }
-    if (target.getOBJTYP() == null && source.getOBJTYP() != null) {
-      target.setOBJTYP(source.getOBJTYP());
-    }
-    if (target.getSPECTYP() == null && source.getSPECTYP() != null) {
-      target.setSPECTYP(source.getSPECTYP());
-    }
-
-    if (target.getFLUXV() == null && source.getFLUXV() != null) {
-      target.setFLUXV(source.getFLUXV());
-    }
-    if (target.getFLUXI() == null && source.getFLUXI() != null) {
-      target.setFLUXI(source.getFLUXI());
-    }
-    if (target.getFLUXJ() == null && source.getFLUXJ() != null) {
-      target.setFLUXJ(source.getFLUXJ());
-    }
-    if (target.getFLUXH() == null && source.getFLUXH() != null) {
-      target.setFLUXH(source.getFLUXH());
-    }
-    if (target.getFLUXK() == null && source.getFLUXK() != null) {
-      target.setFLUXK(source.getFLUXK());
-    }
-    if (target.getFLUXN() == null && source.getFLUXN() != null) {
-      target.setFLUXN(source.getFLUXN());
-    }
-  }
-
- /**
-  * Check values:
-  * - optional number values: replace NaN by null values
-  * - string values: replace "" by null values
-  */
-  public void checkValues() {
-    if (isEmpty(veltyp)) {
-        veltyp = null;
-    }
-    if (isEmpty(ids)) {
-        ids = null;
-    }
-    if (isEmpty(objtyp)) {
-        objtyp = null;
-    }
-    if (isEmpty(spectyp)) {
-        spectyp = null;
-    }
-    if (isNaN(sysvel)) {
-        sysvel = null;
-    }
-    if (isNaN(pmra)) {
-        pmra = null;
-    }
-    if (isNaN(pmdec)) {
-        pmdec = null;
-    }
-    if (isNaN(parallax)) {
-        parallax = null;
-    }
-    if (isNaN(paraerr)) {
-        paraerr = null;
-    }
-    if (isNaN(fluxv)) {
-        fluxv = null;
-    }
-    if (isNaN(fluxi)) {
-        fluxi = null;
-    }
-    if (isNaN(fluxj)) {
-        fluxj = null;
-    }
-    if (isNaN(fluxh)) {
-        fluxh = null;
-    }
-    if (isNaN(fluxk)) {
-        fluxk = null;
-    }
-    if (isNaN(fluxn)) {
-        fluxn = null;
-    }
-  }
-  
 //--simple--preserve
 }

@@ -215,7 +215,19 @@ public class UserModel
 
     return copy;
   }
-  
+
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final UserModel other = (UserModel)o;
+        return (areEquals(this.name, other.getName())
+                && areEquals(this.description, other.getDescription())
+                && areEquals(this.file, other.getFile())
+                && areEquals(this.checksum, other.getChecksum()));
+    }
+
 //--simple--preserve
 
 }

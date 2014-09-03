@@ -492,6 +492,9 @@ public class ObservationSetting
   public final ObservationSetting deepClone() {
     final ObservationSetting copy = (ObservationSetting) clone();
 
+    // Deep copy of observation variants :
+    copy.variants = OIBase.deepCopyList(getVariants());
+    
     // Deep copy of targets :
     if (copy.targets != null) {
       copy.targets = OIBase.deepCopyList(copy.targets);
@@ -509,6 +512,23 @@ public class ObservationSetting
     return copy;
   }
 
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final ObservationSetting other = (ObservationSetting)o;
+        // note: ignore schemaVersion, context, extendedConfiguration:
+        return (areEquals(this.name, other.getName())
+                && areEquals(this.description, other.getDescription())
+                && areEquals(this.when, other.getWhen())
+                && areEquals(this.interferometerConfiguration, other.getInterferometerConfiguration())
+                && areEquals(this.instrumentConfiguration, other.getInstrumentConfiguration())
+                && areEquals(this.getTargets(), other.getTargets()) // may create lists
+                && areEquals(this.targetUserInfos, other.getTargetUserInfos())
+                && areEquals(this.getVariants(), other.getVariants())); // may create lists
+    }
+  
   /**
    * Check this object for bad reference(s) and removes them if needed.
    * For now it checks target ID/IDREF consistency (targetUserInformations...)

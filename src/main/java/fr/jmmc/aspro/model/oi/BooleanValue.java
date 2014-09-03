@@ -67,6 +67,7 @@ public class BooleanValue
      * Return the boolean value
      * @return value
      */
+    @Override
     public Object getValue() {
       return isValue();
     }

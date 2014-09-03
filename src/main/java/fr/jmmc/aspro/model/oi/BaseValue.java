@@ -96,6 +96,18 @@ public class BaseValue
     }
     
 //--simple--preserve
+
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final BaseValue other = (BaseValue)o;
+        return (areEquals(this.name, other.getName())
+                && areEquals(this.unit, other.getUnit())
+                && areEquals(this.getValue(), other.getValue()));
+    }
+    
   /**
    * Return the value (implemented by child classes)
    * @return value

@@ -143,4 +143,19 @@ public class WhenSetting
         this.windAzimuth = value;
     }
 
+//--simple--preserve
+
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final WhenSetting other = (WhenSetting)o;
+        return (areEquals(this.date, other.getDate())
+                && areEquals(this.nightRestriction, other.isNightRestriction())
+                && areEquals(this.atmosphereQuality, other.getAtmosphereQuality())
+                && areEquals(this.windAzimuth, other.getWindAzimuth()));
+    }
+    
+//--simple--preserve
 }

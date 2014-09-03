@@ -69,6 +69,15 @@ public class ObservationVariant
     
 //--simple--preserve
 
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final ObservationVariant other = (ObservationVariant)o;
+        return (areEquals(this.stations, other.getStations()));
+    }
+
   /** resolved reference to the list of Stations (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private java.util.List<Station> stationList = null;

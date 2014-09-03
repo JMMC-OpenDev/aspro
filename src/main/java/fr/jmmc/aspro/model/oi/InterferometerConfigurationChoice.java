@@ -106,6 +106,16 @@ public class InterferometerConfigurationChoice
     this.interferometerConfiguration = interferometerConfiguration;
   }
 
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final InterferometerConfigurationChoice other = (InterferometerConfigurationChoice)o;
+        return (areEquals(this.name, other.getName())
+                && areEquals(this.minElevation, other.getMinElevation()));
+    }
+
 //--simple--preserve
 
 }

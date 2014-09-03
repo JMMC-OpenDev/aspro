@@ -107,6 +107,17 @@ public class CalibratorInformations
     }
     
 //--simple--preserve
+
+    @Override
+    protected boolean areEquals(final OIBase o) {
+        if (!super.areEquals(o)) {
+            return false;
+        }
+        final CalibratorInformations other = (CalibratorInformations)o;
+        return (areEquals(this.getParameters(), other.getParameters()) // may create lists
+                && areEquals(this.getFields(), other.getFields())); // may create lists
+    }
+
   /**
    * Return a string representation containing parameters and fields
    * @return string representation
