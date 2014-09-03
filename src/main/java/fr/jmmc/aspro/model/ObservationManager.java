@@ -78,6 +78,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     private final Preferences myPreferences = Preferences.getInstance();
     /** observation listeners */
     private final CopyOnWriteArrayList<ObservationListener> listeners = new CopyOnWriteArrayList<ObservationListener>();
+    /** initial observation settings (loaded or saved state) */
+    private ObservationSetting initialObservation = null;
     /** main observation settings */
     private ObservationSetting mainObservation = null;
     /** associated file to the observation settings */
@@ -150,7 +152,28 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param observation new main observation to set
      */
     private void setMainObservation(final ObservationSetting observation) {
+        this.initialObservation = null;
         this.mainObservation = observation;
+    }
+
+    /**
+     * Private : define the initial observation as the current main observation (deep clone)
+     */
+    private void defineInitialObservation() {
+        this.initialObservation = this.mainObservation.deepClone();
+        // check and update target references :
+        this.initialObservation.checkReferences();
+    }
+
+    /**
+     * @return true if the main observation was modified since its initial state 
+     */
+    public boolean isMainObservationChanged() {
+        // check and update target references (removes null and empty collections):
+        this.mainObservation.checkReferences();
+
+        // perform the complete graph comparison:
+        return !OIBase.areEquals(this.mainObservation, this.initialObservation);
     }
 
     /**
@@ -344,6 +367,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
         // fire change events :
         this.fireTargetChangedEvents();
+
+        // finally: set the initial state of the main observation (after GUI updates => potentially modified) 
+        this.defineInitialObservation();
     }
 
     /**
@@ -363,6 +389,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             ObservationFileProcessor.onSave(observation);
 
             saveObject(file, observation);
+
+            // finally: set the initial state of the main observation (as saved) 
+            this.defineInitialObservation();
 
             setObservationFile(file);
         }
