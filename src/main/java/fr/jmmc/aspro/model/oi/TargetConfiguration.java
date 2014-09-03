@@ -120,7 +120,7 @@ public class TargetConfiguration
     public void setFringeTrackerMode(String value) {
         this.fringeTrackerMode = value;
     }
-
+    
 //--simple--preserve
 
     @Override

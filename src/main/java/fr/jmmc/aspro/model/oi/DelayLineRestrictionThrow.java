@@ -90,7 +90,7 @@ public class DelayLineRestrictionThrow
     public void setRestriction(DelayLineRestriction value) {
         this.restriction = value;
     }
-
+    
 //--simple--preserve
   @Override
   public final String toString() {

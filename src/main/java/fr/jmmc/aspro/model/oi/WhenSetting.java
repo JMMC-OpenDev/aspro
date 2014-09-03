@@ -142,7 +142,7 @@ public class WhenSetting
     public void setWindAzimuth(Double value) {
         this.windAzimuth = value;
     }
-
+    
 //--simple--preserve
 
     @Override
@@ -158,4 +158,5 @@ public class WhenSetting
     }
     
 //--simple--preserve
+
 }
