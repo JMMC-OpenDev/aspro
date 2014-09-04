@@ -3,59 +3,42 @@
 <schemaVersion>2012.02</schemaVersion>
 <name>default</name>
 <when>
-<date>2012-05-01</date>
+<date>2011-06-17</date>
 <nightRestriction>true</nightRestriction>
 <atmosphereQuality>Average</atmosphereQuality>
 </when>
 <interferometerConfiguration>
-<name>VLTI PERIOD 90</name>
+<name>CHARA</name>
 <minElevation>30</minElevation>
 </interferometerConfiguration>
 <instrumentConfiguration>
-<name>PIONIER</name>
-<stations>UT1 UT2 UT3 UT4</stations>
+<name>_INSTRUMENT_</name>
+<stations>_CONFIGURATIONS_</stations>
+<pops>_POPS_</pops>
 </instrumentConfiguration>
-<target id="ETA_TAU">
-<name>ETA TAU</name>
-<RA>03:47:29.0765</RA>
-<DEC>+24:06:18.494</DEC>
-<EQUINOX>2000</EQUINOX>
-<SYSVEL>10.1</SYSVEL>
-<PMRA>19.35</PMRA>
-<PMDEC>-43.11</PMDEC>
-<PARALLAX>8.87</PARALLAX>
-<PARA_ERR>0.99</PARA_ERR>
-<IDS>HD 23630,HIP 17702,2MASS J03472908+2406184,PIVOT 123,</IDS>
-<OBJTYP>**,IR,X,*,*iC,*iN,Em*,Be*,UV</OBJTYP>
-<SPECTYP>B7III</SPECTYP>
-<FLUX_V>2.873</FLUX_V>
-<FLUX_I>2.735</FLUX_I>
-<FLUX_J>2.735</FLUX_J>
-<FLUX_H>2.636</FLUX_H>
-<useAnalyticalModel>true</useAnalyticalModel>
-</target>
 <variant>
-<stations>UT1 UT2 UT3 UT4</stations>
+<stations>_CONFIGURATIONS_</stations>
 </variant>
 <context>
 <operation>NEW</operation>
-<interferometerEditable>true</interferometerEditable>
-<periodEditable>true</periodEditable>
-<instrumentEditable>true</instrumentEditable>
+<interferometerEditable>false</interferometerEditable>
+<periodEditable>false</periodEditable>
+<instrumentEditable>false</instrumentEditable>
 <popsEditable>true</popsEditable>
 <configurationsEditable>true</configurationsEditable>
-<nightEditable>true</nightEditable>
+<nightEditable>false</nightEditable>
 <dateEditable>true</dateEditable>
-<minElevationEditable>true</minElevationEditable>
+<minElevationEditable>false</minElevationEditable>
 <targetsEditable>true</targetsEditable>
 </context>
 <extendedConfiguration>
-<version>PERIOD 90</version>
-<interferometer>VLTI</interferometer>
+<interferometer>CHARA</interferometer>
 <instrument>
-<focalInstrument>PIONIER</focalInstrument>
+<focalInstrument>_INSTRUMENT_</focalInstrument>
 <configuration>
-<stations>UT1 UT2 UT3 UT4</stations>
+<stations>_CONFIGURATIONS_</stations>
+<channels>_BEAMS_</channels>
+<pops>PoP_ PoPP PoPO PoPP PoPS PoP_ </pops>
 </configuration>
 </instrument>
 </extendedConfiguration>
