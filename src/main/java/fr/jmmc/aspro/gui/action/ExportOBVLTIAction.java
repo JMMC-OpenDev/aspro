@@ -118,7 +118,7 @@ public final class ExportOBVLTIAction {
 
             ExportOBVLTI.process(file, observation, os, target);
 
-            sb.append(file.getName()).append("\n");
+            sb.append(file.getName()).append('\n');
           }
 
           StatusBar.show("Observing blocks saved in " + directory + ".");
@@ -134,7 +134,7 @@ public final class ExportOBVLTIAction {
 
           ExportOBVLTI.process(mainFile, observation, os, target);
 
-          sb.append(mainFile.getName()).append("\n");
+          sb.append(mainFile.getName()).append('\n');
 
           // Generate all calibrator OBs for a science target :
           final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
@@ -149,7 +149,7 @@ public final class ExportOBVLTIAction {
                   file = new File(directory, ExportOBVLTI.generateOBFileName(calibrator));
 
                   ExportOBVLTI.process(file, observation, os, calibrator);
-                  sb.append(file.getName()).append("\n");
+                  sb.append(file.getName()).append('\n');
                 }
               }
             }

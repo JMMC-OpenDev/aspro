@@ -153,7 +153,7 @@ public final class UserModelService {
                 if (firstException == null) {
                     firstException = iae;
                 }
-                preparationReport.append(iae.getMessage()).append("\n");
+                preparationReport.append(iae.getMessage()).append('\n');
             }
         }
 
