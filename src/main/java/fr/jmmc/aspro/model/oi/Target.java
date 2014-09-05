@@ -1260,13 +1260,16 @@ public class Target
      * @param source target where information comes from
      */
     public static void mergeTarget(final Target target, final Target source) {
+        // skip name, id, ra/dec
+        // skip useAnalyticalModel, model, userModel, configuration, calibratorInfos
+
         if (target.getEQUINOX() == 0f && source.getEQUINOX() != 0f) {
             target.setEQUINOX(source.getEQUINOX());
         }
         if (target.getSYSVEL() == null && source.getSYSVEL() != null) {
             target.setSYSVEL(source.getSYSVEL());
         }
-        if (target.getVELTYP() == null && source.getVELTYP() != null) {
+        if (isEmpty(target.getVELTYP()) && !isEmpty(source.getVELTYP())) {
             target.setVELTYP(source.getVELTYP());
         }
 
@@ -1284,13 +1287,13 @@ public class Target
             target.setPARAERR(source.getPARAERR());
         }
 
-        if (target.getIDS() == null && source.getIDS() != null) {
+        if (isEmpty(target.getIDS()) && !isEmpty(source.getIDS())) {
             target.setIDS(source.getIDS());
         }
-        if (target.getOBJTYP() == null && source.getOBJTYP() != null) {
+        if (isEmpty(target.getOBJTYP()) && !isEmpty(source.getOBJTYP())) {
             target.setOBJTYP(source.getOBJTYP());
         }
-        if (target.getSPECTYP() == null && source.getSPECTYP() != null) {
+        if (isEmpty(target.getSPECTYP()) && !isEmpty(source.getSPECTYP())) {
             target.setSPECTYP(source.getSPECTYP());
         }
 
