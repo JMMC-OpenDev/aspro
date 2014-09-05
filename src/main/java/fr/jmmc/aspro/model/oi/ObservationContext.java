@@ -236,5 +236,27 @@ public class ObservationContext
     public void setTargetsEditable(boolean value) {
         this.targetsEditable = value;
     }
+    
+//--simple--preserve
 
+    /** Operation value 'NEW' = new observation */
+    public final static String OPERATION_NEW = "NEW";
+    /** Operation value 'ADD' = add targets only */
+    public final static String OPERATION_ADD = "ADD";
+
+    /**
+     * @return true if the operation is 'NEW' = new observation
+     */
+    public boolean isOperationNew() {
+        return (this.operation != null) && OPERATION_NEW.equalsIgnoreCase(this.operation);
+    }
+
+    /**
+     * @return true if the operation is not 'NEW' (ie 'ADD') = add targets only
+     */
+    public boolean isOperationAdd() {
+        return !isOperationNew();
+    }
+    
+//--simple--preserve
 }

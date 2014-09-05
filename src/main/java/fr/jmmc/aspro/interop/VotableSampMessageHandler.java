@@ -30,10 +30,6 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(VotableSampMessageHandler.class.getName());
-    /** threshold to ask user confirmation */
-    public final static int THRESHOLD_TARGETS = 50;
-    /** maximum targets accepted at once */
-    public final static int MAX_TARGETS = 1000;
 
     /**
      * Public constructor
@@ -145,7 +141,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
                 // TODO: use 'undefined' as SearchCal version temporarly:
                 if (!SearchCalVOTableHandler.processMessage(votable, "undefined")) {
-                    AnyVOTableHandler.processMessage(votable);
+                    AnyVOTableHandler.processVOTable(votable, false);
                 }
             } else {
                 SearchCalVOTableHandler.processMessage(votable, searchCalVersion);
@@ -156,22 +152,5 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
             throw new SampException("Can not read the votable : " + voTableURL, ioe);
         }
-    }
-
-    /**
-     * Displays one confirmation message if there is more than 50 targets to import
-     * @param size size of the target list to import
-     * @return true if there is less than 50 targets or the user confirms.
-     */
-    static boolean confirmImport(final int size) {
-        if (size > MAX_TARGETS) {
-            MessagePane.showErrorMessage("Too many targets to import (" + size + " / " + MAX_TARGETS + ") !");
-            return false;
-        }
-        if (size > THRESHOLD_TARGETS) {
-            return MessagePane.showConfirmMessage("Are you sure you want to import " + size + " targets to your current observation ?");
-        }
-
-        return true;
     }
 }

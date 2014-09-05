@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.6 beta 11"/>
-    <compilation date="03/09/2014" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.6 beta 12"/>
+    <compilation date="05/09/2014" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -145,6 +145,11 @@
             <menu label="Save observation" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
                   icon="fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
             <menu/> <!-- menu separator -->
+            <menu label="Import targets from VOTable" classpath="fr.jmmc.aspro.gui.action.ImportVOTableAction" action="importVOTable"
+                  description="Import targets (and calibrators) from a VOTable file"/>
+            <menu label="Export targets to VOTable" classpath="fr.jmmc.aspro.gui.action.ExportVOTableAction" action="exportVOTable"
+                  description="Export targets (and calibrators) to a VOTable file"/>
+            <menu/> <!-- menu separator -->
             <menu label="Export to OIFits file(s)" classpath="fr.jmmc.aspro.gui.action.ExportOIFitsAction" action="exportOIFits" accelerator="F"
                   description="Export your target observables to OIFits file(s)"/>
             <menu/> <!-- menu separator -->
@@ -168,6 +173,9 @@
         </menu>
 
         <menu label="Interop">
+            <menu label="Send targets as VOTable" classpath="fr.jmmc.aspro.interop.SendVOTableAction" action="sendVOTableAction"
+                  description="send your targets to any VOTable application (SAMP)"/>
+            <menu/>
             <menu label="Search calibrators" classpath="fr.jmmc.aspro.interop.SearchCalQueryAction" action="searchCalStartQuery"
                   description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
             <menu label="Perform model fitting" classpath="fr.jmmc.aspro.interop.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"
@@ -176,11 +184,6 @@
                   description="send back the star list to PIVOT (SAMP)"/>
             <menu label="Send OIFits data" classpath="fr.jmmc.aspro.interop.SendOIFitsAction" action="sendOIFitsAction"
                   description="send simulated OIFits data file(s) to OIFitsExplorer or other VO Tools (SAMP)"/>
-            <!--
-                        <menu/>
-                        <menu label="Send targets as VOTable" classpath="fr.jmmc.aspro.interop.SendVOTableAction" action="sendVOTableAction"
-                              description="send your targets to any VOTable application (SAMP)"/>
-            -->
         </menu>
 
         <menu label="Help">
@@ -191,7 +194,11 @@
 
     <releasenotes>
         <release version="0.9.6">
-            <pubDate>Mon, 03 Sep 2014 17:00:00 GMT</pubDate>
+            <pubDate>Fri, 05 Sep 2014 17:00:00 GMT</pubDate>
+            <prerelease version="0.9.6 beta 12">
+                <change type="FEATURE">Added actions 'Import targets from VOTable' / 'Export targets to VOTable' in the File menu
+                    and 'Send targets as VOTable' to share your targets (and calibrators) through the SAMP VO protocol (aladin for finding charts)</change>
+            </prerelease>
             <prerelease version="0.9.6 beta 11">
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/628">Properly detect observation changes
                     before showing the confirmation dialog 'Do you want to save changes... ?' (New, Load and Exit actions)</change>

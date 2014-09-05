@@ -8,6 +8,8 @@ import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.action.ExportAllOBAction;
 import fr.jmmc.aspro.gui.action.ExportOBAction;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
+import fr.jmmc.aspro.gui.action.ExportVOTableAction;
+import fr.jmmc.aspro.gui.action.ImportVOTableAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.NewObservationAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
@@ -17,6 +19,7 @@ import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
 import fr.jmmc.aspro.interop.SearchCalQueryAction;
 import fr.jmmc.aspro.interop.SendOIFitsAction;
+import fr.jmmc.aspro.interop.SendVOTableAction;
 import fr.jmmc.aspro.interop.StarListSendAction;
 import fr.jmmc.aspro.interop.VotableSampMessageHandler;
 import fr.jmmc.aspro.model.ConfigurationManager;
@@ -279,6 +282,10 @@ public final class Aspro2 extends App {
         this.saveAction = new SaveObservationAction();
         // show preferences :
         new ShowPrefAction();
+        // import VOTable:
+        new ImportVOTableAction();
+        // export VOTable:
+        new ExportVOTableAction();
         // export OB :
         new ExportOBAction();
         // export ALl OB :
@@ -305,7 +312,7 @@ public final class Aspro2 extends App {
         new SendOIFitsAction();
 
         // Send VOTable (SAMP) :
-//        new SendVOTableAction();
+        new SendVOTableAction();
 
         // Help menu:
         new ShowReleaseNotesAction("showConf", "Aspro2 Configuration " + ConfigurationManager.getInstance().getConfDescription().getProgramVersion(), ConfigurationManager.getInstance().getConfDescription());

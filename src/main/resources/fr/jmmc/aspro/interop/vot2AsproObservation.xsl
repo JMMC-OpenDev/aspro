@@ -618,7 +618,7 @@
 
             </xsl:if>
 
-            <!-- PIVOT only ie VOTABLE 1.1 only -->
+            <!-- PIVOT only -->
             <!-- skip calibrator info if missing -->
             <xsl:if test="$NAME_index != '' and $SCI_TARGET_NAME_index != '' and $CAL_TARGET_NAME_index != ''">
                 <targetUserInfos>
