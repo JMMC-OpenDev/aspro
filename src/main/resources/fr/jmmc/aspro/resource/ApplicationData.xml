@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.6 beta 12"/>
-    <compilation date="05/09/2014" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.6 beta 13"/>
+    <compilation date="08/09/2014" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -194,7 +194,10 @@
 
     <releasenotes>
         <release version="0.9.6">
-            <pubDate>Fri, 05 Sep 2014 17:00:00 GMT</pubDate>
+            <pubDate>Mon, 08 Sep 2014 16:00:00 GMT</pubDate>
+            <prerelease version="0.9.6 beta 13">
+                <change>Added a star resolver field in the target editor to enter new target(s) while editing your targets and calibrators</change>
+            </prerelease>
             <prerelease version="0.9.6 beta 12">
                 <change type="FEATURE">Added actions 'Import targets from VOTable' / 'Export targets to VOTable' in the File menu
                     and 'Send targets as VOTable' to share your targets (and calibrators) through the SAMP VO protocol (aladin for finding charts)</change>
