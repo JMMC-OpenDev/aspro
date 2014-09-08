@@ -13,6 +13,10 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
+import fr.jmmc.aspro.model.util.TargetUtils;
+import fr.jmmc.jmal.star.Star;
+import fr.jmmc.jmal.star.StarResolverListener;
+import fr.jmmc.jmal.star.StarResolverResult;
 import fr.jmmc.jmcs.gui.component.GenericJTree;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -25,6 +29,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +58,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author bourgesl
  */
-public final class TargetForm extends javax.swing.JPanel implements PropertyChangeListener, TreeSelectionListener, ListSelectionListener {
+public final class TargetForm extends javax.swing.JPanel implements StarResolverListener, PropertyChangeListener,
+                                                                    TreeSelectionListener, ListSelectionListener {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -107,6 +113,9 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
      * This method is useful to set the specific features of initialized swing components.
      */
     private void postInit() {
+
+        // register the StarResolverListener:
+        starSearchField.setListener(this);
 
         final TargetRenderer renderer = new TargetRenderer(this.editTargetUserInfos);
 
@@ -510,6 +519,59 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     }
 
     /**
+     * Handle the star resolver result (EDT) to 
+     * create new Target(s) object with the retrieved data from Simbad and
+     * fire a single ObservationTargetsChanged event
+     * @param result star resolver result
+     */
+    @Override
+    public void handleResult(final StarResolverResult result) {
+        logger.debug("star resolver result:\n{}", result);
+        if (!result.isEmpty()) {
+            // get names (read only):
+            List<String> validNames = result.getNames();
+
+            // Handle multiple matches per identifier:
+            if (result.isMultipleMatches()) {
+                // clone names:
+                validNames = new ArrayList<String>(validNames);
+                // Remove all identifiers having multiple matches:
+                validNames.removeAll(result.getNamesForMultipleMatches());
+            }
+
+            if (!validNames.isEmpty()) {
+                final StringBuilder sb = new StringBuilder(64);
+                boolean isTargetChanged = false;
+                try {
+                    for (String name : validNames) {
+                        final Star star = result.getSingleStar(name);
+                        if (star != null) {
+                            try {
+                                // update the data model:
+                                Target.addTarget(TargetUtils.convert(star), editTargets);
+                                isTargetChanged = true;
+
+                            } catch (IllegalArgumentException iae) {
+                                logger.info("addTarget failed: {}", iae.getMessage());
+                                // Append warnings:
+                                sb.append(iae.getMessage()).append('\n');
+                            }
+                        }
+                    }
+                } finally {
+                    if (isTargetChanged) {
+                        // Refresh the complete form :
+                        this.initialize(getCurrentTarget().getName());
+                    }
+                    if (sb.length() != 0) {
+                        MessagePane.showWarning(sb.toString());
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -521,6 +583,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         java.awt.GridBagConstraints gridBagConstraints;
 
         jPanelLeft = new javax.swing.JPanel();
+        starSearchField = new fr.jmmc.jmal.star.EditableStarResolverWidget(true);
         jScrollPaneTreeTargets = new javax.swing.JScrollPane();
         jTreeTargets = new TargetJTree(this.editTargetUserInfos);
         jPanelCalibrators = new javax.swing.JPanel();
@@ -589,6 +652,12 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
         jPanelLeft.setLayout(new java.awt.GridBagLayout());
 
+        starSearchField.setToolTipText("<html>\nEnter targets here :<br>\nTarget identifier (CDS Simbad service)<br>\nor RA / DEC coordinates (J2000) with an optional identifier:<br>\n'H:M:S [+/-]D:M:S [identifier]'<br>\n<b>Use the semicolon separator ';' for multiple targets</b>\n</html>");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelLeft.add(starSearchField, gridBagConstraints);
+
         jScrollPaneTreeTargets.setMinimumSize(new java.awt.Dimension(80, 100));
         jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(160, 100));
 
@@ -600,7 +669,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
@@ -623,7 +692,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 0.3;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -1714,6 +1783,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     private javax.swing.JTextArea jTextAreaTargetInfos;
     private javax.swing.JToggleButton jToggleButtonCalibrator;
     private javax.swing.JTree jTreeTargets;
+    private fr.jmmc.jmal.star.EditableStarResolverWidget starSearchField;
     // End of variables declaration//GEN-END:variables
 
     /**

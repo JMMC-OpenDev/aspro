@@ -1455,7 +1455,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                         final Star star = result.getSingleStar(name);
                         if (star != null) {
                             try {
-                                // update the data model and fire change events :
+                                // update the data model:
                                 om.addTarget(star);
                                 isTargetChanged = true;
 

@@ -1044,23 +1044,12 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     }
 
     /**
-     * Add a target given a star and fires a target change and an observation change event
+     * Add a target given a star (do not fire a target change and an observation change event)
      * @param star object to create the target object
      * @throws IllegalArgumentException if the target already exists (identifier or coordinates)
      */
     public void addTarget(final Star star) throws IllegalArgumentException {
-        final Target newTarget = TargetUtils.convert(star);
-        if (newTarget != null) {
-            // Find any target (id + position) within 5 arcsecs:
-            // throws IllegalArgumentException
-            Target.matchTarget(newTarget, getTargets(), true);
-
-            if (logger.isTraceEnabled()) {
-                logger.trace("addTarget : {}", newTarget.getName());
-            }
-
-            getTargets().add(newTarget);
-        }
+        Target.addTarget(TargetUtils.convert(star), getTargets());
     }
 
     /**

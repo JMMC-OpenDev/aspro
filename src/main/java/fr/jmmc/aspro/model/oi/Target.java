@@ -1232,6 +1232,26 @@ public class Target
     }
 
     /**
+     * Add the given target if no match (do not fire a target change and an observation change event)
+     * @param newTarget target to add
+     * @param targets list of targets
+     * @throws IllegalArgumentException if the target already exists (identifier or coordinates)
+     */
+    public static void addTarget(final Target newTarget, final List<Target> targets) throws IllegalArgumentException {
+        if (newTarget != null) {
+            // Find any target (id + position) within 5 arcsecs:
+            // throws IllegalArgumentException
+            matchTarget(newTarget, targets, true);
+
+            if (logger.isTraceEnabled()) {
+                logger.trace("addTarget : {}", newTarget.getName());
+            }
+
+            targets.add(newTarget);
+        }
+    }
+
+    /**
      * Remove the given science target from the given target list and user informations
      * @param target science target to remove
      * @param targets target list to modify
