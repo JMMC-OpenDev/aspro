@@ -504,7 +504,6 @@
                         </xsl:variable>
 
                         <target id="{$TARGET_ID}">
-                            <!-- no id attribute : defined by Aspro2 -->
 
                             <!-- identifier -->
                             <name>
@@ -618,79 +617,207 @@
 
             </xsl:if>
 
-            <!-- PIVOT only ie VOTABLE 1.1 only -->
             <!-- skip calibrator info if missing -->
-            <xsl:if test="$NAME_index != '' and $SCI_TARGET_NAME_index != '' and $CAL_TARGET_NAME_index != ''">
-                <targetUserInfos>
-                    <!--
-                          <xsl:message>SCI_TARGET_NAME_index: <xsl:value-of select="$SCI_TARGET_NAME_index"/></xsl:message>
-                          <xsl:message>CAL_TARGET_NAME_index: <xsl:value-of select="$CAL_TARGET_NAME_index"/></xsl:message>
-                    -->
-                    <xsl:variable name="TARGET_TABLE" select="./TABLE[1]"/>
-                    <xsl:variable name="CAL_TABLE" select="./TABLE[2]"/>
-
-                    <!-- list of all calibrators -->
-                    <calibrators>
-                        <xsl:for-each select="$CAL_TABLE/DATA/TABLEDATA/TR">
-                            <xsl:variable name="CAL_NAME" select="./TD[position()=$CAL_TARGET_NAME_index]"/>
-                            <!--
-                                  <xsl:message>CAL_NAME: <xsl:value-of select="$CAL_NAME"/></xsl:message>
-                            -->
-                            <xsl:if test="$TARGET_TABLE/DATA/TABLEDATA/TR/TD[position()=$NAME_index] = $CAL_NAME">
-                                <!--
-                                      <xsl:message>CAL_NAME exists in target table</xsl:message>
-                                -->
-                                <!-- DO UNIQUE -->
-                                <xsl:if test="$CAL_NAME != '' and not(./preceding-sibling::TR/TD[position()=$CAL_TARGET_NAME_index]=$CAL_NAME)">
-                                    <xsl:variable name="CAL_ID">
-                                        <xsl:call-template name="getTargetId">
-                                            <xsl:with-param name="name" select="$CAL_NAME" />
-                                        </xsl:call-template>
-                                    </xsl:variable>
-
-                                    <xsl:value-of select="$CAL_ID"/>
-                                    <xsl:value-of select="' '"/>
-                                </xsl:if>
-                            </xsl:if>
-                        </xsl:for-each>
-                    </calibrators>
-
-                    <!-- list of calibrators per science target -->
-                    <xsl:for-each select="$CAL_TABLE/DATA/TABLEDATA/TR">
-                        <xsl:variable name="SCI_NAME" select="./TD[position()=$SCI_TARGET_NAME_index]"/>
+            <xsl:if test="$SCI_TARGET_NAME_index != '' and $CAL_TARGET_NAME_index != ''">
+                <xsl:choose>
+                    <!-- target defined -->
+                    <xsl:when test="$NAME_index != ''">
                         <!--
-                                <xsl:message>SCI_NAME: <xsl:value-of select="$SCI_NAME"/></xsl:message>
+                              <xsl:message>SCI_TARGET_NAME_index: <xsl:value-of select="$SCI_TARGET_NAME_index"/></xsl:message>
+                              <xsl:message>CAL_TARGET_NAME_index: <xsl:value-of select="$CAL_TARGET_NAME_index"/></xsl:message>
                         -->
-                        <xsl:if test="$TARGET_TABLE/DATA/TABLEDATA/TR/TD[position()=$NAME_index] = $SCI_NAME">
-                            <!--
-                                      <xsl:message>SCI_NAME exists in target table</xsl:message>
-                            -->
-                            <xsl:if test="$SCI_NAME != '' and not(./preceding-sibling::TR/TD[position()=$SCI_TARGET_NAME_index]=$SCI_NAME)">
+                        <xsl:variable name="TARGET_TABLE" select="./TABLE[1]"/>
+                        <xsl:variable name="CAL_TABLE" select="./TABLE[2]"/>
+
+                        <targetUserInfos>
+                            <!-- list of all calibrators -->
+                            <calibrators>
+                                <xsl:for-each select="$CAL_TABLE/DATA/TABLEDATA/TR">
+                                    <xsl:variable name="CAL_NAME" select="./TD[position()=$CAL_TARGET_NAME_index]"/>
+                                    <!--
+                                          <xsl:message>CAL_NAME: <xsl:value-of select="$CAL_NAME"/></xsl:message>
+                                    -->
+                                    <xsl:if test="$TARGET_TABLE/DATA/TABLEDATA/TR/TD[position()=$NAME_index] = $CAL_NAME">
+                                        <!--
+                                              <xsl:message>CAL_NAME exists in target table</xsl:message>
+                                        -->
+                                        <!-- DO UNIQUE -->
+                                        <xsl:if test="$CAL_NAME != '' and not(./preceding-sibling::TR/TD[position()=$CAL_TARGET_NAME_index]=$CAL_NAME)">
+                                            <xsl:variable name="CAL_ID">
+                                                <xsl:call-template name="getTargetId">
+                                                    <xsl:with-param name="name" select="$CAL_NAME" />
+                                                </xsl:call-template>
+                                            </xsl:variable>
+
+                                            <xsl:value-of select="$CAL_ID"/>
+                                            <xsl:value-of select="' '"/>
+                                        </xsl:if>
+                                    </xsl:if>
+                                </xsl:for-each>
+                            </calibrators>
+
+                            <!-- list of calibrators per science target -->
+                            <xsl:for-each select="$CAL_TABLE/DATA/TABLEDATA/TR">
+                                <xsl:variable name="SCI_NAME" select="./TD[position()=$SCI_TARGET_NAME_index]"/>
                                 <!--
-                                            <xsl:message>SCI_NAME: <xsl:value-of select="$SCI_NAME"/></xsl:message>
+                                        <xsl:message>SCI_NAME: <xsl:value-of select="$SCI_NAME"/></xsl:message>
                                 -->
+                                <xsl:if test="$TARGET_TABLE/DATA/TABLEDATA/TR/TD[position()=$NAME_index] = $SCI_NAME">
+                                    <!--
+                                              <xsl:message>SCI_NAME exists in target table</xsl:message>
+                                    -->
+                                    <xsl:if test="$SCI_NAME != '' and not(./preceding-sibling::TR/TD[position()=$SCI_TARGET_NAME_index]=$SCI_NAME)">
+                                        <!--
+                                                    <xsl:message>SCI_NAME: <xsl:value-of select="$SCI_NAME"/></xsl:message>
+                                        -->
+                                        <xsl:variable name="SCI_ID">
+                                            <xsl:call-template name="getTargetId">
+                                                <xsl:with-param name="name" select="$SCI_NAME" />
+                                            </xsl:call-template>
+                                        </xsl:variable>
+
+                                        <!-- DO UNIQUE -->
+                                        <targetInfo>
+                                            <targetRef>
+                                                <xsl:value-of select="$SCI_ID"/>
+                                            </targetRef>
+
+                                            <calibrators>
+                                                <xsl:for-each select="$CAL_TABLE/DATA/TABLEDATA/TR">
+
+                                                    <xsl:variable name="CAL_NAME" select="./TD[position()=$CAL_TARGET_NAME_index]"/>
+                                                    <!--
+                                                                        <xsl:message>CAL_NAME: <xsl:value-of select="$CAL_NAME"/></xsl:message>
+                                                    -->
+                                                    <xsl:if test="$TARGET_TABLE/DATA/TABLEDATA/TR/TD[position()=$NAME_index] = $CAL_NAME">
+                                                        <!--
+                                                                              <xsl:message>CAL_NAME exists in target table</xsl:message>
+                                                        -->
+                                                        <xsl:if test="$CAL_NAME != '' and ./TD[position()=$SCI_TARGET_NAME_index] = $SCI_NAME">
+                                                            <xsl:variable name="CAL_ID">
+                                                                <xsl:call-template name="getTargetId">
+                                                                    <xsl:with-param name="name" select="$CAL_NAME" />
+                                                                </xsl:call-template>
+                                                            </xsl:variable>
+
+                                                            <xsl:value-of select="$CAL_ID"/>
+                                                            <xsl:value-of select="' '"/>
+                                                        </xsl:if>
+                                                    </xsl:if>
+                                                </xsl:for-each>
+                                            </calibrators>
+                                        </targetInfo>
+                                    </xsl:if>
+                                </xsl:if>
+                            </xsl:for-each>
+                        </targetUserInfos>
+                    </xsl:when>
+                    <xsl:otherwise>
+
+                        <!--
+                              <xsl:message>SCI_TARGET_NAME_index: <xsl:value-of select="$SCI_TARGET_NAME_index"/></xsl:message>
+                              <xsl:message>CAL_TARGET_NAME_index: <xsl:value-of select="$CAL_TARGET_NAME_index"/></xsl:message>
+                        -->
+                        <xsl:variable name="CAL_TABLE" select="./TABLE[1]"/>
+
+                        <!-- generate the list of target (id only) from all science and calibrator targets -->
+                        <xsl:for-each select="$CAL_TABLE/DATA/TABLEDATA/TR">
+                            <xsl:variable name="SCI_NAME" select="./TD[position()=$SCI_TARGET_NAME_index]"/>
+
+                            <!-- DO UNIQUE -->
+                            <xsl:if test="$SCI_NAME != '' and not(./preceding-sibling::TR/TD[position()=$SCI_TARGET_NAME_index]=$SCI_NAME)">
                                 <xsl:variable name="SCI_ID">
                                     <xsl:call-template name="getTargetId">
                                         <xsl:with-param name="name" select="$SCI_NAME" />
                                     </xsl:call-template>
                                 </xsl:variable>
 
-                                <!-- DO UNIQUE -->
-                                <targetInfo>
-                                    <targetRef>
-                                        <xsl:value-of select="$SCI_ID"/>
-                                    </targetRef>
+                                <target id="{$SCI_ID}">
+                                    <name>
+                                        <xsl:value-of select="$SCI_NAME"/>
+                                    </name>
+                                    <!-- null position -->
+                                    <RA>NaN</RA>
+                                    <DEC>NaN</DEC>
+                                    <EQUINOX>NaN</EQUINOX>
+                                </target>
+                            </xsl:if>
 
-                                    <calibrators>
-                                        <xsl:for-each select="$CAL_TABLE/DATA/TABLEDATA/TR">
+                            <xsl:variable name="CAL_NAME" select="./TD[position()=$CAL_TARGET_NAME_index]"/>
+                            <!--
+                                  <xsl:message>CAL_NAME: <xsl:value-of select="$CAL_NAME"/></xsl:message>
+                            -->
+                            <!-- DO UNIQUE -->
+                            <xsl:if test="$CAL_NAME != '' and not(./preceding-sibling::TR/TD[position()=$CAL_TARGET_NAME_index]=$CAL_NAME)">
+                                <xsl:variable name="CAL_ID">
+                                    <xsl:call-template name="getTargetId">
+                                        <xsl:with-param name="name" select="$CAL_NAME" />
+                                    </xsl:call-template>
+                                </xsl:variable>
 
-                                            <xsl:variable name="CAL_NAME" select="./TD[position()=$CAL_TARGET_NAME_index]"/>
-                                            <!--
-                                                                <xsl:message>CAL_NAME: <xsl:value-of select="$CAL_NAME"/></xsl:message>
-                                            -->
-                                            <xsl:if test="$TARGET_TABLE/DATA/TABLEDATA/TR/TD[position()=$NAME_index] = $CAL_NAME">
+                                <target id="{$CAL_ID}">
+                                    <name>
+                                        <xsl:value-of select="$CAL_NAME"/>
+                                    </name>
+                                    <!-- null position -->
+                                    <RA>NaN</RA>
+                                    <DEC>NaN</DEC>
+                                    <EQUINOX>NaN</EQUINOX>
+                                </target>
+                            </xsl:if>
+                        </xsl:for-each>
+
+                        <targetUserInfos>
+
+                            <!-- list of all calibrators -->
+                            <calibrators>
+                                <xsl:for-each select="$CAL_TABLE/DATA/TABLEDATA/TR">
+                                    <xsl:variable name="CAL_NAME" select="./TD[position()=$CAL_TARGET_NAME_index]"/>
+                                    <!--
+                                          <xsl:message>CAL_NAME: <xsl:value-of select="$CAL_NAME"/></xsl:message>
+                                    -->
+                                    <!-- DO UNIQUE -->
+                                    <xsl:if test="$CAL_NAME != '' and not(./preceding-sibling::TR/TD[position()=$CAL_TARGET_NAME_index]=$CAL_NAME)">
+                                        <xsl:variable name="CAL_ID">
+                                            <xsl:call-template name="getTargetId">
+                                                <xsl:with-param name="name" select="$CAL_NAME" />
+                                            </xsl:call-template>
+                                        </xsl:variable>
+
+                                        <xsl:value-of select="$CAL_ID"/>
+                                        <xsl:value-of select="' '"/>
+                                    </xsl:if>
+                                </xsl:for-each>
+                            </calibrators>
+
+                            <!-- list of calibrators per science target -->
+                            <xsl:for-each select="$CAL_TABLE/DATA/TABLEDATA/TR">
+                                <xsl:variable name="SCI_NAME" select="./TD[position()=$SCI_TARGET_NAME_index]"/>
+                                <!--
+                                        <xsl:message>SCI_NAME: <xsl:value-of select="$SCI_NAME"/></xsl:message>
+                                -->
+                                <xsl:if test="$SCI_NAME != '' and not(./preceding-sibling::TR/TD[position()=$SCI_TARGET_NAME_index]=$SCI_NAME)">
+                                    <!--
+                                                <xsl:message>SCI_NAME: <xsl:value-of select="$SCI_NAME"/></xsl:message>
+                                    -->
+                                    <xsl:variable name="SCI_ID">
+                                        <xsl:call-template name="getTargetId">
+                                            <xsl:with-param name="name" select="$SCI_NAME" />
+                                        </xsl:call-template>
+                                    </xsl:variable>
+
+                                    <!-- DO UNIQUE -->
+                                    <targetInfo>
+                                        <targetRef>
+                                            <xsl:value-of select="$SCI_ID"/>
+                                        </targetRef>
+
+                                        <calibrators>
+                                            <xsl:for-each select="$CAL_TABLE/DATA/TABLEDATA/TR">
+
+                                                <xsl:variable name="CAL_NAME" select="./TD[position()=$CAL_TARGET_NAME_index]"/>
                                                 <!--
-                                                                      <xsl:message>CAL_NAME exists in target table</xsl:message>
+                                                                    <xsl:message>CAL_NAME: <xsl:value-of select="$CAL_NAME"/></xsl:message>
                                                 -->
                                                 <xsl:if test="$CAL_NAME != '' and ./TD[position()=$SCI_TARGET_NAME_index] = $SCI_NAME">
                                                     <xsl:variable name="CAL_ID">
@@ -702,17 +829,15 @@
                                                     <xsl:value-of select="$CAL_ID"/>
                                                     <xsl:value-of select="' '"/>
                                                 </xsl:if>
-                                            </xsl:if>
+                                            </xsl:for-each>
+                                        </calibrators>
+                                    </targetInfo>
+                                </xsl:if>
+                            </xsl:for-each>
+                        </targetUserInfos>
 
-                                        </xsl:for-each>
-                                    </calibrators>
-
-                                </targetInfo>
-                            </xsl:if>
-                        </xsl:if>
-                    </xsl:for-each>
-
-                </targetUserInfos>
+                    </xsl:otherwise>
+                </xsl:choose>
             </xsl:if>
 
             <xsl:if test="$CONFIGURATIONS != ''">
