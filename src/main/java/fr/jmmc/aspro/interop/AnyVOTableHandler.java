@@ -9,12 +9,18 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.util.TargetUtils;
+import fr.jmmc.jmal.star.Star;
+import fr.jmmc.jmal.star.StarResolver;
+import fr.jmmc.jmal.star.StarResolverResult;
+import fr.jmmc.jmal.star.StarResolverWidget;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.service.XslTransform;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +75,6 @@ public final class AnyVOTableHandler {
             final ObservationSetting newObservation = om.load(new StringReader(document));
 
             if (newObservation != null) {
-
                 final List<Target> targets = newObservation.getTargets();
 
                 if (logger.isDebugEnabled()) {
@@ -79,82 +84,88 @@ public final class AnyVOTableHandler {
                     }
                 }
 
-                // Use invokeLater to avoid concurrency and ensure that 
-                // data model is modified and fire events using Swing EDT:
-                SwingUtils.invokeEDT(new Runnable() {
-                    @Override
-                    public void run() {
+                // report buffer:
+                final StringBuilder sb = new StringBuilder(512);
+                sb.append("Import targets from VOTable:\n");
 
-                        if (TargetEditorDialog.isTargetEditorActive()) {
-                            MessagePane.showErrorMessage("Please close the target editor first !");
-                            return;
-                        }
-
-                        // check the number of targets:
-                        if (targets.isEmpty()) {
-                            MessagePane.showErrorMessage("No valid target found in VOTable: missing name or RA/DEC coordinates (J2000) !");
-                            return;
-                        }
-
-                        if (!confirmImport(targets.size())) {
-                            return;
-                        }
-
-                        // get the observationContext.operation:
-                        final boolean isOperationNew = (!forceAddTargets && newObservation.getContext() != null) ? newObservation.getContext().isOperationNew() : false;
-
-                        if (!isOperationNew
-                                || newObservation.getInterferometerConfiguration() == null
-                                || newObservation.getInstrumentConfiguration() == null) {
-
-                            // empty configuration: add targets only
-                            final TargetUserInformations targetUserInfos = newObservation.getOrCreateTargetUserInfos();
-
-                            // use deep copy of the current observation to manipulate target and calibrator list properly:
-                            final ObservationSetting obsCloned = om.getMainObservation().deepClone();
-
-                            // Prepare the data model (editable targets and user infos):
-                            final List<Target> editTargets = obsCloned.getTargets();
-                            final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
-
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("initial targets:");
-                                for (Target t : editTargets) {
-                                    logger.debug(t.toString());
-                                }
+                // Resolve targets without RA/DEC coordinates:
+                if (resolveTargets(sb, targets)) {
+                    // Use invokeLater to avoid concurrency and ensure that 
+                    // data model is modified and fire events using Swing EDT:
+                    SwingUtils.invokeEDT(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (TargetEditorDialog.isTargetEditorActive()) {
+                                MessagePane.showErrorMessage("Please close the target editor first !");
+                                return;
                             }
 
-                            final String report = mergeTargets(editTargets, editTargetUserInfos, targets, targetUserInfos);
-
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("updated targets:");
-                                for (Target t : editTargets) {
-                                    logger.debug(t.toString());
-                                }
+                            // check the number of targets:
+                            if (targets.isEmpty()) {
+                                MessagePane.showErrorMessage("No valid target found in VOTable: missing name or RA/DEC coordinates (J2000) !");
+                                return;
                             }
 
-                            // update the complete list of targets and force to update references:
-                            // needed to replace old target references by the new targets:
-                            om.updateTargets(editTargets, editTargetUserInfos);
+                            if (!confirmImport(targets.size())) {
+                                return;
+                            }
 
-                            if (logger.isInfoEnabled()) {
-                                logger.info(report);
+                            // get the observationContext.operation:
+                            final boolean isOperationNew = (!forceAddTargets && newObservation.getContext() != null) ? newObservation.getContext().isOperationNew() : false;
+
+                            if (!isOperationNew
+                                    || newObservation.getInterferometerConfiguration() == null
+                                    || newObservation.getInstrumentConfiguration() == null) {
+
+                                // empty configuration: add targets only
+                                final TargetUserInformations targetUserInfos = newObservation.getOrCreateTargetUserInfos();
+
+                                // use deep copy of the current observation to manipulate target and calibrator list properly:
+                                final ObservationSetting obsCloned = om.getMainObservation().deepClone();
+
+                                // Prepare the data model (editable targets and user infos):
+                                final List<Target> editTargets = obsCloned.getTargets();
+                                final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
+
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("initial targets:");
+                                    for (Target t : editTargets) {
+                                        logger.debug(t.toString());
+                                    }
+                                }
+
+                                final String report = mergeTargets(sb, editTargets, editTargetUserInfos, targets, targetUserInfos);
+
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("updated targets:");
+                                    for (Target t : editTargets) {
+                                        logger.debug(t.toString());
+                                    }
+                                }
+
+                                // update the complete list of targets and force to update references:
+                                // needed to replace old target references by the new targets:
+                                om.updateTargets(editTargets, editTargetUserInfos);
+
+                                if (logger.isInfoEnabled()) {
+                                    logger.info(report);
+                                }
+
+                                // bring this application to front:
+                                App.showFrameToFront();
+
+                                // display report message:
+                                MessagePane.showMessage(report);
+
+                            } else {
+                                om.resetAndChangeObservation(newObservation);
                             }
 
                             // bring this application to front:
                             App.showFrameToFront();
-
-                            // display report message:
-                            MessagePane.showMessage(report);
-
-                        } else {
-                            om.resetAndChangeObservation(newObservation);
                         }
-
-                        // bring this application to front:
-                        App.showFrameToFront();
-                    }
-                });
+                    });
+                }
             }
         } catch (IllegalArgumentException iae) {
             // Report both Observation and VOTable in a new IllegalArgumentException to get them in the feedback report:
@@ -163,19 +174,76 @@ public final class AnyVOTableHandler {
     }
 
     /**
+     * Resolve targets having no RA/DEC coordinates
+     * @param sb report buffer
+     * @param targets list of new targets
+     * @return true if successfull; false otherwise
+     */
+    private static boolean resolveTargets(final StringBuilder sb, final List<Target> targets) {
+        /*
+         Note: target name can be updated as calibrator are defined by target references (same instance):
+         changing the name is actually transparent (same instance)
+         */
+        // check RA/DEC = NaN
+        final List<String> nameList = new ArrayList<String>();
+        for (Target newTarget : targets) {
+            if (Double.isNaN(newTarget.getRADeg()) || Double.isNaN(newTarget.getDECDeg())) {
+                // update target name to find it later during merge:
+                final String cleanName = StarResolver.cleanNames(newTarget.getName());
+                newTarget.setName(cleanName);
+                nameList.add(cleanName);
+            }
+        }
+
+        if (!nameList.isEmpty()) {
+            // Wait for StarResolver task done:
+            final StarResolverResult result = StarResolver.waitFor(new StarResolver().multipleResolve(nameList));
+            if (result == null) {
+                MessagePane.showErrorMessage("Unable to resolve target identifiers: " + nameList, "Star resolver problem");
+                return false;
+            }
+
+            // Report errors:
+            StarResolverWidget.showResultMessage(result);
+
+            // merge targets:
+            for (String name : nameList) {
+                final Target newTarget = Target.getTarget(name, targets);
+                if (newTarget != null) {
+                    final Star star = result.getSingleStar(name);
+
+                    // convert star as target
+                    final Target resolvedTarget = TargetUtils.convert(star);
+
+                    if (resolvedTarget == null) {
+                        sb.append("Skip target ").append(newTarget.getName()).append("\n");
+                        targets.remove(newTarget);
+                    } else {
+                        Target.mergeTarget(newTarget, resolvedTarget);
+                        // format the target name:
+                        newTarget.updateNameAndIdentifier(resolvedTarget.getName());
+
+                        // fix NaN / null values:
+                        newTarget.checkValues();
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
      * Merge targets and calibrators
+     * @param sb report buffer
      * @param editTargets edited list of targets
      * @param editTargetUserInfos edited target user informations
      * @param targets list of new targets
      * @param targetUserInfos new target user informations
      * @return merge operation report
      */
-    private static String mergeTargets(final List<Target> editTargets, final TargetUserInformations editTargetUserInfos,
+    private static String mergeTargets(final StringBuilder sb,
+                                       final List<Target> editTargets, final TargetUserInformations editTargetUserInfos,
                                        final List<Target> targets, final TargetUserInformations targetUserInfos) {
-        // report buffer:
-        final StringBuilder sb = new StringBuilder(512);
-        sb.append("Import targets from VOTable\n\n");
-
         String targetName;
         Target oldTarget;
 
@@ -187,7 +255,6 @@ public final class AnyVOTableHandler {
             newTarget.setOrigin("VOTable");
 
             // fix RA/DEC deg vs HMS/DMS formats
-            // note: should check for invalid values ?
             newTarget.fixCoords();
 
             // Find any target (id + position) within 5 arcsecs:
