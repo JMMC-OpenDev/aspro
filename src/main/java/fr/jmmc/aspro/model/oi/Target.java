@@ -775,11 +775,32 @@ public class Target
      * Fix coordinates RA and DEC (HMS / DMS formats)
      */
     public final void fixCoords() {
-        setRA(fr.jmmc.aspro.model.util.TargetUtils.fixRA(getRA()));
-        setDEC(fr.jmmc.aspro.model.util.TargetUtils.fixDEC(getDEC()));
+        setCoords(
+                fr.jmmc.aspro.model.util.TargetUtils.fixRA(getRA()), 
+                fr.jmmc.aspro.model.util.TargetUtils.fixDEC(getDEC()),
+                getEQUINOX()
+        );
+    }
+    /**
+     * Set coordinates RA and DEC (HMS / DMS formats)
+     * @param ra RA HMS
+     * @param dec DEC DMS
+     * @param equinox coordinate equinox
+     */
+    public final void setCoords(final String ra, final String dec, final float equinox) {
+        setRA(ra);
+        setDEC(dec);
+        setEQUINOX(equinox);
         // reset any cached RA/DEC as degrees:
         setRADeg(Double.NaN);
         setDECDeg(Double.NaN);
+    }
+    
+    /**
+    * @return true if RA or DEC is NaN
+    */
+    public final boolean isNaNCoords() {
+        return Double.isNaN(getRADeg()) || Double.isNaN(getDECDeg());
     }
 
     /** computed RA in degrees */
@@ -1260,12 +1281,14 @@ public class Target
      * @param source target where information comes from
      */
     public static void mergeTarget(final Target target, final Target source) {
-        // skip name, id, ra/dec
+        // skip name, id
         // skip useAnalyticalModel, model, userModel, configuration, calibratorInfos
 
-        if (target.getEQUINOX() == 0f && source.getEQUINOX() != 0f) {
-            target.setEQUINOX(source.getEQUINOX());
+        // only update RA/DEC if NaN:
+        if (target.isNaNCoords() && !source.isNaNCoords()) {
+            target.setCoords(source.getRA(), source.getDEC(), source.getEQUINOX());
         }
+
         if (target.getSYSVEL() == null && source.getSYSVEL() != null) {
             target.setSYSVEL(source.getSYSVEL());
         }

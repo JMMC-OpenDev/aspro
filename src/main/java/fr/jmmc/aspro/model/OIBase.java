@@ -263,7 +263,7 @@ public class OIBase implements Cloneable {
      * @return true if the given value is NaN
      */
     public static final boolean isNaN(final Float value) {
-        return (value != null && Float.isNaN(value));
+        return (value != null) && Float.isNaN(value);
     }
 
     /**
@@ -271,7 +271,7 @@ public class OIBase implements Cloneable {
      * @return true if the given value is NaN
      */
     public static final boolean isNaN(final Double value) {
-        return (value != null && Double.isNaN(value));
+        return (value != null) && Double.isNaN(value);
     }
 
     /**
@@ -281,6 +281,6 @@ public class OIBase implements Cloneable {
      * @return true if value is empty (null or no chars)
      */
     public static boolean isEmpty(final String value) {
-        return value != null && value.isEmpty();
+        return (value == null) || value.isEmpty();
     }
 }
