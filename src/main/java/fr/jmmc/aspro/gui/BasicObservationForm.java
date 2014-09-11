@@ -21,6 +21,7 @@ import fr.jmmc.aspro.model.WarningMessage.Level;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
+import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
@@ -1058,6 +1059,23 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     /**
+     * Update the selected target in the target list
+     * @param target selected target (not null)
+     */
+    private void showSelectedTarget(final Target target) {
+        final String targetName = target.getName();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("showSelectedTarget: {}", targetName);
+        }
+
+        // update current target to avoid event loop:
+        currentTarget = target;
+
+        jListTargets.setSelectedValue(target, true);
+    }
+
+    /**
      * Process any comboBox change event (interferometer, interferometer configuration, instrument, instrument configuration).
      * Refresh the dependent combo boxes and update the observation according to the form state
      * @param e action event
@@ -1716,6 +1734,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 break;
             case TARGET_CHANGED:
                 updateListTargets();
+                break;
+            case TARGET_SELECTION_CHANGED:
+                if (event instanceof TargetSelectionEvent) {
+                    showSelectedTarget(((TargetSelectionEvent) event).getTarget());
+                }
                 break;
             case DO_UPDATE:
                 if (event instanceof UpdateObservationEvent) {

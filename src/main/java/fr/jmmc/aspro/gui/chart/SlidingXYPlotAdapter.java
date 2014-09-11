@@ -18,6 +18,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -55,6 +56,10 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     public final static int MAX_VIEW_ITEMS = MAX_PRINTABLE_ITEMS_A4;
     /** symbol label insets: 0.5 on top/bottom, 2 on left/right */
     private final static RectangleInsets SYMBOL_LABEL_INSETS = new RectangleInsets(0.5d, 2d, 0.5d, 2d);
+    /** cached highlight colors keyed by their initial color */
+    private static final Map<Color, Paint> HIGHLIGHT_PAINTS = new HashMap<Color, Paint>(8);
+    /** 15% transparent white color */
+    private static final Color WHITE_75 = new Color(255, 255, 255, 224);
     /** observation manager */
     private final static ObservationManager om = ObservationManager.getInstance();
     /* members */
@@ -83,6 +88,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     private List<String> labels = null;
     /** StarObservabilityData list for tooltip generation */
     private List<StarObservabilityData> soTargetList = null;
+    /** complete target to 'virtual' position mapping */
+    private Map<String, Integer> fullTargetIndex = null;
     /** true to indicate to change grid line colors; false otherwise */
     private boolean hasBackground = false;
     /** 24h date formatter like in france */
@@ -125,12 +132,15 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
      * @param targetList target list for tooltip generation / selection handling
      * @param labels data labels (legend)
      * @param soTargetList StarObservabilityData list for tooltip generation
+     * @param fullTargetIndex complete target to 'virtual' position mapping
      * @param hasBackground true to indicate to change grid line colors; false otherwise
      */
     public void setData(final TaskSeriesCollection collection, final List<String> symbols, final List<Color> colors,
                         final Map<Integer, List<XYAnnotation>> annotations,
                         final List<Target> targetList, final List<String> labels,
-                        final List<StarObservabilityData> soTargetList, final boolean hasBackground) {
+                        final List<StarObservabilityData> soTargetList,
+                        final Map<String, Integer> fullTargetIndex,
+                        final boolean hasBackground) {
         this.size = symbols.size();
         this.collection = collection;
         this.symbols = symbols;
@@ -139,6 +149,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         this.targetList = targetList;
         this.labels = labels;
         this.soTargetList = soTargetList;
+        this.fullTargetIndex = fullTargetIndex;
         this.hasBackground = hasBackground;
     }
 
@@ -237,10 +248,38 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         if (oldSelected != selectedPosition) {
             this.state.selectedPosition = selectedPosition;
 
-            // may update renderer:
+            updateAnnotationPaint(oldSelected);
             updateSeriesPaint(oldSelected);
+            updateAnnotationPaint(this.state.selectedPosition);
             updateSeriesPaint(this.state.selectedPosition);
+
+            // fire change event:
+            if (this.renderer instanceof EnhancedXYBarRenderer) {
+                ((EnhancedXYBarRenderer) this.renderer).setNotify(true);
+            }
         }
+    }
+
+    /**
+     * Return the position given the series index
+     * @param series  the series index (zero-based).
+     * @return position relative to the target list
+     */
+    public int getSeriePosition(final int series) {
+        // note: series corresponds to the target
+        if (this.lastStart != -1) {
+            return this.lastStart + series;
+        }
+        return -1;
+    }
+
+    /**
+     * Return true if the given position is visible (between lastStart and lastEnd) 
+     * @param pos position 
+     * @return true if the given position is visible 
+     */
+    public boolean isInViewRange(final int pos) {
+        return (this.lastStart != -1) && (this.lastStart <= pos) && (pos <= this.lastEnd);
     }
 
     /**
@@ -284,7 +323,6 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
      * @param forceUpdate flag to force an update of the plot
      */
     private void updatePlot(final int max, final boolean forceUpdate) {
-
         int start = this.state.position;
         if (start < 0) {
             start = 0;
@@ -343,7 +381,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         this.chart.setNotify(false);
         this.xyPlot.setNotify(false);
         if (this.renderer instanceof EnhancedXYBarRenderer) {
-            ((EnhancedXYBarRenderer)this.renderer).setNotify(false);
+            ((EnhancedXYBarRenderer) this.renderer).setNotify(false);
         }
 
         try {
@@ -367,6 +405,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             }
 
             // update color for selected position:
+            updateAnnotationPaint(this.state.selectedPosition);
             updateSeriesPaint(this.state.selectedPosition);
 
             final XYTaskDataset dataset = new XYTaskDataset(subTaskSeriesCollection);
@@ -438,6 +477,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                                 final EnhancedXYBoxAnnotation a = (EnhancedXYBoxAnnotation) annotation;
                                 a.setX0(n - halfBarWidth);
                                 a.setX1(n + halfBarWidth);
+                                // define the optional series index for mouse events (click on annotation):
+                                a.setSeriesIndex(n);
 
                                 // note: use layer according to the annotation layer:
                                 this.renderer.addAnnotation(a, a.getLayer());
@@ -476,7 +517,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         } finally {
             // restore chart & plot notifications:
             if (this.renderer instanceof EnhancedXYBarRenderer) {
-                ((EnhancedXYBarRenderer)this.renderer).setNotify(savedNotify);
+                ((EnhancedXYBarRenderer) this.renderer).setNotify(true);
             }
             this.xyPlot.setNotify(savedNotify);
             this.chart.setNotify(savedNotify);
@@ -493,17 +534,35 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             final int n = index - this.lastStart;
             // ensure boundary checks in view:
             if (n >= 0 && n < (this.lastEnd - this.lastStart)) {
+                final Color initial = this.colors.get(index);
 
-                final Paint color;
-                if (index == this.state.selectedPosition) {
-                    // use gradient (color to white) to highlight item:
-                    color = new GradientPaint(0f, 0f, Color.WHITE, 0f, 1f, this.colors.get(index));
-                } else {
-                    color = this.colors.get(index);
-                }
+                final Paint fillPaint = (index == this.state.selectedPosition) ? getHighlightPaint(initial) : initial;
 
                 // color :
-                this.renderer.setSeriesPaint(n, color);
+                this.renderer.setSeriesPaint(n, fillPaint, false);
+            }
+        }
+    }
+
+    /**
+     * Update the series paint at given index (highlighted or not)
+     * @param index index to use
+     */
+    private void updateAnnotationPaint(final int index) {
+        // ensure boundary checks in dataset:
+        if (index >= 0 && index < this.size) {
+            final List<XYAnnotation> list = this.annotations.get(NumberUtils.valueOf(index));
+
+            if (list != null) {
+                for (XYAnnotation annotation : list) {
+                    if (annotation instanceof EnhancedXYBoxAnnotation) {
+                        final EnhancedXYBoxAnnotation a = (EnhancedXYBoxAnnotation) annotation;
+                        // set the highlighted flag if an highlight paint is defined:
+                        if (a.getHighlightPaint() != null) {
+                            a.setHighlighted(index == this.state.selectedPosition);
+                        }
+                    }
+                }
             }
         }
     }
@@ -521,9 +580,9 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     public String generateToolTip(final XYDataset dataset, final int series, final int item) {
         // note: series corresponds to the target, item to its observability ranges
         if (this.targetList != null) {
-            final int index = this.lastStart + series;
+            final int index = getSeriePosition(series);
 
-            if (index < this.targetList.size()) {
+            if ((index >= 0) && (index < this.targetList.size())) {
 
                 final Target target = this.targetList.get(index);
                 logger.debug("target: {}", target);
@@ -630,7 +689,6 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         int pos = -1;
 
         if (targetName != null && this.targetList != null) {
-
             for (int i = 0, len = this.targetList.size(); i < len; i++) {
                 final Target t = this.targetList.get(i);
 
@@ -638,6 +696,23 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                     pos = i;
                     break;
                 }
+            }
+        }
+        return pos;
+    }
+
+    /**
+     * Return the virtual position of the given target (first occurence matching by target name) in the complete target list
+     * @param targetName target name to find its position (first occurence)
+     * @return position or -1 if not found
+     */
+    public int findTargetVirtualPosition(final String targetName) {
+        int pos = -1;
+
+        if (targetName != null && this.fullTargetIndex != null) {
+            final Integer index = this.fullTargetIndex.get(targetName);
+            if (index != null) {
+                pos = index.intValue();
             }
         }
         return pos;
@@ -652,7 +727,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     }
 
     /**
-     * Return the target name at the given position
+     * Return the target name at the given position (in the target list)
      * @param pos position
      * @return target name
      */
@@ -662,5 +737,15 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             targetName = this.targetList.get(pos).getName();
         }
         return targetName;
+    }
+
+    public static Paint getHighlightPaint(final Color initial) {
+        Paint paint = HIGHLIGHT_PAINTS.get(initial);
+        if (paint == null) {
+            final Color other = (initial.getAlpha() == 255) ? Color.WHITE : WHITE_75;
+            paint = new GradientPaint(0f, 0f, other, 0f, 1f, initial);
+            HIGHLIGHT_PAINTS.put(initial, paint);
+        }
+        return paint;
     }
 }

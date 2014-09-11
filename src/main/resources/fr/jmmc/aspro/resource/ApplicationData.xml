@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.6 beta 13"/>
-    <compilation date="08/09/2014" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.6 beta 14"/>
+    <compilation date="11/09/2014" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -194,7 +194,14 @@
 
     <releasenotes>
         <release version="0.9.6">
-            <pubDate>Mon, 08 Sep 2014 16:00:00 GMT</pubDate>
+            <pubDate>Thu, 11 Sep 2014 14:00:00 GMT</pubDate>
+            <prerelease version="0.9.6 beta 14">
+                <change type="FEATURE">Improved selection handling and tracking on the observability plot:
+                    click on any observability range to change globally the selected target (highlighted)</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/521">Added the 'Show related' option on the observability plot (enabled by default)
+                    to always always show selected target and its calibrators (not filtered)</change>
+                <change>Improved display of the selected target for unobservable ranges (soft limits) on the observability plot (translucent gradient)</change>
+            </prerelease>
             <prerelease version="0.9.6 beta 13">
                 <change>Added a star resolver field in the target editor to enter new target(s) while editing your targets and calibrators</change>
             </prerelease>

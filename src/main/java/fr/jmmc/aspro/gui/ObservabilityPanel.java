@@ -55,6 +55,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GradientPaint;
 import java.awt.Insets;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
@@ -71,8 +72,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -97,6 +100,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartRenderingInfo;
 import org.jfree.chart.JFreeChart;
@@ -104,6 +109,9 @@ import org.jfree.chart.LegendItemCollection;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.TickUnitSource;
+import org.jfree.chart.entity.ChartEntity;
+import org.jfree.chart.entity.XYAnnotationEntity;
+import org.jfree.chart.entity.XYItemEntity;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.plot.IntervalMarker;
@@ -167,6 +175,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private final static int ITEM_SIZE = 40;
     /** default timeline refresh period = 1 minutes */
     private static final int REFRESH_PERIOD = 60 * 1000;
+    /** cached soft limits colors keyed by their initial color */
+    private static final Map<Color, Color> SOFT_LIMITS_PAINTS = new HashMap<Color, Color>(8);
     /* Filters */
     /** calibrator filter */
     private static final Filter CALIBRATOR_FILTER = new Filter("CalibratorFilter", "Hide calibrators",
@@ -187,10 +197,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             };
 
     /* default plot options */
-    /** default value for the checkbox BaseLine Limits */
+    /** default value for the checkbox Baseline Limits */
     private static final boolean DEFAULT_DO_BASELINE_LIMITS = false;
     /** default value for the checkbox Details */
     private static final boolean DEFAULT_DO_DETAILED_OUTPUT = false;
+    /** default value for the checkbox Show related */
+    private static final boolean DEFAULT_DO_SHOW_RELATED = true;
+    /** default value for the checkbox Scroll view */
+    private static final boolean DEFAULT_DO_SCROLL_VIEW = true;
 
     /* members */
     /** preference singleton */
@@ -237,6 +251,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private String currentTargetName = null;
     /** selected target name (selected target only) for highlight */
     private String selectedTargetName = null;
+    /** offset of the selected target (-1 means invalid) */
+    private int selectedTargetOffset = -1;
 
     /* plot data */
     /** chart data */
@@ -259,12 +275,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private JComboBox jComboTimeRef;
     /** checkbox night only*/
     private JCheckBox jCheckBoxNightOnly;
-    /** checkbox BaseLine Limits */
+    /** checkbox Baseline Limits */
     private JCheckBox jCheckBoxBaseLineLimits;
     /** checkbox Detailed output */
     private JCheckBox jCheckBoxDetailedOutput;
     /** checkbox list (JIDE) filters */
     private CheckBoxList jCheckBoxListFilters;
+    /** checkbox Related output */
+    private JCheckBox jCheckBoxShowRelated;
 
     /**
      * Constructor
@@ -314,6 +332,48 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // date axis :
         this.chartPanel.setRangeZoomable(true);
 
+        this.chartPanel.addChartMouseListener(new ChartMouseListener() {
+            @Override
+            public void chartMouseClicked(final ChartMouseEvent event) {
+                final ChartEntity entity = event.getEntity();
+                int seriesIndex = -1;
+                // only support click on ranges (not text annotations):
+                if (entity instanceof XYItemEntity) {
+                    final XYItemEntity itemEntity = (XYItemEntity) entity;
+                    seriesIndex = itemEntity.getSeriesIndex();
+                } else if (entity instanceof XYAnnotationEntity) {
+                    final XYAnnotationEntity anEntity = (XYAnnotationEntity) entity;
+                    seriesIndex = anEntity.getRendererIndex();
+                }
+
+                if (seriesIndex != -1) {
+                    final ObservationCollectionObsData chartData = getChartData();
+                    // do not change selection if baseline limits displayed:
+                    if ((chartData != null) && !chartData.getFirstObsData().isDoBaseLineLimits()) {
+                        final int index = slidingXYPlotAdapter.getSeriePosition(seriesIndex);
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("chartMouseClicked: serie={}, target index={}", seriesIndex, index);
+                        }
+
+                        final String targetName = slidingXYPlotAdapter.getTargetName(index);
+
+                        if (targetName != null && !ObjectUtils.areEquals(targetName, selectedTargetName)) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("chartMouseClicked: selectedTargetName={}", targetName);
+                            }
+                            final ObservationManager om = ObservationManager.getInstance();
+                            om.fireTargetSelectionChanged(om.getTarget(targetName));
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void chartMouseMoved(final ChartMouseEvent event) {
+            }
+        });
+
         this.add(this.chartPanel, BorderLayout.CENTER);
 
         this.scroller = new JScrollBar(JScrollBar.VERTICAL, 0, 0, 0, 0);
@@ -321,12 +381,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         this.scroller.getModel().addChangeListener(new ChangeListener() {
             @Override
-            public void stateChanged(final ChangeEvent paramChangeEvent) {
-                final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) paramChangeEvent.getSource();
+            public void stateChanged(final ChangeEvent ce) {
+                final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) ce.getSource();
+
                 // update position and repaint the plot:
                 slidingXYPlotAdapter.setPosition(model.getValue());
 
-                // update current target:
+                // update current target from updated position:
                 setCurrentTargetName(slidingXYPlotAdapter.getCurrentTargetName());
             }
         });
@@ -342,7 +403,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         this.add(this.scrollerPanel, BorderLayout.EAST);
 
-        final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 1));
+        final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 2));
 
         panelOptions.add(new JLabel("Time:"));
 
@@ -382,7 +443,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         panelOptions.add(this.jCheckBoxNightOnly);
 
-        this.jCheckBoxBaseLineLimits = new JCheckBox("BaseLine limits");
+        this.jCheckBoxBaseLineLimits = new JCheckBox("Baseline limits");
         this.jCheckBoxBaseLineLimits.setName("jCheckBoxBaseLineLimits");
 
         this.jCheckBoxBaseLineLimits.setSelected(DEFAULT_DO_BASELINE_LIMITS);
@@ -456,15 +517,28 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         this.jCheckBoxListFilters.getCheckBoxListSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(final ListSelectionEvent e) {
-                if (getChartData() != null) {
+                if (!e.getValueIsAdjusting() && getChartData() != null) {
                     updatePlot(getChartData());
                 }
             }
         });
 
-        panelOptions.add(new JSeparator(SwingConstants.VERTICAL));
+        panelOptions.add(createSeparator());
         panelOptions.add(new JLabel("Filters:"));
         panelOptions.add(new JScrollPane(this.jCheckBoxListFilters));
+
+        this.jCheckBoxShowRelated = new JCheckBox("<html>Show<br>related</html>");
+        this.jCheckBoxShowRelated.setName("jCheckBoxShowRelated");
+        this.jCheckBoxShowRelated.setToolTipText("If enabled, selected target and its calibrators are always shown (not filtered)");
+        this.jCheckBoxShowRelated.setSelected(DEFAULT_DO_SHOW_RELATED);
+        this.jCheckBoxShowRelated.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(final ItemEvent e) {
+                // refresh the plot:
+                updatePlot(getChartData());
+            }
+        });
+        panelOptions.add(this.jCheckBoxShowRelated);
 
         this.jCheckBoxScrollView = new JCheckBox("Scroll view");
         this.jCheckBoxScrollView.setName("jCheckBoxScrollView");
@@ -472,8 +546,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 + "<br>but <b>the exported PDF always contains all targets</b> (multiple page if necessary)"
                 + "<br>If disabled, all targets are displayed and the plot can be zoomed in / out (mouse)"
                 + "<br>but <b>the exported PDF document contains targets as displayed (single page only)</b></html>");
-
-        this.jCheckBoxScrollView.setSelected(true);
+        this.jCheckBoxScrollView.setSelected(DEFAULT_DO_SCROLL_VIEW);
         this.jCheckBoxScrollView.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(final ItemEvent e) {
@@ -482,13 +555,21 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             }
         });
 
-        panelOptions.add(new JSeparator(SwingConstants.VERTICAL));
+        panelOptions.add(createSeparator());
         panelOptions.add(this.jCheckBoxScrollView);
 
         this.add(panelOptions, BorderLayout.PAGE_END);
 
         // register this instance as a Preference Observer :
         this.myPreferences.addObserver(this);
+    }
+
+    private static JSeparator createSeparator() {
+        final JSeparator sep = new JSeparator(SwingConstants.VERTICAL);
+        final Dimension dim = sep.getPreferredSize();
+        dim.height = 30;
+        sep.setPreferredSize(dim);
+        return sep;
     }
 
     /**
@@ -594,7 +675,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     @Override
     public String getPDFDefaultFileName() {
         if (this.getChartData() != null) {
-
             final ObservationSetting observation = this.getChartData().getFirstObservation();
 
             // flags used by the plot :
@@ -643,6 +723,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // Backup slidingXYPlotAdapter state before rendering PDF :
         this.stateBeforePDF = this.slidingXYPlotAdapter.backupState();
 
+        // refresh the plot to hide related targets:
+        if (doShowRelated() && this.jCheckBoxScrollView.isSelected()) {
+            updatePlot(getChartData());
+        }
+
         // Render text even if do not fit in block size:
         this.renderContext.setHideAnnotationTooSmall(false);
         // Use smaller fonts (print):
@@ -689,7 +774,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                     // update max items:
                     this.slidingXYPlotAdapter.setMaxViewItems(maxViewsItemsPerPage);
 
-//                    options = new PDFOptions(PageSize.A2, Orientation.Portait);
                     options = new PDFOptions(PageSize.A3, Orientation.Portait, numberOfPages);
 
                 } else if (currentSize > SlidingXYPlotAdapter.MAX_PRINTABLE_ITEMS_A4) {
@@ -747,6 +831,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // Disable the PDF rendering flag:
         this.renderingPDF = false;
 
+        // refresh the plot to show related targets:
+        if (doShowRelated() && this.jCheckBoxScrollView.isSelected()) {
+            updatePlot(getChartData());
+        }
+
         // Restore slidingXYPlotAdapter state after rendering PDF :
         this.slidingXYPlotAdapter.restoreState(this.stateBeforePDF);
         this.stateBeforePDF = null;
@@ -784,13 +873,21 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final boolean prevAutoRefresh = this.setAutoRefresh(false);
         try {
             // restore user preference :
-            this.jComboTimeRef.setSelectedItem(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
+            this.jComboTimeRef.setSelectedItem(myPreferences.getPreference(Preferences.TIME_REFERENCE));
+            this.jCheckBoxNightOnly.setSelected(myPreferences.getPreferenceAsBoolean(Preferences.ONLY_NIGHT));
 
             this.jCheckBoxBaseLineLimits.setSelected(DEFAULT_DO_BASELINE_LIMITS);
             this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
 
+            this.jCheckBoxListFilters.selectNone();
+
+            this.jCheckBoxShowRelated.setSelected(DEFAULT_DO_SHOW_RELATED);
+            this.jCheckBoxScrollView.setSelected(DEFAULT_DO_SCROLL_VIEW);
+
             // reset current target:
             setCurrentTargetName(null);
+            selectedTargetName = null;
+            selectedTargetOffset = -1;
 
         } finally {
             // restore the automatic refresh :
@@ -1103,6 +1200,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // Enable or disable the 'Night only' option:
         this.jCheckBoxNightOnly.setEnabled(!doBaseLineLimits && observation.getWhen().isNightRestriction());
 
+        // Enable or disable the 'Show related' option:
+        this.jCheckBoxListFilters.setEnabled(!doBaseLineLimits);
+        this.jCheckBoxShowRelated.setEnabled(!doBaseLineLimits && isSelectedFilter());
+
         // disable chart & plot notifications:
         this.chart.setNotify(false);
         this.xyPlot.setNotify(false);
@@ -1204,13 +1305,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final Map<Integer, List<XYAnnotation>> annotations = new HashMap<Integer, List<XYAnnotation>>(obsLen * targets.size());
 
         // Get filters:
-        boolean hasFilters = !(doBaseLineLimits); // disable filters for baseline limits
+        boolean hasFilters = !(doBaseLineLimits) && isSelectedFilter(); // disable filters for baseline limits
         Filter[] selectedFilters = null;
 
         if (hasFilters) {
             selectedFilters = getSelectedFilters();
-
-            hasFilters = (selectedFilters.length != 0);
 
             if (hasFilters) {
                 if (logger.isDebugEnabled()) {
@@ -1226,12 +1325,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final List<Color> colorList = new ArrayList<Color>(initialSize);
         final Map<String, Paint> legendItems = new LinkedHashMap<String, Paint>(initialSize);
 
+        // for selection handling:
+        final Map<String, Integer> fullTargetIndex = new HashMap<String, Integer>(initialSize);
         // for tooltip information:
         final List<Target> targetList = new ArrayList<Target>(initialSize);
         final List<String> labelList = new ArrayList<String>(initialSize);
         final List<StarObservabilityData> soTargetList = new ArrayList<StarObservabilityData>(initialSize);
 
-        String name;
+        String targetName, name;
         TaskSeries taskSeries;
         Task task;
         int colorIndex;
@@ -1244,21 +1345,41 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final StringBuilder sb = new StringBuilder(32);
 
         ObservabilityData obsData;
-        // current StarObservabilityData used in loops :
+        // current StarObservabilityData used in loops:
+        StarObservabilityData so;
         List<StarObservabilityData> soList;
         List<List<DateTimeInterval>> visibleVcmLimits;
         List<DateTimeInterval> intervals;
         DateTimeInterval interval;
 
+        final Set<Target> calibratorSet = targetUserInfos.getCalibratorSet();
+
+        final Set<Target> highlightedSet;
+        // show selected target and its calibrators (not PDF):
+        if (!this.renderingPDF && this.jCheckBoxShowRelated.isSelected()) {
+            highlightedSet = new HashSet<Target>(8);
+            final Target selectedTarget = Target.getTarget(this.selectedTargetName, targets);
+            if (selectedTarget != null) {
+                highlightedSet.add(selectedTarget);
+                highlightedSet.addAll(targetUserInfos.getCalibrators(selectedTarget));
+            }
+            logger.debug("highlightedTargets : {}", highlightedSet);
+        } else {
+            highlightedSet = Collections.emptySet();
+        }
+
         boolean isCalibrator;
+        boolean highlighted;
         boolean filtered;
 
         // Iterate over objects targets :
         for (Target target : targets) {
+            targetName = target.getName();
+            // use HashSet for performanced:
+            isCalibrator = calibratorSet.contains(target);
+            highlighted = highlightedSet.contains(target);
 
-            isCalibrator = targetUserInfos.isCalibrator(target);
-
-            if (hasFilters) {
+            if (hasFilters && !highlighted) {
                 filtered = false;
                 for (int k = 0, len = selectedFilters.length; k < len; k++) {
                     Filter filter = selectedFilters[k];
@@ -1268,6 +1389,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                     }
                 }
                 if (filtered) {
+                    // add virtually the target at the current position (first occurence):
+                    if (!fullTargetIndex.containsKey(targetName)) {
+                        fullTargetIndex.put(targetName, NumberUtils.valueOf(n));
+                    }
                     // skip target
                     continue;
                 }
@@ -1278,14 +1403,19 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 obsData = chartData.getObsDataList().get(c);
 
                 // get StarObservabilityData results :
-                soList = obsData.getMapStarVisibilities().get(target.getName());
+                soList = obsData.getMapStarVisibilities().get(targetName);
 
                 if (soList != null) {
                     // Iterate over StarObservabilityData :
                     for (int s = 0, soListLen = soList.size(); s < soListLen; s++) {
-                        StarObservabilityData so = soList.get(s);
+                        so = soList.get(s);
 
-                        if (hasFilters) {
+                        // add virtually the target at the current position (first occurence):
+                        if (!fullTargetIndex.containsKey(targetName)) {
+                            fullTargetIndex.put(targetName, NumberUtils.valueOf(n));
+                        }
+
+                        if (hasFilters && !highlighted) {
                             filtered = false;
                             for (int k = 0, len = selectedFilters.length; k < len; k++) {
                                 Filter filter = selectedFilters[k];
@@ -1300,6 +1430,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             }
                         }
 
+                        // add target:
                         targetList.add(target);
 
                         if (doBaseLineLimits) {
@@ -1381,13 +1512,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             // Observable range limits without HA restrictions:
                             intervals = so.getVisibleNoSoftLimits();
                             if (intervals != null) {
-                                final Paint fillPaint = new Color(paint.getRed(), paint.getGreen(), paint.getBlue(), 48); // 80% transparent
+                                final Color fillPaint = getSoftLimitsPaint(paint);
+                                final Paint highlightPaint = SlidingXYPlotAdapter.getHighlightPaint(fillPaint);
 
                                 for (int d = 0, iLen = intervals.size(); d < iLen; d++) {
                                     interval = intervals.get(d);
                                     addAnnotation(annotations, pos,
                                             new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
-                                                    ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint, Layer.BACKGROUND,
+                                                    ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint, highlightPaint, Layer.BACKGROUND,
                                                     this.slidingXYPlotAdapter.generateToolTip(target, legendLabel, "Moon, Wind, HA", so, interval.getStartDate(), interval.getEndDate())));
                                 }
                             }
@@ -1422,13 +1554,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             // Observable range limits without HA restrictions (background):
                             intervals = so.getVisibleNoSoftLimits();
                             if (intervals != null) {
-                                final Paint fillPaint = new Color(paint.getRed(), paint.getGreen(), paint.getBlue(), 48); // 80% transparent
+                                final Color fillPaint = getSoftLimitsPaint(paint);
+                                final Paint highlightPaint = SlidingXYPlotAdapter.getHighlightPaint(fillPaint);
 
                                 for (int d = 0, iLen = intervals.size(); d < iLen; d++) {
                                     interval = intervals.get(d);
                                     addAnnotation(annotations, pos,
                                             new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
-                                                    ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint, Layer.BACKGROUND,
+                                                    ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint, highlightPaint, Layer.BACKGROUND,
                                                     this.slidingXYPlotAdapter.generateToolTip(target, legendLabel, "Moon, Wind, HA", so, interval.getStartDate(), interval.getEndDate())));
                                 }
                             }
@@ -1540,7 +1673,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         } // loop on targets (display targets or baseline limits)
 
         // update plot data :
-        this.slidingXYPlotAdapter.setData(taskSeriesCollection, symbolList, colorList, annotations, targetList, labelList, soTargetList,
+        this.slidingXYPlotAdapter.setData(taskSeriesCollection, symbolList, colorList, annotations, targetList, labelList, soTargetList, fullTargetIndex,
                 !chartData.isDoBaseLineLimits() && chartData.getFirstObservation().getWhen().isNightRestriction());
 
         // force a plot refresh:
@@ -1565,42 +1698,67 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final boolean doBaseLineLimits
                       = (this.getChartData() != null) ? this.getChartData().getFirstObsData().isDoBaseLineLimits() : false;
 
-        final int size = this.slidingXYPlotAdapter.getSize();
+        final int size = slidingXYPlotAdapter.getSize();
 
         final BoundedRangeModel rangeModel = this.scroller.getModel();
 
         final boolean useSubset;
-        if (doBaseLineLimits || !this.jCheckBoxScrollView.isSelected() || size <= this.slidingXYPlotAdapter.getMaxViewItems()) {
+        if (doBaseLineLimits || !this.jCheckBoxScrollView.isSelected() || size <= slidingXYPlotAdapter.getMaxViewItems()) {
             // disable scrollbar:
             rangeModel.setRangeProperties(0, 0, 0, 0, false);
-            this.scroller.setEnabled(false);
             useSubset = false;
         } else {
-            // refresh scrollbar position:
-            final int lastPos = rangeModel.getValue();
+            int value;
+            if (selectedTargetOffset != -1) {
+                // try preserving selected target at its fixed offset:
 
-            // find target to find first target occurence in slidingXYPlotAdapter:
-            final int pos
-                      = (this.currentTargetName != null && this.currentTargetName.equals(slidingXYPlotAdapter.getTargetName(lastPos))) ? lastPos
-                    : slidingXYPlotAdapter.findTargetPosition(this.currentTargetName);
+                // find selected target to find first target occurence in slidingXYPlotAdapter:
+                int pos = slidingXYPlotAdapter.findTargetVirtualPosition(this.selectedTargetName);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("target position: {}", pos);
+                if (pos != -1) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("updateSliderProperties: selected={}, offset={}", selectedTargetName, selectedTargetOffset);
+                    }
+                    // adjust offset or recenter on selected target:
+                    pos -= Math.min(selectedTargetOffset, slidingXYPlotAdapter.getMaxViewItems() - 1);
+                    value = Math.max(0, pos);
+                } else {
+                    // should not happen
+                    value = rangeModel.getValue();
+                }
+
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("updateSliderProperties: current={}", currentTargetName);
+                }
+                // refresh scrollbar position:
+                final int lastPos = rangeModel.getValue();
+
+                // find target to find first target occurence in slidingXYPlotAdapter:
+                final int pos = (this.currentTargetName == null
+                        || this.currentTargetName.equals(slidingXYPlotAdapter.getTargetName(lastPos))) ? lastPos
+                                : slidingXYPlotAdapter.findTargetVirtualPosition(this.currentTargetName);
+
+                value = (pos != -1) ? pos : lastPos;
             }
-
+            final int max = size - slidingXYPlotAdapter.getMaxViewItems();
+            if (value > max) {
+                value = max;
+            }
             // refresh scrollbar maximum value:
-            rangeModel.setRangeProperties((pos != -1) ? pos : lastPos, 0, 0, size - this.slidingXYPlotAdapter.getMaxViewItems(), false);
-            this.scroller.setEnabled(true);
+            rangeModel.setRangeProperties(value, 0, 0, max, false);
             useSubset = true;
         }
+        this.scroller.setEnabled(useSubset);
+
         // update mouse wheel handler:
-        updateMouseWheelHandler(this.scroller.isEnabled());
+        updateMouseWheelHandler(useSubset);
 
         // update selected target (target may have different position now):
         updateSelectedTarget();
 
-        // repaint the plot:
-        if (forceRefresh || useSubset != this.slidingXYPlotAdapter.isUseSubset()) {
+        // repaint the plot if needed:
+        if (forceRefresh || useSubset != slidingXYPlotAdapter.isUseSubset()) {
             this.slidingXYPlotAdapter.setUseSubset(useSubset);
         }
     }
@@ -1616,31 +1774,95 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             logger.debug("showSelectedTarget: {}", targetName);
         }
 
-        // scroller is enabled if useSubset mode:
-        if (this.scroller.isEnabled()) {
+        // reset current target
+        setCurrentTargetName(null);
+
+        // update selected target now (used by setCurrentTargetName() invoked by scroller setValue)
+        this.selectedTargetName = targetName;
+
+        final boolean doShowRelated = doShowRelated();
+        final boolean useSubset = slidingXYPlotAdapter.isUseSubset();
+
+        if (useSubset) {
             // find target to find first target occurence in slidingXYPlotAdapter:
-            final int pos = slidingXYPlotAdapter.findTargetPosition(targetName);
+            final int pos = slidingXYPlotAdapter.findTargetVirtualPosition(targetName);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("showSelectedTarget: target position: {}", pos);
             }
 
+            boolean doAdjustOffset = true;
             if (pos != -1) {
-                // update scroller model to update slidingXYPlotAdapter (may redraw plot):
-                this.scroller.getModel().setValue(pos);
+                // check if not visible ?
+                if (!slidingXYPlotAdapter.isInViewRange(pos)) {
+                    if (!doShowRelated) {
+                        // update scroller model to update slidingXYPlotAdapter (may redraw plot):
+                        // note: calls setCurrentTargetName()
+                        this.scroller.getModel().setValue(pos - (2 * slidingXYPlotAdapter.getMaxViewItems()) / 5); // center
+                        doAdjustOffset = false;
+                    }
+                }
+            }
+            if (doAdjustOffset) {
+                updateSelectedOffset((2 * slidingXYPlotAdapter.getMaxViewItems()) / 5); // center
             }
         }
 
-        // update current target:
-        setCurrentTargetName(targetName);
+        if (doShowRelated) {
+            // refresh the plot to show related targets:
+            updatePlot(getChartData());
+        } else {
+            updateSelectedTarget();
+            if (!useSubset) {
+                // repaint the plot:
+                this.slidingXYPlotAdapter.setUseSubset(useSubset);
+            }
+        }
+    }
 
-        // update selected target:
-        this.selectedTargetName = targetName;
-        updateSelectedTarget();
-        
-        // repaint the plot:
-        if (!this.scroller.isEnabled()) {
-            this.slidingXYPlotAdapter.setUseSubset(false);
+    private boolean doShowRelated() {
+        // note: enabled means !doBaseLineLimits && isSelectedFilter()
+        return this.jCheckBoxShowRelated.isEnabled() && this.jCheckBoxShowRelated.isSelected();
+    }
+
+    /**
+     * Update the current target name (selected target or given by scroller position)
+     * @param targetName target name
+     */
+    private void setCurrentTargetName(final String targetName) {
+        if (!ObjectUtils.areEquals(targetName, this.currentTargetName)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("setCurrentTargetName: {}", targetName);
+            }
+            this.currentTargetName = targetName;
+        }
+
+        if (targetName != null) {
+            updateSelectedOffset(-1);
+        }
+    }
+
+    private void updateSelectedOffset(final int defaultOffset) {
+        // update offset of the selected target in the current view:
+        if (this.jCheckBoxScrollView.isSelected() && slidingXYPlotAdapter.isUseSubset()) {
+            // find displayed target to find first target occurence in slidingXYPlotAdapter:
+            final int pos = slidingXYPlotAdapter.findTargetPosition(this.selectedTargetName);
+            if (pos != -1) {
+                int offset;
+                // check if not visible ?
+                if (!slidingXYPlotAdapter.isInViewRange(pos)) {
+                    offset = defaultOffset; // -1 to disable tracking selected target, 0 to focus on it
+                } else {
+                    offset = pos - slidingXYPlotAdapter.getSeriePosition(0);
+                }
+                // update offset:
+                if (this.selectedTargetOffset != offset) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("updateSelectedOffset: selected={}, offset={}", selectedTargetName, offset);
+                    }
+                    this.selectedTargetOffset = offset;
+                }
+            }
         }
     }
 
@@ -1648,7 +1870,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * Update the selected position (target) on the plot
      */
     private void updateSelectedTarget() {
-        // find target to find first target occurence in slidingXYPlotAdapter:
+        // find displayed target to find first target occurence in slidingXYPlotAdapter:
         final int pos = this.slidingXYPlotAdapter.findTargetPosition(this.selectedTargetName);
 
         if (logger.isDebugEnabled()) {
@@ -2056,12 +2278,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
     }
 
-    /**
-     * Update the current target name (selected target or given by scroller position)
-     * @param targetName target name
-     */
-    private void setCurrentTargetName(final String targetName) {
-        this.currentTargetName = targetName;
+    private static Color getSoftLimitsPaint(final Color initial) {
+        Color paint = SOFT_LIMITS_PAINTS.get(initial);
+        if (paint == null) {
+            paint = new Color(initial.getRed(), initial.getGreen(), initial.getBlue(), 80); // 70% transparent
+            SOFT_LIMITS_PAINTS.put(initial, paint);
+        }
+        return paint;
     }
 
     private void updateMouseWheelHandler(final boolean scrollable) {
@@ -2184,6 +2407,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             // default; do not filter
             return false;
         }
+    }
+
+    /**
+     * Is any filter selected ?
+     * @return true if any filter is selected
+     */
+    private boolean isSelectedFilter() {
+        return jCheckBoxListFilters.getCheckBoxListSelectedIndex() != -1;
     }
 
     /**
