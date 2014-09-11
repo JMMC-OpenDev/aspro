@@ -199,11 +199,11 @@
                 <change type="FEATURE">Improved selection handling and tracking on the observability plot:
                     click on any observability range to change globally the selected target (highlighted)</change>
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/521">Added the 'Show related' option on the observability plot (enabled by default)
-                    to always always show selected target and its calibrators (not filtered)</change>
-                <change>Improved display of the selected target for unobservable ranges (soft limits) on the observability plot (translucent gradient)</change>
+                    to always show selected target and its calibrators (not filtered)</change>
+                <change type="FEATURE">Improved display of the selected target for unobservable ranges (soft limits) on the observability plot (translucent gradient)</change>
             </prerelease>
             <prerelease version="0.9.6 beta 13">
-                <change>Added a star resolver field in the target editor to enter new target(s) while editing your targets and calibrators</change>
+                <change type="FEATURE">Added a star resolver field in the target editor to enter new target(s) while editing your targets and calibrators</change>
             </prerelease>
             <prerelease version="0.9.6 beta 12">
                 <change type="FEATURE">Added actions 'Import targets from VOTable' / 'Export targets to VOTable' in the File menu
