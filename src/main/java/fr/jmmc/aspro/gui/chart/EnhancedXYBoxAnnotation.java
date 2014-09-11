@@ -44,6 +44,7 @@ import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Stroke;
@@ -59,8 +60,10 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.io.SerialUtilities;
+import org.jfree.ui.GradientPaintTransformer;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.StandardGradientPaintTransformer;
 import org.jfree.util.ObjectUtilities;
 import org.jfree.util.PaintUtilities;
 import org.jfree.util.PublicCloneable;
@@ -78,6 +81,8 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
     /** shared drawing rectangle */
     private static final Rectangle2D.Double drawRect = new Rectangle2D.Double();
 
+    private static final GradientPaintTransformer gradientTransformer = new StandardGradientPaintTransformer();
+
     /* members */
     /** The lower x-coordinate. */
     private double x0;
@@ -93,8 +98,14 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
     private transient Paint outlinePaint;
     /** The paint used to fill the box. */
     private transient Paint fillPaint;
+    /** highlighted flag */
+    private transient boolean highlighted;
+    /** The paint used to fill the box if highlighted. */
+    private transient Paint highlightPaint;
     /** layer to draw this annotation = foreground or background (default) */
     private transient Layer layer;
+    /** optional series index */
+    private transient int seriesIndex = -1;
 
     /**
      * Creates a new annotation (where, by default, the box is drawn
@@ -157,7 +168,30 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * @param tooltipText optional tooltip text
      */
     public EnhancedXYBoxAnnotation(final double x0, final double y0, final double x1, final double y1,
-                                   final BasicStroke stroke, final Paint outlinePaint, final Paint fillPaint, 
+                                   final BasicStroke stroke, final Paint outlinePaint, final Paint fillPaint,
+                                   final Layer layer, final String tooltipText) {
+        this(x0, y0, x1, y1, stroke, outlinePaint, fillPaint, null, layer, tooltipText);
+    }
+
+    /**
+     * Creates a new annotation.
+     *
+     * @param x0  the lower x-coordinate of the box (in data space).
+     * @param y0  the lower y-coordinate of the box (in data space).
+     * @param x1  the upper x-coordinate of the box (in data space).
+     * @param y1  the upper y-coordinate of the box (in data space).
+     * @param stroke  the shape stroke (<code>null</code> permitted).
+     * @param outlinePaint  the shape color (<code>null</code> permitted).
+     * @param fillPaint  the paint used to fill the shape (<code>null</code>
+     *                   permitted).
+     * @param highlightPaint  the paint used to fill the shape if highlighted (<code>null</code>
+     *                   permitted).
+     * @param layer layer to draw this annotation = foreground or background (default)
+     * @param tooltipText optional tooltip text
+     */
+    public EnhancedXYBoxAnnotation(final double x0, final double y0, final double x1, final double y1,
+                                   final BasicStroke stroke, final Paint outlinePaint,
+                                   final Paint fillPaint, final Paint highlightPaint,
                                    final Layer layer, final String tooltipText) {
         this.x0 = x0;
         this.y0 = y0;
@@ -166,6 +200,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
         this.stroke = stroke;
         this.outlinePaint = outlinePaint;
         this.fillPaint = fillPaint;
+        this.highlightPaint = highlightPaint;
         this.layer = layer;
         if (!StringUtils.isEmpty(tooltipText)) {
             this.setToolTipText(tooltipText);
@@ -244,9 +279,12 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
 
         // clipping checks:
         if (drawRect.intersects(dataArea)) {
-
-            if (this.fillPaint != null) {
-                g2.setPaint(this.fillPaint);
+            Paint paint = (this.highlighted) ? this.highlightPaint : this.fillPaint;
+            if (paint != null) {
+                if (paint instanceof GradientPaint) {
+                    paint = gradientTransformer.transform((GradientPaint) paint, drawRect);
+                }
+                g2.setPaint(paint);
                 g2.fill(drawRect);
             }
 
@@ -260,7 +298,8 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
             final String url = getURL();
             if (toolTip != null || url != null) {
                 // clone shared bbox stored in drawRect:
-                addEntity(info, drawRect.getBounds2D(), rendererIndex, toolTip, url);
+                // note: store the optional series index into the chart entity:
+                addEntity(info, drawRect.getBounds2D(), (seriesIndex != -1) ? seriesIndex : rendererIndex, toolTip, url);
             }
         }
     }
@@ -485,6 +524,51 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      */
     public void setLayer(Layer layer) {
         this.layer = layer;
+    }
+
+    /**
+     * @return optional series index
+     */
+    public int getSeriesIndex() {
+        return seriesIndex;
+    }
+
+    /**
+     * Define the optional series index
+     @param seriesIndex optional series index
+     */
+    public void setSeriesIndex(final int seriesIndex) {
+        this.seriesIndex = seriesIndex;
+    }
+
+    /**
+     * @return highlighted flag
+     */
+    public boolean isHighlighted() {
+        return highlighted;
+    }
+
+    /**
+     * Define the highlighted flag
+     * @param highlighted highlighted flag
+     */
+    public void setHighlighted(final boolean highlighted) {
+        this.highlighted = highlighted;
+    }
+
+    /**
+     * @return paint used to fill the box if highlighted.
+     */
+    public Paint getHighlightPaint() {
+        return highlightPaint;
+    }
+
+    /**
+     * Define the paint used to fill the box if highlighted.
+     * @param highlightPaint paint used to fill the box if highlighted.
+     */
+    public void setHighlightPaint(final Paint highlightPaint) {
+        this.highlightPaint = highlightPaint;
     }
 
 }
