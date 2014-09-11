@@ -129,6 +129,20 @@ public class TargetUserInformations
   }
 
   /**
+   * Return the calibrator list as a Set
+   * @return calibrator list as a Set
+   */
+  public final java.util.Set<Target> getCalibratorSet() {
+      final List<Target> calibratorList = getCalibrators();
+      if (calibratorList.isEmpty()) {
+          return java.util.Collections.emptySet();
+      }
+      final java.util.Set<Target> calibratorSet = new java.util.HashSet<Target>(calibratorList.size());
+      calibratorSet.addAll(calibratorList);
+      return calibratorSet;
+  }
+
+  /**
    * Return the display name of the given target using the format 'name' ( ' (cal)')
    * @param target target to use
    * @return display name
