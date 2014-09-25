@@ -96,7 +96,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
                     logger.info("Invalid URI: {}", voTableURL, iae);
                 }
 
-            } else if (scheme.equalsIgnoreCase("http")) {
+            } else {
                 final File file = FileUtils.getTempFile("votable-", ".vot");
 
                 if (Http.download(voTableURI, file, true)) {
