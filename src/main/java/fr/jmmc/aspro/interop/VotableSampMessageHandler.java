@@ -99,7 +99,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
             } else {
                 final File file = FileUtils.getTempFile("votable-", ".vot");
 
-                if (Http.download(voTableURI, file, true)) {
+                if (Http.download(voTableURI, file, false)) {
                     voTableFile = file;
                 }
             }
