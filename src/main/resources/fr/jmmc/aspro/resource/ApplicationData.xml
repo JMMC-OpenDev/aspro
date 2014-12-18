@@ -7,7 +7,8 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2"
                  faqlink="http://www.jmmc.fr/aspro2/faq/"
-                 rsslink="http://www.jmmc.fr/aspro2/aspro2.rss">
+                 rsslink="http://www.jmmc.fr/aspro2/aspro2.rss"
+                 documentationlink="http://www.jmmc.fr/twiki/bin/view/Jmmc/Software/JmmcAspro2">
 
     <company>
         <short_name>JMMC</short_name>
