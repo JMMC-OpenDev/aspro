@@ -123,6 +123,9 @@ public final class AsproGenConfig {
                                            final String absFileVcm1, final String absFileVcm2, final String absFileVcm3) {
 
         logger.info("convertSwitchYard: " + absFileOPL + ", " + absFileVcm1 + ", " + absFileVcm3);
+        
+        // enable / disable delay line throw restrictions (VCM):
+        final boolean doDLRestrictions = false;
 
         final StringBuilder sb = new StringBuilder(16384);
         sb.append("<switchyard>\n");
@@ -288,31 +291,32 @@ public final class AsproGenConfig {
                                 /* delay line maximum throw to let VCM handle pupil */
                                 sb.append("<delayLine>DL").append((i + 1)).append("</delayLine>\n");
 
-                                // skip blanking values for IP/DL (10000 ie no constraint; -10000 ie invalid):
-                                maxDLPupilThrow = maxDLThrowVcm1[idx];
-                                if (maxDLPupilThrow >= maximumThrow) {
-                                    maxDLPupilThrow = maximumThrow;
-                                }
-                                if (maxDLPupilThrow > 0.0) {
-                                    sb.append("<delayLineThrow restriction=\"vcm1\">").append(trimTo4Digits(maxDLPupilThrow)).append("</delayLineThrow>\n");
-                                }
+                                if (doDLRestrictions) {
+                                    // skip blanking values for IP/DL (10000 ie no constraint; -10000 ie invalid):
+                                    maxDLPupilThrow = maxDLThrowVcm1[idx];
+                                    if (maxDLPupilThrow >= maximumThrow) {
+                                        maxDLPupilThrow = maximumThrow;
+                                    }
+                                    if (maxDLPupilThrow > 0.0) {
+                                        sb.append("<delayLineThrow restriction=\"vcm1\">").append(trimTo4Digits(maxDLPupilThrow)).append("</delayLineThrow>\n");
+                                    }
 
-                                maxDLPupilThrow = maxDLThrowVcm2[idx];
-                                if (maxDLPupilThrow >= maximumThrow) {
-                                    maxDLPupilThrow = maximumThrow;
-                                }
-                                if (maxDLPupilThrow > 0.0) {
-                                    sb.append("<delayLineThrow restriction=\"vcm2\">").append(trimTo4Digits(maxDLPupilThrow)).append("</delayLineThrow>\n");
-                                }
+                                    maxDLPupilThrow = maxDLThrowVcm2[idx];
+                                    if (maxDLPupilThrow >= maximumThrow) {
+                                        maxDLPupilThrow = maximumThrow;
+                                    }
+                                    if (maxDLPupilThrow > 0.0) {
+                                        sb.append("<delayLineThrow restriction=\"vcm2\">").append(trimTo4Digits(maxDLPupilThrow)).append("</delayLineThrow>\n");
+                                    }
 
-                                maxDLPupilThrow = maxDLThrowVcm3[idx];
-                                if (maxDLPupilThrow >= maximumThrow) {
-                                    maxDLPupilThrow = maximumThrow;
+                                    maxDLPupilThrow = maxDLThrowVcm3[idx];
+                                    if (maxDLPupilThrow >= maximumThrow) {
+                                        maxDLPupilThrow = maximumThrow;
+                                    }
+                                    if (maxDLPupilThrow > 0.0) {
+                                        sb.append("<delayLineThrow restriction=\"vcm3\">").append(trimTo4Digits(maxDLPupilThrow)).append("</delayLineThrow>\n");
+                                    }
                                 }
-                                if (maxDLPupilThrow > 0.0) {
-                                    sb.append("<delayLineThrow restriction=\"vcm3\">").append(trimTo4Digits(maxDLPupilThrow)).append("</delayLineThrow>\n");
-                                }
-
                                 sb.append("</channelLink>\n");
                             }
                         }
@@ -2028,17 +2032,26 @@ public final class AsproGenConfig {
         final String aspro1Path = userHome + "/dev/aspro1/etc/";
         final String asproTestPath = userHome + "/dev/aspro/src/test/resources/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.SINGLE_DISH;
+        final INTERFEROMETER selected = INTERFEROMETER.VLTI;
 
         switch (selected) {
             case VLTI:
                 VLTIPosition();
 
+                // March 2014 (vcm limit to 2.5)
+/*                
                 generateSwitchYard(
                         asproTestPath + "vlti_opl.txt",
                         asproTestPath + "vlti_vcm_limit_2.5bar.txt",
                         asproTestPath + "vlti_vcm_limit_2.75bar.txt",
                         asproTestPath + "vlti_vcm_limit_3.0bar.txt");
+*/
+                // Oct 2015 (STS ie no more VCM limit expected)
+                generateSwitchYard(
+                        asproTestPath + "vlti_opl.txt",
+                        asproTestPath + "vlti_vcm_no_limit.txt",
+                        asproTestPath + "vlti_vcm_no_limit.txt",
+                        asproTestPath + "vlti_vcm_no_limit.txt");
 
                 final String[] vltStations = {
                     "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
@@ -2053,7 +2066,7 @@ public final class AsproGenConfig {
                 logger.info("convertHorizons : \n" + sb.toString());
 
                 // convert arrayList to get DLx and channels (IPn)
-                convertArrayList(asproTestPath + "vlti_arrayList_20131006.txt", null); // "Period 93");
+                convertArrayList(asproTestPath + "vlti_arrayList_2015.txt", "Period 96");
 
                 break;
             case CHARA:
