@@ -30,6 +30,7 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
+ *         &lt;element name="alias" type="{http://www.w3.org/2001/XMLSchema}NCName" minOccurs="0"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="experimental" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/>
@@ -59,6 +60,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FocalInstrument", propOrder = {
     "name",
+    "alias",
     "description",
     "experimental",
     "numberChannels",
@@ -87,6 +89,9 @@ public class FocalInstrument
     @XmlID
     @XmlSchemaType(name = "ID")
     protected String name;
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlSchemaType(name = "NCName")
+    protected String alias;
     @XmlElement(required = true)
     protected String description;
     protected Boolean experimental;
@@ -133,6 +138,30 @@ public class FocalInstrument
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    /**
+     * Gets the value of the alias property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getAlias() {
+        return alias;
+    }
+
+    /**
+     * Sets the value of the alias property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setAlias(String value) {
+        this.alias = value;
     }
 
     /**
@@ -536,6 +565,13 @@ public class FocalInstrument
     setWaveLengthMax(max);
   }
 
+  /**
+   * Return the alias if defined or the name
+   * @return alias or name
+  */
+  public String getAliasOrName() {
+      return (alias != null) ? alias : name;
+  }
 
   @Override
   public final String toString() {

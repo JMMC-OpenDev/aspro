@@ -1936,6 +1936,13 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="alias" type="xsd:NCName" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Optional alias of the focal instrument (PIONIER for PIONIER_2 ...)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="description" type="xsd:string">
                 <xsd:annotation>
                     <xsd:documentation>
