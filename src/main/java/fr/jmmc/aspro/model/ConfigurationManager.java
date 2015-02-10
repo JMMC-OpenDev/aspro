@@ -881,13 +881,14 @@ public final class ConfigurationManager extends BaseOIManager {
 
     /**
      * Return the first instrument configuration having the given instrument name
-     * @param instrumentName name of the instrument
+     * @param instrumentAlias name or alias of the instrument
      * @return interferometer configuration or null if not found
      */
-    public InterferometerConfiguration getInterferometerConfigurationWithInstrument(final String instrumentName) {
+    public InterferometerConfiguration getInterferometerConfigurationWithInstrument(final String instrumentAlias) {
         for (InterferometerConfiguration c : getInterferometerConfigurations().values()) {
             for (FocalInstrumentConfiguration ic : c.getInstruments()) {
-                if (ic.getFocalInstrument().getName().equals(instrumentName)) {
+                // match alias or name:
+                if (ic.getFocalInstrument().getAliasOrName().equals(instrumentAlias)) {
                     return c;
                 }
             }
@@ -905,7 +906,8 @@ public final class ConfigurationManager extends BaseOIManager {
         if (c != null) {
             final Vector<String> v = new Vector<String>(c.getInstruments().size());
             for (FocalInstrumentConfiguration ic : c.getInstruments()) {
-                v.add(ic.getFocalInstrument().getName());
+                // use alias or name:
+                v.add(ic.getFocalInstrument().getAliasOrName());
             }
             return v;
         }
@@ -915,14 +917,15 @@ public final class ConfigurationManager extends BaseOIManager {
     /**
      * Return the instrument configuration for the given interferometer configuration and instrument name
      * @param configurationName name of the interferometer configuration
-     * @param instrumentName name of the instrument
+     * @param instrumentAlias name or alias of the instrument
      * @return focal instrument configuration
      */
-    public FocalInstrumentConfiguration getInterferometerInstrumentConfiguration(final String configurationName, final String instrumentName) {
+    public FocalInstrumentConfiguration getInterferometerInstrumentConfiguration(final String configurationName, final String instrumentAlias) {
         final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
         if (c != null) {
             for (FocalInstrumentConfiguration ic : c.getInstruments()) {
-                if (ic.getFocalInstrument().getName().equals(instrumentName)) {
+                // match alias or name:
+                if (ic.getFocalInstrument().getAliasOrName().equals(instrumentAlias)) {
                     return ic;
                 }
             }
@@ -933,11 +936,11 @@ public final class ConfigurationManager extends BaseOIManager {
     /**
      * Return the instrument for the given interferometer configuration and instrument name
      * @param configurationName name of the interferometer configuration
-     * @param instrumentName name of the instrument
+     * @param instrumentAlias name or alias of the instrument
      * @return focal instrument
      */
-    public FocalInstrument getInterferometerInstrument(final String configurationName, final String instrumentName) {
-        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    public FocalInstrument getInterferometerInstrument(final String configurationName, final String instrumentAlias) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
         if (ic != null) {
             return ic.getFocalInstrument();
         }
@@ -947,11 +950,11 @@ public final class ConfigurationManager extends BaseOIManager {
     /**
      * Return the list of all instrument configuration names (station list) for the given interferometer configuration and instrument name
      * @param configurationName name of the interferometer configuration
-     * @param instrumentName name of the instrument
+     * @param instrumentAlias name or alias of the instrument
      * @return list of all instrument configuration names
      */
-    public Vector<String> getInstrumentConfigurationNames(final String configurationName, final String instrumentName) {
-        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    public Vector<String> getInstrumentConfigurationNames(final String configurationName, final String instrumentAlias) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
         if (ic != null) {
             final Vector<String> v = new Vector<String>(ic.getConfigurations().size());
             for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
@@ -996,12 +999,12 @@ public final class ConfigurationManager extends BaseOIManager {
     /**
      * Return the list of stations for the given interferometer configuration, instrument name and instrument configuration
      * @param configurationName name of the interferometer configuration
-     * @param instrumentName name of the instrument
+     * @param instrumentAlias name or alias of the instrument
      * @param instrumentConfigurationName name of the instrument configuration
      * @return list of stations
      */
-    public List<Station> getInstrumentConfigurationStations(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
-        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    public List<Station> getInstrumentConfigurationStations(final String configurationName, final String instrumentAlias, final String instrumentConfigurationName) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
         if (ic != null) {
             return getInstrumentConfigurationStations(ic, instrumentConfigurationName);
         }
@@ -1011,12 +1014,12 @@ public final class ConfigurationManager extends BaseOIManager {
     /**
      * Return the (optional) list of instrument channels for the given interferometer configuration, instrument name and instrument configuration
      * @param configurationName name of the interferometer configuration
-     * @param instrumentName name of the instrument
+     * @param instrumentAlias name or alias of the instrument
      * @param instrumentConfigurationName name of the instrument configuration
      * @return list of instrument channels or null if undefined
      */
-    public List<Channel> getInstrumentConfigurationChannels(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
-        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    public List<Channel> getInstrumentConfigurationChannels(final String configurationName, final String instrumentAlias, final String instrumentConfigurationName) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
         if (ic != null) {
             final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
             if (c != null) {
@@ -1029,12 +1032,12 @@ public final class ConfigurationManager extends BaseOIManager {
     /**
      * Return the (optional) list of delay lines for the given interferometer configuration, instrument name and instrument configuration
      * @param configurationName name of the interferometer configuration
-     * @param instrumentName name of the instrument
+     * @param instrumentAlias name or alias of the instrument
      * @param instrumentConfigurationName name of the instrument configuration
      * @return list of delay lines or null if undefined
      */
-    public List<DelayLine> getInstrumentConfigurationDelayLines(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
-        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    public List<DelayLine> getInstrumentConfigurationDelayLines(final String configurationName, final String instrumentAlias, final String instrumentConfigurationName) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
         if (ic != null) {
             final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
             if (c != null) {
@@ -1047,12 +1050,12 @@ public final class ConfigurationManager extends BaseOIManager {
     /**
      * Return the (optional) list of Pops for the given interferometer configuration, instrument name and instrument configuration
      * @param configurationName name of the interferometer configuration
-     * @param instrumentName name of the instrument
+     * @param instrumentAlias name or alias of the instrument
      * @param instrumentConfigurationName name of the instrument configuration
      * @return list of PoPs or null if undefined
      */
-    public List<Pop> getInstrumentConfigurationPoPs(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
-        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    public List<Pop> getInstrumentConfigurationPoPs(final String configurationName, final String instrumentAlias, final String instrumentConfigurationName) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
         if (ic != null) {
             final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
             if (c != null) {

@@ -979,7 +979,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @param observation current observation settings
      */
     private void updateInstrumentData(final ObservationSetting observation) {
-        final String insName = observation.getInstrumentConfiguration().getName();
+        // use the real instrument name (not alias):
+        final String insName = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getName();
         // test if the instrument changed :
         final boolean changed = insName != null && !insName.equals(this.instrumentName);
         if (changed) {

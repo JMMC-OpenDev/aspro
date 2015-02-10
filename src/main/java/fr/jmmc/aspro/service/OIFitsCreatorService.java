@@ -269,7 +269,8 @@ public final class OIFitsCreatorService {
 
         final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
-        this.instrumentName = instrument.getName();
+        // use alias or real instrument name:
+        this.instrumentName = instrument.getAliasOrName();
         this.instrumentExperimental = (instrument.isExperimental() != null) ? instrument.isExperimental().booleanValue() : false;
 
         if (logger.isDebugEnabled()) {

@@ -16,6 +16,7 @@ import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.BaseValue;
+import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
@@ -835,20 +836,28 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * and refresh the internal InstrumentConfiguration reference
      * Used by BasicObservationForm.updateObservation()
      *
-     * @param name name of the instrument configuration
+     * @param instrumentAlias name or alias of the instrument
      * @return true if the value changed
      */
-    public boolean setInstrumentConfigurationName(final String name) {
+    public boolean setInstrumentConfigurationName(final String instrumentAlias) {
         final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
+        
+        // use the real instrument name (not alias):
+        final String insName = instrumentChoice.getInstrumentConfiguration().getFocalInstrument().getName();
 
-        final boolean changed = !name.equals(instrumentChoice.getName());
-        if (changed) {
-            if (logger.isTraceEnabled()) {
-                logger.trace("setInstrumentConfigurationName: {}", name);
-            }
-            instrumentChoice.setName(name);
-            instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(
-                    getMainObservation().getInterferometerConfiguration().getName(), name));
+        // Update the instrument anyway:
+        if (logger.isTraceEnabled()) {
+            logger.trace("setInstrumentConfigurationName: {}", instrumentAlias);
+        }
+        instrumentChoice.setName(instrumentAlias);
+        instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(
+                getMainObservation().getInterferometerConfiguration().getName(), instrumentAlias));
+        
+        // Check if the real instrument changed (alias / names may be the same):
+        final boolean changed = !insName.equals(instrumentChoice.getInstrumentConfiguration().getFocalInstrument().getName());
+
+        if (logger.isTraceEnabled()) {
+            logger.trace("setInstrumentConfigurationName: changed={}", changed);
         }
         return changed;
     }
@@ -1614,13 +1623,13 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfiguration(interferometerConfiguration));
 
         final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
-        final String instrument = instrumentChoice.getName();
+        final String instrumentAlias = instrumentChoice.getName();
 
         if (interferometerChoice.getInterferometerConfiguration() == null) {
             logger.info("the interferometer configuration [{}] is not supported.", interferometerConfiguration);
 
             // use the first interferometer configuration that has the instrument:
-            interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfigurationWithInstrument(instrument));
+            interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfigurationWithInstrument(instrumentAlias));
 
             if (interferometerChoice.getInterferometerConfiguration() != null) {
                 interferometerConfiguration = interferometerChoice.getInterferometerConfiguration().getName();
@@ -1629,15 +1638,15 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 logger.info("A correct instrument configuration is [{}]. Save your file to keep this modification", interferometerConfiguration);
             } else {
                 throw new IllegalStateException("The interferometer configuration [" + interferometerConfiguration + "] is invalid"
-                        + " and none has the instrument [" + instrument + "] !");
+                        + " and none has the instrument [" + instrumentAlias + "] !");
             }
         }
 
-        instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(interferometerConfiguration, instrument));
+        instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(interferometerConfiguration, instrumentAlias));
 
         final FocalInstrumentConfiguration insConf = instrumentChoice.getInstrumentConfiguration();
         if (insConf == null) {
-            throw new IllegalStateException("The instrument [" + instrument + "] is invalid !");
+            throw new IllegalStateException("The instrument [" + instrumentAlias + "] is invalid !");
         }
 
         // first resolve / fix observation variants :
@@ -1667,10 +1676,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         instrumentChoice.setStationList(obsVariant.getStationList());
 
         // pops can be undefined :
-        instrumentChoice.setPopList(cm.parseInstrumentPoPs(interferometerConfiguration, instrument, instrumentChoice.getPops()));
+        instrumentChoice.setPopList(cm.parseInstrumentPoPs(interferometerConfiguration, instrumentAlias, instrumentChoice.getPops()));
 
         // instrument mode can be undefined :
-        instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(interferometerConfiguration, instrument, instrumentChoice.getInstrumentMode()));
+        instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(interferometerConfiguration, instrumentAlias, instrumentChoice.getInstrumentMode()));
 
         if (logger.isTraceEnabled()) {
             logger.trace("updateObservation: {}", toString(observation));

@@ -240,7 +240,8 @@ public final class NoiseService extends VisNoiseService {
 
         final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
-        this.instrumentName = instrument.getName();
+        // use alias or real instrument name:
+        this.instrumentName = instrument.getAliasOrName();
         this.transmission = instrument.getTransmission();
         this.dit = instrument.getDit();
         this.ron = instrument.getRon();
