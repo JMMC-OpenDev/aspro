@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.6 beta 15"/>
-    <compilation date="10/02/2015" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.7 beta 1"/>
+    <compilation date="13/02/2015" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -194,11 +194,14 @@
     </menubar>
 
     <releasenotes>
-        <release version="0.9.6">
-            <pubDate>Tue, 10 Feb 2015 17:00:00 GMT</pubDate>
-            <prerelease version="0.9.6 beta 15">
+        <release version="0.9.7">
+            <pubDate>Fri, 13 Feb 2015 17:00:00 GMT</pubDate>
+            <prerelease version="0.9.7 beta 1">
+                <change type="FEATURE">Added support for multiple interferometer switchyards; every interferometer configuration (VLTI Period) specifies the switchyard to use</change>
                 <change type="FEATURE">Added support for instrument aliases newly added in the Aspro configuration</change>
             </prerelease>
+        </release>
+        <release version="0.9.6">
             <prerelease version="0.9.6 beta 14">
                 <change type="FEATURE">Improved selection handling and tracking on the observability plot:
                     click on any observability range to change globally the selected target (highlighted)</change>

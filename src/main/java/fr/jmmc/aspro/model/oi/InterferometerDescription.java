@@ -31,14 +31,13 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="position" type="{http://www.jmmc.fr/aspro-oi/0.1}Position3D"/>
- *         &lt;element name="posSph" type="{http://www.jmmc.fr/aspro-oi/0.1}LonLatAlt" minOccurs="0"/>
  *         &lt;element name="windPointingRestriction" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="telescope" type="{http://www.jmmc.fr/aspro-oi/0.1}Telescope" maxOccurs="unbounded"/>
  *         &lt;element name="station" type="{http://www.jmmc.fr/aspro-oi/0.1}Station" maxOccurs="unbounded"/>
  *         &lt;element name="channel" type="{http://www.jmmc.fr/aspro-oi/0.1}Channel" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="delayLine" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLine" maxOccurs="unbounded"/>
  *         &lt;element name="delayLineRestriction" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLineRestriction" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="switchyard" type="{http://www.jmmc.fr/aspro-oi/0.1}SwitchYard" minOccurs="0"/>
+ *         &lt;element name="switchyard" type="{http://www.jmmc.fr/aspro-oi/0.1}SwitchYard" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="pop" type="{http://www.jmmc.fr/aspro-oi/0.1}Pop" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="fringeTracker" type="{http://www.jmmc.fr/aspro-oi/0.1}FringeTracker" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="focalInstrument" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrument" maxOccurs="unbounded"/>
@@ -55,14 +54,13 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "description",
     "position",
-    "posSph",
     "windPointingRestriction",
     "telescopes",
     "stations",
     "channels",
     "delayLines",
     "delayLineRestrictions",
-    "switchyard",
+    "switchyards",
     "pops",
     "fringeTrackers",
     "focalInstruments"
@@ -80,7 +78,6 @@ public class InterferometerDescription
     protected String description;
     @XmlElement(required = true)
     protected Position3D position;
-    protected LonLatAlt posSph;
     protected Double windPointingRestriction;
     @XmlElement(name = "telescope", required = true)
     protected List<Telescope> telescopes;
@@ -92,7 +89,8 @@ public class InterferometerDescription
     protected List<DelayLine> delayLines;
     @XmlElement(name = "delayLineRestriction")
     protected List<DelayLineRestriction> delayLineRestrictions;
-    protected SwitchYard switchyard;
+    @XmlElement(name = "switchyard")
+    protected List<SwitchYard> switchyards;
     @XmlElement(name = "pop")
     protected List<Pop> pops;
     @XmlElement(name = "fringeTracker")
@@ -170,30 +168,6 @@ public class InterferometerDescription
      */
     public void setPosition(Position3D value) {
         this.position = value;
-    }
-
-    /**
-     * Gets the value of the posSph property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link LonLatAlt }
-     *     
-     */
-    public LonLatAlt getPosSph() {
-        return posSph;
-    }
-
-    /**
-     * Sets the value of the posSph property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link LonLatAlt }
-     *     
-     */
-    public void setPosSph(LonLatAlt value) {
-        this.posSph = value;
     }
 
     /**
@@ -366,27 +340,32 @@ public class InterferometerDescription
     }
 
     /**
-     * Gets the value of the switchyard property.
+     * Gets the value of the switchyards property.
      * 
-     * @return
-     *     possible object is
-     *     {@link SwitchYard }
-     *     
-     */
-    public SwitchYard getSwitchyard() {
-        return switchyard;
-    }
-
-    /**
-     * Sets the value of the switchyard property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the switchyards property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link SwitchYard }
-     *     
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getSwitchyards().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link SwitchYard }
+     * 
+     * 
      */
-    public void setSwitchyard(SwitchYard value) {
-        this.switchyard = value;
+    public List<SwitchYard> getSwitchyards() {
+        if (switchyards == null) {
+            switchyards = new ArrayList<SwitchYard>();
+        }
+        return this.switchyards;
     }
 
     /**
@@ -477,6 +456,29 @@ public class InterferometerDescription
     }
     
 //--simple--preserve
+    
+    /** flag indicating the checksum of the interferometer file is valid (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private LonLatAlt posSph = null;
+    
+    /**
+     * Return the the spherical coordinates (longitude, latitide, altitude)
+     * 
+     * @return spherical coordinates
+     */
+    public LonLatAlt getPosSph() {
+        return posSph;
+    }
+
+    /**
+     * Define the spherical coordinates (longitude, latitide, altitude)
+     * 
+     * @param posSph spherical coordinates
+     */
+    public void setPosSph(LonLatAlt posSph) {
+        this.posSph = posSph;
+    }
+    
     /** flag indicating the checksum of the interferometer file is valid (read only) */
     @javax.xml.bind.annotation.XmlTransient
     private boolean checksumValid = false;

@@ -1105,6 +1105,19 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <xsd:element name="switchyard" type="xsd:IDREF" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The optional interferometer's switchyard associated with this configuration
+                    </xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:property>
+                            <jaxb:baseType name="SwitchYard" />
+                        </jaxb:property>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="instrument" type="FocalInstrumentConfiguration" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -1255,14 +1268,6 @@
                 </xsd:annotation>
             </xsd:element>
 
-            <xsd:element name="posSph" type="LonLatAlt" minOccurs="0">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        These coordinates are computed internally and must not be provided in the configuration file
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-
             <xsd:element name="windPointingRestriction" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -1311,10 +1316,10 @@
                 </xsd:annotation>
             </xsd:element>
 
-            <xsd:element name="switchyard" type="SwitchYard" minOccurs="0">
+            <xsd:element name="switchyard" type="SwitchYard" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The switchyard for this interferometer (optional)
+                        Optional switchyard(s) for this interferometer
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -1692,6 +1697,20 @@
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
+            <xsd:element name="name" type="xsd:ID">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Optional Switchyard Identifier
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="useDelayLineRestriction" type="xsd:boolean">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Enable / Disable delay line constraints for this interferometer switchyard (VLTI VCM restrictions)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="stationLinks" type="StationLinks" minOccurs="1" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>

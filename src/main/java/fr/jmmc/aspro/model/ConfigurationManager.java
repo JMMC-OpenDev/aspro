@@ -25,6 +25,7 @@ import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
+import fr.jmmc.aspro.model.oi.SwitchYard;
 import fr.jmmc.aspro.service.GeocentricCoords;
 import fr.jmmc.jmal.util.MathUtils;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
@@ -323,6 +324,16 @@ public final class ConfigurationManager extends BaseOIManager {
         if (ic.getInterferometer() == null) {
             throw new IllegalStateException("The interferometer configuration '" + ic.getName()
                     + "' is not associated with an interferometer description (invalid identifier) !");
+        }
+
+        // Check switchyard references:
+        final List<SwitchYard> switchyards = ic.getInterferometer().getSwitchyards();
+        if (switchyards.size() > 1) {
+            // Check that every interferometer configuration has a switchyard reference:
+            if (ic.getSwitchyard() == null) {
+                throw new IllegalStateException("The interferometer configuration '" + ic.getName()
+                        + "' is not associated with a switchyard (invalid identifier) [" + switchyards + "] !");
+            }
         }
     }
 
@@ -820,13 +831,13 @@ public final class ConfigurationManager extends BaseOIManager {
 
     /**
      * Return the switchyard links for the given station
-     * @param id interferometer description
+     * @param sw interferometer switchyard
      * @param station station
      * @return switchyard links or null
      */
-    public StationLinks getStationLinks(final InterferometerDescription id, final Station station) {
-        if (id.getSwitchyard() != null) {
-            for (StationLinks sl : id.getSwitchyard().getStationLinks()) {
+    public StationLinks getStationLinks(final SwitchYard sw, final Station station) {
+        if (sw != null) {
+            for (StationLinks sl : sw.getStationLinks()) {
                 if (sl.getStation().equals(station)) {
                     return sl;
                 }

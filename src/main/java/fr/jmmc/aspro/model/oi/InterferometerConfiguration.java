@@ -31,6 +31,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="version" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="interferometer" type="{http://www.w3.org/2001/XMLSchema}IDREF"/>
+ *         &lt;element name="switchyard" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/>
  *         &lt;element name="instrument" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentConfiguration" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -45,6 +46,7 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "version",
     "interferometer",
+    "switchyard",
     "instruments"
 })
 public class InterferometerConfiguration
@@ -57,6 +59,10 @@ public class InterferometerConfiguration
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
     protected InterferometerDescription interferometer;
+    @XmlElement(type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREF")
+    protected SwitchYard switchyard;
     @XmlElement(name = "instrument")
     protected List<FocalInstrumentConfiguration> instruments;
 
@@ -130,6 +136,30 @@ public class InterferometerConfiguration
      */
     public void setInterferometer(InterferometerDescription value) {
         this.interferometer = value;
+    }
+
+    /**
+     * Gets the value of the switchyard property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Object }
+     *     
+     */
+    public SwitchYard getSwitchyard() {
+        return switchyard;
+    }
+
+    /**
+     * Sets the value of the switchyard property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Object }
+     *     
+     */
+    public void setSwitchyard(SwitchYard value) {
+        this.switchyard = value;
     }
 
     /**

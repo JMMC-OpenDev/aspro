@@ -48,6 +48,7 @@ import fr.jmmc.aspro.model.oi.PopLink;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
+import fr.jmmc.aspro.model.oi.SwitchYard;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.Telescope;
@@ -178,6 +179,8 @@ public final class ObservabilityService {
     private double minElev = Double.NaN;
     /** interferometer description */
     private InterferometerDescription interferometer = null;
+    /** interferometer switchyard (optional) */
+    private SwitchYard switchyard = null;
     /** focal instrument description */
     private FocalInstrument instrument = null;
     /** flag to indicate that a station has an horizon profile */
@@ -504,7 +507,7 @@ public final class ObservabilityService {
         for (Beam b : this.beams) {
             sb.append(b.getStation().getName()).append(' ');
         }
-        if (!this.interferometer.getChannels().isEmpty() && this.interferometer.getSwitchyard() != null) {
+        if (!this.interferometer.getChannels().isEmpty() && this.switchyard != null) {
             sb.append("- Beams: ");
             for (Beam b : this.beams) {
                 sb.append(b.getChannel().getName()).append(' ');
@@ -2376,6 +2379,7 @@ public final class ObservabilityService {
         final InterferometerConfiguration intConf = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
 
         this.interferometer = intConf.getInterferometer();
+        this.switchyard = intConf.getSwitchyard();
 
         final FocalInstrumentConfiguration insConf = this.observation.getInstrumentConfiguration().getInstrumentConfiguration();
 
@@ -2383,6 +2387,7 @@ public final class ObservabilityService {
 
         if (isLogDebug) {
             logger.debug("interferometer: {}", this.interferometer.getName());
+            logger.debug("switchyard: {}", this.switchyard.getName());
             logger.debug("instrument: {}", this.instrument.getName());
         }
 
@@ -2520,12 +2525,13 @@ public final class ObservabilityService {
         final int nDelayLines = delayLines.size();
 
         // Has switchyard ?
-        if (!this.interferometer.getChannels().isEmpty() && this.interferometer.getSwitchyard() != null) {
+        if (!this.interferometer.getChannels().isEmpty() && this.switchyard != null) {
             // Case Interferometer with a switchyard (VLTI and CHARA) :
 
             // VLTI: VCM restrictions:
             final List<DelayLineRestriction> delayLineRestrictions = this.interferometer.getDelayLineRestrictions();
-            final int nDLRestrictions = delayLineRestrictions.size();
+            // enable / disable using delay line restrictions:
+            final int nDLRestrictions = (this.switchyard.isUseDelayLineRestriction()) ? delayLineRestrictions.size() : 0;
 
             // 2 cases ;
             // CHARA : predefined channel per station for a specific base line
@@ -2535,7 +2541,7 @@ public final class ObservabilityService {
             StationLinks sl;
             for (Beam b : this.beams) {
                 // for each station, get the possible channels in the switchyard configuration:
-                sl = ConfigurationManager.getInstance().getStationLinks(this.interferometer, b.getStation());
+                sl = ConfigurationManager.getInstance().getStationLinks(this.switchyard, b.getStation());
 
                 // VLTI : find an available channel for every station:
                 if (useRelatedChannels && b.getDelayLine() != null) {

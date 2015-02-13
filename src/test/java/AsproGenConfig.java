@@ -468,10 +468,12 @@ public final class AsproGenConfig {
 
         final InterferometerSetting is = (InterferometerSetting) result;
 
-        final SwitchYard sw = is.getDescription().getSwitchyard();
+        // always use the first switchyard:
+        final SwitchYard sw = is.getDescription().getSwitchyards().get(0);
         if (sw == null) {
             throw new IllegalStateException("No switchyard found in " + uri + " !");
         }
+        logger.info("Using SwitchYard: "+ sw.getName());
 
         final Map<String, Channel> channels = new HashMap<String, Channel>(8);
 

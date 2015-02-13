@@ -35,8 +35,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "BaseValue")
 @XmlSeeAlso({
     BooleanValue.class,
-    NumberValue.class,
-    StringValue.class
+    StringValue.class,
+    NumberValue.class
 })
 public class BaseValue
     extends OIBase
