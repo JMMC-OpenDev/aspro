@@ -47,6 +47,8 @@
     <sequential>
       <java classname="com.sun.tools.xjc.XJCFacade" classpath="${jaxb.libs}/jaxb-xjc-${jaxb.version}.jar:${mvn.libs}/jaxb-api-${jaxb.version}.jar:${mvn.libs}/jaxb-core-${jaxb.version}.jar:${mvn.libs}/jaxb-impl-${jaxb.version}.jar" fork="true" failonerror="true" maxmemory="256m">
 
+        <jvmarg value="-Djavax.xml.accessExternalSchema=all" />
+
         <arg value="-classpath"/>
         <arg value="${jaxb.libs}/simple-regenerator-1.0.jar"/>
 
@@ -60,7 +62,7 @@
         <arg value="@{destdir}"/>
 
         <arg value="@{schema}"/>
-	<env key="LANG" value="en_US"/>
+        <env key="LANG" value="en_US"/>
       </java>
 
       <delete dir="@{destdir}">
