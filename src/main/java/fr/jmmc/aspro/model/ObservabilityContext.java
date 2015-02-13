@@ -198,33 +198,35 @@ public class ObservabilityContext implements RangeFactory {
      * @param ranges List[Range] to recycle as List
      */
     public final void recycleAll(final List<List<Range>> ranges) {
-        final Range[] pr = rangePool;
-        final List<Range>[] pl = rangeListPool;
-        int nr = nRange;
-        int nl = nRangeList;
+        if ((ranges != null) && ranges.isEmpty()) {
+            final Range[] pr = rangePool;
+            final List<Range>[] pl = rangeListPool;
+            int nr = nRange;
+            int nl = nRangeList;
 
-        List<Range> rangeList;
-        for (int i = 0, size = ranges.size(), len, j; i < size; i++) {
-            rangeList = ranges.get(i);
-            if (rangeList != null
-                    && rangeList != DelayLineService.EMPTY_RANGE_LIST
-                    && rangeList != DelayLineService.FULL_RANGE_LIST) {
-                len = Math.min(MAX_RANGE - nr, rangeList.size());
+            List<Range> rangeList;
+            for (int i = 0, size = ranges.size(), len, j; i < size; i++) {
+                rangeList = ranges.get(i);
+                if (rangeList != null
+                        && rangeList != DelayLineService.EMPTY_RANGE_LIST
+                        && rangeList != DelayLineService.FULL_RANGE_LIST) {
+                    len = Math.min(MAX_RANGE - nr, rangeList.size());
 
-                // recycle ranges:
-                for (j = 0; j < len; j++) {
-                    pr[++nr] = rangeList.get(j);
-                }
+                    // recycle ranges:
+                    for (j = 0; j < len; j++) {
+                        pr[++nr] = rangeList.get(j);
+                    }
 
-                // recycle list:
-                if (nl < MAX_RANGE_LIST) {
-                    rangeList.clear(); // set to null !
-                    pl[++nl] = rangeList;
+                    // recycle list:
+                    if (nl < MAX_RANGE_LIST) {
+                        rangeList.clear(); // set to null !
+                        pl[++nl] = rangeList;
+                    }
                 }
             }
+            nRange = nr;
+            nRangeList = nl;
         }
-        nRange = nr;
-        nRangeList = nl;
     }
 
     /**
