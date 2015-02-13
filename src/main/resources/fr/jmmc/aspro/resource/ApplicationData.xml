@@ -202,6 +202,7 @@
             </prerelease>
         </release>
         <release version="0.9.6">
+            <pubDate>Thu, 11 Sep 2014 14:00:00 GMT</pubDate>
             <prerelease version="0.9.6 beta 14">
                 <change type="FEATURE">Improved selection handling and tracking on the observability plot:
                     click on any observability range to change globally the selected target (highlighted)</change>
