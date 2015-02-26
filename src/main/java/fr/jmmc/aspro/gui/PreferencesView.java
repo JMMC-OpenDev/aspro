@@ -12,6 +12,7 @@ import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
+import fr.jmmc.jmcs.gui.util.WindowUtils;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -95,8 +96,9 @@ public final class PreferencesView extends JFrame implements Observer {
 
         // pack and center window
         pack();
-//        setLocationRelativeTo(null);
-    }
+    
+        WindowUtils.setClosingKeyboardShortcuts(this);
+}
 
     /**
      * Free any ressource or reference to this instance :
