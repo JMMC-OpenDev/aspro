@@ -2068,7 +2068,7 @@ public final class AsproGenConfig {
                 logger.info("convertHorizons : \n" + sb.toString());
 
                 // convert arrayList to get DLx and channels (IPn)
-                convertArrayList(asproTestPath + "vlti_arrayList_2015.txt", null); // "Period 96");
+                convertArrayList(asproTestPath + "vlti_arrayList_2015.txt", "Period 96");
 
                 break;
             case CHARA:
