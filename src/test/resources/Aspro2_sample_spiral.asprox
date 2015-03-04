@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<a:observationSetting xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <schemaVersion>2012.02</schemaVersion>
     <name>default</name>
     <when>
@@ -8,12 +8,12 @@
         <atmosphereQuality>Excellent</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 88</name>
+        <name>VLTI Period 96</name>
         <minElevation>30.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
         <name>AMBER</name>
-        <stations>A1 B2 C1</stations>
+        <stations>K0 G2 D0</stations>
         <pops></pops>
         <instrumentMode>Low_JHK</instrumentMode>
         <samplingPeriod>60.0</samplingPeriod>
@@ -115,6 +115,7 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <FLUX_H>2.735</FLUX_H>
         <FLUX_K>2.636</FLUX_K>
         <useAnalyticalModel>true</useAnalyticalModel>
+        <configuration/>
     </target>
     <target id="HD_1234">
         <name>HD 1234</name>
@@ -144,6 +145,6 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         </configuration>
     </target>
     <variant>
-        <stations>A1 B2 C1</stations>
+        <stations>K0 G2 D0</stations>
     </variant>
 </a:observationSetting>

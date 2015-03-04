@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<a:observationSetting xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <schemaVersion>2011.02</schemaVersion>
+<a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <schemaVersion>2012.02</schemaVersion>
     <name>default</name>
     <when>
         <date>2011-10-15</date>
@@ -8,12 +8,12 @@
         <atmosphereQuality>Average</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 88</name>
+        <name>VLTI Period 96</name>
         <minElevation>30.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
         <name>AMBER</name>
-        <stations>A1 G1 I1</stations>
+        <stations>K0 G2 D0</stations>
         <pops></pops>
         <instrumentMode>Low_JHK</instrumentMode>
         <samplingPeriod>60.0</samplingPeriod>
@@ -33,6 +33,7 @@
         <OBJTYP>*,UV</OBJTYP>
         <SPECTYP>F5</SPECTYP>
         <FLUX_V>7.347</FLUX_V>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_disk1" type="elong_disk">
             <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter, 
 elong_ratio, major_axis_pos_angle) 
@@ -113,6 +114,7 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <FLUX_J>2.735</FLUX_J>
         <FLUX_H>2.735</FLUX_H>
         <FLUX_K>2.636</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <configuration/>
     </target>
     <target id="HD_1234">
@@ -131,6 +133,7 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <FLUX_J>8.318</FLUX_J>
         <FLUX_H>8.131</FLUX_H>
         <FLUX_K>8.112</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_disk1" type="elong_disk">
             <desc>Returns the Fourier transform of a normalized ellipse centered at coordinates (X,Y) 
 (milliarcsecond) with a ratio ELONG_RATIO between the major diameter and the minor one 
@@ -202,6 +205,7 @@ smaller than 1.</desc>
         <FLUX_J>2.578</FLUX_J>
         <FLUX_H>2.154</FLUX_H>
         <FLUX_K>2.074</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
@@ -315,6 +319,7 @@ smaller than 1.</desc>
         <FLUX_J>4.29</FLUX_J>
         <FLUX_H>3.7</FLUX_H>
         <FLUX_K>3.55</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
@@ -404,6 +409,7 @@ smaller than 1.</desc>
         <FLUX_J>4.2</FLUX_J>
         <FLUX_H>3.522</FLUX_H>
         <FLUX_K>3.271</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
@@ -519,6 +525,7 @@ smaller than 1.</desc>
         <FLUX_J>3.708</FLUX_J>
         <FLUX_H>3.32</FLUX_H>
         <FLUX_K>3.212</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
@@ -631,6 +638,7 @@ smaller than 1.</desc>
         <FLUX_J>4.549</FLUX_J>
         <FLUX_H>4.064</FLUX_H>
         <FLUX_K>3.999</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
@@ -745,6 +753,7 @@ smaller than 1.</desc>
         <FLUX_J>3.741</FLUX_J>
         <FLUX_H>3.159</FLUX_H>
         <FLUX_K>2.95</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
@@ -859,6 +868,7 @@ smaller than 1.</desc>
         <FLUX_J>3.95</FLUX_J>
         <FLUX_H>3.07</FLUX_H>
         <FLUX_K>2.76</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
@@ -939,6 +949,6 @@ smaller than 1.</desc>
         </targetInfo>
     </targetUserInfos>
     <variant>
-        <stations>A1 G1 I1</stations>
+        <stations>K0 G2 D0</stations>
     </variant>
 </a:observationSetting>

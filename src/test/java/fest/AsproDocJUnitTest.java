@@ -5,6 +5,7 @@ package fest;
 
 import com.mortennobel.imagescaling.AdvancedResizeOp;
 import com.mortennobel.imagescaling.ResampleOp;
+import fest.common.CustomScreenshotTaker;
 import fest.common.JmcsFestSwingJUnitTestCase;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.SettingPanel;
@@ -51,6 +52,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     private final static String TEST_FOLDER = USER_HOME + "/dev/aspro/src/test/resources/";
     private final static String MY_EMAIL = "laurent.bourges@obs.ujf-grenoble.fr";
 
+    private final static boolean USE_GNOME3_HACKS = true;
+
     /**
      * Initialize system properties & static variables and finally starts the application
      */
@@ -87,6 +90,12 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         // customize PDF action to avoid use StatusBar :
         fr.jmmc.aspro.gui.action.AsproExportPDFAction.setAvoidUseStatusBar(true);
+
+        if (USE_GNOME3_HACKS) 
+        {
+            // Gnome3 work-arround (window location and size are incorrects):
+            CustomScreenshotTaker.defineWindowMargins(9, 8);
+        }
 
         // Start application:
         JmcsFestSwingJUnitTestCase.startApplication(
@@ -212,7 +221,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         enableTooltips(true);
 
         // move the mouse on the first observability interval (top right corner):
-        robot().moveMouse(window.component(), 520, 320);
+        // note: check window margin issue (gnome3):
+        robot().moveMouse(window.component(), 480, 350);
 
         // let tooltip appear:
         pauseMedium();
@@ -268,8 +278,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         enableTooltips(true);
 
-        // move the mouse on the first observability interval (top right corner):
-        robot().moveMouse(window.component(), 700, 560);
+        // move the mouse on one uv measurement:
+        // note: check window margin issue (gnome3):
+        robot().moveMouse(window.component(), 672, 548);
 
         // let tooltip appear:
         pauseMedium();
@@ -525,6 +536,16 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         saveCroppedScreenshotOf("popsUser.png", left, 0, width, height);
     }
 
+    private void openObservation(final String obsFileName) {
+        // hack to solve focus trouble in menu items :
+        window.menuItemWithPath("File").focus();
+        window.menuItemWithPath("File", "Open observation").click();
+
+        confirmDialogDontSave();
+
+        window.fileChooser().selectFile(new File(TEST_FOLDER + obsFileName)).approve();
+    }
+
     /**
      * Test Open file "Aspro2_sample_with_calibrators.asprox"
      */
@@ -532,11 +553,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     @GUITest
     public void shouldOpenSampleWithCalibrators() {
 
-        // hack to solve focus trouble in menu items :
-        window.menuItemWithPath("File").focus();
-        window.menuItemWithPath("File", "Open observation").click();
-
-        window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_with_calibrators.asprox")).approve();
+        openObservation("Aspro2_sample_with_calibrators.asprox");
 
         window.list("jListTargets").selectItem("HD 3546 (cal)");
 
@@ -584,11 +601,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     @GUITest
     public void shouldOpenSampleMultiConf() {
 
-        // hack to solve focus trouble in menu items :
-        window.menuItemWithPath("File").focus();
-        window.menuItemWithPath("File", "Open observation").click();
-
-        window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_multi.asprox")).approve();        
+        openObservation("Aspro2_sample_multi.asprox");
 
         // waits for computation to finish :
         AsproTestUtils.checkRunningTasks();
@@ -619,11 +632,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             logger.error("setPreference failed", pe);
         }
 
-        // hack to solve focus trouble in menu items :
-        window.menuItemWithPath("File").focus();
-        window.menuItemWithPath("File", "Open observation").click();
-
-        window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_spiral.asprox")).approve();
+        openObservation("Aspro2_sample_spiral.asprox");
 
         // target editor with calibrators :
         window.button("jButtonTargetEditor").click();
@@ -807,7 +816,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      * @return height of the main form
      */
     private static int getMainFormHeight(final FrameFixture window) {
-        int height = 32 + 10;
+        int height = ((USE_GNOME3_HACKS) ? 46 : 32) + 10;
 
         JComponent com;
         com = window.panel("observationForm").component();

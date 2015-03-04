@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<a:observationSetting xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <schemaVersion>2011.02</schemaVersion>
+<a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <schemaVersion>2012.02</schemaVersion>
     <name>default</name>
     <when>
         <date>2011-10-15</date>
@@ -8,12 +8,12 @@
         <atmosphereQuality>Average</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 88</name>
+        <name>VLTI Period 96</name>
         <minElevation>30.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
         <name>AMBER</name>
-        <stations>UT1 UT3 UT4</stations>
+        <stations>UT1 UT2 UT3</stations>
         <pops></pops>
         <instrumentMode>Low_JHK</instrumentMode>
         <samplingPeriod>60.0</samplingPeriod>
@@ -33,31 +33,32 @@
         <OBJTYP>*,UV</OBJTYP>
         <SPECTYP>F5</SPECTYP>
         <FLUX_V>7.347</FLUX_V>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_disk1" type="elong_disk">
-            <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter, 
-elong_ratio, major_axis_pos_angle) 
+            <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter,
+                elong_ratio, major_axis_pos_angle)
 
-Returns the Fourier transform, at spatial frequencies (UFREQ,VFREQ) 
-given in 1/rad, of a normalized ellipse centered at coordinates (X,Y) (milliarcsecond) 
-with a ratio ELONG_RATIO between the major diameter and the minor one MINOR_AXIS_DIAMETER, 
-turned from the positive vertical semi-axis (i.e. North direction) with angle 
-MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis 
-(i.e. East direction). (the elongation is along the major_axis) 
+                Returns the Fourier transform, at spatial frequencies (UFREQ,VFREQ)
+                given in 1/rad, of a normalized ellipse centered at coordinates (X,Y) (milliarcsecond)
+                with a ratio ELONG_RATIO between the major diameter and the minor one MINOR_AXIS_DIAMETER,
+                turned from the positive vertical semi-axis (i.e. North direction) with angle
+                MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis
+                (i.e. East direction). (the elongation is along the major_axis)
 
-|North 
-|               For avoiding degenerescence, the domain of variation 
-|---&gt;East       of MAJOR_AXIS_POS_ANGLE is 180 degrees, 
-|               for ex. from 0 to 180 degrees. 
+                |North
+                |               For avoiding degenerescence, the domain of variation
+                |---&gt;East       of MAJOR_AXIS_POS_ANGLE is 180 degrees,
+                |               for ex. from 0 to 180 degrees.
 
-ELONG_RATIO = major_axis / minor_axis 
+                ELONG_RATIO = major_axis / minor_axis
 
-FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
-The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO 
-is smaller than 1. 
+                FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
+                The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO
+                is smaller than 1.
 
-UFREQ and VFREQ must be conformable. The returned array is always 
-complex and with dimensions dimsof(UFREQ,VFREQ). 
-</desc>
+                UFREQ and VFREQ must be conformable. The returned array is always
+                complex and with dimensions dimsof(UFREQ,VFREQ).
+            </desc>
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
                 <hasFixedValue>false</hasFixedValue>
@@ -113,6 +114,8 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <FLUX_J>2.735</FLUX_J>
         <FLUX_H>2.735</FLUX_H>
         <FLUX_K>2.636</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <configuration/>
     </target>
     <target id="HD_1234">
         <name>HD 1234</name>
@@ -130,21 +133,22 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <FLUX_J>8.318</FLUX_J>
         <FLUX_H>8.131</FLUX_H>
         <FLUX_K>8.112</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_disk1" type="elong_disk">
-            <desc>Returns the Fourier transform of a normalized ellipse centered at coordinates (X,Y) 
-(milliarcsecond) with a ratio ELONG_RATIO between the major diameter and the minor one 
-MINOR_AXIS_DIAMETER, turned from the positive vertical semi-axis (i.e. North direction) 
-with angle MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis 
-(i.e. East direction). (the elongation is along the major_axis) 
+            <desc>Returns the Fourier transform of a normalized ellipse centered at coordinates (X,Y)
+                (milliarcsecond) with a ratio ELONG_RATIO between the major diameter and the minor one
+                MINOR_AXIS_DIAMETER, turned from the positive vertical semi-axis (i.e. North direction)
+                with angle MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis
+                (i.e. East direction). (the elongation is along the major_axis)
 
-For avoiding degenerescence, the domain of variation of MAJOR_AXIS_POS_ANGLE is 180 
-degrees, for ex. from 0 to 180 degrees. 
+                For avoiding degenerescence, the domain of variation of MAJOR_AXIS_POS_ANGLE is 180
+                degrees, for ex. from 0 to 180 degrees.
 
-ELONG_RATIO = major_axis / minor_axis 
-FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
+                ELONG_RATIO = major_axis / minor_axis
+                FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
 
-The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO is 
-smaller than 1.</desc>
+                The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO is
+                smaller than 1.</desc>
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
                 <hasFixedValue>false</hasFixedValue>
@@ -184,12 +188,12 @@ smaller than 1.</desc>
         </configuration>
     </target>
     <variant>
-        <stations>UT1 UT3 UT4</stations>
+        <stations>UT1 UT2 UT3</stations>
     </variant>
     <variant>
-        <stations>A1 G1 I1</stations>
+        <stations>B2 D0 C1</stations>
     </variant>
     <variant>
-        <stations>A1 C1 D0</stations>
+        <stations>K0 G2 D0</stations>
     </variant>
 </a:observationSetting>
