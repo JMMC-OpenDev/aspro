@@ -58,7 +58,7 @@
 
         <package name="JSkyCalc"
                  description="Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
-                 link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"
+                 link="http://www.dartmouth.edu/~physics/labs/skycalc/flyer.html"
                  license="redistribution allowed including this acknowledgment 'Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College'" />
 
         <!-- OITools dependencies -->
@@ -80,8 +80,8 @@
         <!-- VO interoperability -->
         <package name="JSAMP"
                  description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, Bristol University."
-                 link="http://software.astrogrid.org/doc/jsamp/"
-                 jars="jsamp-1.3-2.jar"
+                 link="http://www.star.bristol.ac.uk/~mbt/jsamp/"
+                 jars="jsamp-1.3-5.jar"
                  license="AFL v2.1"/>
 
         <!-- jMAL dependencies -->
