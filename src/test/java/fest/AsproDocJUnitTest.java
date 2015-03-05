@@ -5,7 +5,6 @@ package fest;
 
 import com.mortennobel.imagescaling.AdvancedResizeOp;
 import com.mortennobel.imagescaling.ResampleOp;
-import fest.common.CustomScreenshotTaker;
 import fest.common.JmcsFestSwingJUnitTestCase;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.SettingPanel;
@@ -15,6 +14,7 @@ import fr.jmmc.jmcs.data.preference.CommonPreferences;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import java.awt.Frame;
+import java.awt.Point;
 import static java.awt.event.KeyEvent.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -52,8 +52,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     private final static String TEST_FOLDER = USER_HOME + "/dev/aspro/src/test/resources/";
     private final static String MY_EMAIL = "laurent.bourges@obs.ujf-grenoble.fr";
 
-    private final static boolean USE_GNOME3_HACKS = true;
-
     /**
      * Initialize system properties & static variables and finally starts the application
      */
@@ -63,9 +61,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
 
-        // Test JDK 1.6
-        if (!SystemUtils.IS_JAVA_1_6) {
-            MessagePane.showErrorMessage("Please use a JVM 1.6 (Sun) before running tests (fonts and LAF may be wrong) !");
+        // Test JDK 1.7+
+        if (!SystemUtils.isJavaVersionAtLeast(1.7f)) {
+            MessagePane.showErrorMessage("Please use a JVM 1.7+ (Oracle) before running tests (fonts and LAF may be wrong) !");
             Bootstrapper.stopApp(1);
         }
 
@@ -90,12 +88,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         // customize PDF action to avoid use StatusBar :
         fr.jmmc.aspro.gui.action.AsproExportPDFAction.setAvoidUseStatusBar(true);
-
-        if (USE_GNOME3_HACKS) 
-        {
-            // Gnome3 work-arround (window location and size are incorrects):
-            CustomScreenshotTaker.defineWindowMargins(9, 8);
-        }
 
         // Start application:
         JmcsFestSwingJUnitTestCase.startApplication(
@@ -509,7 +501,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         final int width = 5 + window.panel("jPanelMain").component().getWidth()
                 + window.panel("jPanelConfigurations").component().getWidth();
 
-        final int height = getMainFormHeight(window) + 68;
+        // Get plot's title to show PoPs in use:
+        final int height = getMainFormHeight(window) + 64;
 
         // waits for computation to finish :
         AsproTestUtils.checkRunningTasks();
@@ -705,19 +698,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         dialog.close();
     }
 
-    /**
-     * Test the application exit sequence : ALWAYS THE LAST TEST
-     */
-    @Test
-    @GUITest
-    public void shouldExit() {
-        logger.info("shouldExit test");
-
-        window.close();
-
-        confirmDialogDontSave();
-    }
-
     /* 
      --- Utility methods  ---------------------------------------------------------
      */
@@ -816,14 +796,19 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      * @return height of the main form
      */
     private static int getMainFormHeight(final FrameFixture window) {
-        int height = ((USE_GNOME3_HACKS) ? 46 : 32) + 10;
+        // window (top left corner):
+        final Point pw = window.component().getLocationOnScreen();
 
-        JComponent com;
-        com = window.panel("observationForm").component();
+        final JComponent com = window.panel("observationForm").component();
+
+        final Point pf = com.getLocationOnScreen();
+
+        // distance including window bar + menu bar (+ borders):
+        int height = (pf.y - pw.y);
+
         height += com.getHeight();
 
-        com = window.menuItemWithPath("File").component();
-        height += com.getHeight();
+        height += 10;
 
         return height;
     }
