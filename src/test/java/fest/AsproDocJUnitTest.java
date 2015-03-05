@@ -61,6 +61,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
 
+        // NOTE: Use 'Debug Test File' in netbeans to ensure correct test order ...
+        
         // Test JDK 1.7+
         if (!SystemUtils.isJavaVersionAtLeast(1.7f)) {
             MessagePane.showErrorMessage("Please use a JVM 1.7+ (Oracle) before running tests (fonts and LAF may be wrong) !");
@@ -214,7 +216,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         // move the mouse on the first observability interval (top right corner):
         // note: check window margin issue (gnome3):
-        robot().moveMouse(window.component(), 480, 350);
+        robot().moveMouse(window.component(), 435, 345);
 
         // let tooltip appear:
         pauseMedium();

@@ -3,7 +3,7 @@
     <schemaVersion>2012.02</schemaVersion>
     <name>default</name>
     <when>
-        <date>2011-10-15</date>
+        <date>2015-10-28</date>
         <nightRestriction>true</nightRestriction>
         <atmosphereQuality>Average</atmosphereQuality>
     </when>

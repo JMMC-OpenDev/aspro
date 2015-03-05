@@ -3,7 +3,7 @@
     <schemaVersion>2012.02</schemaVersion>
     <name>default</name>
     <when>
-        <date>2011-10-15</date>
+        <date>2015-10-28</date>
         <nightRestriction>true</nightRestriction>
         <atmosphereQuality>Excellent</atmosphereQuality>
     </when>
@@ -13,7 +13,7 @@
     </interferometerConfiguration>
     <instrumentConfiguration>
         <name>AMBER</name>
-        <stations>K0 G2 D0</stations>
+        <stations>B2 D0 C1</stations>
         <pops></pops>
         <instrumentMode>Low_JHK</instrumentMode>
         <samplingPeriod>60.0</samplingPeriod>
@@ -145,6 +145,6 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         </configuration>
     </target>
     <variant>
-        <stations>K0 G2 D0</stations>
+        <stations>B2 D0 C1</stations>
     </variant>
 </a:observationSetting>
