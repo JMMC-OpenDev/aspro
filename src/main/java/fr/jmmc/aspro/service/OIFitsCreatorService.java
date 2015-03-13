@@ -808,7 +808,7 @@ public final class OIFitsCreatorService {
             final double wlInc = (userModel != null && userModel.isModelDataReady()) ? userModel.getModelData(0).getWaveLengthIncrement() : Double.POSITIVE_INFINITY;
 
             // Sub channel width:
-            if (wlInc < deltaLambda) {
+            if ((wlInc > 0.0) && (wlInc < deltaLambda)) {
                 // adjust nSamples to have deltaLambda < wlInc:
                 nSamples = (int) Math.ceil(nSamples * this.waveBand / wlInc);
             }
