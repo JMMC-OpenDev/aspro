@@ -2387,7 +2387,7 @@ public final class ObservabilityService {
 
         if (isLogDebug) {
             logger.debug("interferometer: {}", this.interferometer.getName());
-            logger.debug("switchyard: {}", this.switchyard.getName());
+            logger.debug("switchyard: {}", this.switchyard);
             logger.debug("instrument: {}", this.instrument.getName());
         }
 
