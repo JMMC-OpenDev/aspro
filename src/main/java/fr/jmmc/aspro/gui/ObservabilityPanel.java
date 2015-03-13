@@ -1190,82 +1190,84 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private void updatePlot(final ObservationCollectionObsData chartData) {
         // memorize chart data (used by export PDF) :
         setChartData(chartData);
+        
+        if (chartData != null) {
+            final ObservationSetting observation = chartData.getFirstObservation();
+            final ObservabilityData obsData = chartData.getFirstObsData();
 
-        final ObservationSetting observation = chartData.getFirstObservation();
-        final ObservabilityData obsData = chartData.getFirstObsData();
+            final boolean useLST = obsData.isUseLST();
+            final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
 
-        final boolean useLST = obsData.isUseLST();
-        final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
+            // Enable or disable the 'Night only' option:
+            this.jCheckBoxNightOnly.setEnabled(!doBaseLineLimits && observation.getWhen().isNightRestriction());
 
-        // Enable or disable the 'Night only' option:
-        this.jCheckBoxNightOnly.setEnabled(!doBaseLineLimits && observation.getWhen().isNightRestriction());
+            // Enable or disable the 'Show related' option:
+            this.jCheckBoxListFilters.setEnabled(!doBaseLineLimits);
+            this.jCheckBoxShowRelated.setEnabled(!doBaseLineLimits && isSelectedFilter());
 
-        // Enable or disable the 'Show related' option:
-        this.jCheckBoxListFilters.setEnabled(!doBaseLineLimits);
-        this.jCheckBoxShowRelated.setEnabled(!doBaseLineLimits && isSelectedFilter());
+            // disable chart & plot notifications:
+            this.chart.setNotify(false);
+            this.xyPlot.setNotify(false);
+            try {
+                // title :
+                ChartUtils.clearTextSubTitle(this.chart);
 
-        // disable chart & plot notifications:
-        this.chart.setNotify(false);
-        this.xyPlot.setNotify(false);
-        try {
-            // title :
-            ChartUtils.clearTextSubTitle(this.chart);
-
-            final StringBuilder sb = new StringBuilder(32);
-            sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
-            sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
-            sb.append(chartData.getDisplayConfigurations(" / "));
-            if ((chartData.isSingle() || obsData.isUserPops()) && obsData.getBestPops() != null) {
-                obsData.getBestPops().toString(sb);
-            }
-            ChartUtils.addSubtitle(this.chart, sb.toString());
-
-            if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
-                // date and moon FLI :
-                sb.setLength(0);
-                sb.append("Day: ").append(observation.getWhen().getDate().toString());
-                if (observation.getWhen().isNightRestriction()) {
-                    sb.append(" - Moon = ").append(FormatterUtils.format(this.df1, obsData.getMoonIllumPercent())).append('%');
+                final StringBuilder sb = new StringBuilder(32);
+                sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
+                sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
+                sb.append(chartData.getDisplayConfigurations(" / "));
+                if ((chartData.isSingle() || obsData.isUserPops()) && obsData.getBestPops() != null) {
+                    obsData.getBestPops().toString(sb);
                 }
                 ChartUtils.addSubtitle(this.chart, sb.toString());
-            }
 
-            final String dateAxisLabel;
-            if (doBaseLineLimits) {
-                dateAxisLabel = AsproConstants.TIME_HA;
-            } else {
-                if (useLST) {
-                    dateAxisLabel = AsproConstants.TIME_LST;
-                } else {
-                    dateAxisLabel = AsproConstants.TIME_UTC;
+                if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
+                    // date and moon FLI :
+                    sb.setLength(0);
+                    sb.append("Day: ").append(observation.getWhen().getDate().toString());
+                    if (observation.getWhen().isNightRestriction()) {
+                        sb.append(" - Moon = ").append(FormatterUtils.format(this.df1, obsData.getMoonIllumPercent())).append('%');
+                    }
+                    ChartUtils.addSubtitle(this.chart, sb.toString());
                 }
+
+                final String dateAxisLabel;
+                if (doBaseLineLimits) {
+                    dateAxisLabel = AsproConstants.TIME_HA;
+                } else {
+                    if (useLST) {
+                        dateAxisLabel = AsproConstants.TIME_LST;
+                    } else {
+                        dateAxisLabel = AsproConstants.TIME_UTC;
+                    }
+                }
+
+                // define the date axis (bounds and current range):
+                updateDateAxis(dateAxisLabel, obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
+
+                // only valid for single observation :
+                updateSunMarkers(obsData.getSunIntervals(), obsData.getDateMin(), obsData.getDateMax());
+
+                // update the time marker:
+                updateTimeMarker();
+
+                // computed data are valid :
+                updateChart(observation.getDisplayTargets(),
+                        observation.getOrphanCalibrators(),
+                        observation.getOrCreateTargetUserInfos(),
+                        chartData,
+                        obsData.getDateMin(), obsData.getDateMax(),
+                        doBaseLineLimits);
+
+            } finally {
+                // restore chart & plot notifications:
+                this.xyPlot.setNotify(true);
+                this.chart.setNotify(true);
             }
 
-            // define the date axis (bounds and current range):
-            updateDateAxis(dateAxisLabel, obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
-
-            // only valid for single observation :
-            updateSunMarkers(obsData.getSunIntervals(), obsData.getDateMin(), obsData.getDateMax());
-
-            // update the time marker:
-            updateTimeMarker();
-
-            // computed data are valid :
-            updateChart(observation.getDisplayTargets(),
-                    observation.getOrphanCalibrators(),
-                    observation.getOrCreateTargetUserInfos(),
-                    chartData,
-                    obsData.getDateMin(), obsData.getDateMax(),
-                    doBaseLineLimits);
-
-        } finally {
-            // restore chart & plot notifications:
-            this.xyPlot.setNotify(true);
-            this.chart.setNotify(true);
+            // update the status bar:
+            StatusBar.showIfPrevious(MSG_COMPUTING, "observability done.");
         }
-
-        // update the status bar:
-        StatusBar.showIfPrevious(MSG_COMPUTING, "observability done.");
     }
 
     /**
