@@ -290,7 +290,7 @@ public final class OIFitsCreatorService {
 
         // TODO: fix wavelengths % user model Fits cube (wavelengths):
         this.waveBand = (this.lambdaMax - this.lambdaMin) / this.nWaveLengths;
-        this.waveLengths = computeWaveLengths(this.lambdaMin, this.lambdaMax, this.waveBand);
+        this.waveLengths = computeWaveLengths(this.lambdaMin, this.lambdaMax, this.waveBand, this.nWaveLengths);
 
         // Initial Wavelength information:
         String firstChannel = Double.toString(convertWL(this.waveLengths[0]));
@@ -746,10 +746,10 @@ public final class OIFitsCreatorService {
      * @param min lower bound
      * @param max upper bound
      * @param width spectral channel width
+     * @param nWLen number of wavelengths to compute
      * @return regularly sampled wavelengths
      */
-    private static double[] computeWaveLengths(final double min, final double max, final double width) {
-        final int nWLen = (int) Math.ceil((max - min) / width);
+    private static double[] computeWaveLengths(final double min, final double max, final double width, final int nWLen) {
         final double[] wLen = new double[nWLen];
 
         // effective wavelength corresponds to the channel center:
@@ -810,7 +810,7 @@ public final class OIFitsCreatorService {
             // Sub channel width:
             if ((wlInc > 0.0) && (wlInc < deltaLambda)) {
                 // adjust nSamples to have deltaLambda < wlInc:
-                nSamples = (int) Math.ceil(nSamples * this.waveBand / wlInc);
+                nSamples = (int) Math.ceil((nSamples * this.waveBand) / wlInc);
             }
 
             // Prefer odd number of sub channels:
@@ -826,7 +826,7 @@ public final class OIFitsCreatorService {
 
             // note: integration must be adjusted to use wavelengths in each spectral channel !
             // Only part of instrument spectral channels can be used (see prepare step):
-            final double[] sampleWaveLengths = (nSamples > 1) ? computeWaveLengths(this.lambdaMin, this.lambdaMax, deltaLambda) : this.waveLengths;
+            final double[] sampleWaveLengths = (nSamples > 1) ? computeWaveLengths(this.lambdaMin, this.lambdaMax, deltaLambda, nChannels * nSamples) : this.waveLengths;
 
             // local vars:
             final int nWLen = sampleWaveLengths.length;

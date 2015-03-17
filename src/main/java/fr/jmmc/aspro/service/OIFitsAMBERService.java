@@ -87,7 +87,7 @@ public final class OIFitsAMBERService {
         final double[] opd = new double[nRows];
         final double[] cpxVisVectR = new double[nRows];
 
-        Complex phasor, w1Avg;
+        Complex t, phasor, w1Avg;
         double x;
 
         // Output in OI_VIS table :
@@ -108,10 +108,11 @@ public final class OIFitsAMBERService {
         for (iRow = 0; iRow < nRows; iRow++) {
 
             for (lVis = 0; lVis < nbLVis; lVis++) {
-
+                t = visError[iRow][lVis];
+                
                 sigma2_cpxVisTable[iRow][lVis] = new ImmutableComplex(
-                        FastMath.pow2(visError[iRow][lVis].getReal()),
-                        FastMath.pow2(visError[iRow][lVis].getImaginary())); // immutable complex for safety
+                        FastMath.pow2(t.getReal()),
+                        FastMath.pow2(t.getImaginary())); // immutable complex for safety
             }
         }
 

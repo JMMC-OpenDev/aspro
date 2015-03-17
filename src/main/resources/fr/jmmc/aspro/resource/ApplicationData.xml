@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.7"/>
-    <compilation date="03/03/2015" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.7.1 beta 1"/>
+    <compilation date="17/03/2015" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -194,6 +194,14 @@
     </menubar>
 
     <releasenotes>
+        <release version="0.9.7.1">
+            <pubDate>Tue, 17 Mar 2015 12:00:00 GMT</pubDate>
+            <prerelease version="0.9.7.1 beta 1">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/668">Fixed OIFITS generation (AMBER mode High_K_1_2.288) due to inconsistent wavelength arrays (rounding issue)</change>
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/663">Fixed OIFITS generation to ignore wavelength increment = 0.0</change>
+            </prerelease>
+        </release>
+
         <release version="0.9.7">
             <pubDate>Tue, 03 Mar 2015 10:00:00 GMT</pubDate>
             <prerelease version="0.9.7 beta 2">
