@@ -1,0 +1,11 @@
+Built-By: JMMC (jmmc-tech-group@ujf-grenoble.fr)
+Built-Date: ${timestamp}
+Implementation-Title: Aspro 2
+Implementation-Version: ${project.version}
+Implementation-Vendor: www.jmmc.fr
+Implementation-URL: http://www.jmmc.fr/aspro
+Application-Name: Aspro 2
+Permissions: all-permissions
+Codebase: http://apps.jmmc.fr
+Application-Library-Allowable-Codebase: http://apps.jmmc.fr
+Main-Class: fr.jmmc.aspro.Aspro2
