@@ -151,7 +151,6 @@ public class ExportOBVLTI {
       }
     }
   }
-
   /**
    * Process the common part of the given template for the given target
    * @param template OB template
@@ -164,7 +163,29 @@ public class ExportOBVLTI {
   protected static String processCommon(final String template, final String fileName,
           final ObservationSetting observation,
           final ObservabilityService os,
-          final Target target) {
+          final Target target)
+  {
+      return processCommon(template, fileName, observation, os, target, VAL_CATEGORY_SCIENCE, VAL_CATEGORY_CALIBRATOR);
+  }
+  
+  /**
+   * Process the common part of the given template for the given target
+   * @param template OB template
+   * @param fileName OB file name
+   * @param observation observation settings
+   * @param os observability service with computed data
+   * @param target target to process
+   * @param categoryValue_SCI value of the CATEGORY keyword for a SCIENCE target
+   * @param categoryValue_CAL value of the CATEGORY keyword for a CALIBRATOR target
+   * @return processed template
+   */
+  protected static String processCommon(final String template, final String fileName,
+          final ObservationSetting observation,
+          final ObservabilityService os,
+          final Target target, 
+          final String categoryValue_SCI,
+          final String categoryValue_CAL)
+  {
     if (logger.isDebugEnabled()) {
       logger.debug("processCommon: {}", target.getName());
     }
@@ -204,7 +225,7 @@ public class ExportOBVLTI {
 
     // --- OB category ---
     document = document.replaceFirst(KEY_CATEGORY,
-            (targetUserInfos != null && targetUserInfos.isCalibrator(target)) ? VAL_CATEGORY_CALIBRATOR : VAL_CATEGORY_SCIENCE);
+            (targetUserInfos != null && targetUserInfos.isCalibrator(target)) ? categoryValue_CAL : categoryValue_SCI);
 
 
     // --- Date / Time constraints ---

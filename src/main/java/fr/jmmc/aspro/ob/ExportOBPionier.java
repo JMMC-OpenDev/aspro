@@ -19,6 +19,14 @@ public final class ExportOBPionier extends ExportOBVLTI {
 
     /** template name */
     private final static String TEMPLATE_FILE = "fr/jmmc/aspro/ob/PIONIER_template.obx";
+    /** category value for SCIENCE OB: used in TEMPLATE.NAME 'PIONIER_obs_<CATEGORY>' */
+    public final static String PIONIER_VAL_CATEGORY_SCIENCE = "science";
+    /** category value for CALIBRATOR OB: used in TEMPLATE.NAME 'PIONIER_obs_<CATEGORY>' */
+    public final static String PIONIER_VAL_CATEGORY_CALIBRATOR = "calibrator";
+
+    /* keywords */
+    /** keyword - MODE */
+    public final static String KEY_MODE = "<MODE>";
 
     /**
      * Forbidden constructor
@@ -38,7 +46,7 @@ public final class ExportOBPionier extends ExportOBVLTI {
      * @throws IOException if an I/O exception occurred while writing the observing block
      */
     public static void generate(final File file, final ObservationSetting observation,
-            final ObservabilityService os, final Target target)
+                                final ObservabilityService os, final Target target)
             throws IllegalStateException, IOException {
 
         logger.debug("generate file: {}", file);
@@ -47,7 +55,8 @@ public final class ExportOBPionier extends ExportOBVLTI {
         final String template = ResourceUtils.readResource(TEMPLATE_FILE);
 
         // process common VLTI part :
-        String document = processCommon(template, file.getName(), observation, os, target);
+        String document = processCommon(template, file.getName(), observation, os, target,
+                PIONIER_VAL_CATEGORY_SCIENCE, PIONIER_VAL_CATEGORY_CALIBRATOR);
 
         // Magnitudes for H :
         document = document.replaceFirst(KEY_HMAG, df3.format(getMagnitude(target.getFLUXH())));
@@ -55,8 +64,22 @@ public final class ExportOBPionier extends ExportOBVLTI {
         // Coude Guided Star = Science (= mag V) :
         document = document.replaceFirst(KEY_COUDE_GS_MAG, df3.format(getMagnitude(target.getFLUXV())));
 
-        // what else ?
+        // Mode (INS.DISP.NAME) among "FREE" or "GRISM":
+        final String instrumentMode = observation.getInstrumentConfiguration().getInstrumentMode();
 
+        // Parse Aspro2's instrument mode: [GRISM-H, FREE-H]:
+        final String mode;
+        final int pos = instrumentMode.indexOf('-');
+        if (pos == -1) {
+            logger.warn("Invalid instrument mode for PIONIER: {}", instrumentMode);
+            mode = "FREE";
+        } else {
+            mode = instrumentMode.substring(0, pos);
+        }
+
+        document = document.replaceFirst(KEY_MODE, mode);
+
+        // what else ?
         // Finally, write the file :
         FileUtils.writeFile(file, document);
     }
