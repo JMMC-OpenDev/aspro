@@ -9,10 +9,11 @@ import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.jmcs.gui.component.Disposable;
-import fr.jmmc.oiexplorer.core.gui.PDFExportable;
+import fr.jmmc.oiexplorer.core.export.DocumentExportable;
+import fr.jmmc.oiexplorer.core.export.DocumentOptions;
 import fr.jmmc.oiexplorer.core.gui.PlotChartPanel;
 import fr.jmmc.oiexplorer.core.gui.PlotView;
-import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
+import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import fr.jmmc.oiexplorer.core.model.PlotDefinitionFactory;
 import fr.jmmc.oiexplorer.core.model.oi.SubsetDefinition;
@@ -22,7 +23,7 @@ import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.BorderLayout;
 import java.util.List;
-import org.jfree.chart.JFreeChart;
+import org.jfree.ui.Drawable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * This panel embeds the OIFitsExplorer into Aspro2
  * @author bourgesl
  */
-public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposable, ObservationListener, PDFExportable {
+public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposable, ObservationListener, DocumentExportable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -45,7 +46,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
     }
     /* members */
     /** OIFitsCollectionManager singleton */
-    private OIFitsCollectionManager ocm = OIFitsCollectionManager.getInstance();
+    private final OIFitsCollectionManager ocm = OIFitsCollectionManager.getInstance();
     /** Oifits explorer Plot view */
     private PlotView plotView;
     /** Oifits explorer Plot chart panel */
@@ -99,48 +100,51 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
     }// </editor-fold>//GEN-END:initComponents
 
     /**
-     * Export the chart component as a PDF document
+     * Export the component as a document using the given action:
+     * the component should check if there is something to export ?
+     * @param action export action to perform the export action
      */
     @Override
-    public void performPDFAction() {
-        this.plotChartPanel.performPDFAction();
+    public void performAction(final ExportDocumentAction action) {
+        action.process(this);
     }
 
     /**
-     * Return the PDF default file name
-     * @return PDF default file name
+     * Return the default file name
+     * @param fileExtension  document's file extension
+     * @return default file name
      */
     @Override
-    public String getPDFDefaultFileName() {
-        return this.plotChartPanel.getPDFDefaultFileName();
+    public String getDefaultFileName(final String fileExtension) {
+        return this.plotChartPanel.getDefaultFileName(fileExtension);
     }
 
-    /**
-     * Prepare the chart(s) before exporting them as a PDF document:
-     * Performs layout and return PDF options
-     * @return PDF options
+   /**
+     * Prepare the page layout before doing the export:
+     * Performs layout and modifies the given options
+     * @param options document options used to prepare the document
      */
     @Override
-    public PDFOptions preparePDFExport() {
-        return this.plotChartPanel.preparePDFExport();
+    public void prepareExport(final DocumentOptions options) {
+        this.plotChartPanel.prepareExport(options);
     }
 
-    /**
-     * Return the chart to export on the given page index
+/**
+     * Return the page to export given its page index
      * @param pageIndex page index (1..n)
-     * @return chart
+     * @return Drawable array to export on this page
      */
     @Override
-    public JFreeChart prepareChart(final int pageIndex) {
-        return this.plotChartPanel.prepareChart(pageIndex);
+    public Drawable[] preparePage(final int pageIndex) {
+        return this.plotChartPanel.preparePage(pageIndex);
     }
 
     /**
-     * Callback indicating the chart was processed by the PDF engine
+     * Callback indicating the export is done to reset the component's state
      */
     @Override
-    public void postPDFExport() {
-        this.plotChartPanel.postPDFExport();
+    public void postExport() {
+        this.plotChartPanel.postExport();
     }
 
     /**

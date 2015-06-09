@@ -13,6 +13,7 @@ import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.ObjectUtils;
+import fr.jmmc.oiexplorer.core.export.DocumentExportable;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
@@ -348,6 +349,17 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
      */
     public Component getTabSelectedComponent() {
         return jTabbedPane.getSelectedComponent();
+    }
+    /**
+     * Returns the currently selected component in the tabbedpane as a DocumentExportable
+     * @return selected component or null if the tabbedpane is empty
+     */
+    public DocumentExportable getExportableSelectedComponent() {
+        Component com = getTabSelectedComponent();
+        if (com instanceof DocumentExportable) {
+            return (DocumentExportable)com;
+        }
+        return null;
     }
 
     /**

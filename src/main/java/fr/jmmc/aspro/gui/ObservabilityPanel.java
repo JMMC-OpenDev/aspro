@@ -7,7 +7,6 @@ import com.jidesoft.swing.CheckBoxList;
 import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
-import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.EnhancedXYBoxAnnotation;
 import fr.jmmc.aspro.gui.chart.FitXYTextAnnotation;
@@ -44,18 +43,18 @@ import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
-import fr.jmmc.oiexplorer.core.gui.PDFExportable;
+import fr.jmmc.oiexplorer.core.export.DocumentExportable;
+import fr.jmmc.oiexplorer.core.export.DocumentOptions;
+import fr.jmmc.oiexplorer.core.export.DocumentSize;
+import fr.jmmc.oiexplorer.core.export.Orientation;
+import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedDateAxis;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
-import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
-import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions.Orientation;
-import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions.PageSize;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GradientPaint;
 import java.awt.Insets;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
@@ -123,6 +122,7 @@ import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.time.DateRange;
+import org.jfree.ui.Drawable;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.RectangleInsets;
@@ -135,7 +135,8 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener,
-                                                                            ObservationListener, Observer, PDFExportable, Disposable {
+                                                                            ObservationListener, Observer, 
+                                                                            DocumentExportable, Disposable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -661,19 +662,22 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     /**
-     * Export the chart component as a PDF document
+     * Export the component as a document using the given action:
+     * the component should check if there is something to export ?
+     * @param action export action to perform the export action
      */
     @Override
-    public void performPDFAction() {
-        AsproExportPDFAction.exportPDF(this);
+    public void performAction(final ExportDocumentAction action) {
+        action.process(this);
     }
 
     /**
-     * Return the PDF default file name
-     * @return PDF default file name
+     * Return the default file name
+     * @param fileExtension  document's file extension
+     * @return default file name
      */
     @Override
-    public String getPDFDefaultFileName() {
+    public String getDefaultFileName(final String fileExtension) {
         if (this.getChartData() != null) {
             final ObservationSetting observation = this.getChartData().getFirstObservation();
 
@@ -703,7 +707,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                     sb.append(observation.getWhen().getDate().toString());
                 }
             }
-            sb.append('.').append(PDF_EXT);
+            sb.append('.').append(fileExtension);
 
             return sb.toString();
         }
@@ -711,12 +715,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     /**
-     * Prepare the chart(s) before exporting them as a PDF document:
-     * Performs layout and return PDF options
-     * @return PDF options
+     * Prepare the page layout before doing the export:
+     * Performs layout and modifies the given options
+     * @param options document options used to prepare the document
      */
     @Override
-    public PDFOptions preparePDFExport() {
+    public void prepareExport(final DocumentOptions options) {
         // Enable the PDF rendering flag:
         this.renderingPDF = true;
 
@@ -736,8 +740,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // update the time marker to disable it:
         updateTimeMarker();
 
+        // reset options:
+        options.setSmallDefaults();
+        
         boolean useSubset = false;
-        PDFOptions options = PDFOptions.DEFAULT_PDF_OPTIONS;
 
         if (this.getChartData() != null) {
             // baseline limits flag used by the plot :
@@ -774,10 +780,16 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                     // update max items:
                     this.slidingXYPlotAdapter.setMaxViewItems(maxViewsItemsPerPage);
 
-                    options = new PDFOptions(PageSize.A3, Orientation.Portait, numberOfPages);
+                    // Fix options:
+                    options.setDocumentSize(DocumentSize.NORMAL).
+                            setOrientation(Orientation.Portrait)
+                            .setNumberOfPages(numberOfPages);                        
 
                 } else if (currentSize > SlidingXYPlotAdapter.MAX_PRINTABLE_ITEMS_A4) {
-                    options = new PDFOptions(PageSize.A3, Orientation.Portait);
+                    // Fix options:
+                    options.setDocumentSize(DocumentSize.NORMAL).
+                            setOrientation(Orientation.Portrait)
+                            .setNumberOfPages(1);                        
                 }
             }
         }
@@ -793,17 +805,15 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         if (changeSubset) {
             this.slidingXYPlotAdapter.setUseSubset(useSubset);
         }
-
-        return options;
     }
 
     /**
-     * Return the chart to export on the given page index
+     * Return the page to export given its page index
      * @param pageIndex page index (1..n)
-     * @return chart
+     * @return Drawable array to export on this page
      */
     @Override
-    public JFreeChart prepareChart(final int pageIndex) {
+    public Drawable[] preparePage(final int pageIndex) {
         if (logger.isDebugEnabled()) {
             logger.debug("prepareChart: page {}", pageIndex);
         }
@@ -820,14 +830,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             this.slidingXYPlotAdapter.setPosition(pos);
         }
 
-        return this.chart;
+        return new Drawable[]{this.chart};
     }
 
     /**
-     * Callback indicating the chart was processed by the PDF engine
+     * Callback indicating the export is done to reset the component's state
      */
     @Override
-    public void postPDFExport() {
+    public void postExport() {
         // Disable the PDF rendering flag:
         this.renderingPDF = false;
 

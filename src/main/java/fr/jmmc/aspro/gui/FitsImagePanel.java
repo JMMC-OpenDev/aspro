@@ -4,7 +4,6 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.Preferences;
-import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
 import fr.jmmc.aspro.gui.chart.PaintLogScaleLegend;
@@ -20,9 +19,12 @@ import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
-import fr.jmmc.oiexplorer.core.gui.PDFExportable;
+import fr.jmmc.oiexplorer.core.export.DocumentExportable;
+import fr.jmmc.oiexplorer.core.export.DocumentOptions;
+import fr.jmmc.oiexplorer.core.export.DocumentSize;
+import fr.jmmc.oiexplorer.core.export.Orientation;
+import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
-import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
 import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
@@ -59,6 +61,7 @@ import org.jfree.chart.title.PaintScaleLegend;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.title.Title;
 import org.jfree.data.Range;
+import org.jfree.ui.Drawable;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
@@ -70,7 +73,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public class FitsImagePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-                                                                  Observer, PDFExportable, Disposable {
+                                                                  Observer, DocumentExportable, Disposable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1L;
@@ -214,50 +217,50 @@ public class FitsImagePanel extends javax.swing.JPanel implements ChartProgressL
   }//GEN-LAST:event_jComboBoxLUTActionPerformed
 
     /**
-     * Export the current chart as a PDF document
-     * @param evt action event
-     */
-    /**
-     * Export the chart component as a PDF document
+     * Export the component as a document using the given action:
+     * the component should check if there is something to export ?
+     * @param action export action to perform the export action
      */
     @Override
-    public void performPDFAction() {
-        AsproExportPDFAction.exportPDF(this);
+    public void performAction(final ExportDocumentAction action) {
+        action.process(this);
     }
 
     /**
-     * Return the PDF default file name
-     * @return PDF default file name
+     * Return the default file name
+     * @param fileExtension  document's file extension
+     * @return default file name
      */
     @Override
-    public String getPDFDefaultFileName() {
+    public String getDefaultFileName(final String fileExtension) {
         return null;
     }
 
     /**
-     * Prepare the chart(s) before exporting them as a PDF document:
-     * Performs layout and return PDF options
-     * @return PDF options
+     * Prepare the page layout before doing the export:
+     * Performs layout and modifies the given options
+     * @param options document options used to prepare the document
      */
-    public PDFOptions preparePDFExport() {
-        return PDFOptions.DEFAULT_PDF_OPTIONS;
+    @Override
+    public void prepareExport(final DocumentOptions options) {
+        options.setSmallDefaults();
     }
 
     /**
-     * Return the chart to export on the given page index
+     * Return the page to export given its page index
      * @param pageIndex page index (1..n)
-     * @return chart
+     * @return Drawable array to export on this page
      */
     @Override
-    public JFreeChart prepareChart(final int pageIndex) {
-        return this.chart;
+    public Drawable[] preparePage(final int pageIndex) {
+        return new Drawable[]{this.chart};
     }
 
     /**
-     * Callback indicating the chart was processed by the PDF engine
+     * Callback indicating the export is done to reset the component's state
      */
     @Override
-    public void postPDFExport() {
+    public void postExport() {
         // no-op
     }
 
