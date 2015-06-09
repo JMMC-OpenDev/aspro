@@ -13,6 +13,7 @@ import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.preference.CommonPreferences;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.MessagePane;
+import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import java.awt.Frame;
 import java.awt.Point;
 import static java.awt.event.KeyEvent.*;
@@ -88,8 +89,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // disable tooltips :
         enableTooltips(false);
 
-        // customize PDF action to avoid use StatusBar :
-        fr.jmmc.aspro.gui.action.AsproExportPDFAction.setAvoidUseStatusBar(true);
+        // customize Export action to avoid use StatusBar :
+        ExportDocumentAction.setAvoidUseStatusBar(true);
 
         // Start application:
         JmcsFestSwingJUnitTestCase.startApplication(

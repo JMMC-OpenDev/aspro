@@ -7,6 +7,7 @@ package fest;
 import fest.common.JmcsFestSwingJUnitTestCase;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.util.JVMUtils;
+import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -60,8 +61,8 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
         // disable tooltips :
         enableTooltips(false);
 
-        // customize PDF action to avoid use StatusBar :
-        fr.jmmc.aspro.gui.action.AsproExportPDFAction.setAvoidUseStatusBar(true);
+        // customize Export action to avoid use StatusBar :
+        ExportDocumentAction.setAvoidUseStatusBar(true);
 
         // Start application:
         JmcsFestSwingJUnitTestCase.startApplication(
