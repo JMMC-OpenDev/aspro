@@ -47,6 +47,8 @@ public class ExportOBVLTI {
 
   /** Class logger */
   protected static final Logger logger = LoggerFactory.getLogger(ExportOBVLTI.class.getName());
+  /** enable / disable setting absolute_times_list */
+  public static final boolean ENABLE_ABS_TIME_LIST = false;
   /** P2PP file prefix for science targets */
   public static final String OB_SCIENCE = "SCI";
   /** P2PP file prefix for calibrator targets */
@@ -322,7 +324,7 @@ public class ExportOBVLTI {
           lstTimeIntervals = convertLstRanges(lstRanges);
 
           // if night restriction is active, LST ranges are only valid for the observation date :
-          if (observation.getWhen().isNightRestriction()) {
+          if (ENABLE_ABS_TIME_LIST && observation.getWhen().isNightRestriction()) {
             // get observation date as GregorianCalendar :
             final GregorianCalendar cal = observation.getWhen().getDate().toGregorianCalendar();
             if (logger.isDebugEnabled()) {
