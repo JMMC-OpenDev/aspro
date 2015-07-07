@@ -104,6 +104,8 @@ public final class ExportOBVLTIAction {
 
         // compute observability data:
         os.compute();
+        
+        final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
 
         if (exportAll) {
 
@@ -112,13 +114,23 @@ public final class ExportOBVLTIAction {
           sb.append("  - minimum elevation set to ").append(df1.format(minElev)).append(" deg\n");
           sb.append("  - output folder :\n").append(directory).append("\n\n");
 
+          // Export all SCI/CAL OBs:
           for (Target target : targets) {
-
             file = new File(directory, ExportOBVLTI.generateOBFileName(target));
 
             ExportOBVLTI.process(file, observation, os, target);
 
             sb.append(file.getName()).append('\n');
+          }
+          
+          // Export concatenation OBs:
+          for (Target target : targets) {
+            file = new File(directory, ExportOBVLTI.generateOBFileName(target));
+            
+            final String conFileName = ExportOBVLTI.generateConcatenation(file, targetUserInfos, target);
+            if (conFileName != null) {
+                sb.append(conFileName).append('\n');
+            }            
           }
 
           StatusBar.show("Observing blocks saved in " + directory + ".");
@@ -137,7 +149,6 @@ public final class ExportOBVLTIAction {
           sb.append(mainFile.getName()).append('\n');
 
           // Generate all calibrator OBs for a science target :
-          final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
 
           if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
             final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
@@ -150,6 +161,11 @@ public final class ExportOBVLTIAction {
 
                   ExportOBVLTI.process(file, observation, os, calibrator);
                   sb.append(file.getName()).append('\n');
+                }
+                
+                final String conFileName = ExportOBVLTI.generateConcatenation(mainFile, targetUserInfos, target);
+                if (conFileName != null) {
+                    sb.append(conFileName).append('\n');
                 }
               }
             }
