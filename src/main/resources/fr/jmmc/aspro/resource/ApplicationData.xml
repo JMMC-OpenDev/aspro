@@ -19,7 +19,7 @@
     </company>
 
     <program name="Aspro2" version="0.9.7.2 beta 3"/>
-    <compilation date="07/07/2015" compiler="JDK 1.6.0_24"/>
+    <compilation date="08/07/2015" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -196,10 +196,10 @@
     <releasenotes>
 
         <release version="0.9.7.2">
-            <pubDate>Tue, 07 Jul 2015 12:00:00 GMT</pubDate>
+            <pubDate>Tue, 08 Jul 2015 14:00:00 GMT</pubDate>
             <prerelease version="0.9.7.2 beta 3">
                 <change type="FEATURE">Improved Observing block (OB) export to generate a concatenation container gathering SCI and CAL OBs</change>
-                <change type="FEATURE">Shortened Observing block (OB) file names</change>
+                <change type="FEATURE">Shortened Observing block (OB) file names (limited to 64 characters)</change>
             </prerelease>
             <prerelease version="0.9.7.2 beta 2">
                 <change type="FEATURE">Updated Observing block (OB) export to discard the constraint on absolute time list</change>

@@ -136,7 +136,8 @@ public final class ExportOBVLTIAction {
           StatusBar.show("Observing blocks saved in " + directory + ".");
 
         } else {
-          final File mainFile = file;
+          final File mainFile = new File(directory, ExportOBVLTI.fixFileName(file.getName()) 
+                  + '.' + MimeType.OBX.getExtension());
           final Target target = targets.get(0);
 
           // report buffer :

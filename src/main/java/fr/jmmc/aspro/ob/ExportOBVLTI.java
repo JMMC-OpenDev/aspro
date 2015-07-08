@@ -54,6 +54,8 @@ public class ExportOBVLTI {
     public static final String OB_SCIENCE = "SCI";
     /** P2PP file prefix for calibrator targets */
     public static final String OB_CALIBRATOR = "CAL";
+    /** P2PP file prefix for concatenation containers */
+    public static final String OB_CONCAT = "CON";
     /** P2PP version used for LST interval conversion */
     protected final static int P2PP_VERSION = 3;
     /** double formatter for magnitudes */
@@ -205,9 +207,8 @@ public class ExportOBVLTI {
         String document = template;
 
         // Set name :
-        // remove obx extension :
-        final String name = fix31Chars(FileUtils.getFileNameWithoutExtension(fileName));
-        document = document.replaceFirst(KEY_NAME, name); // 32 chars max
+        final String name = fixFileName(fileName);
+        document = document.replaceFirst(KEY_NAME, name); // 64 chars max
 
         // --- Calibrator OB ---
         final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
@@ -220,7 +221,7 @@ public class ExportOBVLTI {
                 final List<Target> calibrators = targetInfo.getCalibrators();
                 if (!calibrators.isEmpty()) {
                     final Target firstCalibrator = calibrators.get(0);
-                    calibratorOBFileName = FileUtils.getFileNameWithoutExtension(generateOBFileName(firstCalibrator));
+                    calibratorOBFileName = fixFileName(generateOBFileName(firstCalibrator));
                 }
             }
         }
@@ -432,14 +433,14 @@ public class ExportOBVLTI {
             sb.append(StringUtils.replaceWhiteSpacesByUnderscore(target.getSPECTYP()));
         }
 
-        final String OBName = fix31Chars(sb.toString());
+        final String OBName = fix32Chars(sb.toString());
 
         // replace values :
         if (logger.isDebugEnabled()) {
             logger.debug("OBName: {}", OBName);
         }
 
-        return document.replaceFirst(KEY_OB_NAME, OBName); // 32 chars max
+        return document.replaceFirst(KEY_OB_NAME, OBName); // 64 chars max
     }
 
     /**
@@ -545,12 +546,24 @@ public class ExportOBVLTI {
         return AsproConstants.UNDEFINED_MAGNITUDE;
     }
 
-    static String fix31Chars(final String value) {
-        // maximum length :
-        if (value.length() > 31) {
-            return value.substring(0, 31);
+    static String fix32Chars(final String value) {
+        if (value.length() > 32) {
+            return value.substring(0, 32);
         }
         return value;
+    }
+
+    static String fix64Chars(final String value) {
+        // maximum length of both the OB name and file name:
+        if (value.length() > 64) {
+            return value.substring(0, 64);
+        }
+        return value;
+    }
+
+    public static String fixFileName(final String fileName) {
+        // remove obx extension :
+        return fix64Chars(FileUtils.getFileNameWithoutExtension(fileName));
     }
 
     /**
@@ -559,16 +572,16 @@ public class ExportOBVLTI {
      * @return Observing block file name
      */
     public static String generateOBFileName(final Target target) {
-        return generateOBFileName(target, true);
+        return generateOBFileName(target, null);
     }
 
     /**
      * Generate the Observing block file name using the given target
      * @param target target to use
-     * @param usePrefix true to add SCI/CAL prefix
+     * @param customPrefix custom prefix or null
      * @return Observing block file name
      */
-    public static String generateOBFileName(final Target target, final boolean usePrefix) {
+    public static String generateOBFileName(final Target target, final String customPrefix) {
 
         final ObservationManager om = ObservationManager.getInstance();
 
@@ -586,9 +599,59 @@ public class ExportOBVLTI {
         final boolean useFT = (targetConf != null && targetConf.getFringeTrackerMode() != null);
 
         final String suffix = StringUtils.removeUnderscores(insMode.getName()) + '_' + (useFT ? "FT" : "noFT");
-        final String prefix = (usePrefix) ? (om.isCalibrator(target) ? OB_CALIBRATOR : OB_SCIENCE) : null;
+        final String prefix = (customPrefix != null) ? customPrefix : 
+                (om.isCalibrator(target) ? OB_CALIBRATOR : OB_SCIENCE);
 
-        return observation.generateFileName(target.getName(), prefix, suffix, MimeType.OBX.getExtension());
+        return generateFileName(observation, target.getName(), prefix, suffix, MimeType.OBX.getExtension());
+    }
+
+    /**
+     * Generate a standard file name for the selected target using the format :
+     * [<prefix>_<TARGET>_<INSTRUMENT>_<CONFIGURATION>_<suffix>.<extension>]
+     *
+     * @param observation main observation
+     * @param targetName target name
+     * @param prefix prefix (optional) for the file name
+     * @param suffix suffix (optional) before the date
+     * @param extension file extension
+     * @return standard file name
+     */
+    private static String generateFileName(final ObservationSetting observation, final String targetName,
+                                           final String prefix, final String suffix,
+                                           final String extension) {
+        
+        final StringBuilder sb = new StringBuilder(32);
+        if (prefix != null) {
+            sb.append(prefix).append('_');
+        }
+
+        // replace invalid characters :
+        final String altTargetName = StringUtils.removeNonAlphaNumericChars(targetName);
+        sb.append(altTargetName).append('_');
+
+        final String instrumentName = observation.getInstrumentConfiguration().getName();
+        sb.append(instrumentName).append('_');
+
+        final String baseLine = StringUtils.removeWhiteSpaces(observation.getInstrumentConfiguration().getStations());
+        sb.append(baseLine);
+
+        if (suffix != null) {
+            sb.append('_').append(suffix);
+        }
+
+        if (ExportOBVLTI.ENABLE_ABS_TIME_LIST) {
+            final String date = observation.getWhen().getDate().toString();
+            sb.append('_').append(date);
+        }
+
+        // maximum length of both the OB name and file name:
+        if (sb.length() > 64) {
+            sb.setLength(64);
+        }
+        
+        sb.append('.').append(extension);
+
+        return sb.toString();
     }
 
     /**
@@ -612,7 +675,7 @@ public class ExportOBVLTI {
                 final List<Target> calibrators = targetInfo.getCalibrators();
                 if (!calibrators.isEmpty()) {
 
-                    final String conOBFileName = FileUtils.getFileNameWithoutExtension(generateOBFileName(target, false));
+                    final String conOBFileName = fixFileName(generateOBFileName(target, OB_CONCAT));
                     final File file = new File(obFile.getParent(), conOBFileName + CONCAT_EXTENSION);
                     logger.debug("generate concatenation file: {}", file);
 
@@ -620,8 +683,7 @@ public class ExportOBVLTI {
                     String document = ResourceUtils.readResource(CONCAT_TEMPLATE_FILE);
 
                     // Set name :
-                    String name = fix31Chars(conOBFileName);
-                    document = document.replaceFirst(KEY_NAME, name); // 32 chars max
+                    document = document.replaceFirst(KEY_NAME, conOBFileName); // 64 chars max
 
                     // Set the child number:
                     final int childNum = 1 + calibrators.size();
@@ -631,17 +693,14 @@ public class ExportOBVLTI {
                     final StringBuilder sb = new StringBuilder(1024);
                     int n = 0;
 
-                    // remove obx extension :
-                    final String sciOBFileName = FileUtils.getFileNameWithoutExtension(obFile.getName());
-                    
                     // CHILD.0.NAME "SCI_OB_NAME"
-                    name = fix31Chars(sciOBFileName);
-                    sb.append("CHILD.").append(n++).append(".NAME").append(" \"").append(name).append("\"\n");
+                    final String sciOBFileName = fixFileName(obFile.getName());
+                    sb.append("CHILD.").append(n++).append(".NAME").append(" \"").append(sciOBFileName).append("\"\n");
 
                     for (Target calibrator : calibrators) {
                         // CHILD.<n>.NAME "CAL_OB_NAME"
-                        name = fix31Chars(generateOBFileName(calibrator));
-                        sb.append("CHILD.").append(n++).append(".NAME").append(" \"").append(name).append("\"\n");
+                        final String calOBFileName = fixFileName(generateOBFileName(calibrator));
+                        sb.append("CHILD.").append(n++).append(".NAME").append(" \"").append(calOBFileName).append("\"\n");
                     }
 
                     document = document.replaceFirst(KEY_CHILD_NAMES, sb.toString());

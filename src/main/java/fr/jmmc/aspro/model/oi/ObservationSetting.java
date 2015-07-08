@@ -674,49 +674,6 @@ public class ObservationSetting
     this.cachedOrphanCalibrators = orphans;
   }
 
-  /**
-   * Generate a standard file name for the selected target using the format :
-   * [<prefix>_<TARGET>_<INSTRUMENT>_<CONFIGURATION>_<suffix>.<extension>]
-   *
-   * @param targetName target name
-   * @param prefix prefix (optional) for the file name
-   * @param suffix suffix (optional) before the date
-   * @param extension file extension
-   * @return standard file name
-   */
-  public String generateFileName(final String targetName, final String prefix, final String suffix, final String extension) {
-    final StringBuilder sb = new StringBuilder(32);
-    if (prefix != null) {
-      sb.append(prefix).append('_');
-    }
-
-    // replace invalid characters :
-    final String altTargetName = fr.jmmc.jmcs.util.StringUtils.removeNonAlphaNumericChars(targetName);
-    sb.append(altTargetName).append('_');
-
-    String instrumentName = this.getInstrumentConfiguration().getName();
-    // max 3 chars
-    if (instrumentName.length() > 3) {
-        instrumentName = instrumentName.substring(0, 3);
-    }
-    sb.append(instrumentName).append('_');
-
-    final String baseLine = fr.jmmc.jmcs.util.StringUtils.removeWhiteSpaces(this.getInstrumentConfiguration().getStations());
-    sb.append(baseLine);
-
-    if (suffix != null) {
-      sb.append('_').append(suffix);
-    }
-
-    if (fr.jmmc.aspro.ob.ExportOBVLTI.ENABLE_ABS_TIME_LIST) {
-        final String date = this.getWhen().getDate().toString();
-        sb.append('_').append(date);
-    }
-    
-    sb.append('.').append(extension);
-    
-    return sb.toString();
-  }
 //--simple--preserve
 
 }
