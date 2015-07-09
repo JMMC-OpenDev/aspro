@@ -219,8 +219,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private String interferometerConfigurationName = null;
     /** current instrument name to track changes */
     private String instrumentName = null;
-    /** current selected target */
-    private Target currentTarget = null;
+    /** selected target name  */
+    private String selectedTargetName = null;
     /* cached computed data */
     /** last computed Observability Data */
     private List<ObservabilityData> currentObsData = null;
@@ -645,7 +645,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     ExportOBVLTIAction.getInstance().process(observation.getTargets());
                     break;
                 case SINGLE:
-                    ExportOBVLTIAction.getInstance().process(Arrays.asList(new Target[]{getSelectedTarget()}));
+                    final Target target = getSelectedTarget();
+                    if (target != null) {
+                        ExportOBVLTIAction.getInstance().process(Arrays.asList(new Target[]{target}));
+                    }
                     break;
                 default:
             }
@@ -1303,7 +1306,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // reset cached data :
             setObservabilityData(null);
-            this.currentTarget = null;
+            this.selectedTargetName = null;
             this.lastZoomEvent = null;
             this.chartData = null;
 
@@ -1332,7 +1335,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         try {
 
             // update the current selected target :
-            this.setSelectedTarget(target);
+            this.setSelectedTargetName((target != null) ? target.getName() : null);
 
             updateTargetConfiguration();
             updateTargetHA();
@@ -3286,27 +3289,28 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @return target name
      */
     private String getSelectedTargetName() {
-        final Target target = getSelectedTarget();
-        if (target != null) {
-            return target.getName();
+        return this.selectedTargetName;
+    }
+
+    /**
+     * Define the currently selected target name
+     * @param targetName selected target name
+     */
+    private void setSelectedTargetName(final String targetName) {
+        this.selectedTargetName = targetName;
+    }
+
+    /**
+     * Return the currently selected target from the main observation
+     * @return target or null if not found 
+     */
+    private Target getSelectedTarget() {
+        final String targetName = getSelectedTargetName();
+        if (targetName != null) {
+            // Use main observation to get the latest revision of the Target:
+            return om.getMainObservation().getTarget(targetName);
         }
         return null;
-    }
-
-    /**
-     * Return the currently selected target
-     * @return target
-     */
-    public Target getSelectedTarget() {
-        return this.currentTarget;
-    }
-
-    /**
-     * Define the currently selected target
-     * @param target target to use
-     */
-    private void setSelectedTarget(final Target target) {
-        this.currentTarget = target;
     }
 
     /**
