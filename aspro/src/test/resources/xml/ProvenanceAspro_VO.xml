@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<observation>
+	
+  <!-- curation element from ObsDM-Core (not VOResource) -->
+  <Curation>
+    <Publisher>JMMC</Publisher>
+    <Version>1.0</Version>
+    <Contact>
+      <Name>Undefined</Name>
+      <Email>support@jmmc.fr</Email>
+    </Contact>
+    <Date>Date of the document</Date>
+  </Curation>
+
+  <DataID>
+    <!-- observation date -->
+    <Date>2009-12-01</Date>
+  </DataID>
+
+  <Provenance>
+    <ObsConfig>
+      <Array>
+        <!-- the array corresponds to the interferometer -->
+        <!-- interferometer properties -->
+        <name>VLTI</name>
+
+        <description>VLTI ...</description>
+
+        <position>
+          <posX>1942042.8584924</posX>
+          <posY>-5455305.996911</posY>
+          <posZ>-2654521.4011759</posZ>
+        </position>
+
+        <!-- Stations are ordered to form the baseline and represent the branches of the array : U1 U2 U3 -->
+        <ArrayConf>
+          <Station>
+            <name>U1</name>
+            <telescope>
+              <name>UT</name>
+              <diameter>8.2</diameter>
+            </telescope>
+
+            <relativePosition>
+              <posX>-0.73422599479242</posX>
+              <posY>-9.92488562146125</posY>
+              <posZ>-22.03283353519204</posZ>
+            </relativePosition>
+
+          </Station>
+          
+          <delayLine>
+            <name>DL1</name>
+            <maximumThrow>90</maximumThrow>
+          </delayLine>
+
+          <instrument>
+            <name>AMBER</name>
+            <channel>1</channel>
+          </instrument>
+
+        </ArrayConf>
+        <ArrayConf>
+          <Station>
+            <name>U2</name>
+            <telescope>
+              <name>UT</name>
+              <diameter>8.2</diameter>
+            </telescope>
+
+            <relativePosition>
+              <posX>-0.73422599479242</posX>
+              <posY>-9.92488562146125</posY>
+              <posZ>-22.03283353519204</posZ>
+            </relativePosition>
+
+          </Station>
+
+          <delayLine>
+            <name>DL2</name>
+            <maximumThrow>90</maximumThrow>
+          </delayLine>
+
+          <instrument>
+            <name>AMBER</name>
+            <channel>2</channel>
+          </instrument>
+
+        </ArrayConf>
+        <ArrayConf>
+          <Station>
+            <name>U3</name>
+            <telescope>
+              <name>UT</name>
+              <diameter>8.2</diameter>
+            </telescope>
+
+            <relativePosition>
+              <posX>-0.73422599479242</posX>
+              <posY>-9.92488562146125</posY>
+              <posZ>-22.03283353519204</posZ>
+            </relativePosition>
+
+          </Station>
+
+          <delayLine>
+            <name>DL3</name>
+            <maximumThrow>90</maximumThrow>
+          </delayLine>
+
+          <instrument>
+            <name>AMBER</name>
+            <channel>3</channel>
+          </instrument>
+
+        </ArrayConf>
+
+        <InstrumentConf>
+            <name>AMBER</name>
+            <!-- other information -->
+        </InstrumentConf>
+
+<!-- how to associate a single instrument to gather the multiple beams coming from the several telescopes -->
+        
+      </Array>
+    </ObsConfig>
+    <Environment>
+      <!-- seeing / weather conditions -->
+    </Environment>
+  </Provenance>
+
+  <!-- Target section -->
+  <target>
+      <name>ETA TAU</name>
+      <RA>56.8711521</RA>
+      <DEC>24.1051372</DEC>
+      <EQUINOX>2000.0</EQUINOX>
+      <!-- magnitudes -->
+  </target>
+    
+</observation>
