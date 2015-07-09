@@ -31,7 +31,6 @@ CONSTRAINT.SET.NAME           "none"
 
 
 longDescription              ""
-IPVersion                    "1107.09"
 instrument                   "AMBER"
 LineNumber                   "0"
 OBSERVATION.DESCRIPTION.NAME "<OB-NAME>"
