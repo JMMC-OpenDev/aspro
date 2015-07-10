@@ -56,9 +56,9 @@ TEMPLATE.NAME "PIONIER_obs_<CATEGORY>"
 SEQ.NEXPO                        "5"
 
 
-TEMPLATE.NAME "PIONIER_gen_cal_dark"
+TEMPLATE.NAME "PIONIER_gen_cal_kappa"
 SEQ.DOIT                         "T"
 
 
-TEMPLATE.NAME "PIONIER_gen_cal_kappa"
+TEMPLATE.NAME "PIONIER_gen_cal_dark"
 SEQ.DOIT                         "T"
