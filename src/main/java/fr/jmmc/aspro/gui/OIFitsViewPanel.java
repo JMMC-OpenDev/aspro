@@ -12,6 +12,7 @@ import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.oiexplorer.core.export.DocumentExportable;
 import fr.jmmc.oiexplorer.core.export.DocumentOptions;
 import fr.jmmc.oiexplorer.core.gui.PlotChartPanel;
+import fr.jmmc.oiexplorer.core.gui.PlotDefinitionEditor;
 import fr.jmmc.oiexplorer.core.gui.PlotView;
 import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
@@ -39,6 +40,9 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
     private static final Logger logger = LoggerFactory.getLogger(OIFitsViewPanel.class.getName());
 
     static {
+        // Disable the expression editor until it is ready for production:
+        PlotDefinitionEditor.setEnableExpressionEditor(false);
+        
         // Hack to always show flagged data (error undefined):
         for (PlotDefinition plotDef : PlotDefinitionFactory.getInstance().getDefaults()) {
             plotDef.setSkipFlaggedData(false);
