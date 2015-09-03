@@ -151,6 +151,17 @@ public final class Aspro2 extends App {
             }
         });
     }
+    
+    /**
+     * Return the application state when submitting a feedback report
+     *
+     * @return application state as String
+     */
+    @Override
+    public String getStateForFeedbackReport() {
+        // serialize observation to xml :
+        return "Current ObservationSetting:\n" + ObservationManager.getInstance().saveToString();
+    }
 
     /**
      * Hook to handle operations before closing application.
