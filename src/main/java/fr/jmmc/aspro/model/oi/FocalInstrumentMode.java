@@ -195,19 +195,6 @@ public class FocalInstrumentMode
   public final double getWaveLength() {
     return 0.5d * (this.waveLengthMax + this.waveLengthMin);
   }
-
-  /**
-   * Return the number of channels:
-   * @deprecated TODO KILL ASAP
-   * numberChannels if defined else computed from spectral resolution
-   * @return number of channels
-   */
-  public final int getEffectiveNumberOfChannels() {
-    if (getNumberChannels() != null) {
-      return getNumberChannels().intValue();
-    }
-    return getSpectralChannels();
-  }
   
   /** spectral channels (derived from resolution)(read-only) */
   @javax.xml.bind.annotation.XmlTransient

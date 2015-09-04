@@ -1268,6 +1268,14 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <xsd:element name="timezone" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Timezone ID (handling the Daylight Saving Time) of the Interferometer
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="windPointingRestriction" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>

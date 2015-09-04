@@ -31,6 +31,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="position" type="{http://www.jmmc.fr/aspro-oi/0.1}Position3D"/>
+ *         &lt;element name="timezone" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="windPointingRestriction" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="telescope" type="{http://www.jmmc.fr/aspro-oi/0.1}Telescope" maxOccurs="unbounded"/>
  *         &lt;element name="station" type="{http://www.jmmc.fr/aspro-oi/0.1}Station" maxOccurs="unbounded"/>
@@ -54,6 +55,7 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "description",
     "position",
+    "timezone",
     "windPointingRestriction",
     "telescopes",
     "stations",
@@ -78,6 +80,8 @@ public class InterferometerDescription
     protected String description;
     @XmlElement(required = true)
     protected Position3D position;
+    @XmlElement(required = true)
+    protected String timezone;
     protected Double windPointingRestriction;
     @XmlElement(name = "telescope", required = true)
     protected List<Telescope> telescopes;
@@ -168,6 +172,30 @@ public class InterferometerDescription
      */
     public void setPosition(Position3D value) {
         this.position = value;
+    }
+
+    /**
+     * Gets the value of the timezone property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getTimezone() {
+        return timezone;
+    }
+
+    /**
+     * Sets the value of the timezone property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setTimezone(String value) {
+        this.timezone = value;
     }
 
     /**
