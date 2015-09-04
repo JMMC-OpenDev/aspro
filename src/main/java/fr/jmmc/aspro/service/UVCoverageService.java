@@ -4,12 +4,15 @@
 package fr.jmmc.aspro.service;
 
 import edu.dartmouth.AstroSkyCalc;
+import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
+import fr.jmmc.aspro.model.observability.TargetPointInfo;
+import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
@@ -86,6 +89,8 @@ public final class UVCoverageService {
     private double lambdaMax;
     /** number of spectral channels (used by OIFits) */
     private int nSpectralChannels;
+    /** observation sky calc instance */
+    private final AstroSkyCalcObservation sco = new AstroSkyCalcObservation();
 
     /* reused observability data */
     /** sky calc instance */
@@ -157,6 +162,13 @@ public final class UVCoverageService {
 
             // Is the target visible :
             if (this.starData.getHaElev() > 0d) {
+                // define site :
+                this.sco.defineSite(this.sc);
+
+                // get Target coordinates precessed to JD CENTER and define target to get later az/alt positions from JSkyCalc :
+                final Target target = this.observation.getTarget(targetName);
+                this.sco.defineTarget(this.obsData.jdCenter(), target.getRADeg(), target.getDECDeg(), target.getPMRA(), target.getPMDEC());
+
                 if (this.doUVSupport) {
                     computeUVSupport();
                 }
@@ -170,6 +182,9 @@ public final class UVCoverageService {
 
                 // prepare OIFits computation :
                 createOIFits();
+
+                // reset current target :
+                this.sco.reset();
             }
 
             // fast interrupt :
@@ -311,9 +326,23 @@ public final class UVCoverageService {
                     logger.debug("HA ObsTime: {}", haObsTime);
                 }
 
+                // precessed target right ascension in rad :
                 final double precRA = this.starData.getPrecRA();
 
-                final double step = this.haStep;
+                // precessed target declination in rad :
+                final double precDEC = FastMath.toRadians(this.starData.getPrecDEC());
+
+                // compute once cos/sin DEC:
+                final double cosDec = FastMath.cos(precDEC);
+                final double sinDec = FastMath.sin(precDEC);
+
+                final AzEl azEl = new AzEl();
+
+                // Fix JD offset at haMin:
+                final double jdOffset = this.obsData.getJDOffset(this.sc.convertHAToJD(haMin, precRA));
+
+                // step is given in solar time so correct by the sideral / solar ratio:
+                final double step = AstroSkyCalc.solar2lst(this.haStep);
 
                 // estimate the number of HA points :
                 final int capacity = (int) Math.round((haMax - haMin) / step) + 1;
@@ -321,20 +350,26 @@ public final class UVCoverageService {
                 // First pass : find observable HA values :
                 // use safety limit to avoid out of memory errors :
                 final int haLen = (capacity > MAX_HA_POINTS) ? MAX_HA_POINTS : capacity;
-                final double[] haValues = new double[haLen];
-                final Date[] dateValues = new Date[haLen];
+                final TargetPointInfo[] ptInfos = new TargetPointInfo[haLen];
 
                 Range obsRange;
+                TargetPointInfo targetPointInfo;
                 int j = 0;
+
+                // Traverse all observable HA range to find possible observing blocks (haObsTime duration):
                 for (double ha = haMin; ha <= haMax; ha += step) {
 
                     // check HA start:
                     if ((obsRange = Range.find(obsRangesHA, ha, HA_PRECISION)) != null) {
                         // check HA end:
                         if (obsRange.contains(ha + haObsTime, HA_PRECISION)) {
-                            haValues[j] = ha;
-                            dateValues[j] = this.sc.toDate(this.sc.convertHAToJD(ha, precRA), this.obsData.isUseLST()); // LST or GMT
-                            j++;
+
+                            targetPointInfo = createTargetInfo(cosDec, sinDec, precRA, azEl, ha, jdOffset);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("info: {}", targetPointInfo);
+                            }
+
+                            ptInfos[j++] = targetPointInfo;
 
                             // check safety limit :
                             if (j >= MAX_HA_POINTS) {
@@ -350,26 +385,21 @@ public final class UVCoverageService {
                 // correct number of HA points :
                 final int nPoints = j;
 
+                this.data.setNPoints(nPoints);
+
                 // check if there is at least one observable HA :
                 if (nPoints == 0) {
                     addWarning("Check your HA min/max settings. There is no observable HA");
                     return;
                 }
 
-                final double[] HA = new double[nPoints];
-                System.arraycopy(haValues, 0, HA, 0, nPoints);
+                // Copy only valid data points:
+                final TargetPointInfo[] targetPointInfos = new TargetPointInfo[nPoints];
+                System.arraycopy(ptInfos, 0, targetPointInfos, 0, nPoints);
 
-                this.data.setHA(HA);
-                this.data.setDates(dateValues);
+                this.data.setTargetPointInfos(targetPointInfos);
 
                 // Second pass : extract UV values for HA points :
-                // precessed target declination in rad :
-                final double precDEC = FastMath.toRadians(this.starData.getPrecDEC());
-
-                // compute once cos/sin DEC:
-                final double cosDec = FastMath.cos(precDEC);
-                final double sinDec = FastMath.sin(precDEC);
-
                 final double invLambdaMin = 1d / this.lambdaMin;
                 final double invLambdaMax = 1d / this.lambdaMax;
 
@@ -407,7 +437,9 @@ public final class UVCoverageService {
 
                     for (j = 0; j < nPoints; j++) {
 
-                        sinHa = FastMath.sinAndCos(AngleUtils.hours2rad(HA[j]), _cw); // cw holds cosine
+                        sinHa = FastMath.sinAndCos(
+                                AngleUtils.hours2rad(targetPointInfos[j].getHa()),
+                                _cw); // cw holds cosine
                         cosHa = _cw.value;
 
                         // Baseline projected vector (m) :
@@ -486,12 +518,11 @@ public final class UVCoverageService {
         this.lambda = AsproConstants.MICRO_METER * insMode.getWaveLength();
 
         // TODO: handle properly spectral channels (rebinning):
-        // this.nSpectralChannels = insMode.getEffectiveNumberOfChannels();
         this.nSpectralChannels = insMode.getSpectralChannels();
 
         if (logger.isDebugEnabled()) {
             logger.debug("lambdaMin: {}", this.lambdaMin);
-            logger.debug("lambda: {}", this.lambda);
+            logger.debug("lambda:    {}", this.lambda);
             logger.debug("lambdaMax: {}", this.lambdaMax);
             logger.debug("nChannels: {}", this.nSpectralChannels);
         }
@@ -521,9 +552,7 @@ public final class UVCoverageService {
      * Create the OIFits structure (array, target, wave lengths and visibilities)
      */
     private void createOIFits() {
-        final List<UVRangeBaseLineData> targetUVObservability = this.data.getTargetUVObservability();
-
-        if (targetUVObservability == null) {
+        if (this.data.getTargetUVObservability() == null) {
             addWarning("OIFits data not available");
         } else {
             // thread safety : TODO: observation can change ... extract observation info in prepare ??
@@ -544,8 +573,8 @@ public final class UVCoverageService {
                         this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels,
                         this.useInstrumentBias, this.doDataNoise,
                         this.supersamplingOIFits, this.mathModeOIFits,
-                        this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc,
-                        this.data.getWarningContainer());
+                        this.data.getTargetPointInfos(), this.data.getTargetUVObservability(),
+                        this.sc, this.data.getWarningContainer());
 
                 // TODO: create elsewhere the OIFitsCreatorService:
                 this.data.setOiFitsCreator(oiFitsCreator);
@@ -686,5 +715,33 @@ public final class UVCoverageService {
             targetUVObservability = null;
         }
         return targetUVObservability;
+    }
+
+    /**
+     * Create a new target point information (azimuth and elevation) for the current target and julian date
+     * @param cosDec cosinus of target declination
+     * @param sinDec sinus of target declination
+     * @param precRA precessed RA of target
+     * @param azEl AzEl instance
+     * @param ha current hour angle
+     * @param jdOffset offset on julian date to stay within night range
+     * @return target point information
+     */
+    private TargetPointInfo createTargetInfo(final double cosDec, final double sinDec,
+                                             final double precRA,
+                                             final AzEl azEl,
+                                             final double ha,
+                                             final double jdOffset) {
+
+        // fix JD in night range in order to have accurate date:
+        final double jd = this.sc.convertHAToJD(ha, precRA) + jdOffset;
+
+        this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
+
+        final Date date = this.sc.toDate(jd, this.obsData.getTimeRef()); // LST or GMT
+
+        final double airmass = AstroSkyCalc.airmass(azEl.getElevation());
+
+        return new TargetPointInfo(jd, ha, date, azEl.getAzimuth(), azEl.getElevation(), airmass);
     }
 }

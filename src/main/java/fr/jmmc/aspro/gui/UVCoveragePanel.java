@@ -33,6 +33,7 @@ import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent.ChangeType;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
+import fr.jmmc.aspro.model.observability.TargetPointInfo;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
@@ -148,8 +149,8 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolTipGenerator, ChartProgressListener, ZoomEventListener,
-                                                                         ActionListener, ChangeListener, ObservationListener, Observer, 
-                                                                         UserModelAnimator.UserModelAnimatorListener, 
+                                                                         ActionListener, ChangeListener, ObservationListener, Observer,
+                                                                         UserModelAnimator.UserModelAnimatorListener,
                                                                          DocumentExportable, Disposable {
 
     /** default serial UID for Serializable interface */
@@ -2833,8 +2834,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private void updateUVObservableRanges(final XYSeriesCollection dataset, final ObservationCollectionUVData chartData) {
 
         List<UVRangeBaseLineData> targetUVObservability;
-        double[] haValues;
-        Date[] dateValues;
+        UVCoverageData uvData;
+        int nPoints;
+        TargetPointInfo[] targetPointInfos;
+        TargetPointInfo targetPointInfo;
 
         XYSeries xySeries = null;
         String serieKey, blName, confName;
@@ -2848,25 +2851,21 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         double[] vWMax;
         double x1, y1, x2, y2;
 
-        double ha;
-        Date date;
-
-        final String timeRef = chartData.getFirstObsData().isUseLST() ? AsproConstants.TIME_LST : AsproConstants.TIME_UTC;
+        final String timeRef = chartData.getFirstObsData().getTimeRef().getDisplayName();
 
         final boolean single = chartData.isSingle();
 
         // Iterate over UV Coverage data (multi conf) :
         for (int c = 0, len = chartData.size(); c < len; c++) {
-            final UVCoverageData uvData = chartData.getUVDataList().get(c);
+            uvData = chartData.getUVDataList().get(c);
 
             // process observable uv ranges :
             targetUVObservability = uvData.getTargetUVObservability();
 
             if (targetUVObservability != null) {
                 // target is observable:
-
-                haValues = uvData.getHA();
-                dateValues = uvData.getDates();
+                nPoints = uvData.getNPoints();
+                targetPointInfos = uvData.getTargetPointInfos();
 
                 confName = chartData.getConfigurationNames().get(c);
 
@@ -2878,7 +2877,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                     tooltipMap = this.seriesTooltips.get(serieKey);
                     if (tooltipMap == null) {
-                        tooltipMap = new HashMap<Integer, String>(2 * haValues.length * targetUVObservability.size());
+                        tooltipMap = new HashMap<Integer, String>(2 * nPoints * targetUVObservability.size());
                         this.seriesTooltips.put(serieKey, tooltipMap);
                     }
                 }
@@ -2895,7 +2894,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                         tooltipMap = this.seriesTooltips.get(serieKey);
                         if (tooltipMap == null) {
-                            tooltipMap = new HashMap<Integer, String>(2 * haValues.length);
+                            tooltipMap = new HashMap<Integer, String>(2 * nPoints);
                             this.seriesTooltips.put(serieKey, tooltipMap);
                         }
                     }
@@ -2908,9 +2907,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     vWMax = uvBL.getVWMax();
 
                     for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-
-                        ha = haValues[i];
-                        date = dateValues[i];
+                        targetPointInfo = targetPointInfos[i];
 
                         x1 = toUVPlotScale(uWMax[i]);
                         y1 = toUVPlotScale(vWMax[i]);
@@ -2923,7 +2920,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                         // line tooltip use index of (x2, y2) point:
                         tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
-                                generateTooltip(blName, confName, ha, date, timeRef, u[i], v[i]));
+                                generateTooltip(blName, confName, targetPointInfo, timeRef, u[i], v[i]));
 
                         xySeries.add(x2, y2, false);
 
@@ -2935,7 +2932,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                         // line tooltip use index of (x2, y2) point:
                         tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
-                                generateTooltip(blName, confName, ha, date, timeRef, -u[i], -v[i]));
+                                generateTooltip(blName, confName, targetPointInfo, timeRef, -u[i], -v[i]));
 
                         xySeries.add(-x2, -y2, false);
 
@@ -3357,17 +3354,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     }
 
     /**
-     * Generate the tooltip's text for an UV point 
+     * Generate the tooltip's text for the given UV point 
      * @param baseline corresponding base line
      * @param confName configuration name
-     * @param ha hour angle
-     * @param date time expressed in LST or UTC
+     * @param targetPointInfo target point information for the given UV point 
      * @param timeRef time reference LST or UTC
      * @param u u coordinate in meters
      * @param v v coordinate in meters
      * @return tooltip's text for an UV point
      */
-    public String generateTooltip(final String baseline, final String confName, double ha, final Date date, final String timeRef,
+    public String generateTooltip(final String baseline, final String confName, final TargetPointInfo targetPointInfo, final String timeRef,
                                   final double u, final double v) {
 
         final StringBuffer sb = this.sbToolTip;
@@ -3377,9 +3373,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         sb.append("<br>Base line: ").append(baseline);
 
         sb.append("<br>Time</b>: ");
-        FormatterUtils.format(this.timeFormatter, sb, date);
-        sb.append(" [").append(timeRef).append("] - <b>HA</b>: ");
-        FormatterUtils.format(this.df1, sb, ha);
+        FormatterUtils.format(this.timeFormatter, sb, targetPointInfo.getDate());
+        sb.append(" [").append(timeRef).append(']');
+
+        sb.append("<br><b>HA</b>: ");
+        FormatterUtils.format(this.df1, sb, targetPointInfo.getHa());
+        sb.append(" (az ").append((int) Math.round(targetPointInfo.getAzimuth()));
+        sb.append(", el ").append((int) Math.round(targetPointInfo.getElevation())).append(')');
+
+        sb.append("<br><b>Airmass</b>: ");
+        FormatterUtils.format(this.df1, sb, targetPointInfo.getAirmass());
 
         // use U and V to display radius and position angle:
         sb.append("<br><b>Radius</b>: ");
@@ -3418,7 +3421,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 // convert JD to LST/UT date/time and
                 // roll +/- 1 day to be within plot range:
-                final Date now = sc.toDate(jd, obsData.isUseLST(), obsData.getDateMin(), obsData.getDateMax());
+                final Date now = sc.toDate(jd, obsData.getTimeRef(), obsData.getDateMin(), obsData.getDateMax());
 
                 if (logger.isDebugEnabled()) {
                     logger.debug("current date/time is: {}", now);

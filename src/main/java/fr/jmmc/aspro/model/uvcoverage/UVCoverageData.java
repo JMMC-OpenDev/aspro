@@ -6,9 +6,9 @@ package fr.jmmc.aspro.model.uvcoverage;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.ObservationVersion;
 import fr.jmmc.aspro.model.WarningContainer;
+import fr.jmmc.aspro.model.observability.TargetPointInfo;
 import fr.jmmc.aspro.service.NoiseService;
 import fr.jmmc.aspro.service.OIFitsCreatorService;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,10 +31,10 @@ public final class UVCoverageData {
     private List<BaseLine> baseLines = null;
     /** list of uv points corresponding to the target rise/set */
     private List<UVBaseLineData> targetUVRiseSet;
-    /** observable decimal hour angles (used by OIFits and tooltips) */
-    private double[] ha = null;
-    /** time (UTC or LST) (used by tooltips) */
-    private Date[] dates = null;
+    /** number of uv point couples */
+    private int nPoints = 0;
+    /** target information for each uv point couples */
+    private TargetPointInfo[] targetPointInfos = null;
     /** list of uv point couples corresponding to the target observability */
     private List<UVRangeBaseLineData> targetUVObservability;
     /** warning container */
@@ -158,35 +158,35 @@ public final class UVCoverageData {
     }
 
     /**
-     * Return the observable decimal hour angles (used by OIFits and tooltips)
-     * @return observable decimal hour angles (used by OIFits and tooltips)
+     * Return the number of uv point couples
+     * @return number of uv point couples
      */
-    public double[] getHA() {
-        return ha;
+    public int getNPoints() {
+        return nPoints;
     }
 
     /**
-     * Define the observable decimal hour angles (used by OIFits and tooltips)
-     * @param ha observable decimal hour angles (used by OIFits and tooltips)
+     * Define the number of uv point couples
+     * @param nPoints number of uv point couples 
      */
-    public void setHA(final double[] ha) {
-        this.ha = ha;
+    public void setNPoints(final int nPoints) {
+        this.nPoints = nPoints;
     }
 
     /**
-     * Return the time (UTC or LST) (used by tooltips)
-     * @return time (UTC or LST) (used by tooltips)
+     * Return the the target information for each uv point couples
+     * @return target information array
      */
-    public Date[] getDates() {
-        return dates;
+    public TargetPointInfo[] getTargetPointInfos() {
+        return targetPointInfos;
     }
 
     /**
-     * Define the time (UTC or LST) (used by tooltips)
-     * @param dates time (UTC or LST) (used by tooltips)
+     * Define the target information for each uv point couples
+     * @param targetPointInfos target information array
      */
-    public void setDates(Date[] dates) {
-        this.dates = dates;
+    public void setTargetPointInfos(TargetPointInfo[] targetPointInfos) {
+        this.targetPointInfos = targetPointInfos;
     }
 
     /**
