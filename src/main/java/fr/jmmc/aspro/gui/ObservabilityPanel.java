@@ -19,6 +19,7 @@ import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
 import fr.jmmc.aspro.model.ObservationCollectionObsData;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.event.TargetSelectionEvent;
@@ -240,6 +241,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private final NumberFormat df1 = new DecimalFormat("0.0");
     /** timeline marker */
     private ValueMarker timeMarker = null;
+    /** midnight marker */
+    private ValueMarker midMarker = null;
     /** flag to enable / disable the automatic refresh of the plot when any swing component changes */
     private boolean doAutoRefresh = true;
     /** flag to indicate that the plot is rendered for PDF output */
@@ -458,7 +461,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 try {
                     if (doBaseLineLimits) {
                         // force LST to compute correctly base line limits :
-                        jComboTimeRef.setSelectedItem(AsproConstants.TIME_LST);
+                        jComboTimeRef.setSelectedItem(TimeRef.LST.getDisplayName());
                         jCheckBoxDetailedOutput.setSelected(false);
                     } else {
                         // restore user preference :
@@ -976,8 +979,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
 
         /* get plot options from swing components */
-        // indicates if the timestamps are expressed in LST or in UTC:
-        final boolean useLST = AsproConstants.TIME_LST.equals(this.jComboTimeRef.getSelectedItem());
+        // get selected time reference:
+        final TimeRef timeRef = TimeRef.findByDisplayName(this.jComboTimeRef.getSelectedItem().toString());
 
         // flag to find baseline limits:
         final boolean doBaseLineLimits = this.jCheckBoxBaseLineLimits.isSelected();
@@ -991,7 +994,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // Create Observability task worker
         // Cancel other tasks and execute this new task :
         new ObservabilitySwingWorker(this,
-                obsCollection, useLST, doDetailedOutput, doBaseLineLimits,
+                obsCollection, timeRef, doDetailedOutput, doBaseLineLimits,
                 this.prefCenterNight, this.prefTwilightNightLimit, this.prefBestPopsAlgorithm,
                 this.prefBestPopEstimatorCriteriaSigma, this.prefBestPopEstimatorCriteriaAverageWeight).executeTask();
     }
@@ -1007,8 +1010,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         /* members */
         /** observability panel used for refreshUI callback */
         private final ObservabilityPanel obsPanel;
-        /** indicates if the timestamps are expressed in LST or in UTC */
-        private final boolean useLST;
+        /** time reference indicating if the timestamps are expressed in LST, UTC or Local time */
+        private final TimeRef timeRef;
         /** flag to find baseline limits */
         private final boolean doBaseLineLimits;
         /** flag to produce detailed output with all BL / horizon / rise intervals per target */
@@ -1029,7 +1032,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
          *
          * @param obsPanel observability panel
          * @param obsCollection observation collection to use
-         * @param useLST indicates if the timestamps are expressed in LST or in UTC
+         * @param timeRef time reference (LST, UTC or Local)
          * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
          * @param doBaseLineLimits flag to find base line limits
          * @param doCenterMidnight flag to center JD range arround midnight
@@ -1039,7 +1042,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
          * @param bestPopEstimatorCriteriaAverageWeight optional Best Pops criteria on average weight
          */
         private ObservabilitySwingWorker(final ObservabilityPanel obsPanel, final ObservationCollection obsCollection,
-                                         final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
+                                         final TimeRef timeRef, final boolean doDetailedOutput, final boolean doBaseLineLimits,
                                          final boolean doCenterMidnight, final SunType twilightNightLimit,
                                          final Algorithm bestPopsAlgorithm,
                                          final Criteria bestPopEstimatorCriteriaSigma, final Criteria bestPopEstimatorCriteriaAverageWeight) {
@@ -1047,7 +1050,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             // get current observation version :
             super(AsproTaskRegistry.TASK_OBSERVABILITY, obsCollection);
             this.obsPanel = obsPanel;
-            this.useLST = useLST;
+            this.timeRef = timeRef;
             this.doDetailedOutput = doDetailedOutput;
             this.doBaseLineLimits = doBaseLineLimits;
             this.doCenterMidnight = doCenterMidnight;
@@ -1088,7 +1091,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                         public ObservabilityData call() {
 
                             // compute the observability data :
-                            final ObservabilityData obsData = new ObservabilityService(observation, useLST, doDetailedOutput, doBaseLineLimits,
+                            final ObservabilityData obsData = new ObservabilityService(observation, timeRef, doDetailedOutput, doBaseLineLimits,
                                     doCenterMidnight, twilightNightLimit, bestPopsAlgorithm,
                                     bestPopEstimatorCriteriaSigma, bestPopEstimatorCriteriaAverageWeight).compute();
 
@@ -1205,7 +1208,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             final ObservationSetting observation = chartData.getFirstObservation();
             final ObservabilityData obsData = chartData.getFirstObsData();
 
-            final boolean useLST = obsData.isUseLST();
             final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
 
             // Enable or disable the 'Night only' option:
@@ -1231,7 +1233,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 }
                 ChartUtils.addSubtitle(this.chart, sb.toString());
 
-                if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
+                if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() 
+                                            || (TimeRef.LST != obsData.getTimeRef()))) {
                     // date and moon FLI :
                     sb.setLength(0);
                     sb.append("Day: ").append(observation.getWhen().getDate().toString());
@@ -1244,12 +1247,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 final String dateAxisLabel;
                 if (doBaseLineLimits) {
                     dateAxisLabel = AsproConstants.TIME_HA;
+                } else if (TimeRef.LOCAL == obsData.getTimeRef()) {
+                    dateAxisLabel = obsData.getTimeRef().getDisplayName() + " [" + obsData.getTimezoneID() + ']';
                 } else {
-                    if (useLST) {
-                        dateAxisLabel = AsproConstants.TIME_LST;
-                    } else {
-                        dateAxisLabel = AsproConstants.TIME_UTC;
-                    }
+                    dateAxisLabel = obsData.getTimeRef().getDisplayName();
                 }
 
                 // define the date axis (bounds and current range):
@@ -1258,6 +1259,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 // only valid for single observation :
                 updateSunMarkers(obsData.getSunIntervals(), obsData.getDateMin(), obsData.getDateMax());
 
+                // update the midnight marker:
+                updateMidnightMarker();
+                
                 // update the time marker:
                 updateTimeMarker();
 
@@ -2050,10 +2054,56 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     /**
+     * Create or update the midnight marker (black)
+     */
+    private void updateMidnightMarker() {
+        // remove marker anyway:
+        if (this.midMarker != null) {
+            this.xyPlot.removeRangeMarker(this.midMarker, Layer.BACKGROUND);
+        }
+
+        if (getChartData() != null) {
+            final ObservationSetting observation = getChartData().getFirstObservation();
+            final ObservabilityData obsData = getChartData().getFirstObsData();
+            
+            if (!obsData.isDoBaseLineLimits() && observation.getWhen().isNightRestriction()) {
+                final Date midnight = obsData.getDateMidnight();
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("midnight date/time is: {}", midnight);
+                }
+
+                final long timeValue = midnight.getTime();
+
+                if (midMarker == null) {
+                    // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
+                    this.midMarker = new ValueMarker(timeValue, Color.BLACK, ChartUtils.THIN_STROKE, Color.GRAY, ChartUtils.THIN_STROKE, 1.0f);
+                    this.midMarker.setLabelFont(ChartUtils.DEFAULT_FONT_MEDIUM);
+                    this.midMarker.setLabelOffset(TIME_MARKER_LABEL_OFFSET);
+                    this.midMarker.setLabelAnchor(RectangleAnchor.BOTTOM);
+                    this.midMarker.setLabelTextAnchor(TextAnchor.BOTTOM_CENTER);
+                } else {
+                    this.midMarker.setValue(timeValue);
+                }
+                // update displayed dates:
+                this.midMarker.setLabel(obsData.getDayRangeLabel());
+                
+                if (obsData.isDstChange() && obsData.getTimeRef() == TimeRef.LOCAL) {
+                    this.midMarker.setLabelPaint(Color.RED);
+                } else {
+                    this.midMarker.setLabelPaint(Color.BLACK);
+                }
+
+                this.xyPlot.addRangeMarker(this.midMarker, Layer.BACKGROUND);
+            }
+        }
+    }
+
+    /**
      * Create or update the timeline marker (red)
      */
     private void updateTimeMarker() {
-        // remove time marker anyway:
+        // remove marker anyway:
         if (this.timeMarker != null) {
             this.xyPlot.removeRangeMarker(this.timeMarker, Layer.BACKGROUND);
         }
@@ -2062,11 +2112,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         // do not export time marker in PDF output:
         if (!this.renderingPDF && getChartData() != null) {
-
             final ObservabilityData obsData = getChartData().getFirstObsData();
 
             if (!obsData.isDoBaseLineLimits()) {
-
                 // Get AstroSkyCalc instance :
                 final AstroSkyCalc sc = obsData.getDateCalc();
 
@@ -2080,13 +2128,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
                     // convert JD to LST/UT date/time and
                     // roll +/- 1 day to be within plot range:
-                    final Date now = sc.toDate(jd, obsData.isUseLST(), obsData.getDateMin(), obsData.getDateMax());
+                    final Date now = sc.toDate(jd, obsData.getTimeRef(), obsData.getDateMin(), obsData.getDateMax());
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("current date/time is: {}", now);
                     }
 
-                    final double timeValue = now.getTime();
+                    final long timeValue = now.getTime();
 
                     if (timeMarker == null) {
                         // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
@@ -2137,15 +2185,16 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             this.aJMMC.setY(this.xyPlot.getRangeAxis().getUpperBound()); // upper bound instead of other plots
 
             if (isTimelineEnabled()) {
-                // set time marker label anchor:
-                final BoundedDateAxis dateAxis = (BoundedDateAxis) this.xyPlot.getRangeAxis();
+                final double xMin = this.xyPlot.getRangeAxis().getLowerBound();
+                final double xMax = this.xyPlot.getRangeAxis().getUpperBound();
 
-                double left = this.timeMarker.getValue() - dateAxis.getRange().getLowerBound();
+                // set time marker label anchor:
+                double left = this.timeMarker.getValue() - xMin;
                 if (left < 0d) {
                     left = 0d;
                 }
 
-                double right = dateAxis.getRange().getUpperBound() - this.timeMarker.getValue();
+                double right = xMax - this.timeMarker.getValue();
                 if (right < 0d) {
                     right = 0d;
                 }
