@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.7.2"/>
-    <compilation date="09/07/2015" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.8"/>
+    <compilation date="04/09/2015" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -194,6 +194,21 @@
     </menubar>
 
     <releasenotes>
+        <release version="0.9.8">
+            <pubDate>Fri, 04 Sep 2015 17:00:00 GMT</pubDate>
+            <prerelease version="0.9.8.1 beta 1">
+                <change type="FEATURE">Improved the noise modelling to compute the strehl ratio per spectral channel
+                    and taking into account the target elevation (r0)</change>
+                <change type="FEATURE">Improved tooltip in the UV Coverage panel to add air mass, azimuth and elevation for each sampled UV point</change>
+                <change type="FEATURE">Added tooltip on the date field: 'the given date is used to determine the coming night at the observatory in the [DD; DD+1] range.
+                    for example, '2014/4/4' corresponds to the night between April 4th and 5th'</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/693">Added a marker at midnight (Local time) in
+                    the Observability panel indicating the appropriate date range [DD; DD+1] corresponding to the current night</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/399">Added Local time support in
+                    the Observability, UV Coverage and Preferences panels. It provides the local time at the observatory
+                    (timezone including Daylight Saving Time)</change>
+            </prerelease>
+        </release>
 
         <release version="0.9.7.2">
             <pubDate>Thu, 09 Jul 2015 16:00:00 GMT</pubDate>
