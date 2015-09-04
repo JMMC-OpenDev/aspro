@@ -10,6 +10,7 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.jmcs.gui.component.Disposable;
+import fr.jmmc.jmcs.gui.util.WindowUtils;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -106,6 +107,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
             form.setDialog(dialog);
 
             // 4. Size the dialog.
+            WindowUtils.setClosingKeyboardShortcuts(dialog);
             dialog.pack();
 
             // Center it :
