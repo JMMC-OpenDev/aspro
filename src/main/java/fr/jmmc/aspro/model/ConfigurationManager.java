@@ -37,6 +37,7 @@ import fr.jmmc.jmcs.util.ResourceUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oitools.util.CombUtils;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -57,6 +58,8 @@ public final class ConfigurationManager extends BaseOIManager {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class.getName());
     /** debug configuration at startup */
     private static final boolean DEBUG_CONF = false;
+    /** dump horizons at startup */
+    private static final boolean DUMP_HORIZON = false;
     /** Configurations file name */
     private static final String CONF_FILE = "AsproOIConfigurations.xml";
     /** singleton pattern */
@@ -267,10 +270,11 @@ public final class ConfigurationManager extends BaseOIManager {
      * @param id interferometer description
      */
     private static void addInterferometerDescription(final Configuration configuration, final InterferometerDescription id) {
-
+        final String name = id.getName();
+        
         // check if the interferometer is unique (name) :
-        if (configuration.getInterferometerDescriptions().containsKey(id.getName())) {
-            throw new IllegalStateException("The interferometer '" + id.getName() + "' is already present in the loaded configuration !");
+        if (configuration.getInterferometerDescriptions().containsKey(name)) {
+            throw new IllegalStateException("The interferometer '" + name + "' is already present in the loaded configuration !");
         }
 
         computeInterferometerLocation(id);
@@ -303,9 +307,9 @@ public final class ConfigurationManager extends BaseOIManager {
             }
         }
 
-        adjustStationHorizons(id.getStations());
+        adjustStationHorizons(name, id.getStations());
 
-        configuration.getInterferometerDescriptions().put(id.getName(), id);
+        configuration.getInterferometerDescriptions().put(name, id);
     }
 
     /**
@@ -501,9 +505,12 @@ public final class ConfigurationManager extends BaseOIManager {
 
     /**
      * Adjust the station horizons to respect the maximum elevation limit (85 deg for CHARA)
+     * @param name interferometer name (debug)
      * @param stations station to update
      */
-    private static void adjustStationHorizons(final List<Station> stations) {
+    private static void adjustStationHorizons(final String name, final List<Station> stations) {
+        final StringBuilder sb = (DUMP_HORIZON) ? new StringBuilder(65336) : null;
+        
         double maxElev;
         for (Station station : stations) {
             logger.debug("station: {}", station);
@@ -519,6 +526,27 @@ public final class ConfigurationManager extends BaseOIManager {
                             logger.debug("station: {}: fix point: {}", station, point);
                         }
                         point.setElevation(maxElev);
+                    }
+                }
+
+                if (DUMP_HORIZON && sb != null) {
+                    sb.setLength(0);
+                    sb.append("# ").append(name).append(" Station: ").append(station.getName()).append('\n');
+                    sb.append("# AZ,EL\n");
+
+                    for (AzEl point : station.getHorizon().getPoints()) {
+
+                        sb.append(NumberUtils.trimTo3Digits(point.getAzimuth())).append(',')
+                                .append(NumberUtils.trimTo3Digits(point.getElevation())).append('\n');
+                    }
+
+                    final String filePath = "/tmp/" + name + '_' + station.getName() + ".horizon";
+                    logger.info("dump {} horizon to {}", station.getName(), filePath);
+                    
+                    try {
+                        FileUtils.writeFile(new File(filePath), sb.toString());
+                    } catch (IOException ioe) {
+                        logger.error("Unable to save file: {}", filePath, ioe);
                     }
                 }
 
