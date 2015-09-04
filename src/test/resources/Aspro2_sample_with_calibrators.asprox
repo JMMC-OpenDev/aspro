@@ -12,11 +12,11 @@
         <minElevation>30.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
-        <name>AMBER</name>
-        <stations>K0 G2 D0</stations>
+        <name>PIONIER</name>
+        <stations>D0 G2 J3 K0</stations>
         <pops></pops>
-        <instrumentMode>Low_JHK</instrumentMode>
-        <samplingPeriod>60.0</samplingPeriod>
+        <instrumentMode>GRISM-H</instrumentMode>
+        <samplingPeriod>30.0</samplingPeriod>
         <acquisitionTime>300.0</acquisitionTime>
     </instrumentConfiguration>
     <target id="HIP1234">
@@ -33,6 +33,7 @@
         <OBJTYP>*,UV</OBJTYP>
         <SPECTYP>F5</SPECTYP>
         <FLUX_V>7.347</FLUX_V>
+        <FLUX_H>6.0</FLUX_H>
         <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_disk1" type="elong_disk">
             <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter, 
@@ -386,7 +387,7 @@ smaller than 1.</desc>
             <field xsi:type="a:NumberValue" value="6.826" name="Vo" unit="mag"/>
             <field xsi:type="a:NumberValue" value="8.226" name="Bo" unit="mag"/>
             <field xsi:type="a:NumberValue" value="0.862" name="vis2"/>
-            <field xsi:type="a:NumberValue" value="0.0040" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="0.004" name="vis2Err"/>
             <field xsi:type="a:NumberValue" value="5.703" name="dist" unit="deg"/>
             <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
         </calibratorInfos>
@@ -720,7 +721,7 @@ smaller than 1.</desc>
             <field xsi:type="a:NumberValue" value="0.702" name="UD_R" unit="mas"/>
             <field xsi:type="a:NumberValue" value="0.679" name="UD_U" unit="mas"/>
             <field xsi:type="a:NumberValue" value="0.692" name="UD_V" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.0050" name="Av"/>
+            <field xsi:type="a:NumberValue" value="0.005" name="Av"/>
             <field xsi:type="a:NumberValue" value="3.945" name="Lo" unit="mag"/>
             <field xsi:type="a:NumberValue" value="4.035" name="Ko" unit="mag"/>
             <field xsi:type="a:NumberValue" value="4.063" name="Ho" unit="mag"/>
@@ -936,7 +937,7 @@ smaller than 1.</desc>
             <field xsi:type="a:NumberValue" value="6.826" name="Vo" unit="mag"/>
             <field xsi:type="a:NumberValue" value="8.456" name="Bo" unit="mag"/>
             <field xsi:type="a:NumberValue" value="0.679" name="vis2"/>
-            <field xsi:type="a:NumberValue" value="0.0070" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="0.007" name="vis2Err"/>
             <field xsi:type="a:NumberValue" value="9.707" name="dist" unit="deg"/>
             <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
         </calibratorInfos>
@@ -949,6 +950,6 @@ smaller than 1.</desc>
         </targetInfo>
     </targetUserInfos>
     <variant>
-        <stations>K0 G2 D0</stations>
+        <stations>D0 G2 J3 K0</stations>
     </variant>
 </a:observationSetting>
