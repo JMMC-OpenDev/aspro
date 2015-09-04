@@ -637,7 +637,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                 sb.append(" - <b>HA</b>: ");
                 FormatterUtils.format(this.df1, sb, pos.getHa());
                 sb.append(" (az ").append(pos.getAzimuth());
-                sb.append(", el ").append(pos.getElevation()).append(")");
+                sb.append(", el ").append(pos.getElevation()).append(')');
             }
 
             date = endDate;
@@ -649,7 +649,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                 sb.append(" - <b>HA</b>: ");
                 FormatterUtils.format(this.df1, sb, pos.getHa());
                 sb.append(" (az ").append(pos.getAzimuth());
-                sb.append(", el ").append(pos.getElevation()).append(")");
+                sb.append(", el ").append(pos.getElevation()).append(')');
             }
 
             date = starObs.getTransitDate();
@@ -661,7 +661,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                 pos = starObs.getTargetPosition(date);
                 if (pos != null) {
                     sb.append(" (az ").append(pos.getAzimuth());
-                    sb.append(", el ").append(pos.getElevation()).append(")");
+                    sb.append(", el ").append(pos.getElevation()).append(')');
                 }
             }
             sb.append("<hr>");
