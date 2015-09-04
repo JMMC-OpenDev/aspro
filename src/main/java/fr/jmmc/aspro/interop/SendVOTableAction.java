@@ -86,15 +86,8 @@ public class SendVOTableAction extends SampCapabilityAction {
      */
     public static void saveVOTable(final File file) throws IOException {
 
-        final ObservationManager om = ObservationManager.getInstance();
-
-        // Create a 16K buffer for the complete observation setting :
-        final StringWriter sw = new StringWriter(16384); // 16K buffer
-
         // serialize observation to xml :
-        om.saveObject(sw, om.getMainObservation());
-
-        final String xmlObservation = sw.toString();
+        final String xmlObservation = ObservationManager.getInstance().saveToString();
 
         logger.debug("observation:\n{}", xmlObservation);
 

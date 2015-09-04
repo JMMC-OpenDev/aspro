@@ -16,7 +16,6 @@ import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.BaseValue;
-import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
@@ -49,6 +48,7 @@ import fr.nom.tam.fits.FitsException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;
@@ -396,6 +396,21 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
             setObservationFile(file);
         }
+    }
+
+    /**
+     * Save the current observation into a String (xml)
+     * @return observation setting serialized into a String
+     * @throws IllegalStateException if an unexpected exception occured
+    */
+    public String saveToString() throws IllegalStateException {
+        // Create a 16K buffer for the complete observation setting :
+        final StringWriter sw = new StringWriter(16384);
+
+        // serialize observation to xml :
+        saveObject(sw, getMainObservation());
+
+        return sw.toString();        
     }
 
     // --- EVENTS ----------------------------------------------------------------
