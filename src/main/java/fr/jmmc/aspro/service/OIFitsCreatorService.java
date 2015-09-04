@@ -8,6 +8,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.WarningContainer;
+import fr.jmmc.aspro.model.observability.TargetPointInfo;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
@@ -111,8 +112,6 @@ public final class OIFitsCreatorService {
     private final List<BaseLine> baseLines;
     /** number of baselines */
     private final int nBaseLines;
-    /** precessed target right ascension in decimal hours */
-    private final double precRA;
     /** sky calc instance */
     private final AstroSkyCalc sc;
 
@@ -121,12 +120,12 @@ public final class OIFitsCreatorService {
     private double lambdaMin;
     /** maximal wavelength */
     private double lambdaMax;
-    /** number of wavelengths = number of spectral channels */
+    /** number of wavelengths = number of concrete spectral channels */
     private int nWaveLengths;
-    /** observable decimal hour angles */
-    private final double[] obsHa;
-    /** number of points = number of observable hour angles */
-    private final int nHAPoints;
+    /** number of uv points */
+    private final int nObsPoints;
+    /** target information for each uv point couples */
+    private final TargetPointInfo[] targetPointInfos;
     /** list of uv point couples corresponding to the target observability */
     private final List<UVRangeBaseLineData> targetUVObservability;
 
@@ -157,8 +156,10 @@ public final class OIFitsCreatorService {
     private boolean instrumentExperimental = false;
     /** wavelengths */
     private double[] waveLengths;
-    /** wave band */
+    /** wave band (constant) */
     private double waveBand;
+    /** channel widths */
+    private double[] waveBands;
     /** Station mapping */
     private Map<Station, Short> stationMapping = null;
     /** beam mapping */
@@ -189,9 +190,8 @@ public final class OIFitsCreatorService {
      * @param doDataNoise flag to add gaussian noise to OIFits data
      * @param supersamplingOIFits OIFits supersampling preference
      * @param mathModeOIFits OIFits MathMode preference
-     * @param obsHa observable decimal hour angles
+     * @param targetPointInfos target information for each uv point couples
      * @param targetUVObservability list of UV coordinates per baseline
-     * @param precRA precessed target right ascension in decimal hours
      * @param sc sky calc instance
      * @param warningContainer container for warning messages
      */
@@ -205,9 +205,8 @@ public final class OIFitsCreatorService {
                                    final boolean doDataNoise,
                                    final int supersamplingOIFits,
                                    final UserModelService.MathMode mathModeOIFits,
-                                   final double[] obsHa,
+                                   final TargetPointInfo[] targetPointInfos,
                                    final List<UVRangeBaseLineData> targetUVObservability,
-                                   final double precRA,
                                    final AstroSkyCalc sc,
                                    final WarningContainer warningContainer) {
 
@@ -219,28 +218,16 @@ public final class OIFitsCreatorService {
         this.lambdaMin = lambdaMin;
         this.lambdaMax = lambdaMax;
         this.nWaveLengths = nSpectralChannels;
-        this.obsHa = obsHa;
-        this.nHAPoints = this.obsHa.length;
+        this.nObsPoints = targetPointInfos.length;
+        this.targetPointInfos = targetPointInfos;
         this.targetUVObservability = targetUVObservability;
-        this.precRA = precRA;
         this.sc = sc;
 
         if (observation.getInstrumentConfiguration().getAcquisitionTime() != null) {
             this.integrationTime = observation.getInstrumentConfiguration().getAcquisitionTime().doubleValue();
         }
-
-        // Prepare the noise service :
-        // note: NoiseService parameter dependencies:
-        // observation {target}
-        // parameter: warningContainer
-        this.noiseService = new NoiseService(observation, target, useInstrumentBias, warningContainer);
-
+        // use target model:
         this.hasModel = target.hasModel();
-
-        this.errorValid = this.noiseService.isValid();
-
-        // do noise :
-        this.doNoise = (doDataNoise && this.errorValid);
 
         // use Bias:
         this.useInstrumentBias = useInstrumentBias;
@@ -250,7 +237,20 @@ public final class OIFitsCreatorService {
         this.mathModeOIFits = mathModeOIFits;
 
         // Prepare with observation:
+        // note: may adjust wavelengths:
         prepare(observation, warningContainer);
+
+        // Prepare the noise service with exact wavelengths:
+        // note: NoiseService parameter dependencies:
+        // observation {target}
+        // parameter: warningContainer
+        this.noiseService = new NoiseService(observation, target, targetPointInfos, useInstrumentBias, warningContainer,
+                this.waveLengths, this.waveBands);
+
+        this.errorValid = this.noiseService.isValid();
+
+        // do noise :
+        this.doNoise = (doDataNoise && this.errorValid);
     }
 
     /**
@@ -288,9 +288,10 @@ public final class OIFitsCreatorService {
      */
     private void prepareInstrumentMode(final WarningContainer warningContainer) {
 
-        // TODO: fix wavelengths % user model Fits cube (wavelengths):
+        // prepare wavelengths independently of the user model Fits cube (wavelengths):
+        // TODO: handle variable bandwdith:
         this.waveBand = (this.lambdaMax - this.lambdaMin) / this.nWaveLengths;
-        this.waveLengths = computeWaveLengths(this.lambdaMin, this.lambdaMax, this.waveBand, this.nWaveLengths);
+        this.waveLengths = computeWaveLengths(this.lambdaMin, this.waveBand, this.nWaveLengths);
 
         // Initial Wavelength information:
         String firstChannel = Double.toString(convertWL(this.waveLengths[0]));
@@ -324,6 +325,11 @@ public final class OIFitsCreatorService {
         if (logger.isDebugEnabled()) {
             logger.debug("insNameKeyword: {}", insNameKeyword);
         }
+
+        // Adjust spectral channel widths:
+        // TODO: handle irregular bandwidths:
+        this.waveBands = new double[this.nWaveLengths];
+        Arrays.fill(waveBands, waveBand);
     }
 
     /**
@@ -390,6 +396,7 @@ public final class OIFitsCreatorService {
                         }
 
                         // navigate among spectral channels:
+                        // TODO: handle irregular bandwidths:
                         final double insBand = this.waveBand;
                         final double halfBand = 0.5d * insBand;
 
@@ -411,6 +418,7 @@ public final class OIFitsCreatorService {
 
                         for (int i = 0; i < nWaves; i++) {
                             wl = insWaves[i];
+                            // TODO: handle irregular bandwidths:
                             wlLower = wl - halfBand;
                             wlUpper = wl + halfBand;
 
@@ -735,7 +743,7 @@ public final class OIFitsCreatorService {
 
         for (int i = 0; i < this.nWaveLengths; i++) {
             effWave[i] = (float) this.waveLengths[i];
-            effBand[i] = (float) this.waveBand;
+            effBand[i] = (float) this.waveBands[i];
         }
 
         this.oiFitsFile.addOiTable(waves);
@@ -744,12 +752,11 @@ public final class OIFitsCreatorService {
     /**
      * Compute the regularly sampled wavelengths (centered on each spectral channel) given its bounds and spectral channel width
      * @param min lower bound
-     * @param max upper bound
      * @param width spectral channel width
      * @param nWLen number of wavelengths to compute
      * @return regularly sampled wavelengths
      */
-    private static double[] computeWaveLengths(final double min, final double max, final double width, final int nWLen) {
+    private static double[] computeWaveLengths(final double min, final double width, final int nWLen) {
         final double[] wLen = new double[nWLen];
 
         // effective wavelength corresponds to the channel center:
@@ -792,7 +799,6 @@ public final class OIFitsCreatorService {
             }
 
             // Determine nSamples per spectral channel:
-            // TODO: should work on spatial frequency (baseline vector (so HA), object size) instead to be more accurate
             // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
             final UserModelService.MathMode mathMode = this.mathModeOIFits;
 
@@ -826,7 +832,7 @@ public final class OIFitsCreatorService {
 
             // note: integration must be adjusted to use wavelengths in each spectral channel !
             // Only part of instrument spectral channels can be used (see prepare step):
-            final double[] sampleWaveLengths = (nSamples > 1) ? computeWaveLengths(this.lambdaMin, this.lambdaMax, deltaLambda, nChannels * nSamples) : this.waveLengths;
+            final double[] sampleWaveLengths = (nSamples > 1) ? computeWaveLengths(this.lambdaMin, deltaLambda, nChannels * nSamples) : this.waveLengths;
 
             // local vars:
             final int nWLen = sampleWaveLengths.length;
@@ -836,7 +842,7 @@ public final class OIFitsCreatorService {
             }
 
             final int nBl = nBaseLines;
-            final int nHA = nHAPoints;
+            final int nObs = nObsPoints;
             final NoiseService ns = noiseService;
 
             // TODO: compare directFT vs FFT + interpolation
@@ -845,13 +851,12 @@ public final class OIFitsCreatorService {
                 return false;
             }
 
-            final int nRows = nHA * nBl;
+            final int nRows = nObs * nBl;
             final int nPoints = nRows * nWLen;
 
             logger.info("computeModelVisibilities: {} points [{} rows - {} spectral channels - {} samples]- please wait ...",
                     nPoints, nRows, nChannels, nSamples);
 
-//            logger.info("computeModelVisibilities: {} bytes for 1 complex array", 2 * 8 * nPoints); // 1 complex (2 double)
             // Allocate data array for complex visibility and error :
             final MutableComplex[][] cmVis = new MutableComplex[nRows][];
 
@@ -869,21 +874,21 @@ public final class OIFitsCreatorService {
             for (int l = 0; l < nWLen; l++) {
                 invWaveLengths[l] = 1d / sampleWaveLengths[l];
             }
+            
+            final int[] ptIdx = new int[nRows];
 
-//            logger.info("computeModelVisibilities: {} bytes for uv freq array", 2 * 8 * nPoints); // 2 double
             // Iterate on baselines :
             for (int i, j = 0, k, l; j < nBl; j++) {
 
                 final UVRangeBaseLineData uvBL = this.targetUVObservability.get(j);
 
-                // Iterate on HA points :
-                for (i = 0; i < nHA; i++) {
+                // Iterate on observable UV points :
+                for (i = 0; i < nObs; i++) {
                     k = nBl * i + j;
+                    // define point index:
+                    ptIdx[k] = i;
 
-                    // TODO: ensure jd is within the current night [0;24] and not [-12; +36]
-                    // ie precompute jd corresponding to HA and reorder them to be continuous in [0;24] range !
-                    // then u/v freqs ...
-
+                    // u/v freqs ...
                     final double[] uRow = ufreq[k];
                     final double[] vRow = vfreq[k];
 
@@ -1108,10 +1113,9 @@ public final class OIFitsCreatorService {
                 final int[] fromWL = new int[nChannels];
                 final int[] endWL = new int[nChannels];
 
-                // Note: sometimes sub channels may overlap channel limits
-                final double halfBand = 0.5d * this.waveBand;
-
                 for (int l = 0; l < nChannels; l++) {
+                    // Note: sometimes sub channels may overlap channel limits
+                    final double halfBand = 0.5d * this.waveBands[l];
                     final double wlMin = this.waveLengths[l] - halfBand;
                     final double wlMax = this.waveLengths[l] + halfBand;
 
@@ -1174,7 +1178,7 @@ public final class OIFitsCreatorService {
                 // Iterate on spectral channels:
                 for (l = 0; l < nChannels; l++) {
                     // complex visibility error or Complex.NaN:
-                    cVisErrorRow[l] = ns.computeVisComplexError(cVisRow[l].abs());
+                    cVisErrorRow[l] = ns.computeVisComplexError(ptIdx[k], l, cVisRow[l].abs());
                 }
             }
 
@@ -1342,11 +1346,14 @@ public final class OIFitsCreatorService {
         final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
 
         // Create OI_VIS table :
-        final OIVis vis = new OIVis(this.oiFitsFile, this.insNameKeyword, this.nHAPoints * this.nBaseLines);
+        final OIVis vis = new OIVis(this.oiFitsFile, this.insNameKeyword, this.nObsPoints * this.nBaseLines);
         vis.setArrName(this.arrNameKeyword);
 
-        // Compute UTC start date from first HA :
-        final Calendar calObs = this.sc.toCalendar(this.sc.convertHAToJD(this.obsHa[0], this.precRA), false);
+        // Get target information for each UV point:
+        final TargetPointInfo[] obsPointInfos = this.targetPointInfos;
+
+        // Compute UTC start date of the first point :
+        final Calendar calObs = this.sc.toCalendar(obsPointInfos[0].getJd(), false);
 
         final String dateObs = calendarToString(calObs);
         vis.setDateObs(dateObs);
@@ -1375,7 +1382,7 @@ public final class OIFitsCreatorService {
         // complex visiblity with noise (sigma = visError)
         final Complex[][] visComplexNoisy = new Complex[vis.getNbRows()][this.nWaveLengths];
 
-        final int nPoints = this.nHAPoints * this.nBaseLines * this.nWaveLengths;
+        final int nPoints = this.nObsPoints * this.nBaseLines * this.nWaveLengths;
         final boolean doNoiseSampling = (this.hasModel && this.errorValid && !isAmber && this.instrumentExperimental);
 
         if (doNoiseSampling) {
@@ -1408,15 +1415,11 @@ public final class OIFitsCreatorService {
                     double diff, ampSquareDiffAcc, phiSquareDiffAcc;
                     final MutableComplex visComplexSample = new MutableComplex();
 
-                    // TODO: ensure jd is within the current night [0;24] and not [-12; +36]
-                    // ie precompute jd corresponding to HA and reorder them to be continuous in [0;24] range !
-                    // then fix time / mjd columns
-                    
-                    // Iterate on HA points :
-                    for (int i = 0, j, k, l, n; i < nHAPoints; i++) {
+                    // Iterate on observable UV points :
+                    for (int i = 0, j, k, l, n; i < nObsPoints; i++) {
 
-                        // jd from HA :
-                        jd = sc.convertHAToJD(obsHa[i], precRA);
+                        // jd at the observed uv point:
+                        jd = obsPointInfos[i].getJd();
 
                         // UTC :
                         time = calendarToTime(sc.toCalendar(jd, false), calObs);
@@ -1488,7 +1491,7 @@ public final class OIFitsCreatorService {
                                         vAmp = visComplex[k][l].abs();
 
                                         // pure correlated fluxes or NaN:
-                                        flux = noiseService.computeCorrelatedFlux(vAmp);
+                                        flux = noiseService.computeCorrelatedFlux(i, l, vAmp);
 
                                         // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) or Complex.NaN :
                                         visErrRe = visError[k][l].getReal();
@@ -1636,44 +1639,54 @@ public final class OIFitsCreatorService {
         double visRe, visIm;
         double v2, v2Err;
 
-        for (int k = 0, l; k < nRows; k++) {
+        // Iterate on observable UV points :
+        for (int i = 0, j, k, l; i < this.nObsPoints; i++) {
+            j = 0;
 
-            // if target has models, then complex visibility are computed :
-            if (!this.hasModel) {
+            // Iterate on baselines :
+            for (final UVRangeBaseLineData uvBL : targetUVObservability) {
+                k = nBaseLines * i + j;
 
-                // Iterate on wave lengths :
-                for (l = 0; l < this.nWaveLengths; l++) {
-                    vis2Data[k][l] = Double.NaN;
-                    vis2Err[k][l] = Double.NaN;
+                // if target has models, then complex visibility are computed :
+                if (!this.hasModel) {
 
-                    // mark this value as invalid :
-                    flags[k][l] = true;
-                }
+                    // Iterate on wave lengths :
+                    for (l = 0; l < this.nWaveLengths; l++) {
+                        vis2Data[k][l] = Double.NaN;
+                        vis2Err[k][l] = Double.NaN;
 
-            } else {
-
-                // Iterate on wave lengths :
-                for (l = 0; l < this.nWaveLengths; l++) {
-                    // pure complex visibility data :
-                    visRe = this.visComplex[k][l].getReal();
-                    visIm = this.visComplex[k][l].getImaginary();
-
-                    // pure square visibility :
-                    v2 = FastMath.pow2(visRe) + FastMath.pow2(visIm);
-                    vis2Data[k][l] = v2;
-
-                    // square visibility error :
-                    v2Err = this.noiseService.computeVis2Error(Math.sqrt(v2));
-                    vis2Err[k][l] = v2Err;
-
-                    if (this.doNoise) {
-                        // add gaussian noise with sigma = err :
-                        vis2Data[k][l] += VisNoiseService.gaussianNoise(this.random, v2Err);
+                        // mark this value as invalid :
+                        flags[k][l] = true;
                     }
 
-                    // mark this value as valid only if error is valid :
-                    flags[k][l] = !this.errorValid;
+                } else {
+
+                    // Iterate on wave lengths :
+                    for (l = 0; l < this.nWaveLengths; l++) {
+                        // pure complex visibility data :
+                        visRe = this.visComplex[k][l].getReal();
+                        visIm = this.visComplex[k][l].getImaginary();
+
+                        // pure square visibility :
+                        v2 = FastMath.pow2(visRe) + FastMath.pow2(visIm);
+                        vis2Data[k][l] = v2;
+
+                        // square visibility error :
+                        v2Err = this.noiseService.computeVis2Error(i, l, Math.sqrt(v2));
+                        vis2Err[k][l] = v2Err;
+
+                        if (this.doNoise) {
+                            // add gaussian noise with sigma = err :
+                            vis2Data[k][l] += VisNoiseService.gaussianNoise(this.random, v2Err);
+                        }
+
+                        // mark this value as valid only if error is valid :
+                        flags[k][l] = !this.errorValid;
+                    }
                 }
+
+                // increment j:
+                j++;
             }
         }
 
@@ -1723,7 +1736,7 @@ public final class OIFitsCreatorService {
         final OIVis vis = this.oiFitsFile.getOiVis()[0];
 
         // Create OI_T3 table :
-        final OIT3 t3 = new OIT3(this.oiFitsFile, this.insNameKeyword, this.nHAPoints * nTriplets);
+        final OIT3 t3 = new OIT3(this.oiFitsFile, this.insNameKeyword, this.nObsPoints * nTriplets);
         t3.setArrName(this.arrNameKeyword);
         t3.setDateObs(vis.getDateObs());
 
@@ -1773,8 +1786,8 @@ public final class OIFitsCreatorService {
         int[] relPos;
         int pos;
 
-        // Iterate on HA points :
-        for (int i = 0, j, k, l, vp; i < this.nHAPoints; i++) {
+        // Iterate on observable UV points :
+        for (int i = 0, j, k, l, vp; i < this.nObsPoints; i++) {
 
             // position in OI_VIS HA row group :
             vp = this.nBaseLines * i;
@@ -1882,7 +1895,7 @@ public final class OIFitsCreatorService {
                         t3Phi[k][l] = FastMath.toDegrees(t3Data.getArgument());
 
                         // phase closure error (rad) :
-                        errPhi = this.noiseService.computeT3PhiError(vis12.abs(), vis23.abs(), vis31.abs());
+                        errPhi = this.noiseService.computeT3PhiError(i, l, vis12.abs(), vis23.abs(), vis31.abs());
 
                         // amplitude error t3AmpErr = t3Amp * t3PhiErr :
                         errAmp = t3Amp[k][l] * errPhi;
