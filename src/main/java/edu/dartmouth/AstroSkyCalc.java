@@ -3,6 +3,7 @@
  ******************************************************************************/
 package edu.dartmouth;
 
+import fr.jmmc.aspro.model.TimeRef;
 import edu.dartmouth.AstroAlmanacTime.AlmanacType;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.Range;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +30,14 @@ public final class AstroSkyCalc {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(AstroSkyCalc.class.getName());
+    /** time ratio : sideral rate = LST / SOLAR ratio */
+    public final static double SIDERAL_RATIO = Const.SID_RATE;
     /** time ratio : jd to LST hours */
-    public final static double JD_TO_LST = 24d * Const.SID_RATE;
+    public final static double JD_TO_LST = 24d * SIDERAL_RATIO;
     /** time ratio : LST to jd hours */
     public final static double LST_TO_JD = 1d / JD_TO_LST;
     /** one Day in LST expressed in JD day */
-    public final static double LST_DAY_IN_JD = 1d / Const.SID_RATE;
+    public final static double LST_DAY_IN_JD = 1d / SIDERAL_RATIO;
     /** half a day in LST expressed in JD day */
     public final static double HALF_LST_DAY_IN_JD = LST_DAY_IN_JD / 2d;
     /** Modified Juliean day reference */
@@ -52,6 +56,8 @@ public final class AstroSkyCalc {
     private final boolean isLogDebug = logger.isDebugEnabled();
     /** site location */
     Site site;
+    /** site timezone (handling the Daylight Saving Time) */
+    private TimeZone siteTZ = null;
     /** jd corresponding to LT=24:00:00 for the observation date */
     private double jdMidnight;
     /** jd corresponding to LST=00:00:00 for the observation date */
@@ -102,9 +108,33 @@ public final class AstroSkyCalc {
      * Define the observation site from the longitude, latitude and altitude coordinates (geographic)
      * @param name site name
      * @param position longitude (rad), latitude (rad) and altitude (m) coordinates
+     * @param timezone timezone of the observatory (used to convert to Local Time)
      */
-    public void defineSite(final String name, final LonLatAlt position) {
+    public void defineSite(final String name, final LonLatAlt position, final String timezone) {
         this.site = createSite(name, position);
+        // timezone (handling the Daylight Saving Time):
+        final String timezoneID = (timezone != null) ? timezone : "GMT"; // GMT if unknown
+        this.siteTZ = TimeZone.getTimeZone(timezoneID);
+        if (logger.isDebugEnabled()) {
+            logger.debug("site timezone: {} => {}", timezoneID, getTimezoneID());
+        }
+    }
+
+    /**
+     * Return the time zone offset from UT, decimal hrs
+     * @return time zone offset from UT, decimal hrs
+     */
+    public double getSiteStdZone() {
+        return this.site.stdz;
+    }
+
+    /**
+     * Return a long standard time name of this {@code TimeZone} suitable for
+     * presentation to the user in the default locale.
+     * @return the human-readable name of this time zone in the default locale (US).
+     */
+    public String getTimezoneID() {
+        return this.siteTZ.getID(); // DisplayName();
     }
 
     /**
@@ -270,42 +300,69 @@ public final class AstroSkyCalc {
      * @return Date object
      */
     public Date toDateLST(final double jd) {
-        return toDate(jd, true);
+        return toDate(jd, TimeRef.LST);
     }
 
     /**
      * Convert a julian date to a gregorian date (precise up to the second) in LST or UTC
      * @param jd julian date
-     * @param useLst flag to select LST (true) or UTC conversion (false)
+     * @param timeRef time reference (LST, UTC or Local)
      * @return Date object
      */
-    public Date toDate(final double jd, final boolean useLst) {
+    public Date toDate(final double jd, final TimeRef timeRef) {
         // use temporary GregorianCalendar instance:
-        final Calendar cal = toCalendar(jd, useLst, tmpCal);
-        return cal.getTime();
+        final Calendar cal = toCalendar(jd, (timeRef == TimeRef.LST), tmpCal);
+        final Date date = cal.getTime();
+
+        if (timeRef == TimeRef.LOCAL) {
+            // Convert UTC to Local time and modify date:
+            convertUTCToLocal(date, siteTZ);
+        }
+
+        return date;
+    }
+
+    /**
+     * Return the time offset in milliseconds between the given UT date and the local date (DST)
+     * @param utDate UT date
+     * @return time offset in milliseconds between the given UT date and the local date
+     */
+    public long getDateOffset(final Date utDate) {
+        final long milliseconds_initial = utDate.getTime();
+
+        convertUTCToLocal(utDate, siteTZ);
+
+        return milliseconds_initial - utDate.getTime();
     }
 
     /**
      * Convert a julian date to a gregorian date (precise up to the second) in LST or UTC
      * and adjust the date field to be within range [dateMin; dateMax]
      * @param jd julian date
-     * @param useLst flag to select LST (true) or UTC conversion (false)
+     * @param timeRef time reference (LST, UTC or Local)
      * @param dateMin lower date/time
      * @param dateMax upper date/time
      * @return Date object within range [dateMin; dateMax]
      */
-    public Date toDate(final double jd, final boolean useLst, final Date dateMin, final Date dateMax) {
+    public Date toDate(final double jd, final TimeRef timeRef, final Date dateMin, final Date dateMax) {
         // convert JD to LST/UT date/time:
-        final Calendar cal = toCalendar(jd, useLst);
+        final Calendar cal = toCalendar(jd, (timeRef == TimeRef.LST));
 
         // roll +/- 1 day to be within plot range:
-        return convertCalendarToDate(cal, dateMin, dateMax);
+        final Date date = convertCalendarToDate(cal, timeRef, dateMin, dateMax);
+
+        if (timeRef == TimeRef.LOCAL) {
+            // Convert UTC to Local time and modify date:
+            convertUTCToLocal(date, siteTZ);
+        }
+
+        return date;
     }
 
     /**
      * Convert a julian date to a gregorian calendar (precise up to the second) in LST or UTC
      * @param jd julian date
-     * @param useLst flag to select LST (true) or UTC conversion (false)
+     * @param useLst flag to use LST (true) or UTC reference (false)
      * @return Calendar object
      */
     public Calendar toCalendar(final double jd, final boolean useLst) {
@@ -313,13 +370,37 @@ public final class AstroSkyCalc {
     }
 
     /**
+     * Convert the given date as 'MM/DD'
+     * @param sb buffer to append into
+     * @param date date to convert
+     */
+    public void toDateString(final StringBuilder sb, final Date date) {
+        // use temporary GregorianCalendar instance:
+        tmpCal.setTime(date);
+
+        // write date as 'MM/DD':
+        final int month = tmpCal.get(Calendar.MONTH) + 1;
+        if (month < 10) {
+            sb.append('0');
+        }
+        sb.append(month);
+        sb.append('/');
+
+        final int day = tmpCal.get(Calendar.DAY_OF_MONTH);
+        if (day < 10) {
+            sb.append('0');
+        }
+        sb.append(day);
+    }
+
+    /**
      * Convert a julian date to a gregorian calendar (precise up to the second) in LST or UTC
      * @param jd julian date
-     * @param useLst flag to select LST (true) or UTC conversion (false)
+     * @param useLst flag to select LST (true) or UTC reference (false)
      * @param cal calendar instance to use
      * @return Calendar object
      */
-    public Calendar toCalendar(final double jd, final boolean useLst, final Calendar cal) {
+    private Calendar toCalendar(final double jd, final boolean useLst, final Calendar cal) {
         // avoid new instances:
         if (wwCal == null) {
             wwCal = new WhenWhere(jd, this.site, false);
@@ -327,11 +408,12 @@ public final class AstroSkyCalc {
             wwCal.changeWhen(jd);
         }
 
-        /* notes :
+        /* 
+         * Notes :
          * - month is in range [0;11] in java Calendar
          * - milliseconds are set to 0 to be able to compare date instances
          */
-        // The default TimeZone is already set to GMT :
+        // The default TimeZone is already set to UTC (GMT):
         final Calendar calendar;
         if (useLst) {
             final RA sidereal = wwCal.siderealobj;
@@ -349,7 +431,7 @@ public final class AstroSkyCalc {
                 calendar = cal;
             }
 
-            double days = (jd - this.jdLst0) * Const.SID_RATE;
+            double days = (jd - this.jdLst0) * SIDERAL_RATIO;
 
             // tricky code here to ensure correct rounding error handling (inclusive):
             int ndays = 0;
@@ -601,7 +683,7 @@ public final class AstroSkyCalc {
      * @param rangeFactory Factory used to create Range instances
      */
     public void convertHAToJDRanges(final List<Range> ranges, final List<Range> destRanges, final double precRA,
-                                        final RangeFactory rangeFactory) {
+                                    final RangeFactory rangeFactory) {
         if (ranges != null) {
             for (int i = 0, size = ranges.size(); i < size; i++) {
                 destRanges.add(convertHAToJDRange(ranges.get(i), precRA, rangeFactory));
@@ -778,6 +860,15 @@ public final class AstroSkyCalc {
     }
 
     /**
+     * Convert solar duration to lst duration
+     * @param solar solar duration
+     * @return lst duration
+     */
+    public static double solar2lst(final double solar) {
+        return solar * SIDERAL_RATIO;
+    }
+
+    /**
      * Return the modified julian day from the given julian day
      * @param jd julian day
      * @return modified julian day
@@ -787,18 +878,44 @@ public final class AstroSkyCalc {
     }
 
     /**
+     * Return the true airmass for a given elevation (degrees).
+     * @param elev elevation in degrees [0;90]
+     * @return true airmass for a given elevation
+     */
+    public static double airmass(final double elev) {
+        final double airmass = Spherical.true_airmass(elev);
+
+        // return NaN for elevation = 0 deg:
+        return (airmass < 0.0) ? Double.NaN : airmass;
+    }
+
+    /**
      * Convert the given calendar to a date within range [dateMin; dateMax]
      * @param cal date/time to convert
+     * @param timeRef time reference (LST, UTC or Local) for given date range
      * @param dateMin lower date/time
      * @param dateMax upper date/time
      * @return date/time within range [dateMin; dateMax]
      */
-    private static Date convertCalendarToDate(final Calendar cal, final Date dateMin, final Date dateMax) {
+    private Date convertCalendarToDate(final Calendar cal, final TimeRef timeRef, final Date dateMin, final Date dateMax) {
         // Note: use Calendar.roll to only fix date field
 
-        if (cal.getTimeInMillis() >= dateMin.getTime()) {
+        // time in UTC:
+        final long timeInMillis;
 
-            if (cal.getTimeInMillis() > dateMax.getTime()) {
+        if (timeRef == TimeRef.LOCAL) {
+            final Date date = cal.getTime();
+            // Convert UTC to Local time and modify date:
+            convertUTCToLocal(date, siteTZ);
+            // Fix time to compare with date ranges:
+            timeInMillis = date.getTime();
+        } else {
+            timeInMillis = cal.getTimeInMillis();
+        }
+
+        if (timeInMillis >= dateMin.getTime()) {
+
+            if (timeInMillis > dateMax.getTime()) {
                 // after date max :
 
                 // return [cal - 1 day]
@@ -812,5 +929,39 @@ public final class AstroSkyCalc {
             cal.roll(Calendar.DATE, true);
         }
         return cal.getTime();
+    }
+    /*
+     static {
+     for (String name : TimeZone.getAvailableIDs()) {
+     System.out.println("TZ [" + name + "]");
+     }
+     }
+     */
+
+    private static void convertUTCToLocal(final Date date, final TimeZone localTZ) {
+        if (localTZ == null) {
+            throw new IllegalStateException("Site timezone is undefined !");
+        }
+        if (isLogTrace) {
+            logger.debug("date[UTC]: {}", date);
+        }
+        // number of milliseconds since January 1, 1970, 00:00:00 GMT (UTC)
+        long milliseconds = date.getTime();
+
+        // add the amount of time in milliseconds to add to UTC 
+        // to get standard time in this time zone
+        milliseconds += localTZ.getRawOffset();
+
+        // If Daylight Saving Time:
+        if (localTZ.inDaylightTime(date)) {
+            // add the amount of time to be added to local standard time
+            // to get local wall clock time
+            milliseconds += localTZ.getDSTSavings();
+        }
+        date.setTime(milliseconds);
+
+        if (isLogTrace) {
+            logger.debug("date[{}]: {}", localTZ.getID(), date);
+        }
     }
 }

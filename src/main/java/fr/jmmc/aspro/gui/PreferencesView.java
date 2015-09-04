@@ -5,6 +5,7 @@ package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
+import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
@@ -146,8 +147,10 @@ public final class PreferencesView extends JFrame implements Observer {
         jPanelView = new javax.swing.JPanel();
         jPanelObservability = new javax.swing.JPanel();
         jLabelTimeRef = new javax.swing.JLabel();
+        jPanelTimeRef = new javax.swing.JPanel();
         jRadioButtonTimeLST = new javax.swing.JRadioButton();
         jRadioButtonTimeUTC = new javax.swing.JRadioButton();
+        jRadioButtonTimeLOCAL = new javax.swing.JRadioButton();
         jLabelCenterNight = new javax.swing.JLabel();
         jRadioButtonCenterNightYes = new javax.swing.JRadioButton();
         jRadioButtonCenterNightNo = new javax.swing.JRadioButton();
@@ -208,28 +211,36 @@ public final class PreferencesView extends JFrame implements Observer {
         jPanelObservability.add(jLabelTimeRef, gridBagConstraints);
 
         buttonGroupTimeRef.add(jRadioButtonTimeLST);
-        jRadioButtonTimeLST.setText(AsproConstants.TIME_LST);
+        jRadioButtonTimeLST.setText(TimeRef.LST.getDisplayName());
         jRadioButtonTimeLST.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jRadioButtonTimeRefActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelObservability.add(jRadioButtonTimeLST, gridBagConstraints);
+        jPanelTimeRef.add(jRadioButtonTimeLST);
 
         buttonGroupTimeRef.add(jRadioButtonTimeUTC);
-        jRadioButtonTimeUTC.setText(AsproConstants.TIME_UTC);
+        jRadioButtonTimeUTC.setText(TimeRef.UTC.getDisplayName());
         jRadioButtonTimeUTC.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jRadioButtonTimeRefActionPerformed(evt);
             }
         });
+        jPanelTimeRef.add(jRadioButtonTimeUTC);
+
+        buttonGroupTimeRef.add(jRadioButtonTimeLOCAL);
+        jRadioButtonTimeLOCAL.setText(TimeRef.LOCAL.getDisplayName());
+        jRadioButtonTimeLOCAL.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonTimeRefActionPerformed(evt);
+            }
+        });
+        jPanelTimeRef.add(jRadioButtonTimeLOCAL);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelObservability.add(jRadioButtonTimeUTC, gridBagConstraints);
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanelObservability.add(jPanelTimeRef, gridBagConstraints);
 
         jLabelCenterNight.setText("Center plot around night");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -708,10 +719,12 @@ public final class PreferencesView extends JFrame implements Observer {
     private void jRadioButtonTimeRefActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonTimeRefActionPerformed
         try {
             final String value;
-            if (this.jRadioButtonTimeUTC.isSelected()) {
-                value = AsproConstants.TIME_UTC;
+            if (this.jRadioButtonTimeLOCAL.isSelected()) {
+                value = TimeRef.LOCAL.getDisplayName();
+            } else if (this.jRadioButtonTimeUTC.isSelected()) {
+                value = TimeRef.UTC.getDisplayName();
             } else {
-                value = AsproConstants.TIME_LST;
+                value = TimeRef.LST.getDisplayName();
             }
 
             // will fire triggerObserversNotification so update() will be called
@@ -832,9 +845,19 @@ public final class PreferencesView extends JFrame implements Observer {
         // read prefs to set states of GUI elements
 
         // Observability:
-        final boolean preferTimeLst = AsproConstants.TIME_LST.equals(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
-        this.jRadioButtonTimeLST.setSelected(preferTimeLst);
-        this.jRadioButtonTimeUTC.setSelected(!preferTimeLst);
+        final TimeRef timeRef = TimeRef.findByDisplayName(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
+        switch (timeRef) {
+            default:
+            case LST:
+                this.jRadioButtonTimeLST.setSelected(true);
+                break;
+            case UTC:
+                this.jRadioButtonTimeUTC.setSelected(true);
+                break;
+            case LOCAL:
+                this.jRadioButtonTimeLOCAL.setSelected(true);
+                break;
+        }
 
         final boolean preferCenterNight = this.myPreferences.getPreferenceAsBoolean(Preferences.CENTER_NIGHT);
         this.jRadioButtonCenterNightYes.setSelected(preferCenterNight);
@@ -919,6 +942,7 @@ public final class PreferencesView extends JFrame implements Observer {
     private javax.swing.JPanel jPanelModelImage;
     private javax.swing.JPanel jPanelOIFits;
     private javax.swing.JPanel jPanelObservability;
+    private javax.swing.JPanel jPanelTimeRef;
     private javax.swing.JPanel jPanelUserModel;
     private javax.swing.JPanel jPanelView;
     private javax.swing.JRadioButton jRadioButtonAddNoiseNo;
@@ -932,6 +956,7 @@ public final class PreferencesView extends JFrame implements Observer {
     private javax.swing.JRadioButton jRadioButtonNightOnlyNo;
     private javax.swing.JRadioButton jRadioButtonNightOnlyYes;
     private javax.swing.JRadioButton jRadioButtonSepPosAngle;
+    private javax.swing.JRadioButton jRadioButtonTimeLOCAL;
     private javax.swing.JRadioButton jRadioButtonTimeLST;
     private javax.swing.JRadioButton jRadioButtonTimeUTC;
     private javax.swing.JRadioButton jRadioButtonXY;

@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro;
 
+import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
@@ -111,7 +112,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
         setDefaultPreference(MODEL_USER_FAST, Boolean.TRUE);
 
         // Time reference:
-        setDefaultPreference(TIME_REFERENCE, AsproConstants.TIME_LST);
+        setDefaultPreference(TIME_REFERENCE, TimeRef.LST.getDisplayName());
 
         // minimum elevation:
         setDefaultPreference(MIN_ELEVATION, Double.valueOf(AsproConstants.DEFAULT_MIN_ELEVATION));

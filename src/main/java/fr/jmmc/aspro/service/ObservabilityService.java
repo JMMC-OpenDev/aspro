@@ -17,6 +17,7 @@ import fr.jmmc.aspro.model.HorizonShape;
 import fr.jmmc.aspro.model.BestPoPsObservabilityContext;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.ObservabilityContext;
+import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.GroupedPopObservabilityData;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
@@ -137,8 +138,6 @@ public final class ObservabilityService {
     /* inputs */
     /** observation settings used  (read-only copy of the modifiable observation) */
     private final ObservationSetting observation;
-    /** indicates if the timestamps are expressed in LST or in UTC */
-    private final boolean useLST;
     /** flag to find baseline limits */
     private final boolean doBaseLineLimits;
     /** flag to produce detailed output with all BL / horizon / rise intervals per target */
@@ -221,7 +220,7 @@ public final class ObservabilityService {
      * Note : This service is statefull so it can not be reused by several calls.
      *
      * @param observation observation settings
-     * @param useLST indicates if the timestamps are expressed in LST or in UTC
+     * @param timeRef time reference (LST, UTC or Local)
      * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
      * @param doBaseLineLimits flag to find base line limits
      * @param doCenterMidnight flag to center JD range arround midnight
@@ -231,14 +230,13 @@ public final class ObservabilityService {
      * @param bestPopEstimatorCriteriaAverageWeight optional Best Pops criteria on average weight
      */
     public ObservabilityService(final ObservationSetting observation,
-                                final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
+                                final TimeRef timeRef, final boolean doDetailedOutput, final boolean doBaseLineLimits,
                                 final boolean doCenterMidnight, final SunType twilightNightLimit,
                                 final Algorithm bestPopsAlgorithm,
                                 final Criteria bestPopEstimatorCriteriaSigma, final Criteria bestPopEstimatorCriteriaAverageWeight) {
 
         // Inputs :
         this.observation = observation;
-        this.useLST = useLST;
         this.doDetailedOutput = doDetailedOutput;
         this.doBaseLineLimits = doBaseLineLimits;
         this.doCenterMidnight = doCenterMidnight;
@@ -250,7 +248,7 @@ public final class ObservabilityService {
         this.bestPopEstimatorCriteriaAverageWeight = bestPopEstimatorCriteriaAverageWeight;
 
         // estimate the observability data corresponding to the observation version :
-        this.data = new ObservabilityData(observation.getVersion(), useLST, doDetailedOutput, doBaseLineLimits, doCenterMidnight, twilightNightLimit);
+        this.data = new ObservabilityData(observation.getVersion(), timeRef, doDetailedOutput, doBaseLineLimits, doCenterMidnight, twilightNightLimit);
     }
 
     /**
@@ -272,7 +270,7 @@ public final class ObservabilityService {
      */
     public ObservabilityService(final ObservationSetting observation, final boolean ignoreNightLimits) {
         // use LST without using night center:
-        this(observation, true, false, false, false, SunType.Night,
+        this(observation, TimeRef.LST, false, false, false, SunType.Night,
                 Preferences.getInstance().getBestPopsAlgorithm(),
                 Preferences.getInstance().getBestPopsCriteriaSigma(),
                 Preferences.getInstance().getBestPopsCriteriaAverageWeight());
@@ -323,8 +321,12 @@ public final class ObservabilityService {
         this.data.setTargets(targets);
 
         // define site :
-        this.sc.defineSite(this.interferometer.getName(), this.interferometer.getPosSph());
+        this.sc.defineSite(this.interferometer.getName(), 
+                           this.interferometer.getPosSph(), 
+                           this.interferometer.getTimezone());
         this.sco.defineSite(this.sc);
+        // store timezone ID:
+        this.data.setTimezoneID(this.sc.getTimezoneID());
 
         // define observation date :
         // find the appropriate night (LST range):
@@ -406,9 +408,13 @@ public final class ObservabilityService {
 
         this.data.setJdMin(this.jdLower);
         this.data.setJdMax(this.jdUpper);
-
-        this.data.setDateMin(jdToDate(this.jdLower));
-        this.data.setDateMax(jdToDate(this.jdUpper));
+        
+        // adjust midnight (to DST):
+        if (this.data.defineDateMidnight(this.sc.getJdMidnight()) && data.getTimeRef() == TimeRef.LOCAL) {
+           addWarning("Daylight Saving Time (DST) transition: observability ranges may appear shorter / longer !");
+        }
+        
+        // TODO: DST change range for Local Time REF
 
         if (isLogDebug) {
             logger.debug("date min: {}", this.data.getDateMin());
@@ -431,6 +437,8 @@ public final class ObservabilityService {
                     logger.debug("jdMidnight: {}", jdMidnight);
                 }
 
+                // TODO: use LST_DAY or 24H DAY ?
+                
                 // adjust the jd bounds :
                 this.jdLower = jdMidnight - AstroSkyCalc.HALF_LST_DAY_IN_JD;
                 this.jdUpper = jdMidnight + AstroSkyCalc.HALF_LST_DAY_IN_JD;
@@ -442,9 +450,6 @@ public final class ObservabilityService {
 
                 this.data.setJdMin(this.jdLower);
                 this.data.setJdMax(this.jdUpper);
-
-                this.data.setDateMin(jdToDate(this.jdLower));
-                this.data.setDateMax(jdToDate(this.jdUpper));
 
                 if (isLogDebug) {
                     logger.debug("date min: {}", this.data.getDateMin());
@@ -813,7 +818,7 @@ public final class ObservabilityService {
         if (maxObsTarget != nObsTarget) {
             final StringBuffer sb = getBuffer();
             sb.append("Impossible to find a PoPs combination compatible with all observable targets (").append(maxObsTarget);
-            sb.append(" / ").append(nObsTarget).append(")");
+            sb.append(" / ").append(nObsTarget).append(')');
             addWarning(sb.toString());
         }
 
@@ -3205,18 +3210,7 @@ public final class ObservabilityService {
      * @return date
      */
     private double getJDInLstRange(final double jd) {
-        if (jd >= this.jdLower) {
-            if (jd <= this.jdUpper) {
-                // JD in [jdLst0;jdLst24]
-                return jd;
-            }
-            // over LST 24 :
-            // return [jd - day]
-            return jd - AstroSkyCalc.LST_DAY_IN_JD;
-        }
-        // start occurs before LST 0h :
-        // return [jd + day]
-        return jd + AstroSkyCalc.LST_DAY_IN_JD;
+        return this.data.getJDInLstRange(jd);
     }
 
     /**
@@ -3227,36 +3221,19 @@ public final class ObservabilityService {
      */
     private Date convertJDToDate(final double jd) {
         // fix JD in LST range [0; 24] in order to have accurate date:
-        return jdToDateInDateRange(getJDInLstRange(jd));
+        return this.data.jdToDateInDateRange(getJDInLstRange(jd));
     }
 
     /**
      * Convert a JD value to a Date Object (LST or UTC)
-     * within range [jdLst0;jdLst24]]<=>[DateMin;DateMax]
-     * @see #useLST
+     * within range [jdLst0;jdLst24]<=>[DateMin;DateMax]
+     * @see ObservabilityData#timeRef
      * @see #jdToDate(double)
      * @param jd julian day
      * @return Date Object (LST or UTC)
      */
     private Date jdToDateInDateRange(final double jd) {
-        // adjust range limits :
-        if (jd <= this.jdLower) {
-            return this.data.getDateMin();
-        }
-        if (jd >= this.jdUpper) {
-            return this.data.getDateMax();
-        }
-        return jdToDate(jd);
-    }
-
-    /**
-     * Convert a JD value to a Date Object (LST or UTC)
-     * @see #useLST
-     * @param jd julian day
-     * @return Date Object (LST or UTC)
-     */
-    private Date jdToDate(final double jd) {
-        return this.sc.toDate(jd, this.useLST);
+        return this.data.jdToDateInDateRange(jd);
     }
 
     /**
@@ -3420,8 +3397,8 @@ public final class ObservabilityService {
             convertRangesToDateIntervals(jdRanges, dateIntervals);
 
             // Replace the 24:00:00 date by 00:00:00 to merge contiguous intervals in LST :
-            final Date lst0 = getData().getDateMin();
-            final Date lst24 = getData().getDateMax();
+            final Date lst0 = this.data.getDateMin();
+            final Date lst24 = this.data.getDateMax();
 
             boolean found = false;
             DateTimeInterval interval;
@@ -3459,7 +3436,7 @@ public final class ObservabilityService {
      * @return jd at the middle of the range
      */
     private double jdCenter() {
-        return 0.5d * (this.jdLower + this.jdUpper);
+        return this.data.jdCenter();
     }
 
     /**

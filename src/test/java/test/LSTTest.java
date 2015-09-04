@@ -4,6 +4,7 @@
 package test;
 
 import edu.dartmouth.AstroSkyCalc;
+import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.Range;
@@ -110,7 +111,7 @@ public final class LSTTest {
     final AstroSkyCalc sc = new AstroSkyCalc();
 
     // define site :
-    sc.defineSite(interferometer.getName(), interferometer.getPosSph());
+    sc.defineSite(interferometer.getName(), interferometer.getPosSph(), "GMT");
 
     // day expressed in milliseconds (depends on LST or JD day length) :
     final double dayLength = ((useLst) ? 1d : AstroSkyCalc.LST_DAY_IN_JD) * 24d * 3600d * 1000d;
@@ -157,8 +158,9 @@ public final class LSTTest {
         // find the julian date corresponding to LST=00:00:00 next day:
         jdUpper = sc.findJdForLst0(jdLower + AstroSkyCalc.LST_DAY_IN_JD);
 
-        dateMin = sc.toDate(jdLower, useLst);
-        dateMax = sc.toDate(jdUpper, useLst);
+        final TimeRef timeRef = (useLst) ? TimeRef.LST : TimeRef.UTC;
+        dateMin = sc.toDate(jdLower, timeRef);
+        dateMax = sc.toDate(jdUpper, timeRef);
 
         if (dateMax.before(dateMin)) {
           throw new RuntimeException("upper[" + dateMax + "] before lower[" + dateMin + "]");
@@ -201,8 +203,8 @@ public final class LSTTest {
 //          logger.error("jdLower = " + jdLower);
 //          logger.error("jdUpper = " + jdUpper);
 
-            dateMin = sc.toDate(jdLower, useLst);
-            dateMax = sc.toDate(jdUpper, useLst);
+            dateMin = sc.toDate(jdLower, timeRef);
+            dateMax = sc.toDate(jdUpper, timeRef);
 
 //          logger.error("date min = " + dateMin);
 //          logger.error("date max = " + dateMax);
@@ -411,6 +413,6 @@ public final class LSTTest {
   private static Date jdToDate(final double jd,
           /* missing members */
           final boolean useLst, final AstroSkyCalc sc) {
-    return sc.toDate(jd, useLst);
+    return sc.toDate(jd, (useLst) ? TimeRef.LST : TimeRef.UTC);
   }
 }

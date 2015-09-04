@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro;
 
+import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmcs.util.NumberUtils;
 import java.util.Arrays;
@@ -73,15 +74,10 @@ public interface AsproConstants {
     /** no value for combo boxes */
     public static final String NONE = "None";
 
-    /* time references */
-    /** LST time reference */
-    public static final String TIME_LST = "L.S.T.";
-    /** UTC time reference */
-    public static final String TIME_UTC = "U.T.C.";
     /** HA time reference */
     public static final String TIME_HA = "H.A.";
     /** list of choosable time references */
-    public static final Vector<String> TIME_CHOICES = new Vector<String>(Arrays.asList(new String[]{TIME_LST, TIME_UTC}));
+    public static final Vector<String> TIME_CHOICES = new Vector<String>(TimeRef.getDisplayNames());
 
     /* instrument names for specific features */
     /** VLTI AMBER */
