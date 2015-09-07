@@ -19,7 +19,7 @@
     </company>
 
     <program name="Aspro2" version="0.9.8"/>
-    <compilation date="04/09/2015" compiler="JDK 1.6.0_24"/>
+    <compilation date="07/09/2015" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -195,7 +195,11 @@
 
     <releasenotes>
         <release version="0.9.8">
-            <pubDate>Fri, 04 Sep 2015 17:00:00 GMT</pubDate>
+            <pubDate>Mon, 07 Sep 2015 17:00:00 GMT</pubDate>
+            <prerelease version="0.9.8.1 beta 2">
+                <change type="FEATURE">Improved VLTI Observing block (OB) export to reduce observability ranges by 2 minutes on each side (LST constraints)
+                    and skip observability ranges smaller than 10 minutes</change>
+            </prerelease>
             <prerelease version="0.9.8.1 beta 1">
                 <change type="FEATURE">Improved the noise modelling to compute the strehl ratio per spectral channel
                     and taking into account the target elevation (r0)</change>

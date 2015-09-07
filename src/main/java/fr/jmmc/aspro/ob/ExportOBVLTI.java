@@ -56,8 +56,10 @@ public class ExportOBVLTI {
     public static final String OB_CALIBRATOR = "CAL";
     /** P2PP file prefix for concatenation containers */
     public static final String OB_CONCAT = "CON";
-    /** P2PP version used for LST interval conversion */
-    protected final static int P2PP_VERSION = 3;
+    /** P2PP LST margin in seconds = 2 minutes */
+    public static final int P2PP_LST_MARGIN = 2; 
+    /** P2PP minimal duration = 10 minutes */
+    public static final int P2PP_LST_MIN_DURATION = 10; 
     /** double formatter for magnitudes */
     protected final static NumberFormat df1 = new DecimalFormat("0.0");
     /** double formatter for magnitudes */
@@ -330,7 +332,7 @@ public class ExportOBVLTI {
                         if (logger.isDebugEnabled()) {
                             logger.debug("obs Date: {}", cal);
                         }
-            // define Date constraint in eso date format is '2010-05-04T00:00:00' :
+                        // define Date constraint in eso date format is '2010-05-04T00:00:00' :
 
                         // {<DATE_START> <DATE_END> 0}
                         absTimeList = VAL_ABS_TIME_LIST.replaceFirst(VAL_ABS_TIME_LIST_DATE_START, timeFormatter.format(cal.getTime()));
@@ -468,54 +470,36 @@ public class ExportOBVLTI {
      */
     private static void convertLstRange(final DateTimeInterval interval, final StringBuilder sb, final Calendar cal) {
 
-        if (P2PP_VERSION == 2) {
-            // "4980:17760;" i.e. 'date1_in_seconds:date2_in_seconds;...' (P2PP v2.x)
+        // "{0 31320 0} {78120 86400 0} " (P2PP v3.x)
+        boolean valid = false;
 
-            cal.setTime(interval.getStartDate());
-            sb.append(convertDateToSeconds(cal, 1)).append(':'); // upper minute
+        final Date start = interval.getStartDate();
+        final Date end = interval.getEndDate();
 
-            cal.setTime(interval.getEndDate());
-            sb.append(convertDateToSeconds(cal, -1));
+        cal.setTime(start);
+        final int sec1 = convertDateToSeconds(cal, 1);  // round up
 
-            sb.append(';'); // interval separator
-
-        } else if (P2PP_VERSION == 3) {
-            // "{0 31320 0} {78120 86400 0} " (P2PP v3.x)
-
-            final Date start = interval.getStartDate();
-            final Date end = interval.getEndDate();
-
-            if (end.before(start)) {
-                // single interval over midnight splitted into two intervals:
-
-                sb.append("{0 "); // from midnight [00:00]
-
-                cal.setTime(end);
-                sb.append(convertDateToSeconds(cal, -1)); // lower minute
-
-                sb.append(" 0} {");
-
-                cal.setTime(start);
-                sb.append(convertDateToSeconds(cal, 1)); // upper minute
-
-                sb.append(" 86400 0}"); // until midnight [00:00]
-
-            } else {
-                sb.append('{');
-
-                cal.setTime(start);
-                sb.append(convertDateToSeconds(cal, 1)).append(' '); // upper minute
-
-                cal.setTime(end);
-                sb.append(convertDateToSeconds(cal, -1)); // lower minute
-
-                sb.append(" 0}");
+        cal.setTime(end);
+        final int sec2 = convertDateToSeconds(cal, -1); // round down
+        
+        if (end.before(start)) {
+            // single interval over midnight splitted into two intervals:
+            if (((86400 + sec2) - sec1) > (P2PP_LST_MIN_DURATION * 60)) {
+                valid = true;
+                
+                sb.append("{0 ").append(sec2).append(" 0}");     //  from midnight [00:00]
+                sb.append('{').append(sec1).append(" 86400 0}"); // until midnight [00:00]
             }
-
-            sb.append(' '); // interval separator
-
         } else {
-            throw new IllegalStateException("Unsupported P2PP_VERSION: " + P2PP_VERSION);
+            if ((sec2 - sec1) > (P2PP_LST_MIN_DURATION * 60)) {
+                valid = true;
+                
+                sb.append('{').append(sec1).append(' ').append(sec2).append(" 0}");
+            }
+        }
+
+        if (valid) {
+            sb.append(' '); // interval separator
         }
     }
 
@@ -530,8 +514,9 @@ public class ExportOBVLTI {
 
         final int h = cal.get(Calendar.HOUR_OF_DAY);
         final int m = cal.get(Calendar.MINUTE);
+        final int s = cal.get(Calendar.SECOND);
 
-        return h * 3600 + (m + sign) * 60;
+        return h * 3600 + (m + sign * P2PP_LST_MARGIN) * 60 + s;
     }
 
     /**
