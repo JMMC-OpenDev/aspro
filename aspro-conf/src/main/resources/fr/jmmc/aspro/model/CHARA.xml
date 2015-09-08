@@ -1,0 +1,3037 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ *******************************************************************************
+ -->
+<!--
+    Document   : CHARA.xml
+    Created on : 14 october 2009
+    Author     : bourgesl
+    Description:
+        CHARA interferometer.
+-->
+
+<a:interferometerSetting
+   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+   xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+  <description>
+    <name>CHARA</name>
+
+    <description>CHARA ...</description>
+
+    <!--
+      Coordinates CHARA (= S1) :
+      LONG    -118 3 25.31272
+      LAT       34 13 27.78130
+    -->
+    <position>
+      <posX>-2476998.047780274</posX>
+      <posY>-4647390.089884061</posY>
+      <posZ>3582240.6122966344</posZ>
+    </position>
+
+    <timezone>America/Los_Angeles</timezone>
+
+    <telescope>
+      <name>T</name>
+      <diameter>1.0</diameter>
+      <!-- if seeing is correct, it is possible point targets up to 88 deg; if not 85 deg is the max -->
+      <maxElevation>88.5</maxElevation>
+
+      <adaptiveOptics>
+        <band>V</band>
+        <!-- tip tilt -->
+        <numberActuators>2</numberActuators>
+      </adaptiveOptics>
+
+      <!--
+        Moon Pointing Restrictions on CHARA:
+        Theo: Bright light like that into the system would certainly stop tiptilt and tracking. If you want to enter numbers I would say to use for a star brighter than 12th magnitude guiding is not possible for a moon distance smaller than 5 degrees.
+      -->
+      <moonPointingRestriction>
+        <warningThreshold>10</warningThreshold>
+        <restriction>
+          <separation>5.0</separation>
+        </restriction>
+      </moonPointingRestriction>
+
+    </telescope>
+
+    <station>
+      <name>S1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>0.0</posX>
+        <posY>0.0</posY>
+        <posZ>0.0</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>0.0</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>36.563466066</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>73.12818008599999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>109.72473292</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>143.03583087799998</opticalLength>
+      </popLink>
+    </station>
+
+    <station>
+      <name>S2</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-18.36198252387274</posX>
+        <posY>-5.746856889999999</posY>
+        <posZ>28.124060011684616</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>6.503152059336001</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>-36.54492441399999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>36.56764467</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>73.15766149199999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>106.46715312399999</opticalLength>
+      </popLink>
+
+      <horizon>
+        <point><azimuth>0.0</azimuth><elevation>0.0</elevation></point><point><azimuth>65.0</azimuth><elevation>0.0</elevation></point><point><azimuth>65.0</azimuth><elevation>20.0</elevation></point><point><azimuth>70.0</azimuth><elevation>21.0</elevation></point><point><azimuth>80.0</azimuth><elevation>30.0</elevation></point><point><azimuth>90.0</azimuth><elevation>31.0</elevation></point><point><azimuth>100.0</azimuth><elevation>31.0</elevation></point><point><azimuth>110.0</azimuth><elevation>30.0</elevation></point><point><azimuth>120.0</azimuth><elevation>22.0</elevation></point><point><azimuth>130.0</azimuth><elevation>20.0</elevation></point><point><azimuth>235.0</azimuth><elevation>20.0</elevation></point><point><azimuth>238.0</azimuth><elevation>25.0</elevation></point><point><azimuth>243.0</azimuth><elevation>25.5</elevation></point><point><azimuth>244.0</azimuth><elevation>26.0</elevation></point><point><azimuth>246.0</azimuth><elevation>25.5</elevation></point><point><azimuth>248.0</azimuth><elevation>25.0</elevation></point><point><azimuth>250.0</azimuth><elevation>25.0</elevation></point><point><azimuth>253.0</azimuth><elevation>24.0</elevation></point><point><azimuth>258.0</azimuth><elevation>21.0</elevation></point><point><azimuth>275.0</azimuth><elevation>20.0</elevation></point><point><azimuth>288.0</azimuth><elevation>30.0</elevation></point><point><azimuth>290.0</azimuth><elevation>30.0</elevation></point><point><azimuth>292.0</azimuth><elevation>33.0</elevation></point><point><azimuth>294.0</azimuth><elevation>37.0</elevation></point><point><azimuth>300.0</azimuth><elevation>41.0</elevation></point><point><azimuth>303.0</azimuth><elevation>41.0</elevation></point><point><azimuth>305.0</azimuth><elevation>40.0</elevation></point><point><azimuth>310.0</azimuth><elevation>44.0</elevation></point><point><azimuth>315.0</azimuth><elevation>46.0</elevation></point><point><azimuth>318.0</azimuth><elevation>47.0</elevation></point><point><azimuth>320.0</azimuth><elevation>48.0</elevation></point><point><azimuth>323.0</azimuth><elevation>48.0</elevation></point><point><azimuth>324.0</azimuth><elevation>49.0</elevation></point><point><azimuth>328.0</azimuth><elevation>48.0</elevation></point><point><azimuth>330.0</azimuth><elevation>47.0</elevation></point><point><azimuth>335.0</azimuth><elevation>46.0</elevation></point><point><azimuth>340.0</azimuth><elevation>34.0</elevation></point><point><azimuth>344.0</azimuth><elevation>30.0</elevation></point><point><azimuth>345.0</azimuth><elevation>30.0</elevation></point><point><azimuth>348.0</azimuth><elevation>27.0</elevation></point><point><azimuth>350.0</azimuth><elevation>27.0</elevation></point><point><azimuth>353.0</azimuth><elevation>23.0</elevation></point><point><azimuth>355.0</azimuth><elevation>20.0</elevation></point><point><azimuth>355.0</azimuth><elevation>0.0</elevation></point><point><azimuth>360.0</azimuth><elevation>0.0</elevation></point><point><azimuth>360.0</azimuth><elevation>90.0</elevation></point><point><azimuth>0.0</azimuth><elevation>90.0</elevation></point>
+      </horizon>
+    </station>
+
+    <station>
+      <name>E1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-176.95599846374608</posX>
+        <posY>125.33247787299999</posY>
+        <posZ>249.63430463197454</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>15.51545686222</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>36.586549999999995</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>73.120786</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>109.708072</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>143.02003</opticalLength>
+      </popLink>
+
+      <horizon>
+        <point><azimuth>0.0</azimuth><elevation>29.0</elevation></point><point><azimuth>2.0</azimuth><elevation>30.0</elevation></point><point><azimuth>4.0</azimuth><elevation>28.0</elevation></point><point><azimuth>8.0</azimuth><elevation>29.0</elevation></point><point><azimuth>10.0</azimuth><elevation>26.0</elevation></point><point><azimuth>12.0</azimuth><elevation>28.0</elevation></point><point><azimuth>14.0</azimuth><elevation>38.0</elevation></point><point><azimuth>16.0</azimuth><elevation>38.0</elevation></point><point><azimuth>18.0</azimuth><elevation>36.0</elevation></point><point><azimuth>20.0</azimuth><elevation>35.0</elevation></point><point><azimuth>22.0</azimuth><elevation>33.0</elevation></point><point><azimuth>24.0</azimuth><elevation>34.0</elevation></point><point><azimuth>26.0</azimuth><elevation>34.0</elevation></point><point><azimuth>28.0</azimuth><elevation>31.5</elevation></point><point><azimuth>30.0</azimuth><elevation>30.5</elevation></point><point><azimuth>32.0</azimuth><elevation>28.5</elevation></point><point><azimuth>34.0</azimuth><elevation>30.0</elevation></point><point><azimuth>36.0</azimuth><elevation>29.0</elevation></point><point><azimuth>38.0</azimuth><elevation>28.5</elevation></point><point><azimuth>40.0</azimuth><elevation>29.0</elevation></point><point><azimuth>42.0</azimuth><elevation>28.0</elevation></point><point><azimuth>44.0</azimuth><elevation>27.0</elevation></point><point><azimuth>46.0</azimuth><elevation>24.0</elevation></point><point><azimuth>48.0</azimuth><elevation>20.0</elevation></point><point><azimuth>70.0</azimuth><elevation>20.0</elevation></point><point><azimuth>90.0</azimuth><elevation>20.0</elevation></point><point><azimuth>123.0</azimuth><elevation>20.0</elevation></point><point><azimuth>176.0</azimuth><elevation>20.0</elevation></point><point><azimuth>190.0</azimuth><elevation>20.0</elevation></point><point><azimuth>220.0</azimuth><elevation>20.0</elevation></point><point><azimuth>250.0</azimuth><elevation>20.0</elevation></point><point><azimuth>270.0</azimuth><elevation>20.0</elevation></point><point><azimuth>272.0</azimuth><elevation>22.0</elevation></point><point><azimuth>273.0</azimuth><elevation>22.0</elevation></point><point><azimuth>275.0</azimuth><elevation>22.0</elevation></point><point><azimuth>277.0</azimuth><elevation>22.0</elevation></point><point><azimuth>279.0</azimuth><elevation>24.0</elevation></point><point><azimuth>280.0</azimuth><elevation>25.0</elevation></point><point><azimuth>281.0</azimuth><elevation>25.0</elevation></point><point><azimuth>283.0</azimuth><elevation>26.0</elevation></point><point><azimuth>285.0</azimuth><elevation>27.0</elevation></point><point><azimuth>287.0</azimuth><elevation>27.0</elevation></point><point><azimuth>288.0</azimuth><elevation>27.0</elevation></point><point><azimuth>290.0</azimuth><elevation>30.0</elevation></point><point><azimuth>292.0</azimuth><elevation>30.0</elevation></point><point><azimuth>292.0</azimuth><elevation>30.0</elevation></point><point><azimuth>292.0</azimuth><elevation>30.0</elevation></point><point><azimuth>292.0</azimuth><elevation>30.0</elevation></point><point><azimuth>294.0</azimuth><elevation>30.0</elevation></point><point><azimuth>294.0</azimuth><elevation>30.0</elevation></point><point><azimuth>296.0</azimuth><elevation>31.0</elevation></point><point><azimuth>300.0</azimuth><elevation>32.0</elevation></point><point><azimuth>305.0</azimuth><elevation>32.0</elevation></point><point><azimuth>310.0</azimuth><elevation>28.0</elevation></point><point><azimuth>314.0</azimuth><elevation>30.0</elevation></point><point><azimuth>317.0</azimuth><elevation>28.5</elevation></point><point><azimuth>318.0</azimuth><elevation>29.0</elevation></point><point><azimuth>319.0</azimuth><elevation>27.0</elevation></point><point><azimuth>320.0</azimuth><elevation>28.0</elevation></point><point><azimuth>321.0</azimuth><elevation>25.0</elevation></point><point><azimuth>322.0</azimuth><elevation>20.0</elevation></point><point><azimuth>325.0</azimuth><elevation>20.0</elevation></point><point><azimuth>337.0</azimuth><elevation>20.0</elevation></point><point><azimuth>340.0</azimuth><elevation>24.0</elevation></point><point><azimuth>342.0</azimuth><elevation>24.0</elevation></point><point><azimuth>344.0</azimuth><elevation>26.0</elevation></point><point><azimuth>346.0</azimuth><elevation>27.5</elevation></point><point><azimuth>348.0</azimuth><elevation>27.5</elevation></point><point><azimuth>350.0</azimuth><elevation>27.0</elevation></point><point><azimuth>352.0</azimuth><elevation>27.5</elevation></point><point><azimuth>354.0</azimuth><elevation>27.2</elevation></point><point><azimuth>356.0</azimuth><elevation>27.0</elevation></point><point><azimuth>358.0</azimuth><elevation>28.0</elevation></point><point><azimuth>359.6</azimuth><elevation>28.5</elevation></point><point><azimuth>360.0</azimuth><elevation>29.0</elevation></point><point><azimuth>360.0</azimuth><elevation>90.0</elevation></point><point><azimuth>0.0</azimuth><elevation>90.0</elevation></point>
+      </horizon>
+    </station>
+
+    <station>
+      <name>E2</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-154.01179496849892</posX>
+        <posY>70.394847986</posY>
+        <posZ>221.43749113266915</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>26.369130573148</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>-73.112068</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>-36.537942</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>36.578964</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>69.92112399999999</opticalLength>
+      </popLink>
+
+      <horizon>
+        <point><azimuth>0.0</azimuth><elevation>20.0</elevation></point><point><azimuth>24.0</azimuth><elevation>30.0</elevation></point><point><azimuth>25.0</azimuth><elevation>22.0</elevation></point><point><azimuth>27.0</azimuth><elevation>25.0</elevation></point><point><azimuth>30.0</azimuth><elevation>26.0</elevation></point><point><azimuth>33.0</azimuth><elevation>28.0</elevation></point><point><azimuth>36.0</azimuth><elevation>23.0</elevation></point><point><azimuth>38.0</azimuth><elevation>22.0</elevation></point><point><azimuth>39.0</azimuth><elevation>20.0</elevation></point><point><azimuth>40.0</azimuth><elevation>20.0</elevation></point><point><azimuth>90.0</azimuth><elevation>20.0</elevation></point><point><azimuth>180.0</azimuth><elevation>20.0</elevation></point><point><azimuth>200.0</azimuth><elevation>20.0</elevation></point><point><azimuth>203.0</azimuth><elevation>20.0</elevation></point><point><azimuth>220.0</azimuth><elevation>20.0</elevation></point><point><azimuth>248.0</azimuth><elevation>20.0</elevation></point><point><azimuth>250.0</azimuth><elevation>20.0</elevation></point><point><azimuth>252.0</azimuth><elevation>22.0</elevation></point><point><azimuth>254.0</azimuth><elevation>24.0</elevation></point><point><azimuth>256.0</azimuth><elevation>26.0</elevation></point><point><azimuth>258.0</azimuth><elevation>23.0</elevation></point><point><azimuth>260.0</azimuth><elevation>21.0</elevation></point><point><azimuth>262.0</azimuth><elevation>20.0</elevation></point><point><azimuth>320.0</azimuth><elevation>20.0</elevation></point><point><azimuth>358.0</azimuth><elevation>20.0</elevation></point><point><azimuth>360.0</azimuth><elevation>20.0</elevation></point><point><azimuth>360.0</azimuth><elevation>90.0</elevation></point><point><azimuth>0.0</azimuth><elevation>90.0</elevation></point>
+      </horizon>
+    </station>
+
+    <station>
+      <name>W1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-130.58901935887238</posX>
+        <posY>-175.07192798199998</posY>
+        <posZ>172.79381780170365</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>29.126335454573997</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>-73.10947999999999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>-36.536268</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>36.594083999999995</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>69.905974</opticalLength>
+      </popLink>
+
+      <horizon>
+        <point><azimuth>0.0</azimuth><elevation>0.0</elevation></point><point><azimuth>25.0</azimuth><elevation>0.0</elevation></point><point><azimuth>25.0</azimuth><elevation>20.0</elevation></point><point><azimuth>30.0</azimuth><elevation>21.0</elevation></point><point><azimuth>33.0</azimuth><elevation>23.0</elevation></point><point><azimuth>40.0</azimuth><elevation>22.6</elevation></point><point><azimuth>45.0</azimuth><elevation>27.0</elevation></point><point><azimuth>48.0</azimuth><elevation>30.0</elevation></point><point><azimuth>50.0</azimuth><elevation>32.0</elevation></point><point><azimuth>55.0</azimuth><elevation>36.2</elevation></point><point><azimuth>58.0</azimuth><elevation>37.0</elevation></point><point><azimuth>60.0</azimuth><elevation>37.0</elevation></point><point><azimuth>65.0</azimuth><elevation>37.0</elevation></point><point><azimuth>67.0</azimuth><elevation>37.2</elevation></point><point><azimuth>70.0</azimuth><elevation>38.0</elevation></point><point><azimuth>73.0</azimuth><elevation>38.0</elevation></point><point><azimuth>80.0</azimuth><elevation>36.0</elevation></point><point><azimuth>85.0</azimuth><elevation>35.2</elevation></point><point><azimuth>90.0</azimuth><elevation>38.2</elevation></point><point><azimuth>92.0</azimuth><elevation>39.2</elevation></point><point><azimuth>95.0</azimuth><elevation>38.4</elevation></point><point><azimuth>97.0</azimuth><elevation>38.6</elevation></point><point><azimuth>100.0</azimuth><elevation>38.0</elevation></point><point><azimuth>105.0</azimuth><elevation>37.0</elevation></point><point><azimuth>110.0</azimuth><elevation>34.0</elevation></point><point><azimuth>115.0</azimuth><elevation>31.0</elevation></point><point><azimuth>117.0</azimuth><elevation>31.0</elevation></point><point><azimuth>120.0</azimuth><elevation>31.0</elevation></point><point><azimuth>125.0</azimuth><elevation>30.2</elevation></point><point><azimuth>130.0</azimuth><elevation>29.2</elevation></point><point><azimuth>132.0</azimuth><elevation>30.0</elevation></point><point><azimuth>134.0</azimuth><elevation>29.6</elevation></point><point><azimuth>136.0</azimuth><elevation>28.4</elevation></point><point><azimuth>138.0</azimuth><elevation>27.2</elevation></point><point><azimuth>140.0</azimuth><elevation>27.6</elevation></point><point><azimuth>140.0</azimuth><elevation>0.0</elevation></point><point><azimuth>360.0</azimuth><elevation>0.0</elevation></point><point><azimuth>360.0</azimuth><elevation>90.0</elevation></point><point><azimuth>0.0</azimuth><elevation>90.0</elevation></point>
+      </horizon>
+    </station>
+
+    <station>
+      <name>W2</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-111.72863237173488</posX>
+        <posY>-69.091262937</posY>
+        <posZ>165.08039882525827</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>-8.456807516486</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>-143.055</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>-106.45532399999999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>-69.911098</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>-33.306356</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+
+      <horizon>
+        <point><azimuth>0.0</azimuth><elevation>20.0</elevation></point><point><azimuth>20.0</azimuth><elevation>20.0</elevation></point><point><azimuth>40.0</azimuth><elevation>20.0</elevation></point><point><azimuth>60.0</azimuth><elevation>20.0</elevation></point><point><azimuth>75.0</azimuth><elevation>20.0</elevation></point><point><azimuth>77.0</azimuth><elevation>20.0</elevation></point><point><azimuth>77.8</azimuth><elevation>20.0</elevation></point><point><azimuth>80.0</azimuth><elevation>21.0</elevation></point><point><azimuth>84.0</azimuth><elevation>21.5</elevation></point><point><azimuth>87.0</azimuth><elevation>22.0</elevation></point><point><azimuth>89.0</azimuth><elevation>23.0</elevation></point><point><azimuth>91.0</azimuth><elevation>25.0</elevation></point><point><azimuth>93.0</azimuth><elevation>25.0</elevation></point><point><azimuth>96.0</azimuth><elevation>24.0</elevation></point><point><azimuth>98.0</azimuth><elevation>22.0</elevation></point><point><azimuth>100.0</azimuth><elevation>23.0</elevation></point><point><azimuth>105.0</azimuth><elevation>21.0</elevation></point><point><azimuth>107.0</azimuth><elevation>20.0</elevation></point><point><azimuth>109.0</azimuth><elevation>20.0</elevation></point><point><azimuth>109.8</azimuth><elevation>22.5</elevation></point><point><azimuth>110.0</azimuth><elevation>22.5</elevation></point><point><azimuth>113.0</azimuth><elevation>22.5</elevation></point><point><azimuth>115.5</azimuth><elevation>26.0</elevation></point><point><azimuth>118.0</azimuth><elevation>24.2</elevation></point><point><azimuth>120.0</azimuth><elevation>25.0</elevation></point><point><azimuth>123.0</azimuth><elevation>24.0</elevation></point><point><azimuth>125.0</azimuth><elevation>20.0</elevation></point><point><azimuth>125.0</azimuth><elevation>25.0</elevation></point><point><azimuth>126.0</azimuth><elevation>23.0</elevation></point><point><azimuth>127.0</azimuth><elevation>22.0</elevation></point><point><azimuth>128.0</azimuth><elevation>22.0</elevation></point><point><azimuth>129.0</azimuth><elevation>20.0</elevation></point><point><azimuth>150.0</azimuth><elevation>20.0</elevation></point><point><azimuth>160.0</azimuth><elevation>20.0</elevation></point><point><azimuth>185.0</azimuth><elevation>20.0</elevation></point><point><azimuth>200.0</azimuth><elevation>20.0</elevation></point><point><azimuth>250.0</azimuth><elevation>20.0</elevation></point><point><azimuth>280.0</azimuth><elevation>20.0</elevation></point><point><azimuth>310.0</azimuth><elevation>20.0</elevation></point><point><azimuth>358.0</azimuth><elevation>20.0</elevation></point><point><azimuth>360.0</azimuth><elevation>20.0</elevation></point><point><azimuth>360.0</azimuth><elevation>90.0</elevation></point><point><azimuth>0.0</azimuth><elevation>90.0</elevation></point>
+      </horizon>
+    </station>
+
+    <channel>
+      <name>V1</name>
+    </channel>
+    <channel>
+      <name>V2</name>
+    </channel>
+    <channel>
+      <name>V3</name>
+    </channel>
+    <channel>
+      <name>V4</name>
+    </channel>
+    <channel>
+      <name>V5</name>
+    </channel>
+    <channel>
+      <name>V6</name>
+    </channel>
+
+    <!-- DL : (-1.4 to +44.3) = 45.7 x2 = 91.4 (sep 2013) -->
+    <!-- all delay lines have the same throw (july 2011) -->
+    <!--
+    Delay line Front sw Back sw
+	S1	-1.42	44.32
+	S2	-1.42	44.35
+	E1	-1.10	44.54
+	E2	-1.23	44.43
+	W1	-1.42	44.35
+	W2	-1.37	44.29
+    -->
+    <delayLine>
+      <name>DL_S1</name>
+      <station>S1</station>
+      <maximumThrow>91.48</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL_S2</name>
+      <station>S2</station>
+      <maximumThrow>91.54</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL_E1</name>
+      <station>E1</station>
+      <maximumThrow>91.28</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL_E2</name>
+      <station>E2</station>
+      <maximumThrow>91.32</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL_W1</name>
+      <station>W1</station>
+      <maximumThrow>91.54</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL_W2</name>
+      <station>W2</station>
+      <maximumThrow>91.32</maximumThrow>
+    </delayLine>
+
+    <switchyard>
+      <name>default</name>
+      <useDelayLineRestriction>false</useDelayLineRestriction>
+      <stationLinks>
+        <station>S1</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.62447053</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+      <stationLinks>
+        <station>S2</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.62447053</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+      <stationLinks>
+        <station>E1</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.62447053</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+      <stationLinks>
+        <station>E2</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.62447053</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+      <stationLinks>
+        <station>W1</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.62447053</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+      <stationLinks>
+        <station>W2</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.20815684</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.41631369</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.62447053</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+    </switchyard>
+
+    <!-- pop on CHARA -->
+    <pop>
+      <name>PoP1</name>
+      <index>1</index>
+    </pop>
+    <pop>
+      <name>PoP2</name>
+      <index>2</index>
+    </pop>
+    <pop>
+      <name>PoP3</name>
+      <index>3</index>
+    </pop>
+    <pop>
+      <name>PoP4</name>
+      <index>4</index>
+    </pop>
+    <pop>
+      <name>PoP5</name>
+      <index>5</index>
+    </pop>
+
+
+    <fringeTracker>
+      <name>PAVO_FT</name>
+      <band>I</band>
+
+      <mode>Group</mode>
+
+      <instrumentVisibility>0.8</instrumentVisibility>
+      <magLimit>8.5</magLimit>
+      <maxIntegration>1</maxIntegration>
+    </fringeTracker>
+
+<!-- instruments (2T) -->
+
+    <focalInstrument>
+      <name>CLASSIC</name>
+      <description>CLASSIC instrument (2T)</description>
+      <numberChannels>2</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.10</transmission>
+      <dit>0.002</dit>
+      <ron>10</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
+      <nbPixInterferometry>2</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>J</name>
+        <resolution>4.6</resolution>
+        <waveLengthMin>1.1472</waveLengthMin>
+        <waveLengthMax>1.4252</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>H</name>
+        <resolution>5.9</resolution>
+        <waveLengthMin>1.53</waveLengthMin>
+        <waveLengthMax>1.82</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>K-Prime</name>
+        <resolution>6.1</resolution>
+        <waveLengthMin>1.96</waveLengthMin>
+        <waveLengthMax>2.31</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>K-Cont</name>
+        <resolution>88.9</resolution>
+        <waveLengthMin>2.08</waveLengthMin>
+        <waveLengthMax>2.10</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>B-gamma</name>
+        <resolution>103.</resolution>
+        <waveLengthMin>2.153</waveLengthMin>
+        <waveLengthMax>2.175</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>FRIEND_2T</name>
+      <description>FRIEND instrument (2T)</description>
+      <numberChannels>2</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.02</transmission>
+      <dit>0.005</dit>
+      <ron>10</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
+      <nbPixInterferometry>4</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>LR</name>
+        <resolution>400</resolution>
+        <waveLengthMin>0.63</waveLengthMin>
+        <waveLengthMax>0.75</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>HR-600</name>
+        <resolution>2300</resolution>
+        <waveLengthMin>0.585</waveLengthMin>
+        <waveLengthMax>0.615</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HR-650</name>
+        <resolution>2300</resolution>
+        <waveLengthMin>0.635</waveLengthMin>
+        <waveLengthMax>0.665</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HR-700</name>
+        <resolution>2300</resolution>
+        <waveLengthMin>0.685</waveLengthMin>
+        <waveLengthMax>0.715</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HR-750</name>
+        <resolution>2300</resolution>
+        <waveLengthMin>0.735</waveLengthMin>
+        <waveLengthMax>0.765</waveLengthMax>
+      </mode>
+
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>PAVO_2T</name>
+      <description>PAVO combiner (2T)</description>
+      <numberChannels>2</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+      <fringeTracker>PAVO_FT</fringeTracker>
+      <fringeTrackerRequired>true</fringeTrackerRequired>
+
+      <!-- noise parameters -->
+      <transmission>0.02</transmission>
+      <dit>0.008</dit>
+      <ron>20</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
+      <nbPixInterferometry>4</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>R</name>
+        <resolution>40</resolution>
+        <waveLengthMin>0.63</waveLengthMin>
+        <waveLengthMax>0.95</waveLengthMax>
+      </mode>
+
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>VEGA_2T</name>
+      <description>VEGA instrument (2T)</description>
+      <numberChannels>2</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <!-- chara transmission = 0.03 -->
+      <!-- instrumentalTransmission = mirrorTransmission * gratingTransmission * slitTransmission = 0.9^13 * 0.6 * 0.3 -->
+      <!-- global transmission = chara transmission * instrumentalTransmission * detectorQuantumEff * 4 = 0.03 * instrumentalTransmission * 0.2 * 4 -->
+      <!-- why x4 ? -->
+      <transmission>0.001098088</transmission>
+      <dit>0.015</dit> <!-- exposure time (15ms) every 25ms -->
+      <ron>0</ron>
+      <detectorSaturation>3000</detectorSaturation>
+      <instrumentVisibility>1.0</instrumentVisibility> <!-- 1.0 -->
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>1</nbPixInterferometry> <!-- per spectral element -->
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+<!--
+      <mode>
+        <name>standard</name>
+        <resolution>40</resolution>
+        <numberChannels>8</numberChannels>
+        <waveLengthMin>0.48</waveLengthMin>
+        <waveLengthMax>0.82</waveLengthMax>
+      </mode>
+-->
+<!-- VEGA SETUP Parameters -->
+<!--
+- dispersion spectrale = lambda min/max:
+si Réseau=1800 (HR), largeur de bande=8nm  (0.008 um)
+si Réseau=300 (MR), largeur de bande=45nm  (0.045 um)
+si Réseau=100 (LR), largeur de bande=150nm (0.15 um)
+
+- resolution:
+HR=30000
+MR=6000
+LR=1500
+
+- nombre de canaux spectraux:
+400 quelle que soit la résolution. Ensuite au traitement on binne très souvent:
+1 canal de 8nm en HR, 2 canaux spectraux de 20nm en MR et 5 canaux de 30nm en LR.
+
+- nombre de blocs (?):
+La bonne valeur par défaut est 20 blocs.
+
+Configuration instrumentale
+- TRACKING : définit quel détecteur sert pour le traitement temps réel
+  o B, R
+  o Valeur par défaut : R
+- SLIT : choix de la fente d’entrée du spectrographe
+  o CLOSE, W047H2, W047H4, W056H2, W056H4, W070H2, W070H4, W100H2, W100H4, OPEN
+  o Valeur par défaut: W070H4
+- GRATING : choix du réseau ou par équivalent de la résolution spectrale
+  o 1800, 300, 100 ou HR, MR, LR
+  o Valeur par défaut : 300 ou MR
+- CAMERA : choix de la chambre de référence
+  o B, BR, R, RB
+  o Valeur par défaut : RB
+- LAMBDA : longueur d’onde centrale de la chambre de référence
+  o Valeur flottante en nanomètre
+  o Valeur par défaut : 656.2
+- SPIN : mode polarisation actif ou non
+  o ON, OFF
+  o Valeur par défaut : OFF
+Configuration d’enregistrement
+- RED FILTER : valeur de la densité neutre de la voie rouge
+  o OPEN, 0.3, 0.6, 1, 1.5, 2, 3, CLOSE
+  o Valeur par défaut : OPEN
+- BLUE FILTER : valeur de la densité neutre de la voie bleue
+  o OPEN, 0.3, 0.6, 1, 1.5, 2, 3, CLOSE
+  o Valeur par défaut : OPEN
+- RECORD : définit quels sont les détecteurs dont il faut enregistrer les données.
+  o B, R, RB
+  o Valeur par défaut : RB
+- NUMBER OF BLOCKS : nombre de blocs
+  o Valeur donnée sous forme d’un entier
+  o Valeur par défaut : 20
+- NUMBER OF FRAMES : nombre de poses individuelles par bloc
+  o Valeur donnée sous forme d’un entier
+  o Valeur par défaut : 1000
+
+      <mode>
+        <name>Mode</name>
+        <resolution>1500 ou 6000 ou 30000</resolution>
+        <numberChannels>5 ou 2 ou 1</numberChannels>
+        <waveLengthMin>lambda - (0.15 ou 0.045 ou 0.008) / 2</waveLengthMin>
+        <waveLengthMax>lambda + (0.15 ou 0.045 ou 0.008) / 2</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+-->
+
+      <!-- Réseau=300 (MR), largeur de bande=45nm  (0.045 um) + resolution=6000 -->
+      <mode>
+        <name>R2656</name>
+        <resolution>33</resolution> <!-- 33 instead of 6000 to get only 2 channels -->
+        <numberChannels>2</numberChannels>
+        <waveLengthMin>0.6337</waveLengthMin>
+        <waveLengthMax>0.6787</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R2668</name>
+        <resolution>33</resolution> <!-- 33 instead of 6000 to get only 2 channels -->
+        <numberChannels>2</numberChannels>
+        <waveLengthMin>0.6455</waveLengthMin>
+        <waveLengthMax>0.6905</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>668.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R2720</name>
+        <resolution>36</resolution> <!-- 36 instead of 6000 to get only 2 channels -->
+        <numberChannels>2</numberChannels>
+        <waveLengthMin>0.6975</waveLengthMin>
+        <waveLengthMax>0.7425</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>720.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <!-- Réseau=1800 (HR), largeur de bande=8nm  (0.008 um) + resolution=30000 -->
+      <mode>
+        <name>R1656</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.6522</waveLengthMin>
+        <waveLengthMax>0.6602</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1589</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.5853</waveLengthMin>
+        <waveLengthMax>0.5933</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>589.3</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1770</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.7659</waveLengthMin>
+        <waveLengthMax>0.7739</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>769.9</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1849</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.8455</waveLengthMin>
+        <waveLengthMax>0.8535</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>849.5</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1854</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.850</waveLengthMin>
+        <waveLengthMax>0.858</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>854.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1867</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.8635</waveLengthMin>
+        <waveLengthMax>0.8715</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>867.5</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+    </focalInstrument>
+
+
+<!-- instruments (3T) -->
+
+    <focalInstrument>
+      <name>CLIMB</name>
+      <description>CLIMB instrument (3T)</description>
+      <numberChannels>3</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.08</transmission>
+      <dit>0.002</dit>
+      <ron>10</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>3</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>J</name>
+        <resolution>4.6</resolution>
+        <waveLengthMin>1.1472</waveLengthMin>
+        <waveLengthMax>1.4252</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>H</name>
+        <resolution>5.9</resolution>
+        <waveLengthMin>1.53</waveLengthMin>
+        <waveLengthMax>1.82</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>K-Prime</name>
+        <resolution>6.1</resolution>
+        <waveLengthMin>1.96</waveLengthMin>
+        <waveLengthMax>2.31</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>K-Cont</name>
+        <resolution>88.9</resolution>
+        <waveLengthMin>2.08</waveLengthMin>
+        <waveLengthMax>2.10</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>B-gamma</name>
+        <resolution>103.</resolution>
+        <waveLengthMin>2.153</waveLengthMin>
+        <waveLengthMax>2.175</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>FRIEND_3T</name>
+      <description>FRIEND instrument (3T)</description>
+      <numberChannels>2</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.02</transmission>
+      <dit>0.005</dit>
+      <ron>10</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
+      <nbPixInterferometry>4</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>LR</name>
+        <resolution>400</resolution>
+        <waveLengthMin>0.63</waveLengthMin>
+        <waveLengthMax>0.75</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>HR-600</name>
+        <resolution>2300</resolution>
+        <waveLengthMin>0.585</waveLengthMin>
+        <waveLengthMax>0.615</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HR-650</name>
+        <resolution>2300</resolution>
+        <waveLengthMin>0.635</waveLengthMin>
+        <waveLengthMax>0.665</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HR-700</name>
+        <resolution>2300</resolution>
+        <waveLengthMin>0.685</waveLengthMin>
+        <waveLengthMax>0.715</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HR-750</name>
+        <resolution>2300</resolution>
+        <waveLengthMin>0.735</waveLengthMin>
+        <waveLengthMax>0.765</waveLengthMax>
+      </mode>
+
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>PAVO_3T</name>
+      <description>PAVO combiner (3T)</description>
+      <numberChannels>3</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+      <fringeTracker>PAVO_FT</fringeTracker>
+      <fringeTrackerRequired>true</fringeTrackerRequired>
+
+      <!-- noise parameters -->
+      <transmission>0.02</transmission>
+      <dit>0.008</dit>
+      <ron>20</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
+      <nbPixInterferometry>4</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>R</name>
+        <resolution>40</resolution>
+        <waveLengthMin>0.63</waveLengthMin>
+        <waveLengthMax>0.95</waveLengthMax>
+      </mode>
+
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>VEGA_3T</name>
+      <description>VEGA instrument (3T)</description>
+      <numberChannels>3</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <!-- chara transmission = 0.03 -->
+      <!-- instrumentalTransmission = mirrorTransmission * gratingTransmission * slitTransmission = 0.9^13 * 0.6 * 0.3 -->
+      <!-- global transmission = chara transmission * instrumentalTransmission * detectorQuantumEff * 4 = 0.03 * instrumentalTransmission * 0.2 * 4 -->
+      <!-- why x4 ? -->
+      <transmission>0.001098088</transmission>
+      <dit>0.015</dit> <!-- exposure time (15ms) every 25ms -->
+      <ron>0</ron>
+      <detectorSaturation>3000</detectorSaturation>
+      <instrumentVisibility>1.0</instrumentVisibility> <!-- 1.0 -->
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>1</nbPixInterferometry> <!-- per spectral element -->
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+<!-- VEGA SETUP Parameters -->
+<!--
+- dispersion spectrale = lambda min/max:
+si Réseau=1800 (HR), largeur de bande=8nm  (0.008 um)
+si Réseau=300 (MR), largeur de bande=45nm  (0.045 um)
+si Réseau=100 (LR), largeur de bande=150nm (0.15 um)
+
+- resolution:
+HR=30000
+MR=6000
+LR=1500
+
+- nombre de canaux spectraux:
+400 quelle que soit la résolution. Ensuite au traitement on binne très souvent:
+1 canal de 8nm en HR, 2 canaux spectraux de 20nm en MR et 5 canaux de 30nm en LR.
+
+- nombre de blocs (?):
+La bonne valeur par défaut est 20 blocs.
+
+Configuration instrumentale
+- TRACKING : définit quel détecteur sert pour le traitement temps réel
+  o B, R
+  o Valeur par défaut : R
+- SLIT : choix de la fente d’entrée du spectrographe
+  o CLOSE, W047H2, W047H4, W056H2, W056H4, W070H2, W070H4, W100H2, W100H4, OPEN
+  o Valeur par défaut: W070H4
+- GRATING : choix du réseau ou par équivalent de la résolution spectrale
+  o 1800, 300, 100 ou HR, MR, LR
+  o Valeur par défaut : 300 ou MR
+- CAMERA : choix de la chambre de référence
+  o B, BR, R, RB
+  o Valeur par défaut : RB
+- LAMBDA : longueur d’onde centrale de la chambre de référence
+  o Valeur flottante en nanomètre
+  o Valeur par défaut : 656.2
+- SPIN : mode polarisation actif ou non
+  o ON, OFF
+  o Valeur par défaut : OFF
+Configuration d’enregistrement
+- RED FILTER : valeur de la densité neutre de la voie rouge
+  o OPEN, 0.3, 0.6, 1, 1.5, 2, 3, CLOSE
+  o Valeur par défaut : OPEN
+- BLUE FILTER : valeur de la densité neutre de la voie bleue
+  o OPEN, 0.3, 0.6, 1, 1.5, 2, 3, CLOSE
+  o Valeur par défaut : OPEN
+- RECORD : définit quels sont les détecteurs dont il faut enregistrer les données.
+  o B, R, RB
+  o Valeur par défaut : RB
+- NUMBER OF BLOCKS : nombre de blocs
+  o Valeur donnée sous forme d’un entier
+  o Valeur par défaut : 20
+- NUMBER OF FRAMES : nombre de poses individuelles par bloc
+  o Valeur donnée sous forme d’un entier
+  o Valeur par défaut : 1000
+
+      <mode>
+        <name>Mode</name>
+        <resolution>1500 ou 6000 ou 30000</resolution>
+        <numberChannels>5 ou 2 ou 1</numberChannels>
+        <waveLengthMin>lambda - (0.15 ou 0.045 ou 0.008) / 2</waveLengthMin>
+        <waveLengthMax>lambda + (0.15 ou 0.045 ou 0.008) / 2</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+-->
+
+      <!-- Réseau=300 (MR), largeur de bande=45nm  (0.045 um) + resolution=6000 -->
+      <mode>
+        <name>R2656</name>
+        <resolution>33</resolution> <!-- 33 instead of 6000 to get only 2 channels -->
+        <numberChannels>2</numberChannels>
+        <waveLengthMin>0.6337</waveLengthMin>
+        <waveLengthMax>0.6787</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R2668</name>
+        <resolution>33</resolution> <!-- 33 instead of 6000 to get only 2 channels -->
+        <numberChannels>2</numberChannels>
+        <waveLengthMin>0.6455</waveLengthMin>
+        <waveLengthMax>0.6905</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>668.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R2720</name>
+        <resolution>36</resolution> <!-- 36 instead of 6000 to get only 2 channels -->
+        <numberChannels>2</numberChannels>
+        <waveLengthMin>0.6975</waveLengthMin>
+        <waveLengthMax>0.7425</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>720.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <!-- Réseau=1800 (HR), largeur de bande=8nm  (0.008 um) + resolution=30000 -->
+      <mode>
+        <name>R1656</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.6522</waveLengthMin>
+        <waveLengthMax>0.6602</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1589</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.5853</waveLengthMin>
+        <waveLengthMax>0.5933</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>589.3</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1770</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.7659</waveLengthMin>
+        <waveLengthMax>0.7739</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>769.9</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1849</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.8455</waveLengthMin>
+        <waveLengthMax>0.8535</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>849.5</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1854</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.850</waveLengthMin>
+        <waveLengthMax>0.858</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>854.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1867</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.8635</waveLengthMin>
+        <waveLengthMax>0.8715</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>867.5</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+    </focalInstrument>
+
+
+<!-- instruments (4T) -->
+
+    <focalInstrument>
+      <!-- name: Name of the focal instrument (AMBER, MIDI ...) -->
+      <name>MIRC</name>
+      <!-- description: Description of the instrument -->
+      <description>MIRC instrument (4T)</description>
+      <!-- numberChannels : The number of channels used by this instrument -->
+      <numberChannels>4</numberChannels>
+      <!-- defaultSamplingTime: The default sampling time for this instrument (min) -->
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- Noise modelling parameters -->
+        <!-- The transmission of interferometer+instrument at observed wavelength (typically 0.01) -->
+        <transmission>0.0025</transmission>
+        <!-- The Detector individual integration time in seconds (typically less than 0.1s) -->
+        <dit>0.01</dit>
+        <!-- ron: The Detector readout noise (typically 10) -->
+        <ron>15</ron>
+        <!-- detectorSaturation: The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000) -->
+        <detectorSaturation>50000</detectorSaturation>
+        <!-- instrumentVisibility: The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9) -->
+        <instrumentVisibility>0.9</instrumentVisibility>
+        <!-- instrumentVisibilityBias: The Typical Visibility Bias (percent of V) (typically 1) -->
+        <instrumentVisibilityBias>1</instrumentVisibilityBias>
+        <!-- instrumentPhaseBias: The Typical Phase/Phase Closure Bias in degrees (typically 1) -->
+        <instrumentPhaseBias>1</instrumentPhaseBias>
+        <!-- nbPixInterferometry: The number of pixels to code all fringes together (interferometric channel) -->
+        <nbPixInterferometry>126</nbPixInterferometry>
+        <!-- nbPixPhotometry: The number of pixels to code each photometric channel -->
+        <nbPixPhotometry>18</nbPixPhotometry>
+        <!-- fracFluxInInterferometry: The fraction of flux going into interferometric channel (typically 0.9) -->
+        <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
+
+      <!--
+        Instrument predefined modes :
+        Each mode describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
+        It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
+        and optionaly a number of channels (numberChannels)
+      -->
+      <mode>
+        <!-- name: The name of this instrument mode -->
+        <name>Low_H</name>
+        <!-- resolution: The spectral resolution of this instrument mode -->
+        <resolution>41</resolution>
+        <!--
+          The number of spectral channels of this instrument mode (optional)
+          <numberChannels>n</numberChannels>
+        -->
+        <!-- 1.476 - 1.755 (8 channels) -->
+        <!-- waveLengthMin: The lower wave length of this instrument mode -->
+        <waveLengthMin>1.4551</waveLengthMin>
+        <!-- waveLengthMax: The upper wave length of this instrument mode -->
+        <waveLengthMax>1.7724</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Low_K</name>
+        <resolution>40</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_H</name>
+        <resolution>150</resolution>
+        <!-- 1.476 - 1.755 (26 channels) -->
+        <waveLengthMin>1.4704</waveLengthMin>
+        <waveLengthMax>1.7606</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_K</name>
+        <resolution>150</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_H</name>
+        <resolution>400</resolution>
+        <!-- 1.476 - 1.755 (70 channels) -->
+        <waveLengthMin>1.4740</waveLengthMin>
+        <waveLengthMax>1.7570</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K</name>
+        <resolution>400</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>VEGA_4T</name>
+      <description>VEGA instrument (4T)</description>
+      <numberChannels>4</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <!-- chara transmission = 0.03 -->
+      <!-- instrumentalTransmission = mirrorTransmission * gratingTransmission * slitTransmission = 0.9^13 * 0.6 * 0.3 -->
+      <!-- global transmission = chara transmission * instrumentalTransmission * detectorQuantumEff * 4 = 0.03 * instrumentalTransmission * 0.2 * 4 -->
+      <!-- why x4 ? -->
+      <transmission>0.001098088</transmission>
+      <dit>0.015</dit> <!-- exposure time (15ms) every 25ms -->
+      <ron>0</ron>
+      <detectorSaturation>3000</detectorSaturation>
+      <instrumentVisibility>1.0</instrumentVisibility> <!-- 1.0 -->
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>1</nbPixInterferometry> <!-- per spectral element -->
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+<!-- VEGA SETUP Parameters -->
+<!--
+- dispersion spectrale = lambda min/max:
+si Réseau=1800 (HR), largeur de bande=8nm  (0.008 um)
+si Réseau=300 (MR), largeur de bande=45nm  (0.045 um)
+si Réseau=100 (LR), largeur de bande=150nm (0.15 um)
+
+- resolution:
+HR=30000
+MR=6000
+LR=1500
+
+- nombre de canaux spectraux:
+400 quelle que soit la résolution. Ensuite au traitement on binne très souvent:
+1 canal de 8nm en HR, 2 canaux spectraux de 20nm en MR et 5 canaux de 30nm en LR.
+
+- nombre de blocs (?):
+La bonne valeur par défaut est 20 blocs.
+
+Configuration instrumentale
+- TRACKING : définit quel détecteur sert pour le traitement temps réel
+  o B, R
+  o Valeur par défaut : R
+- SLIT : choix de la fente d’entrée du spectrographe
+  o CLOSE, W047H2, W047H4, W056H2, W056H4, W070H2, W070H4, W100H2, W100H4, OPEN
+  o Valeur par défaut: W070H4
+- GRATING : choix du réseau ou par équivalent de la résolution spectrale
+  o 1800, 300, 100 ou HR, MR, LR
+  o Valeur par défaut : 300 ou MR
+- CAMERA : choix de la chambre de référence
+  o B, BR, R, RB
+  o Valeur par défaut : RB
+- LAMBDA : longueur d’onde centrale de la chambre de référence
+  o Valeur flottante en nanomètre
+  o Valeur par défaut : 656.2
+- SPIN : mode polarisation actif ou non
+  o ON, OFF
+  o Valeur par défaut : OFF
+Configuration d’enregistrement
+- RED FILTER : valeur de la densité neutre de la voie rouge
+  o OPEN, 0.3, 0.6, 1, 1.5, 2, 3, CLOSE
+  o Valeur par défaut : OPEN
+- BLUE FILTER : valeur de la densité neutre de la voie bleue
+  o OPEN, 0.3, 0.6, 1, 1.5, 2, 3, CLOSE
+  o Valeur par défaut : OPEN
+- RECORD : définit quels sont les détecteurs dont il faut enregistrer les données.
+  o B, R, RB
+  o Valeur par défaut : RB
+- NUMBER OF BLOCKS : nombre de blocs
+  o Valeur donnée sous forme d’un entier
+  o Valeur par défaut : 20
+- NUMBER OF FRAMES : nombre de poses individuelles par bloc
+  o Valeur donnée sous forme d’un entier
+  o Valeur par défaut : 1000
+
+      <mode>
+        <name>Mode</name>
+        <resolution>1500 ou 6000 ou 30000</resolution>
+        <numberChannels>5 ou 2 ou 1</numberChannels>
+        <waveLengthMin>lambda - (0.15 ou 0.045 ou 0.008) / 2</waveLengthMin>
+        <waveLengthMax>lambda + (0.15 ou 0.045 ou 0.008) / 2</waveLengthMax>
+
+                    <parameter><name>TRACKING</name><value>R</value></parameter>
+                    <parameter><name>SLIT</name><value>W070H4</value></parameter>
+                    <parameter><name>GRATING</name><value>300</value></parameter>
+                    <parameter><name>CAMERA</name><value>RB</value></parameter>
+                    <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+                    <parameter><name>SPIN</name><value>OFF</value></parameter>
+                    <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+                    <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+                    <parameter><name>RECORD</name><value>RB</value></parameter>
+                    <parameter><name>BLOCKS</name><value>20</value></parameter>
+                    <parameter><name>FRAMES</name><value>1000</value></parameter>
+                  </mode>
+            -->
+
+            <!-- Réseau=300 (MR), largeur de bande=45nm  (0.045 um) + resolution=6000 -->
+            <mode>
+                <name>R2656</name>
+                <resolution>33</resolution> <!-- 33 instead of 6000 to get only 2 channels -->
+                <numberChannels>2</numberChannels>
+                <waveLengthMin>0.6337</waveLengthMin>
+                <waveLengthMax>0.6787</waveLengthMax>
+
+                <parameter>
+                    <name>TRACKING</name>
+                    <value>R</value>
+                </parameter>
+                <parameter>
+                    <name>SLIT</name>
+                    <value>W070H4</value>
+                </parameter>
+                <parameter>
+                    <name>GRATING</name>
+                    <value>300</value>
+                </parameter>
+                <parameter>
+                    <name>CAMERA</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>LAMBDA</name>
+                    <value>656.2</value>
+                </parameter>
+                <parameter>
+                    <name>SPIN</name>
+                    <value>OFF</value>
+                </parameter>
+                <parameter>
+                    <name>RED FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>BLUE FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>RECORD</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>BLOCKS</name>
+                    <value>20</value>
+                </parameter>
+                <parameter>
+                    <name>FRAMES</name>
+                    <value>1000</value>
+                </parameter>
+            </mode>
+
+            <mode>
+                <name>R2668</name>
+                <resolution>33</resolution> <!-- 33 instead of 6000 to get only 2 channels -->
+                <numberChannels>2</numberChannels>
+                <waveLengthMin>0.6455</waveLengthMin>
+                <waveLengthMax>0.6905</waveLengthMax>
+
+                <parameter>
+                    <name>TRACKING</name>
+                    <value>R</value>
+                </parameter>
+                <parameter>
+                    <name>SLIT</name>
+                    <value>W070H4</value>
+                </parameter>
+                <parameter>
+                    <name>GRATING</name>
+                    <value>300</value>
+                </parameter>
+                <parameter>
+                    <name>CAMERA</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>LAMBDA</name>
+                    <value>668.0</value>
+                </parameter>
+                <parameter>
+                    <name>SPIN</name>
+                    <value>OFF</value>
+                </parameter>
+                <parameter>
+                    <name>RED FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>BLUE FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>RECORD</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>BLOCKS</name>
+                    <value>20</value>
+                </parameter>
+                <parameter>
+                    <name>FRAMES</name>
+                    <value>1000</value>
+                </parameter>
+            </mode>
+
+            <mode>
+                <name>R2720</name>
+                <resolution>36</resolution> <!-- 36 instead of 6000 to get only 2 channels -->
+                <numberChannels>2</numberChannels>
+                <waveLengthMin>0.6975</waveLengthMin>
+                <waveLengthMax>0.7425</waveLengthMax>
+
+                <parameter>
+                    <name>TRACKING</name>
+                    <value>R</value>
+                </parameter>
+                <parameter>
+                    <name>SLIT</name>
+                    <value>W070H4</value>
+                </parameter>
+                <parameter>
+                    <name>GRATING</name>
+                    <value>300</value>
+                </parameter>
+                <parameter>
+                    <name>CAMERA</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>LAMBDA</name>
+                    <value>720.0</value>
+                </parameter>
+                <parameter>
+                    <name>SPIN</name>
+                    <value>OFF</value>
+                </parameter>
+                <parameter>
+                    <name>RED FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>BLUE FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>RECORD</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>BLOCKS</name>
+                    <value>20</value>
+                </parameter>
+                <parameter>
+                    <name>FRAMES</name>
+                    <value>1000</value>
+                </parameter>
+            </mode>
+
+            <!-- Réseau=1800 (HR), largeur de bande=8nm  (0.008 um) + resolution=30000 -->
+            <mode>
+                <name>R1656</name>
+                <resolution>30000</resolution>
+                <numberChannels>1</numberChannels>
+                <waveLengthMin>0.6522</waveLengthMin>
+                <waveLengthMax>0.6602</waveLengthMax>
+
+                <parameter>
+                    <name>TRACKING</name>
+                    <value>R</value>
+                </parameter>
+                <parameter>
+                    <name>SLIT</name>
+                    <value>W070H4</value>
+                </parameter>
+                <parameter>
+                    <name>GRATING</name>
+                    <value>1800</value>
+                </parameter>
+                <parameter>
+                    <name>CAMERA</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>LAMBDA</name>
+                    <value>656.2</value>
+                </parameter>
+                <parameter>
+                    <name>SPIN</name>
+                    <value>OFF</value>
+                </parameter>
+                <parameter>
+                    <name>RED FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>BLUE FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>RECORD</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>BLOCKS</name>
+                    <value>20</value>
+                </parameter>
+                <parameter>
+                    <name>FRAMES</name>
+                    <value>1000</value>
+                </parameter>
+            </mode>
+
+            <mode>
+                <name>R1589</name>
+                <resolution>30000</resolution>
+                <numberChannels>1</numberChannels>
+                <waveLengthMin>0.5853</waveLengthMin>
+                <waveLengthMax>0.5933</waveLengthMax>
+
+                <parameter>
+                    <name>TRACKING</name>
+                    <value>R</value>
+                </parameter>
+                <parameter>
+                    <name>SLIT</name>
+                    <value>W070H4</value>
+                </parameter>
+                <parameter>
+                    <name>GRATING</name>
+                    <value>1800</value>
+                </parameter>
+                <parameter>
+                    <name>CAMERA</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>LAMBDA</name>
+                    <value>589.3</value>
+                </parameter>
+                <parameter>
+                    <name>SPIN</name>
+                    <value>OFF</value>
+                </parameter>
+                <parameter>
+                    <name>RED FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>BLUE FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>RECORD</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>BLOCKS</name>
+                    <value>20</value>
+                </parameter>
+                <parameter>
+                    <name>FRAMES</name>
+                    <value>1000</value>
+                </parameter>
+            </mode>
+
+            <mode>
+                <name>R1770</name>
+                <resolution>30000</resolution>
+                <numberChannels>1</numberChannels>
+                <waveLengthMin>0.7659</waveLengthMin>
+                <waveLengthMax>0.7739</waveLengthMax>
+
+                <parameter>
+                    <name>TRACKING</name>
+                    <value>R</value>
+                </parameter>
+                <parameter>
+                    <name>SLIT</name>
+                    <value>W070H4</value>
+                </parameter>
+                <parameter>
+                    <name>GRATING</name>
+                    <value>1800</value>
+                </parameter>
+                <parameter>
+                    <name>CAMERA</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>LAMBDA</name>
+                    <value>769.9</value>
+                </parameter>
+                <parameter>
+                    <name>SPIN</name>
+                    <value>OFF</value>
+                </parameter>
+                <parameter>
+                    <name>RED FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>BLUE FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>RECORD</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>BLOCKS</name>
+                    <value>20</value>
+                </parameter>
+                <parameter>
+                    <name>FRAMES</name>
+                    <value>1000</value>
+                </parameter>
+            </mode>
+
+            <mode>
+                <name>R1849</name>
+                <resolution>30000</resolution>
+                <numberChannels>1</numberChannels>
+                <waveLengthMin>0.8455</waveLengthMin>
+                <waveLengthMax>0.8535</waveLengthMax>
+
+                <parameter>
+                    <name>TRACKING</name>
+                    <value>R</value>
+                </parameter>
+                <parameter>
+                    <name>SLIT</name>
+                    <value>W070H4</value>
+                </parameter>
+                <parameter>
+                    <name>GRATING</name>
+                    <value>1800</value>
+                </parameter>
+                <parameter>
+                    <name>CAMERA</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>LAMBDA</name>
+                    <value>849.5</value>
+                </parameter>
+                <parameter>
+                    <name>SPIN</name>
+                    <value>OFF</value>
+                </parameter>
+                <parameter>
+                    <name>RED FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>BLUE FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>RECORD</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>BLOCKS</name>
+                    <value>20</value>
+                </parameter>
+                <parameter>
+                    <name>FRAMES</name>
+                    <value>1000</value>
+                </parameter>
+            </mode>
+
+            <mode>
+                <name>R1854</name>
+                <resolution>30000</resolution>
+                <numberChannels>1</numberChannels>
+                <waveLengthMin>0.850</waveLengthMin>
+                <waveLengthMax>0.858</waveLengthMax>
+
+                <parameter>
+                    <name>TRACKING</name>
+                    <value>R</value>
+                </parameter>
+                <parameter>
+                    <name>SLIT</name>
+                    <value>W070H4</value>
+                </parameter>
+                <parameter>
+                    <name>GRATING</name>
+                    <value>1800</value>
+                </parameter>
+                <parameter>
+                    <name>CAMERA</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>LAMBDA</name>
+                    <value>854.0</value>
+                </parameter>
+                <parameter>
+                    <name>SPIN</name>
+                    <value>OFF</value>
+                </parameter>
+                <parameter>
+                    <name>RED FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>BLUE FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>RECORD</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>BLOCKS</name>
+                    <value>20</value>
+                </parameter>
+                <parameter>
+                    <name>FRAMES</name>
+                    <value>1000</value>
+                </parameter>
+            </mode>
+
+            <mode>
+                <name>R1867</name>
+                <resolution>30000</resolution>
+                <numberChannels>1</numberChannels>
+                <waveLengthMin>0.8635</waveLengthMin>
+                <waveLengthMax>0.8715</waveLengthMax>
+
+                <parameter>
+                    <name>TRACKING</name>
+                    <value>R</value>
+                </parameter>
+                <parameter>
+                    <name>SLIT</name>
+                    <value>W070H4</value>
+                </parameter>
+                <parameter>
+                    <name>GRATING</name>
+                    <value>1800</value>
+                </parameter>
+                <parameter>
+                    <name>CAMERA</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>LAMBDA</name>
+                    <value>867.5</value>
+                </parameter>
+                <parameter>
+                    <name>SPIN</name>
+                    <value>OFF</value>
+                </parameter>
+                <parameter>
+                    <name>RED FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>BLUE FILTER</name>
+                    <value>OPEN</value>
+                </parameter>
+                <parameter>
+                    <name>RECORD</name>
+                    <value>RB</value>
+                </parameter>
+                <parameter>
+                    <name>BLOCKS</name>
+                    <value>20</value>
+                </parameter>
+                <parameter>
+                    <name>FRAMES</name>
+                    <value>1000</value>
+                </parameter>
+            </mode>
+
+        </focalInstrument>
+
+
+        <!-- instruments (5T) -->
+
+        <focalInstrument>
+            <!-- name: Name of the focal instrument (AMBER, MIDI ...) -->
+            <name>MIRC_5T</name>
+            <!-- description: Description of the instrument -->
+            <description>MIRC instrument (5T)</description>
+            <!-- numberChannels : The number of channels used by this instrument -->
+            <numberChannels>5</numberChannels>
+            <!-- defaultSamplingTime: The default sampling time for this instrument (min) -->
+            <defaultSamplingTime>40</defaultSamplingTime>
+
+            <!-- Noise modelling parameters -->
+            <!-- The transmission of interferometer+instrument at observed wavelength (typically 0.01) -->
+            <transmission>0.0025</transmission>
+            <!-- The Detector individual integration time in seconds (typically less than 0.1s) -->
+            <dit>0.01</dit>
+            <!-- ron: The Detector readout noise (typically 10) -->
+            <ron>15</ron>
+            <!-- detectorSaturation: The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000) -->
+            <detectorSaturation>50000</detectorSaturation>
+            <!-- instrumentVisibility: The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9) -->
+            <instrumentVisibility>0.9</instrumentVisibility>
+            <!-- instrumentVisibilityBias: The Typical Visibility Bias (percent of V) (typically 1) -->
+            <instrumentVisibilityBias>1</instrumentVisibilityBias>
+            <!-- instrumentPhaseBias: The Typical Phase/Phase Closure Bias in degrees (typically 1) -->
+            <instrumentPhaseBias>1</instrumentPhaseBias>
+            <!-- nbPixInterferometry: The number of pixels to code all fringes together (interferometric channel) -->
+            <nbPixInterferometry>126</nbPixInterferometry>
+            <!-- nbPixPhotometry: The number of pixels to code each photometric channel -->
+            <nbPixPhotometry>18</nbPixPhotometry>
+            <!-- fracFluxInInterferometry: The fraction of flux going into interferometric channel (typically 0.9) -->
+            <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
+
+            <!--
+              Instrument predefined modes :
+              Each mode describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
+              It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
+              and optionaly a number of channels (numberChannels)
+            -->
+            <mode>
+                <!-- name: The name of this instrument mode -->
+                <name>Low_H</name>
+                <!-- resolution: The spectral resolution of this instrument mode -->
+                <resolution>41</resolution>
+                <!--
+                  The number of spectral channels of this instrument mode (optional)
+                  <numberChannels>n</numberChannels>
+                -->
+                <!-- 1.476 - 1.755 (8 channels) -->
+                <!-- waveLengthMin: The lower wave length of this instrument mode -->
+                <waveLengthMin>1.4551</waveLengthMin>
+                <!-- waveLengthMax: The upper wave length of this instrument mode -->
+                <waveLengthMax>1.7724</waveLengthMax>
+            </mode>
+            <mode>
+                <name>Low_K</name>
+                <resolution>40</resolution>
+                <waveLengthMin>2.0</waveLengthMin>
+                <waveLengthMax>2.5</waveLengthMax>
+            </mode>
+            <mode>
+                <name>Medium_H</name>
+                <resolution>150</resolution>
+                <!-- 1.476 - 1.755 (26 channels) -->
+                <waveLengthMin>1.4704</waveLengthMin>
+                <waveLengthMax>1.7606</waveLengthMax>
+            </mode>
+            <mode>
+                <name>Medium_K</name>
+                <resolution>150</resolution>
+                <waveLengthMin>2.0</waveLengthMin>
+                <waveLengthMax>2.5</waveLengthMax>
+            </mode>
+            <mode>
+                <name>High_H</name>
+                <resolution>400</resolution>
+                <!-- 1.476 - 1.755 (70 channels) -->
+                <waveLengthMin>1.4740</waveLengthMin>
+                <waveLengthMax>1.7570</waveLengthMax>
+            </mode>
+            <mode>
+                <name>High_K</name>
+                <resolution>400</resolution>
+                <waveLengthMin>2.0</waveLengthMin>
+                <waveLengthMax>2.5</waveLengthMax>
+            </mode>
+        </focalInstrument>
+
+
+        <!-- instruments (6T) -->
+
+        <focalInstrument>
+            <!-- name: Name of the focal instrument (AMBER, MIDI ...) -->
+            <name>MIRC_6T</name>
+            <!-- description: Description of the instrument -->
+            <description>MIRC instrument (6T)</description>
+            <!-- numberChannels : The number of channels used by this instrument -->
+            <numberChannels>6</numberChannels>
+            <!-- defaultSamplingTime: The default sampling time for this instrument (min) -->
+            <defaultSamplingTime>40</defaultSamplingTime>
+
+            <!-- Noise modelling parameters -->
+            <!-- The transmission of interferometer+instrument at observed wavelength (typically 0.01) -->
+            <transmission>0.0025</transmission>
+            <!-- The Detector individual integration time in seconds (typically less than 0.1s) -->
+            <dit>0.01</dit>
+            <!-- ron: The Detector readout noise (typically 10) -->
+            <ron>15</ron>
+            <!-- detectorSaturation: The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000) -->
+            <detectorSaturation>50000</detectorSaturation>
+            <!-- instrumentVisibility: The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9) -->
+            <instrumentVisibility>0.9</instrumentVisibility>
+            <!-- instrumentVisibilityBias: The Typical Visibility Bias (percent of V) (typically 1) -->
+            <instrumentVisibilityBias>1</instrumentVisibilityBias>
+            <!-- instrumentPhaseBias: The Typical Phase/Phase Closure Bias in degrees (typically 1) -->
+            <instrumentPhaseBias>1</instrumentPhaseBias>
+            <!-- nbPixInterferometry: The number of pixels to code all fringes together (interferometric channel) -->
+            <nbPixInterferometry>126</nbPixInterferometry>
+            <!-- nbPixPhotometry: The number of pixels to code each photometric channel -->
+            <nbPixPhotometry>18</nbPixPhotometry>
+            <!-- fracFluxInInterferometry: The fraction of flux going into interferometric channel (typically 0.9) -->
+            <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
+
+            <!--
+              Instrument predefined modes :
+              Each mode describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
+              It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
+              and optionaly a number of channels (numberChannels)
+            -->
+            <mode>
+                <!-- name: The name of this instrument mode -->
+                <name>Low_H</name>
+                <!-- resolution: The spectral resolution of this instrument mode -->
+                <resolution>41</resolution>
+                <!--
+                  The number of spectral channels of this instrument mode (optional)
+                  <numberChannels>n</numberChannels>
+                -->
+                <!-- 1.476 - 1.755 (8 channels) -->
+                <!-- waveLengthMin: The lower wave length of this instrument mode -->
+                <waveLengthMin>1.4551</waveLengthMin>
+                <!-- waveLengthMax: The upper wave length of this instrument mode -->
+                <waveLengthMax>1.7724</waveLengthMax>
+            </mode>
+            <mode>
+                <name>Low_K</name>
+                <resolution>40</resolution>
+                <waveLengthMin>2.0</waveLengthMin>
+                <waveLengthMax>2.5</waveLengthMax>
+            </mode>
+            <mode>
+                <name>Medium_H</name>
+                <resolution>150</resolution>
+                <!-- 1.476 - 1.755 (26 channels) -->
+                <waveLengthMin>1.4704</waveLengthMin>
+                <waveLengthMax>1.7606</waveLengthMax>
+            </mode>
+            <mode>
+                <name>Medium_K</name>
+                <resolution>150</resolution>
+                <waveLengthMin>2.0</waveLengthMin>
+                <waveLengthMax>2.5</waveLengthMax>
+            </mode>
+            <mode>
+                <name>High_H</name>
+                <resolution>400</resolution>
+                <!-- 1.476 - 1.755 (70 channels) -->
+                <waveLengthMin>1.4740</waveLengthMin>
+                <waveLengthMax>1.7570</waveLengthMax>
+            </mode>
+            <mode>
+                <name>High_K</name>
+                <resolution>400</resolution>
+                <waveLengthMin>2.0</waveLengthMin>
+                <waveLengthMax>2.5</waveLengthMax>
+            </mode>
+        </focalInstrument>
+
+    </description>
+
+    <configuration>
+        <interferometer>CHARA</interferometer>
+
+        <!-- instruments (CLASSIC, CLIMB, MIRC 4T/6T, PAVO 2T/3T, VEGA 2T/3T/4T) -->
+
+        <!-- CLASSIC (2T) -->
+        <instrument>
+            <focalInstrument>CLASSIC</focalInstrument>
+            <!-- CLASSIC: beams 5-6 -->
+            <configuration>
+                <stations>S1 S2</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E2</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W1</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W2</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E2</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W1</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W2</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 E2</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 W1</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 W2</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W1</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W2</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>W1 W2</stations>
+                <channels>V5 V6</channels>
+            </configuration>
+        </instrument>
+
+
+        <!-- CLIMB (3T) -->
+        <instrument>
+            <focalInstrument>CLIMB</focalInstrument>
+            <!-- CLIMB: beams 1-2-3 -->
+            <configuration>
+                <stations>S1 S2 E1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 E2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1 E2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E2 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E2 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1 E2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E2 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E2 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 E2 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 E2 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 W1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+        </instrument>
+
+
+        <!-- FRIEND (2T/3T) same beams as VEGA -->
+        <instrument>
+            <focalInstrument>FRIEND_2T</focalInstrument>
+            <configuration>
+                <stations>S1 S2</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 S1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 S1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W1</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W2</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 S2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 S2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W1</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W2</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 E2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 W1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 W2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>W1 W2</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+        </instrument>
+
+        <instrument>
+            <focalInstrument>FRIEND_3T</focalInstrument>
+            <configuration>
+                <stations>S2 S1 E1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 E2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 W1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 W2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 S1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W1 S1 E1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 E1 S1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W1 S1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 E2 S1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 S1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 S2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W1 E1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 S2 E1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 S2 W1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 E2 S2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 S2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 W1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 W2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 E1</stations> <!-- TODO : Fix E3 means E1V3 -->
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 E2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+        </instrument>
+
+
+        <!-- MIRC (4T/5T/6T) -->
+        <instrument>
+            <focalInstrument>MIRC</focalInstrument>
+            <!-- MIRC: beams 1-2-3-4 -->
+            <configuration>
+                <stations>S1 S2 E1 E2</stations>
+                <channels>V3 V4 V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 E1 W1</stations>
+                <channels>V3 V4 V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 E1 W2</stations>
+                <channels>V2 V3 V1 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 E2 W1</stations>
+                <channels>V3 V4 V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 E2 W2</stations>
+                <channels>V2 V3 V1 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 W1 W2</stations>
+                <channels>V2 V3 V1 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1 E2 W1</stations>
+                <channels>V4 V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1 E2 W2</stations>
+                <channels>V3 V1 V2 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1 W1 W2</stations>
+                <channels>V3 V1 V2 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E2 W1 W2</stations>
+                <channels>V3 V1 V2 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1 E2 W1</stations>
+                <channels>V4 V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1 E2 W2</stations>
+                <channels>V3 V1 V2 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1 W1 W2</stations>
+                <channels>V3 V1 V2 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E2 W1 W2</stations>
+                <channels>V3 V1 V2 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 E2 W1 W2</stations>
+                <channels>V1 V2 V3 V4</channels>
+            </configuration>
+        </instrument>
+
+
+        <instrument>
+            <focalInstrument>MIRC_5T</focalInstrument>
+            <!-- MIRC: S1 S2 W1 W2 E1 E2 = beams 1-2-3-4-6-5 -->
+
+            <configuration>
+                <stations>S1 S2 W1 W2 E1</stations>
+                <channels>V1 V2 V3 V4 V6</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 W1 W2 E2</stations>
+                <channels>V1 V2 V3 V4 V5</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 W1 E1 E2</stations>
+                <channels>V1 V2 V3 V6 V5</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 W2 E1 E2</stations>
+                <channels>V1 V2 V4 V6 V5</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W1 W2 E1 E2</stations>
+                <channels>V1 V3 V4 V6 V5</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W1 W2 E1 E2</stations>
+                <channels>V2 V3 V4 V6 V5</channels>
+            </configuration>
+        </instrument>
+
+
+        <instrument>
+            <!-- focalInstrument: The focal instrument associated with this configuration -->
+            <focalInstrument>MIRC_6T</focalInstrument>
+            <!-- MIRC: S1 S2 W1 W2 E1 E2 = beams 1-2-3-4-6-5 -->
+
+            <!-- configuration: The list of configuration for the focal instrument -->
+            <configuration>
+                <!-- stations: The list of stations for this configuration (U1 U2 U4) -->
+                <stations>S1 S2 W1 W2 E1 E2</stations>
+                <!-- channels: The list of channels for this configuration (V1 V2) used by CHARA instruments -->
+                <channels>V1 V2 V3 V4 V6 V5</channels>
+            </configuration>
+        </instrument>
+
+
+        <!-- PAVO 2T/3T -->
+        <instrument>
+            <focalInstrument>PAVO_2T</focalInstrument>
+            <!-- PAVO: beams 1-2-3 -->
+            <configuration>
+                <stations>S1 S2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 E2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 W1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 W2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>W1 W2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+        </instrument>
+
+        <instrument>
+            <focalInstrument>PAVO_3T</focalInstrument>
+            <!-- PAVO: beams 1-2-3 -->
+            <configuration>
+                <stations>S1 S2 E1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 E2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 S2 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1 E2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E2 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 E2 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1 E2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E2 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 E2 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 E2 W1</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 E2 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 W1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W1 W2</stations>
+                <channels>V1 V2 V3</channels>
+            </configuration>
+        </instrument>
+
+
+        <!-- VEGA 2T/3T/4T -->
+        <!-- last modified: 04/07/2011 according to Denis Mourard document (ConfigsBeamDefault.pdf - 30/06/2011)-->
+        <instrument>
+            <focalInstrument>VEGA_2T</focalInstrument>
+            <configuration>
+                <stations>S1 S2</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 S1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 S1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W1</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+            <configuration>
+                <stations>S1 W2</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 S2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 S2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W1</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W2</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 E2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 W1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E1 W2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W1</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W2</stations>
+                <channels>V1 V2</channels>
+            </configuration>
+            <configuration>
+                <stations>W1 W2</stations>
+                <channels>V2 V1</channels>
+            </configuration>
+        </instrument>
+
+        <instrument>
+            <focalInstrument>VEGA_3T</focalInstrument>
+            <configuration>
+                <stations>S2 S1 E1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 E2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 W1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 W2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 S1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W1 S1 E1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 E1 S1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 W1 S1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 E2 S1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 S1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 S2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 W1 E1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 S2 E1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 S2 W1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 E2 S2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 S2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 W1</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 W2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 E1</stations> <!-- TODO : Fix E3 means E1V3 -->
+                <channels>V2 V1 V3</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 E2</stations>
+                <channels>V2 V1 V3</channels>
+            </configuration>
+        </instrument>
+
+        <instrument>
+            <focalInstrument>VEGA_4T</focalInstrument>
+            <configuration>
+                <stations>S2 S1 E2 E1</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 W1 E1</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 W2 E1</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 W1 E2</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 W2 E2</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>S2 S1 W2 W1</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 S1 W1 E1</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 E2 S1 E1</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 S1 E1</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 S1 E2</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 W1 S2</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 W2 S2</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 S2 E1</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>W2 W1 S2 E2</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+            <configuration>
+                <stations>E2 E1 W2 W1</stations>
+                <channels>V2 V1 V3 V4</channels>
+            </configuration>
+        </instrument>
+    </configuration>
+
+</a:interferometerSetting>
