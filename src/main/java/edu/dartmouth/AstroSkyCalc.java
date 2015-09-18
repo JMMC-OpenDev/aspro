@@ -553,6 +553,22 @@ public final class AstroSkyCalc {
             logger.debug("almanac: {}", almanac);
         }
 
+        // Trim redundant times:
+        // sun:
+        refTimes.clear();
+        refTimes.addAll(sunTimes);
+        sunTimes.clear();
+        AstroAlmanac.trim(refTimes, sunTimes);
+        // moon:
+        refTimes.clear();
+        refTimes.addAll(moonTimes);
+        moonTimes.clear();
+        AstroAlmanac.trim(refTimes, moonTimes);
+
+        if (isLogDebug) {
+            logger.debug("almanac trimmed: {}", almanac);
+        }
+
         return almanac;
     }
 
@@ -564,25 +580,59 @@ public final class AstroSkyCalc {
     private void addAlmanacTimes(final double jd, final AstroAlmanac almanac) {
         final WhenWhere ww = new WhenWhere(jd, this.site, false);
 
-        final NightlyAlmanac na = new NightlyAlmanac(ww);
+        final NightlyAlmanac na = new NightlyAlmanac(ww, true);
+
+        // Get midnight value to compute the jd boundaries:
+        final double jd0 = na.jdMidnight - HALF_LST_DAY_IN_JD;
+        final double jd1 = na.jdMidnight + HALF_LST_DAY_IN_JD;
+
+        // fix sun ranges:
+        fixRiseSet(na.sunriseTwilight18, na.sunsetTwilight18, jd0, jd1);
+        fixRiseSet(na.sunriseTwilight12, na.sunsetTwilight12, jd0, jd1);
+        fixRiseSet(na.sunriseTwilight06, na.sunsetTwilight06, jd0, jd1);
+        fixRiseSet(na.sunrise, na.sunset, jd0, jd1);
+        // fix moon ranges:
+        fixRiseSet(na.moonrise, na.moonset, jd0, jd1);
 
         // add sun times:
         final Set<AstroAlmanacTime> sunTimes = almanac.getSunTimes();
 
-        sunTimes.add(new AstroAlmanacTime(na.morningTwilight18.when.jd, AlmanacType.SunTwl18Rise));
-        sunTimes.add(new AstroAlmanacTime(na.morningTwilight12.when.jd, AlmanacType.SunTwl12Rise));
-        sunTimes.add(new AstroAlmanacTime(na.morningTwilight06.when.jd, AlmanacType.SunTwl06Rise));
+        sunTimes.add(new AstroAlmanacTime(na.sunriseTwilight18.when.jd, AlmanacType.SunTwl18Rise));
+        sunTimes.add(new AstroAlmanacTime(na.sunriseTwilight12.when.jd, AlmanacType.SunTwl12Rise));
+        sunTimes.add(new AstroAlmanacTime(na.sunriseTwilight06.when.jd, AlmanacType.SunTwl06Rise));
         sunTimes.add(new AstroAlmanacTime(na.sunrise.when.jd, AlmanacType.SunRise));
         sunTimes.add(new AstroAlmanacTime(na.sunset.when.jd, AlmanacType.SunSet));
-        sunTimes.add(new AstroAlmanacTime(na.eveningTwilight06.when.jd, AlmanacType.SunTwl06Set));
-        sunTimes.add(new AstroAlmanacTime(na.eveningTwilight12.when.jd, AlmanacType.SunTwl12Set));
-        sunTimes.add(new AstroAlmanacTime(na.eveningTwilight18.when.jd, AlmanacType.SunTwl18Set));
+        sunTimes.add(new AstroAlmanacTime(na.sunsetTwilight06.when.jd, AlmanacType.SunTwl06Set));
+        sunTimes.add(new AstroAlmanacTime(na.sunsetTwilight12.when.jd, AlmanacType.SunTwl12Set));
+        sunTimes.add(new AstroAlmanacTime(na.sunsetTwilight18.when.jd, AlmanacType.SunTwl18Set));
 
         // add moon times:
         final Set<AstroAlmanacTime> moonTimes = almanac.getMoonTimes();
 
         moonTimes.add(new AstroAlmanacTime(na.moonrise.when.jd, AlmanacType.MoonRise));
         moonTimes.add(new AstroAlmanacTime(na.moonset.when.jd, AlmanacType.MoonSet));
+    }
+
+    private static void fixRiseSet(final WhenWhere rise, final WhenWhere set, final double jd0, final double jd1) {
+        final double jdRise = rise.when.jd;
+        final double jdSet = set.when.jd;
+
+        if (Double.isInfinite(jdRise) || Double.isInfinite(jdSet)) {
+            // equals to +Inf = impossible range
+            // equals to -Inf: inclusive range
+
+            if (jdRise == Double.POSITIVE_INFINITY) {
+                rise.when.jd = jd1;
+            } else if (jdRise == Double.NEGATIVE_INFINITY) {
+                rise.when.jd = jd0;
+            }
+
+            if (jdSet == Double.POSITIVE_INFINITY) {
+                set.when.jd = jd0;
+            } else if (jdSet == Double.NEGATIVE_INFINITY) {
+                set.when.jd = jd1;
+            }
+        }
     }
 
     /**
@@ -612,7 +662,8 @@ public final class AstroSkyCalc {
                 jdTo = moonTo.getJd();
 
                 // Keep intervals that are inside or overlapping the range [jd0; jd1] :
-                if ((jdFrom >= jd0 && jdFrom <= jd1) || (jdTo >= jd0 && jdTo <= jd1)) {
+                if ((jdFrom >= jd0 && jdFrom <= jd1) || (jdTo >= jd0 && jdTo <= jd1)
+                        || (jdFrom < jd0 && jdTo > jd1)) {
 
                     if (isLogDebug) {
                         logger.debug("Range[{} - {}]", jdFrom, jdTo);

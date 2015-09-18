@@ -481,7 +481,7 @@ public final class ObservabilityService {
             final List<Range> moonRanges = Range.intersectRanges(obsMoonRanges, 2, obsCtx);
 
             if (isLogDebug) {
-                logger.debug("moonRanges: {}", moonRanges);
+                logger.debug("obsMoonRanges: {}", moonRanges);
             }
 
             // Moon filters:
@@ -3053,6 +3053,15 @@ public final class ObservabilityService {
 
                 jdFrom = stFrom.getJd();
                 jdTo = stTo.getJd();
+                
+                if (jdFrom == jdTo) {
+                    // skip empty intervals:
+                    continue;
+                }
+                
+                if (isDebug) {
+                    logger.debug("sun range[{}]: [{} to {}]", stFrom.getType(), jdFrom, jdTo);
+                }
 
                 switch (stFrom.getType()) {
                     case SunTwl18Rise:
@@ -3085,18 +3094,23 @@ public final class ObservabilityService {
 
                 if (type != null && type.isNight(this.twilightNightLimit)) {
                     // Keep nights that are inside or overlapping the range [jdLstLower; jdLstUpper] range :
-                    if ((jdFrom >= jdLstLower && jdFrom <= jdLstUpper) || (jdTo >= jdLstLower && jdTo <= jdLstUpper)) {
-                        this.nightLimits.add(new Range(jdFrom, jdTo));
+                    if ((jdFrom >= jdLstLower && jdFrom <= jdLstUpper) || (jdTo >= jdLstLower && jdTo <= jdLstUpper)
+                         || (jdFrom < jdLstLower && jdTo > jdLstUpper)) {
+                        
+                        this.nightLimits.add(new Range(Math.max(jdFrom, jdLstLower), Math.min(jdTo, jdLstUpper)));
                     }
 
                     // Keep the night part inside or overlapping the range [jdLower; jdUpper] range used to compute moon illumination: */
-                    if ((jdFrom >= this.jdLower && jdFrom <= this.jdUpper) || (jdTo >= this.jdLower && jdTo <= this.jdUpper)) {
+                    if ((jdFrom >= this.jdLower && jdFrom <= this.jdUpper) || (jdTo >= this.jdLower && jdTo <= this.jdUpper)
+                        || (jdFrom < this.jdLower && jdTo > this.jdUpper)) {
+                        
                         this.nightOnlyRanges.add(new Range(Math.max(jdFrom, this.jdLower), Math.min(jdTo, this.jdUpper)));
                     }
                 }
 
                 // Keep intervals that are inside or overlapping the range [jdLower; jdUpper] range :
-                if ((jdFrom >= this.jdLower && jdFrom <= this.jdUpper) || (jdTo >= this.jdLower && jdTo <= this.jdUpper)) {
+                if ((jdFrom >= this.jdLower && jdFrom <= this.jdUpper) || (jdTo >= this.jdLower && jdTo <= this.jdUpper)
+                        || (jdFrom < this.jdLower && jdTo > this.jdUpper)) {
 
                     if (isDebug) {
                         logger.debug("Range[{} - {}] : {}", jdFrom, jdTo, type);
@@ -3104,12 +3118,14 @@ public final class ObservabilityService {
 
                     from = jdToDateInDateRange(jdFrom);
                     to = jdToDateInDateRange(jdTo);
+                    
+                    if (to.getTime() - from.getTime() > 0L) {
+                        if (isDebug) {
+                            logger.debug("SunInterval[{} - {}] : {}", from, to, type);
+                        }
 
-                    if (isDebug) {
-                        logger.debug("SunInterval[{} - {}] : {}", from, to, type);
+                        intervals.add(new SunTimeInterval(from, to, type));
                     }
-
-                    intervals.add(new SunTimeInterval(from, to, type));
                 }
             }
 

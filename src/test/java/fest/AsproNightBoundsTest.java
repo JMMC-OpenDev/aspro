@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fest;
 
-
 import fest.common.JmcsFestSwingJUnitTestCase;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.util.JVMUtils;
@@ -37,8 +36,8 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
     /** name of the tab pane corresponding to the observability panel */
     private static final String TAB_OBSERVABILITY = "Observability";
     /** initial year */
-    private static final int YEAR = 2005;
-    /** number of days to traverse (30 years) */
+    private static final int YEAR = 2010;
+    /** number of days to traverse (10 years) */
     private static final int DAYS = 10 * 365;
 
     /**
@@ -57,7 +56,7 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
 
         // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
-        
+
         // disable tooltips :
         enableTooltips(false);
 
@@ -73,9 +72,7 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
     /**
      * Test if the application started correctly
      */
-    @Test
-    @GUITest
-    public void shouldStart() {
+    public void initTest() {
         window.textBox("starSearchField").setText("Simbad");
 
         // waits for computation to finish :
@@ -91,6 +88,8 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
     @Test
     @GUITest
     public void shouldChangeDateForVLTI() {
+
+        initTest();
 
         final JPanelFixture form = window.panel("observationForm");
 
@@ -112,6 +111,8 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
     @GUITest
     public void shouldChangeDateForCHARA() {
 
+        initTest();
+
         final JPanelFixture form = window.panel("observationForm");
 
         // select CHARA interferometer :
@@ -131,6 +132,28 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
                 jTextPoPs.setValue(Integer.valueOf(54));
             }
         });
+
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
+
+        final JSpinnerFixture dateSpinner = form.spinner("jDateSpinner");
+
+        traverseDays(dateSpinner);
+    }
+
+    /**
+     * Test observability plot when updating the observation date
+     */
+    @Test
+    @GUITest
+    public void shouldChangeDateForDEMO() {
+
+        initTest();
+
+        final JPanelFixture form = window.panel("observationForm");
+
+        // select DEMO interferometer :
+        form.comboBox("jComboBoxInterferometer").selectItem("DEMO");
 
         // waits for computation to finish :
         AsproTestUtils.checkRunningTasks();

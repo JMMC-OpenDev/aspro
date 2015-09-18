@@ -72,14 +72,13 @@ public final class Spherical {
         final double pa = FastMath.atan2(pasin, pacos);
 
 //   print "pa of arc from moon to sun is %5.2f deg." % (pa * _skysub.DEG_IN_RADIAN)
-
         final double cusppa = pa - Const.PI_OVER_2;   // line of cusps ...
 //     System.out.printf("cusppa = %f%n",cusppa);
         return new double[]{cusppa, moonsun};
     }
 
     /** returns the minimum and maximum altitudes (degrees) of an object at
-     declination DEC as viewed from lat.  */
+     declination DEC as viewed from lat. returns +Inf if asin(>1) */
     static double[] min_max_alt(final double lat, final double dec) {
         /* translated straight from skycalc. */
         final double[] retvals = {0d, 0d};
@@ -90,29 +89,40 @@ public final class Spherical {
         if (Math.abs(x) <= 1d) {
             retvals[1] = FastMath.asin(x) * Const.DEG_IN_RADIAN;
         } else {
-//      System.out.printf("min_max_alt ... asin(>1)%n");
+            // System.out.printf("min_max_alt ... asin(>1)%n");
+            retvals[1] = Double.POSITIVE_INFINITY;
         }
 
         x = FastMath.sin(decrad) * FastMath.sin(latrad) - FastMath.cos(decrad) * FastMath.cos(latrad);
         if (Math.abs(x) <= 1d) {
             retvals[0] = FastMath.asin(x) * Const.DEG_IN_RADIAN;
         } else {
-//      System.out.printf("min_max_alt ... asin(>1)%n");
+            // System.out.printf("min_max_alt ... asin(>1)%n");
+            retvals[0] = Double.POSITIVE_INFINITY;
         }
 
         return retvals;
     }
 
     /** Finds the hour angle at which an object at declination DEC is at altitude
-     alt, as viewed from Latitude lat;  returns 1000 if always higher,
-     -1000 if always lower. */
+     alt, as viewed from Latitude lat;  returns +Inf if always higher,
+     -Inf if always lower. */
     static double ha_alt(final double dec, final double lat, final double alt) {
+        return ha_alt(dec, lat, alt, -1000d, 1000d);
+    }
+
+    static double ha_alt_Inf(final double dec, final double lat, final double alt) {
+        return ha_alt(dec, lat, alt, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+    }
+
+    private static double ha_alt(final double dec, final double lat, final double alt,
+                                 final double valLower, final double valHigher) {
         final double[] minmax = min_max_alt(lat, dec);
         if (alt < minmax[0]) {
-            return 1000d;   // always higher than asked
+            return valHigher;   // always higher than asked
         }
         if (alt > minmax[1]) {
-            return -1000d;  // always lower than asked
+            return valLower;  // always lower than asked
         }
         // System.out.printf("DEC %f lat %f alt %f ...%n",DEC,lat,alt);
         final double codec = Const.PI_OVER_2 - dec * Const.RADIAN_IN_DEG;
@@ -122,8 +132,8 @@ public final class Spherical {
         if (Math.abs(x) <= 1d) {
             return (FastMath.acos(x) * Const.HRS_IN_RADIAN);
         } else {
-//      System.out.printf("Bad inverse trig in ha_alt ... acos(%f)%n", x);
-            return 1000d;
+            // System.out.printf("Bad inverse trig in ha_alt ... acos(%f)%n", x);
+            return valHigher;
         }
     }
 
@@ -166,7 +176,6 @@ public final class Spherical {
     static Celest gal2Cel(double galacticlongit, double galacticlatit) {
         double[] xyz = {0d, 0d, 0d};
         double[] xyzgal = {0d, 0d, 0d};
-        double[] temp;
 
         double p11 = -0.066988739415,
                 p12 = -0.872755765853,
@@ -196,6 +205,9 @@ public final class Spherical {
         Celest cel = new Celest(retvals[0], retvals[1], 1950.);  // galactic are defined for 1950
 
         return cel;   // and precess elsehwere to whatever.
-
+    }
+    
+    private Spherical() {
+        // no-op
     }
 }

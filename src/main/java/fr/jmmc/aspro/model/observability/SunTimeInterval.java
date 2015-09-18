@@ -27,7 +27,7 @@ public final class SunTimeInterval extends DateTimeInterval {
     /** CIVIL TWILIGHT */
     CivilTwilight(-3);
     /** sun elevation used to determine night */
-    private int sunElevation;
+    private final int sunElevation;
 
     /**
      * Constructor with sun elevation

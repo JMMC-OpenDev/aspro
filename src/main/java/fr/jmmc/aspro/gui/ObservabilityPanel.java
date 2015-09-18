@@ -136,7 +136,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener,
-                                                                            ObservationListener, Observer, 
+                                                                            ObservationListener, Observer,
                                                                             DocumentExportable, Disposable {
 
     /** default serial UID for Serializable interface */
@@ -745,7 +745,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         // reset options:
         options.setSmallDefaults();
-        
+
         boolean useSubset = false;
 
         if (this.getChartData() != null) {
@@ -786,13 +786,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                     // Fix options:
                     options.setDocumentSize(DocumentSize.NORMAL).
                             setOrientation(Orientation.Portrait)
-                            .setNumberOfPages(numberOfPages);                        
+                            .setNumberOfPages(numberOfPages);
 
                 } else if (currentSize > SlidingXYPlotAdapter.MAX_PRINTABLE_ITEMS_A4) {
                     // Fix options:
                     options.setDocumentSize(DocumentSize.NORMAL).
                             setOrientation(Orientation.Portrait)
-                            .setNumberOfPages(1);                        
+                            .setNumberOfPages(1);
                 }
             }
         }
@@ -1203,7 +1203,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private void updatePlot(final ObservationCollectionObsData chartData) {
         // memorize chart data (used by export PDF) :
         setChartData(chartData);
-        
+
         if (chartData != null) {
             final ObservationSetting observation = chartData.getFirstObservation();
             final ObservabilityData obsData = chartData.getFirstObsData();
@@ -1233,8 +1233,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 }
                 ChartUtils.addSubtitle(this.chart, sb.toString());
 
-                if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() 
-                                            || (TimeRef.LST != obsData.getTimeRef()))) {
+                if (!doBaseLineLimits && (observation.getWhen().isNightRestriction()
+                        || (TimeRef.LST != obsData.getTimeRef()))) {
                     // date and moon FLI :
                     sb.setLength(0);
                     sb.append("Day: ").append(observation.getWhen().getDate().toString());
@@ -1261,7 +1261,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
                 // update the midnight marker:
                 updateMidnightMarker();
-                
+
                 // update the time marker:
                 updateTimeMarker();
 
@@ -1978,7 +1978,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         // add the Markers :
         if (intervals != null) {
-
             long nightMin = Long.MAX_VALUE;
             long nightMax = Long.MIN_VALUE;
 
@@ -2025,15 +2024,21 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 this.xyPlot.addRangeMarker(new IntervalMarker(startTime, endTime, col, ChartUtils.THIN_STROKE, null, null, 1f), Layer.BACKGROUND);
             }
 
-            // Add 15 minutes margin:
-            nightMin -= NIGHT_MARGIN;
-            nightMax += NIGHT_MARGIN;
+            if (nightMin != Long.MAX_VALUE && nightMax != Long.MIN_VALUE) {
+                // Add 15 minutes margin:
+                nightMin -= NIGHT_MARGIN;
+                nightMax += NIGHT_MARGIN;
 
-            if (nightMin < from.getTime()) {
+                if (nightMin < from.getTime()) {
+                    nightMin = from.getTime();
+                }
+
+                if (nightMax > to.getTime()) {
+                    nightMax = to.getTime();
+                }
+            } else {
+                // no night in range:
                 nightMin = from.getTime();
-            }
-
-            if (nightMax > to.getTime()) {
                 nightMax = to.getTime();
             }
 
@@ -2065,7 +2070,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         if (getChartData() != null) {
             final ObservationSetting observation = getChartData().getFirstObservation();
             final ObservabilityData obsData = getChartData().getFirstObsData();
-            
+
             if (!obsData.isDoBaseLineLimits() && observation.getWhen().isNightRestriction()) {
                 final Date midnight = obsData.getDateMidnight();
 
@@ -2087,7 +2092,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 }
                 // update displayed dates:
                 this.midMarker.setLabel(obsData.getDayRangeLabel());
-                
+
                 if (obsData.isDstChange() && obsData.getTimeRef() == TimeRef.LOCAL) {
                     this.midMarker.setLabelPaint(Color.RED);
                 } else {

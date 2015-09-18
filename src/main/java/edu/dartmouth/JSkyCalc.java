@@ -2359,11 +2359,11 @@ class JSkyCalcWindow {
         void UpdateDisplay() {  // assumes Nightly has been updated separately.
 
             phenfield[0].setText(Nightly.sunset.when.localDate.roundedCalString(2, 0));
-            phenfield[1].setText(Nightly.eveningTwilight18.when.localDate.roundedCalString(2, 0));
-            phenfield[2].setText(Nightly.eveningTwilight18.siderealobj.roundedRAString(-2, " "));
+            phenfield[1].setText(Nightly.sunsetTwilight18.when.localDate.roundedCalString(2, 0));
+            phenfield[2].setText(Nightly.sunsetTwilight18.siderealobj.roundedRAString(-2, " "));
             phenfield[3].setText(Nightly.nightcenter.when.localDate.roundedCalString(2, 0));
-            phenfield[4].setText(Nightly.morningTwilight18.when.localDate.roundedCalString(2, 0));
-            phenfield[5].setText(Nightly.morningTwilight18.siderealobj.roundedRAString(-2, " "));
+            phenfield[4].setText(Nightly.sunriseTwilight18.when.localDate.roundedCalString(2, 0));
+            phenfield[5].setText(Nightly.sunriseTwilight18.siderealobj.roundedRAString(-2, " "));
             phenfield[6].setText(Nightly.sunrise.when.localDate.roundedCalString(2, 0));
 
             if (Nightly.moonrise.when.jd < Nightly.moonset.when.jd) {
@@ -4432,10 +4432,10 @@ class JSkyCalcWindow {
             timespan = (jdend - jdstart) * 24d;
             // System.out.printf("timespan = %f hrs\n",timespan);
             xhi = xlo + timespan;
-            endfade = xlo + (Nightly.eveningTwilight18.when.jd - jdstart) * 24d;
+            endfade = xlo + (Nightly.sunsetTwilight18.when.jd - jdstart) * 24d;
             //System.out.printf("xlo %f dt %f Endfade = %f\n",xlo,
             //      (Nightly.eveningTwilight18.when.jd - jdstart) * 24.,endfade);
-            startfade = xlo + (Nightly.morningTwilight18.when.jd - jdstart) * 24d;
+            startfade = xlo + (Nightly.sunriseTwilight18.when.jd - jdstart) * 24d;
 
             double span = xhi - xlo;
             double fracx = xvphi - xvplo;

@@ -213,14 +213,14 @@ public final class AstroSkyCalcObservation {
             getTargetMinMaxAlt();
         }
 
-        final double ha = Spherical.ha_alt(dec, this.site.lat.value, minElev);
+        final double ha = Spherical.ha_alt_Inf(dec, this.site.lat.value, minElev);
 
-        if (ha == -1000d) {
+        if (ha == Double.NEGATIVE_INFINITY) {
             // never rise (target is never over the min elevation) :
             return -1d;
         }
 
-        if (ha == 1000d) {
+        if (ha == Double.POSITIVE_INFINITY) {
             // always rise (target is always over the min elevation) :
             return 12d;
         }

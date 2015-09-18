@@ -61,7 +61,7 @@ public final class Seasonal {
 
         // System.out.printf(" sunrise: %s%n",ng.sunrise.when.localDate.roundedCalString(1,0));
 
-        oseason.w.changeWhen(ng.eveningTwilight18.when.jd);
+        oseason.w.changeWhen(ng.sunsetTwilight18.when.jd);
         oseason.computeSky();
         tabledata[2 * i][2] = oseason.ha.roundedHAString(-2, ":");
         tabledata[2 * i][3] = airmassstring(oseason.altitude, oseason.airmass);
@@ -72,7 +72,7 @@ public final class Seasonal {
         tabledata[2 * i][5] = airmassstring(oseason.altitude, oseason.airmass);
         ha_at_center = oseason.ha.value;  // store for later
 
-        oseason.w.changeWhen(ng.morningTwilight18.when.jd);
+        oseason.w.changeWhen(ng.sunriseTwilight18.when.jd);
         oseason.computeSky();
         tabledata[2 * i][6] = oseason.ha.roundedHAString(-2, ":");
         tabledata[2 * i][7] = airmassstring(oseason.altitude, oseason.airmass);
@@ -93,7 +93,7 @@ public final class Seasonal {
         ng.Update(oseason.w);
         // System.out.printf(" sunrise: %s%n",ng.sunrise.when.localDate.roundedCalString(1,0));
 
-        oseason.w.changeWhen(ng.eveningTwilight18.when.jd);
+        oseason.w.changeWhen(ng.sunsetTwilight18.when.jd);
         oseason.computeSky();
         tabledata[2 * i + 1][2] = oseason.ha.roundedHAString(-2, ":");
         tabledata[2 * i + 1][3] = airmassstring(oseason.altitude, oseason.airmass);
@@ -104,7 +104,7 @@ public final class Seasonal {
         tabledata[2 * i + 1][5] = airmassstring(oseason.altitude, oseason.airmass);
         ha_at_center = oseason.ha.value;  // store for later
 
-        oseason.w.changeWhen(ng.morningTwilight18.when.jd);
+        oseason.w.changeWhen(ng.sunriseTwilight18.when.jd);
         oseason.computeSky();
         tabledata[2 * i + 1][6] = oseason.ha.roundedHAString(-2, ":");
         tabledata[2 * i + 1][7] = airmassstring(oseason.altitude, oseason.airmass);
@@ -230,12 +230,12 @@ public final class Seasonal {
 
       if (jdup[i] != 0.) // passes the relevant airmass
       {
-        retvals[i] = String.format(Locale.ENGLISH, "%4.1f", hrs_up(jdup[i], jddown[i], ng.eveningTwilight18.when.jd,
-                ng.morningTwilight18.when.jd));
+        retvals[i] = String.format(Locale.ENGLISH, "%4.1f", hrs_up(jdup[i], jddown[i], ng.sunsetTwilight18.when.jd,
+                ng.sunriseTwilight18.when.jd));
       } // always remains above the relevant altitude
       else if (min_alt > critical_alt[i]) {
         retvals[i] = String.format(Locale.ENGLISH, "%4.1f",
-                24d * (ng.morningTwilight18.when.jd - ng.eveningTwilight18.when.jd));
+                24d * (ng.sunriseTwilight18.when.jd - ng.sunsetTwilight18.when.jd));
       } // never rises above the relevant altitude
       else {
         retvals[i] = String.format(Locale.ENGLISH, "0.0");
