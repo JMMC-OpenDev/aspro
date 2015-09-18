@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.8"/>
-    <compilation date="08/09/2015" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9 beta 1"/>
+    <compilation date="18/09/2015" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -194,6 +194,14 @@
     </menubar>
 
     <releasenotes>
+
+        <release version="0.9.9">
+            <pubDate>Fri, 18 Sep 2015 17:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.1 beta 1">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/664">Fixed night restrictions (including twilights) and moon illumination arround pole (DEMO)</change>
+            </prerelease>
+        </release>
+
         <release version="0.9.8">
             <pubDate>Tue, 08 Sep 2015 14:00:00 GMT</pubDate>
             <prerelease version="0.9.8.1 beta 2">
