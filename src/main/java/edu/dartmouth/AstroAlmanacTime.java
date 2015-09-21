@@ -139,7 +139,7 @@ public final class AstroAlmanacTime implements Comparable<AstroAlmanacTime> {
         // take care of precision issue (below 1ms):
         int pos = (Math.abs(this.jd - t.getJd()) > PREC_JD) ? Double.compare(this.jd, t.getJd()) : 0;
         if (pos == 0) {
-            pos = Integer.compare(this.type.ordinal(), t.getType().ordinal());
+            pos = this.type.compareTo(t.getType());
         }
         return pos;
     }
