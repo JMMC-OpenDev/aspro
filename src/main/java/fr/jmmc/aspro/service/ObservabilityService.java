@@ -2120,8 +2120,8 @@ public final class ObservabilityService {
      */
     private List<Range> checkMoonRestriction(final Target target, final double precDEC, final Range jdRiseSet) {
 
-        // Note: as JD ranges are in [LST0 -12; LST0 + 36], sampled jds are fixed by getJDInLstRange(jd) 
-        // in LST range [0; 24] in order to have accurate moon position
+        // Note: as JD ranges are in [LST0 -12; LST0 + 36], sampled jds are fixed (by getJDInLstRange(jd) 
+        // called by getMoonSeparation() ) in LST range [0; 24] in order to have accurate moon position
         // get FLI on the coming night (only):
         final double fli = this.data.getMoonIllumPercent();
 

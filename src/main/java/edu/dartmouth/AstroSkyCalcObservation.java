@@ -25,11 +25,13 @@ public final class AstroSkyCalcObservation {
     /** cached log debug enabled */
     private final boolean isLogDebug = logger.isDebugEnabled();
     /** site location (package visibility) */
-    Site site;
+    private Site site;
+    /** rise/set altitude taking into account the observatory altitude */
+    private double rise_set_alt;
     /** cosinus of site latitude */
-    double cosLat = 0d;
+    private double cosLat = 0d;
     /** sinus of site latitude */
-    double sinLat = 0d;
+    private double sinLat = 0d;
     /** target info */
     private Observation observation = null;
 
@@ -59,6 +61,12 @@ public final class AstroSkyCalcObservation {
         final double latRad = this.site.lat.radians();
         this.cosLat = FastMath.cos(latRad);
         this.sinLat = FastMath.sin(latRad);
+        
+        // approx means you can't use a negative elevation for the obs to
+        // compensate for higher terrain.
+        // depression of the horizon in degrees
+        final double horiz = Const.DEG_IN_RADIAN * Math.sqrt(2d * sc.site.elevhoriz / (1000d * Const.EARTHRAD_IN_KM));
+        this.rise_set_alt = -(0.83d + horiz);        
     }
 
     /**
@@ -174,10 +182,13 @@ public final class AstroSkyCalcObservation {
         // Compute moon position and distances :
         this.observation.computeMoonSeparation();
 
-        if (this.observation.w.altmoon < 0d) {
+        if (this.observation.w.altmoon < rise_set_alt) {
+            if (isLogDebug) {
+                logger.debug("moon set ? jd {} - moon altitude = {}", this.observation.w.when.jd, this.observation.w.altmoon);
+            }
             return Double.POSITIVE_INFINITY;
         }
-
+        
         // observation.moonobj gives the angular distance with moon in degrees
         final double moonSeparation = this.observation.moonobj;
 
