@@ -28,8 +28,8 @@ public final class HorizonShape {
 
   /**
    * Check if the given azimuth and elevation is inside the observable shape
-   * @param az azimuth (degrees)
-   * @param elev elevation (degrees)
+   * @param az azimuth
+   * @param elev elevation
    * @return true if the given coordinates are inside the observable shape
    */
   public boolean check(final double az, final double elev) {

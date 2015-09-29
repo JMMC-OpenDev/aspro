@@ -9,15 +9,21 @@ import fr.jmmc.aspro.model.oi.HorizonProfile;
 import fr.jmmc.aspro.model.oi.Station;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class checks if an azimuth / elevation coordinate is over the telescope horizon
  * @author bourgesl
  */
 public final class HorizonService {
+
+    /** Class logger */
+    private static final Logger logger = LoggerFactory.getLogger(HorizonService.class.getName());
 
     /** singleton instance */
     private static final HorizonService instance = new HorizonService();
@@ -56,7 +62,7 @@ public final class HorizonService {
         if (profile == null) {
             final HorizonProfile p = station.getHorizon();
 
-            // As VLT horizons have only integer coordinates, let's use a simple polygon :
+            // As VLT horizons have almost integer coordinates, let's use a simple polygon:
             final List<AzEl> points = p.getPoints();
 
             if (!points.isEmpty()) {
@@ -68,14 +74,15 @@ public final class HorizonService {
                 // 0 = meridian (north-south) positive toward east
                 int i = 0;
                 for (AzEl point : points) {
-                    xpoints[i] = (int) point.getAzimuth();
-                    ypoints[i] = (int) point.getElevation();
+                    xpoints[i] = round(point.getAzimuth());
+                    ypoints[i] = round(point.getElevation());
                     i++;
                 }
                 // close the polygon :
-                final AzEl orig = points.get(0);
-                xpoints[i] = (int) orig.getAzimuth();
-                ypoints[i] = (int) orig.getElevation();
+                xpoints[i] = xpoints[0];
+                ypoints[i] = ypoints[0];
+                
+                logger.info("Polygon[{}]:\nx={}\ny={}", key, Arrays.toString(xpoints), Arrays.toString(ypoints));
 
                 final Polygon polygon = new Polygon(xpoints, ypoints, npoints) {
                     /** default serial UID for Serializable interface */
@@ -190,11 +197,16 @@ public final class HorizonService {
      * @return true if no obstruction
      */
     public boolean checkProfile(final HorizonShape profile, final double az, final double elev) {
-    // adjust azimuth to be compatible with vlti profiles :
+        return profile.check(upscale(az), upscale(elev));
+    }
 
-        // 0 = meridian (north-south) positive toward east :
-        final double adjAz = (az < 180d) ? az + 180d : az - 180d;
-
-        return profile.check(adjAz, elev);
+    private static int round(final double coord) {
+        // use round() to avoid any precision issue with double numbers:
+        return (int)Math.round(upscale(coord));
+    }
+    
+    private static double upscale(final double coord) {
+        // upscale 10 times to have a precision of 1/10 deg:
+        return (coord * 10.0);
     }
 }

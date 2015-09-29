@@ -108,8 +108,8 @@ public final class ObservabilityService {
     private final static boolean DEBUG_SLOW_SERVICE = false;
     /** number of best Pops displayed in warnings */
     private final static int MAX_POPS_IN_WARNING = 15;
-    /** jd step = 1 minute */
-    private final double JD_STEP = (1d / 60d) / 24d;
+    /** jd step = half a minute */
+    private final double JD_STEP = (0.5) / (24 * 60);
     /** Moon separation margin = 0.5 arcmin for uncertainty */
     private final double MOON_SEPARATION_MARGIN = 0.5d / 60d;
     /** Jmcs Parallel Job executor */
@@ -321,9 +321,9 @@ public final class ObservabilityService {
         this.data.setTargets(targets);
 
         // define site :
-        this.sc.defineSite(this.interferometer.getName(), 
-                           this.interferometer.getPosSph(), 
-                           this.interferometer.getTimezone());
+        this.sc.defineSite(this.interferometer.getName(),
+                this.interferometer.getPosSph(),
+                this.interferometer.getTimezone());
         this.sco.defineSite(this.sc);
         // store timezone ID:
         this.data.setTimezoneID(this.sc.getTimezoneID());
@@ -408,13 +408,11 @@ public final class ObservabilityService {
 
         this.data.setJdMin(this.jdLower);
         this.data.setJdMax(this.jdUpper);
-        
+
         // adjust midnight (to DST):
         if (this.data.defineDateMidnight(this.sc.getJdMidnight()) && data.getTimeRef() == TimeRef.LOCAL) {
-           addWarning("Daylight Saving Time (DST) transition: observability ranges may appear shorter / longer !");
+            addWarning("Daylight Saving Time (DST) transition: observability ranges may appear shorter / longer !");
         }
-        
-        // TODO: DST change range for Local Time REF
 
         if (isLogDebug) {
             logger.debug("date min: {}", this.data.getDateMin());
@@ -438,7 +436,6 @@ public final class ObservabilityService {
                 }
 
                 // TODO: use LST_DAY or 24H DAY ?
-                
                 // adjust the jd bounds :
                 this.jdLower = jdMidnight - AstroSkyCalc.HALF_LST_DAY_IN_JD;
                 this.jdUpper = jdMidnight + AstroSkyCalc.HALF_LST_DAY_IN_JD;
@@ -1926,6 +1923,10 @@ public final class ObservabilityService {
         final ObservabilityContext ctx = obsCtx;
         List<Range> ranges = ctx.getList();
 
+        // Interferometer:
+        final String name = this.interferometer.getName();
+        final boolean isSouth = this.interferometer.getPosSph().getLatitude() < 0d;
+        
         // Prepare profiles :
         final HorizonService hs = HorizonService.getInstance();
 
@@ -1934,7 +1935,7 @@ public final class ObservabilityService {
 
         for (int i = 0; i < nBeams; i++) {
             final Beam b = this.beams.get(i);
-            profiles[i] = hs.getProfile(this.interferometer.getName(), b.getStation());
+            profiles[i] = hs.getProfile(name, b.getStation());
         }
 
         // prepare cosDec/sinDec:
@@ -1961,6 +1962,22 @@ public final class ObservabilityService {
             jdIn = getJDInLstRange(jd);
 
             this.sco.getTargetPosition(cosDec, sinDec, jdIn, azEl);
+            
+            // Quick fix AZ for VLTI (ie south):
+            if (isSouth) {
+                // adjust azimuth to be compatible with vlti profiles :
+                final double az = azEl.getAzimuth();
+
+                // 0 = meridian (north-south) positive toward east :
+                final double adjAz = (az < 180d) ? az + 180d : az - 180d;
+                
+                azEl.setAzimuth(adjAz);
+            }
+
+            if (isDebug) {
+                logger.debug("Target position [{} {}]",
+                        azEl.getAzimuth(), azEl.getElevation());
+            }
 
             visible = true;
 
@@ -3053,12 +3070,12 @@ public final class ObservabilityService {
 
                 jdFrom = stFrom.getJd();
                 jdTo = stTo.getJd();
-                
+
                 if (jdFrom == jdTo) {
                     // skip empty intervals:
                     continue;
                 }
-                
+
                 if (isDebug) {
                     logger.debug("sun range[{}]: [{} to {}]", stFrom.getType(), jdFrom, jdTo);
                 }
@@ -3095,15 +3112,15 @@ public final class ObservabilityService {
                 if (type != null && type.isNight(this.twilightNightLimit)) {
                     // Keep nights that are inside or overlapping the range [jdLstLower; jdLstUpper] range :
                     if ((jdFrom >= jdLstLower && jdFrom <= jdLstUpper) || (jdTo >= jdLstLower && jdTo <= jdLstUpper)
-                         || (jdFrom < jdLstLower && jdTo > jdLstUpper)) {
-                        
+                            || (jdFrom < jdLstLower && jdTo > jdLstUpper)) {
+
                         this.nightLimits.add(new Range(Math.max(jdFrom, jdLstLower), Math.min(jdTo, jdLstUpper)));
                     }
 
                     // Keep the night part inside or overlapping the range [jdLower; jdUpper] range used to compute moon illumination: */
                     if ((jdFrom >= this.jdLower && jdFrom <= this.jdUpper) || (jdTo >= this.jdLower && jdTo <= this.jdUpper)
-                        || (jdFrom < this.jdLower && jdTo > this.jdUpper)) {
-                        
+                            || (jdFrom < this.jdLower && jdTo > this.jdUpper)) {
+
                         this.nightOnlyRanges.add(new Range(Math.max(jdFrom, this.jdLower), Math.min(jdTo, this.jdUpper)));
                     }
                 }
@@ -3118,7 +3135,7 @@ public final class ObservabilityService {
 
                     from = jdToDateInDateRange(jdFrom);
                     to = jdToDateInDateRange(jdTo);
-                    
+
                     if (to.getTime() - from.getTime() > 0L) {
                         if (isDebug) {
                             logger.debug("SunInterval[{} - {}] : {}", from, to, type);
