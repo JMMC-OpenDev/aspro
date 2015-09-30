@@ -82,7 +82,9 @@ public final class HorizonService {
                 xpoints[i] = xpoints[0];
                 ypoints[i] = ypoints[0];
                 
-                logger.info("Polygon[{}]:\nx={}\ny={}", key, Arrays.toString(xpoints), Arrays.toString(ypoints));
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Polygon[{}]:\nx={}\ny={}", key, Arrays.toString(xpoints), Arrays.toString(ypoints));
+                }
 
                 final Polygon polygon = new Polygon(xpoints, ypoints, npoints) {
                     /** default serial UID for Serializable interface */
