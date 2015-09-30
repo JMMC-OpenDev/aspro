@@ -110,12 +110,14 @@ public final class TargetUtils {
         newTarget.setPARAERR(star.getPropertyAsDouble(Star.Property.PARALLAX_err));
 
         // Magnitudes (optional) :
+        newTarget.setFLUXB(star.getPropertyAsDouble(Star.Property.FLUX_B));
         newTarget.setFLUXV(star.getPropertyAsDouble(Star.Property.FLUX_V));
+        newTarget.setFLUXR(star.getPropertyAsDouble(Star.Property.FLUX_R));
         newTarget.setFLUXI(star.getPropertyAsDouble(Star.Property.FLUX_I));
         newTarget.setFLUXJ(star.getPropertyAsDouble(Star.Property.FLUX_J));
         newTarget.setFLUXH(star.getPropertyAsDouble(Star.Property.FLUX_H));
         newTarget.setFLUXK(star.getPropertyAsDouble(Star.Property.FLUX_K));
-        newTarget.setFLUXN(star.getPropertyAsDouble(Star.Property.FLUX_N));
+        // LMN magnitudes are missing in Simbad !
 
         // Spectral types :
         newTarget.setSPECTYP(star.getPropertyAsString(Star.Property.SPECTRALTYPES));

@@ -27,14 +27,14 @@ public final class SpectralBandUtils {
   public static SpectralBand findBand(final Band band) {
     switch (band) {
       case U:
-        // band U not supported return V
+        // band U not supported
+          throw new IllegalArgumentException("Band "+band + " not supported !");
       case B:
-        // band B not supported return V
+        return SpectralBand.B;
       case V:
         return SpectralBand.V;
       case R:
-        // band R not supported return V
-        return SpectralBand.V;
+        return SpectralBand.R;
       case I:
         return SpectralBand.I;
       case J:
@@ -44,13 +44,14 @@ public final class SpectralBandUtils {
       case K:
         return SpectralBand.K;
       case L:
-        // band L not supported return N
+        return SpectralBand.L;
       case M:
-        // band M not supported return N
+        return SpectralBand.M;
       case N:
         return SpectralBand.N;
       case Q:
-        // band Q not supported return N
+        // band Q not supported
+          throw new IllegalArgumentException("Band "+band + " not supported !");
       default:
         return null;
     }

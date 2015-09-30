@@ -154,6 +154,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
         }
 
         final Band band = Band.findBand(lambda);
+        // Scenario SearchCal on VJHKN bands:
         final SpectralBand insBand = getSearchCalBand(band);
 
         if (logger.isDebugEnabled()) {
@@ -163,7 +164,6 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
 
         // If a flux / magnitude is missing => user message
         // and it is impossible to compute any error
-
         final Double flux = target.getFlux(insBand);
 
         final double objectMag;
@@ -230,15 +230,17 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
      * @return SpectralBand or null
      */
     public static SpectralBand getSearchCalBand(final Band band) {
+        // TODO: update this once SearchCal v5 is available = 1 single scenario 
+        // but all bands used by the magnitude filter !
         switch (band) {
             case U:
-            case B:
-                // band U and B not supported by SearchCal:
+                // band U not supported by SearchCal:
                 return null;
+            case B:
             case V:
             case R:
             case I:
-                // use scenario V for VEGA:
+                // VBRI: use scenario V for VEGA:
                 return SpectralBand.V;
             case J:
                 // use scenario K but band J:
@@ -251,6 +253,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
                 return SpectralBand.K;
             case L:
             case M:
+                // LM: what to do ?
             case N:
                 // use scenario N for MIDI:
                 return SpectralBand.N;
