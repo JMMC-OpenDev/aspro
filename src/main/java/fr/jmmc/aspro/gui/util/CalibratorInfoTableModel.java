@@ -25,7 +25,7 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(CalibratorInfoTableModel.class.getName());
   /** double formatter for number values */
-  protected final static NumberFormat df3 = new DecimalFormat("0.0##");
+  private final static NumberFormat df3 = new DecimalFormat("0.0##");
 
   /** Column definition enum */
   public enum ColumnDef {
@@ -148,12 +148,15 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
 
       // Secondly add fields :
       addFieldValue(calInfos, CalibratorInformations.FIELD_DISTANCE);
+      addFieldValue(calInfos, CalibratorInformations.FIELD_UD_B);
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD_V);
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD_R);
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD_I);
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD_J);
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD_H);
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD_K);
+      addFieldValue(calInfos, CalibratorInformations.FIELD_UD_L);
+      addFieldValue(calInfos, CalibratorInformations.FIELD_UD_M);
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD_N);
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD);
       addFieldValue(calInfos, CalibratorInformations.FIELD_LD);
@@ -174,9 +177,7 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
    */
   private void addParameterValue(final CalibratorInformations calInfos, final String name) {
     final BaseValue value = calInfos.getParameter(name);
-    if (value != null) {
-      this.rowList.add(value);
-    }
+    addValue(value);
   }
 
   /**
@@ -186,9 +187,7 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
    */
   private void addFieldValue(final CalibratorInformations calInfos, final String name) {
     final BaseValue value = calInfos.getField(name);
-    if (value != null) {
-      this.rowList.add(value);
-    }
+    addValue(value);
   }
 
   /**
@@ -210,6 +209,7 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
    * @return the number of columns in the model
    * @see #getRowCount
    */
+  @Override
   public int getColumnCount() {
     return this.columnCount;
   }
@@ -262,6 +262,7 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
    * @return the number of rows in the model
    * @see #getColumnCount
    */
+  @Override
   public int getRowCount() {
     return this.rowList.size();
   }
@@ -274,6 +275,7 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
    * @param	columnIndex 	the column whose value is to be queried
    * @return	the value Object at the specified cell
    */
+  @Override
   public Object getValueAt(final int rowIndex, final int columnIndex) {
     final BaseValue value = this.rowList.get(rowIndex);
 
