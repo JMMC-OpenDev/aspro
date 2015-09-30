@@ -693,10 +693,26 @@
             </xsd:element>
 
             <!-- magnitudes -->
+            <xsd:element name="FLUX_B" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band B
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="FLUX_V" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
                         Flux magnitude in band V
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_R" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band R
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -729,6 +745,22 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         Flux magnitude in band K
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_L" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band L
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_M" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band M
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2239,11 +2271,16 @@
     <xsd:simpleType name="SpectralBand">
         <xsd:annotation>
             <xsd:documentation>
-                Possible values for the SpectralBand (UBVRIJHKLMNQ)
+                Possible values for the SpectralBand [BVRIJHKLMN]
                 http://fr.wikipedia.org/wiki/Syst%C3%A8me_photom%C3%A9trique
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="B">
+                <xsd:annotation>
+                    <xsd:documentation>B band</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
             <xsd:enumeration value="V">
                 <xsd:annotation>
                     <xsd:documentation>V band</xsd:documentation>
@@ -2274,6 +2311,16 @@
                     <xsd:documentation>K band</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
+            <xsd:enumeration value="L">
+                <xsd:annotation>
+                    <xsd:documentation>L band</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="M">
+                <xsd:annotation>
+                    <xsd:documentation>M band</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
             <xsd:enumeration value="N">
                 <xsd:annotation>
                     <xsd:documentation>N band</xsd:documentation>
@@ -2290,37 +2337,37 @@
         <xsd:annotation>
             <xsd:documentation>
                 Possible values for the AtmosphereQuality :
-                - "Average"   seeing = 1.0 arc sec
-                - "Good"      seeing = 0.6 arc sec
                 - "Excellent" seeing = 0.4 arc sec
+                - "Good"      seeing = 0.6 arc sec
+                - "Average"   seeing = 1.0 arc sec
                 - "Bad"       seeing = 1.4 arc sec
                 - "Awful"     seeing = 1.8 arc sec
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="Average">
+            <xsd:enumeration value="Excellent">
                 <xsd:annotation>
-                    <xsd:documentation>'Average' means seeing = 1.0 arc sec</xsd:documentation>
+                    <xsd:documentation>'Excellent' means seeing = 0.4 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Good">
                 <xsd:annotation>
-                    <xsd:documentation>'Good' means seeing = 0.6 arc sec</xsd:documentation>
+                    <xsd:documentation>'Good' means seeing = 0.6 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
-            <xsd:enumeration value="Excellent">
+            <xsd:enumeration value="Average">
                 <xsd:annotation>
-                    <xsd:documentation>'Excellent' means seeing = 0.4 arc sec</xsd:documentation>
+                    <xsd:documentation>'Average' means seeing = 1.0 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Bad">
                 <xsd:annotation>
-                    <xsd:documentation>'Bad' means seeing = 1.4 arc sec</xsd:documentation>
+                    <xsd:documentation>'Bad' means seeing = 1.4 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Awful">
                 <xsd:annotation>
-                    <xsd:documentation>'Awful' means seeing = 1.8 arc sec</xsd:documentation>
+                    <xsd:documentation>'Awful' means seeing = 1.8 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
         </xsd:restriction>

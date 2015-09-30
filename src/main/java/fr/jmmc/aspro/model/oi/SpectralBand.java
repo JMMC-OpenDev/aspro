@@ -13,12 +13,15 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;simpleType name="SpectralBand">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
+ *     &lt;enumeration value="B"/>
  *     &lt;enumeration value="V"/>
  *     &lt;enumeration value="R"/>
  *     &lt;enumeration value="I"/>
  *     &lt;enumeration value="J"/>
  *     &lt;enumeration value="H"/>
  *     &lt;enumeration value="K"/>
+ *     &lt;enumeration value="L"/>
+ *     &lt;enumeration value="M"/>
  *     &lt;enumeration value="N"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
@@ -29,6 +32,12 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum SpectralBand {
 
+
+    /**
+     * B band
+     * 
+     */
+    B,
 
     /**
      * V band
@@ -65,6 +74,18 @@ public enum SpectralBand {
      * 
      */
     K,
+
+    /**
+     * L band
+     * 
+     */
+    L,
+
+    /**
+     * M band
+     * 
+     */
+    M,
 
     /**
      * N band

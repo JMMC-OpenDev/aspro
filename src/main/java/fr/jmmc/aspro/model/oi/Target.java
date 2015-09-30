@@ -44,11 +44,15 @@ import fr.jmmc.jmal.model.targetmodel.Model;
  *         &lt;element name="IDS" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="OBJTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="SPECTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="FLUX_B" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_V" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_R" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_I" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_J" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_H" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_K" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_L" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_M" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_N" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="useAnalyticalModel" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element ref="{http://www.jmmc.fr/jmcs/models/0.1}model" maxOccurs="unbounded" minOccurs="0"/>
@@ -80,11 +84,15 @@ import fr.jmmc.jmal.model.targetmodel.Model;
     "ids",
     "objtyp",
     "spectyp",
+    "fluxb",
     "fluxv",
+    "fluxr",
     "fluxi",
     "fluxj",
     "fluxh",
     "fluxk",
+    "fluxl",
+    "fluxm",
     "fluxn",
     "useAnalyticalModel",
     "models",
@@ -123,8 +131,12 @@ public class Target
     protected String objtyp;
     @XmlElement(name = "SPECTYP")
     protected String spectyp;
+    @XmlElement(name = "FLUX_B")
+    protected Double fluxb;
     @XmlElement(name = "FLUX_V")
     protected Double fluxv;
+    @XmlElement(name = "FLUX_R")
+    protected Double fluxr;
     @XmlElement(name = "FLUX_I")
     protected Double fluxi;
     @XmlElement(name = "FLUX_J")
@@ -133,6 +145,10 @@ public class Target
     protected Double fluxh;
     @XmlElement(name = "FLUX_K")
     protected Double fluxk;
+    @XmlElement(name = "FLUX_L")
+    protected Double fluxl;
+    @XmlElement(name = "FLUX_M")
+    protected Double fluxm;
     @XmlElement(name = "FLUX_N")
     protected Double fluxn;
     protected Boolean useAnalyticalModel;
@@ -476,6 +492,30 @@ public class Target
     }
 
     /**
+     * Gets the value of the fluxb property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXB() {
+        return fluxb;
+    }
+
+    /**
+     * Sets the value of the fluxb property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXB(Double value) {
+        this.fluxb = value;
+    }
+
+    /**
      * Gets the value of the fluxv property.
      * 
      * @return
@@ -497,6 +537,30 @@ public class Target
      */
     public void setFLUXV(Double value) {
         this.fluxv = value;
+    }
+
+    /**
+     * Gets the value of the fluxr property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXR() {
+        return fluxr;
+    }
+
+    /**
+     * Sets the value of the fluxr property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXR(Double value) {
+        this.fluxr = value;
     }
 
     /**
@@ -593,6 +657,54 @@ public class Target
      */
     public void setFLUXK(Double value) {
         this.fluxk = value;
+    }
+
+    /**
+     * Gets the value of the fluxl property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXL() {
+        return fluxl;
+    }
+
+    /**
+     * Sets the value of the fluxl property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXL(Double value) {
+        this.fluxl = value;
+    }
+
+    /**
+     * Gets the value of the fluxm property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXM() {
+        return fluxm;
+    }
+
+    /**
+     * Sets the value of the fluxm property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXM(Double value) {
+        this.fluxm = value;
     }
 
     /**
@@ -969,21 +1081,19 @@ public class Target
         int n = 0;
         Double flux;
         for (SpectralBand b : SpectralBand.values()) {
-            if (b != SpectralBand.R) {
-                flux = getFlux(b);
-                if (flux != null) {
-                    if (n != 0 && n <= 3) {
-                        sb.append(" - ");
-                    }
+            flux = getFlux(b);
+            if (flux != null) {
+                if (n != 0 && n <= 3) {
+                    sb.append(" - ");
+                }
 
-                    sb.append("<b>").append(b.value()).append("</b>: ").append(flux);
+                sb.append("<b>").append(b.value()).append("</b>: ").append(flux);
 
-                    n++;
+                n++;
 
-                    if (n > 3) {
-                        sb.append("<br>");
-                        n = 0;
-                    }
+                if (n > 3) {
+                    sb.append("<br>");
+                    n = 0;
                 }
             }
         }
@@ -1018,11 +1128,12 @@ public class Target
     public final Double getFlux(final SpectralBand band) {
         if (band != null) {
             switch (band) {
+                case B:
+                    return getFLUXB();
                 case V:
                     return getFLUXV();
                 case R:
-                    // missing flux R : return V
-                    return getFLUXV();
+                    return getFLUXR();
                 case I:
                     return getFLUXI();
                 case J:
@@ -1031,6 +1142,10 @@ public class Target
                     return getFLUXH();
                 case K:
                     return getFLUXK();
+                case L:
+                    return getFLUXL();
+                case M:
+                    return getFLUXM();
                 case N:
                     return getFLUXN();
                 default:
@@ -1144,11 +1259,15 @@ public class Target
                 && areEquals(this.ids, other.getIDS())
                 && areEquals(this.objtyp, other.getOBJTYP())
                 && areEquals(this.spectyp, other.getSPECTYP())
+                && areEquals(this.fluxb, other.getFLUXB())
                 && areEquals(this.fluxv, other.getFLUXV())
+                && areEquals(this.fluxr, other.getFLUXR())
                 && areEquals(this.fluxi, other.getFLUXI())
                 && areEquals(this.fluxj, other.getFLUXJ())
                 && areEquals(this.fluxh, other.getFLUXH())
                 && areEquals(this.fluxk, other.getFLUXK())
+                && areEquals(this.fluxl, other.getFLUXL())
+                && areEquals(this.fluxm, other.getFLUXM())
                 && areEquals(this.fluxn, other.getFLUXN())
                 && areEquals(this.useAnalyticalModel, other.isUseAnalyticalModel())
                 && areEquals(this.getModels(), other.getModels()) // Strict equals(), may create lists
@@ -1340,8 +1459,14 @@ public class Target
             target.setSPECTYP(source.getSPECTYP());
         }
 
+        if (target.getFLUXB() == null && source.getFLUXB() != null) {
+            target.setFLUXB(source.getFLUXB());
+        }
         if (target.getFLUXV() == null && source.getFLUXV() != null) {
             target.setFLUXV(source.getFLUXV());
+        }
+        if (target.getFLUXR() == null && source.getFLUXR() != null) {
+            target.setFLUXR(source.getFLUXR());
         }
         if (target.getFLUXI() == null && source.getFLUXI() != null) {
             target.setFLUXI(source.getFLUXI());
@@ -1354,6 +1479,12 @@ public class Target
         }
         if (target.getFLUXK() == null && source.getFLUXK() != null) {
             target.setFLUXK(source.getFLUXK());
+        }
+        if (target.getFLUXL() == null && source.getFLUXL() != null) {
+            target.setFLUXL(source.getFLUXL());
+        }
+        if (target.getFLUXM() == null && source.getFLUXM() != null) {
+            target.setFLUXM(source.getFLUXM());
         }
         if (target.getFLUXN() == null && source.getFLUXN() != null) {
             target.setFLUXN(source.getFLUXN());
@@ -1393,8 +1524,14 @@ public class Target
         if (isNaN(paraerr)) {
             paraerr = null;
         }
+        if (isNaN(fluxb)) {
+            fluxb = null;
+        }
         if (isNaN(fluxv)) {
             fluxv = null;
+        }
+        if (isNaN(fluxr)) {
+            fluxr = null;
         }
         if (isNaN(fluxi)) {
             fluxi = null;
@@ -1407,6 +1544,12 @@ public class Target
         }
         if (isNaN(fluxk)) {
             fluxk = null;
+        }
+        if (isNaN(fluxl)) {
+            fluxl = null;
+        }
+        if (isNaN(fluxm)) {
+            fluxm = null;
         }
         if (isNaN(fluxn)) {
             fluxn = null;

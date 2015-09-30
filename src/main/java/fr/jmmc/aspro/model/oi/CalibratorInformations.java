@@ -273,6 +273,8 @@ public class CalibratorInformations
    */
   /** field distance (degrees) (number) */
   public final static String FIELD_DISTANCE = "dist";
+  /** field UD_B (mas) (number) */
+  public final static String FIELD_UD_B = "UD_B";
   /** field UD_V (mas) (number) */
   public final static String FIELD_UD_V = "UD_V";
   /** field UD_R (mas) (number) */
@@ -285,6 +287,10 @@ public class CalibratorInformations
   public final static String FIELD_UD_H = "UD_H";
   /** field UD_K (mas) (number) */
   public final static String FIELD_UD_K = "UD_K";
+  /** field UD_L (mas) (number) */
+  public final static String FIELD_UD_L = "UD_L";
+  /** field UD_M (mas) (number) */
+  public final static String FIELD_UD_M = "UD_M";
   /** field UD_N (mas) (number) */
   public final static String FIELD_UD_N = "UD_N";
 
@@ -339,6 +345,8 @@ public class CalibratorInformations
   public final Double getUDDiameter(final SpectralBand band) {
     if (band != null) {
       switch (band) {
+        case B:
+          return getFieldNumber(FIELD_UD_B);
         case V:
           return getFieldNumber(FIELD_UD_V);
         case R:
@@ -351,6 +359,10 @@ public class CalibratorInformations
           return getFieldNumber(FIELD_UD_H);
         case K:
           return getFieldNumber(FIELD_UD_K);
+        case L:
+          return getFieldNumber(FIELD_UD_L);
+        case M:
+          return getFieldNumber(FIELD_UD_M);
         case N:
           return getFieldNumber(FIELD_UD_N);
         default:
