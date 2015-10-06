@@ -143,7 +143,7 @@ public final class NoiseService extends VisNoiseService {
     /** Magnitude in V Band (for AO performances / for strehl) (mag) */
     private double adaptiveOpticsMag = Double.NaN;
     /** target information for each uv point couples */
-    private final TargetPointInfo[] targetPointInfos; // TODO: remove only init()
+    private final TargetPointInfo[] targetPointInfos;
     /** number of uv points */
     private final int nPoints;
     /** index of central uv point */
@@ -383,6 +383,8 @@ public final class NoiseService extends VisNoiseService {
         final double lambdaMid = 0.5 * (lambdaMin + lambdaMax);
 
         // TODO: use band range to cover lambdaMin / lambdaMax:
+        
+        // JHK or LM or BVR
         final Band band = findBand(lambdaMid / AsproConstants.MICRO_METER); // microns
         this.insBand = band;
         this.insTargetBand = SpectralBandUtils.findBand(band);
@@ -397,6 +399,8 @@ public final class NoiseService extends VisNoiseService {
 
         // If a flux / magnitude is missing => user message
         // and it is impossible to compute any error
+        
+        // TODO: handle B|R vs V for VEGA:
         flux = target.getFlux(insTargetBand);
         this.objectMag = (flux != null) ? flux.doubleValue() : Double.NaN;
         if (logger.isDebugEnabled()) {
@@ -1126,7 +1130,9 @@ public final class NoiseService extends VisNoiseService {
      */
     public static Band findBand(final double waveLength) throws IllegalArgumentException {
         Band band = Band.findBand(waveLength);
+        // TODO: fix that logic to use all possible bands within the instrument bandwidth
         switch (band) {
+            case B:
             case V:
             case R:
             case I:
