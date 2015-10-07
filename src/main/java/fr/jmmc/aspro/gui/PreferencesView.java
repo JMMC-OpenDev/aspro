@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import edu.stanford.ejalbert.browserprefui.BrowserPrefAction;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.TimeRef;
@@ -14,6 +15,7 @@ import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
+import fr.jmmc.jmcs.service.BrowserLauncher;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -195,6 +197,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jPanelButtons = new javax.swing.JPanel();
         jButtonDefault = new javax.swing.JButton();
         jButtonSave = new javax.swing.JButton();
+        jButtonBrowserSelector = new javax.swing.JButton();
 
         setTitle("Preferences");
         getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
@@ -668,6 +671,14 @@ public final class PreferencesView extends JFrame implements Observer {
         });
         jPanelButtons.add(jButtonSave);
 
+        jButtonBrowserSelector.setText("Browser");
+        jButtonBrowserSelector.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBrowserSelectorActionPerformed(evt);
+            }
+        });
+        jPanelButtons.add(jButtonBrowserSelector);
+
         jPanelView.add(jPanelButtons);
 
         jScrollPaneView.setViewportView(jPanelView);
@@ -833,6 +844,17 @@ public final class PreferencesView extends JFrame implements Observer {
         }
     }//GEN-LAST:event_jRadioButtonImageNoiseActionPerformed
 
+    private void jButtonBrowserSelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowserSelectorActionPerformed
+        if (browserPrefAction == null) {
+            browserPrefAction = BrowserLauncher.getBrowserPrefAction(this);
+        }
+        browserPrefAction.actionPerformed(evt);
+        // TODO: save it in preferences.
+        // System.setProperty(BrowserLauncher.BROWSER_SYSTEM_PROPERTY, prefBrowser);
+    }//GEN-LAST:event_jButtonBrowserSelectorActionPerformed
+
+    private BrowserPrefAction browserPrefAction = null;
+    
     /**
      * Listen to preferences changes
      * @param o Preferences
@@ -910,6 +932,7 @@ public final class PreferencesView extends JFrame implements Observer {
     private javax.swing.ButtonGroup buttonGroupPositionStyle;
     private javax.swing.ButtonGroup buttonGroupTimeAxis;
     private javax.swing.ButtonGroup buttonGroupTimeRef;
+    private javax.swing.JButton jButtonBrowserSelector;
     private javax.swing.JButton jButtonDefault;
     private javax.swing.JButton jButtonSave;
     private javax.swing.JComboBox jComboBoxBestPopsAlgorithm;
