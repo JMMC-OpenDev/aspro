@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import edu.stanford.ejalbert.browserprefui.BrowserPrefAction;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.TimeRef;
@@ -14,8 +13,6 @@ import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
-import fr.jmmc.jmcs.gui.util.WindowUtils;
-import fr.jmmc.jmcs.service.BrowserLauncher;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -23,19 +20,18 @@ import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Preferences GUI
  */
-public final class PreferencesView extends JFrame implements Observer {
+public final class PreferencePanel extends javax.swing.JPanel implements Observer {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
     /** Class logger */
-    private static final Logger logger = LoggerFactory.getLogger(PreferencesView.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(PreferencePanel.class.getName());
     /** twilight choices */
     private final static String[] TWILIGHTS = new String[]{"Astronomical (-18°)", "Nautical (-12°)", "Civil (-6°)", "Sun (0°)"};
 
@@ -44,10 +40,9 @@ public final class PreferencesView extends JFrame implements Observer {
     private final Preferences myPreferences = Preferences.getInstance();
 
     /**
-     * Creates a new PreferencesView
+     * Creates a new PreferencePanel
      */
-    public PreferencesView() {
-        super("Preferences");
+    public PreferencePanel() {
         initComponents();
 
         postInit();
@@ -58,6 +53,7 @@ public final class PreferencesView extends JFrame implements Observer {
      * Update the combo boxes with their models
      */
     private void postInit() {
+        
         // define custom models :
         this.jComboBoxImageSize.setModel(new DefaultComboBoxModel(AsproConstants.IMAGE_SIZES));
         this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
@@ -96,26 +92,6 @@ public final class PreferencesView extends JFrame implements Observer {
         final Dimension dim = new Dimension(500, 500);
         setMinimumSize(dim);
         addComponentListener(new ComponentResizeAdapter(dim));
-
-        // pack and center window
-        pack();
-    
-        WindowUtils.setClosingKeyboardShortcuts(this);
-}
-
-    /**
-     * Free any ressource or reference to this instance :
-     * remove this instance form Preference Observers
-     */
-    @Override
-    public void dispose() {
-        logger.debug("dispose: {}", this);
-
-        // unregister this instance as a Preference Observer :
-        this.myPreferences.deleteObserver(this);
-
-        // dispose Frame :
-        super.dispose();
     }
 
     /**
@@ -145,8 +121,8 @@ public final class PreferencesView extends JFrame implements Observer {
         buttonGroupNightOnly = new javax.swing.ButtonGroup();
         buttonGroupAddNoise = new javax.swing.ButtonGroup();
         buttonGroupImageNoise = new javax.swing.ButtonGroup();
-        jScrollPaneView = new javax.swing.JScrollPane();
-        jPanelView = new javax.swing.JPanel();
+        jScrollPane = new javax.swing.JScrollPane();
+        jPanelLayout = new javax.swing.JPanel();
         jPanelObservability = new javax.swing.JPanel();
         jLabelTimeRef = new javax.swing.JLabel();
         jPanelTimeRef = new javax.swing.JPanel();
@@ -194,15 +170,11 @@ public final class PreferencesView extends JFrame implements Observer {
         jLabelAddNoise = new javax.swing.JLabel();
         jRadioButtonAddNoiseYes = new javax.swing.JRadioButton();
         jRadioButtonAddNoiseNo = new javax.swing.JRadioButton();
-        jPanelButtons = new javax.swing.JPanel();
-        jButtonDefault = new javax.swing.JButton();
-        jButtonSave = new javax.swing.JButton();
-        jButtonBrowserSelector = new javax.swing.JButton();
+        jPanelCommonPreferencesView = new fr.jmmc.jmcs.gui.component.CommonPreferencesView();
 
-        setTitle("Preferences");
-        getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
+        setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.LINE_AXIS));
 
-        jPanelView.setLayout(new javax.swing.BoxLayout(jPanelView, javax.swing.BoxLayout.PAGE_AXIS));
+        jPanelLayout.setLayout(new javax.swing.BoxLayout(jPanelLayout, javax.swing.BoxLayout.Y_AXIS));
 
         jPanelObservability.setBorder(javax.swing.BorderFactory.createTitledBorder("Observability"));
         jPanelObservability.setLayout(new java.awt.GridBagLayout());
@@ -217,7 +189,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonTimeLST.setText(TimeRef.LST.getDisplayName());
         jRadioButtonTimeLST.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonTimeRefActionPerformed(evt);
+                jRadioButtonTimeLSTjRadioButtonTimeRefActionPerformed(evt);
             }
         });
         jPanelTimeRef.add(jRadioButtonTimeLST);
@@ -226,7 +198,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonTimeUTC.setText(TimeRef.UTC.getDisplayName());
         jRadioButtonTimeUTC.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonTimeRefActionPerformed(evt);
+                jRadioButtonTimeUTCjRadioButtonTimeRefActionPerformed(evt);
             }
         });
         jPanelTimeRef.add(jRadioButtonTimeUTC);
@@ -235,7 +207,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonTimeLOCAL.setText(TimeRef.LOCAL.getDisplayName());
         jRadioButtonTimeLOCAL.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonTimeRefActionPerformed(evt);
+                jRadioButtonTimeLOCALjRadioButtonTimeRefActionPerformed(evt);
             }
         });
         jPanelTimeRef.add(jRadioButtonTimeLOCAL);
@@ -258,7 +230,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonCenterNightYes.setText("yes");
         jRadioButtonCenterNightYes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonCenterNightActionPerformed(evt);
+                jRadioButtonCenterNightYesjRadioButtonCenterNightActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -272,7 +244,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonCenterNightNo.setText("no");
         jRadioButtonCenterNightNo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonCenterNightActionPerformed(evt);
+                jRadioButtonCenterNightNojRadioButtonCenterNightActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -294,7 +266,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonNightOnlyYes.setText("yes");
         jRadioButtonNightOnlyYes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonNightOnlyActionPerformed(evt);
+                jRadioButtonNightOnlyYesjRadioButtonNightOnlyActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -307,7 +279,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonNightOnlyNo.setText("no");
         jRadioButtonNightOnlyNo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonNightOnlyActionPerformed(evt);
+                jRadioButtonNightOnlyNojRadioButtonNightOnlyActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -421,7 +393,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelObservability.add(jComboBoxBestPopsCriteriaAverageWeight, gridBagConstraints);
 
-        jPanelView.add(jPanelObservability);
+        jPanelLayout.add(jPanelObservability);
 
         jPanelModelEditor.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Editor"));
         jPanelModelEditor.setLayout(new java.awt.GridBagLayout());
@@ -439,7 +411,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonXY.setText("x / y (mas)");
         jRadioButtonXY.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonPositionStyleActionPerformed(evt);
+                jRadioButtonXYjRadioButtonPositionStyleActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -451,7 +423,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonSepPosAngle.setText("sep. (mas) / pos. angle");
         jRadioButtonSepPosAngle.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonPositionStyleActionPerformed(evt);
+                jRadioButtonSepPosAnglejRadioButtonPositionStyleActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -459,7 +431,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelEditor.add(jRadioButtonSepPosAngle, gridBagConstraints);
 
-        jPanelView.add(jPanelModelEditor);
+        jPanelLayout.add(jPanelModelEditor);
 
         jPanelModelImage.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Image"));
         jPanelModelImage.setLayout(new java.awt.GridBagLayout());
@@ -537,7 +509,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonImageNoiseYes.setText("yes");
         jRadioButtonImageNoiseYes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonImageNoiseActionPerformed(evt);
+                jRadioButtonImageNoiseYesjRadioButtonImageNoiseActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -551,7 +523,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonImageNoiseNo.setText("no");
         jRadioButtonImageNoiseNo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonImageNoiseActionPerformed(evt);
+                jRadioButtonImageNoiseNojRadioButtonImageNoiseActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -561,7 +533,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jRadioButtonImageNoiseNo, gridBagConstraints);
 
-        jPanelView.add(jPanelModelImage);
+        jPanelLayout.add(jPanelModelImage);
 
         jPanelUserModel.setBorder(javax.swing.BorderFactory.createTitledBorder("User Model"));
         jPanelUserModel.setLayout(new java.awt.GridBagLayout());
@@ -576,7 +548,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonFastUserModelYes.setText("yes");
         jRadioButtonFastUserModelYes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonFastUserModelActionPerformed(evt);
+                jRadioButtonFastUserModelYesjRadioButtonFastUserModelActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -588,7 +560,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonFastUserModelNo.setText("no");
         jRadioButtonFastUserModelNo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonFastUserModelActionPerformed(evt);
+                jRadioButtonFastUserModelNojRadioButtonFastUserModelActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -596,7 +568,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jRadioButtonFastUserModelNo, gridBagConstraints);
 
-        jPanelView.add(jPanelUserModel);
+        jPanelLayout.add(jPanelUserModel);
 
         jPanelOIFits.setBorder(javax.swing.BorderFactory.createTitledBorder("OIFits data"));
         jPanelOIFits.setLayout(new java.awt.GridBagLayout());
@@ -629,7 +601,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonAddNoiseYes.setText("yes");
         jRadioButtonAddNoiseYes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonAddNoiseActionPerformed(evt);
+                jRadioButtonAddNoiseYesjRadioButtonAddNoiseActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -643,7 +615,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonAddNoiseNo.setText("no");
         jRadioButtonAddNoiseNo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonAddNoiseActionPerformed(evt);
+                jRadioButtonAddNoiseNojRadioButtonAddNoiseActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -653,81 +625,15 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelOIFits.add(jRadioButtonAddNoiseNo, gridBagConstraints);
 
-        jPanelView.add(jPanelOIFits);
+        jPanelLayout.add(jPanelOIFits);
+        jPanelLayout.add(jPanelCommonPreferencesView);
 
-        jButtonDefault.setText("Restore Default Settings");
-        jButtonDefault.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonDefaultActionPerformed(evt);
-            }
-        });
-        jPanelButtons.add(jButtonDefault);
+        jScrollPane.setViewportView(jPanelLayout);
 
-        jButtonSave.setText("Save Modifications");
-        jButtonSave.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonSaveActionPerformed(evt);
-            }
-        });
-        jPanelButtons.add(jButtonSave);
-
-        jButtonBrowserSelector.setText("Browser");
-        jButtonBrowserSelector.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonBrowserSelectorActionPerformed(evt);
-            }
-        });
-        jPanelButtons.add(jButtonBrowserSelector);
-
-        jPanelView.add(jPanelButtons);
-
-        jScrollPaneView.setViewportView(jPanelView);
-
-        getContentPane().add(jScrollPaneView);
+        add(jScrollPane);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jRadioButtonPositionStyleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonPositionStyleActionPerformed
-        try {
-            // will fire triggerObserversNotification so update() will be called
-            this.myPreferences.setPreference(Preferences.MODELEDITOR_PREFERXY, Boolean.valueOf(this.jRadioButtonXY.isSelected()));
-        } catch (PreferencesException pe) {
-            logger.error("property failure : ", pe);
-        }
-    }//GEN-LAST:event_jRadioButtonPositionStyleActionPerformed
-
-    private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
-        try {
-            this.myPreferences.saveToFile();
-        } catch (PreferencesException pe) {
-            // this try catch should not be solved here
-            // one feedback report could be thrown on error into Preference code
-            logger.error("property failure : ", pe);
-        }
-    }//GEN-LAST:event_jButtonSaveActionPerformed
-
-    private void jButtonDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDefaultActionPerformed
-        this.myPreferences.resetToDefaultPreferences();
-    }//GEN-LAST:event_jButtonDefaultActionPerformed
-
-    private void jComboBoxImageSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxImageSizeActionPerformed
-        try {
-            // will fire triggerObserversNotification so update() will be called
-            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SIZE, this.jComboBoxImageSize.getSelectedItem());
-        } catch (PreferencesException pe) {
-            logger.error("property failure : ", pe);
-        }
-    }//GEN-LAST:event_jComboBoxImageSizeActionPerformed
-
-    private void jComboBoxLUTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxLUTActionPerformed
-        try {
-            // will fire triggerObserversNotification so update() will be called
-            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_LUT, this.jComboBoxLUT.getSelectedItem());
-        } catch (PreferencesException pe) {
-            logger.error("property failure : ", pe);
-        }
-    }//GEN-LAST:event_jComboBoxLUTActionPerformed
-
-    private void jRadioButtonTimeRefActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonTimeRefActionPerformed
+    private void jRadioButtonTimeLSTjRadioButtonTimeRefActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonTimeLSTjRadioButtonTimeRefActionPerformed
         try {
             final String value;
             if (this.jRadioButtonTimeLOCAL.isSelected()) {
@@ -743,16 +649,79 @@ public final class PreferencesView extends JFrame implements Observer {
         } catch (PreferencesException pe) {
             logger.error("property failure : ", pe);
         }
-    }//GEN-LAST:event_jRadioButtonTimeRefActionPerformed
+    }//GEN-LAST:event_jRadioButtonTimeLSTjRadioButtonTimeRefActionPerformed
 
-    private void jRadioButtonCenterNightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonCenterNightActionPerformed
+    private void jRadioButtonTimeUTCjRadioButtonTimeRefActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonTimeUTCjRadioButtonTimeRefActionPerformed
+        try {
+            final String value;
+            if (this.jRadioButtonTimeLOCAL.isSelected()) {
+                value = TimeRef.LOCAL.getDisplayName();
+            } else if (this.jRadioButtonTimeUTC.isSelected()) {
+                value = TimeRef.UTC.getDisplayName();
+            } else {
+                value = TimeRef.LST.getDisplayName();
+            }
+
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.TIME_REFERENCE, value);
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonTimeUTCjRadioButtonTimeRefActionPerformed
+
+    private void jRadioButtonTimeLOCALjRadioButtonTimeRefActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonTimeLOCALjRadioButtonTimeRefActionPerformed
+        try {
+            final String value;
+            if (this.jRadioButtonTimeLOCAL.isSelected()) {
+                value = TimeRef.LOCAL.getDisplayName();
+            } else if (this.jRadioButtonTimeUTC.isSelected()) {
+                value = TimeRef.UTC.getDisplayName();
+            } else {
+                value = TimeRef.LST.getDisplayName();
+            }
+
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.TIME_REFERENCE, value);
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonTimeLOCALjRadioButtonTimeRefActionPerformed
+
+    private void jRadioButtonCenterNightYesjRadioButtonCenterNightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonCenterNightYesjRadioButtonCenterNightActionPerformed
         try {
             // will fire triggerObserversNotification so update() will be called
             this.myPreferences.setPreference(Preferences.CENTER_NIGHT, Boolean.valueOf(this.jRadioButtonCenterNightYes.isSelected()));
         } catch (PreferencesException pe) {
             logger.error("property failure : ", pe);
         }
-    }//GEN-LAST:event_jRadioButtonCenterNightActionPerformed
+    }//GEN-LAST:event_jRadioButtonCenterNightYesjRadioButtonCenterNightActionPerformed
+
+    private void jRadioButtonCenterNightNojRadioButtonCenterNightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonCenterNightNojRadioButtonCenterNightActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.CENTER_NIGHT, Boolean.valueOf(this.jRadioButtonCenterNightYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonCenterNightNojRadioButtonCenterNightActionPerformed
+
+    private void jRadioButtonNightOnlyYesjRadioButtonNightOnlyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonNightOnlyYesjRadioButtonNightOnlyActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.ONLY_NIGHT, Boolean.valueOf(this.jRadioButtonNightOnlyYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonNightOnlyYesjRadioButtonNightOnlyActionPerformed
+
+    private void jRadioButtonNightOnlyNojRadioButtonNightOnlyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonNightOnlyNojRadioButtonNightOnlyActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.ONLY_NIGHT, Boolean.valueOf(this.jRadioButtonNightOnlyYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonNightOnlyNojRadioButtonNightOnlyActionPerformed
 
     private void jComboBoxTwilightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxTwilightActionPerformed
         try {
@@ -763,59 +732,113 @@ public final class PreferencesView extends JFrame implements Observer {
         }
     }//GEN-LAST:event_jComboBoxTwilightActionPerformed
 
-  private void jComboBoxColorScaleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxColorScaleActionPerformed
-      try {
-          // will fire triggerObserversNotification so update() will be called
-          this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SCALE, this.jComboBoxColorScale.getSelectedItem().toString());
-      } catch (PreferencesException pe) {
-          logger.error("property failure : ", pe);
-      }
-  }//GEN-LAST:event_jComboBoxColorScaleActionPerformed
+    private void jComboBoxBestPopsAlgorithmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsAlgorithmActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.BEST_POPS_ALGORITHM, this.jComboBoxBestPopsAlgorithm.getSelectedItem().toString());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxBestPopsAlgorithmActionPerformed
 
-  private void jRadioButtonFastUserModelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonFastUserModelActionPerformed
-      try {
-          // will fire triggerObserversNotification so update() will be called
-          this.myPreferences.setPreference(Preferences.MODEL_USER_FAST, Boolean.valueOf(this.jRadioButtonFastUserModelYes.isSelected()));
-      } catch (PreferencesException pe) {
-          logger.error("property failure : ", pe);
-      }
-  }//GEN-LAST:event_jRadioButtonFastUserModelActionPerformed
+    private void jComboBoxBestPopsCriteriaSigmaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsCriteriaSigmaActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.BEST_POPS_CRITERIA_SIGMA, this.jComboBoxBestPopsCriteriaSigma.getSelectedItem().toString());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxBestPopsCriteriaSigmaActionPerformed
 
-  private void jRadioButtonNightOnlyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonNightOnlyActionPerformed
-      try {
-          // will fire triggerObserversNotification so update() will be called
-          this.myPreferences.setPreference(Preferences.ONLY_NIGHT, Boolean.valueOf(this.jRadioButtonNightOnlyYes.isSelected()));
-      } catch (PreferencesException pe) {
-          logger.error("property failure : ", pe);
-      }
-  }//GEN-LAST:event_jRadioButtonNightOnlyActionPerformed
+    private void jComboBoxBestPopsCriteriaAverageWeightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsCriteriaAverageWeightActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.BEST_POPS_CRITERIA_AVERAGE_WEIGHT, this.jComboBoxBestPopsCriteriaAverageWeight.getSelectedItem().toString());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxBestPopsCriteriaAverageWeightActionPerformed
 
-  private void jComboBoxBestPopsAlgorithmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsAlgorithmActionPerformed
-      try {
-          // will fire triggerObserversNotification so update() will be called
-          this.myPreferences.setPreference(Preferences.BEST_POPS_ALGORITHM, this.jComboBoxBestPopsAlgorithm.getSelectedItem().toString());
-      } catch (PreferencesException pe) {
-          logger.error("property failure : ", pe);
-      }
-  }//GEN-LAST:event_jComboBoxBestPopsAlgorithmActionPerformed
+    private void jRadioButtonXYjRadioButtonPositionStyleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonXYjRadioButtonPositionStyleActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODELEDITOR_PREFERXY, Boolean.valueOf(this.jRadioButtonXY.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonXYjRadioButtonPositionStyleActionPerformed
 
-  private void jComboBoxBestPopsCriteriaSigmaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsCriteriaSigmaActionPerformed
-      try {
-          // will fire triggerObserversNotification so update() will be called
-          this.myPreferences.setPreference(Preferences.BEST_POPS_CRITERIA_SIGMA, this.jComboBoxBestPopsCriteriaSigma.getSelectedItem().toString());
-      } catch (PreferencesException pe) {
-          logger.error("property failure : ", pe);
-      }
-  }//GEN-LAST:event_jComboBoxBestPopsCriteriaSigmaActionPerformed
+    private void jRadioButtonSepPosAnglejRadioButtonPositionStyleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonSepPosAnglejRadioButtonPositionStyleActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODELEDITOR_PREFERXY, Boolean.valueOf(this.jRadioButtonXY.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonSepPosAnglejRadioButtonPositionStyleActionPerformed
 
-  private void jComboBoxBestPopsCriteriaAverageWeightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsCriteriaAverageWeightActionPerformed
-      try {
-          // will fire triggerObserversNotification so update() will be called
-          this.myPreferences.setPreference(Preferences.BEST_POPS_CRITERIA_AVERAGE_WEIGHT, this.jComboBoxBestPopsCriteriaAverageWeight.getSelectedItem().toString());
-      } catch (PreferencesException pe) {
-          logger.error("property failure : ", pe);
-      }
-  }//GEN-LAST:event_jComboBoxBestPopsCriteriaAverageWeightActionPerformed
+    private void jComboBoxLUTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxLUTActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_LUT, this.jComboBoxLUT.getSelectedItem());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxLUTActionPerformed
+
+    private void jComboBoxImageSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxImageSizeActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SIZE, this.jComboBoxImageSize.getSelectedItem());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxImageSizeActionPerformed
+
+    private void jComboBoxColorScaleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxColorScaleActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SCALE, this.jComboBoxColorScale.getSelectedItem().toString());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxColorScaleActionPerformed
+
+    private void jRadioButtonImageNoiseYesjRadioButtonImageNoiseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonImageNoiseYesjRadioButtonImageNoiseActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_NOISE, Boolean.valueOf(this.jRadioButtonImageNoiseYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonImageNoiseYesjRadioButtonImageNoiseActionPerformed
+
+    private void jRadioButtonImageNoiseNojRadioButtonImageNoiseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonImageNoiseNojRadioButtonImageNoiseActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_NOISE, Boolean.valueOf(this.jRadioButtonImageNoiseYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonImageNoiseNojRadioButtonImageNoiseActionPerformed
+
+    private void jRadioButtonFastUserModelYesjRadioButtonFastUserModelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonFastUserModelYesjRadioButtonFastUserModelActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_USER_FAST, Boolean.valueOf(this.jRadioButtonFastUserModelYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonFastUserModelYesjRadioButtonFastUserModelActionPerformed
+
+    private void jRadioButtonFastUserModelNojRadioButtonFastUserModelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonFastUserModelNojRadioButtonFastUserModelActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_USER_FAST, Boolean.valueOf(this.jRadioButtonFastUserModelYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonFastUserModelNojRadioButtonFastUserModelActionPerformed
 
     private void jComboBoxSuperSamplingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxSuperSamplingActionPerformed
         try {
@@ -826,35 +849,85 @@ public final class PreferencesView extends JFrame implements Observer {
         }
     }//GEN-LAST:event_jComboBoxSuperSamplingActionPerformed
 
-    private void jRadioButtonAddNoiseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonAddNoiseActionPerformed
+    private void jRadioButtonAddNoiseYesjRadioButtonAddNoiseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonAddNoiseYesjRadioButtonAddNoiseActionPerformed
         try {
             // will fire triggerObserversNotification so update() will be called
             this.myPreferences.setPreference(Preferences.OIFITS_ADD_NOISE, Boolean.valueOf(this.jRadioButtonAddNoiseYes.isSelected()));
         } catch (PreferencesException pe) {
             logger.error("property failure : ", pe);
         }
-    }//GEN-LAST:event_jRadioButtonAddNoiseActionPerformed
+    }//GEN-LAST:event_jRadioButtonAddNoiseYesjRadioButtonAddNoiseActionPerformed
 
-    private void jRadioButtonImageNoiseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonImageNoiseActionPerformed
+    private void jRadioButtonAddNoiseNojRadioButtonAddNoiseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonAddNoiseNojRadioButtonAddNoiseActionPerformed
         try {
             // will fire triggerObserversNotification so update() will be called
-            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_NOISE, Boolean.valueOf(this.jRadioButtonImageNoiseYes.isSelected()));
+            this.myPreferences.setPreference(Preferences.OIFITS_ADD_NOISE, Boolean.valueOf(this.jRadioButtonAddNoiseYes.isSelected()));
         } catch (PreferencesException pe) {
             logger.error("property failure : ", pe);
         }
-    }//GEN-LAST:event_jRadioButtonImageNoiseActionPerformed
+    }//GEN-LAST:event_jRadioButtonAddNoiseNojRadioButtonAddNoiseActionPerformed
 
-    private void jButtonBrowserSelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowserSelectorActionPerformed
-        if (browserPrefAction == null) {
-            browserPrefAction = BrowserLauncher.getBrowserPrefAction(this);
-        }
-        browserPrefAction.actionPerformed(evt);
-        // TODO: save it in preferences.
-        // System.setProperty(BrowserLauncher.BROWSER_SYSTEM_PROPERTY, prefBrowser);
-    }//GEN-LAST:event_jButtonBrowserSelectorActionPerformed
 
-    private BrowserPrefAction browserPrefAction = null;
-    
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroupAddNoise;
+    private javax.swing.ButtonGroup buttonGroupFastUserModel;
+    private javax.swing.ButtonGroup buttonGroupImageNoise;
+    private javax.swing.ButtonGroup buttonGroupNightOnly;
+    private javax.swing.ButtonGroup buttonGroupPositionStyle;
+    private javax.swing.ButtonGroup buttonGroupTimeAxis;
+    private javax.swing.ButtonGroup buttonGroupTimeRef;
+    private javax.swing.JComboBox jComboBoxBestPopsAlgorithm;
+    private javax.swing.JComboBox jComboBoxBestPopsCriteriaAverageWeight;
+    private javax.swing.JComboBox jComboBoxBestPopsCriteriaSigma;
+    private javax.swing.JComboBox jComboBoxColorScale;
+    private javax.swing.JComboBox jComboBoxImageSize;
+    private javax.swing.JComboBox jComboBoxLUT;
+    private javax.swing.JComboBox jComboBoxSuperSampling;
+    private javax.swing.JComboBox jComboBoxTwilight;
+    private javax.swing.JFormattedTextField jFieldMinElev;
+    private javax.swing.JLabel jLabelAddNoise;
+    private javax.swing.JLabel jLabelBestPopsAlgorithm;
+    private javax.swing.JLabel jLabelBestPopsCriteriaAverageWeight;
+    private javax.swing.JLabel jLabelBestPopsCriteriaSigma;
+    private javax.swing.JLabel jLabelCenterNight;
+    private javax.swing.JLabel jLabelColorScale;
+    private javax.swing.JLabel jLabelFastUserModel;
+    private javax.swing.JLabel jLabelImageNoise;
+    private javax.swing.JLabel jLabelImageSize;
+    private javax.swing.JLabel jLabelLutTable;
+    private javax.swing.JLabel jLabelMinElev;
+    private javax.swing.JLabel jLabelNightOnly;
+    private javax.swing.JLabel jLabelPositionStyle;
+    private javax.swing.JLabel jLabelSuperSampling;
+    private javax.swing.JLabel jLabelTimeRef;
+    private javax.swing.JLabel jLabelTwilight;
+    private fr.jmmc.jmcs.gui.component.CommonPreferencesView jPanelCommonPreferencesView;
+    private javax.swing.JPanel jPanelLayout;
+    private javax.swing.JPanel jPanelModelEditor;
+    private javax.swing.JPanel jPanelModelImage;
+    private javax.swing.JPanel jPanelOIFits;
+    private javax.swing.JPanel jPanelObservability;
+    private javax.swing.JPanel jPanelTimeRef;
+    private javax.swing.JPanel jPanelUserModel;
+    private javax.swing.JRadioButton jRadioButtonAddNoiseNo;
+    private javax.swing.JRadioButton jRadioButtonAddNoiseYes;
+    private javax.swing.JRadioButton jRadioButtonCenterNightNo;
+    private javax.swing.JRadioButton jRadioButtonCenterNightYes;
+    private javax.swing.JRadioButton jRadioButtonFastUserModelNo;
+    private javax.swing.JRadioButton jRadioButtonFastUserModelYes;
+    private javax.swing.JRadioButton jRadioButtonImageNoiseNo;
+    private javax.swing.JRadioButton jRadioButtonImageNoiseYes;
+    private javax.swing.JRadioButton jRadioButtonNightOnlyNo;
+    private javax.swing.JRadioButton jRadioButtonNightOnlyYes;
+    private javax.swing.JRadioButton jRadioButtonSepPosAngle;
+    private javax.swing.JRadioButton jRadioButtonTimeLOCAL;
+    private javax.swing.JRadioButton jRadioButtonTimeLST;
+    private javax.swing.JRadioButton jRadioButtonTimeUTC;
+    private javax.swing.JRadioButton jRadioButtonXY;
+    private javax.swing.JScrollPane jScrollPane;
+    private javax.swing.JSeparator jSeparator;
+    // End of variables declaration//GEN-END:variables
+
     /**
      * Listen to preferences changes
      * @param o Preferences
@@ -865,7 +938,6 @@ public final class PreferencesView extends JFrame implements Observer {
         logger.debug("Preferences updated on : {}", this);
 
         // read prefs to set states of GUI elements
-
         // Observability:
         final TimeRef timeRef = TimeRef.findByDisplayName(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
         switch (timeRef) {
@@ -924,68 +996,6 @@ public final class PreferencesView extends JFrame implements Observer {
         this.jRadioButtonAddNoiseYes.setSelected(preferAddNoise);
         this.jRadioButtonAddNoiseNo.setSelected(!preferAddNoise);
     }
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.ButtonGroup buttonGroupAddNoise;
-    private javax.swing.ButtonGroup buttonGroupFastUserModel;
-    private javax.swing.ButtonGroup buttonGroupImageNoise;
-    private javax.swing.ButtonGroup buttonGroupNightOnly;
-    private javax.swing.ButtonGroup buttonGroupPositionStyle;
-    private javax.swing.ButtonGroup buttonGroupTimeAxis;
-    private javax.swing.ButtonGroup buttonGroupTimeRef;
-    private javax.swing.JButton jButtonBrowserSelector;
-    private javax.swing.JButton jButtonDefault;
-    private javax.swing.JButton jButtonSave;
-    private javax.swing.JComboBox jComboBoxBestPopsAlgorithm;
-    private javax.swing.JComboBox jComboBoxBestPopsCriteriaAverageWeight;
-    private javax.swing.JComboBox jComboBoxBestPopsCriteriaSigma;
-    private javax.swing.JComboBox jComboBoxColorScale;
-    private javax.swing.JComboBox jComboBoxImageSize;
-    private javax.swing.JComboBox jComboBoxLUT;
-    private javax.swing.JComboBox jComboBoxSuperSampling;
-    private javax.swing.JComboBox jComboBoxTwilight;
-    private javax.swing.JFormattedTextField jFieldMinElev;
-    private javax.swing.JLabel jLabelAddNoise;
-    private javax.swing.JLabel jLabelBestPopsAlgorithm;
-    private javax.swing.JLabel jLabelBestPopsCriteriaAverageWeight;
-    private javax.swing.JLabel jLabelBestPopsCriteriaSigma;
-    private javax.swing.JLabel jLabelCenterNight;
-    private javax.swing.JLabel jLabelColorScale;
-    private javax.swing.JLabel jLabelFastUserModel;
-    private javax.swing.JLabel jLabelImageNoise;
-    private javax.swing.JLabel jLabelImageSize;
-    private javax.swing.JLabel jLabelLutTable;
-    private javax.swing.JLabel jLabelMinElev;
-    private javax.swing.JLabel jLabelNightOnly;
-    private javax.swing.JLabel jLabelPositionStyle;
-    private javax.swing.JLabel jLabelSuperSampling;
-    private javax.swing.JLabel jLabelTimeRef;
-    private javax.swing.JLabel jLabelTwilight;
-    private javax.swing.JPanel jPanelButtons;
-    private javax.swing.JPanel jPanelModelEditor;
-    private javax.swing.JPanel jPanelModelImage;
-    private javax.swing.JPanel jPanelOIFits;
-    private javax.swing.JPanel jPanelObservability;
-    private javax.swing.JPanel jPanelTimeRef;
-    private javax.swing.JPanel jPanelUserModel;
-    private javax.swing.JPanel jPanelView;
-    private javax.swing.JRadioButton jRadioButtonAddNoiseNo;
-    private javax.swing.JRadioButton jRadioButtonAddNoiseYes;
-    private javax.swing.JRadioButton jRadioButtonCenterNightNo;
-    private javax.swing.JRadioButton jRadioButtonCenterNightYes;
-    private javax.swing.JRadioButton jRadioButtonFastUserModelNo;
-    private javax.swing.JRadioButton jRadioButtonFastUserModelYes;
-    private javax.swing.JRadioButton jRadioButtonImageNoiseNo;
-    private javax.swing.JRadioButton jRadioButtonImageNoiseYes;
-    private javax.swing.JRadioButton jRadioButtonNightOnlyNo;
-    private javax.swing.JRadioButton jRadioButtonNightOnlyYes;
-    private javax.swing.JRadioButton jRadioButtonSepPosAngle;
-    private javax.swing.JRadioButton jRadioButtonTimeLOCAL;
-    private javax.swing.JRadioButton jRadioButtonTimeLST;
-    private javax.swing.JRadioButton jRadioButtonTimeUTC;
-    private javax.swing.JRadioButton jRadioButtonXY;
-    private javax.swing.JScrollPane jScrollPaneView;
-    private javax.swing.JSeparator jSeparator;
-    // End of variables declaration//GEN-END:variables
 
     /**
      * Return the string choice corresponding to the given SunType instance

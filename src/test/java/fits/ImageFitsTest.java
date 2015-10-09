@@ -5,9 +5,9 @@ package fits;
 
 import edu.emory.mathcs.jtransforms.fft.FloatFFT_2D;
 import edu.emory.mathcs.utils.ConcurrencyUtils;
+import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.FitsImagePanel;
-import fr.jmmc.aspro.gui.PreferencesView;
 import fr.jmmc.aspro.image.FitsImageUtils;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.service.UserModelService;
@@ -89,7 +89,7 @@ public class ImageFitsTest {
         final ColorScale colorScale = ColorScale.LINEAR;
 
         // display fits image:
-        new PreferencesView().setVisible(true);
+        Aspro2.createPreferencesView().setVisible(true);
 
         final String userHome = System.getProperty("user.home");
 
@@ -277,7 +277,7 @@ public class ImageFitsTest {
             if (directory.exists() && directory.isDirectory()) {
 
                 // display fits image:
-                new PreferencesView().setVisible(true);
+                Aspro2.createPreferencesView().setVisible(true);
 
                 final long start = System.nanoTime();
 
@@ -292,7 +292,7 @@ public class ImageFitsTest {
                         file = f.getAbsolutePath();
                         try {
                             logger.info("Loading file: " + file);
-                            
+
                             // load and prepare images:
                             model.setFile(file);
 

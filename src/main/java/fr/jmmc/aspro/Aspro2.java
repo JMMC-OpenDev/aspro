@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro;
 
+import fr.jmmc.aspro.gui.PreferencePanel;
 import fr.jmmc.aspro.gui.SettingPanel;
 import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.action.ExportAllOBAction;
@@ -13,7 +14,6 @@ import fr.jmmc.aspro.gui.action.ImportVOTableAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.NewObservationAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
-import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.action.TargetEditorAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
@@ -27,6 +27,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
+import fr.jmmc.jmcs.gui.PreferencesView;
 import fr.jmmc.jmcs.gui.action.ShowReleaseNotesAction;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -43,7 +44,9 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.util.LinkedHashMap;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,12 +129,30 @@ public final class Aspro2 extends App {
         logger.debug("Aspro2.setupGui() handler enter");
 
         prepareFrame();
+        
+        createPreferencesView();
 
         // Create a new observation and update the GUI :
         // even if opening a file in case the file can not be loaded:
         ObservationManager.getInstance().reset();
 
         logger.debug("Aspro2.setupGui() handler exit");
+    }
+
+    /**
+     * Create the Preferences view
+     * @return Preferences view
+     */
+    public static PreferencesView createPreferencesView() {
+        // Retrieve application preferences and attach them to their view
+        // (This instance must be instanciated after dependencies)
+        final LinkedHashMap<String, JPanel> panels = new LinkedHashMap<String, JPanel>(2);
+        panels.put("General settings", new PreferencePanel());
+
+        final PreferencesView preferencesView = new PreferencesView(Preferences.getInstance(), panels);
+        preferencesView.init();
+
+        return preferencesView;
     }
 
     /**
@@ -151,7 +172,7 @@ public final class Aspro2 extends App {
             }
         });
     }
-    
+
     /**
      * Return the application state when submitting a feedback report
      *
@@ -291,8 +312,6 @@ public final class Aspro2 extends App {
         new LoadObservationAction();
         // save observation :
         this.saveAction = new SaveObservationAction();
-        // show preferences :
-        new ShowPrefAction();
         // import VOTable:
         new ImportVOTableAction();
         // export VOTable:
