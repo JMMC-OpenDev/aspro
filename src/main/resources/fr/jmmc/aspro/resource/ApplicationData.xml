@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.8.1 beta 4"/>
-    <compilation date="09/10/2015" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.8.1"/>
+    <compilation date="13/10/2015" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -196,7 +196,7 @@
     <releasenotes>
 
         <release version="0.9.8.1">
-            <pubDate>Fri, 09 Oct 2015 13:00:00 GMT</pubDate>
+            <pubDate>Tue, 13 Oct 2015 15:00:00 GMT</pubDate>
             <prerelease version="0.9.8.1 beta 4">
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/716">Improved linux web browser support to use the [Default System Browser]
                     customizable in the Preferences panel</change>
