@@ -21,8 +21,6 @@ import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oiexplorer.core.export.DocumentExportable;
 import fr.jmmc.oiexplorer.core.export.DocumentOptions;
-import fr.jmmc.oiexplorer.core.export.DocumentSize;
-import fr.jmmc.oiexplorer.core.export.Orientation;
 import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
@@ -34,7 +32,9 @@ import fr.jmmc.oitools.image.FitsImage;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.Image;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.text.DecimalFormat;
@@ -268,10 +268,16 @@ public class FitsImagePanel extends javax.swing.JPanel implements ChartProgressL
      * This method is useful to set the models and specific features of initialized swing components :
      */
     private void postInit() {
-        this.chart = ChartUtils.createSquareXYLineChart(null, null, false);
+        this.chart = ChartUtils.createSquareXYLineChart("RA - North", "DEC - East", false);
         this.chart.setPadding(CHART_PADDING);
 
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
+        
+        // Move RA axis to top:
+        this.xyPlot.setDomainAxisLocation(AxisLocation.TOP_OR_LEFT);
+        
+        this.xyPlot.getDomainAxis().setPositiveArrowVisible(true);
+        this.xyPlot.getRangeAxis().setPositiveArrowVisible(true);
 
         // Adjust background settings :
         this.xyPlot.setBackgroundImageAlpha(1.0f);
@@ -527,10 +533,22 @@ public class FitsImagePanel extends javax.swing.JPanel implements ChartProgressL
             if (Thread.currentThread().isInterrupted()) {
                 return null;
             }
-
+            
             _logger.info("compute[ImageChartData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+            
+            final BufferedImage displayedImage;
+            if (fitsImage.isIncColPositive()) {
+                // Flip the image horizontally to have RA orientation = East is towards the left:
+                final AffineTransform tx = AffineTransform.getScaleInstance(-1, 1); 
+                tx.translate(-image.getWidth(), 0);
 
-            return new ImageChartData(fitsImage, colorModel, usedColorScale, min, max, image);
+                final AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BICUBIC);
+                displayedImage = op.filter(image, null);
+            } else {
+                displayedImage = image;
+            }
+
+            return new ImageChartData(fitsImage, colorModel, usedColorScale, min, max, displayedImage);
         }
 
         /**
@@ -663,14 +681,11 @@ public class FitsImagePanel extends javax.swing.JPanel implements ChartProgressL
         this.xyPlot.restoreAxesBounds();
 
         // define axis orientation:
-        if (!lFitsImage.isIncColPositive()) {
-            final ValueAxis domainAxis = this.xyPlot.getDomainAxis(0);
-            domainAxis.setInverted(true);
-        }
-        if (!lFitsImage.isIncRowPositive()) {
-            final ValueAxis rangeAxis = this.xyPlot.getRangeAxis(0);
-            rangeAxis.setInverted(true);
-        }
+        // RA: East is positive at left:
+        this.xyPlot.getDomainAxis().setInverted(lFitsImage.isIncColPositive());
+
+        // DEC: North is positive at top:
+        this.xyPlot.getRangeAxis().setInverted(!lFitsImage.isIncRowPositive());
 
         // update the background image and legend:
         updateImage(imageData);
@@ -747,7 +762,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements ChartProgressL
 
         // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
         // whereas it corresponds in Fits image to the lower left corner => inverse the Y axis
-        if (!imageData.getFitsImage().isIncColPositive()) {
+        if (imageData.getFitsImage().isIncColPositive()) {
             // Inverse X axis issue :
             x = imageWidth - x - w;
         }
