@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.8.1"/>
-    <compilation date="13/10/2015" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.8.2 beta 1"/>
+    <compilation date="15/10/2015" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -194,6 +194,17 @@
     </menubar>
 
     <releasenotes>
+        <release version="0.9.8.2">
+            <pubDate>Tue, 15 Oct 2015 15:00:00 GMT</pubDate>
+            <prerelease version="0.9.8.2 beta 1">
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/717">Fixed the model image orientation
+                    (astronomical convention): East is towards the left</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/717">Added East and North indications
+                    on the user model viewer in the target editor panel</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/717">Added East and North indications
+                    on the UV Coverage plot (astronomical convention)</change>
+            </prerelease>
+        </release>
 
         <release version="0.9.8.1">
             <pubDate>Tue, 13 Oct 2015 15:00:00 GMT</pubDate>
