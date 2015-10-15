@@ -744,6 +744,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         this.chart = ChartUtils.createSquareXYLineChart("U (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", "V (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", true);
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
+        
+        this.xyPlot.getDomainAxis().setPositiveArrowVisible(true);
+        this.xyPlot.getRangeAxis().setPositiveArrowVisible(true);
 
         // Use FastXYLineAndShapeRenderer to have tooltip on line segments:
         final FastXYLineAndShapeRenderer rendererPoints = new FastXYLineAndShapeRenderer(true, false); // DATASET_UV_POINTS
@@ -781,13 +784,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
 
         // add UV axes in meters:
-        final BoundedNumberAxis uAxisMeter = new BoundedNumberAxis("U (m)");
+        final BoundedNumberAxis uAxisMeter = new BoundedNumberAxis("U (m) - North");
         uAxisMeter.setAutoRangeIncludesZero(false);
         uAxisMeter.setTickLabelFont(ChartUtils.DEFAULT_TITLE_FONT);
         uAxisMeter.setTickMarkPaint(Color.BLACK);
         this.xyPlot.setDomainAxis(1, uAxisMeter);
 
-        final BoundedNumberAxis vAxisMeter = new BoundedNumberAxis("V (m)");
+        final BoundedNumberAxis vAxisMeter = new BoundedNumberAxis("V (m) - East");
         vAxisMeter.setAutoRangeIncludesZero(false);
         vAxisMeter.setTickLabelFont(ChartUtils.DEFAULT_TITLE_FONT);
         vAxisMeter.setTickMarkPaint(Color.BLACK);
