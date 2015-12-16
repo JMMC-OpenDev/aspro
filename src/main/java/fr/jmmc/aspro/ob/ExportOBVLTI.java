@@ -162,6 +162,8 @@ public class ExportOBVLTI {
                 ExportOBMidi.generate(file, observation, os, target);
             } else if (instrumentName.startsWith(AsproConstants.INS_PIONIER)) {
                 ExportOBPionier.generate(file, observation, os, target);
+            } else if (instrumentName.startsWith(AsproConstants.INS_GRAVITY)) {
+                ExportOBGravity.generate(file, observation, os, target);
             } else {
                 throw new IllegalArgumentException("Aspro 2 can not generate an Observing Block for this instrument [" + instrumentName + "] !");
             }
@@ -210,7 +212,7 @@ public class ExportOBVLTI {
 
         // Set name :
         final String name = fixFileName(fileName);
-        document = document.replaceFirst(KEY_NAME, name); // 64 chars max
+        document = document.replaceAll(KEY_NAME, name); // 64 chars max
 
         // --- Calibrator OB ---
         final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
@@ -229,10 +231,10 @@ public class ExportOBVLTI {
         }
 
         // Define the calibrator OB using the first calibrator :
-        document = document.replaceFirst(KEY_CALIBRATOR_OB, calibratorOBFileName);
+        document = document.replaceAll(KEY_CALIBRATOR_OB, calibratorOBFileName);
 
         // --- OB category ---
-        document = document.replaceFirst(KEY_CATEGORY,
+        document = document.replaceAll(KEY_CATEGORY,
                 (targetUserInfos != null && targetUserInfos.isCalibrator(target)) ? categoryValue_CAL : categoryValue_SCI);
 
         // --- Date / Time constraints ---
@@ -240,30 +242,30 @@ public class ExportOBVLTI {
 
         // --- Target information ---
         // comments = spectral type :
-        document = document.replaceFirst(KEY_COMMENTS, (target.getSPECTYP() != null) ? target.getSPECTYP() : "");
+        document = document.replaceAll(KEY_COMMENTS, (target.getSPECTYP() != null) ? target.getSPECTYP() : "");
 
         // convert RA/DEC (mas) up to 3 digits :
         final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
 
-        document = document.replaceFirst(KEY_RA, raDec[0]);
-        document = document.replaceFirst(KEY_DEC, raDec[1]);
+        document = document.replaceAll(KEY_RA, raDec[0]);
+        document = document.replaceAll(KEY_DEC, raDec[1]);
 
         // --- OB NAME ---
         document = processObservationName(document, observation, raDec, target);
 
         // PMRA / PMDEC (optional) converted to arcsec/year :
-        document = document.replaceFirst(KEY_PM_RA,
+        document = document.replaceAll(KEY_PM_RA,
                 df6.format((target.getPMRA() != null) ? target.getPMRA().doubleValue() / 1000d : 0d));
-        document = document.replaceFirst(KEY_PM_DEC,
+        document = document.replaceAll(KEY_PM_DEC,
                 df6.format((target.getPMDEC() != null) ? target.getPMDEC().doubleValue() / 1000d : 0d));
 
         // replace invalid characters (i.e. not alpha numeric) :
         final String altName = StringUtils.replaceNonAlphaNumericCharsByUnderscore(target.getName());
-        document = document.replaceFirst(KEY_TARGET_NAME, altName);
+        document = document.replaceAll(KEY_TARGET_NAME, altName);
 
         // Later : atmosphere / seeing
         // Base line :
-        document = document.replaceFirst(KEY_BASE_LINE, getBaseLine(observation));
+        document = document.replaceAll(KEY_BASE_LINE, getBaseLine(observation));
 
         return document;
     }
