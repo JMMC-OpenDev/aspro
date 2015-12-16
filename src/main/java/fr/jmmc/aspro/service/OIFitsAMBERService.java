@@ -48,7 +48,7 @@ public final class OIFitsAMBERService {
      */
     public static void amdlibFakeAmberDiffVis(final OIVis vis,
             final Complex[][] visComplex,
-            final Complex[][] visError,
+            final double[][] visError,
             final double[] waveLengths) {
 
         /*
@@ -108,11 +108,9 @@ public final class OIFitsAMBERService {
         for (iRow = 0; iRow < nRows; iRow++) {
 
             for (lVis = 0; lVis < nbLVis; lVis++) {
-                t = visError[iRow][lVis];
+                x = FastMath.pow2(visError[iRow][lVis]);
                 
-                sigma2_cpxVisTable[iRow][lVis] = new ImmutableComplex(
-                        FastMath.pow2(t.getReal()),
-                        FastMath.pow2(t.getImaginary())); // immutable complex for safety
+                sigma2_cpxVisTable[iRow][lVis] = new ImmutableComplex(x, x); // immutable complex for safety
             }
         }
 

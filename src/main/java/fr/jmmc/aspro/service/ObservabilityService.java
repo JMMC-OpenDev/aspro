@@ -1961,10 +1961,11 @@ public final class ObservabilityService {
             // fix JD in LST range [0; 24] in order to have accurate target position:
             jdIn = getJDInLstRange(jd);
 
+            // AZ [0; 360] where 0 is North, positive toward East:
             this.sco.getTargetPosition(cosDec, sinDec, jdIn, azEl);
             
             // Quick fix AZ for VLTI (ie south):
-            if (isSouth) {
+            if (false && isSouth) {
                 // adjust azimuth to be compatible with vlti profiles :
                 final double az = azEl.getAzimuth();
 
@@ -3277,7 +3278,7 @@ public final class ObservabilityService {
 
         final double obsLat = FastMath.toDegrees(this.interferometer.getPosSph().getLatitude());
 
-        final int decStep = 2;
+        final int decStep = 1;
 
         int decMin = decStep * (int) Math.round((obsLat - 90d + this.minElev) / decStep);
         decMin = Math.max(decMin, -90);

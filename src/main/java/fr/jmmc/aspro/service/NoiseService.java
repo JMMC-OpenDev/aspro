@@ -16,12 +16,17 @@ import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.observability.TargetPointInfo;
+import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
+import fr.jmmc.aspro.model.oi.FocalInstrumentSetup;
+import fr.jmmc.aspro.model.oi.ObservationSequence;
+import fr.jmmc.aspro.model.oi.SpectralSetup;
+import fr.jmmc.aspro.model.oi.SpectralSetupColumn;
+import fr.jmmc.aspro.model.oi.SpectralSetupQuantity;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.jmal.Band;
-import fr.jmmc.jmal.complex.Complex;
-import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmal.model.VisNoiseService;
+import fr.jmmc.jmcs.util.NumberUtils;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author bourgesl
  */
-public final class NoiseService extends VisNoiseService {
+public final class NoiseService implements VisNoiseService {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(NoiseService.class.getName());
@@ -45,58 +50,80 @@ public final class NoiseService extends VisNoiseService {
     public final static double H_PLANCK = 6.62606896e-34d;
     /** Speed of light (2.99792458e8) */
     public final static double C_LIGHT = 2.99792458e8d;
+    
+    /** flag to use the new numeric approach = statistical distributions */
+    public final static boolean USE_DISTRIB_APPROACH = true;
+    
     /** enable bound checks on iPoint / iChannel */
     private final static boolean DO_CHECKS = false;
+
+    /** maximum error on Vis to avoid excessively large errors */
+    private final static double MAX_ERR_V = 3.0;
+    /** maximum error on Vis2 to avoid excessively large errors */
+    private final static double MAX_ERR_V2 = MAX_ERR_V * MAX_ERR_V;
 
     /* members */
     /** instrument name */
     private String instrumentName = null;
 
     /* interferometer parameters */
+    /** telescope in use */
+    private Telescope telescope = null;
     /** Telescope Diameter (m) */
-    private double telDiam = 1d;
+    private double telDiam = Double.NaN;
     /** Number of telescopes interfering as double */
-    private double nbTel = 1;
+    private double nbTel = Double.NaN;
 
     /* adaptive optics parameters */
     /** seeing (arc sec) */
-    private double seeing = 1d;
+    private double seeing = Double.NaN;
     /** Number of Actuators of AO */
-    private int nbOfActuators = 1;
+    private int nbOfActuators = 0;
     /** AO band */
     private SpectralBand aoBand;
 
     /* instrument parameters */
-    /* fixed values (spectrally independent) */
+ /* fixed values (spectrally independent) */
     /** Total Acquisition time per observed u,v point (s) */
-    private double totalObsTime = 300d;
+    private double totalObsTime = Double.NaN;
     /** Detector individual integration time (s) */
-    private double dit = 0.01d;
+    private double dit = Double.NaN;
     /** Detector readout noise */
-    private double ron = 12d;
-    /** Detector is non-linear above (to avoid saturation/non-linearity) */
-    private double detectorSaturation = 100000d;
-    /** fraction of flux going into interferometric channel */
-    private double fracFluxInInterferometry = 0.9d;
+    private double ron = Double.NaN;
+    /** Detector is non-linear above (to avoid saturation/n-on-linearity) */
+    private double detectorSaturation = Double.NaN;
+    /** Detector quantum efficiency (optional ie 1.0 by default) */
+    private double quantumEfficiency = Double.NaN;
+
     /** flag to use the photometry */
     private boolean usePhotometry = false;
+    /** flag to use the strehl correction */
+    private boolean useStrehlCorrection = true;
+
     /* varying values (spectrally dependent) */
     /** instrument band */
     private Band insBand;
     /** instrument band corresponding to target mags */
     private SpectralBand insTargetBand;
 
-    /* TODO: phase 2: get such values for MATISSE from each spectral modes */
-    /** (W) Transmission of interferometer+instrument at observed wavelength */
-    private double transmission = 1d;
-    /** (W?) Instrumental Visibility [0.0-1.0] */
-    private double instrumentalVisibility = 1d;
+    /** fraction of flux going into the interferometric channel */
+    private double fracFluxInInterferometry = Double.NaN;
+    /** fraction of flux going into the photometric channel */
+    private double fracFluxInPhotometry = Double.NaN;
+
     /** number of pixels to code all fringes together (interferometric channel) */
-    /* TODO: more detailled explanations */
-    private int nbPixInterf = 600;
+    private double nbPixInterf = Double.NaN;
     /** number of pixels to code each photometric channel */
-    /* TODO: more detailled explanations */
-    private int nbPixPhoto = 4;
+    private double nbPixPhoto = Double.NaN;
+    /** ratio photometry exposures per photometric channel (chopping) */
+    private double ratioPhotoPerBeam = Double.NaN;
+
+    /** (W) Transmission of interferometer+instrument at observed wavelength */
+    private double[] transmission = null;
+    /** (W) Instrumental Visibility [0.0-1.0] */
+    private double[] instrumentalVisibility = null;
+    /** (W) Number of thermal photon (background) per beam per second (no strehl, no QE) */
+    private double[] nbPhotThermal = null;
 
     /* bias */
     /** true to use instrument bias; false to compute only theoretical error */
@@ -126,11 +153,11 @@ public final class NoiseService extends VisNoiseService {
     /** Fringe Tracking Mode i.e. not group tracking (FINITO) */
     private boolean fringeTrackingMode = false;
     /** Fringe Tracker (multiplicative) Instrumental Visibility */
-    private double fringeTrackerInstrumentalVisibility = 1d;
+    private double fringeTrackerInstrumentalVisibility = Double.NaN;
     /** Fringe Tracker Usage limit (mag) */
-    private double fringeTrackerLimit = 12d;
+    private double fringeTrackerLimit = Double.NaN;
     /** Fringe Tracker Max Integration Time (s) */
-    private double fringeTrackerMaxIntTime = 30d;
+    private double fringeTrackerMaxIntTime = Double.NaN;
     /** FT band */
     private SpectralBand ftBand;
 
@@ -155,14 +182,17 @@ public final class NoiseService extends VisNoiseService {
     /** flag to indicate that a parameter is invalid in order the code to return errors as NaN values */
     private boolean invalidParameters = false;
 
-    /** (W?) total instrumental visibility (with FT if any) */
-    private double vinst;
+    /** total instrumental visibility (with FT if any) */
+    private double[] vinst;
 
     /* cached intermediate constants */
     /** error correction = 1 / SQRT(total frame) */
     private double totFrameCorrection;
     /** noise computation parameters per uv point */
     private NoiseWParams[] params = null;
+    /* varying values (spectrally dependent) */
+    /** (W) number of thermal photons per telescope */
+    private double[] nbPhotTherm = null;
 
     /**
      * Protected constructor
@@ -221,12 +251,12 @@ public final class NoiseService extends VisNoiseService {
         this.nbTel = stations.size();
 
         // All telescopes have the same diameter for a given baseline :
-        final Telescope tel = stations.get(0).getTelescope();
+        this.telescope = stations.get(0).getTelescope();
 
-        this.telDiam = tel.getDiameter();
+        this.telDiam = telescope.getDiameter();
 
         // AO :
-        final AdaptiveOptics ao = tel.getAdaptiveOptics();
+        final AdaptiveOptics ao = telescope.getAdaptiveOptics();
         if (ao != null) {
             this.aoBand = ao.getBand();
             this.nbOfActuators = ao.getNumberActuators();
@@ -235,6 +265,10 @@ public final class NoiseService extends VisNoiseService {
             this.aoBand = SpectralBand.V;
             this.nbOfActuators = 1;
         }
+        
+        // TODO: add AO mag limits like FT
+        // V < 15 for UTs (MACAO)
+        // V < 11 for ATs (STRAP)
 
         // Seeing :
         final AtmosphereQuality atmQual = observation.getWhen().getAtmosphereQuality();
@@ -249,6 +283,8 @@ public final class NoiseService extends VisNoiseService {
             logger.debug("nbOfActuators                 : {}", nbOfActuators);
             logger.debug("seeing                        : {}", seeing);
         }
+
+        // TODO: get atm spectra here ...
     }
 
     /**
@@ -263,35 +299,59 @@ public final class NoiseService extends VisNoiseService {
 
         final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
+        final FocalInstrumentSetup insSetup = observation.getInstrumentConfiguration().getFocalInstrumentMode().getSetupRef();
+
         // use alias or real instrument name:
         this.instrumentName = instrument.getAliasOrName();
-        this.transmission = instrument.getTransmission();
-        this.dit = instrument.getDit();
-        this.ron = instrument.getRon();
-        this.detectorSaturation = instrument.getDetectorSaturation();
-        this.instrumentalVisibility = instrument.getInstrumentVisibility();
-        this.nbPixInterf = instrument.getNbPixInterferometry();
 
-        // optional photometry parameters
-        this.nbPixPhoto = instrument.getNbPixPhotometry(); // can be 0
-        this.fracFluxInInterferometry = instrument.getFracFluxInInterferometry(); // can be 1
+        this.dit = insSetup.getDit();
+        this.ron = insSetup.getRon();
+        this.detectorSaturation = insSetup.getDetectorSaturation();
+        this.quantumEfficiency = insSetup.getQuantumEfficiency();
 
-        final String instrumentMode = observation.getInstrumentConfiguration().getInstrumentMode();
-        if (instrumentMode.startsWith("HIGH_SENS_")) {
-            // MATISSE hack:
-            this.fracFluxInInterferometry = 1.0;
+        // fractions:
+        this.fracFluxInInterferometry = insSetup.getFracFluxInInterferometry();
+        this.fracFluxInPhotometry = insSetup.getFracFluxInPhotometry();
+
+        this.nbPixInterf = insSetup.getNbPixInterferometry();
+        this.nbPixPhoto = insSetup.getNbPixPhotometry(); // can be 0
+
+        this.useStrehlCorrection = insSetup.isUseStrehlCorrection();
+        this.usePhotometry = (fracFluxInPhotometry > 0.0 && nbPixPhoto > 0.0);
+
+        // Use Sequence to get both time & beam ratios:
+        final ObservationSequence sequence = insSetup.getSequence();
+
+        this.ratioPhotoPerBeam = sequence.getRatioPhotoPerBeam();
+
+        final double ratioTime = sequence.getRatioTime();
+        final double ratioDeadTime = sequence.getRatioDeadTime();
+        
+        final double effectiveFrameTime = ratioTime * this.dit + ratioDeadTime * insSetup.getDeadtimeExposure();
+        // + insSetup.getDeadtimeSequence(); // TODO: chopping switch is 2 times per SECOND not per sequence !
+
+        final double ratioTimeInterfero = this.dit / effectiveFrameTime;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("ratioPhotoPerBeam: " + ratioPhotoPerBeam);
+            logger.debug("ratioTime: " + ratioTime);
+            logger.debug("ratioDeadTime: " + ratioDeadTime);
+            logger.debug("effectiveFrameTime: " + effectiveFrameTime);
+            logger.debug("efficiency (%): " + (100.0 * ratioTimeInterfero));
+            logger.debug("totalObsTime                  : {}", totalObsTime);
+            logger.debug("totalOBTime                   : {}", totalObsTime / ratioTimeInterfero);
         }
-
-        this.usePhotometry = (fracFluxInInterferometry < 1.0 && nbPixPhoto > 0);
+        logger.info("totalObsTime                  : {}", totalObsTime);
+        logger.info("totalOBTime                   : {}", totalObsTime / ratioTimeInterfero);
 
         if (this.useInstrumentBias) {
             /* Convert Phase bias to radians */
-            this.instrumentalPhaseBias = FastMath.toRadians(instrument.getInstrumentPhaseBias());
+            this.instrumentalPhaseBias = FastMath.toRadians(insSetup.getInstrumentPhaseBias());
 
             /* Get Vis bias (percents) */
-            final double instrumentalVisBias = getPercents(instrument.getInstrumentVisibilityBias());
+            final double instrumentalVisBias = getPercents(insSetup.getInstrumentVisibilityBias());
 
-            final Double vis2CalibrationBias = instrument.getInstrumentVis2CalibrationBias();
+            final Double vis2CalibrationBias = insSetup.getInstrumentVis2CalibrationBias();
             if (vis2CalibrationBias == null) {
                 this.useVis2CalibrationBias = false;
                 this.instrumentVis2CalibrationBias = 0d;
@@ -313,25 +373,108 @@ public final class NoiseService extends VisNoiseService {
             this.useVis2CalibrationBias = false;
         }
 
+        final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+        if (insMode == null) {
+            throw new IllegalStateException("The instrumentMode is empty !");
+        }
+
+        final SpectralSetup table = insMode.getTable();
+        int firstIdx = -1;
+        int lastIdx = -1;
+
+        if (table != null) {
+            // check WLen range:-
+            final double[] lambda = table.getAndScaleColumn(SpectralSetupQuantity.LAMBDA, 1e-6);
+
+            final double lambdaMin = this.waveLengths[0];
+            final double lambdaMax = this.waveLengths[nSpectralChannels - 1];
+
+            for (int i = 0; i < lambda.length; i++) {
+                if (Math.abs(lambda[i] - lambdaMin) < 1e-15) {
+                    firstIdx = i;
+                    break;
+                }
+            }
+
+            for (int i = lambda.length - 1; i >= 0; i--) {
+                if (Math.abs(lambda[i] - lambdaMax) < 1e-15) {
+                    lastIdx = i + 1; // exclusive
+                    break;
+                }
+            }
+
+            if (firstIdx == -1 || lastIdx == -1) {
+                throw new IllegalStateException("Invalid range within spectral table !");
+            }
+            // check the number of channels is consistent:
+            if ((lastIdx - firstIdx) != nSpectralChannels) {
+                throw new IllegalStateException("Inconsistent channel count: " + (lastIdx - firstIdx) + " expected : " + nSpectralChannels + " !");
+            }
+
+            // Get table data:
+            SpectralSetupColumn col;
+            // transmission:
+            col = table.getColumn(SpectralSetupQuantity.TRANSMISSION, telescope);
+            if (col == null) {
+                col = table.getColumn(SpectralSetupQuantity.TRANSMISSION);
+            }
+            if (col != null) {
+                this.transmission = Arrays.copyOfRange(col.getValues(), firstIdx, lastIdx);
+            }
+            // visibility:
+            col = table.getColumn(SpectralSetupQuantity.VISIBILITY, telescope);
+            if (col == null) {
+                col = table.getColumn(SpectralSetupQuantity.VISIBILITY);
+            }
+            if (col != null) {
+                this.instrumentalVisibility = Arrays.copyOfRange(col.getValues(), firstIdx, lastIdx);
+            }
+            
+            // nb photon thermal per beam per second (background):
+            col = table.getColumn(SpectralSetupQuantity.NB_PHOTON_THERMAL, telescope);
+            if (col == null) {
+                col = table.getColumn(SpectralSetupQuantity.NB_PHOTON_THERMAL);
+            }
+            if (col != null) {
+                this.nbPhotThermal = Arrays.copyOfRange(col.getValues(), firstIdx, lastIdx);
+            }
+        }
+
+        if (this.transmission == null) {
+            this.transmission = new double[nSpectralChannels];
+            Arrays.fill(this.transmission, insSetup.getTransmission());
+        }
+        if (this.instrumentalVisibility == null) {
+            this.instrumentalVisibility = new double[nSpectralChannels];
+            Arrays.fill(this.instrumentalVisibility, insSetup.getInstrumentVisibility());
+        }
+
         if (logger.isDebugEnabled()) {
             logger.debug("instrumentName                : {}", instrumentName);
+            logger.debug("instrumentSetup               : {}", insSetup.getName());
             logger.debug("totalObsTime                  : {}", totalObsTime);
-            logger.debug("transmission                  : {}", transmission);
             logger.debug("dit                           : {}", dit);
             logger.debug("ron                           : {}", ron);
             logger.debug("detectorSaturation            : {}", detectorSaturation);
-            logger.debug("instrumentalVisibility        : {}", instrumentalVisibility);
+            logger.debug("quantumEfficiency             : {}", quantumEfficiency);
+            logger.debug("fracFluxInInterferometry      : {}", fracFluxInInterferometry);
+            logger.debug("fracFluxInPhotometry          : {}", fracFluxInPhotometry);
+            logger.debug("nbPixInterf                   : {}", nbPixInterf);
+            logger.debug("nbPixPhoto                    : {}", nbPixPhoto);
+            logger.debug("usePhotometry                 : {}", usePhotometry);
+            logger.debug("useStrehlCorrection           : {}", useStrehlCorrection);
+            logger.debug("transmission                  : {}", Arrays.toString(transmission));
+            logger.debug("instrumentalVisibility        : {}", Arrays.toString(instrumentalVisibility));
+            logger.debug("nbPhotThermal                 : {}", Arrays.toString(nbPhotThermal));
             logger.debug("useInstrumentBias             : {}", useInstrumentBias);
             logger.debug("instrumentalVisibilityBias    : {}", instrumentalVis2Bias);
             logger.debug("instrumentalPhaseBias         : {}", instrumentalPhaseBias);
             logger.debug("useVis2CalibrationBias        : {}", useVis2CalibrationBias);
             logger.debug("instrumentVis2CalibrationBias : {}", instrumentVis2CalibrationBias);
-            logger.debug("nbPixInterf                   : {}", nbPixInterf);
-            logger.debug("nbPixPhoto                    : {}", nbPixPhoto);
-            logger.debug("fracFluxInInterferometry      : {}", fracFluxInInterferometry);
-            logger.debug("usePhotometry                 : {}", usePhotometry);
         }
     }
+    
+    private static boolean useTB = false;
 
     /**
      * Prepare fringe tracker parameters
@@ -383,7 +526,6 @@ public final class NoiseService extends VisNoiseService {
         final double lambdaMid = 0.5 * (lambdaMin + lambdaMax);
 
         // TODO: use band range to cover lambdaMin / lambdaMax:
-        
         // JHK or LM or BVR
         final Band band = findBand(lambdaMid / AsproConstants.MICRO_METER); // microns
         this.insBand = band;
@@ -399,7 +541,6 @@ public final class NoiseService extends VisNoiseService {
 
         // If a flux / magnitude is missing => user message
         // and it is impossible to compute any error
-        
         // TODO: handle B|R vs V for VEGA:
         flux = target.getFlux(insTargetBand);
         this.objectMag = (flux != null) ? flux.doubleValue() : Double.NaN;
@@ -443,24 +584,13 @@ public final class NoiseService extends VisNoiseService {
             return;
         }
 
-        // Target flux per spectral channel:
-        final double[] fluxSrcPerChannel = computeTargetFlux();
-
-        // strehl ratio of AO :
-        // TODO: add parameter use_strehl or not (transmission may already include it) 
-        final boolean use_strehl = !(instrumentName.startsWith(AsproConstants.INS_VEGA));
-
-        final double telSurface = Math.PI * FastMath.pow2(0.5 * telDiam);
-
-        final int nWLen = nSpectralChannels;
-
         final int nObs = nPoints; // = targetPointInfos.length
 
-        // Pass 1: find maximum flux per channel taking in to account the target elevation:
+        // Pass 1: find maximum flux per channel taking into account the target elevation:
         // strehl is spectrally dependent:
         final double[][] strehlPerChannel;
 
-        if (use_strehl) {
+        if (useStrehlCorrection) {
             strehlPerChannel = new double[nObs][];
 
             for (int n = 0; n < nObs; n++) {
@@ -477,33 +607,58 @@ public final class NoiseService extends VisNoiseService {
             strehlPerChannel = null;
         }
 
-        // total number of photons per channel and per second:
-        final double[][] nbTotalPhotPerSec = new double[nObs][nWLen];
+        final int nWLen = nSpectralChannels;
 
-        // maximum number of photons per channel and per second:
+        // total number of thermal photons per spectral channel:
+        final double[] nbTotalPhotTherm;
+
+        if (this.nbPhotThermal == null) {
+            nbTotalPhotTherm = null;
+        } else {
+            nbTotalPhotTherm = new double[nWLen];
+
+            for (int i = 0; i < nWLen; i++) {
+                // Per beam Per second:
+                nbTotalPhotTherm[i] = this.nbPhotThermal[i] * quantumEfficiency;
+            }
+        }
+
+        // Target flux per spectral channel per second per m^2:
+        final double[] fluxSrcPerChannel = computeTargetFlux();
+
+        // total number of science photons per spectral channel per second per telescope:
+        final double[][] nbTotalPhot = new double[nObs][nWLen];
+
+        final double telSurface = Math.PI * FastMath.pow2(0.5 * telDiam);
+
+        // maximum number of science photons per channel and per second:
         double maxNbTotalPhotPerSec = 0.0;
+        double nbPhot;
 
         for (int n = 0; n < nObs; n++) {
 
             for (int i = 0; i < nWLen; i++) {
-                final double fluxPerChannel = fluxSrcPerChannel[i] /* + thermal photon number */;
+                // Per second:
+                nbPhot = (telSurface * quantumEfficiency) * transmission[i] * fluxSrcPerChannel[i];
 
-                /* TODO: make transmission depend on wavelengths */
-                double nbTotalPhotPerSecNoStrehl = telSurface * nbTel * transmission * fluxPerChannel;
-
-                nbTotalPhotPerSec[n][i] = nbTotalPhotPerSecNoStrehl;
-
-                if (use_strehl) {
-                    nbTotalPhotPerSec[n][i] *= strehlPerChannel[n][i];
+                if (useStrehlCorrection) {
+                    nbPhot *= strehlPerChannel[n][i];
                 }
 
-                if (nbTotalPhotPerSec[n][i] > maxNbTotalPhotPerSec) {
-                    maxNbTotalPhotPerSec = nbTotalPhotPerSec[n][i];
+                nbTotalPhot[n][i] = nbPhot;
+
+                if (nbTotalPhotTherm != null) {
+                    // add thermal photons per sec:
+                    nbPhot += nbTotalPhotTherm[i];
+                }
+
+                if (nbPhot > maxNbTotalPhotPerSec) {
+                    maxNbTotalPhotPerSec = nbPhot;
                 }
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("elevation                     : {}", targetPointInfos[n].getElevation());
-                logger.debug("nbTotalPhotPerSec             : {}", Arrays.toString(nbTotalPhotPerSec[n]));
+                logger.debug("nbTotalPhotPerSec             : {}", Arrays.toString(nbTotalPhot[n]));
             }
         }
 
@@ -514,10 +669,13 @@ public final class NoiseService extends VisNoiseService {
         // dit used by this observation:
         double obsDit = dit;
 
-        // maximum number of expected photoevents in dit:
-        final double maxTotalPhot = maxNbTotalPhotPerSec * obsDit;
+        // maximum number of expected photoevents in dit (for all telescopes):
+        final double maxTotalPhot = (nbTel * maxNbTotalPhotPerSec) * obsDit;
 
-        // fraction of total interferometric flux in peak pixel :
+        // fraction of total interferometric flux in the peak pixel :
+// TODO: adjust that code as both science and thermal photons are varying on spectral channels
+// it may saturate few pixels ie do not divide by nbPixInterf as it means average(photons) not MAX !
+// It is correct if 1 pixel = 1 spectral channel:
         final double peakflux = fracFluxInInterferometry * maxTotalPhot / nbPixInterf;
 
         if (logger.isDebugEnabled()) {
@@ -549,10 +707,12 @@ public final class NoiseService extends VisNoiseService {
             if ((fringeTrackerMag <= fringeTrackerLimit) && (nbFrameToSaturation > 1)) {
                 // correct instrumental visibility:
                 // TODO: may be depend on the spectral band (H != K != N) ?
-                this.vinst *= fringeTrackerInstrumentalVisibility;
+                for (int i = 0; i < this.vinst.length; i++) {
+                    this.vinst[i] *= fringeTrackerInstrumentalVisibility;
+                }
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("vinst (FT)                    : {}", vinst);
+                    logger.debug("vinst (FT)                    : {}", Arrays.toString(vinst));
                 }
 
                 if (fringeTrackingMode) {
@@ -570,6 +730,10 @@ public final class NoiseService extends VisNoiseService {
                 }
             } else {
                 addWarning("Observation can not use FT (magnitude limit or saturation).");
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("vinst (noFT)                    : {}", Arrays.toString(vinst));
+                }
             }
         }
 
@@ -586,68 +750,96 @@ public final class NoiseService extends VisNoiseService {
         }
 
         // 2nd pass: obsDit is known = integration time (setup)
-        this.params = new NoiseWParams[nObs];
+        this.nbPhotTherm = new double[nWLen];
 
-        // number of expected photoevents in dit:
-        final double[] nbTotalPhot = new double[nWLen];
-
-        for (int n = 0; n < nObs; n++) {
-
-            // corrected total number of photons using final observation dit:
+        if (nbTotalPhotTherm != null) {
             for (int i = 0; i < nWLen; i++) {
-                nbTotalPhot[i] = nbTotalPhotPerSec[n][i] * obsDit;
+                // corrected total number of thermal photons using the final observation dit per telescope:
+                nbPhotTherm[i] = nbTotalPhotTherm[i] * obsDit;
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("nbTotalPhot                   : {}", Arrays.toString(nbTotalPhot));
+                logger.debug("nbPhotTherm              : {}", Arrays.toString(nbPhotTherm));
             }
+        }
+
+        this.params = new NoiseWParams[nObs];
+
+        for (int n = 0; n < nObs; n++) {
 
             // give back the two useful values for the noise estimate :
             final NoiseWParams param = new NoiseWParams(nWLen);
             this.params[n] = param;
 
-            final double[] nbPhotonInI = param.nbPhotonInI;
-            final double[] nbPhotonInP = param.nbPhotonInP;
+            final double[] nbPhotInterf = param.nbPhotInterf;
+            final double[] nbPhotPhoto = param.nbPhotPhoto;
 
             for (int i = 0; i < nWLen; i++) {
-                // TODO: divide by nbTel to be consistent and avoid repeated expression [nbPhotonInI / nbTel] ?
-                // consistency issue ?
-                // number of photons in interferometric channel :
-                nbPhotonInI[i] = nbTotalPhot[i] * fracFluxInInterferometry;
-                // number of photons in photometric channel (photometric flux):
-                nbPhotonInP[i] = nbTotalPhot[i] / nbTel * ((1.0 - fracFluxInInterferometry));
+
+                // corrected total number of photons using the final observation dit per telescope:
+                nbTotalPhot[n][i] *= obsDit;
+                nbPhot = nbTotalPhot[n][i];
+
+                // number of photons in the interferometric channel (per telescope):
+                nbPhotInterf[i] = nbPhot * fracFluxInInterferometry;
+                // number of photons in each photometric channel (photometric flux):
+                nbPhotPhoto[i] = nbPhot * fracFluxInPhotometry;
             }
 
             if (logger.isDebugEnabled()) {
                 logger.debug("elevation                     : {}", targetPointInfos[n].getElevation());
-                logger.debug("nbPhotonInI                   : {}", Arrays.toString(nbPhotonInI));
-                logger.debug("nbPhotonInP                   : {}", Arrays.toString(nbPhotonInP));
+                logger.debug("nbTotalPhot                   : {}", Arrays.toString(nbTotalPhot[n]));
+                logger.debug("nbPhotonInI                   : {}", Arrays.toString(nbPhotInterf));
+                logger.debug("nbPhotonInP                   : {}", Arrays.toString(nbPhotPhoto));
             }
 
             // Prepare numeric constants for fast error computation:
             prepareVis2Error(n);
             prepareT3PhiError(n);
         }
-        
+
         if (logger.isDebugEnabled()) {
-            dumpVis2Error(0);
-            dumpVis2Error(iMidChannel);
-            dumpVis2Error(nSpectralChannels - 1);
+            if (nWLen < 50) {
+
+                for (int i = 0; i < nWLen; i++) {
+                    dumpVis2Error(i);
+                }
+            } else {
+                dumpVis2Error(0);
+                dumpVis2Error(iMidChannel);
+                dumpVis2Error(nSpectralChannels - 1);
+            }
         }
     }
-    
+
     private void dumpVis2Error(final int iChannel) {
         logger.debug("channel                       : {}", iChannel);
-        logger.debug("computeVis2Error(1.0)         : {}", computeVis2ErrorNoBias(iChannel, 1d));
-        logger.debug("computeVis2Error(0.5)         : {}", computeVis2ErrorNoBias(iChannel, 0.5d));
-        logger.debug("computeVis2Error(0.1)         : {}", computeVis2ErrorNoBias(iChannel, 0.1d));
-        logger.debug("computeVis2Error(0.05)        : {}", computeVis2ErrorNoBias(iChannel, 0.05d));
-        logger.debug("computeVis2Error(0.01)        : {}", computeVis2ErrorNoBias(iChannel, 0.01d));
-        logger.debug("computeVis2Error(0.001)       : {}", computeVis2ErrorNoBias(iChannel, 0.001d));
-        logger.debug("computeVis2Error(0.0001)      : {}", computeVis2ErrorNoBias(iChannel, 0.0001d));
+        dumpVis2ErrorSample(iChannel, 1d);
+        dumpVis2ErrorSample(iChannel, 0.75d);
+        dumpVis2ErrorSample(iChannel, 0.5d);
+        dumpVis2ErrorSample(iChannel, 0.25d);
+        dumpVis2ErrorSample(iChannel, 0.1d);
+        dumpVis2ErrorSample(iChannel, 0.01d);
+        dumpVis2ErrorSample(iChannel, 0.001d);
+    }
+
+    private void dumpVis2ErrorSample(final int iChannel, final double visAmp) {
+        double v2 = visAmp * visAmp;
+        double errV2 = computeVis2ErrorNoBias(iChannel, visAmp);
+        double snr = v2 / errV2;
+
+        logger.debug("computeVis2Error({}) :{} SNR= {}", NumberUtils.trimTo5Digits(v2), errV2, NumberUtils.trimTo3Digits(snr));
     }
 
     double[] computeTargetFlux() {
+
+        // TODO: fix transmission for all instruments (before now):
+        final double[] atmTrans = AtmosphereSpectrumService.getInstance().getTransmission(this.waveLengths, this.waveBands);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("atmTrans: {}", Arrays.toString(atmTrans));
+        }
+
         // nb of photons m^-2.s^-1.m^-1 for an object at magnitude 0:
         // note: fzero depends on the spectral band:
         final double fzero = FastMath.pow(10d, insBand.getLogFluxZero()) * (insBand.getLambda() * AsproConstants.MICRO_METER) / (H_PLANCK * C_LIGHT);
@@ -668,12 +860,40 @@ public final class NoiseService extends VisNoiseService {
         /* TODO: use band range (previous / next) to interpolate flux or SED based on spectral type */
         for (int i = 0; i < nWLen; i++) {
             // nb of photons m^-2.s^-1 for the target object:
-            fluxSrcPerChannel[i] = fsrc * waveBands[i];
+            fluxSrcPerChannel[i] = atmTrans[i] * fsrc * waveBands[i];
         }
         if (logger.isDebugEnabled()) {
             logger.debug("fluxSrcPerChannel             : {}", Arrays.toString(fluxSrcPerChannel));
         }
+
         return fluxSrcPerChannel;
+    }
+
+    /**
+     * Return the correlated flux weight of the object (without visibility). 
+     * It returns NaN if the flux can not be computed
+     *
+     * @param iPoint index of the observable point
+     * @param iChannel index of the channel
+     * @return correlated flux or NaN if the flux can not be computed
+     */
+    public double computeCorrelatedFluxWeight(final int iPoint, final int iChannel) {
+        if (DO_CHECKS) {
+            // fast return NaN if invalid configuration :
+            if (this.invalidParameters) {
+                return Double.NaN;
+            }
+            if (check(iPoint, iChannel)) {
+                return Double.NaN;
+            }
+        }
+
+        final NoiseWParams param = this.params[iPoint];
+
+        // correlated flux (include instrumental visibility loss) (1T):
+        final double fcorrel = param.nbPhotInterf[iChannel] * vinst[iChannel];
+
+        return fcorrel;
     }
 
     /**
@@ -688,10 +908,10 @@ public final class NoiseService extends VisNoiseService {
 
         final NoiseWParams param = this.params[iPoint];
 
-        final double[] nbPhotonInI = param.nbPhotonInI;
-        final double[] nbPhotonInP = param.nbPhotonInP;
+        final double[] nbPhotInterf = param.nbPhotInterf;
+        final double[] nbPhotPhoto = param.nbPhotPhoto;
 
-        final double[] errV2Phot = param.errV2Phot;
+        final double[] sqErrVis2Phot = param.sqErrVis2Phot;
         final double[] sqCorFluxCoef = param.sqCorFluxCoef;
         final double[] varSqCorFluxCoef = param.varSqCorFluxCoef;
         final double[] varSqCorFluxConst = param.varSqCorFluxConst;
@@ -699,27 +919,37 @@ public final class NoiseService extends VisNoiseService {
         if (usePhotometry) {
             for (int i = 0; i < nWLen; i++) {
                 // variance of the photometric flux in photometric channel:
-                final double varFluxPhot = nbPhotonInP[i] + nbPixPhoto * FastMath.pow2(ron);
+                final double varFluxPhot = nbPhotPhoto[i]
+                        + ratioPhotoPerBeam * (nbPhotTherm[i] + nbPixPhoto * FastMath.pow2(ron));
 
-                // photometric error contribution on the square visiblity:
-                errV2Phot[i] = 2.0 * varFluxPhot / FastMath.pow2(nbPhotonInP[i]);
+                // square error contribution of 2 photometric channels on the square visiblity FiFj:
+                sqErrVis2Phot[i] = 2.0 * varFluxPhot / FastMath.pow2(nbPhotPhoto[i]);
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("errV2Phot                     : {}", Arrays.toString(errV2Phot));
+                logger.debug("sqErrVis2Phot                 : {}", Arrays.toString(sqErrVis2Phot));
             }
         } else {
-            Arrays.fill(errV2Phot, 0.0);
+            Arrays.fill(sqErrVis2Phot, 0.0);
         }
 
+        double nbPhot;
+
         for (int i = 0; i < nWLen; i++) {
+            // Per telescope
+            nbPhot = nbPhotInterf[i];
+
             // squared correlated flux (include instrumental visibility loss) for vis2 = 1.0:
-            sqCorFluxCoef[i] = FastMath.pow2(nbPhotonInI[i] / nbTel * vinst);
+            sqCorFluxCoef[i] = FastMath.pow2(nbPhot * vinst[i]);
+
+            // total number of photons for all telescopes:
+            nbPhot *= nbTel;
 
             // variance of the squared correlated flux = sqCorFlux * coef + constant
-            varSqCorFluxCoef[i] = 2.0 * nbPhotonInI[i] + 4.0 + 2.0 * nbPixInterf * FastMath.pow2(ron);
+            varSqCorFluxCoef[i] = 2.0 * (nbPhot + nbPhotTherm[i] * nbTel)
+                    + 4.0 + 2.0 * nbPixInterf * FastMath.pow2(ron);
 
-            varSqCorFluxConst[i] = nbPhotonInI[i] * (1.0 + nbPhotonInI[i] + 2.0 * nbPixInterf * FastMath.pow2(ron))
+            varSqCorFluxConst[i] = nbPhot * (1.0 + nbPhot + 2.0 * nbPixInterf * FastMath.pow2(ron))
                     + nbPixInterf * (nbPixInterf + 3.0) * FastMath.pow(ron, 4.0);
         }
 
@@ -729,32 +959,6 @@ public final class NoiseService extends VisNoiseService {
             logger.debug("varSqCorFluxCoef              : {}", Arrays.toString(varSqCorFluxCoef));
             logger.debug("varSqCorFluxConst             : {}", Arrays.toString(varSqCorFluxConst));
         }
-    }
-
-    /**
-     * Return the correlated flux of the object. It returns NaN if the flux can not be computed
-     *
-     * @param iPoint index of the observable point
-     * @param iChannel index of the channel
-     * @param visAmp visibility amplitude
-     * @return correlated flux or NaN if the flux can not be computed
-     */
-    public double computeCorrelatedFlux(final int iPoint, final int iChannel, final double visAmp) {
-        // fast return NaN if invalid configuration :
-        if (this.invalidParameters) {
-            return Double.NaN;
-        }
-        if (DO_CHECKS && check(iPoint, iChannel)) {
-            return Double.NaN;
-        }
-
-        final NoiseWParams param = this.params[iPoint];
-        final double[] nbPhotonInI = param.nbPhotonInI;
-
-        // correlated flux (include instrumental visibility loss):
-        final double fcorrel = (nbPhotonInI[iChannel] / nbTel * vinst) * visAmp;
-
-        return fcorrel;
     }
 
     /**
@@ -768,50 +972,50 @@ public final class NoiseService extends VisNoiseService {
      */
     private double computeVis2Error(final int iPoint, final int iChannel,
                                     final double visAmp, final boolean useBias) {
-        // fast return NaN if invalid configuration :
-        if (this.invalidParameters) {
-            return Double.NaN;
+        if (DO_CHECKS) {
+            // fast return NaN if invalid configuration :
+            if (this.invalidParameters) {
+                return Double.NaN;
+            }
+            if (check(iPoint, iChannel)) {
+                return Double.NaN;
+            }
         }
-        if (DO_CHECKS && check(iPoint, iChannel)) {
-            return Double.NaN;
-        }
+        // TODO: use V2 as input parameter instead of visAmp:
+        final double vis2 = FastMath.pow2(visAmp);
 
         final NoiseWParams param = this.params[iPoint];
-        final double[] errV2Phot = param.errV2Phot;
-        final double[] sqCorFluxCoef = param.sqCorFluxCoef;
-        final double[] varSqCorFluxCoef = param.varSqCorFluxCoef;
-        final double[] varSqCorFluxConst = param.varSqCorFluxConst;
-
-        final double vis2 = visAmp * visAmp;
 
         // squared correlated flux (include instrumental visibility loss):
-        double sqCorFlux = sqCorFluxCoef[iChannel] * vis2;
+        double sqCorFlux = param.sqCorFluxCoef[iChannel] * vis2;
         /*
          double sqCorFlux = FastMath.pow2(nbPhotonInI * vinst / nbTel) * vis2;
          */
 
         // variance of the squared correlated flux:
         // variance = sqCorFlux * coef + constant
-        final double varSqCorFlux = sqCorFlux * varSqCorFluxCoef[iChannel] + varSqCorFluxConst[iChannel];
-
+        final double varSqCorFlux = sqCorFlux * param.varSqCorFluxCoef[iChannel]
+                + param.varSqCorFluxConst[iChannel];
         /*
          final double varSqCorFlux = sqCorFlux * (2d * nbPhotonInI + 4d + 2d * nbPixInterf * ron * ron)
          + nbPhotonInI * (1d + nbPhotonInI + 2d * nbPixInterf * ron * ron)
          + nbPixInterf * (nbPixInterf + 3d) * FastMath.pow(ron, 4d);
          */
-        // protect zero divide: TODO: why 1e-3d ?
-        sqCorFlux = Math.max(sqCorFlux, 1e-20d);
 
-        // Uncertainty on square visibility:
+        // Uncertainty on square visibility per frame:
         double errVis2;
         if (usePhotometry) {
-            errVis2 = vis2 * Math.sqrt(varSqCorFlux / (sqCorFlux * sqCorFlux) + errV2Phot[iChannel]);
+            // TODO: howto deal with beams ? ie what is the impact of 1 vs 4 beams ?
+            errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)) + param.sqErrVis2Phot[iChannel]);
         } else {
             // no photometry...
-            errVis2 = vis2 * Math.sqrt(varSqCorFlux / (sqCorFlux * sqCorFlux));
+            errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)));
         }
         // repeat OBS measurements to reach totalObsTime minutes:
         errVis2 *= totFrameCorrection;
+
+        // Limit excessively large errors (very low transmission or strehl):
+        errVis2 = Math.min(errVis2, MAX_ERR_V2);
 
         if (useBias) {
             // Note: bias are normally not a gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
@@ -831,13 +1035,15 @@ public final class NoiseService extends VisNoiseService {
      * Note: this method is statefull and NOT thread safe
      *
      * @param iPoint index of the observable point
+     * 
+     * @deprecated 
      */
     private void prepareT3PhiError(final int iPoint) {
         final int nWLen = nSpectralChannels;
 
         final NoiseWParams param = this.params[iPoint];
 
-        final double[] nbPhotonInI = param.nbPhotonInI;
+        final double[] nbPhotInterf = param.nbPhotInterf;
 
         final double[] t3photCoef = param.t3photCoef;
         final double[] t3photCoef2 = param.t3photCoef2;
@@ -848,7 +1054,7 @@ public final class NoiseService extends VisNoiseService {
         final double[] t3detCoef2 = param.t3detCoef2;
 
         for (int i = 0; i < nWLen; i++) {
-            final double invNbPhotonInIPerTel = nbTel / nbPhotonInI[i];
+            final double invNbPhotonInIPerTel = 1.0 / nbPhotInterf[i];
 
             // photon noise on closure phase
             t3photCoef[i] = invNbPhotonInIPerTel;
@@ -885,15 +1091,19 @@ public final class NoiseService extends VisNoiseService {
      * @param visAmp23 visibility amplitude of baseline BC = 23
      * @param visAmp31 visibility amplitude of baseline CA = 31
      * @return error on closure phase in radians or NaN if the error can not be computed
+     * 
+     * @deprecated 
      */
     public double computeT3PhiError(final int iPoint, final int iChannel,
                                     final double visAmp12, final double visAmp23, final double visAmp31) {
-        // fast return NaN if invalid configuration :
-        if (this.invalidParameters) {
-            return Double.NaN;
-        }
-        if (DO_CHECKS && check(iPoint, iChannel)) {
-            return Double.NaN;
+        if (DO_CHECKS) {
+            // fast return NaN if invalid configuration :
+            if (this.invalidParameters) {
+                return Double.NaN;
+            }
+            if (check(iPoint, iChannel)) {
+                return Double.NaN;
+            }
         }
 
         final NoiseWParams param = this.params[iPoint];
@@ -906,14 +1116,14 @@ public final class NoiseService extends VisNoiseService {
         final double[] t3detCoef2 = param.t3detCoef2;
 
         // include instrumental visib
-        final double v1 = visAmp12 * vinst;
-        final double v2 = visAmp23 * vinst;
-        final double v3 = visAmp31 * vinst;
+        final double v1 = visAmp12 * vinst[iChannel];
+        final double v2 = visAmp23 * vinst[iChannel];
+        final double v3 = visAmp31 * vinst[iChannel];
 
         double v123 = v1 * v2 * v3;
 
-        // protect zero divide: TODO: why 1e-4d / 1e-20d ?
-        v123 = Math.max(v123, 1e-4d);
+        // protect zero divide: why 1e-3 ?
+        v123 = Math.max(v123, 1e-3);
 
         final double v12 = v1 * v2;
         final double v13 = v1 * v3;
@@ -969,27 +1179,6 @@ public final class NoiseService extends VisNoiseService {
 
     /**
      * Compute error on complex visibility derived from computeVis2Error(visAmp).
-     * It returns Complex.NaN if the flux can not be computed
-     *
-     * @param iPoint index of the observable point
-     * @param iChannel index of the channel
-     * @param visAmp visibility amplitude
-     * @return complex visiblity error or NaN if the error can not be computed
-     */
-    public Complex computeVisComplexError(final int iPoint, final int iChannel, final double visAmp) {
-        // complex visibility error:
-        final double visErr = computeVisComplexErrorValue(iPoint, iChannel, visAmp);
-
-        // fast return Complex.NaN if invalid configuration :
-        if (Double.isNaN(visErr)) {
-            return Complex.NaN;
-        }
-
-        return new ImmutableComplex(visErr, visErr); // immutable complex for safety
-    }
-
-    /**
-     * Compute error on complex visibility derived from computeVis2Error(visAmp).
      * It returns Double.NaN if the error can not be computed
      *
      * @param iPoint index of the observable point
@@ -998,16 +1187,21 @@ public final class NoiseService extends VisNoiseService {
      * @return complex visiblity error or NaN if the error can not be computed
      */
     public double computeVisComplexErrorValue(final int iPoint, final int iChannel, final double visAmp) {
-        // fast return Double.NaN if invalid configuration :
-        if (this.invalidParameters) {
-            return Double.NaN;
+        // visibility amplitude error (gaussian distribution):
+        double visAmpErr = computeVisError(iPoint, iChannel, visAmp);
+
+        // Limit excessively large errors (very low transmission or strehl):
+        visAmpErr = Math.min(visAmpErr, MAX_ERR_V);
+
+        if (NoiseService.USE_DISTRIB_APPROACH) {
+            // I disagree: it seems a bivariate distribution (2 independent variables C = re + i * im)
+            // var(re)=var(im)=var(amp) for a circular normal distribution
+            return visAmpErr;
         }
-        // visibility amplitude error :
-        final double visAmpErr = computeVisError(iPoint, iChannel, visAmp);
 
         // Distribute the error on RE/IM parts for an uniform error distribution :
         // see These Martin Vannier (2003) p 76
-        // sigma2(visRe) = 1/2 ( sigma2(visRe) + sigma2(visIm) = sigma2(vis) / 2
+        // sigma2(visRe) = 1/2 ( sigma2(visRe) + sigma2(visIm) ) = sigma2(vis) / 2
         // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) :
         return visAmpErr * VIS_AMP_TO_VIS_CPX_ERR;
     }
@@ -1051,9 +1245,10 @@ public final class NoiseService extends VisNoiseService {
      * @param visAmp visibility amplitude
      * @return square visiblity error or NaN if the error can not be computed
      */
-    public double computeVis2ErrorNoBias(final int iChannel, final double visAmp) {
+    private double computeVis2ErrorNoBias(final int iChannel, final double visAmp) {
         return computeVis2Error(iMidPoint, iChannel, visAmp, false);
     }
+
     /**
      * Compute error on square visibility without bias. It returns NaN if the error can not be computed
      *
@@ -1097,26 +1292,7 @@ public final class NoiseService extends VisNoiseService {
      */
     @Override
     public double computeVisComplexErrorValue(final double visAmp) {
-        // fast return NaN if invalid configuration :
-        if (this.invalidParameters) {
-            return Double.NaN;
-        }
         return computeVisComplexErrorValue(iMidPoint, iMidChannel, visAmp);
-    }
-
-    /**
-     * Compute error on square visibility. It returns NaN if the error can not be computed
-     *
-     * @param visAmp visibility amplitude
-     * @return square visiblity error or NaN if the error can not be computed
-     */
-    @Override
-    public double computeVis2Error(final double visAmp) {
-        // fast return NaN if invalid configuration :
-        if (this.invalidParameters) {
-            return Double.NaN;
-        }
-        return computeVis2Error(iMidPoint, iMidChannel, visAmp);
     }
 
     /* --- utility methods --- */
@@ -1183,14 +1359,14 @@ public final class NoiseService extends VisNoiseService {
     }
 
     static class NoiseWParams {
-        /* varying values (spectrally dependent) */
 
-        /** (W) number of photons in interferometer channel */
-        final double[] nbPhotonInI;
+        /* varying values (spectrally dependent) */
+        /** (W) number of photons in interferometer channel per telescope */
+        final double[] nbPhotInterf;
         /** (W) number of photons in each photometric channel (photometric flux) */
-        final double[] nbPhotonInP;
-        /** (W) photometric error contribution on the square visiblity */
-        final double[] errV2Phot;
+        final double[] nbPhotPhoto;
+        /** (W) square error contribution of 2 photometric channels on the square visiblity FiFj */
+        final double[] sqErrVis2Phot;
         /** (W) coefficient used to the squared correlated flux */
         final double[] sqCorFluxCoef;
         /** (W) coefficient used to compute variance of the squared correlated flux */
@@ -1211,9 +1387,10 @@ public final class NoiseService extends VisNoiseService {
         final double[] t3detCoef2;
 
         NoiseWParams(final int nWLen) {
-            this.nbPhotonInI = init(nWLen);
-            this.nbPhotonInP = init(nWLen);
-            this.errV2Phot = init(nWLen);
+            // TODO: align to 8 or 16 ? (simd ?)
+            this.nbPhotInterf = init(nWLen);
+            this.nbPhotPhoto = init(nWLen);
+            this.sqErrVis2Phot = init(nWLen);
             this.sqCorFluxCoef = init(nWLen);
             this.varSqCorFluxCoef = init(nWLen);
             this.varSqCorFluxConst = init(nWLen);

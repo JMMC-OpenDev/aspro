@@ -14,6 +14,7 @@ import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
+import fr.jmmc.aspro.model.oi.FocalInstrumentSetup;
 import fr.jmmc.aspro.model.oi.FringeTracker;
 import fr.jmmc.aspro.model.oi.HorizonProfile;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
@@ -26,6 +27,8 @@ import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.SwitchYard;
+import fr.jmmc.aspro.model.oi.Telescope;
+import fr.jmmc.aspro.service.AtmosphereSpectrumService;
 import fr.jmmc.aspro.service.GeocentricCoords;
 import fr.jmmc.jmal.util.MathUtils;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
@@ -34,7 +37,6 @@ import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ResourceUtils;
-import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oitools.util.CombUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -271,42 +273,32 @@ public final class ConfigurationManager extends BaseOIManager {
      */
     private static void addInterferometerDescription(final Configuration configuration, final InterferometerDescription id) {
         final String name = id.getName();
-        
+
         // check if the interferometer is unique (name) :
         if (configuration.getInterferometerDescriptions().containsKey(name)) {
             throw new IllegalStateException("The interferometer '" + name + "' is already present in the loaded configuration !");
         }
 
-        computeInterferometerLocation(id);
-        computeInstrumentWaveLengthRange(id);
-
-        // check instrument modes (spectral channels):
         // TODO: handle properly spectral channels (rebinning):
-        if (DEBUG_CONF) {
+        // initialize and check instrument modes (spectral channels):
+        boolean dump = false;
+        try {
             for (FocalInstrument instrument : id.getFocalInstruments()) {
-                for (FocalInstrumentMode insMode : instrument.getModes()) {
-
-                    logger.info("Instrument[{}][mode {}] wavelength range: {} - {} {} [{} channels] [resolution = {}]",
-                            instrument.getName(), insMode.getName(),
-                            NumberUtils.trimTo5Digits(insMode.getWaveLengthMin()),
-                            NumberUtils.trimTo5Digits(insMode.getWaveLengthMax()),
-                            SpecialChars.UNIT_MICRO_METER,
-                            insMode.getSpectralChannels(),
-                            insMode.getResolution());
-
-                    if (insMode.getNumberChannels() != null) {
-                        if (insMode.getSpectralChannels() == insMode.getNumberChannels()) {
-                            logger.info("Instrument [{}] mode [{}] useless numberChannels: {}",
-                                    instrument.getName(), insMode.getName(), insMode.getNumberChannels());
-                        } else {
-                            logger.info("Instrument [{}] mode [{}] channel configuration: {} / {}",
-                                    instrument.getName(), insMode.getName(), insMode.getNumberChannels(), insMode.getSpectralChannels());
-                        }
-                    }
+                instrument.init(logger);
+            }
+        } catch (IllegalStateException ise) {
+            dump = true;
+            throw ise;
+        } finally {
+            if (dump || DEBUG_CONF) {
+                for (FocalInstrument instrument : id.getFocalInstruments()) {
+                    instrument.dump(logger);
                 }
             }
         }
 
+        computeInterferometerLocation(id);
+        computeInstrumentWaveLengthRange(id);
         adjustStationHorizons(name, id.getStations());
 
         configuration.getInterferometerDescriptions().put(name, id);
@@ -371,12 +363,47 @@ public final class ConfigurationManager extends BaseOIManager {
      * @param id interferometer description
      */
     private static void computeInstrumentWaveLengthRange(final InterferometerDescription id) {
+
+        final AtmosphereSpectrumService atmService = AtmosphereSpectrumService.getInstance();
+
+        final double[] lambda = new double[1];
+        final double[] delta_lambda = new double[1];
+
         for (FocalInstrument instrument : id.getFocalInstruments()) {
             instrument.defineWaveLengthRange();
 
+            final double lambdaMin = instrument.getWaveLengthMin();
+            final double lambdaMax = instrument.getWaveLengthMax();
+
+            lambda[0] = 0.5 * (lambdaMin + lambdaMax) * AsproConstants.MICRO_METER;
+            delta_lambda[0] = (lambdaMax - lambdaMin) * AsproConstants.MICRO_METER;
+
+            final double[] trans = atmService.getTransmission(lambda, delta_lambda);
+
+            final double atmTrans = trans[0];
+
             if (logger.isDebugEnabled()) {
-                logger.debug("Instrument [{}] - wavelengths [{} - {}]",
-                        instrument.getName(), instrument.getWaveLengthMin(), instrument.getWaveLengthMax());
+                logger.debug("Instrument [{}] - wavelengths [{} - {}]: mean atmosphere tranmission = {}",
+                        instrument.getName(), lambdaMin, lambdaMax, atmTrans);
+            }
+
+            // Fix instrument transmission:
+            for (FocalInstrumentSetup setup : instrument.getSetups()) {
+
+                if (setup.isIncludeAtmosphereCorrection()) {
+                    // hack transmission for old instruments to avoid taking into acount twice the mean atmosphere transmission
+                    // (already included in instrument's transmission)
+
+                    final double insTrans = setup.getTransmission();
+                    final double correctedTrans = insTrans / atmTrans;
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Instrument [{}]: insTrans = {} correctedTrans = {}",
+                                instrument.getName(), insTrans, correctedTrans);
+                    }
+
+                    setup.setTransmission(correctedTrans);
+                }
             }
         }
     }
@@ -510,13 +537,19 @@ public final class ConfigurationManager extends BaseOIManager {
      */
     private static void adjustStationHorizons(final String name, final List<Station> stations) {
         final StringBuilder sb = (DUMP_HORIZON) ? new StringBuilder(65336) : null;
-        
+
         double maxElev;
         for (Station station : stations) {
             logger.debug("station: {}", station);
+            
+            Telescope tel = station.getTelescope();
+            
+            if (tel == null) {
+                throw new IllegalStateException("Missing telescope reference found in the station '" + station.getName() + "' !");
+            }
 
             // maximum elevation in degrees per telescope :
-            maxElev = station.getTelescope().getMaxElevation();
+            maxElev = tel.getMaxElevation();
 
             if (station.getHorizon() != null && !station.getHorizon().getPoints().isEmpty()) {
                 // horizon is defined : check elevation
@@ -542,7 +575,7 @@ public final class ConfigurationManager extends BaseOIManager {
 
                     final String filePath = "/tmp/" + name + '_' + station.getName() + ".horizon";
                     logger.info("dump {} horizon to {}", station.getName(), filePath);
-                    
+
                     try {
                         FileUtils.writeFile(new File(filePath), sb.toString());
                     } catch (IOException ioe) {
@@ -739,8 +772,8 @@ public final class ConfigurationManager extends BaseOIManager {
 
                         insConfMerged.getConfigurations().add(insConfItem);
 
-                    } else {
-                        // if channels are defined, use the given configuration; otherwise keep original configuration:
+                    } else // if channels are defined, use the given configuration; otherwise keep original configuration:
+                    {
                         if (!insConfItem.getChannels().isEmpty()) {
                             logger.info("mergeConfiguration: use given {}", insConfItem);
 
@@ -1135,7 +1168,10 @@ public final class ConfigurationManager extends BaseOIManager {
     public int getInstrumentSamplingTime(final String configurationName, final String instrumentName) {
         final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
         if (ins != null) {
-            return ins.getDefaultSamplingTime();
+            // TODO: use appropriate sampling time and do the same for total integration time:
+            if (ins.getSetups() != null) {
+                return ins.getSetups().get(0).getDefaultSamplingTime();
+            }
         }
         return -1;
     }
