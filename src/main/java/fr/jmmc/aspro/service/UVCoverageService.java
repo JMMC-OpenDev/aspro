@@ -43,7 +43,7 @@ public final class UVCoverageService {
     /** safety limit for the number of sampled HA points = 500 */
     public static final int MAX_HA_POINTS = 500;
     /** 1s precision in HA */
-    public static final double HA_PRECISION = 1d / 3600d;
+    public static final double HA_PRECISION = 1.0 / 3600d;
 
     /* members */
 
@@ -81,14 +81,10 @@ public final class UVCoverageService {
     private double haObsTime;
     /** lower wavelength of the selected instrument (meter) */
     private double instrumentMinWaveLength;
-    /** minimal wavelength of the selected instrument mode (meter) */
-    private double lambdaMin;
     /** central wavelength of the selected instrument mode (meter) */
     private double lambda;
-    /** maximal wavelength of the selected instrument mode (meter) */
-    private double lambdaMax;
-    /** number of spectral channels (used by OIFits) */
-    private int nSpectralChannels;
+    /** selected instrument mode */
+    private FocalInstrumentMode instrumentMode = null;
     /** observation sky calc instance */
     private final AstroSkyCalcObservation sco = new AstroSkyCalcObservation();
 
@@ -231,9 +227,9 @@ public final class UVCoverageService {
         final double haElev = this.starData.getHaElev();
 
         // 1 minute is fine to get pretty ellipse :
-        final double step = 1d / 60d;
+        final double step = 1.0 / 60d;
 
-        final int nPoints = (int) Math.round(2d * haElev / step) + 1;
+        final int nPoints = (int) Math.round(2.0 * haElev / step) + 1;
 
         // precessed target declination in rad :
         final double precDEC = FastMath.toRadians(this.starData.getPrecDEC());
@@ -242,7 +238,7 @@ public final class UVCoverageService {
         final double cosDec = FastMath.cos(precDEC);
         final double sinDec = FastMath.sin(precDEC);
 
-        final double invLambda = 1d / this.lambda;
+        final double invLambda = 1.0 / this.lambda;
 
         final List<BaseLine> _baseLines = this.baseLines;
         final int sizeBL = _baseLines.size();
@@ -398,10 +394,19 @@ public final class UVCoverageService {
                 System.arraycopy(ptInfos, 0, targetPointInfos, 0, nPoints);
 
                 this.data.setTargetPointInfos(targetPointInfos);
+                
+                // Get wavelength range for the selected instrument mode :
+                final double lambdaMin = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin();
+                final double lambdaMax = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMax();
 
+                if (logger.isDebugEnabled()) {
+                    logger.debug("lambdaMin: {}", lambdaMin);
+                    logger.debug("lambdaMax: {}", lambdaMax);
+                }
+                
                 // Second pass : extract UV values for HA points :
-                final double invLambdaMin = 1d / this.lambdaMin;
-                final double invLambdaMax = 1d / this.lambdaMax;
+                final double invLambdaMin = 1.0 / lambdaMin;
+                final double invLambdaMax = 1.0 / lambdaMax;
 
                 final List<BaseLine> _baseLines = this.baseLines;
                 final int sizeBL = _baseLines.size();
@@ -503,28 +508,15 @@ public final class UVCoverageService {
         this.instrumentMinWaveLength = AsproConstants.MICRO_METER
                 * this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
 
-        final FocalInstrumentMode insMode = this.observation.getInstrumentConfiguration().getFocalInstrumentMode();
-        if (insMode == null) {
+        this.instrumentMode = this.observation.getInstrumentConfiguration().getFocalInstrumentMode();
+        if (instrumentMode == null) {
             throw new IllegalStateException("The instrumentMode is empty !");
         }
+        this.lambda = AsproConstants.MICRO_METER * instrumentMode.getWaveLength();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("instrumentMode: {}", insMode.getName());
-        }
-
-        // Get wavelength range for the selected instrument mode :
-        this.lambdaMin = AsproConstants.MICRO_METER * insMode.getWaveLengthMin();
-        this.lambdaMax = AsproConstants.MICRO_METER * insMode.getWaveLengthMax();
-        this.lambda = AsproConstants.MICRO_METER * insMode.getWaveLength();
-
-        // TODO: handle properly spectral channels (rebinning):
-        this.nSpectralChannels = insMode.getSpectralChannels();
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("lambdaMin: {}", this.lambdaMin);
+            logger.debug("instrumentMode: {}", instrumentMode.getName());
             logger.debug("lambda:    {}", this.lambda);
-            logger.debug("lambdaMax: {}", this.lambdaMax);
-            logger.debug("nChannels: {}", this.nSpectralChannels);
         }
 
         // hour angle step in decimal hours :
@@ -564,13 +556,13 @@ public final class UVCoverageService {
                 // Create the OIFitsCreatorService / NoiseService :
 
                 // note: OIFitsCreatorService parameter dependencies:
-                // observation {target, instrumentMode {lambdaMin, lambdaMax, nSpectralChannels}}
+                // observation {target, instrumentMode}
                 // obsData {beams, baseLines, starData, sc (DateCalc)}
                 // parameter: supersamplingOIFits, doDataNoise, useInstrumentBias
                 // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
                 // and warning container
                 final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
-                        this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels,
+                        this.beams, this.baseLines,
                         this.useInstrumentBias, this.doDataNoise,
                         this.supersamplingOIFits, this.mathModeOIFits,
                         this.data.getTargetPointInfos(), this.data.getTargetUVObservability(),
@@ -649,8 +641,8 @@ public final class UVCoverageService {
             final double cosDec = FastMath.cos(precDEC);
             final double sinDec = FastMath.sin(precDEC);
 
-            final double invLambdaMin = 1d / lambdaMin;
-            final double invLambdaMax = 1d / lambdaMax;
+            final double invLambdaMin = 1.0 / lambdaMin;
+            final double invLambdaMax = 1.0 / lambdaMax;
 
             final int sizeBL = baseLines.size();
             targetUVObservability = new ArrayList<UVRangeBaseLineData>(sizeBL);
