@@ -137,7 +137,8 @@ public final class AsproGenConfig {
 
         final int maxDL = 6;
         final int maxIP = 4;
-        final double maximumThrow = 100d; /* 100m */
+        final double maximumThrow = 100d;
+        /* 100m */
 
         // load data from file :
         BufferedReader readerOPL = null;
@@ -366,12 +367,10 @@ public final class AsproGenConfig {
     }
 
     /**
-     * Convert ASPRO 1 VLTI horizons for the given station : 360.000000000000 0.000000000000000E+000 235.000000000000
-     * 0.000000000000000E+000 235.000000000000 8.00000000000000 224.000000000000 8.00000000000000 224.000000000000
-     * 0.000000000000000E+000 ...
+     * Convert ESO VLTI horizons for the given station
      *
      * @param station station name
-     * @param absFileName absolute file path of the ASPRO 1 station profile
+     * @param absFileName absolute file path of the ESO station profile
      * @param sb output buffer for xml output
      */
     private static void convertHorizon(final String station, final String absFileName, final StringBuilder sb) {
@@ -383,43 +382,142 @@ public final class AsproGenConfig {
         // number of columns filled with double values :
         final int maxCols = 2;
         // column separator :
-        final String delimiter = " ";
+        final String delimiter = "\t";
 
         // load data from file :
         BufferedReader reader = null;
         try {
             final File data = new File(absFileName);
 
+            System.out.println("reading: " + absFileName);
+
             reader = new BufferedReader(new FileReader(data));
 
-            int i;
             String line;
             StringTokenizer tok;
             // outputs :
-            double[] values = new double[maxCols];
+            final double[] values = new double[maxCols];
+
+            final double[] prevVals = new double[]{Double.NaN, Double.NaN};
+
+            double elevAtAz0 = Double.NaN;
+            
+            boolean use, prev = false;
+            
+            final ArrayList<double[]> rows = new ArrayList<double[]>(1024);
 
             while ((line = reader.readLine()) != null) {
+//                System.out.println("line: ["+line+"]");
 
-                // replace multiple delimiters :
-                tok = new StringTokenizer(line, delimiter);
+                if (!line.startsWith("#")) {
 
-                i = 0;
-                while (tok.hasMoreTokens()) {
-                    if (i < maxCols) {
-                        values[i] = Double.parseDouble(tok.nextToken());
+                    // replace multiple delimiters :
+                    tok = new StringTokenizer(line, delimiter);
+
+                    int i = 0;
+                    while (tok.hasMoreTokens()) {
+                        if (i < maxCols) {
+                            values[i] = Double.parseDouble(tok.nextToken());
+                        }
+                        i++;
                     }
-                    i++;
+
+                    use = false;
+
+                    // check first Az:
+                    if (Double.isNaN(prevVals[0])) {
+                        if (values[0] != 0.0) {
+                            throw new IllegalStateException("Invalid first azimuth value [expected az=0] !");
+                        }
+                        elevAtAz0 = values[1];
+                        use = true;
+                    } else if (prevVals[1] != values[1]) {
+                        use = true;
+                    } else {
+                        prevVals[0] = values[0];
+                    }
+
+                    if (use) {
+                        /*
+                     System.out.println("values: " + Arrays.toString(values));
+                         */
+                        if (!prev && !Double.isNaN(prevVals[0])) {
+//                            System.out.println("add prev: " + Arrays.toString(prevVals));
+
+                            final double[] row = new double[maxCols];
+                            row[0] = prevVals[0];
+                            row[1] = prevVals[1];
+                            rows.add(row);
+                        }
+                        
+                        final double[] row = new double[maxCols];
+                        row[0] = values[0];
+                        row[1] = values[1];
+                        rows.add(row);
+
+                        // copy values:
+                        prevVals[0] = values[0];
+                        prevVals[1] = values[1];
+                    }
+                    prev = use;
                 }
-                /*
-                 System.out.println("values : " + Arrays.toString(values));
-                 */
+            }
+            
+            if (prevVals[0] != 360.0) {
+                if (prevVals[1] != elevAtAz0) {
+                    throw new IllegalStateException("Invalid last azimuth value [expected az=360 el="+elevAtAz0+"] !");
+                }
+            }
+            
+//            System.out.println("rows: "+rows.size());
+
+            for (int i = 0, len = rows.size(); i < len; i++) {
+                final double[] row = rows.get(i);
+
+                // VLTI:
+                // fix VLTI azimuth (south = 0, east = 90):
+                double az = 180.0 - row[0]; // row[0] is within [0;360]
+                if (az < 0.0) {
+                    az += 360.0;
+                }
+                
+//                System.out.println("row : " + Arrays.toString(row) + " Fix az: " + row[0] + " => "+az);
+                row[0] = az;
+            }
+            
+            // Sort rows by az [0;360]:
+            Collections.sort(rows, new Comparator<double[]>() {
+                @Override
+                public int compare(double[] o1, double[] o2) {
+                    return Double.compare(o1[0], o2[0]);
+                }
+            });
+            
+            // Check again continuity at az=0 and az=360:
+            double[] row = rows.get(0);
+            if (row[0] != 0.0) {
+                rows.add(0, new double[]{0.0, row[1]});
+            }
+            
+            row = rows.get(rows.size() - 1);
+            if (row[0] != 360.0) {
+                rows.add(new double[]{360.0, row[1]});
+            }            
+
+//            System.out.println("sorted:");
+            for (int i = 0, len = rows.size(); i < len; i++) {
+                row = rows.get(i);
+//                System.out.println("row : " + Arrays.toString(row));
 
                 // output :
                 sb.append("<point>");
-                sb.append("<azimuth>").append(values[0]).append("</azimuth>");
-                sb.append("<elevation>").append(values[1]).append("</elevation>");
+                sb.append("<azimuth>").append(row[0]).append("</azimuth>");
+                sb.append("<elevation>").append(row[1]).append("</elevation>");
                 sb.append("</point>");
             }
+            // Add upper limits:
+            sb.append("<point><azimuth>360</azimuth><elevation>90</elevation></point>");
+            sb.append("<point><azimuth>0</azimuth><elevation>90</elevation></point>");
 
         } catch (FileNotFoundException fnfe) {
             logger.error("File not found", fnfe);
@@ -429,9 +527,8 @@ public final class AsproGenConfig {
             FileUtils.closeFile(reader);
         }
 
-        sb.append("</horizon>\n");
+        sb.append("\n</horizon>\n");
         sb.append("</station>\n");
-
     }
 
     /**
@@ -627,7 +724,7 @@ public final class AsproGenConfig {
                                         if (idx == nTel) {
                                             // matching:
                                             match = true;
-    //                                        logger.info("conf match: [{}]: {}", conf.getName(), line);
+                                            //                                        logger.info("conf match: [{}]: {}", conf.getName(), line);
 
                                             // Update channels in conf:
                                             confIPs = conf.getChannels();
@@ -1610,7 +1707,7 @@ public final class AsproGenConfig {
                      System.out.println("station : " + station);
                      System.out.println("values : " + Arrays.toString(values));
                      */
-                    /*
+ /*
                      <station>
                      <name>S1</name>
                      <telescope>T</telescope>
@@ -2042,10 +2139,13 @@ public final class AsproGenConfig {
         Bootstrapper.getState();
 
         final String userHome = SystemUtils.USER_HOME;
+
         final String aspro1Path = userHome + "/dev/aspro1/etc/";
+        final String vltiHorizonPath = userHome + "/dev/aspro/src/test/resources/VLTI_NewDatabase/";
+
         final String asproTestPath = userHome + "/dev/aspro/src/test/resources/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.CHARA;
+        final INTERFEROMETER selected = INTERFEROMETER.VLTI;
 
         switch (selected) {
             case VLTI:
@@ -2074,7 +2174,7 @@ public final class AsproGenConfig {
                 final StringBuilder sb = new StringBuilder(65535);
 
                 for (String station : vltStations) {
-                    convertHorizon(station, aspro1Path + station + ".horizon", sb);
+                    convertHorizon(station, vltiHorizonPath + station + ".horizon", sb);
                 }
                 logger.info("convertHorizons : \n" + sb.toString());
 

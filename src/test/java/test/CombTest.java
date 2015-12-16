@@ -24,6 +24,9 @@ public class CombTest {
    * @param args unused
    */
   public static void main(String[] args) {
+
+    System.out.println("nBaseLines (C" + 6 + "-2) = " + CombUtils.comb(6, 2));
+
     test(2);
     test(3);
     test(4);
