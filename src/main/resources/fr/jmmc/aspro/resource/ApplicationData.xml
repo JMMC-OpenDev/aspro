@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.8.2 beta 1"/>
-    <compilation date="15/10/2015" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9 beta 1"/>
+    <compilation date="16/12/2015" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -194,6 +194,14 @@
     </menubar>
 
     <releasenotes>
+        <release version="0.9.9">
+            <pubDate>Wed, 16 Dec 2015 20:00:00 GMT</pubDate>
+            <prerelease version="0.9.9 beta 1">
+                <change type="FEATURE">Added GRAVITY OB generation (preliminary)</change>
+                <change type="FEATURE">Added the mean atmosphere transmission (PARANAL) used by the Noise modelling</change>
+                <change type="FEATURE">Improved Noise modelling and its configuration for MATISSE</change>
+            </prerelease>
+        </release>
         <release version="0.9.8.2">
             <pubDate>Tue, 15 Oct 2015 15:00:00 GMT</pubDate>
             <prerelease version="0.9.8.2 beta 1">
