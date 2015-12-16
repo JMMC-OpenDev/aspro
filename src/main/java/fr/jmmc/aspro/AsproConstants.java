@@ -86,6 +86,8 @@ public interface AsproConstants {
     public static final String INS_MIDI = "MIDI";
     /** VLTI PIONIER */
     public static final String INS_PIONIER = "PIONIER";
+    /** VLTI GRAVITY */
+    public static final String INS_GRAVITY = "GRAVITY";
     /** CHARA VEGA (2T/3T) */
     public static final String INS_VEGA = "VEGA_";
     /** JMMC legal notice on plots */

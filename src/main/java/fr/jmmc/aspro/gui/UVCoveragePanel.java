@@ -599,7 +599,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelLeft.add(jCheckBoxAddNoise, gridBagConstraints);
 
-        jCheckBoxUseBias.setSelected(true);
         jCheckBoxUseBias.setText("Use inst. & cal. error bias");
         jCheckBoxUseBias.setToolTipText("if enabled, correct error with both instrumental visibility / phase biases and calibration bias");
         jCheckBoxUseBias.setName("jCheckBoxUseBias"); // NOI18N
@@ -636,7 +635,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         if (AsproConstants.INS_AMBER.equals(insName)
                 || AsproConstants.INS_MIDI.equals(insName)
-                || insName.startsWith(AsproConstants.INS_PIONIER)) {
+                || insName.startsWith(AsproConstants.INS_PIONIER)
+                || insName.startsWith(AsproConstants.INS_GRAVITY)) {
 
             // set the source with this instance :
             evt.setSource(this);
