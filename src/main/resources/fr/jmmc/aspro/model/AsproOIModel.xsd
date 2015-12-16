@@ -1981,6 +1981,249 @@
 
 
     <!-- FocalInstrument -->
+    <xsd:complexType name="FocalInstrumentSetup">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes a focal instrument setup ie an instrument operation setup (including noise parameters)
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:ID">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Name of the focal instrument setup (MATISSE_SCI_PHOT, MATISSE_HIGH_SENS ...)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="description" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Description of the instrument setup
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- default timings -->
+            <xsd:element name="defaultTotalIntegrationTime" type="xsd:int" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The default observation time for this instrument setup (second)
+                        i.e. the time really spend on the science object per calibrated point
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="defaultSamplingTime" type="xsd:int" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The default sampling time for this instrument setup (min)
+                        to have 1 calibrated visibility (CAL/SCI/CAL or CAL/SCI)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- general times -->
+            <xsd:element name="dit" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The detector individual integration time in seconds (typically less than 0.1s)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="deadtimeExposure" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The individual dead time per exposure in seconds (typically less than 0.01s)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="deadtimeSequence" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The individual dead time per sequence (several exposure) in seconds (typically less than 0.05s)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- general detector parameters -->
+            <xsd:element name="ron" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The detector readout noise (typically 10)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="detectorSaturation" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="quantumEfficiency" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The (optional) detector quantum efficiency (90%)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- flux ratios -->
+            <xsd:element name="fracFluxInInterferometry" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The fraction of flux going into the interferometric channel (typically 0.66)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="fracFluxInPhotometry" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The fraction of flux going into the photometric channel(s) (typically 0.33)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- number of detector pixels -->
+            <xsd:element name="nbPixInterferometry" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The number of pixels to code all fringes together (interferometric channel)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="nbPixPhotometry" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The number of pixels to code each photometric channel
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- general transmission and visibility -->
+            <xsd:element name="transmission" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The transmission of interferometer + instrument at observed wavelength (typically 0.01)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="instrumentVisibility" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- TODO: add interfero and photo coefficients for the thermal noise residual (structure function) -->
+
+            <!-- biases -->
+            <xsd:element name="instrumentVisibilityBias" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The Typical Fixed Visibility Bias (percent of V) (typically 1)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="instrumentVis2CalibrationBias" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The Typical Vis2 Calibration Bias (proportional to V2) (typically 5)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="instrumentPhaseBias" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The Typical Phase/Phase Closure Bias in degrees (typically 1)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="sequence" type="ObservationSequence" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The (optional) observation sequence for 1 U-V point;
+                        if missing, the observation is implicitely 1 exposure on
+                        both interferometric and photometric channels (without chopping nor dead time)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+
+        <!-- use attribute to have its default value defined to true -->
+        <xsd:attribute name="useStrehlCorrection" type="xsd:boolean" default="true"/>
+
+        <!-- use attribute to have its default value defined to true -->
+        <xsd:attribute name="includeAtmosphereCorrection" type="xsd:boolean" default="true"/>
+
+    </xsd:complexType>
+
+    <!-- ObservationSequence -->
+    <xsd:complexType name="ObservationSequence">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes an observation sequence (SCIENCE | SKY | DEAD_TIME)
+                on interferometric and/or photometric channels
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="exposure" type="Exposure" minOccurs="1" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The list of observation exposures made for 1 U-V point
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Exposure -->
+    <xsd:complexType name="Exposure">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes an exposure (SCIENCE | SKY | DEAD_TIME)
+                on interferometric and/or photometric channels
+            </xsd:documentation>
+        </xsd:annotation>
+
+        <xsd:attribute name="type" type="ExposureType" use="required">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The sequence type (SCIENCE | SKY | DEAD_TIME)
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="mode" type="ExposureMode" default="ALL">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The sequence mode (ALL | INTERFEROMETRY | PHOTOMETRY)
+                    (ALL by default)
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="unit" type="xsd:double" default="1">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The sequence duration in dit or deadtime units (fractional)
+                    (1 by default)
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="beams" type="xsd:int">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The optional number of used beams (only for photometry)
+                    (1 by default)
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+
+
+
+    <!-- FocalInstrument -->
     <xsd:complexType name="FocalInstrument">
         <xsd:annotation>
             <xsd:documentation>
@@ -2005,7 +2248,7 @@
             <xsd:element name="description" type="xsd:string">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Description of the instrument
+                        Description of the focal instrument
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2023,14 +2266,9 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="defaultSamplingTime" type="xsd:int">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The default sampling time for this instrument (min)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
+            <!-- TODO: add use_strehl (global) -->
 
+            <!-- fringe tracker -->
             <xsd:element name="fringeTracker" type="xsd:IDREF" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -2051,94 +2289,20 @@
                 </xsd:annotation>
             </xsd:element>
 
-
-
-            <!-- noise modelling parameters -->
-
-            <xsd:element name="transmission" type="xsd:double">
+            <!-- instrument setup(s) -->
+            <xsd:element name="setup" type="FocalInstrumentSetup" minOccurs="1" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The transmission of interferometer+instrument at observed wavelength (typically 0.01)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="dit" type="xsd:double">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The Detector individual integration time in seconds (typically less than 0.1s)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="ron" type="xsd:double">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The Detector readout noise (typically 10)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="detectorSaturation" type="xsd:double">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="instrumentVisibility" type="xsd:double">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="instrumentVisibilityBias" type="xsd:double">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The Typical Fixed Visibility Bias (percent of V) (typically 1)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="instrumentVis2CalibrationBias" type="xsd:double" minOccurs="0" >
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The Typical Vis2 Calibration Bias (proportional to V2) (typically 5)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="instrumentPhaseBias" type="xsd:double">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The Typical Phase/Phase Closure Bias in degrees (typically 1)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="nbPixInterferometry" type="xsd:int">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The number of pixels to code all fringes together (interferometric channel)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="nbPixPhotometry" type="xsd:int">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The number of pixels to code each photometric channel
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="fracFluxInInterferometry" type="xsd:double">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The fraction of flux going into interferometric channel (typically 0.9)
+                        The list of instrument setups for this focal instrument
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
 
-            <!-- should we have an explicit list of channels used by this focal instrument ? -->
-
+            <!-- instrument modes -->
             <xsd:element name="mode" type="FocalInstrumentMode" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The list of mode for this focal instrument
+                        The list of modes for this focal instrument
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2155,7 +2319,6 @@
             <xsd:documentation>
                 This type describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
                 It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
-                and optionaly a number of channels (numberChannels)
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
@@ -2166,35 +2329,72 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="resolution" type="xsd:double">
+            <xsd:element name="resolution" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
                         The spectral resolution of this instrument mode
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="numberChannels" type="xsd:int" minOccurs="0">
+            <xsd:element name="waveLengthMin" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The number of spectral channels of this instrument mode (optional)
+                        The lower wave length of this instrument mode (micrometer)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="waveLengthMin" type="xsd:double">
+            <xsd:element name="waveLengthMax" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The lower wave length of this instrument mode
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="waveLengthMax" type="xsd:double">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The upper wave length of this instrument mode
+                        The upper wave length of this instrument mode (micrometer)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
 
+            <!-- instrument setup reference -->
+            <xsd:element name="setupRef" type="xsd:IDREF" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The instrument setup associated with this instrument mode
+                    </xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:property>
+                            <jaxb:baseType name="FocalInstrumentSetup" />
+                        </jaxb:property>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- optimium dit -->
+            <xsd:element name="dit" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The detector individual integration time in seconds (typically less than 0.1s)
+                        optimized for this instrument mode
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- minimum dit -->
+            <xsd:element name="ditMin" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The minimum detector individual integration time in seconds (typically less than 0.1s)
+                        for this instrument mode (to read once the detector)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- tabular data sampling -->
+            <xsd:element name="table" type="SpectralSetup" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The spectral setup table for this instrument mode
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- Custom parameters (OB VEGA) -->
             <xsd:element name="parameter" type="Parameter" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -2206,6 +2406,82 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <!-- SpectralTable -->
+    <xsd:complexType name="SpectralSetup">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the spectral setup to provide several instrumental quantities
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="column" type="SpectralSetupColumn" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The table column meta data
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="data" type="ValueList">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The table data (as matrix of double values)
+                    </xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:property collectionType="indexed" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="SpectralSetupColumn">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the column meta data
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:attribute name="quantity" type="SpectralSetupQuantity" use="required">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The quantity corresponding to this column
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="telescope" type="xsd:IDREF">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Optional Telescope Reference
+                </xsd:documentation>
+                <xsd:appinfo>
+                    <jaxb:property>
+                        <jaxb:baseType name="Telescope" />
+                    </jaxb:property>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="FocalInstrumentComposedMode">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes a focal instrument mode (MATISSE LM + N)
+                as a composition of several individual instrument modes
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="FocalInstrumentMode">
+                <xsd:sequence>
+                    <xsd:element name="mode" type="FocalInstrumentMode" minOccurs="1" maxOccurs="unbounded">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                The list of focal instrument mode associated to this composed instrument mode
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
 
 
 
@@ -2400,6 +2676,120 @@
 
 
 
+    <!-- ExposureType -->
+    <xsd:simpleType name="ExposureType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Possible values for the ExposureType :
+                - "SCIENCE"
+                - "SKY"
+                - "DEAD_TIME"
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SCIENCE">
+                <xsd:annotation>
+                    <xsd:documentation>'SCIENCE' means observing the SCIENCE target</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="SKY">
+                <xsd:annotation>
+                    <xsd:documentation>'SKY' means observing the SKY only (chopping)</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="DEAD_TIME">
+                <xsd:annotation>
+                    <xsd:documentation>'DEAD_TIME' means no observing (overhead)</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+
+
+    <!-- ExposureMode -->
+    <xsd:simpleType name="ExposureMode">
+        <xsd:annotation>
+            <xsd:documentation>
+                Possible values for the ExposureMode :
+                - "NONE"
+                - "INTERFEROMETRY"
+                - "PHOTOMETRY"
+                - "ALL"
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="NONE">
+                <xsd:annotation>
+                    <xsd:documentation>'NONE' means not observing</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="INTERFEROMETRY">
+                <xsd:annotation>
+                    <xsd:documentation>'INTERFEROMETRY' means observing only the interferometric channel</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="PHOTOMETRY">
+                <xsd:annotation>
+                    <xsd:documentation>'PHOTOMETRY' means observing only the photometric channel</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="ALL">
+                <xsd:annotation>
+                    <xsd:documentation>'ALL' means observing both interferometric and photometric channels</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+
+
+    <!-- SpectralSetupQuantity -->
+    <xsd:simpleType name="SpectralSetupQuantity">
+        <xsd:annotation>
+            <xsd:documentation>
+                Possible values for the SpectralSetupQuantity :
+                - "lambda"
+                - "delta_lambda"
+                - "nb_photon_thermal"
+                - "transmission"
+                - "visibility"
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="lambda">
+                <xsd:annotation>
+                    <xsd:documentation>'lambda' = central wavelength</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="delta_lambda">
+                <xsd:annotation>
+                    <xsd:documentation>'delta_lambda' = spectral bandwidth</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="nb_photon_thermal">
+                <xsd:annotation>
+                    <xsd:documentation>'nb_photon_thermal' = number of thermal photons per seconds</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="transmission">
+                <xsd:annotation>
+                    <xsd:documentation>'transmission' = overall transmission (instrument + interferometer)</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="visibility">
+                <xsd:annotation>
+                    <xsd:documentation>'visibility' = instrumental visibility</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+
+
     <!-- Generic parameter key / value -->
     <xsd:complexType name="Parameter">
         <xsd:annotation>
@@ -2516,5 +2906,10 @@
             </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
+
+    <!-- list of double values -->
+    <xsd:simpleType name="ValueList">
+        <xsd:list itemType="xsd:double"/>
+    </xsd:simpleType>
 
 </xsd:schema>
