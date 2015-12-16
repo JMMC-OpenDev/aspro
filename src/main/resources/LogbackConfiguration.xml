@@ -64,6 +64,8 @@
     <logger name="fr.jmmc.aspro.service.DelayLineService" level="INFO"/>
     <logger name="fr.jmmc.aspro.service.ObservabilityService" level="INFO"/>
     <logger name="fr.jmmc.aspro.service.UVCoverageService" level="INFO"/>
+
+    <logger name="fr.jmmc.aspro.service.NoiseService" level="DEBUG"/>
     -->
 
 </included>

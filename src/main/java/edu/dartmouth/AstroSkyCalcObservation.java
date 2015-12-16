@@ -137,7 +137,7 @@ public final class AstroSkyCalcObservation {
      * @param cosDec cosinus of target declination
      * @param sinDec sinus of target declination
      * @param jd julian date
-     * @param position target position: azimuth (0 to north) / elevation in degrees
+     * @param position target position: azimuth (0 to north, 90 to east) / elevation in degrees
      * @return hour angle
      */
     public double getTargetPosition(final double cosDec, final double sinDec, final double jd, final AzEl position) {
