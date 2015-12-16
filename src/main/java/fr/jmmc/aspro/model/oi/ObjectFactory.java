@@ -214,6 +214,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link SpectralSetupColumn }
+     * 
+     */
+    public SpectralSetupColumn createSpectralSetupColumn() {
+        return new SpectralSetupColumn();
+    }
+
+    /**
      * Create an instance of {@link TargetConfiguration }
      * 
      */
@@ -235,6 +243,14 @@ public class ObjectFactory {
      */
     public Channel createChannel() {
         return new Channel();
+    }
+
+    /**
+     * Create an instance of {@link Exposure }
+     * 
+     */
+    public Exposure createExposure() {
+        return new Exposure();
     }
 
     /**
@@ -262,6 +278,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link FocalInstrumentComposedMode }
+     * 
+     */
+    public FocalInstrumentComposedMode createFocalInstrumentComposedMode() {
+        return new FocalInstrumentComposedMode();
+    }
+
+    /**
      * Create an instance of {@link AdaptiveOptics }
      * 
      */
@@ -275,6 +299,14 @@ public class ObjectFactory {
      */
     public DelayLineRestriction createDelayLineRestriction() {
         return new DelayLineRestriction();
+    }
+
+    /**
+     * Create an instance of {@link SpectralSetup }
+     * 
+     */
+    public SpectralSetup createSpectralSetup() {
+        return new SpectralSetup();
     }
 
     /**
@@ -358,6 +390,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link ObservationSequence }
+     * 
+     */
+    public ObservationSequence createObservationSequence() {
+        return new ObservationSequence();
+    }
+
+    /**
      * Create an instance of {@link CalibratorInformations }
      * 
      */
@@ -395,6 +435,14 @@ public class ObjectFactory {
      */
     public Parameter createParameter() {
         return new Parameter();
+    }
+
+    /**
+     * Create an instance of {@link FocalInstrumentSetup }
+     * 
+     */
+    public FocalInstrumentSetup createFocalInstrumentSetup() {
+        return new FocalInstrumentSetup();
     }
 
     /**

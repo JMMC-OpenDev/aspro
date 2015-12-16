@@ -192,5 +192,12 @@ public class FringeTracker
     public void setMaxIntegration(int value) {
         this.maxIntegration = value;
     }
+    
+//--simple--preserve
+    @Override
+    public final String toString() {
+        return "FringeTracker [" + ((this.name != null) ? this.name : "undefined") + "]";
+    }
+//--simple--preserve
 
 }

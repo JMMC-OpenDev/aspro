@@ -164,5 +164,12 @@ public class Telescope
     public void setMoonPointingRestriction(MoonPointingRestriction value) {
         this.moonPointingRestriction = value;
     }
+    
+//--simple--preserve
+    @Override
+    public String toString() {
+        return "Telescope[" + ((this.name != null) ? this.name : "undefined") + "]";
+    }
+//--simple--preserve
 
 }

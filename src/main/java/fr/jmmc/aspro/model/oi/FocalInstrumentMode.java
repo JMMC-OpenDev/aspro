@@ -6,6 +6,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlIDREF;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -14,7 +17,6 @@ import fr.jmmc.aspro.model.OIBase;
  * 
  *                 This type describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
  *                 It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
- *                 and optionaly a number of channels (numberChannels)
  *             
  * 
  * <p>Java class for FocalInstrumentMode complex type.
@@ -27,10 +29,13 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="resolution" type="{http://www.w3.org/2001/XMLSchema}double"/>
- *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="waveLengthMin" type="{http://www.w3.org/2001/XMLSchema}double"/>
- *         &lt;element name="waveLengthMax" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="resolution" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="waveLengthMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="waveLengthMax" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="setupRef" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/>
+ *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="ditMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="table" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralSetup" minOccurs="0"/>
  *         &lt;element name="parameter" type="{http://www.jmmc.fr/aspro-oi/0.1}Parameter" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -44,10 +49,16 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "FocalInstrumentMode", propOrder = {
     "name",
     "resolution",
-    "numberChannels",
     "waveLengthMin",
     "waveLengthMax",
+    "setupRef",
+    "dit",
+    "ditMin",
+    "table",
     "parameters"
+})
+@XmlSeeAlso({
+    FocalInstrumentComposedMode.class
 })
 public class FocalInstrumentMode
     extends OIBase
@@ -55,10 +66,16 @@ public class FocalInstrumentMode
 
     @XmlElement(required = true)
     protected String name;
-    protected double resolution;
-    protected Integer numberChannels;
-    protected double waveLengthMin;
-    protected double waveLengthMax;
+    protected Double resolution;
+    protected Double waveLengthMin;
+    protected Double waveLengthMax;
+    @XmlElement(type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREF")
+    protected FocalInstrumentSetup setupRef;
+    protected Double dit;
+    protected Double ditMin;
+    protected SpectralSetup table;
     @XmlElement(name = "parameter")
     protected List<Parameter> parameters;
 
@@ -89,73 +106,169 @@ public class FocalInstrumentMode
     /**
      * Gets the value of the resolution property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
      */
-    public double getResolution() {
+    public Double getResolution() {
         return resolution;
     }
 
     /**
      * Sets the value of the resolution property.
      * 
-     */
-    public void setResolution(double value) {
-        this.resolution = value;
-    }
-
-    /**
-     * Gets the value of the numberChannels property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
-     */
-    public Integer getNumberChannels() {
-        return numberChannels;
-    }
-
-    /**
-     * Sets the value of the numberChannels property.
-     * 
      * @param value
      *     allowed object is
-     *     {@link Integer }
+     *     {@link Double }
      *     
      */
-    public void setNumberChannels(Integer value) {
-        this.numberChannels = value;
+    public void setResolution(Double value) {
+        this.resolution = value;
     }
 
     /**
      * Gets the value of the waveLengthMin property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
      */
-    public double getWaveLengthMin() {
+    public Double getWaveLengthMin() {
         return waveLengthMin;
     }
 
     /**
      * Sets the value of the waveLengthMin property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
      */
-    public void setWaveLengthMin(double value) {
+    public void setWaveLengthMin(Double value) {
         this.waveLengthMin = value;
     }
 
     /**
      * Gets the value of the waveLengthMax property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
      */
-    public double getWaveLengthMax() {
+    public Double getWaveLengthMax() {
         return waveLengthMax;
     }
 
     /**
      * Sets the value of the waveLengthMax property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
      */
-    public void setWaveLengthMax(double value) {
+    public void setWaveLengthMax(Double value) {
         this.waveLengthMax = value;
+    }
+
+    /**
+     * Gets the value of the setupRef property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Object }
+     *     
+     */
+    public FocalInstrumentSetup getSetupRef() {
+        return setupRef;
+    }
+
+    /**
+     * Sets the value of the setupRef property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Object }
+     *     
+     */
+    public void setSetupRef(FocalInstrumentSetup value) {
+        this.setupRef = value;
+    }
+
+    /**
+     * Gets the value of the dit property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getDit() {
+        return dit;
+    }
+
+    /**
+     * Sets the value of the dit property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setDit(Double value) {
+        this.dit = value;
+    }
+
+    /**
+     * Gets the value of the ditMin property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getDitMin() {
+        return ditMin;
+    }
+
+    /**
+     * Sets the value of the ditMin property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setDitMin(Double value) {
+        this.ditMin = value;
+    }
+
+    /**
+     * Gets the value of the table property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link SpectralSetup }
+     *     
+     */
+    public SpectralSetup getTable() {
+        return table;
+    }
+
+    /**
+     * Sets the value of the table property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link SpectralSetup }
+     *     
+     */
+    public void setTable(SpectralSetup value) {
+        this.table = value;
     }
 
     /**
@@ -188,60 +301,139 @@ public class FocalInstrumentMode
     }
     
 //--simple--preserve
-  /**
-   * Return the central wave length (read only)
-   * @return central wave length
-   */
-  public final double getWaveLength() {
-    return 0.5d * (this.waveLengthMax + this.waveLengthMin);
-  }
-  
-  /** spectral channels (derived from resolution)(read-only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private int spectralChannels = -1;
-
-  /**
-   * Return the number of spectral channels derived from resolution and bandwidth
-   * @return number of spectral channels
-   */
-  public final int getSpectralChannels() {
-    if (this.spectralChannels == -1) {
-      this.spectralChannels = Math.max(1, (int) Math.round(getResolution() * (this.waveLengthMax - this.waveLengthMin) / getWaveLength()));
+    /**
+     * Return the central wave length (read only)
+     * @return central wave length
+     */
+    public final double getWaveLength() {
+        return 0.5d * (this.waveLengthMax + this.waveLengthMin);
     }
-    return this.spectralChannels;
-  }
 
-  /**
-   * Return the parameter value of the given name from the list of parameters associated to this focal instrument mode
-   * @param name parameter name
-   * @return parameter value or null if the parameter was not found
-   */
-  public final String getParameterValue(final String name) {
-    if (this.parameters != null) {
-      final Parameter p = getParameter(name, this.parameters);
-      if (p != null) {
-        return p.getValue();
-      }
-    }
-    return null;
-  }
+    /** spectral channels (derived from resolution)(read-only) */
+    @javax.xml.bind.annotation.XmlTransient
+    protected int spectralChannels = -1;
 
-  /**
-   * Return the parameter of the given name in the given list of parameters
-   * @param name parameter name
-   * @param parameters list of parameters
-   * @return parameter or null if the parameter was not found
-   */
-  public static Parameter getParameter(final String name, final List<Parameter> parameters) {
-    if (name != null) {
-      for (Parameter p : parameters) {
-        if (p.getName().equalsIgnoreCase(name)) {
-          return p;
+    /**
+     * Return the number of spectral channels derived from resolution and bandwidth
+     * @return number of spectral channels
+     */
+    public int getSpectralChannels() {
+        if (this.spectralChannels == -1) {
+            this.spectralChannels = Math.max(1, (int) Math.round(getResolution() * (this.waveLengthMax - this.waveLengthMin) / getWaveLength()));
         }
-      }
+        return this.spectralChannels;
     }
-    return null;
-  }
+
+    /**
+     * Return the parameter value of the given name from the list of parameters associated to this focal instrument mode
+     * @param name parameter name
+     * @return parameter value or null if the parameter was not found
+     */
+    public final String getParameterValue(final String name) {
+        if (this.parameters != null) {
+            final Parameter p = getParameter(name, this.parameters);
+            if (p != null) {
+                return p.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return the parameter of the given name in the given list of parameters
+     * @param name parameter name
+     * @param parameters list of parameters
+     * @return parameter or null if the parameter was not found
+     */
+    public static Parameter getParameter(final String name, final List<Parameter> parameters) {
+        if (name != null) {
+            for (Parameter p : parameters) {
+                if (p.getName().equalsIgnoreCase(name)) {
+                    return p;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public final String toString() {
+        return "FocalInstrumentMode [" + ((this.name != null) ? this.name : "undefined") + "]";
+    }
+
+    /**
+    * Initialize and check this instance
+     * @param logger logger to use
+     * @throws IllegalStateException if the configuration is severly invalid !
+     */
+    public void init(final org.slf4j.Logger logger) throws IllegalStateException {
+        if (this.name == null) {
+            throw new IllegalStateException("Invalid name !");
+        }
+        
+        // setup is tested at higher level !
+        
+        // dit and ditMin are optional.
+        
+        if (this.table != null) {
+            this.table.init(logger);
+            
+            final double[] lambda = this.table.getColumn(SpectralSetupQuantity.LAMBDA).getValues();
+            final double[] delta_lambda = this.table.getColumn(SpectralSetupQuantity.DELTA_LAMBDA).getValues();
+
+            final int nbRows = this.table.getNbRows();
+            
+            // Define the number of spectral channels:
+            this.spectralChannels = nbRows;
+            
+            // Define wavelength min/max and resolution:
+            int ch = 0;
+            setWaveLengthMin(lambda[ch] - 0.5 * delta_lambda[ch]);
+            
+            ch = nbRows - 1;
+            setWaveLengthMax(lambda[ch] + 0.5 * delta_lambda[ch]);
+            
+            ch = nbRows / 2;
+            setResolution(lambda[ch] / delta_lambda[ch]);
+        }
+        
+        if (this.waveLengthMin == null) {
+            logger.warn("Invalid waveLengthMin !");
+            setWaveLengthMin(Double.NaN);
+        }
+        if (this.waveLengthMax == null) {
+            logger.warn("Invalid waveLengthMax !");
+            setWaveLengthMax(Double.NaN);
+        }
+        if (this.resolution == null) {
+            logger.warn("Invalid resolution !");
+            setResolution(Double.NaN);
+        }
+    }
+
+    public void dump(final org.slf4j.Logger logger) {
+        logger.info("Mode[{}] {", getName());
+        logger.info("  name: {}", getName());
+        logger.info("  resolution: {}", getResolution());
+        logger.info("  waveLengthMin: {}", fr.jmmc.jmcs.util.NumberUtils.trimTo5Digits(getWaveLengthMin()));
+        logger.info("  waveLengthMax: {}", fr.jmmc.jmcs.util.NumberUtils.trimTo5Digits(getWaveLengthMax()));
+
+        logger.info("  setup: {}", getSetupRef());
+
+        logger.info("  dit: {}", getDit());
+        logger.info("  ditMin: {}", getDitMin());
+
+        // computed values:
+        logger.info("  waveLength: {}", getWaveLength());
+        logger.info("  nbSpectralChannels: {}", getSpectralChannels());
+
+        if (this.table != null) {
+            logger.info("  table: {}", table);
+        }
+
+        logger.info ("}");
+    }
+  
 //--simple--preserve
 
 }
