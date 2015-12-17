@@ -34,6 +34,13 @@
         </dependency>
 
         <dependency>
+            <groupId>fr.jmmc.aspro</groupId>
+            <artifactId>aspro-conf</artifactId>
+            <version>TRUNK</version>
+            <classifier>atm</classifier>
+        </dependency>
+
+        <dependency>
             <groupId>fr.jmmc.oiexplorer</groupId>
             <artifactId>oiexplorer-core</artifactId>
             <version>TRUNK</version>
@@ -51,7 +58,7 @@
             <version>TRUNK</version>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <artifactId>junit</artifactId>
             <groupId>junit</groupId>
