@@ -10,7 +10,6 @@ import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import org.apache.commons.lang.SystemUtils;
 
 import org.fest.swing.annotation.GUITest;
 import org.fest.swing.fixture.JPanelFixture;
@@ -38,23 +37,8 @@ public final class AsproObservabilityTest extends JmcsFestSwingJUnitTestCase {
      */
     @BeforeClass
     public static void intializeAndStartApplication() {
-        // disable dev LAF menu :
-        System.setProperty(JVMUtils.SYSTEM_PROPERTY_LAF_MENU, "false");
-
-        // define robot delays :
-        defineRobotDelayBetweenEvents(SHORT_DELAY);
-
-        // define delay before taking screenshot :
-        defineScreenshotDelay(SHORT_DELAY);
-
-        // invoke Bootstrapper method to initialize logback now:
-        Bootstrapper.getState();
-
-        // disable tooltips :
-        enableTooltips(false);
-
-        // customize Export action to avoid use StatusBar :
-        ExportDocumentAction.setAvoidUseStatusBar(true);
+        
+        AsproDocJUnitTest.prepareAsproTest();
 
         // Start application:
         JmcsFestSwingJUnitTestCase.startApplication(
@@ -62,12 +46,11 @@ public final class AsproObservabilityTest extends JmcsFestSwingJUnitTestCase {
                 "-open", TEST_FOLDER + "lazareff_largeprogramHaebe.asprox");
     }
 
+
     /**
      * Test if the application started correctly
      */
-    @Test
-    @GUITest
-    public void shouldStart() {
+    public void initTest() {
         window.textBox("starSearchField").setText("Simbad");
 
         // waits for computation to finish :
@@ -83,6 +66,8 @@ public final class AsproObservabilityTest extends JmcsFestSwingJUnitTestCase {
     @Test
     @GUITest
     public void shouldChangeDateForVLTI() {
+
+        initTest();
 
         final JPanelFixture form = window.panel("observationForm");
 
@@ -120,19 +105,6 @@ public final class AsproObservabilityTest extends JmcsFestSwingJUnitTestCase {
             // waits for computation to finish :
             AsproTestUtils.checkRunningTasks();
         }
-    }
-
-    /**
-     * Test the application exit sequence : ALWAYS THE LAST TEST
-     */
-    @Test
-    @GUITest
-    public void shouldExit() {
-        logger.info("shouldExit test");
-
-        window.close();
-
-        confirmDialogDontSave();
     }
 
     /* 

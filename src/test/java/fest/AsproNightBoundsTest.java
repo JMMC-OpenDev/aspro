@@ -4,14 +4,10 @@
 package fest;
 
 import fest.common.JmcsFestSwingJUnitTestCase;
-import fr.jmmc.jmcs.Bootstrapper;
-import fr.jmmc.jmcs.util.JVMUtils;
-import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import javax.swing.JFormattedTextField;
-import org.apache.commons.lang.SystemUtils;
 
 import org.fest.swing.annotation.GUITest;
 import org.fest.swing.edt.GuiActionRunner;
@@ -34,30 +30,15 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
     /** initial year */
     private static final int YEAR = 2010;
     /** number of days to traverse (10 years) */
-    private static final int DAYS = 10 * 365;
+    private static final int DAYS = 1 * 365;
 
     /**
      * Initialize system properties & static variables and finally starts the application
      */
     @BeforeClass
     public static void intializeAndStartApplication() {
-        // disable dev LAF menu :
-        System.setProperty(JVMUtils.SYSTEM_PROPERTY_LAF_MENU, "false");
-
-        // define robot delays :
-        defineRobotDelayBetweenEvents(SHORT_DELAY);
-
-        // define delay before taking screenshot :
-        defineScreenshotDelay(SHORT_DELAY);
-
-        // invoke Bootstrapper method to initialize logback now:
-        Bootstrapper.getState();
-
-        // disable tooltips :
-        enableTooltips(false);
-
-        // customize Export action to avoid use StatusBar :
-        ExportDocumentAction.setAvoidUseStatusBar(true);
+        
+        AsproDocJUnitTest.prepareAsproTest();
 
         // Start application:
         JmcsFestSwingJUnitTestCase.startApplication(
@@ -182,19 +163,6 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
             // waits for computation to finish :
             AsproTestUtils.checkRunningTasks();
         }
-    }
-
-    /**
-     * Test the application exit sequence : ALWAYS THE LAST TEST
-     */
-    @Test
-    @GUITest
-    public void shouldExit() {
-        logger.info("shouldExit test");
-
-        window.close();
-
-        confirmDialogDontSave();
     }
 
     /* 

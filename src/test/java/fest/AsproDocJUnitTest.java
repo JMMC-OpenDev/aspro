@@ -39,28 +39,33 @@ import org.fest.swing.fixture.JTabbedPaneFixture;
 import org.fest.swing.fixture.JTextComponentFixture;
 import org.fest.swing.util.Platform;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 /**
  * This simple tests takes screenshots to complete the Aspro2 documentation
  * 
  * @author bourgesl
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     private final static String MY_EMAIL = "laurent.bourges@obs.ujf-grenoble.fr";
 
+    private static void deleteAsproPrefs() {
+        new File(SystemUtils.USER_HOME + "/.fr.jmmc.jmcs.session_settings.jmmc.aspro2.properties").delete();
+    }
+
     /**
-     * Initialize system properties & static variables and finally starts the application
+     * Initialize system properties & static variables
      */
-    @BeforeClass
-    public static void intializeAndStartApplication() {
+    public static void prepareAsproTest() {
 
         // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
 
         // NOTE: Use 'Debug Test File' in netbeans to ensure correct test order ...
-        
         // Test JDK 1.7+
         if (!SystemUtils.isJavaVersionAtLeast(1.7f)) {
             MessagePane.showErrorMessage("Please use a JVM 1.7+ (Oracle) before running tests (fonts and LAF may be wrong) !");
@@ -68,7 +73,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         }
 
         // reset Preferences:
-        new File(SystemUtils.USER_HOME + "/.fr.jmmc.jmcs.session_settings.jmmc.aspro2.properties").delete();
+        deleteAsproPrefs();
 
         try {
             CommonPreferences.getInstance().setPreference(CommonPreferences.FEEDBACK_REPORT_USER_EMAIL, MY_EMAIL);
@@ -88,6 +93,15 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         // customize Export action to avoid use StatusBar :
         ExportDocumentAction.setAvoidUseStatusBar(true);
+    }
+
+    /**
+     * Initialize system properties & static variables and finally starts the application
+     */
+    @BeforeClass
+    public static void intializeAndStartApplication() {
+
+        AsproDocJUnitTest.prepareAsproTest();
 
         // Start application:
         JmcsFestSwingJUnitTestCase.startApplication(
@@ -100,7 +114,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldStart() {
+    public void m01_shouldStart() {
         window.textBox("starSearchField").setText("Simbad");
 
         // waits for computation to finish :
@@ -115,7 +129,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void captureMain() {
+    public void m02_captureMain() {
         captureMainForm("Aspro2-main.png");
     }
 
@@ -124,7 +138,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void captureWindCompass() {
+    public void m03_captureWindCompass() {
         // enable wind restriction:
         window.checkBox("jCheckBoxWind").check();
 
@@ -183,7 +197,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void captureJSkyCalc() {
+    public void m04_captureJSkyCalc() {
         window.button("jButtonSkyCalc").click();
 
         final FrameFixture skyCalcWin = getFrame("JSkyCalc");
@@ -205,7 +219,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldShowObservability() {
+    public void m05_shouldShowObservability() {
 
         // Capture observability plot :
         getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
@@ -261,7 +275,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldShowUVCoverage() {
+    public void m06_shouldShowUVCoverage() {
 
         // Capture UV Coverage plot :
         getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
@@ -309,7 +323,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldShowVis2Plot() {
+    public void m07_shouldShowVis2Plot() {
 
         // Capture OIFits viewer plot :
         showPlotTab(SettingPanel.TAB_OIFITS_VIEWER, "Aspro2-vis2-noErr.png");
@@ -339,7 +353,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldOpenTargetEditor() {
+    public void m08_shouldOpenTargetEditor() {
 
         window.button("jButtonTargetEditor").click();
 
@@ -369,7 +383,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldOpenPreferences() {
+    public void m09_shouldOpenPreferences() {
         window.menuItemWithPath("Edit", "Preferences...").click();
 
         final Frame prefFrame = robot().finder().find(FrameMatcher.withTitle("Preferences"));
@@ -392,7 +406,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void showInteropMenu() {
+    public void m10_showInteropMenu() {
         window.menuItemWithPath("Interop").click();
         captureMainForm("Aspro2-interop-menu.png");
 
@@ -425,7 +439,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldCallSearchCall() {
+    public void m11_shouldCallSearchCall() {
         // hack to solve focus trouble in menu items :
         window.menuItemWithPath("Interop").focus();
 
@@ -447,7 +461,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldCallLITpro() {
+    public void m12_shouldCallLITpro() {
         // select tab to let menu lost focus:
         getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
 
@@ -484,7 +498,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldShowCharaPoPs() {
+    public void m13_shouldShowCharaPoPs() {
 
         // show observability plot :
         getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
@@ -544,7 +558,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldOpenSampleWithCalibrators() {
+    public void m14_shouldOpenSampleWithCalibrators() {
 
         openObservation("Aspro2_sample_with_calibrators.asprox");
 
@@ -592,7 +606,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldOpenSampleMultiConf() {
+    public void m15_shouldOpenSampleMultiConf() {
 
         openObservation("Aspro2_sample_multi.asprox");
 
@@ -617,7 +631,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldOpenSampleWithUserModel() {
+    public void m16_shouldOpenSampleWithUserModel() {
         try {
             Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, "heat");
             Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_SIZE, Integer.valueOf(1024));
@@ -672,7 +686,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void shouldOpenFeedbackReport() {
+    public void m20_shouldOpenFeedbackReport() {
 
         // hack to solve focus trouble in menu items :
         window.menuItemWithPath("Help").focus();
@@ -696,6 +710,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         // close dialog :
         dialog.close();
+        
+        // reset Preferences:
+        deleteAsproPrefs();
     }
 
     /* 
