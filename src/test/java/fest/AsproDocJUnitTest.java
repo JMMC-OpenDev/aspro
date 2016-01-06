@@ -51,10 +51,19 @@ import org.junit.runners.MethodSorters;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
-    private final static String MY_EMAIL = "laurent.bourges@obs.ujf-grenoble.fr";
+    private final static String FAKE_EMAIL = "FAKE_EMAIL";
+    private static String CURRENT_EMAIL = "";
 
-    private static void deleteAsproPrefs() {
-        new File(SystemUtils.USER_HOME + "/.fr.jmmc.jmcs.session_settings.jmmc.aspro2.properties").delete();
+    private static void defineEmailPref(final String email) {
+        try {
+            final CommonPreferences prefs = CommonPreferences.getInstance();
+
+            CURRENT_EMAIL = prefs.getPreference(CommonPreferences.FEEDBACK_REPORT_USER_EMAIL);
+
+            prefs.setPreference(CommonPreferences.FEEDBACK_REPORT_USER_EMAIL, email);
+        } catch (PreferencesException pe) {
+            logger.error("setPreference failed", pe);
+        }
     }
 
     /**
@@ -72,14 +81,10 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             Bootstrapper.stopApp(1);
         }
 
-        // reset Preferences:
-        deleteAsproPrefs();
+        // reset window Preferences:
+        new File(SystemUtils.USER_HOME + "/.fr.jmmc.jmcs.session_settings.jmmc.aspro2.properties").delete();
 
-        try {
-            CommonPreferences.getInstance().setPreference(CommonPreferences.FEEDBACK_REPORT_USER_EMAIL, MY_EMAIL);
-        } catch (PreferencesException pe) {
-            logger.error("setPreference failed", pe);
-        }
+        defineEmailPref(FAKE_EMAIL);
         Preferences.getInstance().resetToDefaultPreferences();
 
         // define robot delays :
@@ -698,7 +703,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         dialog.requireVisible();
         dialog.moveToFront();
 
-        final JTextComponentFixture emailField = dialog.textBox(JTextComponentMatcher.withText(MY_EMAIL));
+        final JTextComponentFixture emailField = dialog.textBox(JTextComponentMatcher.withText(FAKE_EMAIL));
 
         // hide my email address :
         emailField.setText("type your email address here");
@@ -706,13 +711,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         saveScreenshot(dialog, "Aspro2-FeebackReport.png");
 
         // restore my preferences :
-        emailField.setText(MY_EMAIL);
+        emailField.setText(FAKE_EMAIL);
 
         // close dialog :
         dialog.close();
-        
-        // reset Preferences:
-        deleteAsproPrefs();
+
+        // reset email preference:
+        defineEmailPref(CURRENT_EMAIL);
     }
 
     /* 
