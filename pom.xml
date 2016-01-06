@@ -59,12 +59,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <artifactId>junit</artifactId>
-            <groupId>junit</groupId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 </project>

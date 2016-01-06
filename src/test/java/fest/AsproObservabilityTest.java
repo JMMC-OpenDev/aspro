@@ -26,10 +26,6 @@ import org.junit.Test;
  */
 public final class AsproObservabilityTest extends JmcsFestSwingJUnitTestCase {
 
-    /** absolute path to test folder to load observations */
-    private final static String USER_HOME = SystemUtils.USER_HOME;
-    private final static String TEST_FOLDER = USER_HOME + "/dev/aspro/src/test/resources/";
-
     /** name of the tab pane corresponding to the observability panel */
     private static final String TAB_OBSERVABILITY = "Observability";
     /** initial year */

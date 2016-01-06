@@ -117,7 +117,8 @@ public class LonLatAlt
 
   @Override
   public final String toString() {
-    return "[" + fr.jmmc.aspro.service.GeocentricCoords.toString(getLongitude(), getLatitude(), getAltitude()) + "]";
+    return "[" + fr.jmmc.aspro.service.GeocentricCoords.toString(getLongitude(), getLatitude(), getAltitude()) + "]["
+            + net.jafama.FastMath.toDegrees(getLongitude()) + ", " + net.jafama.FastMath.toDegrees(getLatitude()) + "]";
   }
 //--simple--preserve
 
