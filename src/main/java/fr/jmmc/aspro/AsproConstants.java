@@ -100,4 +100,8 @@ public interface AsproConstants {
     public final static double UNDEFINED_MAGNITUDE = -99d;
     /** label to display when multiple configurations are in use (file names, chart titles ...) */
     public static final String MULTI_CONF = "MULTI CONFIGURATION";
+
+    /* Warning matchers */    
+    /** Prefix for the warning message 'Missing photometry ...' */
+    public final static String WARN_MISSING_MAGS = "Missing photometry";
 }

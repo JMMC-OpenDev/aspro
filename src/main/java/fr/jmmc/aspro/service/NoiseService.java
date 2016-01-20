@@ -568,7 +568,7 @@ public final class NoiseService implements VisNoiseService {
             // missing magnitude
             this.invalidParameters = true;
 
-            addWarning("Missing photometry on target [" + target.getName() + "] in following bands: "
+            addWarning(AsproConstants.WARN_MISSING_MAGS + " on target [" + target.getName() + "] in following bands: "
                     + (Double.isNaN(objectMag) ? insTargetBand : "")
                     + (fringeTrackerPresent && Double.isNaN(fringeTrackerMag) ? ftBand : "")
                     + (Double.isNaN(adaptiveOpticsMag) ? aoBand : ""));
