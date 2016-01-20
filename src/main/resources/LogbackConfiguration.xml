@@ -41,6 +41,7 @@
     <!-- Aspro warning -->
     <logger name="fr.jmmc.aspro.warning" level="INFO" additivity="true">
         <appender-ref ref="WARNINGLOG" />
+        <appender-ref ref="STATUSLOG" />
     </logger>
 
     <!--
