@@ -788,9 +788,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                         @Override
                         public void run() {
                             final int last = textComponent.getDocument().getLength();
-                            // select the day field to force the spinner to use it
-                            textComponent.setCaretPosition(last - 2);
-                            textComponent.moveCaretPosition(last);
+                            if (last >= 2) {
+                                // select the day field to force the spinner to use it
+                                textComponent.setCaretPosition(last - 2);
+                                textComponent.moveCaretPosition(last);
+                            }
                         }
                     });
                 }

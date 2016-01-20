@@ -199,6 +199,7 @@
         <release version="0.9.9">
             <pubDate>Wed, 20 Jan 2015 16:00:00 GMT</pubDate>
             <prerelease version="0.9.9 beta 2">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/741">Fixed a caret issue with the date spinner widget (mac os)</change>
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/725">Added OIFits warning checks (missing magnitude)
                     to show a confirmation dialog when exporting either an OIFits file (including SAMP interoperability) or an OIFits viewer plot
                 </change>
