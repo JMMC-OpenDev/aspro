@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
+import fr.jmmc.aspro.model.OIFitsData;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
@@ -24,6 +25,7 @@ import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.BorderLayout;
 import java.util.List;
+import org.jfree.chart.ChartColor;
 import org.jfree.ui.Drawable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +44,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
     static {
         // Disable the expression editor until it is ready for production:
         PlotDefinitionEditor.setEnableExpressionEditor(false);
-        
+
         // Hack to always show flagged data (error undefined):
         for (PlotDefinition plotDef : PlotDefinitionFactory.getInstance().getDefaults()) {
             plotDef.setSkipFlaggedData(false);
@@ -51,6 +53,8 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
     /* members */
     /** OIFitsCollectionManager singleton */
     private final OIFitsCollectionManager ocm = OIFitsCollectionManager.getInstance();
+    /** chart data */
+    private OIFitsData oiFitsData = null;
     /** Oifits explorer Plot view */
     private PlotView plotView;
     /** Oifits explorer Plot chart panel */
@@ -100,6 +104,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
 
         jLabelMessage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelMessage.setText("LABEL");
+        jLabelMessage.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         add(jLabelMessage, java.awt.BorderLayout.NORTH);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -110,7 +115,14 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
      */
     @Override
     public void performAction(final ExportDocumentAction action) {
-        action.process(this);
+        if (getOIFitsData() == null) {
+            return;
+        }
+        final List<OIFitsFile> oiFitsFiles = getOIFitsData().checkAndGetOIFitsList();
+
+        if (oiFitsFiles != null && oiFitsFiles != OIFitsData.IGNORE_OIFITS_LIST) {
+            action.process(this);
+        }
     }
 
     /**
@@ -123,7 +135,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
         return this.plotChartPanel.getDefaultFileName(fileExtension);
     }
 
-   /**
+    /**
      * Prepare the page layout before doing the export:
      * Performs layout and modifies the given options
      * @param options document options used to prepare the document
@@ -133,7 +145,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
         this.plotChartPanel.prepareExport(options);
     }
 
-/**
+    /**
      * Return the page to export given its page index
      * @param pageIndex page index (1..n)
      * @return Drawable array to export on this page
@@ -157,6 +169,8 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
     private void postInit() {
         ocm.start();
 
+        this.jLabelMessage.setForeground(ChartColor.DARK_RED);
+
         // define which plot to use:
         final String plotId = OIFitsCollectionManager.CURRENT_VIEW;
 
@@ -178,7 +192,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
         switch (event.getType()) {
             case OIFITS_DONE:
                 if (event instanceof OIFitsEvent) {
-                    this.plot(((OIFitsEvent) event).getOIFitsList());
+                    this.plot(((OIFitsEvent) event).getOIFitsData());
                 }
                 break;
             default:
@@ -189,23 +203,58 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
     }
 
     /**
+     * Return the OIFits data
+     * @return OIFits data
+     */
+    private OIFitsData getOIFitsData() {
+        return this.oiFitsData;
+    }
+
+    /**
+     * Define the OIFits data
+     * @param oiFitsData OIFits data
+     */
+    private void setOIFitsData(final OIFitsData oiFitsData) {
+        this.oiFitsData = oiFitsData;
+    }
+
+    /**
      * Plot OIFits data using embedded OIFitsExplorer Plot panel
      * This code must be executed by the Swing Event Dispatcher thread (EDT)
-     * @param oiFitsList OIFits files to use
+     * @param oiFitsData OIFits data
      */
-    private void plot(final List<OIFitsFile> oiFitsList) {
-        logger.debug("plot : {}", oiFitsList);
+    private void plot(final OIFitsData oiFitsData) {
+        logger.debug("plot : {}", oiFitsData);
+
+        // memorize chart data (used by export PDF):
+        setOIFitsData(oiFitsData);
+
+        final List<OIFitsFile> oiFitsList = (oiFitsData != null) ? oiFitsData.getOIFitsList() : null;
 
         if (oiFitsList == null) {
             this.jLabelMessage.setText("No OIFits data available: the target is not observable or has no model.");
 
-            showMessage(true);
+            display(false, true);
 
             // reset:
             ocm.reset();
 
         } else {
-            showMessage(false);
+            final List<String> warnings = (oiFitsData != null) ? oiFitsData.getWarningMessages() : null;
+
+            if (warnings != null) {
+                final StringBuilder sb = new StringBuilder(256);
+                sb.append("<html>");
+                for (String msg : warnings) {
+                    sb.append(msg).append("<br>");
+                }
+                sb.append("</html>");
+
+                this.jLabelMessage.setText(sb.toString());
+                display(true, true);
+            } else {
+                display(true, false);
+            }
 
             // Fix file paths ie generate file names ?
             for (OIFitsFile oiFitsFile : oiFitsList) {
@@ -244,12 +293,14 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
 
     /**
      * Show message or plot
-     * @param show flag to indicate to show label
+     * @param showPlot flag indicating to show the plot view
+     * @param showMessage flag indicating to show the message label
      */
-    private void showMessage(final boolean show) {
-        this.jLabelMessage.setVisible(show);
-        this.plotView.setVisible(!show);
+    private void display(final boolean showPlot, final boolean showMessage) {
+        this.jLabelMessage.setVisible(showMessage);
+        this.plotView.setVisible(showPlot);
     }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabelMessage;
     // End of variables declaration//GEN-END:variables

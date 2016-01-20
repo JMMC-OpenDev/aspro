@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.interop;
 
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
+import fr.jmmc.aspro.model.OIFitsData;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jmal.model.targetmodel.Model;
@@ -74,10 +75,12 @@ public final class BroadcastToModelFittingAction extends SampCapabilityAction {
         // get Target model from the targetId given by oifits.oiTargets
         // serialize and build one samp message
 
-        final List<OIFitsFile> oiFitsFiles = ObservationManager.getInstance().getOIFitsList();
+        final List<OIFitsFile> oiFitsFiles = ObservationManager.getInstance().checkAndGetOIFitsList();
 
         if (oiFitsFiles == null) {
             MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
+            return null;
+        } else if (oiFitsFiles == OIFitsData.IGNORE_OIFITS_LIST) {
             return null;
         }
 

@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
+import fr.jmmc.aspro.model.OIFitsData;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -54,59 +55,60 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
     public void actionPerformed() {
         logger.debug("actionPerformed");
 
-        final List<OIFitsFile> oiFitsFiles = ObservationManager.getInstance().getOIFitsList();
+        final List<OIFitsFile> oiFitsFiles = ObservationManager.getInstance().checkAndGetOIFitsList();
 
-        if (oiFitsFiles != null) {
+        if (oiFitsFiles == null) {
+            MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
+            return;
+        } else if (oiFitsFiles == OIFitsData.IGNORE_OIFITS_LIST) {
+            return;
+        }
 
-            final boolean exportAll = oiFitsFiles.size() > 1;
+        final boolean exportAll = oiFitsFiles.size() > 1;
+        File file;
 
-            File file;
+        if (exportAll) {
+            file = FileChooser.showDirectoryChooser("Export observations as OIFits files", null, mimeType);
+        } else {
+            final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
 
-            if (exportAll) {
-                file = FileChooser.showDirectoryChooser("Export observations as OIFits files", null, mimeType);
-            } else {
-                final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
+            file = FileChooser.showSaveFileChooser("Export this observation as an OIFits file", null, mimeType, getDefaultFileName(oiFitsFile));
+        }
 
-                file = FileChooser.showSaveFileChooser("Export this observation as an OIFits file", null, mimeType, getDefaultFileName(oiFitsFile));
-            }
+        logger.debug("Selected file: {}", file);
 
-            logger.debug("Selected file: {}", file);
+        // If a file was defined (No cancel in the dialog)
+        if (file != null) {
+            final String directory = (exportAll) ? file.getPath() : file.getParent();
 
-            // If a file was defined (No cancel in the dialog)
-            if (file != null) {
-                final String directory = (exportAll) ? file.getPath() : file.getParent();
+            try {
 
-                try {
+                if (exportAll) {
 
-                    if (exportAll) {
+                    for (OIFitsFile oiFitsFile : oiFitsFiles) {
 
-                        for (OIFitsFile oiFitsFile : oiFitsFiles) {
-
-                            file = new File(directory, getDefaultFileName(oiFitsFile));
-
-                            OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
-
-                            StatusBar.show(file.getName() + " created.");
-                        }
-
-                        StatusBar.show("OIFits files saved in " + directory + ".");
-
-                    } else {
-                        final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
+                        file = new File(directory, getDefaultFileName(oiFitsFile));
 
                         OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
 
                         StatusBar.show(file.getName() + " created.");
                     }
 
-                } catch (FitsException fe) {
-                    MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), fe);
-                } catch (IOException ioe) {
-                    MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
+                    StatusBar.show("OIFits files saved in " + directory + ".");
+
+                } else {
+                    final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
+
+                    OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
+
+                    StatusBar.show(file.getName() + " created.");
                 }
+
+            } catch (FitsException fe) {
+                MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), fe);
+            } catch (IOException ioe) {
+                MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
             }
-        } else {
-            MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
         }
     }
 

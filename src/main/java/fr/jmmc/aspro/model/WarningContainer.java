@@ -76,6 +76,22 @@ public final class WarningContainer {
     }
 
     /**
+     * Return the first warning message in this warning container that contains the given string
+     * @param match matching string
+     * @return first warning message in this warning container that contains the given string or null if not found
+     */
+    public String getMatchingWarningMessage(final String match) {
+        if (hasWarningMessages()) {
+            for (WarningMessage message : getWarningMessages()) {
+                if (message.getMessage().contains(match)) {
+                    return message.getMessage();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Return the highest level of warning messages (Warning > Information)
      * @return highest level of warning messages (Warning > Information) or null if empty
      */

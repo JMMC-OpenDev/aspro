@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9 beta 1"/>
-    <compilation date="17/12/2015" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9 beta 2"/>
+    <compilation date="20/01/2015" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -161,6 +161,8 @@
             <menu/> <!-- menu separator -->
             <menu label="Export plot to PDF" classpath="fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction" action="exportPDF" accelerator="P"
                   icon="fr/jmmc/oiexplorer/core/resource/image/icon_pdf.gif" description="Export the current plot to a PDF document"/>
+            <menu label="Export plot to PNG" classpath="fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction" action="exportPNG"
+                  description="Export the current plot to a PNG image"/>
         </menu>
 
         <menu label="Edit">
@@ -195,11 +197,23 @@
 
     <releasenotes>
         <release version="0.9.9">
-            <pubDate>Thu, 17 Dec 2015 10:00:00 GMT</pubDate>
+            <pubDate>Wed, 20 Jan 2015 16:00:00 GMT</pubDate>
+            <prerelease version="0.9.9 beta 2">
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/725">Added OIFits warning checks (missing magnitude)
+                    to show a confirmation dialog when exporting either an OIFits file (including SAMP interoperability) or an OIFits viewer plot
+                </change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/725">Added a warning label displayed on the OIFits viewer plot
+                    indicating that the noise modelling is not working due to missing magnitude(s)
+                </change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/725">Added warning messages into the status log accessible
+                    via the status toolbar (click on the icon)</change>
+                <change type="FEATURE">Added action 'Export plot to PNG' in the File menu</change>
+            </prerelease>
             <prerelease version="0.9.9 beta 1">
                 <change type="FEATURE">Added GRAVITY OB generation (preliminary)</change>
                 <change type="FEATURE">Updated VLTI telescope shadowing profiles according to ESO new "theoretical" master tables for VLTI horizons</change>
                 <change type="FEATURE">Added the mean atmosphere transmission (PARANAL) used by the Noise modelling</change>
+                <change type="FEATURE">Added the Hertz unit support (hz, khz, mhz, ghz) for the wavelength keywords in user models</change>
                 <change type="FEATURE">Improved Noise modelling and its configuration for MATISSE</change>
             </prerelease>
         </release>

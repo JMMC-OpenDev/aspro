@@ -87,8 +87,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     private File observationFile = null;
     /** derived observation collection used by computations */
     private ObservationCollection obsCollection = null;
-    /** computed OIFits structures */
-    private List<OIFitsFile> oiFitsList = null;
+    /** computed OIFits data */
+    private OIFitsData oiFitsData = null;
     /** (cached) flag to use fast user model (preference) */
     private boolean useFastUserModel;
 
@@ -402,7 +402,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * Save the current observation into a String (xml)
      * @return observation setting serialized into a String
      * @throws IllegalStateException if an unexpected exception occured
-    */
+     */
     public String saveToString() throws IllegalStateException {
         // Create a 16K buffer for the complete observation setting :
         final StringWriter sw = new StringWriter(16384);
@@ -410,7 +410,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         // serialize observation to xml :
         saveObject(sw, getMainObservation());
 
-        return sw.toString();        
+        return sw.toString();
     }
 
     // --- EVENTS ----------------------------------------------------------------
@@ -536,10 +536,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 logger.debug("fireObservationUpdate : FORCE REFRESH - changed: {}", event.getChanged());
             }
             event.setChanged(UpdateObservationEvent.ChangeType.MAIN);
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("fireObservationUpdate : changed: {}", event.getChanged());
-            }
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("fireObservationUpdate : changed: {}", event.getChanged());
         }
 
         // Handle event result :
@@ -649,13 +647,13 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      *
      * Listeners : SettingPanel / OIFitsPanel
      *
-     * @param oiFitsFiles OIFits structures
+     * @param oiFitsData OIFits structures
      */
-    public void fireOIFitsDone(final List<OIFitsFile> oiFitsFiles) {
+    public void fireOIFitsDone(final OIFitsData oiFitsData) {
         // use observation for computations :
-        logger.debug("fireOIFitsDone: {}", oiFitsFiles);
+        logger.debug("fireOIFitsDone: {}", oiFitsData);
 
-        fireEvent(new OIFitsEvent(oiFitsFiles));
+        fireEvent(new OIFitsEvent(oiFitsData));
     }
 
     /**
@@ -856,7 +854,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      */
     public boolean setInstrumentConfigurationName(final String instrumentAlias) {
         final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
-        
+
         // use the real instrument name (not alias):
         final String insName = instrumentChoice.getInstrumentConfiguration().getFocalInstrument().getName();
 
@@ -867,7 +865,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         instrumentChoice.setName(instrumentAlias);
         instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(
                 getMainObservation().getInterferometerConfiguration().getName(), instrumentAlias));
-        
+
         // Check if the real instrument changed (alias / names may be the same):
         final boolean changed = !insName.equals(instrumentChoice.getInstrumentConfiguration().getFocalInstrument().getName());
 
@@ -1368,25 +1366,33 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * Defines the OIFits structures (SHARED) for later reuse (OIFits Explorer)
      * Used by UVCoveragePanel.UVCoverageSwingWorker.refreshUI()
      *
-     * @param oiFitsList list of OIFits structures (or null)
+     * @param oiFitsData OIFits structures (or null)
      */
-    public void setOIFitsList(final List<OIFitsFile> oiFitsList) {
-        logger.debug("setOIFitsList: {}", oiFitsList);
+    public void setOIFitsData(final OIFitsData oiFitsData) {
+        logger.debug("setOIFitsData: {}", oiFitsData);
 
         // TODO: use a new class OIFitsData (version / File / Target) ...
         // Use OIFitsCollectionManager ?
-        this.oiFitsList = (oiFitsList == null || oiFitsList.isEmpty()) ? null : oiFitsList;
+        this.oiFitsData = (oiFitsData == null || oiFitsData.getOIFitsList().isEmpty()) ? null : oiFitsData;
 
         // Fire OIFitsDone event to inform panels to be updated anyway:
-        this.fireOIFitsDone(this.oiFitsList);
+        this.fireOIFitsDone(this.oiFitsData);
     }
 
     /**
      * Return the computed OIFits structures (read only)
-     * @return OIFits structure or null
+     * @return OIFits structures or null
      */
-    public List<OIFitsFile> getOIFitsList() {
-        return this.oiFitsList;
+    public OIFitsData getOIFitsData() {
+        return this.oiFitsData;
+    }
+
+    /**
+     * Return the computed OIFits structures (read only) but check warnings and potentially display a confirmation dialog
+     * @return OIFits structures or null
+     */
+    public List<OIFitsFile> checkAndGetOIFitsList() {
+        return (this.oiFitsData != null) ? this.oiFitsData.checkAndGetOIFitsList() : null;
     }
 
     // --- OBSERVATION VARIANTS -------------------------------------------------

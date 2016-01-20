@@ -21,6 +21,7 @@ import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
 import fr.jmmc.aspro.gui.util.UserModelAnimator;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.ConfigurationManager;
+import fr.jmmc.aspro.model.OIFitsData;
 import fr.jmmc.aspro.model.ObservationCollectionUVData;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
@@ -744,7 +745,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         this.chart = ChartUtils.createSquareXYLineChart("U (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", "V (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", true);
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
-        
+
         this.xyPlot.getDomainAxis().setPositiveArrowVisible(true);
         this.xyPlot.getRangeAxis().setPositiveArrowVisible(true);
 
@@ -1185,14 +1186,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             if (this.getChartData() != null) {
                 if (this.jCheckBoxDoOIFits.isSelected()) {
                     computeOIFits(this.getChartData());
-                } else {
-                    // cancel anyway currently running OIFitsSwingWorker:
+                } else // cancel anyway currently running OIFitsSwingWorker:
+                {
                     if (TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_OIFITS)) {
                         // update the status bar:
                         StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits data cancelled.");
 
                         // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
-                        ObservationManager.getInstance().setOIFitsList(null);
+                        ObservationManager.getInstance().setOIFitsData(null);
                     }
                 }
             }
@@ -1828,8 +1829,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                     uvMapData = ModelUVMapService.computeUVMap(models, uvRect,
                                             this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
                                 }
-                            } else {
-                                // User Model:
+                            } else // User Model:
+                            {
                                 if (modelDataList != null) {
                                     // Get preloaded and prepared fits image at given index:
                                     final FitsImage fitsImage = modelDataList.get(imageIdx).getFitsImage();
@@ -1971,7 +1972,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
             if (resetOIFits) {
-                ObservationManager.getInstance().setOIFitsList(null);
+                ObservationManager.getInstance().setOIFitsData(null);
             }
 
             // Fire a warnings ready event :
@@ -2031,7 +2032,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         boolean computing = false;
 
         // check if the OIFits data are still available:
-        if (ObservationManager.getInstance().getOIFitsList() != null) {
+        if (ObservationManager.getInstance().getOIFitsData() != null) {
             // Check if the previously computed UV Data is still valid :
             final ObservationCollectionUVData currentUVData = getChartData();
 
@@ -2331,8 +2332,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                     imageMode, imageSize, colorModel, colorScale, noiseService).executeTask();
 
                         }
-                    } else {
-                        // cancel anyway currently running UVMapSwingWorker:
+                    } else // cancel anyway currently running UVMapSwingWorker:
+                    {
                         if (TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_UV_MAP)) {
                             // update the status bar:
                             StatusBar.showIfPrevious(MSG_COMPUTING_MAP, "uv map cancelled.");
@@ -3097,7 +3098,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.uvDataCollection.setOIFitsDone(true);
 
             // update the OIFits structure in the current observation :
-            ObservationManager.getInstance().setOIFitsList(oiFitsList);
+            ObservationManager.getInstance().setOIFitsData(
+                    new OIFitsData(oiFitsList, this.uvDataCollection.getWarningContainer())
+            );
 
             // update the status bar:
             StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits done.");
@@ -3486,8 +3489,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // u negative:
                 annotation.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
             }
-        } else {
-            // v negative:
+        } else // v negative:
+        {
             if (u >= 0.0) {
                 annotation.setTextAnchor(TextAnchor.TOP_LEFT);
             } else {
@@ -3510,12 +3513,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 this.timerTimeRefresh.start();
             }
-        } else {
-            if (this.timerTimeRefresh.isRunning()) {
-                logger.debug("Stopping timer: {}", this.timerTimeRefresh);
+        } else if (this.timerTimeRefresh.isRunning()) {
+            logger.debug("Stopping timer: {}", this.timerTimeRefresh);
 
-                this.timerTimeRefresh.stop();
-            }
+            this.timerTimeRefresh.stop();
         }
     }
 }

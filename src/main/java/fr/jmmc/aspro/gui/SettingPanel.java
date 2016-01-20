@@ -311,7 +311,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
             }
         } else if (type == ObservationEventType.OIFITS_DONE
                 && event instanceof OIFitsEvent
-                && ((OIFitsEvent) event).getOIFitsList() != null) {
+                && ((OIFitsEvent) event).getOIFitsData() != null) {
 
             // create the OIFits viewer panel if null :      
             if (this.oiFitsViewPanel == null) {
