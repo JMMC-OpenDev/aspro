@@ -5,7 +5,7 @@ package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.gui.PreferencePanel;
 import fr.jmmc.aspro.gui.SettingPanel;
-import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
+import fr.jmmc.aspro.gui.action.AsproExportAction;
 import fr.jmmc.aspro.gui.action.ExportAllOBAction;
 import fr.jmmc.aspro.gui.action.ExportOBAction;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
@@ -26,6 +26,7 @@ import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.Bootstrapper;
+import fr.jmmc.jmcs.data.MimeType;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.PreferencesView;
 import fr.jmmc.jmcs.gui.action.ShowReleaseNotesAction;
@@ -320,8 +321,9 @@ public final class Aspro2 extends App {
         new ExportOBAction();
         // export ALl OB :
         new ExportAllOBAction();
-        // export PDF :
-        new AsproExportPDFAction();
+        // export actions:
+        new AsproExportAction(MimeType.PDF);
+        new AsproExportAction(MimeType.PNG);
         // export OIFits :
         new ExportOIFitsAction();
 
