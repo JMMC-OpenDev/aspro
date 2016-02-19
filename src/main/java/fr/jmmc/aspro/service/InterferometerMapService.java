@@ -77,6 +77,7 @@ public final class InterferometerMapService {
             final double[] mapX = new double[size];
             final double[] mapY = new double[size];
 
+            double maxDiam = Double.NEGATIVE_INFINITY;
             double x, y, z;
 
             Station s;
@@ -85,6 +86,10 @@ public final class InterferometerMapService {
 
                 name[i] = s.getName();
                 diam[i] = s.getTelescope().getDiameter();
+                
+                if (diam[i] > maxDiam) {
+                    maxDiam = diam[i];
+                }
 
                 // convert XYZ station coordinates to XY plan :
                 x = s.getRelativePosition().getPosX();
@@ -115,7 +120,9 @@ public final class InterferometerMapService {
             final double maxY = getMax(mapY);
             relocate(mapY, minY + 0.5d * (maxY - minY));
 
-            final double maxXY = Math.max(0.5d * (maxX - minX), 0.5d * (maxY - minY));
+            final double maxXY = Math.max(maxDiam, 
+                    Math.max(0.5d * (maxX - minX), 0.5d * (maxY - minY))
+            );
 
             // copy results :
             data.setMaxXY(maxXY);
