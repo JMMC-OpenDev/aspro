@@ -3166,23 +3166,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             }
         }
 
-        if (false) {
-            switch (event.getType()) {
-                case ChartProgressEvent.DRAWING_STARTED:
-                    this.chartDrawStartTime = System.nanoTime();
-                    break;
-                case ChartProgressEvent.DRAWING_FINISHED:
-                    logger.info("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
-                    this.chartDrawStartTime = 0l;
-                    break;
-                default:
-            }
+        if (event.getType() == ChartProgressEvent.DRAWING_STARTED) {
+            // Perform custom operations before chart rendering:
+            // move JMMC annotation:
+            this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
+            this.aJMMC.setY(this.xyPlot.getRangeAxis().getLowerBound());
         }
-
-        // Perform custom operations before/after chart rendering:
-        // move JMMC annotation:
-        this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
-        this.aJMMC.setY(this.xyPlot.getRangeAxis().getLowerBound());
     }
 
     /**
