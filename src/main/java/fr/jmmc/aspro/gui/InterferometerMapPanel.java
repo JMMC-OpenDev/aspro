@@ -425,9 +425,11 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
             }
         }
 
-        // Perform custom operations before/after chart rendering:
-        // move JMMC annotation:
-        this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
-        this.aJMMC.setY(this.xyPlot.getRangeAxis().getLowerBound());
+        if (event.getType() == ChartProgressEvent.DRAWING_STARTED) {
+            // Perform custom operations before chart rendering:
+            // move JMMC annotation:
+            this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
+            this.aJMMC.setY(this.xyPlot.getRangeAxis().getLowerBound());
+        }
     }
 }
