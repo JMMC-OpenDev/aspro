@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9 beta 2"/>
-    <compilation date="20/01/2015" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9 beta 3"/>
+    <compilation date="19/02/2016" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -197,7 +197,11 @@
 
     <releasenotes>
         <release version="0.9.9">
-            <pubDate>Wed, 20 Jan 2015 16:00:00 GMT</pubDate>
+            <pubDate>Fri, 19 Feb 2016 16:00:00 GMT</pubDate>
+            <prerelease version="0.9.9 beta 3">
+                <change type="FEATURE">Upgraded the OIFits viewer: improved editable axis bounds, added plot information (data ranges...)</change>
+                <change type="BUGFIX">Fixed bad box size of the interferometer map for single dishes</change>
+            </prerelease>
             <prerelease version="0.9.9 beta 2">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/741">Fixed a caret issue with the date spinner widget (mac os)</change>
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/725">Added OIFits warning checks (missing magnitude)
