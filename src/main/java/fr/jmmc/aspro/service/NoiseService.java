@@ -341,8 +341,6 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("totalObsTime                  : {}", totalObsTime);
             logger.debug("totalOBTime                   : {}", totalObsTime / ratioTimeInterfero);
         }
-        logger.info("totalObsTime                  : {}", totalObsTime);
-        logger.info("totalOBTime                   : {}", totalObsTime / ratioTimeInterfero);
 
         if (this.useInstrumentBias) {
             /* Convert Phase bias to radians */
@@ -473,8 +471,6 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("instrumentVis2CalibrationBias : {}", instrumentVis2CalibrationBias);
         }
     }
-    
-    private static boolean useTB = false;
 
     /**
      * Prepare fringe tracker parameters
