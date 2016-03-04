@@ -34,6 +34,7 @@ import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiTask;
 import org.fest.swing.fixture.DialogFixture;
 import org.fest.swing.fixture.FrameFixture;
+import org.fest.swing.fixture.JOptionPaneFixture;
 import org.fest.swing.fixture.JPanelFixture;
 import org.fest.swing.fixture.JTabbedPaneFixture;
 import org.fest.swing.fixture.JTextComponentFixture;
@@ -730,6 +731,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // export OB file :
         window.pressAndReleaseKey(keyCode(VK_B).modifiers(Platform.controlOrCommandMask()));
 
+        // close warning on OIFITS message:
+        closeOIFitsMessage();
+
         // use image folder to store OB file and validate :
         window.fileChooser().setCurrentDirectory(getScreenshotFolder()).approve();
 
@@ -748,6 +752,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // export OIFits :
         window.pressAndReleaseKey(keyCode(VK_F).modifiers(Platform.controlOrCommandMask()));
 
+        // close warning on OIFITS message:
+        closeOIFitsMessage();
+
         // use image folder to store OIFits and validate :
         window.fileChooser().setCurrentDirectory(getScreenshotFolder()).approve();
 
@@ -762,11 +769,37 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // export PDF :
         window.pressAndReleaseKey(keyCode(VK_P).modifiers(Platform.controlOrCommandMask()));
 
+        // close warning on OIFITS message:
+        closeOIFitsMessage();
+
         // use image folder to store PDF and validate :
         window.fileChooser().setCurrentDirectory(getScreenshotFolder()).approve();
 
         // overwrite any existing file :
         confirmDialogFileOverwrite();
+    }
+
+    /**
+     * Close any option pane by cliking Yes
+     * @return true if a message was closed
+     */
+    protected final boolean closeOIFitsMessage() {
+        try {
+            // if a message appears :
+            final JOptionPaneFixture optionPane = window.optionPane();
+
+            if (optionPane != null) {
+                // click Yes :
+                optionPane.yesButton().click();
+
+                return true;
+            }
+
+        } catch (RuntimeException re) {
+            // happens when the confirm message does not occur :
+            logger.debug("lookup failure : ", re);
+        }
+        return false;
     }
 
     /**
