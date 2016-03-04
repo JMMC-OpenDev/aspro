@@ -18,24 +18,24 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="ObservationContext">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="operation" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="interferometerEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="periodEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="instrumentEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="popsEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="configurationsEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="nightEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="dateEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="minElevationEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="targetsEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="ObservationContext"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="operation" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="interferometerEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="periodEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="instrumentEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="popsEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="configurationsEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="nightEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="dateEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="minElevationEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="targetsEditable" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

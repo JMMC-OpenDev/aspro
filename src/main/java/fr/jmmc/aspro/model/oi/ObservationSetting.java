@@ -21,25 +21,25 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="ObservationSetting">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="schemaVersion" type="{http://www.w3.org/2001/XMLSchema}float"/>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="when" type="{http://www.jmmc.fr/aspro-oi/0.1}WhenSetting"/>
- *         &lt;element name="interferometerConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}InterferometerConfigurationChoice"/>
- *         &lt;element name="instrumentConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentConfigurationChoice"/>
- *         &lt;element name="target" type="{http://www.jmmc.fr/aspro-oi/0.1}Target" maxOccurs="unbounded"/>
- *         &lt;element name="targetUserInfos" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetUserInformations" minOccurs="0"/>
- *         &lt;element name="variant" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationVariant" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="context" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationContext" minOccurs="0"/>
- *         &lt;element name="extendedConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}InterferometerConfiguration" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="ObservationSetting"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="schemaVersion" type="{http://www.w3.org/2001/XMLSchema}float"/&gt;
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="when" type="{http://www.jmmc.fr/aspro-oi/0.1}WhenSetting"/&gt;
+ *         &lt;element name="interferometerConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}InterferometerConfigurationChoice"/&gt;
+ *         &lt;element name="instrumentConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentConfigurationChoice"/&gt;
+ *         &lt;element name="target" type="{http://www.jmmc.fr/aspro-oi/0.1}Target" maxOccurs="unbounded"/&gt;
+ *         &lt;element name="targetUserInfos" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetUserInformations" minOccurs="0"/&gt;
+ *         &lt;element name="variant" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationVariant" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="context" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationContext" minOccurs="0"/&gt;
+ *         &lt;element name="extendedConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}InterferometerConfiguration" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

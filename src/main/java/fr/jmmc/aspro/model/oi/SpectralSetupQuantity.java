@@ -12,15 +12,15 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="SpectralSetupQuantity">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="lambda"/>
- *     &lt;enumeration value="delta_lambda"/>
- *     &lt;enumeration value="nb_photon_thermal"/>
- *     &lt;enumeration value="transmission"/>
- *     &lt;enumeration value="visibility"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="SpectralSetupQuantity"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="lambda"/&gt;
+ *     &lt;enumeration value="delta_lambda"/&gt;
+ *     &lt;enumeration value="nb_photon_thermal"/&gt;
+ *     &lt;enumeration value="transmission"/&gt;
+ *     &lt;enumeration value="visibility"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  * 
  */

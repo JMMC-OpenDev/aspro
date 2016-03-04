@@ -23,36 +23,36 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="FocalInstrumentSetup">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
- *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="defaultTotalIntegrationTime" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="defaultSamplingTime" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="deadtimeExposure" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="deadtimeSequence" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="ron" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="detectorSaturation" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="quantumEfficiency" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="fracFluxInInterferometry" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="fracFluxInPhotometry" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="nbPixInterferometry" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="nbPixPhotometry" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="transmission" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="instrumentVisibility" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="instrumentVisibilityBias" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="instrumentVis2CalibrationBias" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="instrumentPhaseBias" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="sequence" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationSequence" minOccurs="0"/>
- *       &lt;/sequence>
- *       &lt;attribute name="useStrehlCorrection" type="{http://www.w3.org/2001/XMLSchema}boolean" default="true" />
- *       &lt;attribute name="includeAtmosphereCorrection" type="{http://www.w3.org/2001/XMLSchema}boolean" default="true" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="FocalInstrumentSetup"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
+ *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="defaultTotalIntegrationTime" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/&gt;
+ *         &lt;element name="defaultSamplingTime" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/&gt;
+ *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="deadtimeExposure" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="deadtimeSequence" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="ron" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="detectorSaturation" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="quantumEfficiency" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="fracFluxInInterferometry" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="fracFluxInPhotometry" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="nbPixInterferometry" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="nbPixPhotometry" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="transmission" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="instrumentVisibility" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="instrumentVisibilityBias" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="instrumentVis2CalibrationBias" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="instrumentPhaseBias" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="sequence" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationSequence" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute name="useStrehlCorrection" type="{http://www.w3.org/2001/XMLSchema}boolean" default="true" /&gt;
+ *       &lt;attribute name="includeAtmosphereCorrection" type="{http://www.w3.org/2001/XMLSchema}boolean" default="true" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

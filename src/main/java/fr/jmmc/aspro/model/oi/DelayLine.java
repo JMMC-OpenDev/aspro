@@ -23,17 +23,17 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="DelayLine">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
- *         &lt;element name="station" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/>
- *         &lt;element name="maximumThrow" type="{http://www.w3.org/2001/XMLSchema}double"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="DelayLine"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
+ *         &lt;element name="station" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
+ *         &lt;element name="maximumThrow" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

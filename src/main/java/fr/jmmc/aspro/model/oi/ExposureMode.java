@@ -11,14 +11,14 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="ExposureMode">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="NONE"/>
- *     &lt;enumeration value="INTERFEROMETRY"/>
- *     &lt;enumeration value="PHOTOMETRY"/>
- *     &lt;enumeration value="ALL"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="ExposureMode"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="NONE"/&gt;
+ *     &lt;enumeration value="INTERFEROMETRY"/&gt;
+ *     &lt;enumeration value="PHOTOMETRY"/&gt;
+ *     &lt;enumeration value="ALL"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  * 
  */

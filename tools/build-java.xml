@@ -97,6 +97,18 @@
         <xjc destdir="${output}"
              schema="${resources}/fr/jmmc/aspro/model/AsproOIModel.xsd" />
 
+	<!-- 
+	remove several @XmlSchemaType in JAXB 2.2.11:
+	- @XmlSchemaType(name = "string") by '' (bad enum)
+	- @XmlSchemaType(name = "anySimpleType") by none (bad double[])
+	-->
+	<replace summary="true" dir="${output}/fr/jmmc/aspro/model/oi/" includes="*.java" value="">
+		<replacetoken>@XmlSchemaType(name = "string")</replacetoken>
+	</replace>
+	<replace summary="true" dir="${output}/fr/jmmc/aspro/model/oi/" includes="*.java" value="">
+		<replacetoken>@XmlSchemaType(name = "anySimpleType")</replacetoken>
+	</replace>
+
         <!-- remove generated classes for jmal package (target model) -->
 
         <delete dir="${output}/fr/jmmc/jmal/" />

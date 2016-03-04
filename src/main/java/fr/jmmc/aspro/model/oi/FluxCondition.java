@@ -4,6 +4,7 @@ package fr.jmmc.aspro.model.oi;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -18,17 +19,17 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="FluxCondition">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/>
- *         &lt;element name="op" type="{http://www.jmmc.fr/aspro-oi/0.1}Operator"/>
- *         &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}double"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="FluxCondition"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/&gt;
+ *         &lt;element name="op" type="{http://www.jmmc.fr/aspro-oi/0.1}Operator"/&gt;
+ *         &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -44,8 +45,10 @@ public class FluxCondition
 {
 
     @XmlElement(required = true)
+    
     protected SpectralBand band;
     @XmlElement(required = true)
+    
     protected Operator op;
     protected double value;
 

@@ -22,18 +22,18 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="ChannelLink">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="channel" type="{http://www.w3.org/2001/XMLSchema}IDREF"/>
- *         &lt;element name="opticalLength" type="{http://www.w3.org/2001/XMLSchema}double"/>
- *         &lt;element name="delayLine" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/>
- *         &lt;element name="delayLineThrow" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLineRestrictionThrow" maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="ChannelLink"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="channel" type="{http://www.w3.org/2001/XMLSchema}IDREF"/&gt;
+ *         &lt;element name="opticalLength" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
+ *         &lt;element name="delayLine" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
+ *         &lt;element name="delayLineThrow" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLineRestrictionThrow" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

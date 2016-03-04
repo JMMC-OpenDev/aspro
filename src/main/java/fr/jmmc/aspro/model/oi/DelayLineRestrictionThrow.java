@@ -25,13 +25,13 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="DelayLineRestrictionThrow">
- *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>double">
- *       &lt;attribute name="restriction" use="required" type="{http://www.w3.org/2001/XMLSchema}IDREF" />
- *     &lt;/extension>
- *   &lt;/simpleContent>
- * &lt;/complexType>
+ * &lt;complexType name="DelayLineRestrictionThrow"&gt;
+ *   &lt;simpleContent&gt;
+ *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;double"&gt;
+ *       &lt;attribute name="restriction" use="required" type="{http://www.w3.org/2001/XMLSchema}IDREF" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/simpleContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

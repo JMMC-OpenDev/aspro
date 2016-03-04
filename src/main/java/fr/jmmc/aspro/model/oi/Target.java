@@ -26,44 +26,44 @@ import fr.jmmc.jmal.model.targetmodel.Model;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Target">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="origin" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="RA" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="DEC" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="EQUINOX" type="{http://www.w3.org/2001/XMLSchema}float"/>
- *         &lt;element name="SYSVEL" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="VELTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="PMRA" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="PMDEC" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="PARALLAX" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="PARA_ERR" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="IDS" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="OBJTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="SPECTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="FLUX_B" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="FLUX_V" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="FLUX_R" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="FLUX_I" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="FLUX_J" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="FLUX_H" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="FLUX_K" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="FLUX_L" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="FLUX_M" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="FLUX_N" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="useAnalyticalModel" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element ref="{http://www.jmmc.fr/jmcs/models/0.1}model" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="userModel" type="{http://www.jmmc.fr/aspro-oi/0.1}UserModel" minOccurs="0"/>
- *         &lt;element name="configuration" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetConfiguration" minOccurs="0"/>
- *         &lt;element name="calibratorInfos" type="{http://www.jmmc.fr/aspro-oi/0.1}CalibratorInformations" minOccurs="0"/>
- *       &lt;/sequence>
- *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}ID" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="Target"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="origin" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="RA" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="DEC" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="EQUINOX" type="{http://www.w3.org/2001/XMLSchema}float"/&gt;
+ *         &lt;element name="SYSVEL" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="VELTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="PMRA" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="PMDEC" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="PARALLAX" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="PARA_ERR" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="IDS" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="OBJTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="SPECTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_B" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_V" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_R" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_I" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_J" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_H" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_K" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_L" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_M" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_N" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="useAnalyticalModel" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
+ *         &lt;element ref="{http://www.jmmc.fr/jmcs/models/0.1}model" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="userModel" type="{http://www.jmmc.fr/aspro-oi/0.1}UserModel" minOccurs="0"/&gt;
+ *         &lt;element name="configuration" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetConfiguration" minOccurs="0"/&gt;
+ *         &lt;element name="calibratorInfos" type="{http://www.jmmc.fr/aspro-oi/0.1}CalibratorInformations" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}ID" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

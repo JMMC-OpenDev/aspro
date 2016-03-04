@@ -24,20 +24,20 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="FringeTracker">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
- *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/>
- *         &lt;element name="mode" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="instrumentVisibility" type="{http://www.w3.org/2001/XMLSchema}double"/>
- *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double"/>
- *         &lt;element name="maxIntegration" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="FringeTracker"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
+ *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/&gt;
+ *         &lt;element name="mode" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="instrumentVisibility" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
+ *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
+ *         &lt;element name="maxIntegration" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -61,6 +61,7 @@ public class FringeTracker
     @XmlSchemaType(name = "ID")
     protected String name;
     @XmlElement(required = true)
+    
     protected SpectralBand band;
     @XmlElement(name = "mode")
     protected List<String> modes;

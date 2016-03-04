@@ -24,28 +24,28 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="InterferometerDescription">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
- *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="position" type="{http://www.jmmc.fr/aspro-oi/0.1}Position3D"/>
- *         &lt;element name="timezone" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="windPointingRestriction" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="telescope" type="{http://www.jmmc.fr/aspro-oi/0.1}Telescope" maxOccurs="unbounded"/>
- *         &lt;element name="station" type="{http://www.jmmc.fr/aspro-oi/0.1}Station" maxOccurs="unbounded"/>
- *         &lt;element name="channel" type="{http://www.jmmc.fr/aspro-oi/0.1}Channel" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="delayLine" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLine" maxOccurs="unbounded"/>
- *         &lt;element name="delayLineRestriction" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLineRestriction" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="switchyard" type="{http://www.jmmc.fr/aspro-oi/0.1}SwitchYard" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="pop" type="{http://www.jmmc.fr/aspro-oi/0.1}Pop" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="fringeTracker" type="{http://www.jmmc.fr/aspro-oi/0.1}FringeTracker" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="focalInstrument" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrument" maxOccurs="unbounded"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="InterferometerDescription"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
+ *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="position" type="{http://www.jmmc.fr/aspro-oi/0.1}Position3D"/&gt;
+ *         &lt;element name="timezone" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="windPointingRestriction" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="telescope" type="{http://www.jmmc.fr/aspro-oi/0.1}Telescope" maxOccurs="unbounded"/&gt;
+ *         &lt;element name="station" type="{http://www.jmmc.fr/aspro-oi/0.1}Station" maxOccurs="unbounded"/&gt;
+ *         &lt;element name="channel" type="{http://www.jmmc.fr/aspro-oi/0.1}Channel" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="delayLine" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLine" maxOccurs="unbounded"/&gt;
+ *         &lt;element name="delayLineRestriction" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLineRestriction" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="switchyard" type="{http://www.jmmc.fr/aspro-oi/0.1}SwitchYard" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="pop" type="{http://www.jmmc.fr/aspro-oi/0.1}Pop" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="fringeTracker" type="{http://www.jmmc.fr/aspro-oi/0.1}FringeTracker" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="focalInstrument" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrument" maxOccurs="unbounded"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

@@ -11,20 +11,20 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="SpectralBand">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="B"/>
- *     &lt;enumeration value="V"/>
- *     &lt;enumeration value="R"/>
- *     &lt;enumeration value="I"/>
- *     &lt;enumeration value="J"/>
- *     &lt;enumeration value="H"/>
- *     &lt;enumeration value="K"/>
- *     &lt;enumeration value="L"/>
- *     &lt;enumeration value="M"/>
- *     &lt;enumeration value="N"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="SpectralBand"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="B"/&gt;
+ *     &lt;enumeration value="V"/&gt;
+ *     &lt;enumeration value="R"/&gt;
+ *     &lt;enumeration value="I"/&gt;
+ *     &lt;enumeration value="J"/&gt;
+ *     &lt;enumeration value="H"/&gt;
+ *     &lt;enumeration value="K"/&gt;
+ *     &lt;enumeration value="L"/&gt;
+ *     &lt;enumeration value="M"/&gt;
+ *     &lt;enumeration value="N"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  * 
  */

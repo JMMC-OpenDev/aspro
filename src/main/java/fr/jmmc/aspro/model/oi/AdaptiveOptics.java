@@ -4,6 +4,7 @@ package fr.jmmc.aspro.model.oi;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -18,17 +19,17 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="AdaptiveOptics">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/>
- *         &lt;element name="numberActuators" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="AdaptiveOptics"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/&gt;
+ *         &lt;element name="numberActuators" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -44,6 +45,7 @@ public class AdaptiveOptics
 {
 
     @XmlElement(required = true)
+    
     protected SpectralBand band;
     protected int numberActuators;
     protected Double magLimit;

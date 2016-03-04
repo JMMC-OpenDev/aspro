@@ -17,13 +17,13 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="NumberValue">
- *   &lt;complexContent>
- *     &lt;extension base="{http://www.jmmc.fr/aspro-oi/0.1}BaseValue">
- *       &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}double" />
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="NumberValue"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{http://www.jmmc.fr/aspro-oi/0.1}BaseValue"&gt;
+ *       &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}double" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

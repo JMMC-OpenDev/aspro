@@ -12,15 +12,15 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="AtmosphereQuality">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="Excellent"/>
- *     &lt;enumeration value="Good"/>
- *     &lt;enumeration value="Average"/>
- *     &lt;enumeration value="Bad"/>
- *     &lt;enumeration value="Awful"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="AtmosphereQuality"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="Average"/&gt;
+ *     &lt;enumeration value="Good"/&gt;
+ *     &lt;enumeration value="Excellent"/&gt;
+ *     &lt;enumeration value="Bad"/&gt;
+ *     &lt;enumeration value="Awful"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  * 
  */
@@ -30,11 +30,11 @@ public enum AtmosphereQuality {
 
 
     /**
-     * 'Excellent' means seeing = 0.4 arcsec
+     * 'Average' means seeing = 1.0 arcsec
      * 
      */
-    @XmlEnumValue("Excellent")
-    EXCELLENT("Excellent"),
+    @XmlEnumValue("Average")
+    AVERAGE("Average"),
 
     /**
      * 'Good' means seeing = 0.6 arcsec
@@ -44,11 +44,11 @@ public enum AtmosphereQuality {
     GOOD("Good"),
 
     /**
-     * 'Average' means seeing = 1.0 arcsec
+     * 'Excellent' means seeing = 0.4 arcsec
      * 
      */
-    @XmlEnumValue("Average")
-    AVERAGE("Average"),
+    @XmlEnumValue("Excellent")
+    EXCELLENT("Excellent"),
 
     /**
      * 'Bad' means seeing = 1.4 arcsec

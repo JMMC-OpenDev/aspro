@@ -24,23 +24,23 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="FocalInstrumentMode">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="resolution" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="waveLengthMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="waveLengthMax" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="setupRef" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/>
- *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="ditMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="table" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralSetup" minOccurs="0"/>
- *         &lt;element name="parameter" type="{http://www.jmmc.fr/aspro-oi/0.1}Parameter" maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="FocalInstrumentMode"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="resolution" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="waveLengthMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="waveLengthMax" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="setupRef" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
+ *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="ditMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="table" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralSetup" minOccurs="0"/&gt;
+ *         &lt;element name="parameter" type="{http://www.jmmc.fr/aspro-oi/0.1}Parameter" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -306,6 +306,9 @@ public class FocalInstrumentMode
      * @return central wave length
      */
     public final double getWaveLength() {
+        if (this.waveLengthMin == null || this.waveLengthMax == null) {
+            return Double.NaN;
+        }
         return 0.5d * (this.waveLengthMax + this.waveLengthMin);
     }
 
@@ -319,7 +322,11 @@ public class FocalInstrumentMode
      */
     public int getSpectralChannels() {
         if (this.spectralChannels == -1) {
-            this.spectralChannels = Math.max(1, (int) Math.round(getResolution() * (this.waveLengthMax - this.waveLengthMin) / getWaveLength()));
+            if (this.waveLengthMin == null || this.waveLengthMax == null) {
+                this.spectralChannels = 1;
+            } else {
+                this.spectralChannels = Math.max(1, (int) Math.round(getResolution() * (this.waveLengthMax - this.waveLengthMin) / getWaveLength()));
+            }
         }
         return this.spectralChannels;
     }
@@ -415,9 +422,12 @@ public class FocalInstrumentMode
         logger.info("Mode[{}] {", getName());
         logger.info("  name: {}", getName());
         logger.info("  resolution: {}", getResolution());
-        logger.info("  waveLengthMin: {}", fr.jmmc.jmcs.util.NumberUtils.trimTo5Digits(getWaveLengthMin()));
-        logger.info("  waveLengthMax: {}", fr.jmmc.jmcs.util.NumberUtils.trimTo5Digits(getWaveLengthMax()));
-
+        if (getWaveLengthMin() != null) {
+            logger.info("  waveLengthMin: {}", fr.jmmc.jmcs.util.NumberUtils.trimTo5Digits(getWaveLengthMin()));
+        }
+        if (getWaveLengthMax() != null) {
+            logger.info("  waveLengthMax: {}", fr.jmmc.jmcs.util.NumberUtils.trimTo5Digits(getWaveLengthMax()));
+        }
         logger.info("  setup: {}", getSetupRef());
 
         logger.info("  dit: {}", getDit());

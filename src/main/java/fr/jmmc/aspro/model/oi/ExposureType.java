@@ -11,13 +11,13 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="ExposureType">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="SCIENCE"/>
- *     &lt;enumeration value="SKY"/>
- *     &lt;enumeration value="DEAD_TIME"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="ExposureType"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="SCIENCE"/&gt;
+ *     &lt;enumeration value="SKY"/&gt;
+ *     &lt;enumeration value="DEAD_TIME"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  * 
  */

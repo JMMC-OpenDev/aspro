@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlList;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -21,16 +22,16 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="SpectralSetup">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="column" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralSetupColumn" maxOccurs="unbounded"/>
- *         &lt;element name="data" type="{http://www.jmmc.fr/aspro-oi/0.1}ValueList"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="SpectralSetup"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="column" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralSetupColumn" maxOccurs="unbounded"/&gt;
+ *         &lt;element name="data" type="{http://www.jmmc.fr/aspro-oi/0.1}ValueList"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -48,6 +49,7 @@ public class SpectralSetup
     protected List<SpectralSetupColumn> columns;
     @XmlList
     @XmlElement(type = Double.class)
+    
     protected double[] data;
 
     /**

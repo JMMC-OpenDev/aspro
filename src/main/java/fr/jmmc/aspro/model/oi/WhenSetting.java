@@ -20,18 +20,18 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="WhenSetting">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="date" type="{http://www.w3.org/2001/XMLSchema}date"/>
- *         &lt;element name="nightRestriction" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="atmosphereQuality" type="{http://www.jmmc.fr/aspro-oi/0.1}AtmosphereQuality" minOccurs="0"/>
- *         &lt;element name="windAzimuth" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="WhenSetting"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="date" type="{http://www.w3.org/2001/XMLSchema}date"/&gt;
+ *         &lt;element name="nightRestriction" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="atmosphereQuality" type="{http://www.jmmc.fr/aspro-oi/0.1}AtmosphereQuality" minOccurs="0"/&gt;
+ *         &lt;element name="windAzimuth" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -52,6 +52,7 @@ public class WhenSetting
     protected XMLGregorianCalendar date;
     @XmlElement(defaultValue = "true")
     protected boolean nightRestriction;
+    
     protected AtmosphereQuality atmosphereQuality;
     protected Double windAzimuth;
 

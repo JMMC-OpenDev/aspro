@@ -19,16 +19,16 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Exposure">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="type" use="required" type="{http://www.jmmc.fr/aspro-oi/0.1}ExposureType" />
- *       &lt;attribute name="mode" type="{http://www.jmmc.fr/aspro-oi/0.1}ExposureMode" default="ALL" />
- *       &lt;attribute name="unit" type="{http://www.w3.org/2001/XMLSchema}double" default="1" />
- *       &lt;attribute name="beams" type="{http://www.w3.org/2001/XMLSchema}int" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="Exposure"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;attribute name="type" use="required" type="{http://www.jmmc.fr/aspro-oi/0.1}ExposureType" /&gt;
+ *       &lt;attribute name="mode" type="{http://www.jmmc.fr/aspro-oi/0.1}ExposureMode" default="ALL" /&gt;
+ *       &lt;attribute name="unit" type="{http://www.w3.org/2001/XMLSchema}double" default="1" /&gt;
+ *       &lt;attribute name="beams" type="{http://www.w3.org/2001/XMLSchema}int" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

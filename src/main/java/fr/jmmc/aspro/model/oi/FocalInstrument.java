@@ -25,23 +25,23 @@ import fr.jmmc.aspro.model.OIBase;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="FocalInstrument">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
- *         &lt;element name="alias" type="{http://www.w3.org/2001/XMLSchema}NCName" minOccurs="0"/>
- *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="experimental" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *         &lt;element name="fringeTracker" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/>
- *         &lt;element name="fringeTrackerRequired" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="setup" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentSetup" maxOccurs="unbounded"/>
- *         &lt;element name="mode" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentMode" maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="FocalInstrument"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
+ *         &lt;element name="alias" type="{http://www.w3.org/2001/XMLSchema}NCName" minOccurs="0"/&gt;
+ *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="experimental" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
+ *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *         &lt;element name="fringeTracker" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
+ *         &lt;element name="fringeTrackerRequired" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
+ *         &lt;element name="setup" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentSetup" maxOccurs="unbounded"/&gt;
+ *         &lt;element name="mode" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentMode" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
