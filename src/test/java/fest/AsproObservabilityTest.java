@@ -4,9 +4,6 @@
 package fest;
 
 import fest.common.JmcsFestSwingJUnitTestCase;
-import fr.jmmc.jmcs.Bootstrapper;
-import fr.jmmc.jmcs.util.JVMUtils;
-import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
