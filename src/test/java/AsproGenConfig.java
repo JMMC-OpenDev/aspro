@@ -535,9 +535,9 @@ public final class AsproGenConfig {
      * Load and parse the vlti array list
      *
      * @param absFileName
-     * @param period
+     * @param periods
      */
-    private static void convertArrayList(final String absFileName, final String period) {
+    private static void convertArrayList(final String absFileName, final String[] periods) {
 
         /**
          * package name for JAXB generated code
@@ -586,22 +586,22 @@ public final class AsproGenConfig {
 
         /* Process a single period or update all periods */
         List<InterferometerConfiguration> confToProcess;
-        if (period == null) {
+        if (periods == null) {
             confToProcess = new ArrayList<InterferometerConfiguration>(is.getConfigurations());
         } else {
-            confToProcess = new ArrayList<InterferometerConfiguration>(1);
+            confToProcess = new ArrayList<InterferometerConfiguration>(periods.length);
             for (InterferometerConfiguration ic : is.getConfigurations()) {
-                if (period.equalsIgnoreCase(ic.getVersion())) {
+                if (contains(periods, ic.getVersion())) {
+                    logger.info("Configuration '"+ic.getVersion()+"' match in " + uri + " ...");
                     confToProcess.add(ic);
-                    break;
                 }
             }
 
             if (confToProcess.isEmpty()) {
-                throw new IllegalStateException("Configuration '" + period + "' not found in " + uri + " !");
+                throw new IllegalStateException("Configuration '" + periods + "' not found in " + uri + " !");
             }
 
-            logger.info("Configuration '" + period + "' found in " + uri + " ...");
+            logger.info("Configuration(s) found in " + uri + " ...");
         }
 
         // load data from file :
@@ -624,161 +624,157 @@ public final class AsproGenConfig {
             StringTokenizer tok;
             String line, config;
 
-            // mapping 0 = station, 1 = delayLine (DL), 2 = channel (IP):
-            final int STA = 0;
-            final int DL = 1;
+            // mapping: 0 = delayLine (DL), 1 = station, 2 = channel (IP):
+            final int DL = 0;
+            final int STA = 1;
             final int IP = 2;
             final String[][] mappings = new String[4][3]; // max 4T
 
             while ((line = reader.readLine()) != null) {
+                if (line.startsWith("--")) {
+                    continue;
+                }
                 line = line.replaceAll("\\s+", " ").trim();
 
                 if (line.length() > 0) {
-                    /* (50) A1DL5IP1-G1DL6IP3-K0DL4IP5-I1DL3IP7 */
-
-                    pos = line.indexOf(')');
-
-                    if (pos != -1) {
-                        line = line.substring(pos + 2);
 //                        logger.info("line: {}", line);
+                    /* "DL6A0IP1-DL5B2IP3-DL1D0IP5-DL2C1IP7" */
 
-                        // Parse values :
-                        tok = new StringTokenizer(line, delimiter);
+                    // Parse values :
+                    tok = new StringTokenizer(line, delimiter);
 
-                        idx = 0;
+                    idx = 0;
 
-                        while (tok.hasMoreTokens()) {
-                            config = tok.nextToken();
+                    while (tok.hasMoreTokens()) {
+                        config = tok.nextToken();
 //                            logger.info("config: {}", config);
 
-                            // Fix Ux = UTx
-                            mappings[idx][STA] = fixStationName(config.substring(0, 2)); // first 2 chars (A1)
-                            mappings[idx][DL] = config.substring(2, 5); // middle chars (DL3)
-                            mappings[idx][IP] = config.substring(5, 8); // last char (IP5)
+                        mappings[idx][DL] = config.substring(0, 3); // first 3 chars (DL3)
+                        // Fix Ux = UTx
+                        mappings[idx][STA] = fixStationName(config.substring(3, 5)); // next 2 chars (A1)
+                        mappings[idx][IP] = config.substring(5, 8); // last char (IP5)
 //                            logger.info("station: {} - DL: {} - IP: {}", mappings[idx][STA], mappings[idx][DL], mappings[idx][IP]);
 
-                            idx++;
-                        }
-                        nTel = idx;
+                        idx++;
+                    }
+                    nTel = idx;
 
-                        // Check switchyard:
-                        /*
-                         <switchyard>
-                         <stationLinks>
-                         <station>A0</station>
-                         <channelLink>
-                         <channel>IP1</channel>
-                         <delayLine>DL1</delayLine>
-                         <opticalLength>134.8395</opticalLength>
-                         <maximumThrow>39.4</maximumThrow>
-                         </channelLink>
-                         ...
-                         */
-                        for (pos = 0; pos < nTel; pos++) {
-                            match = false;
-                            for (StationLinks sl : sw.getStationLinks()) {
-                                if (sl.getStation().getName().equalsIgnoreCase(mappings[pos][STA])) {
-                                    // station found in switchyard:
-                                    for (ChannelLink cl : sl.getChannelLinks()) {
-                                        if (cl.getChannel().getName().equalsIgnoreCase(mappings[pos][IP])) {
-                                            match = true;
-                                            if ((cl.getDelayLine() != null) && (!cl.getDelayLine().getName().equalsIgnoreCase(mappings[pos][DL]))) {
-                                                match = false;
-                                            }
-                                            if (match) {
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-
-                            if (!match) {
-                                logger.error("IP [{}] or DL [{}] not defined in switchyard for station: [{}]",
-                                        mappings[pos][IP], mappings[pos][DL], mappings[pos][STA]);
-                            }
-                        }
-
-                        // Find configuration:
+                    // Check switchyard:
+                    /*
+                     <switchyard>
+                     <stationLinks>
+                     <station>A0</station>
+                     <channelLink>
+                     <channel>IP1</channel>
+                     <delayLine>DL1</delayLine>
+                     <opticalLength>134.8395</opticalLength>
+                     <maximumThrow>39.4</maximumThrow>
+                     </channelLink>
+                     ...
+                     */
+                    for (pos = 0; pos < nTel; pos++) {
                         match = false;
-
-                        for (InterferometerConfiguration ic : confToProcess) {
-
-                            for (FocalInstrumentConfiguration insConf : ic.getInstruments()) {
-                                if (nTel == insConf.getFocalInstrument().getNumberChannels()) {
-                                    // logger.info("checking instrument [{}]", insConf.getFocalInstrument().getName());
-
-                                    for (FocalInstrumentConfigurationItem conf : insConf.getConfigurations()) {
-
-                                        // Find matching stations:
-                                        idx = 0;
-                                        for (pos = 0; pos < nTel; pos++) {
-                                            for (Station sta : conf.getStations()) {
-                                                if (sta.getName().equalsIgnoreCase(mappings[pos][STA])) {
-                                                    idx++;
-                                                }
-                                            }
+                        for (StationLinks sl : sw.getStationLinks()) {
+                            if (sl.getStation().getName().equalsIgnoreCase(mappings[pos][STA])) {
+                                // station found in switchyard:
+                                for (ChannelLink cl : sl.getChannelLinks()) {
+                                    if (cl.getChannel().getName().equalsIgnoreCase(mappings[pos][IP])) {
+                                        match = true;
+                                        if ((cl.getDelayLine() != null) && (!cl.getDelayLine().getName().equalsIgnoreCase(mappings[pos][DL]))) {
+                                            match = false;
                                         }
-
-                                        if (idx == nTel) {
-                                            // matching:
-                                            match = true;
-                                            //                                        logger.info("conf match: [{}]: {}", conf.getName(), line);
-
-                                            // Update channels in conf:
-                                            confIPs = conf.getChannels();
-                                            confIPs.clear(); // reset
-
-                                            // Update delay lines in conf:
-                                            confDLs = conf.getDelayLines();
-                                            confDLs.clear(); // reset
-
-                                            // for all stations in conf:
-                                            for (Station sta : conf.getStations()) {
-                                                ch = null;
-                                                dl = null;
-                                                /* find again if order is different */
-                                                for (pos = 0; pos < nTel; pos++) {
-                                                    if (sta.getName().equalsIgnoreCase(mappings[pos][STA])) {
-                                                        dl = delayLines.get(mappings[pos][DL]);
-                                                        ch = channels.get(mappings[pos][IP]);
-                                                        break;
-                                                    }
-                                                }
-                                                // add channel:
-                                                if (ch == null) {
-                                                    logger.error("no channel found for station: {}", sta.getName());
-                                                } else {
-                                                    confIPs.add(ch);
-                                                }
-                                                // add DL:
-                                                if (dl == null) {
-                                                    logger.error("no DL found for station: {}", sta.getName());
-                                                } else {
-                                                    confDLs.add(dl);
-                                                }
-                                            }
-                                            if (confIPs.size() != nTel) {
-                                                logger.error("Missing channel : [{}] for stations [{}]", confIPs, conf.getStations());
-                                            } else {
-                                                // logger.info("channels: [{}] for stations [{}]", confIPs, conf.getStations());
-                                            }
-                                            if (confDLs.size() != nTel) {
-                                                logger.error("Missing DL : [{}] for stations [{}]", confDLs, conf.getStations());
-                                            } else {
-                                                // logger.info("DL: [{}] for stations [{}]", confDLs, conf.getStations());
-                                            }
+                                        if (match) {
+                                            break;
                                         }
                                     }
                                 }
+                                break;
                             }
                         }
 
                         if (!match) {
-                            logger.error("no conf match: {}", line);
-                            break;
+                            logger.error("IP [{}] or DL [{}] not defined in switchyard for station: [{}]",
+                                    mappings[pos][IP], mappings[pos][DL], mappings[pos][STA]);
                         }
+                    }
+
+                    // Find configuration:
+                    match = false;
+
+                    for (InterferometerConfiguration ic : confToProcess) {
+
+                        for (FocalInstrumentConfiguration insConf : ic.getInstruments()) {
+                            if (nTel == insConf.getFocalInstrument().getNumberChannels()) {
+                                // logger.info("checking instrument [{}]", insConf.getFocalInstrument().getName());
+
+                                for (FocalInstrumentConfigurationItem conf : insConf.getConfigurations()) {
+
+                                    // Find matching stations:
+                                    idx = 0;
+                                    for (pos = 0; pos < nTel; pos++) {
+                                        for (Station sta : conf.getStations()) {
+                                            if (sta.getName().equalsIgnoreCase(mappings[pos][STA])) {
+                                                idx++;
+                                            }
+                                        }
+                                    }
+
+                                    if (idx == nTel) {
+                                        // matching:
+                                        match = true;
+                                        //                                        logger.info("conf match: [{}]: {}", conf.getName(), line);
+
+                                        // Update channels in conf:
+                                        confIPs = conf.getChannels();
+                                        confIPs.clear(); // reset
+
+                                        // Update delay lines in conf:
+                                        confDLs = conf.getDelayLines();
+                                        confDLs.clear(); // reset
+
+                                        // for all stations in conf:
+                                        for (Station sta : conf.getStations()) {
+                                            ch = null;
+                                            dl = null;
+                                            /* find again if order is different */
+                                            for (pos = 0; pos < nTel; pos++) {
+                                                if (sta.getName().equalsIgnoreCase(mappings[pos][STA])) {
+                                                    dl = delayLines.get(mappings[pos][DL]);
+                                                    ch = channels.get(mappings[pos][IP]);
+                                                    break;
+                                                }
+                                            }
+                                            // add channel:
+                                            if (ch == null) {
+                                                logger.error("no channel found for station: {}", sta.getName());
+                                            } else {
+                                                confIPs.add(ch);
+                                            }
+                                            // add DL:
+                                            if (dl == null) {
+                                                logger.error("no DL found for station: {}", sta.getName());
+                                            } else {
+                                                confDLs.add(dl);
+                                            }
+                                        }
+                                        if (confIPs.size() != nTel) {
+                                            logger.error("Missing channel : [{}] for stations [{}]", confIPs, conf.getStations());
+                                        } else {
+                                            // logger.info("channels: [{}] for stations [{}]", confIPs, conf.getStations());
+                                        }
+                                        if (confDLs.size() != nTel) {
+                                            logger.error("Missing DL : [{}] for stations [{}]", confDLs, conf.getStations());
+                                        } else {
+                                            // logger.info("DL: [{}] for stations [{}]", confDLs, conf.getStations());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!match) {
+                        logger.error("no conf match: {}", line);
                     }
                 }
             } // line
@@ -2127,6 +2123,15 @@ public final class AsproGenConfig {
         }
         return (Math.round(1e4d * value)) / 1e4d;
     }
+    
+    static boolean contains(final String[] vals, final String val) {
+        for (int i = 0; i < vals.length; i++) {
+            if (vals[i].equalsIgnoreCase(val)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Main entry point to generate configuration parts (xml)
@@ -2179,7 +2184,8 @@ public final class AsproGenConfig {
                 logger.info("convertHorizons : \n" + sb.toString());
 
                 // convert arrayList to get DLx and channels (IPn)
-                convertArrayList(asproTestPath + "vlti_arrayList_2015.txt", "Period 96");
+                convertArrayList(asproTestPath + "vlti_arrayList_2016.txt", 
+                        new String[] {"Period 98", "Future"});
 
                 break;
             case CHARA:

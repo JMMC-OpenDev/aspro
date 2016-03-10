@@ -5,7 +5,7 @@
     <when>
         <date>2015-10-28</date>
         <nightRestriction>true</nightRestriction>
-        <atmosphereQuality>Average</atmosphereQuality>
+        <atmosphereQuality>Good</atmosphereQuality>
     </when>
     <interferometerConfiguration>
         <name>VLTI Period 96</name>
