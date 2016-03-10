@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="AsproOIConfigurations.xsl" type="text/xsl"?>
+<!--
+*******************************************************************************
+* JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+*******************************************************************************
+-->
+<!--
+    Document   : AsproOIConfigurations.xml
+    Created on : 14 octobre 2009, 14:31
+    Author     : bourgesl
+    Description:
+        This file lists all interferometer configuration files.
+-->
+
+<a:configurations
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+    xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+    <!-- minimum version corresponds to Aspro2 0.9.9 (Nov 2015 / CfP 98) -->
+    <minVersion>0.9.9</minVersion>
+
+    <interferometerFile>
+        <file>VLTI.xml</file>
+        <checksum>1253477027772628992</checksum>
+    </interferometerFile>
+
+    <interferometerFile>
+        <file>CHARA.xml</file>
+        <checksum>352436518595002368</checksum>
+    </interferometerFile>
+
+    <interferometerFile>
+        <file>SUSI.xml</file>
+        <checksum>3438298854842171392</checksum>
+    </interferometerFile>
+
+    <!--
+        <interferometerFile>
+            <file>MROI.xml</file>
+        </interferometerFile>
+    -->
+
+    <interferometerFile>
+        <file>NPOI.xml</file>
+        <checksum>2351195547560476672</checksum>
+    </interferometerFile>
+
+    <interferometerFile>
+        <file>DEMO.xml</file>
+        <checksum>3923161837402980352</checksum>
+    </interferometerFile>
+
+    <!-- Paranal single-dish mode -->
+    <interferometerFile>
+        <file>PARANAL.xml</file>
+        <checksum>8712121904891748352</checksum>
+    </interferometerFile>
+
+    <!-- Sutherland single-dish mode -->
+    <interferometerFile>
+        <file>SUTHERLAND.xml</file>
+        <checksum>6909392424038039552</checksum>
+    </interferometerFile>
+
+    <interferometerFile>
+        <file>OHP.xml</file>
+        <checksum>7963630178058027008</checksum>
+    </interferometerFile>
+
+</a:configurations>

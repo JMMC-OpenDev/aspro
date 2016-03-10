@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<jnlp spec="1.0+" codebase="@GENERATED@" href="AsproConfig.jnlp">
+    <information>
+        <title>Aspro 2 Configuration</title>
+        <vendor>JMMC (Jean-Marie MARIOTTI Center)</vendor>
+        <homepage href="http://www.jmmc.fr/aspro2"/>
+        <description>This bundles the Aspro 2 configuration</description>
+        <offline-allowed/>
+    </information>
+    <security>
+        <all-permissions/>
+    </security>
+    <resources>
+        <!-- Configuration module -->
+        <jar href="jar/aspro-conf-TRUNK.jar" />
+        <!-- Atmosphere transmission -->
+        <jar href="jar/aspro-conf-TRUNK-atm.jar" />
+    </resources>
+    <component-desc/>
+</jnlp>
