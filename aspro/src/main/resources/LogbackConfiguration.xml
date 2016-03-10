@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!-- Application specific configuration -->
+<included>
+
+    <appender name="WARNINGLOG" class="fr.jmmc.jmcs.logging.ByteArrayOutputStreamAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Jmal: target model -->
+    <!--
+    <logger name="fr.jmmc.jmal.model" level="INFO"/>
+    -->
+
+    <!-- Jmal: star resolver -->
+    <!--
+    <logger name="fr.jmmc.jmal.star" level="INFO"/>
+    -->
+
+    <!-- OITools -->
+    <!--
+    <logger name="fr.jmmc.oitools" level="INFO"/>
+    -->
+
+    <!-- OIFitsExplorer core -->
+    <!--
+    <logger name="fr.jmmc.oiexplorer.core" level="INFO"/>
+    <logger name="fr.jmmc.oiexplorer.core.gui.PlotChartPanel" level=""/>
+    -->
+
+    <!-- JSkyCalc -->
+    <logger name="edu.dartmouth" level="INFO"/>
+
+    <!-- Aspro -->
+<!--
+    <logger name="fr.jmmc.aspro" level="INFO"/>
+-->
+
+    <!-- Aspro warning -->
+    <logger name="fr.jmmc.aspro.warning" level="INFO" additivity="true">
+        <appender-ref ref="WARNINGLOG" />
+        <appender-ref ref="STATUSLOG" />
+    </logger>
+
+    <!--
+    <logger name="fr.jmmc.aspro.gui" level="INFO"/>
+    <logger name="fr.jmmc.aspro.gui.BasicObservationForm" level="DEBUG"/>
+    <logger name="fr.jmmc.aspro.gui.InterferometerMapPanel" level="INFO"/>
+    <logger name="fr.jmmc.aspro.gui.ObservabilityPanel" level="INFO"/>
+    <logger name="fr.jmmc.aspro.gui.UVCoveragePanel" level="INFO"/>
+    <logger name="fr.jmmc.aspro.gui.Vis2Panel" level="INFO"/>
+
+    <logger name="fr.jmmc.aspro.gui.action" level="INFO"/>
+
+    <logger name="fr.jmmc.aspro.interop" level="INFO"/>
+
+    <logger name="fr.jmmc.aspro.model" level="INFO"/>
+    <logger name="fr.jmmc.aspro.model.ConfigurationManager" level="INFO"/>
+
+    <logger name="fr.jmmc.aspro.ob" level="INFO"/>
+
+    <logger name="fr.jmmc.aspro.service" level="INFO"/>
+    <logger name="fr.jmmc.aspro.service.DelayLineService" level="INFO"/>
+    <logger name="fr.jmmc.aspro.service.ObservabilityService" level="INFO"/>
+    <logger name="fr.jmmc.aspro.service.UVCoverageService" level="INFO"/>
+
+    <logger name="fr.jmmc.aspro.service.NoiseService" level="DEBUG"/>
+    -->
+
+</included>
