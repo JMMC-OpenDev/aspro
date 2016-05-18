@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.ob;
 
-import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Target;
@@ -30,10 +29,6 @@ public final class ExportOBGravity extends ExportOBVLTI {
     /* keywords */
     /** keyword - SEQ.FT.ROBJ.MAG */
     public final static String KEY_KMAG = "<KMAG>";
-    /** keyword - SEQ.FT.ROBJ.MAG */
-    public final static String KEY_FT_ALPHA = "<FT-ALPHA>"; // 012658.09492
-    /** keyword - SEQ.FT.ROBJ.MAG */
-    public final static String KEY_FT_DELTA = "<FT-DELTA>"; // -323235.4374
     /** keyword - INS-SPEC-RES */
     public final static String KEY_INS_SPEC_RES = "<INS-SPEC-RES>";
     /** keyword - INS-POLA-MODE */
@@ -71,13 +66,6 @@ public final class ExportOBGravity extends ExportOBVLTI {
         String document = processCommon(template, file.getName(), observation, os, target,
                 GRAVITY_VAL_CATEGORY_SCIENCE, GRAVITY_VAL_CATEGORY_CALIBRATOR);
 
-        
-        // convert RA/DEC (mas) up to 3 digits :
-        final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
-
-        document = document.replaceFirst(KEY_FT_ALPHA, raDec[0].replaceAll(":", ""));
-        document = document.replaceFirst(KEY_FT_DELTA, raDec[1].replaceAll(":", ""));
-        
         // Magnitudes for H, K :
         document = document.replaceFirst(KEY_HMAG, df3.format(getMagnitude(target.getFLUXH())));
         document = document.replaceFirst(KEY_KMAG, df3.format(getMagnitude(target.getFLUXK())));
@@ -88,8 +76,9 @@ public final class ExportOBGravity extends ExportOBVLTI {
         // Mode (INS.DISP.NAME) among "FREE" or "GRISM":
         final String instrumentMode = observation.getInstrumentConfiguration().getInstrumentMode();
 
-        // Parse Aspro2's instrument mode: [GRISM-H, FREE-H]:
-        final String res;
+        // Parse Aspro2's instrument mode: 
+        // [LOW-COMBINED, LOW-SPLIT, MEDIUM-COMBINED, MEDIUM-SPLIT, HIGH-COMBINED, HIGH-SPLIT]
+        String res;
         final String pola;
         final int pos = instrumentMode.indexOf('-');
         if (pos == -1) {
@@ -98,6 +87,9 @@ public final class ExportOBGravity extends ExportOBVLTI {
             pola = "IN";
         } else {
             res = instrumentMode.substring(0, pos);
+            if ("MEDIUM".equals(res)) {
+                res = "MED";
+            }
             pola = ("COMBINED".equals(instrumentMode.substring(pos + 1))) ? "IN": "OUT";
         }
 
@@ -116,7 +108,6 @@ public final class ExportOBGravity extends ExportOBVLTI {
         }
         document = document.replaceFirst(KEY_DIAMETER, df3.format(diameter));
         
-        // what else ?
         // Finally, write the file :
         FileUtils.writeFile(file, document);
     }

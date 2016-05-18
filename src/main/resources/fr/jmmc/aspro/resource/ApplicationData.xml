@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9"/>
-    <compilation date="10/03/2016" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.1 beta 1"/>
+    <compilation date="18/05/2016" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -196,6 +196,12 @@
     </menubar>
 
     <releasenotes>
+        <release version="0.9.9.1">
+            <pubDate>Wed, 18 May 2016 16:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.1 beta 1">
+                <change type="FEATURE">Fixed GRAVITY OB generation (tested with P2PP)</change>
+            </prerelease>
+        </release>
         <release version="0.9.9">
             <pubDate>Thu, 10 Mar 2016 10:00:00 GMT</pubDate>
             <prerelease version="0.9.9 beta 3">
