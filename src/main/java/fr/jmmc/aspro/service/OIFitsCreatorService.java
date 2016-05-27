@@ -83,12 +83,12 @@ public final class OIFitsCreatorService {
     /** threshold to use parallel jobs for user models (32 UV points) */
     private final static int JOB_THRESHOLD_USER_MODELS = 32;
     /** SNR threshold to flag values with low SNR */
-    private final static double SNR_THRESHOLD = 1.0;
+    private final static double SNR_THRESHOLD = 3.0;
     /** Jmcs Parallel Job executor */
     private static final ParallelJobExecutor jobExecutor = ParallelJobExecutor.getInstance();
 
     /* members */
-    /* input */
+ /* input */
     /** selected target */
     private final Target target;
     /** OIFits supersampling preference */
@@ -1233,19 +1233,23 @@ public final class OIFitsCreatorService {
             final double[][] cVisError = new double[nRows][nChannels];
             final boolean[][] cVisSnrFlag = new boolean[nRows][nChannels];
             final ComplexDistribution[] cVisRndDist = new ComplexDistribution[nRows];
-            final int[][] cVisRndIdx = new int[nRows][nChannels];
+
+            // use the same sample index per ha point (as distributions are different instances)
+            // to ensure T3 sample is correlated with C12, C23, C13 samples:
+            final int[][] cVisRndIdx = new int[nRows][];
+
+            int prevPt = -1;
 
             // Iterate on rows :
             for (int k = 0, l; k < nRows; k++) {
-                final ImmutableComplex[] cVisRow = cVis[k];
                 final double[] cVisErrorRow = cVisError[k];
                 final boolean[] cVisSnrFlagRow = cVisSnrFlag[k];
-                final int[] cVisRndIdxRow = cVisRndIdx[k];
 
                 if (ns == null) {
                     Arrays.fill(cVisErrorRow, Double.NaN);
                     Arrays.fill(cVisSnrFlagRow, true);
                 } else {
+                    final ImmutableComplex[] cVisRow = cVis[k];
                     // select a different complex distribution per row:
                     cVisRndDist[k] = stat.get();
 
@@ -1259,15 +1263,25 @@ public final class OIFitsCreatorService {
 
                         if (NoiseService.USE_DISTRIB_APPROACH) {
                             // check SNR:
-                            if ((visErr > 1.0) && Math.abs(visAmp / visErr) < SNR_THRESHOLD) {
+                            if ((visErr > 0.1) && Math.abs(visAmp / visErr) < SNR_THRESHOLD) {
                                 cVisSnrFlagRow[l] = true;
                             }
                         }
+                    }
+
+                    if (ptIdx[k] != prevPt) {
+                        prevPt = ptIdx[k];
 
                         if (this.doNoise) {
-                            // Choose 1 sample:
-                            cVisRndIdxRow[l] = this.random.nextInt(N_SAMPLES);
+                            final int[] cVisRndIdxRow = cVisRndIdx[k] = new int[nChannels];
+                            for (l = 0; l < nChannels; l++) {
+                                // Choose the jth sample (uniform probability):
+                                cVisRndIdxRow[l] = this.random.nextInt(N_SAMPLES);
+                            }
                         }
+                    } else {
+                        // use same random indexes:
+                        cVisRndIdx[k] = cVisRndIdx[k - 1];
                     }
                 }
             }
@@ -1497,7 +1511,8 @@ public final class OIFitsCreatorService {
         double re, im, sample, diff;
         double vamp_sum, vamp_sum_diff, vamp_sum_diff_square;
         double s_vamp_mean, s_vamp_err;
-        double vphi_sum, vphi_sum_diff, vphi_sum_diff_square;
+        double vphi_sum_cos, vphi_sum_sin;
+        double vphi_sum_diff, vphi_sum_diff_square;
         double s_vphi_mean, s_vphi_err;
 
         final double[] vamp_samples = new double[N_SAMPLES];
@@ -1631,7 +1646,7 @@ public final class OIFitsCreatorService {
                                     // pure complex visibility data :
                                     visRe = visComplex[k][l].getReal();
                                     visIm = visComplex[k][l].getImaginary();
-
+                                    
                                     // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
                                     visErrCplx = visError[k][l];
 
@@ -1643,8 +1658,8 @@ public final class OIFitsCreatorService {
 
                                     // Sampling complex visibilities:
                                     vamp_sum = vamp_sum_diff = vamp_sum_diff_square = 0.0;
-                                    vphi_sum = vphi_sum_diff = vphi_sum_diff_square = 0.0;
-
+                                    vphi_sum_cos = vphi_sum_sin = 0.0;
+                                    
                                     // bivariate distribution (complex normal):
                                     for (n = 0; n < N_SAMPLES; n++) {
                                         // update nth sample:
@@ -1661,15 +1676,14 @@ public final class OIFitsCreatorService {
                                         vamp_sum_diff += diff;
                                         vamp_sum_diff_square += diff * diff;
 
-                                        // phase:
+                                        // mean angle: compute sum(cos) and sum(sin):
+                                        // note: do not check div 0 (should never happen as distrib != pure 0.0):
+                                        vphi_sum_cos += re / sample;
+                                        vphi_sum_sin += im / sample;
+
+                                        // phase in [-PI; PI]:
                                         sample = (im != 0.0) ? FastMath.atan2(im, re) : 0.0;
                                         vphi_samples[n] = sample;
-
-                                        // Compensated-summation variant for better numeric precision:
-                                        vphi_sum += sample;
-                                        diff = sample - vphi;
-                                        vphi_sum_diff += diff;
-                                        vphi_sum_diff_square += diff * diff;
                                     }
 
                                     // mean(vamp):
@@ -1682,7 +1696,20 @@ public final class OIFitsCreatorService {
                                     );
 
                                     // mean(vphi):
-                                    s_vphi_mean = SAMPLING_FACTOR_MEAN * vphi_sum;
+                                    s_vphi_mean = (vphi_sum_sin != 0.0) ? FastMath.atan2(vphi_sum_sin, vphi_sum_cos) : 0.0;
+
+                                    vphi_sum_diff = vphi_sum_diff_square = 0.0;
+
+                                    // compute angle variance:
+                                    for (n = 0; n < N_SAMPLES; n++) {
+                                        sample = vphi_samples[n];
+
+                                        // Compensated-summation variant for better numeric precision:
+                                        // check if diff is [-PI; PI]:
+                                        diff = distance(sample, s_vphi_mean);
+                                        vphi_sum_diff += diff;
+                                        vphi_sum_diff_square += diff * diff;
+                                    }
 
                                     // error(vphi):
                                     // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
@@ -1703,7 +1730,8 @@ public final class OIFitsCreatorService {
 
                                     if (NoiseService.USE_DISTRIB_APPROACH) {
                                         // check SNR:
-                                        if ((s_vphi_err > Math.PI) && (Math.abs(s_vphi_mean / s_vphi_err) < SNR_THRESHOLD)) {
+                                        // PI / 8  = 22.5 deg:
+                                        if ((s_vphi_err > (Math.PI * 0.125)) && (Math.abs(s_vphi_mean / s_vphi_err) < SNR_THRESHOLD)) {
                                             doFlag = true;
                                         }
                                     }
@@ -1852,7 +1880,7 @@ public final class OIFitsCreatorService {
                         // pure complex visibility data :
                         visRe = this.visComplex[k][l].getReal();
                         visIm = this.visComplex[k][l].getImaginary();
-                        
+
                         // pure square visibility :
                         v2 = visRe * visRe + visIm * visIm;
 
@@ -1860,95 +1888,88 @@ public final class OIFitsCreatorService {
 
                         if (ns == null) {
                             v2Err = Double.NaN;
-                        } else {
-                            if (NoiseService.USE_DISTRIB_APPROACH) {
-                                // Sampling complex visibilities:
+                        } else if (NoiseService.USE_DISTRIB_APPROACH) {
+                            // Sampling complex visibilities:
 
-                                // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
-                                errCVis = visError[k][l];
-                                // bias = var(re) + var(im) = 2.0 * var(visAmpErr)
-                                bias = 2.0 * errCVis * errCVis;
+                            // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
+                            errCVis = visError[k][l];
+                            // bias = var(re) + var(im) = 2.0 * var(visAmpErr)
+                            bias = 2.0 * errCVis * errCVis;
+                            
+                            // Remove v2 bias:
+                            v2 -= bias;
 
-                                v2_sum = v2_sum_diff = v2_sum_diff_square = 0.0;
+                            v2_sum = v2_sum_diff = v2_sum_diff_square = 0.0;
 
-                                // bivariate distribution (complex normal):
-                                for (n = 0; n < N_SAMPLES; n++) {
-                                    // update nth sample:
-                                    re = visRe + (errCVis * distRe[n]);
-                                    im = visIm + (errCVis * distIm[n]);
+                            // bivariate distribution (complex normal):
+                            for (n = 0; n < N_SAMPLES; n++) {
+                                // update nth sample:
+                                re = visRe + (errCVis * distRe[n]);
+                                im = visIm + (errCVis * distIm[n]);
 
 //                  biased_CV = amdlibPow2(R[nbGoodFrames]) + amdlibPow2(I[nbGoodFrames]);
-                    
-                    /* bias: see formula AMB-IGR-019 number 36 */
+                                /* bias: see formula AMB-IGR-019 number 36 */
 //                    bias = sigma2_R[nbGoodFrames] + sigma2_I[nbGoodFrames];
-                    
-                    /*
+                                /*
                      * <R^2 + I^2 - bias>_fram =
                      * <R^2>_fram + <I^2>_fram - <bias>_fram averaged =
                      * <C^2 - bias>
-                     */
+                                 */
 //                    unbiased_CV[nbGoodFrames] = biased_CV - bias;
+                                // compute unbiased V2 = re^2 + im^2 - 2 * varCVis:
+                                sample = re * re + im * im - bias;
+                                v2_samples[n] = sample;
 
-                                    // compute unbiased V2 = re^2 + im^2 - 2 * varCVis:
-                                    sample = re * re + im * im - bias;
-                                    v2_samples[n] = sample;
+                                // Compensated-summation variant for better numeric precision:
+                                v2_sum += sample;
+                                diff = sample - v2;
+                                v2_sum_diff += diff;
+                                v2_sum_diff_square += diff * diff;
+                            }
 
-                                    // Compensated-summation variant for better numeric precision:
-                                    v2_sum += sample;
-                                    diff = sample - v2;
-                                    v2_sum_diff += diff;
-                                    v2_sum_diff_square += diff * diff;
-                                }
+                            // mean(V2):
+                            s_v2_mean = SAMPLING_FACTOR_MEAN * v2_sum;
 
-                                // mean(V2):
-                                s_v2_mean = SAMPLING_FACTOR_MEAN * v2_sum;
+                            // error(V2):
+                            // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
+                            s_v2_err = Math.sqrt(
+                                    SAMPLING_FACTOR_VARIANCE * (v2_sum_diff_square - (SAMPLING_FACTOR_MEAN * (v2_sum_diff * v2_sum_diff)))
+                            );
 
-                                // error(V2):
-                                // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
-                                s_v2_err = Math.sqrt(
-                                        SAMPLING_FACTOR_VARIANCE * (v2_sum_diff_square - (SAMPLING_FACTOR_MEAN * (v2_sum_diff * v2_sum_diff)))
-                                );
-
-                                if (DEBUG) {
-                                    // square visibility error :
-                                    v2Err = ns.computeVis2Error(i, l, Math.sqrt(v2)); // TODO: KILL
-
-                                    logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_v2_mean / s_v2_err) + " V2"
-                                            + " (err(re,im)= " + errCVis + ")"
-                                            + " avg= " + s_v2_mean + " V2= " + v2 + " ratio: " + (s_v2_mean / v2)
-                                            + " stddev= " + s_v2_err + " err(V2)= " + v2Err + " ratio: " + (s_v2_err / v2Err)
-                                    );
-                                }
-                                
-                                if (NoiseService.USE_DISTRIB_APPROACH) {
-                                    // check SNR:
-                                    if ((s_v2_err > 1.0) && Math.abs(s_v2_mean / s_v2_err) < SNR_THRESHOLD) {
-                                        doFlag = true;
-                                    }
-                                }
-
-                                if (this.doNoise) {
-                                    // Use the corresponding sample:
-                                    v2 = v2_samples[visRndIdxRow[l]];
-                                } else {
-                                    v2 = s_v2_mean;
-                                }
-                                v2Err = s_v2_err;
-                                
-                                if (v2 > 1000.0 && !doFlag) {
-                                    System.out.println("V2: "+v2);
-                                }
-                                
-                                
-                            } else {
-                                // Old approach:
+                            if (DEBUG) {
                                 // square visibility error :
-                                v2Err = ns.computeVis2Error(i, l, Math.sqrt(v2));
+                                v2Err = ns.computeVis2Error(i, l, Math.sqrt(v2)); // TODO: KILL
 
-                                if (this.doNoise) {
-                                    // add gaussian noise with sigma = err :
-                                    v2 += v2Err * this.random.nextGaussian();
+                                logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_v2_mean / s_v2_err) + " V2"
+                                        + " (err(re,im)= " + errCVis + ")"
+                                        + " avg= " + s_v2_mean + " V2= " + v2 + " ratio: " + (s_v2_mean / v2)
+                                        + " stddev= " + s_v2_err + " err(V2)= " + v2Err + " ratio: " + (s_v2_err / v2Err)
+                                );
+                            }
+
+                            if (NoiseService.USE_DISTRIB_APPROACH) {
+                                // check SNR:
+                                if ((s_v2_err > 0.1) && Math.abs(s_v2_mean / s_v2_err) < SNR_THRESHOLD) {
+                                    doFlag = true;
                                 }
+                            }
+
+                            if (this.doNoise) {
+                                // Use the corresponding sample:
+                                v2 = v2_samples[visRndIdxRow[l]];
+                            } else {
+                                v2 = s_v2_mean;
+                            }
+                            v2Err = s_v2_err;
+
+                        } else {
+                            // Old approach:
+                            // square visibility error :
+                            v2Err = ns.computeVis2Error(i, l, Math.sqrt(v2));
+
+                            if (this.doNoise) {
+                                // add gaussian noise with sigma = err :
+                                v2 += v2Err * this.random.nextGaussian();
                             }
                         }
 
@@ -2068,7 +2089,8 @@ public final class OIFitsCreatorService {
         // try resampling:
         double t3amp_sum, t3amp_sum_diff, t3amp_sum_diff_square;
         double s_t3amp_mean, s_t3amp_err;
-        double t3phi_sum, t3phi_sum_diff, t3phi_sum_diff_square;
+        double t3phi_sum_cos, t3phi_sum_sin;
+        double t3phi_sum_diff, t3phi_sum_diff_square;
         double s_t3phi_mean, s_t3phi_err;
 
         final double[] t3amp_samples = new double[N_SAMPLES];
@@ -2167,6 +2189,7 @@ public final class OIFitsCreatorService {
                 visSnrFlag13 = this.visSnrFlag[vp + pos];
 
                 // Get proper index:
+                // note: visRndIdx[12] = visRndIdx[23] = visRndIdx[13] by construction
                 visRndIdxRow = this.visRndIdx[vp + pos];
 
                 // if target has models, then complex visibility are computed :
@@ -2243,7 +2266,7 @@ public final class OIFitsCreatorService {
                             visErrCplx31 = visErr13[l];
 
                             t3amp_sum = t3amp_sum_diff = t3amp_sum_diff_square = 0.0;
-                            t3phi_sum = t3phi_sum_diff = t3phi_sum_diff_square = 0.0;
+                            t3phi_sum_cos = t3phi_sum_sin = 0.0;
 
                             // bivariate distribution (complex normal):
                             for (n = 0; n < N_SAMPLES; n++) {
@@ -2277,15 +2300,14 @@ public final class OIFitsCreatorService {
                                 t3amp_sum_diff += diff;
                                 t3amp_sum_diff_square += diff * diff;
 
-                                // phase :
+                                // mean angle: compute sum(cos) and sum(sin):
+                                // note: do not check div 0 (should never happen as distrib != pure 0.0):
+                                t3phi_sum_cos += t3Re / sample;
+                                t3phi_sum_sin += t3Im / sample;
+
+                                // phase in [-PI; PI]:
                                 sample = (t3Im != 0.0) ? FastMath.atan2(t3Im, t3Re) : 0.0;
                                 t3phi_samples[n] = sample;
-
-                                // Compensated-summation variant for better numeric precision:
-                                t3phi_sum += sample;
-                                diff = sample - t3phi;
-                                t3phi_sum_diff += diff;
-                                t3phi_sum_diff_square += diff * diff;
                             }
 
                             // mean(T3amp):
@@ -2298,7 +2320,20 @@ public final class OIFitsCreatorService {
                             );
 
                             // mean(T3phi):
-                            s_t3phi_mean = SAMPLING_FACTOR_MEAN * t3phi_sum;
+                            s_t3phi_mean = (t3phi_sum_sin != 0.0) ? FastMath.atan2(t3phi_sum_sin, t3phi_sum_cos) : 0.0;
+
+                            t3phi_sum_diff = t3phi_sum_diff_square = 0.0;
+
+                            // compute angle variance:
+                            for (n = 0; n < N_SAMPLES; n++) {
+                                sample = t3phi_samples[n];
+
+                                // Compensated-summation variant for better numeric precision:
+                                // check if diff is [-PI; PI]:
+                                diff = distance(sample, s_t3phi_mean);
+                                t3phi_sum_diff += diff;
+                                t3phi_sum_diff_square += diff * diff;
+                            }
 
                             // error(t3phi):
                             // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
@@ -2325,7 +2360,8 @@ public final class OIFitsCreatorService {
 
                             if (NoiseService.USE_DISTRIB_APPROACH) {
                                 // check SNR:
-                                if ((s_t3phi_err > Math.PI) && (Math.abs(s_t3phi_mean / s_t3phi_err) < SNR_THRESHOLD)) {
+                                        // PI / 8  = 22.5 deg:
+                                if ((s_t3phi_err > (Math.PI * 0.125)) && (Math.abs(s_t3phi_mean / s_t3phi_err) < SNR_THRESHOLD)) {
                                     doFlag = true;
                                 }
                             }
@@ -2729,5 +2765,15 @@ public final class OIFitsCreatorService {
         public String toString() {
             return "UserModelComputePart[" + fromWL + " - " + endWL + "]: " + modelData;
         }
+    }
+
+    private static double distance(final double a1, final double a2) {
+        final double delta = a1 - a2;
+        if (delta > Math.PI) {
+            return delta - (2.0 * Math.PI);
+        } else if (delta < -Math.PI) {
+            return delta + (2.0 * Math.PI);
+        }
+        return delta;
     }
 }
