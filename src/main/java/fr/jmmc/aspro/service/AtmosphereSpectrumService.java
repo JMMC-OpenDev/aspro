@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
-import fr.jmmc.jmal.Band;
 import fr.jmmc.jmcs.util.ResourceUtils;
 import fr.jmmc.oitools.fits.FitsUtils;
 import fr.nom.tam.fits.BasicHDU;
@@ -15,8 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,56 +113,8 @@ public final class AtmosphereSpectrumService {
 
             cached = new AtmTransmission(lambda, trans);
 
-            computeTransmissionInBands();
-
         } catch (FitsException fe) {
             throw new IllegalStateException("Missing columns", fe);
-        }
-    }
-
-    private void computeTransmissionInBands() {
-
-        final Band[] bands = Band.values();
-        final int len = bands.length - 1; // Ignore band Q
-
-        final double[] lambda = new double[len];
-        final double[] delta_lambda = new double[len];
-
-        for (int i = 0; i < len; i++) {
-            final Band band = bands[i];
-
-            // convert micrometers to meters:
-            final double lambdaMid = band.getLambda() * 1e-6;
-            final double width = band.getBandWidth() * 1e-6;
-
-            final double lambdaMin = lambdaMid - 0.5 * width;
-            final double lambdaMax = lambdaMid + 0.5 * width;
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Band: " + band.getName()
-                        + " min: " + lambdaMin
-                        + " mid: " + lambdaMid
-                        + " max: " + lambdaMax
-                );
-            }
-
-            lambda[i] = lambdaMid;
-            delta_lambda[i] = width;
-        }
-
-        final double[] trans = getTransmission(lambda, delta_lambda);
-
-        // TODO: add several transmission curves for paranal !
-        final AtmTransmission atm = this.cached;
-
-        for (int i = 0; i < len; i++) {
-            final Band band = bands[i];
-
-            atm.bandTransmission.put(band, trans[i]);
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("bandTransmission: " + atm.bandTransmission);
         }
     }
 
@@ -224,8 +173,6 @@ public final class AtmosphereSpectrumService {
         final double[] lambda;
         /** transmission [0;1] */
         final double[] transmission;
-        /** mean transmission in bands */
-        final Map<Band, Double> bandTransmission = new LinkedHashMap<Band, Double>(32);
 
         AtmTransmission(final double[] lambda, final double[] transmission) {
             this.lambda = lambda;
