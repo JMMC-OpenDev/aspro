@@ -4,6 +4,9 @@
 package fr.jmmc.aspro.util;
 
 import fr.jmmc.jmal.complex.MutableComplex;
+import fr.jmmc.jmcs.util.FileUtils;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import net.jafama.FastMath;
@@ -23,7 +26,7 @@ public final class StatUtils {
     /** precision expected on stddev */
     private final static double EPSILON_VARIANCE = 5e-5;
     /** number of samples */
-    public final static int N_SAMPLES = 256;
+    public final static int N_SAMPLES = 1024;
     /** normalization factor = 1/N_SAMPLES */
     public final static double SAMPLING_FACTOR_MEAN = 1d / N_SAMPLES;
     /** normalization factor for variance = 1 / (N_SAMPLES - 1) (bessel correction) */
@@ -159,19 +162,39 @@ public final class StatUtils {
     }
 
     // TEST:
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         final int N = 10;
 
         for (int i = 0; i < N; i++) {
-            System.out.println("get(): " + StatUtils.getInstance().get());
+            ComplexDistribution d = StatUtils.getInstance().get();
+            System.out.println("get(): " + d);
         }
+        
+        // dump all distributions:
+        for (int n = 0; n < CACHE_SIZE; n++) {
+            ComplexDistribution d = StatUtils.getInstance().get();
+            System.out.println("get(): " + d);
+
+            // Get the complex distribution for this row:
+            final double[] distRe = d.getSamples()[0];
+            final double[] distIm = d.getSamples()[1];
+            
+            final StringBuilder sb = new StringBuilder(4096);
+            sb.append("# RE\tIM\n");
+
+            for (int i = 0; i < N_SAMPLES; i++) {
+                sb.append(distRe[i]).append("\t").append(distIm[i]).append('\n');
+            }        
+            FileUtils.writeFile(new File("/home/bourgesl/Documents/pub/JMMC-PUB-2800-0001/tmp/dist_"+N_SAMPLES+"_"+n+".txt"), sb.toString());
+        }
+        
 
         System.out.println("VIS AMP:");
         for (int i = 0; i < N; i++) {
             test(true);
         }
 
-        if (true) {
+        if (false) {
             System.out.println("V2:");
             for (int i = 0; i < N; i++) {
                 test(false);
@@ -209,7 +232,6 @@ public final class StatUtils {
                     visRe + visErrRe * random.nextGaussian(),
                     visIm + visErrRe * random.nextGaussian()
             );
-//            System.out.println("" + (visComplexSample.getReal()) + " " + (visComplexSample.getImaginary()));
 
             // compute amplitude:
             sample = FastMath.pow2(visComplexSample.getReal()) + FastMath.pow2(visComplexSample.getImaginary());

@@ -835,6 +835,14 @@ public final class NoiseService implements VisNoiseService {
         if (logger.isDebugEnabled()) {
             logger.debug("atmTrans: {}", Arrays.toString(atmTrans));
         }
+        
+        if (false) {
+            System.out.println("#AtmTransmission["+instrumentName+"] ["+ this.waveLengths[0] + " - " + this.waveLengths[this.waveLengths.length - 1] + "]:");
+            for (int i = 0; i < this.waveLengths.length; i++) {
+                System.out.println(this.waveLengths[i] + "\t" + atmTrans[i]);
+            }
+            System.out.println("#---");
+        }
 
         // nb of photons m^-2.s^-1.m^-1 for an object at magnitude 0:
         // note: fzero depends on the spectral band:
