@@ -191,8 +191,10 @@ public final class NoiseService implements VisNoiseService {
     /** noise computation parameters per uv point */
     private NoiseWParams[] params = null;
     /* varying values (spectrally dependent) */
-    /** (W) number of thermal photons per telescope */
-    private double[] nbPhotTherm = null;
+    /** (W) number of thermal photons per telescope in the interferometric channel */
+    private double[] nbPhotThermInterf = null;
+    /** (W) number of thermal photons per telescope in each photometric channel */
+    private double[] nbPhotThermPhoto = null;
 
     /**
      * Protected constructor
@@ -746,16 +748,24 @@ public final class NoiseService implements VisNoiseService {
         }
 
         // 2nd pass: obsDit is known = integration time (setup)
-        this.nbPhotTherm = new double[nWLen];
+        this.nbPhotThermInterf = new double[nWLen];
+        this.nbPhotThermPhoto = new double[nWLen];
 
         if (nbTotalPhotTherm != null) {
             for (int i = 0; i < nWLen; i++) {
                 // corrected total number of thermal photons using the final observation dit per telescope:
-                nbPhotTherm[i] = nbTotalPhotTherm[i] * obsDit;
+                nbTotalPhotTherm[i] *= obsDit;
+                nbPhot = nbTotalPhotTherm[i];                
+                
+                // number of thermal photons in the interferometric channel (per telescope):
+                nbPhotThermInterf[i] = nbPhot * fracFluxInInterferometry;
+                // number of thermal photons in each photometric channel (photometric flux):
+                nbPhotThermPhoto[i]  = nbPhot * fracFluxInPhotometry;
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("nbPhotTherm              : {}", Arrays.toString(nbPhotTherm));
+                logger.debug("nbPhotThermInterf         : {}", Arrays.toString(nbPhotThermInterf));
+                logger.debug("nbPhotThermPhoto          : {}", Arrays.toString(nbPhotThermPhoto));
             }
         }
 
@@ -924,7 +934,7 @@ public final class NoiseService implements VisNoiseService {
             for (int i = 0; i < nWLen; i++) {
                 // variance of the photometric flux in photometric channel:
                 final double varFluxPhot = nbPhotPhoto[i]
-                        + ratioPhotoPerBeam * (nbPhotTherm[i] + nbPixPhoto * FastMath.pow2(ron));
+                        + ratioPhotoPerBeam * (nbPhotThermPhoto[i] + nbPixPhoto * FastMath.pow2(ron));
 
                 // square error contribution of 2 photometric channels on the square visiblity FiFj:
                 sqErrVis2Phot[i] = 2.0 * varFluxPhot / FastMath.pow2(nbPhotPhoto[i]);
@@ -950,7 +960,7 @@ public final class NoiseService implements VisNoiseService {
             nbPhot *= nbTel;
 
             // variance of the squared correlated flux = sqCorFlux * coef + constant
-            varSqCorFluxCoef[i] = 2.0 * (nbPhot + nbPhotTherm[i] * nbTel)
+            varSqCorFluxCoef[i] = 2.0 * (nbPhot + nbPhotThermInterf[i] * nbTel)
                     + 4.0 + 2.0 * nbPixInterf * FastMath.pow2(ron);
 
             varSqCorFluxConst[i] = nbPhot * (1.0 + nbPhot + 2.0 * nbPixInterf * FastMath.pow2(ron))
@@ -1010,7 +1020,7 @@ public final class NoiseService implements VisNoiseService {
         double errVis2;
         if (usePhotometry) {
             // TODO: howto deal with beams ? ie what is the impact of 1 vs 4 beams ?
-            errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)) + param.sqErrVis2Phot[iChannel]);
+                errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)) + param.sqErrVis2Phot[iChannel]);
         } else {
             // no photometry...
             errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)));
