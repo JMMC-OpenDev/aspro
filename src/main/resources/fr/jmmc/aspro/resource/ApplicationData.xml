@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.1 beta 2"/>
-    <compilation date="30/05/2016" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.1 beta 3"/>
+    <compilation date="03/06/2016" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -197,7 +197,10 @@
 
     <releasenotes>
         <release version="0.9.9.1">
-            <pubDate>Mon, 30 May 2016 14:00:00 GMT</pubDate>
+            <pubDate>Fri, 03 Jun 2016 10:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.1 beta 3">
+                <change type="FEATURE">Fixed polarization modes in the GRAVITY OB generation</change>
+            </prerelease>
             <prerelease version="0.9.9.1 beta 2">
                 <change type="BUGFIX">Fixed VISPHI / T3PHI sampling to compute first the mean angle [compute sum(cos) and sum(sin)] and then the variance as the squared distance [0..180]</change>
                 <change type="BUGFIX">Fixed Noise modelling to generate the random sample index per HA point for noisy data

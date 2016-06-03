@@ -90,7 +90,12 @@ public final class ExportOBGravity extends ExportOBVLTI {
             if ("MEDIUM".equals(res)) {
                 res = "MED";
             }
-            pola = ("COMBINED".equals(instrumentMode.substring(pos + 1))) ? "IN": "OUT";
+            /*
+                pour les deux polariseurs (SPEC.POL et FT.POL):
+                SPLIT -> IN
+                COMBINED -> OUT            
+            */
+            pola = ("COMBINED".equals(instrumentMode.substring(pos + 1))) ? "OUT" : "IN";
         }
 
         document = document.replaceAll(KEY_INS_SPEC_RES, res);
