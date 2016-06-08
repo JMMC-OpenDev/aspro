@@ -7,13 +7,13 @@ import fr.jmmc.aspro.model.oi.Target;
 import java.util.Comparator;
 
 /**
- * Target Comparator implementation based on RA field
+ * Target Comparator implementation based on DE field
  * @author bourgesl
  */
-public final class TargetRAComparator implements Comparator<Target> {
+public final class TargetDEComparator implements Comparator<Target> {
 
   /** singleton instance */
-  private final static TargetRAComparator instance = new TargetRAComparator();
+  private final static TargetDEComparator instance = new TargetDEComparator();
 
   /**
    * Return the comparator singleton
@@ -26,7 +26,7 @@ public final class TargetRAComparator implements Comparator<Target> {
   /**
    * Private constructor
    */
-  private TargetRAComparator() {
+  private TargetDEComparator() {
     super();
   }
 
@@ -43,6 +43,6 @@ public final class TargetRAComparator implements Comparator<Target> {
    */
   @Override
   public int compare(final Target t1, final Target t2) {
-    return Double.compare(t1.getRADeg(), t2.getRADeg());
+    return Double.compare(t1.getDECDeg(), t2.getDECDeg());
   }
 }

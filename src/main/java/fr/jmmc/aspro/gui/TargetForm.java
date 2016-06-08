@@ -12,6 +12,7 @@ import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.util.TargetDEComparator;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
 import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.jmal.star.Star;
@@ -31,6 +32,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -609,12 +611,14 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelActions = new javax.swing.JPanel();
         jButtonBefore = new javax.swing.JButton();
         jButtonAfter = new javax.swing.JButton();
+        jButtonDeleteTarget = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
+        jLabelSort = new javax.swing.JLabel();
         jButtonSortRA = new javax.swing.JButton();
+        jButtonSortDE = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JToolBar.Separator();
         jToggleButtonCalibrator = new javax.swing.JToggleButton();
         jButtonRemoveCalibrator = new javax.swing.JButton();
-        jButtonDeleteTarget = new javax.swing.JButton();
         jPanelRight = new javax.swing.JPanel();
         jPanelTarget = new javax.swing.JPanel();
         jLabelName = new javax.swing.JLabel();
@@ -763,59 +767,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelActions.add(jButtonAfter, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        jPanelActions.add(jSeparator1, gridBagConstraints);
-
-        jButtonSortRA.setText("Sort by R.A.");
-        jButtonSortRA.setToolTipText("sort all targets by their right ascension");
-        jButtonSortRA.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonSortRAActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelActions.add(jButtonSortRA, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
-        gridBagConstraints.gridy = 0;
-        jPanelActions.add(jSeparator2, gridBagConstraints);
-
-        jToggleButtonCalibrator.setText("Flag calibrator");
-        jToggleButtonCalibrator.setToolTipText("(un)flag the selected target as calibrator");
-        jToggleButtonCalibrator.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jToggleButtonCalibratorActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelActions.add(jToggleButtonCalibrator, gridBagConstraints);
-
-        jButtonRemoveCalibrator.setText("Remove calibrator");
-        jButtonRemoveCalibrator.setToolTipText("Remove the selected calibrator from the target's calibrators");
-        jButtonRemoveCalibrator.setFocusable(false);
-        jButtonRemoveCalibrator.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButtonRemoveCalibrator.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jButtonRemoveCalibrator.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonRemoveCalibratorActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 7;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelActions.add(jButtonRemoveCalibrator, gridBagConstraints);
 
         jButtonDeleteTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
         jButtonDeleteTarget.setToolTipText("delete the selected target");
@@ -835,7 +786,85 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelActions.add(jButtonDeleteTarget, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanelActions.add(jSeparator1, gridBagConstraints);
+
+        jLabelSort.setText("Sort by:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanelActions.add(jLabelSort, gridBagConstraints);
+
+        jButtonSortRA.setText("RA");
+        jButtonSortRA.setToolTipText("sort all targets (and calibrators) by their right ascension (ascending)");
+        jButtonSortRA.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonSortRA.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSortRAActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelActions.add(jButtonSortRA, gridBagConstraints);
+
+        jButtonSortDE.setText("DEC");
+        jButtonSortDE.setToolTipText("sort all targets (and calibrators) by their declination (ascending)");
+        jButtonSortDE.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonSortDE.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSortDEActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelActions.add(jButtonSortDE, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 7;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanelActions.add(jSeparator2, gridBagConstraints);
+
+        jToggleButtonCalibrator.setText("Flag calibrator");
+        jToggleButtonCalibrator.setToolTipText("(un)flag the selected target as calibrator");
+        jToggleButtonCalibrator.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButtonCalibratorActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 8;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelActions.add(jToggleButtonCalibrator, gridBagConstraints);
+
+        jButtonRemoveCalibrator.setText("Remove calibrator");
+        jButtonRemoveCalibrator.setToolTipText("Remove the selected calibrator from the target's calibrators");
+        jButtonRemoveCalibrator.setFocusable(false);
+        jButtonRemoveCalibrator.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonRemoveCalibrator.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButtonRemoveCalibrator.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonRemoveCalibratorActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 9;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelActions.add(jButtonRemoveCalibrator, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 10;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
@@ -1489,11 +1518,16 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }//GEN-LAST:event_jToggleButtonCalibratorActionPerformed
 
     private void jButtonSortRAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSortRAActionPerformed
+        // TODO: handle sorting direction (double click)
+        sortAndRefreshForm(TargetRAComparator.getInstance());
+    }
+    
+    private void sortAndRefreshForm(final Comparator<Target> cmp) {
         // sort edited targets :
-        sortTargets(this.editTargets);
+        sortTargets(this.editTargets, cmp);
 
         // sort calibrator list :
-        sortTargets(this.editTargetUserInfos.getCalibrators());
+        sortTargets(this.editTargetUserInfos.getCalibrators(), cmp);
 
         TargetInformation targetInfo;
         for (Target target : this.editTargets) {
@@ -1503,7 +1537,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                 targetInfo = getTargetUserInformation(target);
 
                 if (!targetInfo.getCalibrators().isEmpty()) {
-                    sortTargets(targetInfo.getCalibrators());
+                    sortTargets(targetInfo.getCalibrators(), cmp);
                 }
             }
         }
@@ -1597,6 +1631,11 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
       BrowserLauncher.openURL(url);
     }//GEN-LAST:event_jButtonSEDViewerActionPerformed
+
+    private void jButtonSortDEActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSortDEActionPerformed
+        // TODO: handle sorting direction (double click)
+        sortAndRefreshForm(TargetDEComparator.getInstance());
+    }//GEN-LAST:event_jButtonSortDEActionPerformed
 
     /**
      * Remove all occurences of the calibrator from the tree
@@ -1773,13 +1812,14 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }
 
     /**
-     * Sort the given target list by right ascension (R.A.)
+     * Sort the given target list using the given comparator
      * @param targets target list to sort (modified)
+     * @param cmp target comparator
      */
-    private static void sortTargets(final List<Target> targets) {
+    private static void sortTargets(final List<Target> targets, final Comparator<Target> cmp) {
         logger.debug("targets to sort: {}", targets);
 
-        Collections.sort(targets, TargetRAComparator.getInstance());
+        Collections.sort(targets, cmp);
 
         logger.debug("targets sorted: {}", targets);
     }
@@ -1844,6 +1884,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JButton jButtonRemoveCalibrator;
     private javax.swing.JButton jButtonSEDViewer;
     private javax.swing.JButton jButtonSimbad;
+    private javax.swing.JButton jButtonSortDE;
     private javax.swing.JButton jButtonSortRA;
     private javax.swing.JTextField jFieldDEC;
     private javax.swing.JFormattedTextField jFieldMagB;
@@ -1886,6 +1927,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JLabel jLabelParallax;
     private javax.swing.JLabel jLabelRA;
     private javax.swing.JLabel jLabelRMDEC;
+    private javax.swing.JLabel jLabelSort;
     private javax.swing.JLabel jLabelSpecTypes;
     private javax.swing.JLabel jLabelSysVel;
     private javax.swing.JList jListCalibrators;
