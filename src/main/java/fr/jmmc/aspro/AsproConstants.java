@@ -46,8 +46,6 @@ public interface AsproConstants {
     public static final double DEFAULT_OBSERVATION_DURATION = 300d;
     /** default value for checkbox Night Limit = true */
     public static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
-    /** default image LUT */
-    public final static String DEFAULT_IMAGE_LUT = ColorModels.COLOR_MODEL_ASPRO_ISOPHOT;
     /** default image size */
     public final static Integer DEFAULT_IMAGE_SIZE = NumberUtils.valueOf(512);
     /** image size choices */

@@ -8,7 +8,6 @@ import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
-import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,7 @@ import org.slf4j.LoggerFactory;
  *
  * Note : There is a special preference 'splash.screen.show' used to disable the splash screen (dev mode) if its value is 'false'.
  */
-public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences {
+public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
 
     /** Singleton instance */
     private static Preferences _singleton = null;
@@ -27,12 +26,8 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
     /* Preferences */
     /** Preference : edit positions in XY (true) or rho/theta (false) in the model editor */
     public final static String MODELEDITOR_PREFERXY = "modeleditor.preferxy";
-    /** Preference : LUT table to use for the object model image in the UV Coverage plot */
-    public final static String MODEL_IMAGE_LUT = "model.image.lut";
     /** Preference : Image size to use for the object model image in the UV Coverage plot */
     public final static String MODEL_IMAGE_SIZE = "model.image.size";
-    /** Preference : Color scaling method to use for the object model image in the UV Coverage plot */
-    public final static String MODEL_IMAGE_SCALE = "model.image.scale";
     /** Preference : Enable noise modeling for the object model image in the UV Coverage plot */
     public final static String MODEL_IMAGE_NOISE = "model.image.noise";
     /** Preference : Enable fast user model (optimize FFT and direct FT i.e. skip useless data) */
@@ -97,15 +92,15 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
      */
     @Override
     protected void setDefaultPreferences() throws PreferencesException {
+        super.setDefaultPreferences();
+
         logger.debug("Preferences.setDefaultPreferences()");
 
         // Model editor:
         setDefaultPreference(MODELEDITOR_PREFERXY, Boolean.FALSE);
 
         // UV Coverage - image size and LUT:
-        setDefaultPreference(MODEL_IMAGE_LUT, AsproConstants.DEFAULT_IMAGE_LUT);
         setDefaultPreference(MODEL_IMAGE_SIZE, AsproConstants.DEFAULT_IMAGE_SIZE);
-        setDefaultPreference(MODEL_IMAGE_SCALE, ColorScale.LINEAR.toString());
         setDefaultPreference(MODEL_IMAGE_NOISE, Boolean.FALSE);
 
         // User model:
@@ -170,21 +165,6 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
             logger.debug("ignored invalid value: {}", value);
         }
         return SunType.Night;
-    }
-
-    /**
-     * Return the Color scaling method Preference : use preferences or LINEAR if it is undefined
-     * @return Color scaling method (LINEAR/LOGARITHMIC)
-     */
-    public ColorScale getImageColorScale() {
-        final String value = getPreference(MODEL_IMAGE_SCALE);
-
-        try {
-            return ColorScale.valueOf(value);
-        } catch (IllegalArgumentException iae) {
-            logger.debug("ignored invalid value: {}", value);
-        }
-        return ColorScale.LINEAR;
     }
 
     /**

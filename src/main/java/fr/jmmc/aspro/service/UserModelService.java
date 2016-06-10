@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.Preferences;
-import fr.jmmc.aspro.image.FitsImageUtils;
+import fr.jmmc.oiexplorer.core.util.FitsImageUtils;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmal.image.ColorScale;

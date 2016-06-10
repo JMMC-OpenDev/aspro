@@ -7,8 +7,8 @@ import edu.emory.mathcs.jtransforms.fft.FloatFFT_2D;
 import edu.emory.mathcs.utils.ConcurrencyUtils;
 import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.Preferences;
-import fr.jmmc.aspro.gui.FitsImagePanel;
-import fr.jmmc.aspro.image.FitsImageUtils;
+import fr.jmmc.oiexplorer.core.gui.FitsImagePanel;
+import fr.jmmc.oiexplorer.core.util.FitsImageUtils;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.complex.ImmutableComplex;
@@ -1198,7 +1198,7 @@ public class ImageFitsTest {
         SwingUtils.invokeEDT(new Runnable() {
             @Override
             public void run() {
-                final FitsImagePanel panel = new FitsImagePanel(true, false, minDataRange);
+                final FitsImagePanel panel = new FitsImagePanel(Preferences.getInstance(), true, false, minDataRange);
                 panel.setFitsImage(fitsImage);
 
                 final JFrame frame = new JFrame(name);

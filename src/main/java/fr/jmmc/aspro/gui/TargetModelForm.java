@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.oiexplorer.core.gui.FitsImagePanel;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.AnimatorPanel;
 import fr.jmmc.aspro.gui.util.ModelJTree;
@@ -375,7 +376,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 // update fits Image:
                 if (this.fitsImagePanel == null) {
                     // do not show id but options:
-                    this.fitsImagePanel = new FitsImagePanel(false, true) {
+                    this.fitsImagePanel = new FitsImagePanel(Preferences.getInstance(), false, true) {
                         private static final long serialVersionUID = 1L;
 
                         @Override
