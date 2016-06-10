@@ -33,6 +33,7 @@ public final class AtmosphereSpectrumService {
 
     private static final boolean DEBUG = false;
     private static final boolean DUMP_VALUES = false;
+    private static final boolean MOCK = false;
 
     /** FITS column lambda 'lam' (micrometer) */
     private static final String COL_LAMBDA = "lam";
@@ -58,6 +59,11 @@ public final class AtmosphereSpectrumService {
         final int nWLen = waveLengths.length;
 
         final double[] trans = new double[nWLen];
+        
+        if (MOCK) {
+            Arrays.fill(trans, 1d);
+            return trans;
+        }
 
         // TODO: add several transmission curves for paranal !
         final AtmTransmission atm = this.cached;

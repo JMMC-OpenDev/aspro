@@ -847,7 +847,9 @@ public final class NoiseService implements VisNoiseService {
         }
         
         if (false) {
-            System.out.println("#AtmTransmission["+instrumentName+"] ["+ this.waveLengths[0] + " - " + this.waveLengths[this.waveLengths.length - 1] + "]:");
+            System.out.println("#AtmTransmission[" + instrumentName + "] [" + this.waveLengths[0] + " - " 
+                    + this.waveLengths[this.waveLengths.length - 1] + "]:");
+            
             for (int i = 0; i < this.waveLengths.length; i++) {
                 System.out.println(this.waveLengths[i] + "\t" + atmTrans[i]);
             }
