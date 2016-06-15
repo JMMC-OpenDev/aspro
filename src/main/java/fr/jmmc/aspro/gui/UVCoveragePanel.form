@@ -18,7 +18,6 @@
   <SubComponents>
     <Container class="javax.swing.JSplitPane" name="jSplitPane">
       <Properties>
-        <Property name="dividerSize" type="int" value="5"/>
         <Property name="resizeWeight" type="double" value="0.05"/>
         <Property name="continuousLayout" type="boolean" value="true"/>
         <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
