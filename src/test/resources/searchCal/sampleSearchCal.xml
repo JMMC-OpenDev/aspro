@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <VOTABLE xmlns="http://www.ivoa.net/xml/VOTable/v1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.1" ID="http://www.ivoa.net/xml/VOTable/v1.1 http://www.ivoa.net/xml/VOTable/VOTable-1.1.xsd">
-  <DESCRIPTION>SearchCal software: http://www.jmmc.fr/searchcal (In case of problem, please report to jmmc-user-support@ujf-grenoble.fr)
+  <DESCRIPTION>SearchCal software: http://www.jmmc.fr/searchcal (In case of problem, please report to jmmc-user-support@jmmc.fr)
   Request parameters: -objectName ETA_TAU -mag NaN -diffRa 3600.0 -diffDec 1200.0 -band K -minMagRange 2.0 -maxMagRange 4.0 -ra 03:47:29.0765 -dec 24:06:18.494 -baseMax 102.45 -wlen 2.2 -bright true -noScienceStar false
   Generated on (UTC): 2010-10-06T14:13:14
   </DESCRIPTION>

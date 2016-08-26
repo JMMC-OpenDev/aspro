@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <VOTABLE version="1.1">
 <DESCRIPTION>
-  SearchCal software: http://www.jmmc.fr/searchcal (In case of problem, please report to jmmc-user-support@ujf-grenoble.fr)
+  SearchCal software: http://www.jmmc.fr/searchcal (In case of problem, please report to jmmc-user-support@jmmc.fr)
   Request parameters: -objectName ETA TAU -mag 2.636 -diffRa 3600.0 -diffDec 1200.0 -band K -minMagRange 0.6360000000000001 -maxMagRange 4.636 -ra 03:47:29.076 -dec +24:06:18.494 -baseMax 106.24660114734158 -wlen 2.0045 -bright true -noScienceStar false -outputFormat 2013.7 -diagnose true
   Generated on (UTC): 2014-02-12T12:45:40
  </DESCRIPTION>

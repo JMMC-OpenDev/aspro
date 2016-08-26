@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <VOTABLE xmlns="http://www.ivoa.net/xml/VOTable/v1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.1" ID="http://www.ivoa.net/xml/VOTable/v1.1 http://www.ivoa.net/xml/VOTable/VOTable-1.1.xsd">
-<DESCRIPTION>SearchCal software: http://www.jmmc.fr/searchcal (In case of problem, please report to jmmc-user-support@ujf-grenoble.fr)
+<DESCRIPTION>SearchCal software: http://www.jmmc.fr/searchcal (In case of problem, please report to jmmc-user-support@jmmc.fr)
   Request parameters: -objectName HIP1234 -mag NaN -diffRa 3600.0 -diffDec 1200.0 -band K -minMagRange 2.0 -maxMagRange 4.0 -ra 00:15:21.549 -dec +28:35:13.809 -baseMax 106.72986732869107 -wlen 2.0045 -bright true -noScienceStar false
   Generated on (UTC): 2011-03-14T15:44:13</DESCRIPTION>
 <COOSYS ID="J2000" equinox="J2000." epoch="J2000." system="eq_FK5"/>
