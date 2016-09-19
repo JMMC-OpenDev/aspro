@@ -129,6 +129,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private WindWidget windWidget = null;
     /** Dedicated panel for target quick search */
     private SearchPanel _searchPanel = null;
+    /** loaded observation setup (Interferometer + Instrument + Config) */
+    private String loadedObsSetup = null;
 
     /** Creates new form BasicObservationForm */
     public BasicObservationForm() {
@@ -676,8 +678,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
                 if (MessagePane.showConfirmMessage(jButtonDeleteTarget,
                         (calibrators == size) ? "Do you want to delete all selected calibrator targets and associations ?"
-                        : ((calibrators != 0) ? "Do you want to delete all selected science & calibrator targets and associations ?"
-                        : "Do you want to delete all selected science targets ?"))) {
+                                : ((calibrators != 0) ? "Do you want to delete all selected science & calibrator targets and associations ?"
+                                        : "Do you want to delete all selected science targets ?"))) {
 
                     // update the data model and fire change events :
                     om.removeTargetAndCalibrators(selectedTargets);
@@ -1362,7 +1364,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 }
 
                 // allow user inputs when no PoPs are defined in the configuration and not in multi-conf:
-                makePopsEditable(isPopsEditable() && (value == null || popMulti));
+                makePopsEditable(!isGuiRestrictionEnabled() || isPopsEditable() && (value == null || popMulti));
             } else {
                 // fire a property change event:
                 updatePops(null, true);
@@ -1399,7 +1401,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                     makePopsEditable(isPopsEditable());
                 } else {
                     updatePops(popConfig, false);
-                    makePopsEditable(false);
+                    makePopsEditable(!isGuiRestrictionEnabled());
                     lastConfPopConfig = popConfig;
                 }
             } else if (lastPopConfig != null) {
@@ -1556,6 +1558,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             currentTarget = null;
             currentInstrumentConfiguration = null;
             lastConfPopConfig = null;
+            loadedObsSetup = null;
 
             // use observation context to enable/disable POPS FIRST (event ordering issue):
             makePopsEditable(isPopsEditable());
@@ -1624,7 +1627,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         // ensure one configuration is selected :
         checkInstrumentConfigurationSelection();
 
+        // Memorize the loaded config:
+        updateInitialSetup();
+
         // use observation context to enable/disable GUI features:
+        if (!isGuiRestrictionEnabled()) {
+            logger.warn("Advanced user mode: {} disabled.", Preferences.GUI_RESTRICTIONS);
+        }
         final ObservationContext ctx = getObservationContext();
 
         if (ctx != null) {
@@ -1665,6 +1674,15 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jListTargets.setEnabled(targetEditable);
         jButtonTargetEditor.setEnabled(targetEditable);
         jButtonDeleteTarget.setEnabled(targetEditable);
+    }
+
+    private void updateInitialSetup() {
+        this.loadedObsSetup = ((String) jComboBoxInterferometer.getSelectedItem())
+                + " " + ((String) jComboBoxInstrument.getSelectedItem())
+                + " " + Arrays.toString(getInstrumentConfigurations())
+                + (!StringUtils.isEmpty(jTextPoPs.getText()) ? (" PoPs: " + jTextPoPs.getText()) : "");
+
+        logger.debug("initialSetup: {}", loadedObsSetup);
     }
 
     /**
@@ -1846,6 +1864,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
             final StringBuilder sb = new StringBuilder(100 * warningContainer.getWarningMessages().size());
             sb.append("<html>");
+
+            // Add initial setup:
+            if (this.loadedObsSetup != null) {
+                sb.append("( loaded obs. setup: ").append(loadedObsSetup).append(")<br>");
+            }
 
             String msg;
 
@@ -2098,6 +2121,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * @return observation context or null
      */
     private ObservationContext getObservationContext() {
-        return om.getMainObservation().getContext();
+        if (isGuiRestrictionEnabled()) {
+            return om.getMainObservation().getContext();
+        }
+        return null;
+    }
+
+    private boolean isGuiRestrictionEnabled() {
+        return Preferences.getInstance().getPreferenceAsBoolean(Preferences.GUI_RESTRICTIONS);
     }
 }
