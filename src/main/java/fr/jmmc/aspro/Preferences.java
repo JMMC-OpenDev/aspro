@@ -24,6 +24,8 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(Preferences.class.getName());
     /* Preferences */
+    /** Preference : enable/disable GUI restrictions */
+    public final static String GUI_RESTRICTIONS = "gui.restrictions";
     /** Preference : edit positions in XY (true) or rho/theta (false) in the model editor */
     public final static String MODELEDITOR_PREFERXY = "modeleditor.preferxy";
     /** Preference : Image size to use for the object model image in the UV Coverage plot */
@@ -96,6 +98,9 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
 
         logger.debug("Preferences.setDefaultPreferences()");
 
+        // Gui restrictions:
+        setDefaultPreference(GUI_RESTRICTIONS, Boolean.TRUE);
+        
         // Model editor:
         setDefaultPreference(MODELEDITOR_PREFERXY, Boolean.FALSE);
 
