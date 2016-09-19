@@ -2724,6 +2724,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         // points renderer:
         final AbstractRenderer rendererPoints = (AbstractRenderer) this.xyPlot.getRenderer(); // DATASET_UV_POINTS
+        // show series in legend:
+        rendererPoints.setBaseSeriesVisibleInLegend(true);
         // side effect with chart theme :
         rendererPoints.setAutoPopulateSeriesPaint(false);
         // reset colors :
@@ -2731,7 +2733,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         // tracks renderer:
         final AbstractRenderer rendererTracks = (AbstractRenderer) this.xyPlot.getRenderer(DATASET_UV_TRACKS);
-        // force to use the very large stroke :
+        // hide series in legend:
         rendererTracks.setBaseSeriesVisibleInLegend(false);
         // side effect with chart theme :
         rendererTracks.setAutoPopulateSeriesPaint(false);
@@ -2740,7 +2742,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         // points shadow renderer:
         final AbstractRenderer rendererPointsShadow = (AbstractRenderer) this.xyPlot.getRenderer(DATASET_UV_POINTS_SHADOW);
-        // force to use the very large stroke :
+        // hide series in legend:
         rendererPointsShadow.setBaseSeriesVisibleInLegend(false);
         // side effect with chart theme :
         rendererPointsShadow.setAutoPopulateSeriesPaint(false);
@@ -2748,7 +2750,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         // points shadow renderer:
         final AbstractRenderer rendererTracksShadow = (AbstractRenderer) this.xyPlot.getRenderer(DATASET_UV_TRACKS_SHADOW);
-        // force to use the very large stroke :
+        // hide series in legend:
         rendererTracksShadow.setBaseSeriesVisibleInLegend(false);
         // side effect with chart theme :
         rendererTracksShadow.setAutoPopulateSeriesPaint(false);
@@ -2771,8 +2773,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // uv in meters (megalambda to meter conversion):
         this.xyPlot.defineAxisBounds(1, uvMaxInLambda * uvData.getLambda());
 
+        // Reset Fixed legend items:
+        this.xyPlot.setFixedLegendItems(null);
+        
         // set the main data set :
         this.xyPlot.setDataset(DATASET_UV_POINTS, datasetPoints);
+
+        // Collect legend items now to avoid duplicates:        
+        this.xyPlot.setFixedLegendItems(this.xyPlot.getLegendItems());
+        
+        // hide series in legend:
+        rendererPoints.setBaseSeriesVisibleInLegend(false);
+        
         this.xyPlot.setDataset(DATASET_UV_POINTS_SHADOW, datasetPoints);
         this.xyPlot.setDataset(DATASET_UV_TRACKS, datasetTracks);
         this.xyPlot.setDataset(DATASET_UV_TRACKS_SHADOW, datasetTracks);
