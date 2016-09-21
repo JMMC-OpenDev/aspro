@@ -13,13 +13,21 @@ import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +75,11 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
 
         // register this instance as a Preference Observer :
         this.myPreferences.addObserver(this);
+
+        // Custom renderer for LUT:
+        final LUTComboBoxRenderer renderer = new LUTComboBoxRenderer();
+        renderer.setPreferredSize(new Dimension(380, 24));
+        this.jComboBoxLUT.setRenderer(renderer);
 
         // update GUI
         update(null, null);
@@ -1015,7 +1028,6 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         this.jRadioButtonAddNoiseNo.setSelected(!preferAddNoise);
 
         // Gui settings:
-        
         // Inverse logical:
         final boolean bypassGuiRestrictions = !this.myPreferences.getPreferenceAsBoolean(Preferences.GUI_RESTRICTIONS);
         this.jRadioButtonBypassGuiRestrictionsYes.setSelected(bypassGuiRestrictions);
@@ -1067,6 +1079,46 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
                 return SunType.NauticalTwilight;
             case 3:
                 return SunType.CivilTwilight;
+        }
+    }
+
+    private static final class LUTComboBoxRenderer extends DefaultListCellRenderer {
+
+        private static final long serialVersionUID = 1L;
+        
+        // members:
+        private final Map<String, Icon> cachedIcons = new HashMap<String, Icon>(64);
+
+        LUTComboBoxRenderer() {
+            super();
+        }
+
+        @Override
+        public Component getListCellRendererComponent(final JList list,
+                                                      final Object value,
+                                                      final int index,
+                                                      final boolean isSelected,
+                                                      final boolean cellHasFocus) {
+
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+            // Get
+            final String name = (String) list.getModel().getElementAt(index);
+
+            Icon icon = cachedIcons.get(name);
+            if (icon == null) {
+                if (name != null) {
+                    final BufferedImage image = ColorModels.getColorModelImage(name);
+                    if (image != null) {
+                        icon = new ImageIcon(image);
+                        // cache icon:
+                        cachedIcons.put(name, icon);
+                    }
+                }
+            }
+            setIcon(icon);
+
+            return this;
         }
     }
 }
