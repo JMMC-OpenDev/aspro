@@ -80,6 +80,9 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
             // disable notifications:
             _singleton = new Preferences(false);
 
+            // register color palette observer:
+            _singleton.addColorPaletteObserver();
+
             // enable future notifications:
             _singleton.setNotify(true);
         }
@@ -100,7 +103,7 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
 
         // Gui restrictions:
         setDefaultPreference(GUI_RESTRICTIONS, Boolean.TRUE);
-        
+
         // Model editor:
         setDefaultPreference(MODELEDITOR_PREFERXY, Boolean.FALSE);
 

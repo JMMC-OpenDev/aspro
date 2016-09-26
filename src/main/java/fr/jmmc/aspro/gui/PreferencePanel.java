@@ -13,21 +13,15 @@ import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
-import java.awt.Component;
+import fr.jmmc.oiexplorer.core.gui.IconComboBoxRenderer;
 import java.awt.Dimension;
-import java.awt.image.BufferedImage;
+import java.awt.Image;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,13 +67,19 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
 
         this.jComboBoxSuperSampling.setModel(new DefaultComboBoxModel(AsproConstants.SUPER_SAMPLING));
 
+        // Custom renderer for LUT:
+        this.jComboBoxLUT.setRenderer(new IconComboBoxRenderer() {
+            @Override
+            protected Image getImage(final String name) {
+                return ColorModels.getColorModelImage(name);
+            }
+        });
+        
+        // Set the Aspro Preferences:
+        this.chartPreferencesView.setPreferences(myPreferences);
+
         // register this instance as a Preference Observer :
         this.myPreferences.addObserver(this);
-
-        // Custom renderer for LUT:
-        final LUTComboBoxRenderer renderer = new LUTComboBoxRenderer();
-        renderer.setPreferredSize(new Dimension(380, 24));
-        this.jComboBoxLUT.setRenderer(renderer);
 
         // update GUI
         update(null, null);
@@ -188,6 +188,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jLabelGuiRestrictions = new javax.swing.JLabel();
         jRadioButtonBypassGuiRestrictionsYes = new javax.swing.JRadioButton();
         jRadioButtonBypassGuiRestrictionsNo = new javax.swing.JRadioButton();
+        chartPreferencesView = new fr.jmmc.oiexplorer.core.gui.ChartPreferencesView();
         jPanelCommonPreferencesView = new fr.jmmc.jmcs.gui.component.CommonPreferencesView();
 
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.LINE_AXIS));
@@ -341,6 +342,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 4, 2);
         jPanelObservability.add(jComboBoxTwilight, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -368,6 +370,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 2);
         jPanelObservability.add(jComboBoxBestPopsAlgorithm, gridBagConstraints);
 
@@ -388,6 +391,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelObservability.add(jComboBoxBestPopsCriteriaSigma, gridBagConstraints);
 
@@ -408,6 +412,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 8;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelObservability.add(jComboBoxBestPopsCriteriaAverageWeight, gridBagConstraints);
 
@@ -471,6 +476,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jComboBoxLUT, gridBagConstraints);
 
@@ -491,6 +497,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jComboBoxImageSize, gridBagConstraints);
 
@@ -511,6 +518,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jComboBoxColorScale, gridBagConstraints);
 
@@ -604,6 +612,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.weightx = 0.1;
         jPanelOIFits.add(jComboBoxSuperSampling, gridBagConstraints);
 
         jLabelAddNoise.setText("Add error noise to data");
@@ -686,6 +695,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jPanelGui.add(jRadioButtonBypassGuiRestrictionsNo, gridBagConstraints);
 
         jPanelLayout.add(jPanelGui);
+        jPanelLayout.add(chartPreferencesView);
         jPanelLayout.add(jPanelCommonPreferencesView);
 
         jScrollPane.setViewportView(jPanelLayout);
@@ -903,6 +913,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.ButtonGroup buttonGroupPositionStyle;
     private javax.swing.ButtonGroup buttonGroupTimeAxis;
     private javax.swing.ButtonGroup buttonGroupTimeRef;
+    private fr.jmmc.oiexplorer.core.gui.ChartPreferencesView chartPreferencesView;
     private javax.swing.JComboBox jComboBoxBestPopsAlgorithm;
     private javax.swing.JComboBox jComboBoxBestPopsCriteriaAverageWeight;
     private javax.swing.JComboBox jComboBoxBestPopsCriteriaSigma;
@@ -1082,43 +1093,4 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         }
     }
 
-    private static final class LUTComboBoxRenderer extends DefaultListCellRenderer {
-
-        private static final long serialVersionUID = 1L;
-        
-        // members:
-        private final Map<String, Icon> cachedIcons = new HashMap<String, Icon>(64);
-
-        LUTComboBoxRenderer() {
-            super();
-        }
-
-        @Override
-        public Component getListCellRendererComponent(final JList list,
-                                                      final Object value,
-                                                      final int index,
-                                                      final boolean isSelected,
-                                                      final boolean cellHasFocus) {
-
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            // Get
-            final String name = (String) list.getModel().getElementAt(index);
-
-            Icon icon = cachedIcons.get(name);
-            if (icon == null) {
-                if (name != null) {
-                    final BufferedImage image = ColorModels.getColorModelImage(name);
-                    if (image != null) {
-                        icon = new ImageIcon(image);
-                        // cache icon:
-                        cachedIcons.put(name, icon);
-                    }
-                }
-            }
-            setIcon(icon);
-
-            return this;
-        }
-    }
 }
