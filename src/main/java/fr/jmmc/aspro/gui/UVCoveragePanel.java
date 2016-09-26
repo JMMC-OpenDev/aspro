@@ -2797,7 +2797,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @return dataset
      */
     private static XYSeriesCollection prepareDataset(final ObservationCollectionUVData chartData, final AbstractRenderer renderer) {
-        final ColorPalette palette = ColorPalette.getDefaultColorPaletteAlpha();
+        final ColorPalette palette = ColorPalette.getColorPaletteAlpha();
 
         final XYSeriesCollection dataset = new XYSeriesCollection();
 

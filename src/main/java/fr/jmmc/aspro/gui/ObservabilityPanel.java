@@ -1302,7 +1302,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                              final Date min, final Date max,
                              final boolean doBaseLineLimits) {
 
-        final ColorPalette palette = ColorPalette.getDefaultColorPalette();
+        final ColorPalette palette = ColorPalette.getColorPalette();
 
         final XYBarRenderer xyBarRenderer = (XYBarRenderer) this.xyPlot.getRenderer();
 
