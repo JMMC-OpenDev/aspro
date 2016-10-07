@@ -1504,7 +1504,8 @@ public final class ObservabilityService {
                 // rise/set range WITHOUT HA Min/Max constraints:
                 final Range haLimits = getTargetHALimits(target, ctx);
 
-                final boolean doSoftLimits = checkJDMoon || checkJDWind || rangeHARiseSet.contains(haLimits.getMin()) || rangeHARiseSet.contains(haLimits.getMax());
+                final boolean checkHA = rangeHARiseSet.contains(haLimits.getMin()) || rangeHARiseSet.contains(haLimits.getMax());
+                final boolean doSoftLimits = checkJDMoon || checkJDWind || checkHA;
 
                 if (isLogDebug) {
                     logger.debug("checkJDMoon: {}", checkJDMoon);
@@ -1520,10 +1521,15 @@ public final class ObservabilityService {
                     obsRanges.clear();
                     obsRanges.addAll(finalRangesHardLimits);
 
-                    // convert HA Limits to JD range in range [LST0 - 12; LST0 + 36]
-                    final Range rangeJDHALimits = this.sc.convertHAToJDRange(haLimits, precRA, ctx);
-                    obsRanges.add(rangeJDHALimits);
-                    nValid++;
+                    final Range rangeJDHALimits;
+                    if (checkHA) {
+                        // convert HA Limits to JD range in range [LST0 - 12; LST0 + 36]
+                        rangeJDHALimits = this.sc.convertHAToJDRange(haLimits, precRA, ctx);
+                        obsRanges.add(rangeJDHALimits);
+                        nValid++;
+                    } else {
+                        rangeJDHALimits = null;
+                    }
 
                     // Intersect with moon separation ranges :
                     if (checkJDMoon) {
@@ -1552,11 +1558,39 @@ public final class ObservabilityService {
                         // recycle ranges & list:
                         ctx.recycleRangesAndList(restrictedRanges);
                     } else {
+                        final String restrictionLevel;
                         if (restrictedRanges == null) {
                             finalRanges = DelayLineService.EMPTY_RANGE_LIST;
+                            restrictionLevel = "not";
                         } else {
                             finalRanges = restrictedRanges;
+                            restrictionLevel = "partially";
                         }
+
+                        if (isLogDebug) {
+                            logger.debug("Target {} observable: {} (HA, moon or wind restrictions)", restrictionLevel, target);
+                        }
+                        final StringBuffer sb = getBuffer();
+                        sb.append("Target [").append(targetName).append("] is ")
+                                .append(restrictionLevel).append(" observable [");
+                        final int len = sb.length();
+                        if (checkHA) {
+                            sb.append("HA");
+                        }
+                        if (checkJDMoon) {
+                            if (sb.length() > len) {
+                                sb.append(" or ");
+                            }
+                            sb.append("Moon");
+                        }
+                        if (checkJDWind) {
+                            if (sb.length() > len) {
+                                sb.append(" or ");
+                            }
+                            sb.append("Wind");
+                        }
+                        sb.append(" restrictions]");
+                        addInformation(sb.toString());
 
                         // get target position (ha, az, el) at range boundaries:
                         getTargetPosition(starObs, finalRangesHardLimits, precRA, precDEC, false);
