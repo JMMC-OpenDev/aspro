@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.2 beta 2"/>
-    <compilation date="26/09/2016" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.2 beta 3"/>
+    <compilation date="14/10/2016" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -204,7 +204,10 @@
 
     <releasenotes>
         <release version="0.9.9.2">
-            <pubDate>Mon, 26 Sep 2016 14:00:00 GMT</pubDate>
+            <pubDate>Fri, 14 Oct 2016 17:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.2 beta 3">
+                <change type="FEATURE">Improved color attribution in plots for baselines and configurations to be consistent across Aspro2 and OIFitsExplorer</change>
+            </prerelease>
             <prerelease version="0.9.9.2 beta 2">
                 <change type="FEATURE">Improved the Preference GUI for the color table (LUT preview image)</change>
                 <change type="FEATURE">Added a new 'color palette' preference to customize the colors used in plots;
