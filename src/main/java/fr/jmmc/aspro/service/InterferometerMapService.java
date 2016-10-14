@@ -52,7 +52,6 @@ public final class InterferometerMapService {
         final InterferometerMapData data = new InterferometerMapData();
 
         // stations :
-
         final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
 
         final InterferometerConfiguration ic = interferometerChoice.getInterferometerConfiguration();
@@ -86,7 +85,7 @@ public final class InterferometerMapService {
 
                 name[i] = s.getName();
                 diam[i] = s.getTelescope().getDiameter();
-                
+
                 if (diam[i] > maxDiam) {
                     maxDiam = diam[i];
                 }
@@ -95,17 +94,6 @@ public final class InterferometerMapService {
                 x = s.getRelativePosition().getPosX();
                 y = s.getRelativePosition().getPosY();
                 z = s.getRelativePosition().getPosZ();
-
-                /*
-                 SP = SIN(PI*(LONLAT(2))/180.0D0)
-                 CP = COS(PI*(LONLAT(2))/180.0D0)
-                 XX = STATX(1)
-                 YY = STATY(1)
-                 ZZ = STATZ(1)
-
-                 x=YY
-                 y=ZZ*CP-XX*SP
-                 */
 
                 mapX[i] = y;
                 mapY[i] = z * cosLat - x * sinLat;
@@ -120,7 +108,7 @@ public final class InterferometerMapService {
             final double maxY = getMax(mapY);
             relocate(mapY, minY + 0.5d * (maxY - minY));
 
-            final double maxXY = Math.max(maxDiam, 
+            final double maxXY = Math.max(maxDiam,
                     Math.max(0.5d * (maxX - minX), 0.5d * (maxY - minY))
             );
 
@@ -146,14 +134,16 @@ public final class InterferometerMapService {
             final int blen = CombUtils.comb(nStations, 2);
 
             final String[] blName = new String[blen];
+            final String[] blLabel = new String[blen];
             final double[] blX1 = new double[blen];
             final double[] blY1 = new double[blen];
             final double[] blX2 = new double[blen];
             final double[] blY2 = new double[blen];
+            final double[] blLen = new double[blen];
 
             final StringBuffer sb = new StringBuffer(32);
 
-            double dist;
+            double dist, total = 0.0;
             Station s1, s2;
             int i1, i2;
             int n = 0;
@@ -165,23 +155,28 @@ public final class InterferometerMapService {
                     s2 = stations.get(j);
                     i2 = data.getStationIndex(s2.getName());
 
-                    x = s2.getRelativePosition().getPosX() - s1.getRelativePosition().getPosX();
-                    y = s2.getRelativePosition().getPosY() - s1.getRelativePosition().getPosY();
-                    z = s2.getRelativePosition().getPosZ() - s1.getRelativePosition().getPosZ();
-
-                    dist = MathUtils.carthesianNorm(x, y, z);
-
                     if (i1 != -1 && i2 != -1) {
-                        sb.setLength(0);
-                        sb.append(s1.getName()).append('-').append(s2.getName()).append(' ');
-                        FormatterUtils.format(df2, sb, dist).append(" m");
+                        x = s2.getRelativePosition().getPosX() - s1.getRelativePosition().getPosX();
+                        y = s2.getRelativePosition().getPosY() - s1.getRelativePosition().getPosY();
+                        z = s2.getRelativePosition().getPosZ() - s1.getRelativePosition().getPosZ();
 
+                        dist = MathUtils.carthesianNorm(x, y, z);
+
+                        sb.setLength(0);
+                        sb.append(s1.getName()).append('-').append(s2.getName());
                         blName[n] = sb.toString();
+
+                        sb.append(' ');
+                        FormatterUtils.format(df2, sb, dist).append(" m");
+                        blLabel[n] = sb.toString();
+
                         blX1[n] = data.getStationX()[i1];
                         blY1[n] = data.getStationY()[i1];
                         blX2[n] = data.getStationX()[i2];
                         blY2[n] = data.getStationY()[i2];
+                        blLen[n] = dist;
 
+                        total += dist;
                         n++;
                     }
                 }
@@ -189,10 +184,13 @@ public final class InterferometerMapService {
 
             // copy results :
             data.setBaselineName(blName);
+            data.setBaselineLabel(blLabel);
             data.setBaselineStationX1(blX1);
             data.setBaselineStationY1(blY1);
             data.setBaselineStationX2(blX2);
             data.setBaselineStationY2(blY2);
+            data.setBaselineLength(blLen);
+            data.setTotalLength(total);
         }
 
         return data;

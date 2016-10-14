@@ -19,10 +19,10 @@ import fr.jmmc.oiexplorer.core.export.DocumentExportable;
 import fr.jmmc.oiexplorer.core.export.DocumentOptions;
 import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
-import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
 import fr.jmmc.oiexplorer.core.gui.chart.FastXYBubbleRenderer;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
+import fr.jmmc.oiexplorer.core.gui.chart.dataset.SharedSeriesAttributes;
 import fr.jmmc.oiexplorer.core.util.Constants;
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -162,6 +162,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
 
         final XYItemRenderer lineRenderer = this.xyPlot.getRenderer();
+        lineRenderer.setBaseStroke(ChartUtils.LARGE_STROKE);
 
         // Use Bubble Renderer for the first dataset :
         this.xyPlot.setRenderer(0, new FastXYBubbleRenderer());
@@ -344,14 +345,17 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         // side effect with chart theme :
         renderer.setAutoPopulateSeriesPaint(false);
 
-        final ColorPalette palette = ColorPalette.getColorPaletteAlpha();
+        // Get Global SharedSeriesAttributes:
+        final SharedSeriesAttributes globalAttrs = SharedSeriesAttributes.INSTANCE;
+        // reset global attributes ONCE in Aspro2:
+        globalAttrs.reset();
 
         final XYSeriesCollection dataset = new XYSeriesCollection();
 
         XYSeries xySeries = null;
-
-        String[] blName;
-        double[] blX1, blY1, blX2, blY2;
+        String label;
+        String[] blName, blLabel;
+        double[] blX1, blY1, blX2, blY2, blLen;
         int n;
 
         final boolean single = chartData.isSingle();
@@ -359,31 +363,35 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         // Iterate over map data (multi conf) :
         for (InterferometerMapData mapData : chartData.getMapDataList()) {
             blName = mapData.getBaselineName();
+            blLabel = mapData.getBaselineLabel();
             blX1 = mapData.getBaselineStationX1();
             blY1 = mapData.getBaselineStationY1();
             blX2 = mapData.getBaselineStationX2();
             blY2 = mapData.getBaselineStationY2();
+            blLen = mapData.getBaselineLength();
 
             if (!single) {
                 // 1 color per configuration (i.e. per XYSeries) :
-                xySeries = new XYSeries(mapData.getStationNames(), false);
+                label = mapData.getStationNames();
+                globalAttrs.addLabel(label, mapData.getTotalLength());
+
+                xySeries = new XYSeries(label, false);
                 xySeries.setNotify(false);
 
                 dataset.addSeries(xySeries);
-                n = dataset.getSeriesCount() - 1;
-                renderer.setSeriesPaint(n, palette.getColor(n), false);
             }
 
             for (int i = 0, len = blName.length; i < len; i++) {
 
                 if (single) {
                     // 1 color per base line (i.e. per XYSeries) :
-                    xySeries = new XYSeries(blName[i], false);
+                    label = blLabel[i];
+                    globalAttrs.addLabel(blName[i], label, blLen[i]);
+                    // Use label for the name of the serie (legend):
+                    xySeries = new XYSeries(label, false);
                     xySeries.setNotify(false);
 
                     dataset.addSeries(xySeries);
-                    n = dataset.getSeriesCount() - 1;
-                    renderer.setSeriesPaint(n, palette.getColor(n), false);
                 }
 
                 // first station :
@@ -396,6 +404,15 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
                 xySeries.add(NumberUtils.DBL_NAN, NumberUtils.DBL_NAN, false);
 
             } // BL
+        }
+
+        // Assign ONCE colors to labels automatically:
+        globalAttrs.define();
+
+        // Apply attributes to dataset:
+        for (int serie = 0, seriesCount = dataset.getSeriesCount(); serie < seriesCount; serie++) {
+            label = (String) dataset.getSeriesKey(serie);
+            renderer.setSeriesPaint(serie, globalAttrs.getColorAlpha(label), false);
         }
 
         // set the second data set :

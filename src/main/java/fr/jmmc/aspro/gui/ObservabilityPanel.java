@@ -52,6 +52,7 @@ import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedDateAxis;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
+import fr.jmmc.oiexplorer.core.gui.chart.dataset.SharedSeriesAttributes;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -183,20 +184,20 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     /** calibrator filter */
     private static final Filter CALIBRATOR_FILTER = new Filter("CalibratorFilter", "Hide calibrators",
             "hide all targets flagged as calibrator and orphaned calibrators") {
-                @Override
-                protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
-                    // if calibrator, filter item:
-                    return calibrator;
-                }
-            };
+        @Override
+        protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
+            // if calibrator, filter item:
+            return calibrator;
+        }
+    };
     /** unobservable filter */
     private static final Filter UNOBSERVABLE_FILTER = new Filter("UnobservableFilter", "Hide unobservable",
             "hide all targets that are not observable or never rise") {
-                @Override
-                protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
-                    return so != null && so.getVisible().isEmpty();
-                }
-            };
+        @Override
+        protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
+            return so != null && so.getVisible().isEmpty();
+        }
+    };
 
     /* default plot options */
     /** default value for the checkbox Baseline Limits */
@@ -1302,6 +1303,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                              final Date min, final Date max,
                              final boolean doBaseLineLimits) {
 
+        // Get Global SharedSeriesAttributes:
+        final SharedSeriesAttributes globalAttrs = SharedSeriesAttributes.INSTANCE;
+
         final ColorPalette palette = ColorPalette.getColorPalette();
 
         final XYBarRenderer xyBarRenderer = (XYBarRenderer) this.xyPlot.getRenderer();
@@ -1486,6 +1490,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                         taskSeriesCollection.add(taskSeries);
 
                         // color :
+                        // note: these colors are independent from the SharedSeriesAttributes
+                        // and are inconsistent for baselines ... for compatibility.
                         colorIndex = so.getType();
                         calibrator = false;
 
@@ -1499,11 +1505,17 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             // 1 color per StarObservabilityData type (star, calibrator, rise_set, horizon, baselines ...) :
                             // note : uses so.getInfo() to get baseline ...
                             legendLabel = so.getLegendLabel(colorIndex);
+                            /*                            
+                            if (colorIndex >= StarObservabilityData.TYPE_BASE_LINE) {
+                                // TODO: decide to shift colors for baselines (detailled observability):
+                                colorIndex = globalAttrs.getColorIndex(legendLabel);
+                            }
+                             */
                         } else {
                             legendLabel = chartData.getConfigurationNames().get(c);
 
                             // 1 color per configuration (incompatible with Detailed output : too complex i.e. unreadable) :
-                            colorIndex = c;
+                            colorIndex = globalAttrs.getColorIndex(legendLabel);
                         }
 
                         // display differently orphan calibrators:
@@ -1753,7 +1765,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 // find target to find first target occurence in slidingXYPlotAdapter:
                 final int pos = (this.currentTargetName == null
                         || this.currentTargetName.equals(slidingXYPlotAdapter.getTargetName(lastPos))) ? lastPos
-                                : slidingXYPlotAdapter.findTargetVirtualPosition(this.currentTargetName);
+                        : slidingXYPlotAdapter.findTargetVirtualPosition(this.currentTargetName);
 
                 value = (pos != -1) ? pos : lastPos;
             }

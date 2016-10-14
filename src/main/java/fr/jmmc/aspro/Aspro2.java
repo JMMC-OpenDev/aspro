@@ -118,6 +118,8 @@ public final class Aspro2 extends App {
         // Initialize warning log:
         LoggingService.getInstance().addLogMapper("Warning messages", AsproConstants.ASPRO_WARNING_LOG, "WARNINGLOG");
 
+        // TODO: decide to shift colors for baselines (detailled observability):
+//        SharedSeriesAttributes.INSTANCE.setOffsetIdx(StarObservabilityData.TYPE_BASE_LINE);
         logger.debug("Aspro2.initServices: handler exit");
     }
 
@@ -130,7 +132,7 @@ public final class Aspro2 extends App {
         logger.debug("Aspro2.setupGui() handler enter");
 
         prepareFrame();
-        
+
         createPreferencesView();
 
         // Create a new observation and update the GUI :

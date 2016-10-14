@@ -78,13 +78,13 @@ import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedNumberAxis;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorModelPaintScale;
-import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
 import fr.jmmc.oiexplorer.core.gui.chart.FastXYLineAndShapeRenderer;
 import fr.jmmc.oiexplorer.core.gui.chart.PaintLogScaleLegend;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
 import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
 import fr.jmmc.oiexplorer.core.gui.chart.ZoomEventListener;
+import fr.jmmc.oiexplorer.core.gui.chart.dataset.SharedSeriesAttributes;
 import fr.jmmc.oiexplorer.core.util.Constants;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -150,9 +150,9 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolTipGenerator, ChartProgressListener, ZoomEventListener,
-        ActionListener, ChangeListener, ObservationListener, Observer,
-        UserModelAnimator.UserModelAnimatorListener,
-        DocumentExportable, Disposable {
+                                                                         ActionListener, ChangeListener, ObservationListener, Observer,
+                                                                         UserModelAnimator.UserModelAnimatorListener,
+                                                                         DocumentExportable, Disposable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1L;
@@ -1691,13 +1691,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param currentUVMapData previously computed UV Map Data
          */
         private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationCollection obsCollection,
-                final List<ObservabilityData> obsDataList, final String targetName,
-                final double uvMax, final boolean doUVSupport, final boolean doOIFits,
-                final boolean useInstrumentBias, final boolean doDataNoise,
-                final boolean doModelImage, final ImageMode imageMode, final int imageSize,
-                final IndexColorModel colorModel, final ColorScale colorScale, final boolean doImageNoise,
-                final int imageIndex, final int supersamplingOIFits, final UserModelService.MathMode mathModeOIFits,
-                final UVMapData currentUVMapData) {
+                                      final List<ObservabilityData> obsDataList, final String targetName,
+                                      final double uvMax, final boolean doUVSupport, final boolean doOIFits,
+                                      final boolean useInstrumentBias, final boolean doDataNoise,
+                                      final boolean doModelImage, final ImageMode imageMode, final int imageSize,
+                                      final IndexColorModel colorModel, final ColorScale colorScale, final boolean doImageNoise,
+                                      final int imageIndex, final int supersamplingOIFits, final UserModelService.MathMode mathModeOIFits,
+                                      final UVMapData currentUVMapData) {
 
             // get current observation version :
             super(AsproTaskRegistry.TASK_UV_COVERAGE, obsCollection);
@@ -2388,11 +2388,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param noiseService optional Complex visibility Noise Service ready to use to compute noise on model images
          */
         private UVMapSwingWorker(final UVCoveragePanel uvPanel, final List<Model> models,
-                final Rectangle2D.Double uvRect,
-                final Float refMin, final Float refMax,
-                final ImageMode imageMode, final int imageSize,
-                final IndexColorModel colorModel, final ColorScale colorScale,
-                final VisNoiseService noiseService) {
+                                 final Rectangle2D.Double uvRect,
+                                 final Float refMin, final Float refMax,
+                                 final ImageMode imageMode, final int imageSize,
+                                 final IndexColorModel colorModel, final ColorScale colorScale,
+                                 final VisNoiseService noiseService) {
             super(AsproTaskRegistry.TASK_UV_MAP);
             this.uvPanel = uvPanel;
             this.models = models;
@@ -2422,11 +2422,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param noiseService optional Complex visibility Noise Service ready to use to compute noise on model images
          */
         private UVMapSwingWorker(final UVCoveragePanel uvPanel, final FitsImage fitsImage,
-                final Rectangle2D.Double uvRect,
-                final Float refMin, final Float refMax,
-                final ImageMode imageMode, final int imageSize,
-                final IndexColorModel colorModel, final ColorScale colorScale,
-                final VisNoiseService noiseService) {
+                                 final Rectangle2D.Double uvRect,
+                                 final Float refMin, final Float refMax,
+                                 final ImageMode imageMode, final int imageSize,
+                                 final IndexColorModel colorModel, final ColorScale colorScale,
+                                 final VisNoiseService noiseService) {
             super(AsproTaskRegistry.TASK_UV_MAP);
             this.uvPanel = uvPanel;
             this.models = null;
@@ -2775,16 +2775,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         // Reset Fixed legend items:
         this.xyPlot.setFixedLegendItems(null);
-        
+
         // set the main data set :
         this.xyPlot.setDataset(DATASET_UV_POINTS, datasetPoints);
 
         // Collect legend items now to avoid duplicates:        
         this.xyPlot.setFixedLegendItems(this.xyPlot.getLegendItems());
-        
+
         // hide series in legend:
         rendererPoints.setBaseSeriesVisibleInLegend(false);
-        
+
         this.xyPlot.setDataset(DATASET_UV_POINTS_SHADOW, datasetPoints);
         this.xyPlot.setDataset(DATASET_UV_TRACKS, datasetTracks);
         this.xyPlot.setDataset(DATASET_UV_TRACKS_SHADOW, datasetTracks);
@@ -2797,12 +2797,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @return dataset
      */
     private static XYSeriesCollection prepareDataset(final ObservationCollectionUVData chartData, final AbstractRenderer renderer) {
-        final ColorPalette palette = ColorPalette.getColorPaletteAlpha();
+        // Get Global SharedSeriesAttributes:
+        final SharedSeriesAttributes globalAttrs = SharedSeriesAttributes.INSTANCE;
 
         final XYSeriesCollection dataset = new XYSeriesCollection();
 
         XYSeries xySeries;
-        int n;
+        String label;
 
         final boolean single = chartData.isSingle();
 
@@ -2812,31 +2813,28 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             if (!single) {
                 // 1 color per configuration (i.e. per XYSeries) :
-                xySeries = new XYSeries(chartData.getConfigurationNames().get(c), false);
+                label = chartData.getConfigurationNames().get(c);
+                xySeries = new XYSeries(label, false);
                 xySeries.setNotify(false);
 
                 dataset.addSeries(xySeries);
 
-                if (renderer != null) {
-                    n = dataset.getSeriesCount() - 1;
-                    renderer.setSeriesPaint(n, palette.getColor(n), false);
-                }
-
             } else {
                 for (BaseLine bl : uvData.getBaseLines()) {
-
                     // 1 color per base line (i.e. per XYSeries) :
-                    xySeries = new XYSeries(bl.getName(), false);
+                    label = bl.getName();
+                    xySeries = new XYSeries(label, false);
                     xySeries.setNotify(false);
 
                     dataset.addSeries(xySeries);
-
-                    if (renderer != null) {
-                        n = dataset.getSeriesCount() - 1;
-                        renderer.setSeriesPaint(n, palette.getColor(n), false);
-                    }
                 }
             } // BL
+        }
+
+        // Apply attributes to dataset:
+        for (int serie = 0, seriesCount = dataset.getSeriesCount(); serie < seriesCount; serie++) {
+            label = (String) dataset.getSeriesKey(serie);
+            renderer.setSeriesPaint(serie, globalAttrs.getColorAlpha(label), false);
         }
 
         return dataset;
@@ -3371,7 +3369,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @return tooltip's text for an UV point
      */
     public String generateTooltip(final String baseline, final String confName, final TargetPointInfo targetPointInfo, final String timeRef,
-            final double u, final double v) {
+                                  final double u, final double v) {
 
         final StringBuffer sb = this.sbToolTip;
         sb.setLength(0); // clear
@@ -3441,7 +3439,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 final double ha = AstroSkyCalc.checkHA(sc.convertJDToHA(jd, starData.getPrecRA()));
 
                 final List<UVRangeBaseLineData> targetUVPoints
-                        = UVCoverageService.computeUVPoints(getChartData().getFirstObservation(), obsData, starData, ha);
+                                                = UVCoverageService.computeUVPoints(getChartData().getFirstObservation(), obsData, starData, ha);
 
                 if (targetUVPoints != null) {
                     final String textNow = FormatterUtils.format(this.timeFormatter, now);
