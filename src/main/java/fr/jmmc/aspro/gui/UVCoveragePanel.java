@@ -316,7 +316,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         setLayout(new java.awt.BorderLayout());
 
-        jSplitPane.setDividerSize(5);
         jSplitPane.setResizeWeight(0.05);
         jSplitPane.setContinuousLayout(true);
         jSplitPane.setMinimumSize(new java.awt.Dimension(320, 400));
@@ -421,8 +420,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         gridBagConstraints.gridwidth = 2;
         jPanelLeft.add(jLabelSamplingPeriod, gridBagConstraints);
 
-        jFieldSamplingPeriod.setColumns(3);
-        jFieldSamplingPeriod.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
+        jFieldSamplingPeriod.setColumns(5);
+        jFieldSamplingPeriod.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
         jFieldSamplingPeriod.setMinimumSize(new java.awt.Dimension(40, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -439,8 +438,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         gridBagConstraints.gridwidth = 2;
         jPanelLeft.add(jLabelObsDuration, gridBagConstraints);
 
-        jFieldObsDuration.setColumns(3);
-        jFieldObsDuration.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
+        jFieldObsDuration.setColumns(5);
+        jFieldObsDuration.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
         jFieldObsDuration.setMinimumSize(new java.awt.Dimension(40, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
