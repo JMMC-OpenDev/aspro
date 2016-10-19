@@ -27,9 +27,6 @@ public final class InterferometerMapData {
     private double[] baselineStationY1;
     private double[] baselineStationX2;
     private double[] baselineStationY2;
-    private double[] baselineLength;
-    /** total baseline length */
-    private double totalLength;
 
     /**
      * Public constructor
@@ -141,22 +138,6 @@ public final class InterferometerMapData {
 
     public void setBaselineStationY2(final double[] y) {
         this.baselineStationY2 = y;
-    }
-
-    public double[] getBaselineLength() {
-        return baselineLength;
-    }
-
-    public void setBaselineLength(double[] baselineLength) {
-        this.baselineLength = baselineLength;
-    }
-
-    public double getTotalLength() {
-        return totalLength;
-    }
-
-    public void setTotalLength(final double totalLength) {
-        this.totalLength = totalLength;
     }
 
 }

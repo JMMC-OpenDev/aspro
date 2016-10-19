@@ -189,8 +189,6 @@ public final class InterferometerMapService {
             data.setBaselineStationY1(blY1);
             data.setBaselineStationX2(blX2);
             data.setBaselineStationY2(blY2);
-            data.setBaselineLength(blLen);
-            data.setTotalLength(total);
         }
 
         return data;

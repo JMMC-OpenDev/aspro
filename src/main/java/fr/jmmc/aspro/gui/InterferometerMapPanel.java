@@ -368,12 +368,11 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
             blY1 = mapData.getBaselineStationY1();
             blX2 = mapData.getBaselineStationX2();
             blY2 = mapData.getBaselineStationY2();
-            blLen = mapData.getBaselineLength();
 
             if (!single) {
                 // 1 color per configuration (i.e. per XYSeries) :
                 label = mapData.getStationNames();
-                globalAttrs.addLabel(label, mapData.getTotalLength());
+                globalAttrs.addLabel(label);
 
                 xySeries = new XYSeries(label, false);
                 xySeries.setNotify(false);
@@ -386,7 +385,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
                 if (single) {
                     // 1 color per base line (i.e. per XYSeries) :
                     label = blLabel[i];
-                    globalAttrs.addLabel(blName[i], label, blLen[i]);
+                    globalAttrs.addLabel(blName[i], label);
                     // Use label for the name of the serie (legend):
                     xySeries = new XYSeries(label, false);
                     xySeries.setNotify(false);
