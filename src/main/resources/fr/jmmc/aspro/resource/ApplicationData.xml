@@ -19,7 +19,7 @@
     </company>
 
     <program name="Aspro2" version="0.9.9.2 beta 3"/>
-    <compilation date="14/10/2016" compiler="JDK 1.6.0_24"/>
+    <compilation date="19/10/2016" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -206,6 +206,7 @@
         <release version="0.9.9.2">
             <pubDate>Fri, 14 Oct 2016 17:00:00 GMT</pubDate>
             <prerelease version="0.9.9.2 beta 3">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/801">Fixed numeric format for duration fields in the UV Coverage panel</change>
                 <change type="FEATURE">Improved color attribution in plots for baselines and configurations to be consistent across Aspro2 and OIFitsExplorer</change>
             </prerelease>
             <prerelease version="0.9.9.2 beta 2">
