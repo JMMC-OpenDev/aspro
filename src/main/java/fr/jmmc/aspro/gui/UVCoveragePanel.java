@@ -1192,7 +1192,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                         StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits data cancelled.");
 
                         // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
-                        ObservationManager.getInstance().setOIFitsData(null);
+                        om.setOIFitsData(null);
                     }
                 }
             }
@@ -1248,7 +1248,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private void fireObservationUpdateEvent() {
         // check if the automatic update flag is enabled :
         if (this.doAutoUpdateObservation) {
-            ObservationManager.getInstance().fireObservationUpdate();
+            om.fireObservationUpdate();
         }
     }
 
@@ -1971,11 +1971,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
             if (resetOIFits) {
-                ObservationManager.getInstance().setOIFitsData(null);
+                om.setOIFitsData(null);
             }
 
             // Fire a warnings ready event :
-            ObservationManager.getInstance().fireWarningsReady(uvDataCollection.getWarningContainer());
+            om.fireWarningsReady(uvDataCollection.getWarningContainer());
 
             // Refresh the GUI using coherent data :
             this.uvPanel.updatePlot(uvDataCollection);
@@ -2031,7 +2031,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         boolean computing = false;
 
         // check if the OIFits data are still available:
-        if (ObservationManager.getInstance().getOIFitsData() != null) {
+        if (om.getOIFitsData() != null) {
             // Check if the previously computed UV Data is still valid :
             final ObservationCollectionUVData currentUVData = getChartData();
 
@@ -3107,7 +3107,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.uvDataCollection.setOIFitsDone(true);
 
             // update the OIFits structure in the current observation :
-            ObservationManager.getInstance().setOIFitsData(
+            om.setOIFitsData(
                     new OIFitsData(oiFitsList, this.uvDataCollection.getWarningContainer())
             );
 
