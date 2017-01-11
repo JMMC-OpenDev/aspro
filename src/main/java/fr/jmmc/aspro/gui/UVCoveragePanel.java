@@ -1078,7 +1078,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         final TargetConfiguration targetConf = om.getTargetConfiguration(targetName);
         if (targetConf != null) {
-
             logger.trace("updateTargetConfiguration : {}", targetName);
 
             // disable the automatic update observation :
@@ -1337,7 +1336,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // disable the automatic refresh :
         final boolean prevAutoRefresh = this.setAutoRefresh(false);
         try {
-
             // update the current selected target :
             this.setSelectedTargetName((target != null) ? target.getName() : null);
 
