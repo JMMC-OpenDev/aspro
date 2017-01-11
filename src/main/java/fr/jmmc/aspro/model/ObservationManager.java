@@ -717,6 +717,46 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         }
     }
 
+    // --- Description -----------------------------------------------------------
+    /**
+     * Set the observation name
+     * Used by ObservationForm.updateObservation()
+     *
+     * @param name name of the observation
+     * @return true if the value changed
+     */
+    public boolean setObservationName(final String name) {
+        final ObservationSetting observation = getMainObservation();
+
+        final boolean changed = !name.equals(observation.getName());
+        if (changed) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("setObservationName: {}", name);
+            }
+            observation.setName(name);
+        }
+        return changed;
+    }
+    /**
+     * Set the observation description
+     * Used by ObservationForm.updateObservation()
+     *
+     * @param desc the observation description
+     * @return true if the value changed
+     */
+    public boolean setObservationDescription(final String desc) {
+        final ObservationSetting observation = getMainObservation();
+
+        final boolean changed = !desc.equals(observation.getDescription());
+        if (changed) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("setObservationDescription: {}", desc);
+            }
+            observation.setDescription(desc);
+        }
+        return changed;
+    }
+
     // --- WHEN ------------------------------------------------------------------
     /**
      * Set the observation date (no time)
@@ -1302,7 +1342,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      */
     public boolean setTargetHAMin(final String name, final Double haMin) {
         final TargetConfiguration targetConf = getTargetConfiguration(name);
-
+        if (targetConf == null) {
+            return false;
+        }
         // haMin can be null :
         final boolean changed = isChanged(haMin, targetConf.getHAMin());
         if (changed) {
@@ -1324,7 +1366,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      */
     public boolean setTargetHAMax(final String name, final Double haMax) {
         final TargetConfiguration targetConf = getTargetConfiguration(name);
-
+        if (targetConf == null) {
+            return false;
+        }
         // haMax can be null :
         final boolean changed = isChanged(haMax, targetConf.getHAMax());
         if (changed) {
@@ -1346,7 +1390,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      */
     public boolean setTargetFTMode(final String name, final String ftMode) {
         final TargetConfiguration targetConf = getTargetConfiguration(name);
-
+        if (targetConf == null) {
+            return false;
+        }
         // special case : None
         final String mode = (AsproConstants.NONE.equals(ftMode)) ? null : ftMode;
 
