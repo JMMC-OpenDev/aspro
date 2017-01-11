@@ -24,6 +24,7 @@ import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.service.BrowserLauncher;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.UrlUtils;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
@@ -49,6 +50,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.DefaultFormatter;
 import javax.swing.text.NumberFormatter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -71,8 +73,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private static final String SIMBAD_QUERY_ID = "http://simbad.u-strasbg.fr/simbad/sim-id?Ident=";
     /** Simbad URL (query by identifier) */
     private static final String VIZIER_SED_QUERY_ID = "http://cdsxmatch.u-strasbg.fr/gadgets/ifr?url=http://cdsxmatch.u-strasbg.fr/widgets/SED_plotter.xml&SED_plot_radius=1&SED_plot_object=";
-    /** custom number field formatter */
-    private static NumberFormatter numberFieldFormatter = null;
 
     /* members */
     /** list of edited targets (clone) */
@@ -132,6 +132,9 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         this.jListCalibrators.setCellRenderer(new TargetListRenderer(renderer));
 
         // add property change listener to editable fields :
+        // name :
+        this.jFieldName.addPropertyChangeListener("value", this);
+
         // radial velocity :
         this.jFieldSysVel.addPropertyChangeListener("value", this);
 
@@ -428,6 +431,9 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             this.jLabelCalibratorInfos.setVisible(useTableCalibratorInfos);
             this.jScrollPaneCalibratorInfos.setVisible(useTableCalibratorInfos);
 
+            // check that the target has no calibrator yet to let the user edit the target name:
+            this.jFieldName.setEditable(!calibrator && !this.editTargetUserInfos.hasCalibrators(this.currentTarget));
+
         } finally {
             // restore the automatic update target :
             this.setAutoUpdateTarget(prevAutoUpdateTarget);
@@ -443,81 +449,97 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     public void propertyChange(final PropertyChangeEvent evt) {
         // check if the automatic update flag is enabled :
         if (this.doAutoUpdateTarget) {
-
             final JFormattedTextField field = (JFormattedTextField) evt.getSource();
-            final Double oldValue = (Double) evt.getOldValue();
-            Double value = (Double) evt.getNewValue();
+            
+            if (field == this.jFieldName) {
+                final String oldValue = (String) evt.getOldValue();
+                final String value = (String) evt.getNewValue();
+                
+                // check if value changed (null supported):
+                if (!isChanged(value, oldValue)) {
+                    return;
+                }
 
-            // check if value changed (null supported) :
-            if (!isChanged(value, oldValue)) {
-                return;
-            }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("field {} new: {} old: {}", field.getName(), value, oldValue);
+                }
+                this.currentTarget.setName(value);
+                
+            } else {
+                final Double oldValue = (Double) evt.getOldValue();
+                Double value = (Double) evt.getNewValue();
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("field {} new: {} old: {}", field.getName(), value, oldValue);
-            }
+                // check if value changed (null supported):
+                if (!isChanged(value, oldValue)) {
+                    return;
+                }
 
-            if (value != null) {
-                // check the new value :
-                final double val = value.doubleValue();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("field {} new: {} old: {}", field.getName(), value, oldValue);
+                }
 
-                if (field == this.jFieldParaErr) {
-                    // check if error is negative :
-                    if (val < 0d) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Parallax Error negative: {}", val);
+                if (value != null) {
+                    // check the new value :
+                    final double val = value.doubleValue();
+
+                    if (field == this.jFieldParaErr) {
+                        // check if error is negative :
+                        if (val < 0d) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Parallax Error negative: {}", val);
+                            }
+
+                            field.setValue(oldValue);
+                            return;
                         }
+                    } else if (field.getName().startsWith("FLUX")) {
+                        // check if magnitudes are in range [-10;30]
+                        if (val < -10d || val > 30d) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Magnitude {} invalid : {}", field.getName(), val);
+                            }
 
-                        field.setValue(oldValue);
-                        return;
-                    }
-                } else if (field.getName().startsWith("FLUX")) {
-                    // check if magnitudes are in range [-10;30]
-                    if (val < -10d || val > 30d) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Magnitude {} invalid : {}", field.getName(), val);
+                            field.setValue(oldValue);
+                            return;
                         }
-
-                        field.setValue(oldValue);
-                        return;
                     }
                 }
-            }
 
-            // update the target :
-            // note : we could use introspection to avoid such if/else cascade ...
-            if (field == this.jFieldSysVel) {
-                this.currentTarget.setSYSVEL(value);
-            } else if (field == this.jFieldPMRA) {
-                this.currentTarget.setPMRA(value);
-            } else if (field == this.jFieldPMDEC) {
-                this.currentTarget.setPMDEC(value);
-            } else if (field == this.jFieldParallax) {
-                this.currentTarget.setPARALLAX(value);
-            } else if (field == this.jFieldParaErr) {
-                this.currentTarget.setPARAERR(value);
-            } else if (field == this.jFieldMagB) {
-                this.currentTarget.setFLUXB(value);
-            } else if (field == this.jFieldMagV) {
-                this.currentTarget.setFLUXV(value);
-            } else if (field == this.jFieldMagR) {
-                this.currentTarget.setFLUXR(value);
-            } else if (field == this.jFieldMagI) {
-                this.currentTarget.setFLUXI(value);
-            } else if (field == this.jFieldMagJ) {
-                this.currentTarget.setFLUXJ(value);
-            } else if (field == this.jFieldMagH) {
-                this.currentTarget.setFLUXH(value);
-            } else if (field == this.jFieldMagK) {
-                this.currentTarget.setFLUXK(value);
-            } else if (field == this.jFieldMagL) {
-                this.currentTarget.setFLUXL(value);
-            } else if (field == this.jFieldMagM) {
-                this.currentTarget.setFLUXM(value);
-            } else if (field == this.jFieldMagN) {
-                this.currentTarget.setFLUXN(value);
-            } else {
-                logger.warn("unsupported field: {}", field);
+                // update the target :
+                // note : we could use introspection to avoid such if/else cascade ...
+                if (field == this.jFieldSysVel) {
+                    this.currentTarget.setSYSVEL(value);
+                } else if (field == this.jFieldPMRA) {
+                    this.currentTarget.setPMRA(value);
+                } else if (field == this.jFieldPMDEC) {
+                    this.currentTarget.setPMDEC(value);
+                } else if (field == this.jFieldParallax) {
+                    this.currentTarget.setPARALLAX(value);
+                } else if (field == this.jFieldParaErr) {
+                    this.currentTarget.setPARAERR(value);
+                } else if (field == this.jFieldMagB) {
+                    this.currentTarget.setFLUXB(value);
+                } else if (field == this.jFieldMagV) {
+                    this.currentTarget.setFLUXV(value);
+                } else if (field == this.jFieldMagR) {
+                    this.currentTarget.setFLUXR(value);
+                } else if (field == this.jFieldMagI) {
+                    this.currentTarget.setFLUXI(value);
+                } else if (field == this.jFieldMagJ) {
+                    this.currentTarget.setFLUXJ(value);
+                } else if (field == this.jFieldMagH) {
+                    this.currentTarget.setFLUXH(value);
+                } else if (field == this.jFieldMagK) {
+                    this.currentTarget.setFLUXK(value);
+                } else if (field == this.jFieldMagL) {
+                    this.currentTarget.setFLUXL(value);
+                } else if (field == this.jFieldMagM) {
+                    this.currentTarget.setFLUXM(value);
+                } else if (field == this.jFieldMagN) {
+                    this.currentTarget.setFLUXN(value);
+                } else {
+                    logger.warn("unsupported field: {}", field);
+                }
             }
         }
     }
@@ -622,7 +644,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelRight = new javax.swing.JPanel();
         jPanelTarget = new javax.swing.JPanel();
         jLabelName = new javax.swing.JLabel();
-        jFieldName = new javax.swing.JTextField();
         jPanelTargetActions = new javax.swing.JPanel();
         jButtonSimbad = new javax.swing.JButton();
         jButtonSEDViewer = new javax.swing.JButton();
@@ -631,8 +652,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelDEC = new javax.swing.JLabel();
         jFieldDEC = new javax.swing.JTextField();
         jLabelPMRA = new javax.swing.JLabel();
-        jFieldPMRA = new JFormattedTextField(getNumberFieldFormatter())
-        ;
+        jFieldPMRA = new JFormattedTextField(getNumberFieldFormatter());
         jLabelRMDEC = new javax.swing.JLabel();
         jFieldPMDEC = new JFormattedTextField(getNumberFieldFormatter());
         jSeparator3 = new javax.swing.JSeparator();
@@ -675,6 +695,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelCalibratorInfos = new javax.swing.JLabel();
         jScrollPaneCalibratorInfos = new javax.swing.JScrollPane();
         jTableCalibratorInfos = new javax.swing.JTable();
+        jFieldName = new JFormattedTextField(createFieldNameFormatter());
         jPanelDescription = new javax.swing.JPanel();
         jScrollPaneTargetInfos = new javax.swing.JScrollPane();
         jTextAreaTargetInfos = new javax.swing.JTextArea();
@@ -883,15 +904,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelName, gridBagConstraints);
 
-        jFieldName.setEditable(false);
-        jFieldName.setColumns(5);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelTarget.add(jFieldName, gridBagConstraints);
-
         jPanelTargetActions.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 2));
 
         jButtonSimbad.setText("Simbad");
@@ -915,6 +927,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelTargetActions.add(jButtonSEDViewer);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         jPanelTarget.add(jPanelTargetActions, gridBagConstraints);
 
@@ -1294,8 +1308,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelIds, gridBagConstraints);
 
-        jTextAreaIds.setColumns(20);
         jTextAreaIds.setEditable(false);
+        jTextAreaIds.setColumns(20);
         jTextAreaIds.setLineWrap(true);
         jTextAreaIds.setRows(1);
         jTextAreaIds.setTabSize(2);
@@ -1338,6 +1352,16 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jScrollPaneCalibratorInfos, gridBagConstraints);
 
+        jFieldName.setColumns(10);
+        jFieldName.setName("NAME"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelTarget.add(jFieldName, gridBagConstraints);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -1352,7 +1376,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelDescription.setPreferredSize(new java.awt.Dimension(100, 80));
         jPanelDescription.setLayout(new java.awt.GridBagLayout());
 
-        jTextAreaTargetInfos.setBackground(new java.awt.Color(255, 255, 153));
         jTextAreaTargetInfos.setColumns(20);
         jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         jTextAreaTargetInfos.setRows(1);
@@ -1521,7 +1544,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         // TODO: handle sorting direction (double click)
         sortAndRefreshForm(TargetRAComparator.getInstance());
     }
-    
+
     private void sortAndRefreshForm(final Comparator<Target> cmp) {
         // sort edited targets :
         sortTargets(this.editTargets, cmp);
@@ -1625,11 +1648,11 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }//GEN-LAST:event_jButtonBeforeActionPerformed
 
     private void jButtonSEDViewerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSEDViewerActionPerformed
-      final String url = VIZIER_SED_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
+        final String url = VIZIER_SED_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
 
-      logger.debug("Vizier SED url = {}", url);
+        logger.debug("Vizier SED url = {}", url);
 
-      BrowserLauncher.openURL(url);
+        BrowserLauncher.openURL(url);
     }//GEN-LAST:event_jButtonSEDViewerActionPerformed
 
     private void jButtonSortDEActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSortDEActionPerformed
@@ -1897,7 +1920,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JFormattedTextField jFieldMagN;
     private javax.swing.JFormattedTextField jFieldMagR;
     private javax.swing.JFormattedTextField jFieldMagV;
-    private javax.swing.JTextField jFieldName;
+    private javax.swing.JFormattedTextField jFieldName;
     private javax.swing.JTextField jFieldObjTypes;
     private javax.swing.JFormattedTextField jFieldPMDEC;
     private javax.swing.JFormattedTextField jFieldPMRA;
@@ -2003,14 +2026,42 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         };
     }
 
+    private DefaultFormatter createFieldNameFormatter() {
+        final DefaultFormatter df = new DefaultFormatter() {
+            /** default serial UID for Serializable interface */
+            private static final long serialVersionUID = 1;
+
+            private final ParseException INVALID = new ParseException("Invalid", -1);
+
+            /**
+             * Hack to discard empty string or already-used names
+             */
+            @Override
+            public Object stringToValue(final String text) throws ParseException {
+                if (StringUtils.isEmpty(text)) {
+                    throw INVALID;
+                }
+
+                // Check if the name is not already in use ?
+                final Target match = Target.getTarget(text, editTargets);
+
+                if (match != null && match != currentTarget) {
+                    throw INVALID;
+                }
+
+                return super.stringToValue(text);
+            }
+        };
+        df.setValueClass(String.class);
+        df.setCommitsOnValidEdit(false);
+        return df;
+    }
+
     /**
      * Return the custom double formatter that accepts null values
      * @return number formatter
      */
     private static NumberFormatter getNumberFieldFormatter() {
-        if (numberFieldFormatter != null) {
-            return numberFieldFormatter;
-        }
         final NumberFormatter nf = new NumberFormatter(new DecimalFormat("####.####")) {
             /** default serial UID for Serializable interface */
             private static final long serialVersionUID = 1;
@@ -2028,8 +2079,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         };
         nf.setValueClass(Double.class);
         nf.setCommitsOnValidEdit(false);
-
-        numberFieldFormatter = nf;
         return nf;
     }
 

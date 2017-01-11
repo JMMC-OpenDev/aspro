@@ -970,6 +970,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
             // restore previous selected item :
             if (selectedTarget != null) {
+                // may use an old Target instance (modified since):
                 jListTargets.setSelectedValue(selectedTarget, true);
             }
 
@@ -1047,7 +1048,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         logger.debug("Selected targets: {}", selectedTargets);
 
         // check if the current selected target changed:
-        if (currentTarget == null || !selectedTargets.contains(currentTarget)) {
+        if (currentTarget == null || !Target.containsInstance(currentTarget, selectedTargets)) {
             // memorize the first selected item :
             currentTarget = selectedTargets.get(0);
 
@@ -1522,7 +1523,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 logger.warn("FIRE_UPDATE", new Throwable());
             }
 
-            ObservationManager.getInstance().fireObservationUpdate();
+            om.fireObservationUpdate();
         }
     }
 
@@ -1533,7 +1534,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private void fireTargetSelectionChangeEvent(final Target selected) {
         logger.debug("fireTargetSelectionChangeEvent : target = {}", selected);
 
-        ObservationManager.getInstance().fireTargetSelectionChanged(selected);
+        om.fireTargetSelectionChanged(selected);
     }
 
     /**
