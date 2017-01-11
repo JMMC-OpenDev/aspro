@@ -43,6 +43,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     private final static ToolTipManager tm = ToolTipManager.sharedInstance();
 
     /* Tab names */
+    /** name of the tab pane corresponding to the observation description */
+    public static final String TAB_OBS_DESC = "Notebook";
     /** name of the tab pane corresponding to the interferometer map */
     public static final String TAB_INTERFEROMETER_MAP = "Map";
     /** name of the tab pane corresponding to the observability panel */
@@ -193,6 +195,15 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         ObservationManager.getInstance().register(this);
 
         // Add panels :
+        // create the observation description form:
+        final ObservationDescriptionForm  obsDescForm = new ObservationDescriptionForm();
+        obsDescForm.setName("obsDescForm");
+
+        // add the map panel :
+        this.jTabbedPane.addTab(TAB_OBS_DESC, obsDescForm);
+
+        // register the observation form as an observation listener :
+        ObservationManager.getInstance().register(obsDescForm);
 
         // create the map panel :
         final InterferometerMapPanel mapPanel = new InterferometerMapPanel();
@@ -239,7 +250,11 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
 
             if (type == ObservationEventType.LOADED) {
                 // show interferometer map when a file is loaded or the observation is reset :
-                this.jTabbedPane.setSelectedIndex(0);
+                
+                final int idx = this.jTabbedPane.indexOfTab(TAB_INTERFEROMETER_MAP);
+                if (idx != -1) {
+                    this.jTabbedPane.setSelectedIndex(idx);
+                }
             }
 
             final ObservationSetting observation = (type == ObservationEventType.REFRESH) ? 
