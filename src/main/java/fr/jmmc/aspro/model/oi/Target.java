@@ -1,4 +1,3 @@
-
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -14,7 +13,6 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
 import fr.jmmc.jmal.model.targetmodel.Model;
-
 
 /**
  * 
@@ -101,8 +99,7 @@ import fr.jmmc.jmal.model.targetmodel.Model;
     "calibratorInfos"
 })
 public class Target
-    extends OIBase
-{
+        extends OIBase {
 
     @XmlElement(required = true)
     protected String name;
@@ -881,18 +878,19 @@ public class Target
     public void setId(String value) {
         this.id = value;
     }
-    
+
 //--simple--preserve
     /**
      * Fix coordinates RA and DEC (HMS / DMS formats)
      */
     public final void fixCoords() {
         setCoords(
-                fr.jmmc.aspro.model.util.TargetUtils.fixRA(getRA()), 
+                fr.jmmc.aspro.model.util.TargetUtils.fixRA(getRA()),
                 fr.jmmc.aspro.model.util.TargetUtils.fixDEC(getDEC()),
                 getEQUINOX()
         );
     }
+
     /**
      * Set coordinates RA and DEC (HMS / DMS formats)
      * @param ra RA HMS
@@ -907,10 +905,10 @@ public class Target
         setRADeg(Double.NaN);
         setDECDeg(Double.NaN);
     }
-    
+
     /**
-    * @return true if RA or DEC is NaN
-    */
+     * @return true if RA or DEC is NaN
+     */
     public final boolean isNaNCoords() {
         return Double.isNaN(getRADeg()) || Double.isNaN(getDECDeg());
     }
@@ -967,10 +965,15 @@ public class Target
      * @return target identifier
      */
     public final String getIdentifier() {
+        // ensure id is never null:
         if (this.id == null) {
-            setId(fr.jmmc.aspro.model.util.XmlIdUtils.convert(getName()));
+            setIdentifier();
         }
         return this.id;
+    }
+    
+    private final void setIdentifier() {
+        setId(fr.jmmc.aspro.model.util.XmlIdUtils.convert(getName()));
     }
 
     /**
@@ -988,9 +991,8 @@ public class Target
      */
     public final void updateNameAndIdentifier(final String name) {
         this.setName(formatName(name));
-        // reset and recompute identifier:
-        this.id = null;
-        this.getIdentifier();
+        // recompute identifier:
+        setIdentifier();
     }
 
     /**
@@ -1292,28 +1294,23 @@ public class Target
      * @return target or null if the target was not found
      */
     public static Target matchTarget(final Target srcTarget, final List<Target> targets) {
-        return matchTarget(srcTarget, targets, false);
+        final fr.jmmc.aspro.model.util.TargetMatch match = doMatchTarget(srcTarget, targets);
+        return (match != null) ? match.getMatch() : null;
     }
 
     /**
      * Check if the given target list contains the given target: same identifier or coordinates (crossmatch)
      * @param srcTarget target to look for
      * @param targets list of targets
-     * @param throwException true indicates to throw an IllegalArgumentException if the target is found (giving distance and coordinates)
      * @return target or null if the target was not found
-     * @throws IllegalArgumentException if the target is too close to another target present in the given list of targets
      */
-    public static Target matchTarget(final Target srcTarget, final List<Target> targets,
-                                     final boolean throwException) throws IllegalArgumentException {
-
+    public static fr.jmmc.aspro.model.util.TargetMatch doMatchTarget(final Target srcTarget, final List<Target> targets) {
+        // Is the same identifier ?
         Target t = getTargetById(srcTarget.getIdentifier(), targets);
         if (t != null) {
-            if (throwException) {
-                throw new IllegalArgumentException("Target[" + srcTarget.getName() + "] already defined.");
-            }
-            return t;
+            return new fr.jmmc.aspro.model.util.TargetMatch(t);
         }
-        return fr.jmmc.aspro.model.util.TargetUtils.matchTargetCoordinates(srcTarget, targets, throwException);
+        return fr.jmmc.aspro.model.util.TargetUtils.matchTargetCoordinates(srcTarget, targets);
     }
 
     /**
@@ -1351,16 +1348,45 @@ public class Target
     }
 
     /**
+     * Returns true only if the given target instance is present in the given target list
+     * @param target target instance to look for
+     * @param targets target list
+     * @return true if instance found, false otherwise
+     */
+    public static boolean containsInstance(final Target target, final List<Target> targets) {
+        final int pos = targets.indexOf(target);
+        if (pos >= 0) {
+            // check instance equality (pointer like):
+            if (targets.get(pos) == target) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Add the given target if no match (do not fire a target change and an observation change event)
      * @param newTarget target to add
      * @param targets list of targets
-     * @throws IllegalArgumentException if the target already exists (identifier or coordinates)
+     * @throws IllegalArgumentException if the target already exists (identifier or cross-match)
      */
     public static void addTarget(final Target newTarget, final List<Target> targets) throws IllegalArgumentException {
         if (newTarget != null) {
             // Find any target (id + position) within 5 arcsecs:
-            // throws IllegalArgumentException
-            matchTarget(newTarget, targets, true);
+            final fr.jmmc.aspro.model.util.TargetMatch match = doMatchTarget(newTarget, targets);
+
+            if (match != null) {
+                final Target t = match.getMatch();
+
+                // exact match:
+                if (match.getDistance() == 0.0) {
+                    throw new IllegalArgumentException("Target[" + newTarget.getName() + "] already defined [" + t.getName() + "].");
+                } else {
+                    throw new IllegalArgumentException("Target[" + newTarget.getName() + "](" + newTarget.getRA() + ", " + newTarget.getDEC()
+                            + ") too close to Target[" + t.getName() + "](" + t.getRA() + ", " + t.getDEC()
+                            + "): " + fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(match.getDistance() * fr.jmmc.jmal.ALX.DEG_IN_ARCSEC) + " arcsec !");
+                }
+            }
 
             if (logger.isTraceEnabled()) {
                 logger.trace("addTarget : {}", newTarget.getName());
@@ -1557,5 +1583,4 @@ public class Target
     }
 
 //--simple--preserve
-
 }

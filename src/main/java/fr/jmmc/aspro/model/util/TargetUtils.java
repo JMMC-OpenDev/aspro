@@ -8,18 +8,21 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.CoordUtils;
 import fr.jmmc.jmal.star.Star;
-import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author bourgesl
  */
 public final class TargetUtils {
+    /** Class logger */
+    private static final Logger logger = LoggerFactory.getLogger(TargetUtils.class.getName());
 
-    /** distance in degrees to consider same targets = 5 arcsecs */
-    public final static double SAME_TARGET_DISTANCE = 5d * fr.jmmc.jmal.ALX.ARCSEC_IN_DEGREES;
+    /** distance in degrees to consider same targets = 1 arcsecs */
+    public final static double SAME_TARGET_DISTANCE = 1d * fr.jmmc.jmal.ALX.ARCSEC_IN_DEGREES;
 
     /**
      * Forbidden constructor
@@ -50,35 +53,74 @@ public final class TargetUtils {
      * Check the distance between the given source target and the given list of targets (5 arcesecs)
      * @param srcTarget source target
      * @param targets list of targets
-     * @param throwException true indicates to throw an IllegalArgumentException if the target is found (giving distance and coordinates)
      * @return Target if found or null
      * @throws IllegalArgumentException if the target is too close to another target present in the given list of targets
      */
-    public static Target matchTargetCoordinates(final Target srcTarget, final List<Target> targets,
-                                                final boolean throwException) throws IllegalArgumentException {
+    public static TargetMatch matchTargetCoordinates(final Target srcTarget, final List<Target> targets) throws IllegalArgumentException {
         final double srcRaDeg = srcTarget.getRADeg();
         final double srcDecDeg = srcTarget.getDECDeg();
 
-        double distance;
+        double distance, min = Double.MAX_VALUE;
+        Target match = null;
 
         for (Target target : targets) {
             distance = CoordUtils.computeDistanceInDegrees(srcRaDeg, srcDecDeg, target.getRADeg(), target.getDECDeg());
 
             if (distance <= SAME_TARGET_DISTANCE) {
-                // first one (not the closest one):
-                if (throwException) {
-                    throw new IllegalArgumentException("Target[" + srcTarget.getName() + "](" + srcTarget.getRA() + ", " + srcTarget.getDEC()
-                            + ") too close to Target[" + target.getName() + "](" + target.getRA() + ", " + target.getDEC()
-                            + "): " + NumberUtils.trimTo3Digits(distance * ALX.DEG_IN_ARCSEC) + " arcsec !");
+                // check simbad identifiers to avoid false-positives:
+                Boolean check = matchTargetIds(srcTarget, target);
+                if (check != null) {
+                    // only 1 common identifier may be enough (depends on the catalog accuracy)
+                    // TODO: to be confirmed ?
+                    if (check.booleanValue()) {
+                        return new TargetMatch(target);
+                    } else {
+                        // no common identifier at all => skip to ignore that target
+                        continue;
+                    }
                 }
-                return target;
+
+                // keep closest target:
+                if (distance < min) {
+                    min = distance;
+                    match = target;
+                }
             }
+        }
+        if (match != null) {
+            // return the closest match:
+            return new TargetMatch(match, min);
+        }
+        return null;
+    }
+
+    public static Boolean matchTargetIds(final Target src, final Target other) {
+        final String sIds = src.getIDS();
+        final String oIds = other.getIDS();
+
+        if (sIds != null && oIds != null) {
+            // exactly the same identifiers (simbad):
+            if (sIds.equals(oIds)) {
+                return Boolean.TRUE;
+            }
+            final String[] sIdArray = sIds.split(",");
+            final String[] oIdArray = oIds.split(",");
+
+            for (String s : sIdArray) {
+                for (String o : oIdArray) {
+                    if (s.equals(o)) {
+                        logger.info("match[{}] from ids [{}] x [{}]", s, sIds, oIds);
+                        return Boolean.TRUE;
+                    }
+                }
+            }
+            return Boolean.FALSE;
         }
         return null;
     }
 
     /**
-     * COnvert the given Star instance to a Target instance
+     * Convert the given Star instance to a Target instance
      * @param star star instance
      * @return new Target instance
      */
@@ -98,7 +140,7 @@ public final class TargetUtils {
         // coordinates (HMS / DMS) (mandatory):
         newTarget.setCoords(
                 star.getPropertyAsString(Star.Property.RA).replace(' ', ':'),
-                star.getPropertyAsString(Star.Property.DEC).replace(' ', ':'), 
+                star.getPropertyAsString(Star.Property.DEC).replace(' ', ':'),
                 AsproConstants.EPOCH_J2000);
 
         // Proper motion (mas/yr) (optional) :
