@@ -19,7 +19,7 @@
     </company>
 
     <program name="Aspro2" version="0.9.9.2 beta 4"/>
-    <compilation date="12/01/2017" compiler="JDK 1.6.0_24"/>
+    <compilation date="13/01/2017" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -204,11 +204,11 @@
 
     <releasenotes>
         <release version="0.9.9.2">
-            <pubDate>Tue, 12 Jan 2017 10:00:00 GMT</pubDate>
+            <pubDate>Fri, 13 Jan 2017 14:00:00 GMT</pubDate>
             <prerelease version="0.9.9.2 beta 4">
-                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/831">Fixed the target matching tests when adding/importing targets to analyze Simbad identifiers and have proper object associations (1 arcsec cross-match)</change>
-                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/749">Added the edition of the target name in the Target Editor
-                    (only when the target is not referenced as calibrator or has calibrators)</change>
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/831">Fixed the target matching tests when adding/importing targets to compare all Simbad identifiers when targets are within 5 arcsec (cross-match)</change>
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/749">Allow the target name modification in the Target Editor
+                    (only when the target is not referenced as calibrator and has no calibrator yet)</change>
                 <change type="FEATURE">Added a Notebook panel to write the observation description (log)</change>
             </prerelease>
             <prerelease version="0.9.9.2 beta 3">
