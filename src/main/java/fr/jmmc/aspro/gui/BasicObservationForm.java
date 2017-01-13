@@ -36,6 +36,9 @@ import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.util.TargetMatch;
+import fr.jmmc.aspro.model.util.TargetUtils;
+import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.star.EditableStarResolverWidget;
 import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmal.star.StarResolverListener;
@@ -1479,23 +1482,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             }
 
             if (!validNames.isEmpty()) {
+                final List<Target> editTargets = om.getTargets();
+
                 final StringBuilder sb = new StringBuilder(64);
                 boolean isTargetChanged = false;
                 try {
                     for (String name : validNames) {
-                        final Star star = result.getSingleStar(name);
-                        if (star != null) {
-                            try {
-                                // update the data model:
-                                om.addTarget(star);
-                                isTargetChanged = true;
-
-                            } catch (IllegalArgumentException iae) {
-                                logger.info("addTarget failed: {}", iae.getMessage());
-                                // Append warnings:
-                                sb.append(iae.getMessage()).append('\n');
-                            }
-                        }
+                        isTargetChanged |= addTarget(result.getSingleStar(name), editTargets, sb);
                     }
                 } finally {
                     if (isTargetChanged) {
@@ -1508,6 +1501,51 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 }
             }
         }
+    }
+
+    public static boolean addTarget(final Star star, final List<Target> editTargets, final StringBuilder sb) {
+        boolean changed = false;
+        if (star != null) {
+            final Target newTarget = TargetUtils.convert(star);
+
+            // update the data model or throw exception ?
+            if (newTarget != null) {
+                boolean add = true;
+
+                // Find any target (id + position) within 5 arcsecs:
+                final TargetMatch match = Target.doMatchTarget(newTarget, editTargets);
+
+                if (match != null) {
+                    final Target t = match.getMatch();
+                    String msg;
+
+                    // exact match:
+                    if (match.getDistance() == 0.0) {
+                        add = false;
+                        msg = "Target[" + newTarget.getName() + "] already defined [" + t.getName() + "].";
+                    } else {
+                        msg = "Target[" + newTarget.getName() + "](" + newTarget.getRA() + " , " + newTarget.getDEC()
+                                + ") too close to Target[" + t.getName() + "](" + t.getRA() + " , " + t.getDEC()
+                                + "): " + NumberUtils.trimTo3Digits(match.getDistance() * ALX.DEG_IN_ARCSEC) + " arcsec.";
+
+                        // Ask user confirmation:
+                        add = MessagePane.showConfirmMessage(msg + "\n\nDo you really want to add this target anyway ?");
+
+                        msg += "\nTarget[" + newTarget.getName() + "] " + ((add) ? "added" : "skipped") + " (user)";
+                    }
+                    if (msg != null) {
+                        logger.info("addTarget: {}", msg);
+                        // Append warnings:
+                        sb.append(msg).append('\n');
+                    }
+                }
+                if (add) {
+                    editTargets.add(newTarget);
+                    changed = true;
+                }
+            }
+        }
+        return changed;
     }
 
     /**

@@ -31,13 +31,11 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
-import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.model.targetmodel.Parameter;
-import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.service.RecentFilesManager;
@@ -1103,15 +1101,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      */
     public List<Target> getDisplayTargets() {
         return getMainObservation().getDisplayTargets();
-    }
-
-    /**
-     * Add a target given a star (do not fire a target change and an observation change event)
-     * @param star object to create the target object
-     * @throws IllegalArgumentException if the target already exists (identifier or coordinates)
-     */
-    public void addTarget(final Star star) throws IllegalArgumentException {
-        Target.addTarget(TargetUtils.convert(star), getTargets());
     }
 
     /**

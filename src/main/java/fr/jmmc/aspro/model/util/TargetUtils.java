@@ -8,6 +8,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.CoordUtils;
 import fr.jmmc.jmal.star.Star;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import java.util.List;
 import org.slf4j.Logger;
@@ -18,11 +19,15 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class TargetUtils {
+
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(TargetUtils.class.getName());
 
-    /** distance in degrees to consider same targets = 1 arcsecs */
-    public final static double SAME_TARGET_DISTANCE = 1d * fr.jmmc.jmal.ALX.ARCSEC_IN_DEGREES;
+    /** distance in degrees to consider same targets = 5 arcsecs */
+    public final static double SAME_TARGET_DISTANCE = 5d * fr.jmmc.jmal.ALX.ARCSEC_IN_DEGREES;
+
+    /** minimum number of identifiers to analyze */
+    public final static double MIN_ID = 3;
 
     /**
      * Forbidden constructor
@@ -68,14 +73,17 @@ public final class TargetUtils {
 
             if (distance <= SAME_TARGET_DISTANCE) {
                 // check simbad identifiers to avoid false-positives:
-                Boolean check = matchTargetIds(srcTarget, target);
-                if (check != null) {
-                    // only 1 common identifier may be enough (depends on the catalog accuracy)
-                    // TODO: to be confirmed ?
-                    if (check.booleanValue()) {
+                int count = matchTargetIds(srcTarget, target);
+                if (count != -1) {
+                    // only 1 common identifier may be not enough (depends on the catalog accuracy)
+                    if (count >= MIN_ID) {
+                        logger.info("match[{} arcsec] for [{}]: [{}]", NumberUtils.trimTo3Digits(distance * ALX.DEG_IN_ARCSEC),
+                                srcTarget.getId(), target.getId());
                         return new TargetMatch(target);
-                    } else {
+                    } else if (count == 0) {
                         // no common identifier at all => skip to ignore that target
+                        logger.info("no match[{} arcsec] for [{}]: [{}]", NumberUtils.trimTo3Digits(distance * ALX.DEG_IN_ARCSEC),
+                                srcTarget.getId(), target.getId());
                         continue;
                     }
                 }
@@ -94,29 +102,39 @@ public final class TargetUtils {
         return null;
     }
 
-    public static Boolean matchTargetIds(final Target src, final Target other) {
+    private static int matchTargetIds(final Target src, final Target other) {
+        int count = -1;
+
         final String sIds = src.getIDS();
         final String oIds = other.getIDS();
 
         if (sIds != null && oIds != null) {
-            // exactly the same identifiers (simbad):
-            if (sIds.equals(oIds)) {
-                return Boolean.TRUE;
-            }
             final String[] sIdArray = sIds.split(",");
-            final String[] oIdArray = oIds.split(",");
 
-            for (String s : sIdArray) {
-                for (String o : oIdArray) {
-                    if (s.equals(o)) {
-                        logger.info("match[{}] from ids [{}] x [{}]", s, sIds, oIds);
-                        return Boolean.TRUE;
+            // require at least several identifiers to compare:
+            if (sIdArray.length >= MIN_ID) {
+                // exactly the same identifiers (simbad):
+                if (sIds.equals(oIds)) {
+                    count = sIdArray.length;
+                } else {
+                    final String[] oIdArray = oIds.split(",");
+                    if (oIdArray.length >= MIN_ID) {
+                        count = 0;
+                        for (String s : sIdArray) {
+                            for (String o : oIdArray) {
+                                if (s.equals(o)) {
+                                    count++;
+                                }
+                            }
+                        }
                     }
                 }
+                if (count >= 0) {
+                    logger.info("match[{}] from ids [{}] x [{}]", count, sIds, oIds);
+                }
             }
-            return Boolean.FALSE;
         }
-        return null;
+        return count;
     }
 
     /**

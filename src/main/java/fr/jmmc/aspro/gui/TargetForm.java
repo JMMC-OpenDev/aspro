@@ -14,8 +14,6 @@ import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.TargetDEComparator;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
-import fr.jmmc.aspro.model.util.TargetUtils;
-import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmal.star.StarResolverListener;
 import fr.jmmc.jmal.star.StarResolverResult;
 import fr.jmmc.jmcs.gui.component.GenericJTree;
@@ -450,11 +448,11 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         // check if the automatic update flag is enabled :
         if (this.doAutoUpdateTarget) {
             final JFormattedTextField field = (JFormattedTextField) evt.getSource();
-            
+
             if (field == this.jFieldName) {
                 final String oldValue = (String) evt.getOldValue();
                 final String value = (String) evt.getNewValue();
-                
+
                 // check if value changed (null supported):
                 if (!isChanged(value, oldValue)) {
                     return;
@@ -464,7 +462,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                     logger.debug("field {} new: {} old: {}", field.getName(), value, oldValue);
                 }
                 this.currentTarget.setName(value);
-                
+
             } else {
                 final Double oldValue = (Double) evt.getOldValue();
                 Double value = (Double) evt.getNewValue();
@@ -585,19 +583,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                 boolean isTargetChanged = false;
                 try {
                     for (String name : validNames) {
-                        final Star star = result.getSingleStar(name);
-                        if (star != null) {
-                            try {
-                                // update the data model:
-                                Target.addTarget(TargetUtils.convert(star), editTargets);
-                                isTargetChanged = true;
-
-                            } catch (IllegalArgumentException iae) {
-                                logger.info("addTarget failed: {}", iae.getMessage());
-                                // Append warnings:
-                                sb.append(iae.getMessage()).append('\n');
-                            }
-                        }
+                        isTargetChanged |= BasicObservationForm.addTarget(result.getSingleStar(name), editTargets, sb);
                     }
                 } finally {
                     if (isTargetChanged) {
