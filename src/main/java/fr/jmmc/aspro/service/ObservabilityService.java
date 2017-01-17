@@ -84,6 +84,7 @@ import net.jafama.FastMath;
 import fr.jmmc.jmcs.util.CollectionUtils;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -2487,7 +2488,7 @@ public final class ObservabilityService {
             logger.debug("stations: {}", stations);
         }
 
-        this.data.setStationNames(this.observation.getInstrumentConfiguration().getStations());
+        this.data.setStationNames(StringUtils.replaceWhiteSpacesByMinusSign(this.observation.getInstrumentConfiguration().getStations()));
 
         // All telescopes have the same properties for a given baseline :
         final Telescope tel = stations.get(0).getTelescope();
