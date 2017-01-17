@@ -16,8 +16,10 @@ public class ObservationCollectionObsData extends ObservationCollection {
 
     /** observability data */
     private final List<ObservabilityData> obsDataList;
-    /** configuration names using the format 'CONF + PoPs' */
+    /** configuration names using the format 'CONF' */
     private final List<String> confNames;
+    /** configuration names using the format 'CONF + PoPs' */
+    private final List<String> confLabels;
 
     /**
      * Public constructor : copy information from the given observation collection (by reference)
@@ -25,11 +27,12 @@ public class ObservationCollectionObsData extends ObservationCollection {
      * @param obsDataList observability data
      */
     public ObservationCollectionObsData(final ObservationCollection obsCollection,
-            final List<ObservabilityData> obsDataList) {
+                                        final List<ObservabilityData> obsDataList) {
         super(obsCollection);
         this.obsDataList = obsDataList;
 
         this.confNames = new ArrayList<String>(size());
+        this.confLabels = new ArrayList<String>(size());
         prepareConfigurationNames();
     }
 
@@ -42,12 +45,13 @@ public class ObservationCollectionObsData extends ObservationCollection {
         // Iterate over Observability data (multi conf) :
         for (ObservabilityData obsData : getObsDataList()) {
             sb.append(obsData.getStationNames());
+            this.confNames.add(sb.toString());
 
             if (!obsData.isUserPops() && obsData.getBestPops() != null) {
                 obsData.getBestPops().toString(sb);
             }
 
-            this.confNames.add(sb.toString());
+            this.confLabels.add(sb.toString());
             sb.setLength(0);
         }
     }
@@ -85,10 +89,18 @@ public class ObservationCollectionObsData extends ObservationCollection {
     }
 
     /**
-     * Return the configuration names using the format 'CONF + PoPs'
-     * @return the configuration names using the format 'CONF + PoPs'
+     * Return the configuration names using the format 'CONF'
+     * @return the configuration names using the format 'CONF'
      */
-    public final List<String> getConfigurationNames() {
+    public final List<String> getConfigurationName() {
         return this.confNames;
+    }
+
+    /**
+     * Return the configuration labels using the format 'CONF + PoPs'
+     * @return the configuration labels using the format 'CONF + PoPs'
+     */
+    public final List<String> getConfigurationLabel() {
+        return this.confLabels;
     }
 }

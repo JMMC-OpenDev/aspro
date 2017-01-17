@@ -1167,10 +1167,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                     if (DEBUG_VERSIONS) {
                         _logger.warn("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
                     }
-
-                    // use consistent observation and observability data :
+                    // Skip = ignore these results
                     // next iteration will see changes ...
-                    om.fireObservabilityDone(taskObsCollection, obsDataList);
+                    // Note: this is necessary as SharedSeriesAttributes (color) is global (consistency issue)
+                    return;
                 }
             }
 
@@ -1512,7 +1512,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             }
                              */
                         } else {
-                            legendLabel = chartData.getConfigurationNames().get(c);
+                            // configuration 'CONF + PoPs':
+                            legendLabel = chartData.getConfigurationLabel().get(c);
+                            // add alias 'CONF' <=> 'CONF + PoPs':
+                            globalAttrs.addColorAlias(chartData.getConfigurationName().get(c), legendLabel);
 
                             // 1 color per configuration (incompatible with Detailed output : too complex i.e. unreadable) :
                             colorIndex = globalAttrs.getColorIndex(legendLabel);

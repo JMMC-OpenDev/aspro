@@ -1959,6 +1959,37 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          */
         @Override
         public void refreshUI(final ObservationCollectionUVData uvDataCollection) {
+
+            // Note : the main observation can have changed while computation
+            final ObservationCollection taskObsCollection = uvDataCollection;
+
+            // use the latest observation for computations to check versions :
+            final ObservationCollection lastObsCollection = om.getObservationCollection();
+
+            // avoid to mix inconsistent observation and uv coverage data :
+            // Next plot (uv coverage done event) will take into account UI widget changes.
+            if (taskObsCollection.getVersion().isSameUVVersion(lastObsCollection.getVersion())) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("computeOIFits: uv version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+                }
+                if (DEBUG_VERSIONS) {
+                    logger.warn("computeOIFits: uv version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+                }
+
+            } else {
+                if (_logger.isDebugEnabled()) {
+                    _logger.debug("refreshUI: uv version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+                }
+                if (DEBUG_VERSIONS) {
+                    _logger.warn("refreshUI: uv version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+                }
+
+                // Skip = ignore these results
+                // next iteration will see changes ...
+                // Note: this is necessary as SharedSeriesAttributes (color) is global (consistency issue)
+                return;
+            }
+
             // Start computing OIFits ...
             final boolean resetOIFits = (doOIFits) ? !this.uvPanel.computeOIFits(uvDataCollection) : true;
 
@@ -2810,7 +2841,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             if (!single) {
                 // 1 color per configuration (i.e. per XYSeries) :
-                label = chartData.getConfigurationNames().get(c);
+                label = chartData.getConfigurationLabel().get(c);
                 xySeries = new XYSeries(label, false);
                 xySeries.setNotify(false);
 
@@ -2878,7 +2909,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 nPoints = uvData.getNPoints();
                 targetPointInfos = uvData.getTargetPointInfos();
 
-                confName = chartData.getConfigurationNames().get(c);
+                confName = chartData.getConfigurationLabel().get(c);
 
                 if (!single) {
                     serieKey = confName;
@@ -2985,7 +3016,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 if (!single) {
                     // 1 color per configuration (i.e. per XYSeries) :
-                    xySeries = dataset.getSeries(chartData.getConfigurationNames().get(c));
+                    xySeries = dataset.getSeries(chartData.getConfigurationLabel().get(c));
                 }
 
                 // TODO: adjust capacity of xySeries !
