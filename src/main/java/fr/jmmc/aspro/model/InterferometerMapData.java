@@ -18,6 +18,7 @@ public final class InterferometerMapData {
     private double[] stationY;
     /** configuration */
     private String stationNames;
+    private String sortedStationNames;
     // base lines :
     /* baseline name = "'S1'-'S2'" */
     private String[] baselineName;
@@ -90,6 +91,14 @@ public final class InterferometerMapData {
 
     public void setStationNames(final String stationNames) {
         this.stationNames = stationNames;
+    }
+
+    public String getSortedStationConf() {
+        return sortedStationNames;
+    }
+
+    public void setSortedStationNames(final String stationNames) {
+        this.sortedStationNames = stationNames;
     }
 
     public String[] getBaselineName() {

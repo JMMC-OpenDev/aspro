@@ -13,9 +13,11 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.jmal.util.MathUtils;
 import fr.jmmc.jmcs.util.FormatterUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oitools.util.CombUtils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.List;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
@@ -120,13 +122,14 @@ public final class InterferometerMapService {
             data.setStationX(mapX);
             data.setStationY(mapY);
 
-            // Get chosen stations :
-            data.setStationNames(observation.getInstrumentConfiguration().getStations());
-
             final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
             if (stations == null || stations.isEmpty()) {
                 throw new IllegalStateException("The station list is empty !");
             }
+
+            // Get chosen stations :
+            data.setStationNames(StringUtils.replaceWhiteSpacesByMinusSign(observation.getInstrumentConfiguration().getStations()));
+            data.setSortedStationNames(generateSortedStationNames(stations, stationList));
 
             final int nStations = stations.size();
 
@@ -143,7 +146,7 @@ public final class InterferometerMapService {
 
             final StringBuffer sb = new StringBuffer(32);
 
-            double dist, total = 0.0;
+            double dist;
             Station s1, s2;
             int i1, i2;
             int n = 0;
@@ -175,8 +178,6 @@ public final class InterferometerMapService {
                         blX2[n] = data.getStationX()[i2];
                         blY2[n] = data.getStationY()[i2];
                         blLen[n] = dist;
-
-                        total += dist;
                         n++;
                     }
                 }
@@ -233,5 +234,26 @@ public final class InterferometerMapService {
         for (int i = 0, len = values.length; i < len; i++) {
             values[i] -= center;
         }
+    }
+
+    private static String generateSortedStationNames(final List<Station> stations, final List<Station> stationList) {
+        // mimic OIFitsExplorer approach: sort station index then get names
+
+        final int len = stations.size();
+        final int[] sortedIndex = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            sortedIndex[i] = stationList.indexOf(stations.get(i));
+        }
+
+        Arrays.sort(sortedIndex);
+
+        final StringBuilder sb = new StringBuilder(20);
+        for (int i = 0; i < len; i++) {
+            sb.append(stationList.get(sortedIndex[i]).getName()).append('-');
+        }
+        sb.setLength(sb.length() - 1);
+
+        return sb.toString();
     }
 }

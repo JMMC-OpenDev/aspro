@@ -372,7 +372,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
             if (!single) {
                 // 1 color per configuration (i.e. per XYSeries) :
                 label = mapData.getStationNames();
-                globalAttrs.addLabel(label);
+                // set alias = ordered station names (like OIFitsExplorer)
+                globalAttrs.addLabel(label, mapData.getSortedStationConf());
 
                 xySeries = new XYSeries(label, false);
                 xySeries.setNotify(false);
