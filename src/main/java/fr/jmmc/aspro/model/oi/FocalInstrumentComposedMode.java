@@ -86,7 +86,6 @@ public class FocalInstrumentComposedMode
             for (FocalInstrumentMode mode : getModes()) {
                 min = Math.min(min, mode.getWaveLengthMin());
             }
-            System.out.println("min: "+min);
             waveLengthMin = min;
         }
         return waveLengthMin;
@@ -104,7 +103,6 @@ public class FocalInstrumentComposedMode
             for (FocalInstrumentMode mode : getModes()) {
                 max = Math.max(max, mode.getWaveLengthMax());
             }
-            System.out.println("max: "+max);
             waveLengthMax = max;
         }
         return waveLengthMax;
@@ -122,7 +120,6 @@ public class FocalInstrumentComposedMode
             for (FocalInstrumentMode mode : getModes()) {
                 n += mode.getSpectralChannels();
             }
-            System.out.println("n: "+n);
             this.spectralChannels = Math.max(1, n);
         }
         return this.spectralChannels;
