@@ -354,49 +354,57 @@
                 <name>B</name>
                 <resolution>1000</resolution>
                 <waveLengthMin>0.46</waveLengthMin>
-                <waveLengthMax>0.460001</waveLengthMax>
+                <waveLengthMax>0.46001</waveLengthMax>
+                <!--
+                wlen Max have been reduced because (eg. B 0.460001 -> 0.46001 ) getTransmission() throwed an error for those to small values
+                ...
+                atm.lambda[25646] 4.599950865391827E-7
+                atm.lambda[25647] 4.6000275318784694E-7
+                atm.lambda[25648] 4.600104199642896E-7
+                look at ticket #841
+                -->
             </mode>
 
             <mode>
                 <name>V</name>
                 <resolution>1000</resolution>
                 <waveLengthMin>0.55</waveLengthMin>
-                <waveLengthMax>0.550001</waveLengthMax>
+                <waveLengthMax>0.55001</waveLengthMax>
             </mode>
 
             <mode>
                 <name>R</name>
                 <resolution>1000</resolution>
                 <waveLengthMin>0.66</waveLengthMin>
-                <waveLengthMax>0.660001</waveLengthMax>
+                <waveLengthMax>0.66001</waveLengthMax>
             </mode>
 
             <mode>
                 <name>I</name>
                 <resolution>1000</resolution>
                 <waveLengthMin>0.87</waveLengthMin>
-                <waveLengthMax>0.870001</waveLengthMax>
+                <waveLengthMax>0.87001</waveLengthMax>
             </mode>
 
             <mode>
                 <name>J</name>
                 <resolution>1000</resolution>
                 <waveLengthMin>1.23</waveLengthMin>
-                <waveLengthMax>1.230001</waveLengthMax>
+                <waveLengthMax>1.2301</waveLengthMax>
             </mode>
 
             <mode>
                 <name>H</name>
                 <resolution>1000</resolution>
                 <waveLengthMin>1.67</waveLengthMin>
-                <waveLengthMax>1.670001</waveLengthMax>
+                <waveLengthMax>1.67001</waveLengthMax>
             </mode>
 
             <mode>
                 <name>K</name>
                 <resolution>1000</resolution>
                 <waveLengthMin>2.36</waveLengthMin>
-                <waveLengthMax>2.360001</waveLengthMax>
+                <waveLengthMax>2.3601</waveLengthMax>
             </mode>
 
             <mode>
@@ -410,14 +418,14 @@
                 <name>M</name>
                 <resolution>1000</resolution>
                 <waveLengthMin>6.40</waveLengthMin>
-                <waveLengthMax>6.400001</waveLengthMax>
+                <waveLengthMax>6.40001</waveLengthMax>
             </mode>
 
             <mode>
                 <name>N</name>
                 <resolution>1000</resolution>
                 <waveLengthMin>12</waveLengthMin>
-                <waveLengthMax>12.000001</waveLengthMax>
+                <waveLengthMax>12.0001</waveLengthMax>
             </mode>
 
         </focalInstrument>
