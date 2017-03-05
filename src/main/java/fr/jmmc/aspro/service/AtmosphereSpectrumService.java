@@ -59,7 +59,7 @@ public final class AtmosphereSpectrumService {
         final int nWLen = waveLengths.length;
 
         final double[] trans = new double[nWLen];
-        
+
         if (MOCK) {
             Arrays.fill(trans, 1d);
             return trans;
@@ -98,7 +98,9 @@ public final class AtmosphereSpectrumService {
                 trans[i] = total / (last - first);
 
             } else {
-                throw new IllegalStateException("Invalid lambda range: [" + lambdaMin + " to " + lambdaMax + "]");
+                // Prefer to avoid Exception of an invalid lambda range
+                trans[i] = atm.transmission[first];
+                //throw new IllegalStateException("Invalid lambda range: [" + lambdaMin + " to " + lambdaMax + "]");
             }
         }
 
