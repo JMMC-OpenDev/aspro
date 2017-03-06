@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.2 beta 5"/>
-    <compilation date="17/01/2017" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.2 beta 6"/>
+    <compilation date="06/03/2017" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -204,7 +204,10 @@
 
     <releasenotes>
         <release version="0.9.9.2">
-            <pubDate>Tue, 17 Jan 2017 14:00:00 GMT</pubDate>
+            <pubDate>Mon, 06 Mar 2017 16:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.2 beta 6">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/841">Fixed the OIFits computation for the DEMO interferometer</change>
+            </prerelease>
             <prerelease version="0.9.9.2 beta 5">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/836">Fixed the color attribution for multiple configuration with CHARA instruments</change>
             </prerelease>
