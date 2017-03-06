@@ -31,32 +31,43 @@ public final class StatUtils {
     public final static double SAMPLING_FACTOR_MEAN = 1d / N_SAMPLES;
     /** normalization factor for variance = 1 / (N_SAMPLES - 1) (bessel correction) */
     public final static double SAMPLING_FACTOR_VARIANCE = 1d / (N_SAMPLES - 1);
-    /** cache size = max number of baselines (15 for 6 telescopes) */
-    private final static int CACHE_SIZE = 15;
+    /** initial cache size = number of baselines (15 for 6 telescopes) */
+    private final static int INITIAL_CAPACITY = 15;
     /** singleton */
-    private final static StatUtils instance = new StatUtils();
+    private final static StatUtils INSTANCE = new StatUtils();
 
     public static StatUtils getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     /* members */
+    /** random generator (single thread) */
+    private final Random random = new Random();
     /** current index in the distribution cache */
-    private int current;
+    private int current = 0;
     /** cached distributions */
-    private final ArrayList<ComplexDistribution> cache = new ArrayList<ComplexDistribution>(3);
+    private final ArrayList<ComplexDistribution> cache;
 
     private StatUtils() {
-        for (int i = 0; i < CACHE_SIZE; i++) {
-            cache.add(ComplexDistribution.create(new Random()));
+        this.cache = new ArrayList<ComplexDistribution>(INITIAL_CAPACITY);
+        prepare(INITIAL_CAPACITY);
+    }
+
+    public synchronized void prepare(final int count) {
+        final int needed = count - cache.size();
+        if (needed > 0) {
+            logger.info("prepare: {} needed distributions", needed);
+            for (int i = 0; i < needed; i++) {
+                cache.add(ComplexDistribution.create(random));
+            }
         }
     }
 
-    public ComplexDistribution get() {
+    public synchronized ComplexDistribution get() {
         final int idx = current;
         final ComplexDistribution distrib = cache.get(idx);
 
-        this.current = (idx + 1) % CACHE_SIZE;
+        this.current = (idx + 1) % cache.size();
 
         return distrib;
     }
@@ -169,25 +180,24 @@ public final class StatUtils {
             ComplexDistribution d = StatUtils.getInstance().get();
             System.out.println("get(): " + d);
         }
-        
+
         // dump all distributions:
-        for (int n = 0; n < CACHE_SIZE; n++) {
+        for (int n = 0; n < INITIAL_CAPACITY; n++) {
             ComplexDistribution d = StatUtils.getInstance().get();
             System.out.println("get(): " + d);
 
             // Get the complex distribution for this row:
             final double[] distRe = d.getSamples()[0];
             final double[] distIm = d.getSamples()[1];
-            
+
             final StringBuilder sb = new StringBuilder(4096);
             sb.append("# RE\tIM\n");
 
             for (int i = 0; i < N_SAMPLES; i++) {
                 sb.append(distRe[i]).append("\t").append(distIm[i]).append('\n');
-            }        
-            FileUtils.writeFile(new File("/home/bourgesl/Documents/pub/JMMC-PUB-2800-0001/tmp/dist_"+N_SAMPLES+"_"+n+".txt"), sb.toString());
+            }
+            FileUtils.writeFile(new File("/home/bourgesl/Documents/pub/JMMC-PUB-2800-0001/tmp/dist_" + N_SAMPLES + "_" + n + ".txt"), sb.toString());
         }
-        
 
         System.out.println("VIS AMP:");
         for (int i = 0; i < N; i++) {
@@ -252,8 +262,7 @@ public final class StatUtils {
 
         // standard deviation on amplitude:
         // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
-        double stddev = Math.sqrt(SAMPLING_FACTOR_VARIANCE * (vis_sq_diff_acc - (SAMPLING_FACTOR_MEAN * FastMath.pow2(vis_diff_acc)))
-        );
+        double stddev = Math.sqrt(SAMPLING_FACTOR_VARIANCE * (vis_sq_diff_acc - (SAMPLING_FACTOR_MEAN * FastMath.pow2(vis_diff_acc))));
 
         System.out.println("Sampling[" + N_SAMPLES + "] avg= " + avg + " stddev= " + stddev + " vs visErrRe= " + visErrRe + " ratio: " + (stddev / visErrRe));
     }

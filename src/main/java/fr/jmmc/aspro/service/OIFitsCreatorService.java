@@ -1229,6 +1229,10 @@ public final class OIFitsCreatorService {
             }
 
             final StatUtils stat = StatUtils.getInstance();
+            if (ns != null) {
+                // prepare enough distributions for all baselines:
+                stat.prepare(nBl);
+            }
 
             final double[][] cVisError = new double[nRows][nChannels];
             final boolean[][] cVisSnrFlag = new boolean[nRows][nChannels];
@@ -1646,7 +1650,7 @@ public final class OIFitsCreatorService {
                                     // pure complex visibility data :
                                     visRe = visComplex[k][l].getReal();
                                     visIm = visComplex[k][l].getImaginary();
-                                    
+
                                     // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
                                     visErrCplx = visError[k][l];
 
@@ -1659,7 +1663,7 @@ public final class OIFitsCreatorService {
                                     // Sampling complex visibilities:
                                     vamp_sum = vamp_sum_diff = vamp_sum_diff_square = 0.0;
                                     vphi_sum_cos = vphi_sum_sin = 0.0;
-                                    
+
                                     // bivariate distribution (complex normal):
                                     for (n = 0; n < N_SAMPLES; n++) {
                                         // update nth sample:
@@ -1895,7 +1899,7 @@ public final class OIFitsCreatorService {
                             errCVis = visError[k][l];
                             // bias = var(re) + var(im) = 2.0 * var(visAmpErr)
                             bias = 2.0 * errCVis * errCVis;
-                            
+
                             // Remove v2 bias:
                             v2 -= bias;
 
@@ -2360,7 +2364,7 @@ public final class OIFitsCreatorService {
 
                             if (NoiseService.USE_DISTRIB_APPROACH) {
                                 // check SNR:
-                                        // PI / 8  = 22.5 deg:
+                                // PI / 8  = 22.5 deg:
                                 if ((s_t3phi_err > (Math.PI * 0.125)) && (Math.abs(s_t3phi_mean / s_t3phi_err) < SNR_THRESHOLD)) {
                                     doFlag = true;
                                 }
