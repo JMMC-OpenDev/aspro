@@ -1641,8 +1641,8 @@ public final class OIFitsCreatorService {
 
                                 // For experimental instruments: VisAmp/Phi are only amplitude and phase of complex visibility:
                                 if (ns == null) {
-                                    vamp = visComplexNoisy[k][l].abs();
-                                    vphi = FastMath.toDegrees(visComplexNoisy[k][l].getArgument());
+                                    vamp = visComplex[k][l].abs();
+                                    vphi = visComplex[k][l].getArgument();
 
                                     errAmp = errPhi = Double.NaN;
 
