@@ -71,40 +71,55 @@ public final class AtmosphereSpectrumService {
         for (int i = 0; i < nWLen; i++) {
             final double lambdaMin = waveLengths[i] - 0.5 * waveBands[i];
             final double lambdaMax = waveLengths[i] + 0.5 * waveBands[i];
-//            System.out.println("lambdaMin: " + lambdaMin);
-//            System.out.println("lambdaMax: " + lambdaMax);
 
-            int first = Arrays.binarySearch(atm.lambda, lambdaMin);
-            if (first < 0) {
-                first = -first - 1;
-            }
-//            System.out.println("first: " + first);
+            final int first = findIndex(atm.lambda, lambdaMin, true);
+            final int last = findIndex(atm.lambda, lambdaMax, false);
 
-            int last = Arrays.binarySearch(atm.lambda, lambdaMax);
-            if (last < 0) {
-                last = -last - 1;
+            if (logger.isDebugEnabled()) {
+                logger.debug("lambdaMin: {} vs lambda(first): {}", lambdaMin, atm.lambda[first]);
+                logger.debug("lambdaMax: {} vs lambda(last) : {}", lambdaMax, atm.lambda[last]);
             }
-//            System.out.println("last: " + last);
 
             if (first < last) {
                 // simple mean:
                 // should perform convolution of gaussian filter on each spectral channels (varying width):
                 double total = 0.0;
 
-                for (int j = first; j < last; j++) {
+                for (int j = first; j <= last; j++) {
                     total += atm.transmission[j]; // x weight !
                 }
 
-                trans[i] = total / (last - first);
+                trans[i] = total / (last + 1 - first);
 
             } else {
-                // Prefer to avoid Exception of an invalid lambda range
+                // Lower = Upper index side case:
+                // only happen if lambda < min(atm.lambda) or lambda > max(atm.lambda)
                 trans[i] = atm.transmission[first];
-                //throw new IllegalStateException("Invalid lambda range: [" + lambdaMin + " to " + lambdaMax + "]");
             }
         }
 
         return trans;
+    }
+
+    private static int findIndex(final double[] array, final double value, final boolean smaller) {
+        int idx = Arrays.binarySearch(array, value);
+        if (idx < 0) {
+            // insertion point = index of the first element greater than the key (>= 0)
+            idx = -idx - 1;
+            // adjust to get the index of the first element smaller than the key
+            if (smaller) {
+                idx--;
+            }
+        }
+
+        // Range check:
+        if (idx <= 0) {
+            return 0; // inclusive
+        }
+        if (idx >= array.length) {
+            return array.length - 1; // inclusive
+        }
+        return idx;
     }
 
     private void init() {
