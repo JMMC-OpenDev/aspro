@@ -281,8 +281,8 @@
             </Component>
             <Component class="javax.swing.JTextField" name="jTextFieldFileReference">
               <Properties>
-                <Property name="columns" type="int" value="20"/>
                 <Property name="editable" type="boolean" value="false"/>
+                <Property name="columns" type="int" value="20"/>
                 <Property name="text" type="java.lang.String" value="FileReference"/>
               </Properties>
               <Constraints>
