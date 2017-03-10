@@ -240,7 +240,8 @@ public final class OIFitsCreatorService {
         this.noiseService = new NoiseService(observation, target, targetPointInfos, useInstrumentBias, warningContainer,
                 this.waveLengths, this.waveBands);
 
-        this.errorValid = this.noiseService.isValid();
+        this.errorValid = this.noiseService.isValid()
+                && !"DEMO".equalsIgnoreCase(this.arrNameKeyword); // do not generate errors for the DEMO interferometer
 
         // do noise :
         this.doNoise = (doDataNoise && this.errorValid);
