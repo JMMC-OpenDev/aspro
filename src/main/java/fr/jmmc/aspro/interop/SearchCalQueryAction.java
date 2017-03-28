@@ -17,6 +17,7 @@ import fr.jmmc.jmal.Band;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.network.interop.SampCapability;
 import fr.jmmc.jmcs.network.interop.SampCapabilityAction;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ResourceUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -190,8 +191,9 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
             logger.debug("bright: {}", bright);
         }
 
-        // max base line :
-        final double[] range = ConfigurationManager.computeBaselineUVBounds(stations);
+        // max base line:
+        final double[] range = ConfigurationManager.computeBaselineUVWBounds(stations);
+
         final double maxBaseline = range[1];
 
         if (logger.isDebugEnabled()) {
@@ -200,7 +202,6 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
         }
 
         // --- Target information ---
-
         votable = votable.replaceFirst(KEY_TARGET_NAME, target.getName());
 
         // magnitude in instrument band :
@@ -213,8 +214,8 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
         votable = votable.replaceFirst(KEY_RA, raDec[0]);
         votable = votable.replaceFirst(KEY_DEC, raDec[1]);
 
-        votable = votable.replaceFirst(KEY_BASE_MAX, Double.toString(maxBaseline));
-        votable = votable.replaceFirst(KEY_WAVELENGTH, Double.toString(lambda));
+        votable = votable.replaceFirst(KEY_BASE_MAX, Double.toString(NumberUtils.trimTo3Digits(maxBaseline)));
+        votable = votable.replaceFirst(KEY_WAVELENGTH, Double.toString(NumberUtils.trimTo3Digits(lambda)));
 
         // TODO: remove soon following parameters:
         votable = votable.replaceFirst(KEY_BRIGHT, Boolean.toString(bright));
@@ -253,7 +254,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
                 return SpectralBand.K;
             case L:
             case M:
-                // LM: what to do ?
+            // LM: what to do ?
             case N:
                 // use scenario N for MIDI:
                 return SpectralBand.N;

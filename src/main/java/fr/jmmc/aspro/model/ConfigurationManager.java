@@ -441,55 +441,17 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
-     * Compute the min and max baseline length (XY distance i.e. projected in the UV plane) using all possible baselines
+     * Compute the min and max baseline length (UVW) using all possible baselines
      * for given stations
      * @param stations list of stations to determine baselines
      * @return min - max
      */
-    public static double[] computeBaselineUVBounds(final List<Station> stations) {
+    public static double[] computeBaselineUVWBounds(final List<Station> stations) {
         final double[] minMax = new double[2];
 
-        computeBaselineUVBounds(stations, minMax);
+        computeBaselineUVWBounds(stations, minMax);
 
         return minMax;
-    }
-
-    /**
-     * Compute the min and max baseline length (XY distance i.e. projected in the UV plane) using all possible baselines
-     * for given stations
-     * @param stations list of stations to determine baselines
-     * @param minMax double[min; max]
-     */
-    public static void computeBaselineUVBounds(final List<Station> stations, final double[] minMax) {
-        double maxUV = 0d;
-        double minUV = Double.POSITIVE_INFINITY;
-
-        final int size = stations.size();
-
-        double x, y, distXY;
-        Station s1, s2;
-        for (int i = 0; i < size; i++) {
-            s1 = stations.get(i);
-
-            for (int j = i + 1; j < size; j++) {
-                s2 = stations.get(j);
-
-                x = s2.getRelativePosition().getPosX() - s1.getRelativePosition().getPosX();
-                y = s2.getRelativePosition().getPosY() - s1.getRelativePosition().getPosY();
-
-                distXY = MathUtils.carthesianNorm(x, y);
-
-                minUV = Math.min(minUV, distXY);
-                maxUV = Math.max(maxUV, distXY);
-            }
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("computeBaselineUVBounds = [{} - {}] m for stations {}", minUV, maxUV, stations);
-        }
-
-        minMax[0] = minUV;
-        minMax[1] = maxUV;
     }
 
     /**
@@ -541,9 +503,9 @@ public final class ConfigurationManager extends BaseOIManager {
         double maxElev;
         for (Station station : stations) {
             logger.debug("station: {}", station);
-            
+
             Telescope tel = station.getTelescope();
-            
+
             if (tel == null) {
                 throw new IllegalStateException("Missing telescope reference found in the station '" + station.getName() + "' !");
             }
