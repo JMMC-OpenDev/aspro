@@ -1245,7 +1245,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                             changed = true;
 
                         } else {
-                            // use alternate diameter UD, LD, UDDK, DIA12 (in order of priority) :
+                            // use alternate diameter (in order of priority) :
                             final BaseValue diam = cal.getCalibratorInfos().getAlternateDiameter();
 
                             if (diam != null) {
