@@ -158,10 +158,7 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD_L);
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD_M);
       addFieldValue(calInfos, CalibratorInformations.FIELD_UD_N);
-      addFieldValue(calInfos, CalibratorInformations.FIELD_UD);
-      addFieldValue(calInfos, CalibratorInformations.FIELD_LD);
-      addFieldValue(calInfos, CalibratorInformations.FIELD_UDDK);
-      addFieldValue(calInfos, CalibratorInformations.FIELD_DIA12);
+      addFieldValue(calInfos, CalibratorInformations.FIELD_LDD);
       /*
       for (BaseValue value : calInfos.getFields()) {
       this.rowList.add(value);

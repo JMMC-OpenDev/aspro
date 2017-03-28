@@ -295,14 +295,8 @@ public class CalibratorInformations
   public final static String FIELD_UD_N = "UD_N";
 
   /* alternate diameters */
-  /** field UD (mas) (number) = Uniform-Disc Diameter */
-  public final static String FIELD_UD = "UD";
-  /** field LD (mas) (number) = Limb-Darkened Diameter */
-  public final static String FIELD_LD = "LD";
-  /** field UDDK (mas) (number) = Uniform-Disc Diameter in K-band */
-  public final static String FIELD_UDDK = "UDDK";
-  /** field Dia12 (mas) (number) = Angular Diameter at 12 microns */
-  public final static String FIELD_DIA12 = "Dia12";
+  /** field LDD (mas) (number) = Limb-Darkened Diameter */
+  public final static String FIELD_LDD = "LDD";
 
   /* Utility methods */
   /**
@@ -372,21 +366,12 @@ public class CalibratorInformations
   }
 
   /**
-   * Return the available diameter UD, LD, UDDK, DIA12 (in order of priority)
-   * @return diameter UD, LD, UDDK, DIA12 or null if unavailable
+   * Return the available diameter LDD... (in order of priority)
+   * @return diameter LDD... or null if unavailable
    */
   public final BaseValue getAlternateDiameter() {
-    BaseValue diameter = getField(FIELD_UD);
-    if (diameter == null) {
-      diameter = getField(FIELD_LD);
-    }
-    if (diameter == null) {
-      diameter = getField(FIELD_UDDK);
-    }
-    if (diameter == null) {
-      diameter = getField(FIELD_DIA12);
-    }
-    
+    BaseValue diameter = getField(FIELD_LDD);
+    // ...
     return diameter;
   }
   /**
