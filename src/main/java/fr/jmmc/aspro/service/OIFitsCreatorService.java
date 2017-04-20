@@ -313,8 +313,8 @@ public final class OIFitsCreatorService {
 
         addInformation(warningContainer, this.instrumentName + " instrument mode: "
                 + this.nWaveLengths + " channels "
-                + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + ' ' + SpecialChars.UNIT_MICRO_METER + "] "
-                + "(band: " + convertWL(this.waveBand) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
+                + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] "
+                + "(band: " + convertWL(this.waveBand) + " " + SpecialChars.UNIT_MICRO_METER + ')');
 
         // keep number of channels:
         final int nChannels = this.nWaveLengths;
@@ -331,7 +331,7 @@ public final class OIFitsCreatorService {
 
             addWarning(warningContainer, "Restricted instrument mode: "
                     + this.waveLengths.length + " channels "
-                    + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + ' ' + SpecialChars.UNIT_MICRO_METER + "] ");
+                    + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] ");
         }
 
         this.insNameKeyword = this.instrumentName + '_' + firstChannel + ((lastChannel != null) ? ("-" + lastChannel) : "") + '-' + this.nWaveLengths + "ch";
@@ -449,7 +449,7 @@ public final class OIFitsCreatorService {
                         // check image wavelength is in instrument range:
                         if (wlFirst < this.lambdaMin || wlFirst > this.lambdaMax) {
                             addWarning(warningContainer, "User model (Fits image) wavelength ("
-                                    + convertWL(wlFirst) + ' ' + SpecialChars.UNIT_MICRO_METER
+                                    + convertWL(wlFirst) + " " + SpecialChars.UNIT_MICRO_METER
                                     + ") outside of instrumental wavelength range");
                             return false;
                         }
@@ -460,18 +460,18 @@ public final class OIFitsCreatorService {
                         final double wlInc = modelDataFirst.getWaveLengthIncrement(); // constant in Fits cube
 
                         addInformation(warningContainer, "User model [" + userModel.getName() + "]: " + nImages + " images "
-                                + '[' + convertWL(wlFirst) + " - " + convertWL(wlLast) + ' ' + SpecialChars.UNIT_MICRO_METER + "] "
-                                + "(increment: " + convertWL(wlInc) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
+                                + '[' + convertWL(wlFirst) + " - " + convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER + "] "
+                                + "(increment: " + convertWL(wlInc) + " " + SpecialChars.UNIT_MICRO_METER + ')');
 
                         // check image wavelengths are overlapping the instrument range:
                         if (modelDataFirst.getWaveLengthRange().getMin() > this.lambdaMax) {
-                            addWarning(warningContainer, "Incorrect model min wavelength [" + convertWL(wlFirst) + ' ' + SpecialChars.UNIT_MICRO_METER
-                                    + "] higher than max instrument wavelength [" + convertWL(this.lambdaMax) + ' ' + SpecialChars.UNIT_MICRO_METER + ']');
+                            addWarning(warningContainer, "Incorrect model min wavelength [" + convertWL(wlFirst) + " " + SpecialChars.UNIT_MICRO_METER
+                                    + "] higher than max instrument wavelength [" + convertWL(this.lambdaMax) + " " + SpecialChars.UNIT_MICRO_METER + ']');
                             return false;
                         }
                         if (modelDataLast.getWaveLengthRange().getMax() < this.lambdaMin) {
-                            addWarning(warningContainer, "Incorrect model max wavelength [" + convertWL(wlLast) + ' ' + SpecialChars.UNIT_MICRO_METER
-                                    + "] lower than min instrument wavelength [" + convertWL(this.lambdaMin) + ' ' + SpecialChars.UNIT_MICRO_METER + ']');
+                            addWarning(warningContainer, "Incorrect model max wavelength [" + convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER
+                                    + "] lower than min instrument wavelength [" + convertWL(this.lambdaMin) + " " + SpecialChars.UNIT_MICRO_METER + ']');
                             return false;
                         }
 
@@ -1394,7 +1394,7 @@ public final class OIFitsCreatorService {
             }
         }
         throw new IllegalStateException("findUserModel: unable for find an user model at wavelength = "
-                + convertWL(wavelength) + ' ' + SpecialChars.UNIT_MICRO_METER);
+                + convertWL(wavelength) + " " + SpecialChars.UNIT_MICRO_METER);
     }
 
     /**
