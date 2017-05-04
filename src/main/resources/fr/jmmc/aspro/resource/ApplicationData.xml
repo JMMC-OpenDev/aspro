@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.3 beta 2"/>
-    <compilation date="20/04/2017" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.3 beta 3"/>
+    <compilation date="04/05/2017" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -204,8 +204,11 @@
 
     <releasenotes>
         <release version="0.9.9.3">
-            <pubDate>Thu, 20 Apr 2017 16:00:00 GMT</pubDate>
-            <prerelease version="0.9.9.3 beta 1">
+            <pubDate>Thu, 04 May 2017 09:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.3 beta 3">
+                <change type="FEATURE">Updated GRAVITY OB template (ESO P99)</change>
+            </prerelease>
+            <prerelease version="0.9.9.3 beta 2">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/855">Fixed the incorrectly displayed wavelength in the Target Model Editor for FITS cubes</change>
             </prerelease>
             <prerelease version="0.9.9.3 beta 1">
