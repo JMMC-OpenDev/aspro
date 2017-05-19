@@ -60,9 +60,6 @@
           <SubComponents>
             <Component class="javax.swing.JTree" name="jTreeTargets">
               <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="12" style="1"/>
-                </Property>
                 <Property name="model" type="javax.swing.tree.TreeModel" editor="org.netbeans.modules.form.editors2.TreeModelEditor">
                   <TreeModel code="Targets"/>
                 </Property>
@@ -993,9 +990,6 @@
             <Component class="javax.swing.JTextArea" name="jTextAreaTargetInfos">
               <Properties>
                 <Property name="columns" type="int" value="20"/>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Monospaced" size="12" style="0"/>
-                </Property>
                 <Property name="rows" type="int" value="1"/>
               </Properties>
             </Component>

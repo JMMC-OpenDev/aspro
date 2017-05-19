@@ -161,7 +161,6 @@ public class ObservationDescriptionForm extends javax.swing.JPanel implements Ob
         jPanelDescription.setLayout(new java.awt.GridBagLayout());
 
         jTextAreaObsDesc.setColumns(20);
-        jTextAreaObsDesc.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         jTextAreaObsDesc.setRows(1);
         jScrollPaneObsDesc.setViewportView(jTextAreaObsDesc);
 

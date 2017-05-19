@@ -178,6 +178,9 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         final TransferHandler targetTransferHandler = new TargetTransferHandler(this.editTargets, this.editTargetUserInfos);
         this.jListCalibrators.setTransferHandler(targetTransferHandler);
         this.jTreeTargets.setTransferHandler(targetTransferHandler);
+
+        // Fix row height:
+        SwingUtils.adjustRowHeight(jTableCalibratorInfos);
     }
 
     /**
@@ -699,7 +702,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jScrollPaneTreeTargets.setMinimumSize(new java.awt.Dimension(80, 100));
         jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(160, 100));
 
-        jTreeTargets.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Targets");
         jTreeTargets.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         jTreeTargets.setDragEnabled(true);
@@ -1363,7 +1365,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelDescription.setLayout(new java.awt.GridBagLayout());
 
         jTextAreaTargetInfos.setColumns(20);
-        jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         jTextAreaTargetInfos.setRows(1);
         jScrollPaneTargetInfos.setViewportView(jTextAreaTargetInfos);
 

@@ -159,6 +159,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         // disable column reordering :
         this.jTableModelParameters.getTableHeader().setReorderingAllowed(false);
+
+        // Fix row height:
+        SwingUtils.adjustRowHeight(jTableModelParameters);
     }
 
     /**
@@ -684,7 +687,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jScrollPaneTreeModels.setName(""); // NOI18N
         jScrollPaneTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
 
-        jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Models");
         jTreeModels.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         jScrollPaneTreeModels.setViewportView(jTreeModels);
@@ -800,9 +802,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelAnalytic.add(jLabelType, gridBagConstraints);
-
-        jComboBoxModelType.setMinimumSize(new java.awt.Dimension(100, 24));
-        jComboBoxModelType.setPreferredSize(new java.awt.Dimension(100, 24));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -858,8 +857,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
         jPanelUserModel.add(jLabelFile, gridBagConstraints);
 
-        jTextFieldFileReference.setColumns(20);
         jTextFieldFileReference.setEditable(false);
+        jTextFieldFileReference.setColumns(20);
         jTextFieldFileReference.setText("FileReference");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -915,8 +914,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jPanelDescription.setPreferredSize(new java.awt.Dimension(100, 150));
         jPanelDescription.setLayout(new java.awt.GridBagLayout());
 
-        jLabelModelDescrption.setBackground(new java.awt.Color(255, 255, 255));
-        jLabelModelDescrption.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        jLabelModelDescrption.setBackground(java.awt.Color.white);
         jLabelModelDescrption.setOpaque(true);
         jScrollPaneModelDescription.setViewportView(jLabelModelDescrption);
 
