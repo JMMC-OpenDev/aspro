@@ -17,8 +17,12 @@
 <xsl:stylesheet 
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"     
     xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'   
+    xmlns:exslt="http://exslt.org/common"
+    xmlns:set="http://exslt.org/set"
+    xmlns:str="http://exslt.org/strings"
+    extension-element-prefixes="set str"
     version="1.0"
-    exclude-result-prefixes="a">
+    exclude-result-prefixes="a exslt set str">
     <xsl:output method="xml" indent="yes" encoding="UTF-8" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/>
     
     <xsl:variable name="applicationData" select="document('../conf/resource/ApplicationData.xml')/ApplicationData"/>
@@ -35,6 +39,19 @@
                     <xsl:value-of select="$title"/>
                 </title>
                 <link rel="stylesheet" href="http://www.jmmc.fr/css/2col_leftNav.css" type="text/css" />
+                <style type="text/css">
+                .horizon div{
+                    background-color: #00ff00;
+                    vertical-align:bottom;
+                }
+                .horizon table{
+                border:0px;
+                border-collapse: collapse;
+                }
+                .horizon td {
+                padding: 0px 0px;
+                }
+                </style>
             </head>
             
             <body>                
@@ -174,23 +191,23 @@
                                                 </xsl:for-each>                                                    
                                 
                 
-                                <li>
-                                    <em>a warning message is issued when separation is lower than  
-                                        <xsl:value-of select="moonPointingRestriction/warningThreshold"/>
-                                    </em>
-                                </li>                
-                                </xsl:when>
-                                <xsl:otherwise>                                
-                                    not yet defined
-                                </xsl:otherwise>                            
-                            </xsl:choose>    
+                                                <li>
+                                                    <em>a warning message is issued when separation is lower than  
+                                                        <xsl:value-of select="moonPointingRestriction/warningThreshold"/>
+                                                    </em>
+                                                </li>                
+
+
+                                            </xsl:when>
+                                            <xsl:otherwise>                                
+                                            not yet defined
+                                            </xsl:otherwise>                            
+                                        </xsl:choose>    
+                                    </ul>
+                                </li>                                                                                                                     
                             </ul>
-                        </li>                                                                                                                     
-                    </ul>
-                </li>
-            </ul>   
-                    
-                                                                                                                                                                       
+                        </li>
+                    </ul>   
                 </xsl:for-each>      
                 
                 <br/>
@@ -212,7 +229,28 @@
                         </li>
                     </xsl:for-each>
                 </ul>                                                   
+                                                
+                                                <!-- does not work nicely, do it
+                                                in SVG ???
+
+                <br/>
+                <u>Horizons:</u>                
+                <xsl:for-each select="station">
+                <br/><b><xsl:value-of select="./name"/></b>
+                    <table class="horizon"><tr>
+                    <xsl:for-each select="horizon/point[position()!=last()]">
+                    <xsl:variable name="a1"><xsl:value-of select="./azimuth"/>  </xsl:variable>
+                    <xsl:for-each select="following-sibling::point[1]">
+                        <td><div style="height:{elevation}px;width:{(azimuth - $a1) * 2}px;"/></td>
+                    </xsl:for-each>
+                    </xsl:for-each>
+                    </tr></table>
+                </xsl:for-each>
+                -->
+                
+
             </xsl:for-each>  
+
                                             
         </p>
               
@@ -246,6 +284,25 @@
                                     </xsl:for-each>
                                 </table>
                             </div>
+                            <h3>Instrumental setup(s):</h3>
+                            <div class="coloredtable centered">                                                        
+                                <!-- could be explicit to describe name, description, numberChannels...-->              
+                                <xsl:for-each select="setup">
+                                    <table >                                                                    
+                                        <xsl:for-each select="*[not(*)]">
+                                            <tr>
+                                                <td>
+                                                    <xsl:value-of select="name()"/>:
+                                                </td>
+                                                <td>
+                                                    <xsl:value-of select="."/>
+                                                </td>                                
+                                            </tr>                                                   
+                                        </xsl:for-each>
+                                    </table>
+                                    <br/>
+                                </xsl:for-each>
+                            </div>
                         </td>
                         <td valign="top">
                             <!-- modes -->
@@ -253,18 +310,36 @@
                                 <table>
                                     <tr>
                                         <th>mode</th> 
-                                        <th>resolution</th>
-                                        <th>wlen min</th>
-                                        <th>wlen max</th>
+                                        <!-- simple case : no setupRef-->
+                                        <xsl:if test="mode[resolution and waveLengthMax and waveLengthMin]">
+                                            <th>resolution</th>
+                                            <th>wlen min</th>
+                                            <th>wlen max</th>
+                                        </xsl:if>
                                         <xsl:if test="mode/parameter">
                                             <th>used by OB export</th>
                                         </xsl:if>
+                                         <!-- improved case : setupRef-->
+                                         <xsl:if test="mode[setupRef]">
+                                            <th>detail</th>
+                                        </xsl:if>
                                     </tr>
                                     <xsl:for-each select="mode">
+                                      <xsl:variable name="data">
+                                        <xsl:for-each select="str:tokenize(table/data, '&#10;')">
+                                          <tr><xsl:for-each select="str:tokenize(., ' ')"><td><xsl:value-of select="."/></td></xsl:for-each></tr>
+                                        </xsl:for-each>
+                                      </xsl:variable>
                                         <tr> 
                                             <td>
                                                 <xsl:value-of select="name"/>:
+                                                <xsl:if test="setupRef">
+                                                  <br/>(<xsl:value-of select="setupRef"/>)
+                                                  <br/>resolution: <xsl:value-of select="round(((exslt:node-set($data)/tr[last()-1]/td[1] + exslt:node-set($data)/tr[1]/td[1]) div 2 ) div exslt:node-set($data)/tr[1]/td[2] )"/>
+                                                </xsl:if>
                                             </td>
+                                        <!-- simple case : no setupRef-->
+                                        <xsl:if test="resolution and waveLengthMax and waveLengthMin">
                                             <td>
                                                 <xsl:value-of select="resolution"/>
                                             </td>
@@ -274,6 +349,7 @@
                                             <td>
                                                 <xsl:value-of select="waveLengthMax"/>
                                             </td>   
+                                        </xsl:if>
                                             <xsl:if test="parameter">
                                                 <td>
                                                     <xsl:for-each select="parameter">
@@ -282,6 +358,33 @@
                                 
                                                 </td>
                                             </xsl:if>                     
+                                         <!-- improved case : assume that a given setupRef implies table element -->
+                                         <xsl:if test="setupRef">
+                                            <td>
+                                             <table >                                                                    
+                                                <tr>
+                                                <xsl:for-each select="table/column">
+                                                    <th>
+                                                        <xsl:value-of select="concat(@quantity, ' ', @telescope)"/>
+                                                    </th>
+                                                </xsl:for-each>
+                                                </tr>                                                   
+                                                <xsl:variable name="nbLines">5</xsl:variable>
+                                                <xsl:variable name="dots">
+                                                <tr><xsl:for-each select="table/column"><td>...</td></xsl:for-each></tr>
+                                                </xsl:variable>
+                                                <!-- print subsequence first 5 and last 5 lines
+                                                <xsl:for-each select="$lines[position() &lt; $nbLines]">
+                                                <xsl:for-each select="str:tokenize($table/data, '&#10;')">
+                                                -->
+                                                <xsl:for-each select="exslt:node-set($data)/tr[position() &lt; $nbLines]|exslt:node-set($dots)|exslt:node-set($data)/tr[(last()-position()) &lt; $nbLines]">
+                                                    <xsl:copy-of select="."/>
+                                                </xsl:for-each>
+                                                
+                                            </table>
+                                            </td>
+                                          
+                                        </xsl:if>
                                         </tr>                                             
                                     </xsl:for-each>
                                 </table>
