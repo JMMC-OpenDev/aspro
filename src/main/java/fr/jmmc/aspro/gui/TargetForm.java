@@ -631,6 +631,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jToggleButtonCalibrator = new javax.swing.JToggleButton();
         jButtonRemoveCalibrator = new javax.swing.JButton();
         jPanelRight = new javax.swing.JPanel();
+        jScrollPaneTarget = new javax.swing.JScrollPane();
         jPanelTarget = new javax.swing.JPanel();
         jLabelName = new javax.swing.JLabel();
         jPanelTargetActions = new javax.swing.JPanel();
@@ -1350,14 +1351,15 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jFieldName, gridBagConstraints);
 
+        jScrollPaneTarget.setViewportView(jPanelTarget);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.6;
         gridBagConstraints.weighty = 0.8;
-        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-        add(jPanelTarget, gridBagConstraints);
+        add(jScrollPaneTarget, gridBagConstraints);
 
         jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Target notes" + ObservabilityPanel.SUFFIX_INFO));
         jPanelDescription.setMinimumSize(new java.awt.Dimension(10, 50));
@@ -1951,6 +1953,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JScrollPane jScrollPaneCalibratorInfos;
     private javax.swing.JScrollPane jScrollPaneCalibrators;
     private javax.swing.JScrollPane jScrollPaneIds;
+    private javax.swing.JScrollPane jScrollPaneTarget;
     private javax.swing.JScrollPane jScrollPaneTargetInfos;
     private javax.swing.JScrollPane jScrollPaneTreeTargets;
     private javax.swing.JToolBar.Separator jSeparator1;
