@@ -69,6 +69,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
 
         // Custom renderer for LUT:
         this.jComboBoxLUT.setRenderer(new IconComboBoxRenderer() {
+            private static final long serialVersionUID = 1L;
             @Override
             protected Image getImage(final String name) {
                 return ColorModels.getColorModelImage(name);
@@ -476,6 +477,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jComboBoxLUT, gridBagConstraints);
