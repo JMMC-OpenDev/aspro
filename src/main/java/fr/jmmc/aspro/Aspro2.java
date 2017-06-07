@@ -152,7 +152,7 @@ public final class Aspro2 extends App {
         final LinkedHashMap<String, JPanel> panels = new LinkedHashMap<String, JPanel>(2);
         panels.put("General settings", new PreferencePanel());
 
-        final PreferencesView preferencesView = new PreferencesView(Preferences.getInstance(), panels);
+        final PreferencesView preferencesView = new PreferencesView(App.getFrame(), Preferences.getInstance(), panels);
         preferencesView.init();
 
         return preferencesView;

@@ -71,6 +71,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      * Initialize system properties & static variables
      */
     public static void prepareAsproTest() {
+        // Hack to reset LAF & ui scale:
+        CommonPreferences.getInstance().resetToDefaultPreferences();
 
         // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
@@ -85,8 +87,14 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // reset window Preferences:
         new File(SystemUtils.USER_HOME + "/.fr.jmmc.jmcs.session_settings.jmmc.aspro2.properties").delete();
 
-        defineEmailPref(FAKE_EMAIL);
+        // reset Preferences:
         Preferences.getInstance().resetToDefaultPreferences();
+        try {
+            CommonPreferences.getInstance().setPreference(CommonPreferences.SHOW_STARTUP_SPLASHSCREEN, false);
+        } catch (PreferencesException pe) {
+            logger.error("setPreference failed", pe);
+        }
+        defineEmailPref(FAKE_EMAIL);
 
         // define robot delays :
         defineRobotDelayBetweenEvents(SHORT_DELAY);
