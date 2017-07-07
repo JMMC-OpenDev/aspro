@@ -49,6 +49,7 @@ import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.OIWavelength;
 import fr.jmmc.oitools.util.CombUtils;
+import static java.lang.Math.PI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -73,11 +74,13 @@ public final class OIFitsCreatorService {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(OIFitsCreatorService.class.getName());
     /** enable DEBUG mode */
-    private final static boolean DEBUG = false;
+    public final static boolean DEBUG = false;
     /** target Id */
     private final static short TARGET_ID = (short) 1;
     /** enable the OIFits validation */
     private final static boolean DO_VALIDATE_OIFITS = false;
+    /** use sampled mean(sample) instead of theoretical value */
+    private final static boolean DO_USE_SAMPLED_MEAN = false;
     /** flag to show compute task statistics */
     private final static boolean SHOW_COMPUTE_STATS = false;
     /** threshold to use parallel jobs for user models (32 UV points) */
@@ -1132,7 +1135,6 @@ public final class OIFitsCreatorService {
                             });
                         }
                     }
-
                 }
 
                 final int nJobs = jobList.size();
@@ -1480,6 +1482,9 @@ public final class OIFitsCreatorService {
         final float[][][] visData = vis.getVisData();
         final float[][][] visErr = vis.getVisErr();
 
+//TODO: adjust flag for AMBER or GRAVITY ?
+        final boolean useVisData = (visData != null && visErr != null);
+
         final double[][] visAmp = vis.getVisAmp();
         final double[][] visAmpErr = vis.getVisAmpErr();
 
@@ -1570,11 +1575,13 @@ public final class OIFitsCreatorService {
 
                     // Iterate on wave lengths :
                     for (l = 0; l < nWaveLengths; l++) {
-                        visData[k][l][0] = Float.NaN;
-                        visData[k][l][1] = Float.NaN;
+                        if (useVisData) {
+                            visData[k][l][0] = Float.NaN;
+                            visData[k][l][1] = Float.NaN;
 
-                        visErr[k][l][0] = Float.NaN;
-                        visErr[k][l][1] = Float.NaN;
+                            visErr[k][l][0] = Float.NaN;
+                            visErr[k][l][1] = Float.NaN;
+                        }
 
                         visAmp[k][l] = Double.NaN;
                         visAmpErr[k][l] = Double.NaN;
@@ -1605,11 +1612,13 @@ public final class OIFitsCreatorService {
 
                         // Define first visData / visErr:
                         if (ns == null) {
-                            visData[k][l][0] = Float.NaN;
-                            visData[k][l][1] = Float.NaN;
+                            if (useVisData) {
+                                visData[k][l][0] = Float.NaN;
+                                visData[k][l][1] = Float.NaN;
 
-                            visErr[k][l][0] = Float.NaN;
-                            visErr[k][l][1] = Float.NaN;
+                                visErr[k][l][0] = Float.NaN;
+                                visErr[k][l][1] = Float.NaN;
+                            }
                         } else {
                             // pure complex visibility data :
                             visRe = this.visComplex[k][l].getReal();
@@ -1626,16 +1635,18 @@ public final class OIFitsCreatorService {
                                 ); // immutable complex for safety
                             }
 
-                            // pure correlated fluxes or NaN:
-                            flux = ns.computeCorrelatedFluxWeight(i, l);
+                            if (useVisData) {
+                                // pure correlated fluxes or NaN:
+                                flux = ns.computeCorrelatedFluxWeight(i, l);
 
-                            // store pure (0..1) or noisy correlated fluxes (NaN if no flux):
-                            visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
-                            visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
+                                // store pure (0..1) or noisy correlated fluxes (NaN if no flux):
+                                visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
+                                visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
 
-                            // error on correlated fluxes :
-                            visErr[k][l][0] = (float) (flux * visErrCplx);
-                            visErr[k][l][1] = (float) (flux * visErrCplx);
+                                // error on correlated fluxes :
+                                visErr[k][l][0] = (float) (flux * visErrCplx);
+                                visErr[k][l][1] = (float) (flux * visErrCplx);
+                            }
                         }
 
                         if (!isAmber) {
@@ -1657,8 +1668,9 @@ public final class OIFitsCreatorService {
                                     visErrCplx = visError[k][l];
 
                                     // pure visibility amplitude:
-                                    vamp = Math.sqrt(visRe * visRe + visIm * visIm);
+                                    vamp = Math.sqrt(visRe * visRe + visIm * visIm); // TODO: remove bias
 
+                                    // note: if (V2 - bias) is negative then vamp must be NaN (no error)
                                     // pure visibility phase:
                                     vphi = (visIm != 0.0) ? FastMath.atan2(visIm, visRe) : 0.0;
 
@@ -1729,7 +1741,7 @@ public final class OIFitsCreatorService {
                                                 + " stddev= " + s_vamp_err + " errAmp= " + visErrCplx + " ratio: " + (s_vamp_err / visErrCplx)
                                         );
                                         logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_vphi_mean / s_vphi_err) + " PHI "
-                                                + " avg= " + s_vphi_mean + " vphi= " + vphi + " ratio: " + (s_vphi_mean / vphi)
+                                                + " avg= " + s_vphi_mean + " vphi= " + vphi + " ratio: " + ((PI + s_vphi_mean) / (PI + vphi))
                                                 + " stddev= " + s_vphi_err
                                         );
                                     }
@@ -1747,7 +1759,7 @@ public final class OIFitsCreatorService {
                                         final int nSample = visRndIdxRow[l];
                                         vamp = vamp_samples[nSample];
                                         vphi = vphi_samples[nSample];
-                                    } else {
+                                    } else if (DO_USE_SAMPLED_MEAN) {
                                         vamp = s_vamp_mean;
                                         vphi = s_vphi_mean;
                                     }
@@ -1836,7 +1848,7 @@ public final class OIFitsCreatorService {
         final NoiseService ns = (errorValid) ? noiseService : null;
 
         // vars:
-        double visRe, visIm, errCVis, bias;
+        double visRe, visIm, errCVis, bias = Double.NaN;
         double v2, v2Err;
 
         // distribution samples:
@@ -1899,11 +1911,15 @@ public final class OIFitsCreatorService {
 
                             // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
                             errCVis = visError[k][l];
-                            // bias = var(re) + var(im) = 2.0 * var(visAmpErr)
-                            bias = 2.0 * errCVis * errCVis;
 
-                            // Remove v2 bias:
-                            v2 -= bias;
+                            if (true || this.doNoise) {
+                                bias = ns.computeVis2Bias(i, l);
+                                // Remove v2 bias:
+                                v2 -= bias;
+                            } else {
+                                // do not debias V2 for theoretical values:
+                                bias = 0.0;
+                            }
 
                             v2_sum = v2_sum_diff = v2_sum_diff_square = 0.0;
 
@@ -1963,7 +1979,7 @@ public final class OIFitsCreatorService {
                             if (this.doNoise) {
                                 // Use the corresponding sample:
                                 v2 = v2_samples[visRndIdxRow[l]];
-                            } else {
+                            } else if (DO_USE_SAMPLED_MEAN) {
                                 v2 = s_v2_mean;
                             }
                             v2Err = s_v2_err;
@@ -2359,7 +2375,7 @@ public final class OIFitsCreatorService {
                                         + " stddev= " + s_t3amp_err + " errAmp= " + errAmp + " ratio: " + (s_t3amp_err / errAmp)
                                 );
                                 logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_t3phi_mean / s_t3phi_err) + " PHI "
-                                        + " avg= " + s_t3phi_mean + " T3phi= " + t3phi + " ratio: " + (s_t3phi_mean / t3phi)
+                                        + " avg= " + s_t3phi_mean + " T3phi= " + t3phi + " ratio: " + ((PI + s_t3phi_mean) / (PI + t3phi))
                                         + " stddev= " + s_t3phi_err + " errPhi= " + errPhi + " ratio: " + (s_t3phi_err / errPhi)
                                 );
                             }
@@ -2377,7 +2393,7 @@ public final class OIFitsCreatorService {
                                 final int nSample = visRndIdxRow[l];
                                 t3amp = t3amp_samples[nSample];
                                 t3phi = t3phi_samples[nSample];
-                            } else {
+                            } else if (DO_USE_SAMPLED_MEAN) {
                                 t3amp = s_t3amp_mean;
                                 t3phi = s_t3phi_mean;
                             }

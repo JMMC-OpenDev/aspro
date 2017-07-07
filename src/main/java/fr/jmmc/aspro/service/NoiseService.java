@@ -50,15 +50,18 @@ public final class NoiseService implements VisNoiseService {
     public final static double H_PLANCK = 6.62606896e-34d;
     /** Speed of light (2.99792458e8) */
     public final static double C_LIGHT = 2.99792458e8d;
-    
+
     /** flag to use the new numeric approach = statistical distributions */
     public final static boolean USE_DISTRIB_APPROACH = true;
-    
+
     /** enable bound checks on iPoint / iChannel */
     private final static boolean DO_CHECKS = false;
 
+    /** enable tests on vis2 error */
+    private final static boolean DO_DUMP_VIS2 = false;
+
     /** maximum error on Vis to avoid excessively large errors */
-    private final static double MAX_ERR_V = 3.0;
+    private final static double MAX_ERR_V = 10.0;
     /** maximum error on Vis2 to avoid excessively large errors */
     private final static double MAX_ERR_V2 = MAX_ERR_V * MAX_ERR_V;
 
@@ -267,11 +270,10 @@ public final class NoiseService implements VisNoiseService {
             this.aoBand = SpectralBand.V;
             this.nbOfActuators = 1;
         }
-        
+
         // TODO: add AO mag limits like FT
         // V < 15 for UTs (MACAO)
         // V < 11 for ATs (STRAP)
-
         // Seeing :
         final AtmosphereQuality atmQual = observation.getWhen().getAtmosphereQuality();
         if (atmQual != null) {
@@ -328,7 +330,7 @@ public final class NoiseService implements VisNoiseService {
 
         final double ratioTime = sequence.getRatioTime();
         final double ratioDeadTime = sequence.getRatioDeadTime();
-        
+
         final double effectiveFrameTime = ratioTime * this.dit + ratioDeadTime * insSetup.getDeadtimeExposure();
         // + insSetup.getDeadtimeSequence(); // TODO: chopping switch is 2 times per SECOND not per sequence !
 
@@ -357,7 +359,7 @@ public final class NoiseService implements VisNoiseService {
                 this.instrumentVis2CalibrationBias = 0d;
 
                 /* note: instrumentalVis2Bias = instrumentalVisBias (few percents) as there is no specific calibration bias */
-                /* Correct Vis2 bias = 1/4 * visBias (peak to peak ~ 4 sigma) */
+ /* Correct Vis2 bias = 1/4 * visBias (peak to peak ~ 4 sigma) */
                 this.instrumentalVis2Bias = 0.25 * instrumentalVisBias;
             } else {
                 this.useVis2CalibrationBias = true;
@@ -429,7 +431,7 @@ public final class NoiseService implements VisNoiseService {
             if (col != null) {
                 this.instrumentalVisibility = Arrays.copyOfRange(col.getValues(), firstIdx, lastIdx);
             }
-            
+
             // nb photon thermal per beam per second (background):
             col = table.getColumn(SpectralSetupQuantity.NB_PHOTON_THERMAL, telescope);
             if (col == null) {
@@ -739,6 +741,8 @@ public final class NoiseService implements VisNoiseService {
         // total number of frames:
         final double nbFrames = totalObsTime / obsDit;
 
+        logger.info("nbFrames: {}", nbFrames);
+
         // total frame correction = 1 / SQRT(nFrames):
         this.totFrameCorrection = 1.0 / Math.sqrt(nbFrames);
 
@@ -755,12 +759,12 @@ public final class NoiseService implements VisNoiseService {
             for (int i = 0; i < nWLen; i++) {
                 // corrected total number of thermal photons using the final observation dit per telescope:
                 nbTotalPhotTherm[i] *= obsDit;
-                nbPhot = nbTotalPhotTherm[i];                
-                
+                nbPhot = nbTotalPhotTherm[i];
+
                 // number of thermal photons in the interferometric channel (per telescope):
                 nbPhotThermInterf[i] = nbPhot * fracFluxInInterferometry;
                 // number of thermal photons in each photometric channel (photometric flux):
-                nbPhotThermPhoto[i]  = nbPhot * fracFluxInPhotometry;
+                nbPhotThermPhoto[i] = nbPhot * fracFluxInPhotometry;
             }
 
             if (logger.isDebugEnabled()) {
@@ -804,7 +808,7 @@ public final class NoiseService implements VisNoiseService {
             prepareT3PhiError(n);
         }
 
-        if (logger.isDebugEnabled()) {
+        if (DO_DUMP_VIS2) {
             if (nWLen < 50) {
 
                 for (int i = 0; i < nWLen; i++) {
@@ -833,8 +837,10 @@ public final class NoiseService implements VisNoiseService {
         double v2 = visAmp * visAmp;
         double errV2 = computeVis2ErrorNoBias(iChannel, visAmp);
         double snr = v2 / errV2;
+        double bias = computeVis2Bias(iMidPoint, iChannel);
 
-        logger.debug("computeVis2Error({}) :{} SNR= {}", NumberUtils.trimTo5Digits(v2), errV2, NumberUtils.trimTo3Digits(snr));
+        logger.info("computeVis2Error({}) :{} SNR= {} bias= {}", NumberUtils.trimTo5Digits(v2), errV2, NumberUtils.trimTo3Digits(snr),
+                bias);
     }
 
     double[] computeTargetFlux() {
@@ -845,11 +851,11 @@ public final class NoiseService implements VisNoiseService {
         if (logger.isDebugEnabled()) {
             logger.debug("atmTrans: {}", Arrays.toString(atmTrans));
         }
-        
+
         if (false) {
-            System.out.println("#AtmTransmission[" + instrumentName + "] [" + this.waveLengths[0] + " - " 
+            System.out.println("#AtmTransmission[" + instrumentName + "] [" + this.waveLengths[0] + " - "
                     + this.waveLengths[this.waveLengths.length - 1] + "]:");
-            
+
             for (int i = 0; i < this.waveLengths.length; i++) {
                 System.out.println(this.waveLengths[i] + "\t" + atmTrans[i]);
             }
@@ -932,6 +938,9 @@ public final class NoiseService implements VisNoiseService {
         final double[] varSqCorFluxCoef = param.varSqCorFluxCoef;
         final double[] varSqCorFluxConst = param.varSqCorFluxConst;
 
+        // 2017 07: compute normalized bias on V2 from squared flux bias
+        final double[] biasV2 = param.biasV2;
+
         if (usePhotometry) {
             for (int i = 0; i < nWLen; i++) {
                 // variance of the photometric flux in photometric channel:
@@ -967,6 +976,16 @@ public final class NoiseService implements VisNoiseService {
 
             varSqCorFluxConst[i] = nbPhot * (1.0 + nbPhot + 2.0 * nbPixInterf * FastMath.pow2(ron))
                     + nbPixInterf * (nbPixInterf + 3.0) * FastMath.pow(ron, 4.0);
+
+            // normalized bias on V2:
+            // ie Fc = 1 pour V2=1 car mesures photo identiques (FiFj / FiFj = 1)
+            // correlated flux (include instrumental visibility loss) for vis2 = 1.0:
+            nbPhot = nbPhotInterf[i] * vinst[i];
+
+            // use the toal number photons for nbFrames or not ?
+            biasV2[i] = (nbPhot + nbPixInterf * FastMath.pow2(ron)) / FastMath.pow2(nbPhot);
+            // repeat OBS measurements to reach totalObsTime minutes:
+            biasV2[i] *= totFrameCorrection;
         }
 
         if (logger.isDebugEnabled()) {
@@ -974,7 +993,29 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("sqCorFluxCoef                 : {}", Arrays.toString(sqCorFluxCoef));
             logger.debug("varSqCorFluxCoef              : {}", Arrays.toString(varSqCorFluxCoef));
             logger.debug("varSqCorFluxConst             : {}", Arrays.toString(varSqCorFluxConst));
+            logger.debug("biasV2                        : {}", Arrays.toString(biasV2));
         }
+    }
+
+    /**
+     * Return the bias on V2
+     * It returns 0 if the photometry is not available
+     *
+     * @param iPoint index of the observable point
+     * @param iChannel index of the channel
+     * @return bias on V2 or 0 if the photometry is not available
+     */
+    public double computeVis2Bias(final int iPoint, final int iChannel) {
+        if (DO_CHECKS) {
+            // fast return NaN if invalid configuration :
+            if (this.invalidParameters) {
+                return Double.NaN;
+            }
+            if (check(iPoint, iChannel)) {
+                return Double.NaN;
+            }
+        }
+        return this.params[iPoint].biasV2[iChannel];
     }
 
     /**
@@ -1022,7 +1063,7 @@ public final class NoiseService implements VisNoiseService {
         double errVis2;
         if (usePhotometry) {
             // TODO: howto deal with beams ? ie what is the impact of 1 vs 4 beams ?
-                errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)) + param.sqErrVis2Phot[iChannel]);
+            errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)) + param.sqErrVis2Phot[iChannel]);
         } else {
             // no photometry...
             errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)));
@@ -1055,6 +1096,9 @@ public final class NoiseService implements VisNoiseService {
      * @deprecated 
      */
     private void prepareT3PhiError(final int iPoint) {
+        if (!OIFitsCreatorService.DEBUG && USE_DISTRIB_APPROACH) {
+            return;
+        }
         final int nWLen = nSpectralChannels;
 
         final NoiseWParams param = this.params[iPoint];
@@ -1112,6 +1156,10 @@ public final class NoiseService implements VisNoiseService {
      */
     public double computeT3PhiError(final int iPoint, final int iChannel,
                                     final double visAmp12, final double visAmp23, final double visAmp31) {
+        if (!OIFitsCreatorService.DEBUG && USE_DISTRIB_APPROACH) {
+            logger.info("computeT3PhiError: Unsupported for distributed approach.");
+            return Double.NaN;
+        }
         if (DO_CHECKS) {
             // fast return NaN if invalid configuration :
             if (this.invalidParameters) {
@@ -1389,6 +1437,9 @@ public final class NoiseService implements VisNoiseService {
         final double[] varSqCorFluxCoef;
         /** (W) constant used to compute variance of the squared correlated flux */
         final double[] varSqCorFluxConst;
+
+        final double[] biasV2;
+
         /** (W) t3 phi error - coefficient */
         final double[] t3photCoef;
         /** (W) t3 phi error - coefficient^2 */
@@ -1410,6 +1461,7 @@ public final class NoiseService implements VisNoiseService {
             this.sqCorFluxCoef = init(nWLen);
             this.varSqCorFluxCoef = init(nWLen);
             this.varSqCorFluxConst = init(nWLen);
+            this.biasV2 = init(nWLen);
             this.t3photCoef = init(nWLen);
             this.t3photCoef2 = init(nWLen);
             this.t3photCoef3 = init(nWLen);
