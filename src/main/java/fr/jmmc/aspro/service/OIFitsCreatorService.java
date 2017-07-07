@@ -194,17 +194,17 @@ public final class OIFitsCreatorService {
      * @param warningContainer container for warning messages
      */
     protected OIFitsCreatorService(final ObservationSetting observation,
-                                   final Target target,
-                                   final List<Beam> beams,
-                                   final List<BaseLine> baseLines,
-                                   final boolean useInstrumentBias,
-                                   final boolean doDataNoise,
-                                   final int supersamplingOIFits,
-                                   final UserModelService.MathMode mathModeOIFits,
-                                   final TargetPointInfo[] targetPointInfos,
-                                   final List<UVRangeBaseLineData> targetUVObservability,
-                                   final AstroSkyCalc sc,
-                                   final WarningContainer warningContainer) {
+            final Target target,
+            final List<Beam> beams,
+            final List<BaseLine> baseLines,
+            final boolean useInstrumentBias,
+            final boolean doDataNoise,
+            final int supersamplingOIFits,
+            final UserModelService.MathMode mathModeOIFits,
+            final TargetPointInfo[] targetPointInfos,
+            final List<UVRangeBaseLineData> targetUVObservability,
+            final AstroSkyCalc sc,
+            final WarningContainer warningContainer) {
 
         this.target = target;
         this.beams = beams;
@@ -727,7 +727,7 @@ public final class OIFitsCreatorService {
 
         Position3D position = this.interferometer.getPosition();
 
-        oiArray.setArrayXYZ(new double[]{position.getPosX(), position.getPosY(), position.getPosZ()});
+        oiArray.setArrayXYZ(position.getPosX(), position.getPosY(), position.getPosZ());
 
         // Stations :
         int i = 0;
@@ -745,7 +745,8 @@ public final class OIFitsCreatorService {
             // TODO : rotate the horizontal position to geocentric :
             position = station.getRelativePosition();
 
-            oiArray.getStaXYZ()[i] = new double[]{position.getPosX(), position.getPosY(), position.getPosZ()};
+            //MAYBE DONT RUN
+            oiArray.setStaXYZ(i, position.getPosX(), position.getPosY(), position.getPosZ());
 
             i++;
         }
@@ -776,7 +777,7 @@ public final class OIFitsCreatorService {
 
         // Radial velocity :
         if (this.target.getSYSVEL() != null) {
-            // convert km/s in m/s :
+            // toShort km/s in m/s :
             oiTarget.getSysVel()[0] = this.target.getSYSVEL().doubleValue() * 1e3;
         }
         oiTarget.getVelTyp()[0] = OIFitsConstants.UNKNOWN_VALUE;
@@ -785,7 +786,7 @@ public final class OIFitsCreatorService {
 
         // Proper motion :
         if (this.target.getPMRA() != null && this.target.getPMDEC() != null) {
-            // convert mas/year in deg/year :
+            // toShort mas/year in deg/year :
             oiTarget.getPmRa()[0] = this.target.getPMRA().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES;
             oiTarget.getPmDec()[0] = this.target.getPMDEC().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES;
         }
@@ -796,7 +797,7 @@ public final class OIFitsCreatorService {
 
         // Parallax :
         if (this.target.getPARALLAX() != null && this.target.getPARAERR() != null) {
-            // convert mas in deg :
+            // toShort mas in deg :
             oiTarget.getParallax()[0] = (float) (this.target.getPARALLAX().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES);
             oiTarget.getParaErr()[0] = (float) (this.target.getPARAERR().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES);
         }
@@ -1162,7 +1163,7 @@ public final class OIFitsCreatorService {
 
             // Super sampling ?
             if (sampleWaveLengths == this.waveLengths) {
-                // Simple convert array:
+                // Simple toShort array:
                 // Iterate on rows :
                 for (int k = 0; k < nRows; k++) {
                     // Simple copy array:
@@ -1758,7 +1759,7 @@ public final class OIFitsCreatorService {
                                 visAmp[k][l] = vamp;
                                 visAmpErr[k][l] = errAmp;
 
-                                // convert errPhi in degrees :
+                                // toShort errPhi in degrees :
                                 visPhi[k][l] = FastMath.toDegrees(vphi);
                                 visPhiErr[k][l] = FastMath.toDegrees(errPhi);
 
@@ -2388,7 +2389,7 @@ public final class OIFitsCreatorService {
                         t3Amp[k][l] = t3amp;
                         t3AmpErr[k][l] = errAmp;
 
-                        // convert errPhi in degrees :
+                        // toShort errPhi in degrees :
                         t3Phi[k][l] = FastMath.toDegrees(t3phi);
                         t3PhiErr[k][l] = FastMath.toDegrees(errPhi);
 
@@ -2742,7 +2743,7 @@ public final class OIFitsCreatorService {
 
     /**
      * Return the given wavelength rounded in microns
-     * @param wl wavelength to convert
+     * @param wl wavelength to toShort
      * @return given wavelength rounded in microns
      */
     private static double convertWL(final double wl) {
