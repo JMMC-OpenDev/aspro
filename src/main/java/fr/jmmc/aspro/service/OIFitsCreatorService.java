@@ -1912,7 +1912,7 @@ public final class OIFitsCreatorService {
                             // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
                             errCVis = visError[k][l];
 
-                            if (true || this.doNoise) {
+                            if (this.doNoise) {
                                 bias = ns.computeVis2Bias(i, l);
                                 // Remove v2 bias:
                                 v2 -= bias;
@@ -1929,16 +1929,7 @@ public final class OIFitsCreatorService {
                                 re = visRe + (errCVis * distRe[n]);
                                 im = visIm + (errCVis * distIm[n]);
 
-//                  biased_CV = amdlibPow2(R[nbGoodFrames]) + amdlibPow2(I[nbGoodFrames]);
-                                /* bias: see formula AMB-IGR-019 number 36 */
-//                    bias = sigma2_R[nbGoodFrames] + sigma2_I[nbGoodFrames];
-                                /*
-                     * <R^2 + I^2 - bias>_fram =
-                     * <R^2>_fram + <I^2>_fram - <bias>_fram averaged =
-                     * <C^2 - bias>
-                                 */
-//                    unbiased_CV[nbGoodFrames] = biased_CV - bias;
-                                // compute unbiased V2 = re^2 + im^2 - 2 * varCVis:
+                                // compute unbiased V2 = re^2 + im^2 - bias:
                                 sample = re * re + im * im - bias;
                                 v2_samples[n] = sample;
 
@@ -1960,7 +1951,7 @@ public final class OIFitsCreatorService {
 
                             if (DEBUG) {
                                 // square visibility error :
-                                v2Err = ns.computeVis2Error(i, l, Math.sqrt(v2)); // TODO: KILL
+                                v2Err = ns.computeVis2Error(i, l, Math.sqrt(v2));
 
                                 logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_v2_mean / s_v2_err) + " V2"
                                         + " (err(re,im)= " + errCVis + ")"
