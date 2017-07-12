@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:observingBlockDefinition xmlns:a="http://www.jmmc.fr/aspro-ob/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <schemaVersion>2017.0</schemaVersion>
+    <interferometerConfiguration>
+        <name>VLTI</name>
+        <stations>UT1 UT2 UT3 UT4</stations>
+    </interferometerConfiguration>
+    <instrumentConfiguration>
+        <name>GRAVITY</name>
+        <instrumentMode>MEDIUM-SPLIT</instrumentMode>
+    </instrumentConfiguration>
+    <observationConfiguration id="SCI_UY_Aur">
+        <type>SCIENCE</type>
+        <SCTarget>
+            <name>UY Aur</name>
+            <RA>10:10 ...</RA>
+            <DEC>-57:10 ...</DEC>
+            <EQUINOX>0.0</EQUINOX>
+        </SCTarget>
+        <observationConstraints>
+            <LSTinterval>14:33/18:22</LSTinterval>
+        </observationConstraints>
+    </observationConfiguration>
+    <observationConfiguration id="CAL_UY_Aur">
+        <type>CALIBRATION</type>
+        <SCTarget>
+            <name>CALIB UY Aur</name>
+            <RA>12:10 ...</RA>
+            <DEC>-58:10 ...</DEC>
+            <EQUINOX>0.0</EQUINOX>
+        </SCTarget>
+        <observationConstraints>
+            <LSTinterval>14:20/19:03</LSTinterval>
+        </observationConstraints>
+    </observationConfiguration>
+    <observationSchedule>
+        <OB ref="CAL_UY_Aur"/>
+        <OB ref="SCI_UY_Aur"/>
+        <OB ref="CAL_UY_Aur"/>
+    </observationSchedule>
+</a:observingBlockDefinition>
