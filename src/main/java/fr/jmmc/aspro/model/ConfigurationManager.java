@@ -66,6 +66,8 @@ public final class ConfigurationManager extends BaseOIManager {
     private static final String CONF_FILE = "AsproOIConfigurations.xml";
     /** singleton pattern */
     private static volatile ConfigurationManager instance = null;
+    /** empty vector */
+    private final static Vector<String> EMPTY_VECTOR = new Vector<String>(0);
 
     /* members */
     /** aspro conf description (version and release notes) */
