@@ -194,12 +194,17 @@ def parseXmlMessage(e, api, list): #e is parsedTree.
         if OBJTYPE=='CALIBRATOR':
            DIAMETER=float(scienceTarget.find('DIAMETER').text)
            VIS=1.0 #FIXME
+        # initialize FT variables (must exist)
         FTRA=""
-        FRDEC="" #these variables must exist
+        FTDEC=""
+        SEQ_FT_ROBJ_NAME=""
+        SEQ_FT_ROBJ_MAG=-99.99
+        SEQ_FT_ROBJ_DIAMETER=-1.0
+        SEQ_FT_ROBJ_VIS=-1.0
+
         # if FT Target is not ScTarget, we are in dual-field (TBD)
         try:
             ftTarget=observationConfiguration.find('FTTarget')
-            dualField=True
             SEQ_FT_ROBJ_NAME=ftTarget.find('name').text
             FTRA=ftTarget.find('RA').text
             w=FTRA.rfind('.')
@@ -217,14 +222,15 @@ def parseXmlMessage(e, api, list): #e is parsedTree.
             SEQ_FT_ROBJ_MAG=SEQ_FI_HMAG
             SEQ_FT_ROBJ_DIAMETER=0.0 #FIXME
             SEQ_FT_ROBJ_VIS=1.0      #FIXME
+            dualField=True
         except:
             print('No FT')
             
         #AO target
         try:
             aoTarget=observationConfiguration.find('AOTarget')
-            COU_AG_GSSOURCE='SETUPFILE' #since we have an AO
             AONAME=aoTarget.find('name').text
+            COU_AG_GSSOURCE='SETUPFILE' #since we have an AO
             AORA=aoTarget.find('RA').text
             w=AORA.rfind('.')
             l=len(AORA)
@@ -242,8 +248,8 @@ def parseXmlMessage(e, api, list): #e is parsedTree.
 
         try:
             gsTarget=observationConfiguration.find('GSTarget')
-            COU_AG_SOURCE='SETUPFILE' #since we have an GS
             GSNAME=gsTarget.find('name').text
+            COU_AG_SOURCE='SETUPFILE' #since we have an GS
             GSRA=gsTarget.find('RA').text
             w=GSRA.rfind('.')
             l=len(GSRA)
@@ -264,11 +270,11 @@ def parseXmlMessage(e, api, list): #e is parsedTree.
 #    print(NAME, SCRA,SCDEC,PMRA,PMDEC,COU_GS_MAG,SEQ_INS_SOBJ_MAG,SEQ_FI_HMAG)
     
     #then call the ob-creation using the API.
-    createGravityOB(api,containerId, OBJTYPE, NAME, BASELINE, instrumentMode, SCRA, SCDEC, PMRA, PMDEC, SEQ_INS_SOBJ_MAG, SEQ_FI_HMAG, DIAMETER, COU_AG_GSSOURCE, GSRA, GSDEC, COU_GS_MAG, COU_AG_PMA, COU_AG_PMD, dualField, FTRA, FTDEC, SEQ_FT_ROBJ_NAME, SEQ_FT_ROBJ_MAG, SEQ_FT_ROBJ_DIAMETER, SEQ_FT_ROBJ_VIS )        
+    createGravityOB(api, containerId, OBJTYPE, NAME, BASELINE, instrumentMode, SCRA, SCDEC, PMRA, PMDEC, SEQ_INS_SOBJ_MAG, SEQ_FI_HMAG, DIAMETER, COU_AG_GSSOURCE, GSRA, GSDEC, COU_GS_MAG, COU_AG_PMA, COU_AG_PMD, dualField, FTRA, FTDEC, SEQ_FT_ROBJ_NAME, SEQ_FT_ROBJ_MAG, SEQ_FT_ROBJ_DIAMETER, SEQ_FT_ROBJ_VIS )        
 
 
 #define function creating the OB:
-def createGravityOB(api,containerId, OBJTYPE, NAME, BASELINE, instrumentMode, SCRA, SCDEC, PMRA, PMDEC, SEQ_INS_SOBJ_MAG, SEQ_FI_HMAG, DIAMETER, COU_AG_GSSOURCE, GSRA, GSDEC, COU_GS_MAG, COU_AG_PMA, COU_AG_PMD, dualField, FTRA, FTDEC, SEQ_FT_ROBJ_NAME, SEQ_FT_ROBJ_MAG, SEQ_FT_ROBJ_DIAMETER, SEQ_FT_ROBJ_VIS):
+def createGravityOB(api, containerId, OBJTYPE, NAME, BASELINE, instrumentMode, SCRA, SCDEC, PMRA, PMDEC, SEQ_INS_SOBJ_MAG, SEQ_FI_HMAG, DIAMETER, COU_AG_GSSOURCE, GSRA, GSDEC, COU_GS_MAG, COU_AG_PMA, COU_AG_PMD, dualField, FTRA, FTDEC, SEQ_FT_ROBJ_NAME, SEQ_FT_ROBJ_MAG, SEQ_FT_ROBJ_DIAMETER, SEQ_FT_ROBJ_VIS):
     
     VISIBILITY=1.0
     #if Dualfield and offset between fields is > 7000, complain and do Nothing
@@ -533,7 +539,11 @@ try:
             if api is None:
                 pass
             else:
-                e = xml.etree.ElementTree.parse(r.params['url'])
+                ob_url=r.params['url']
+                if ob_url.startswith("file:") :
+                    ob_url=ob_url[5:]
+                print("ob_url: ", ob_url)
+                e = xml.etree.ElementTree.parse(ob_url)
                 parseXmlMessage(e,api,containerInfo)
             r.received=False
         if flag[0]==1:
