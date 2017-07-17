@@ -1,3 +1,4 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
 import fr.jmmc.jmal.model.targetmodel.Model;
+
 
 /**
  * 
@@ -99,7 +101,8 @@ import fr.jmmc.jmal.model.targetmodel.Model;
     "calibratorInfos"
 })
 public class Target
-        extends OIBase {
+    extends OIBase
+{
 
     @XmlElement(required = true)
     protected String name;
@@ -878,7 +881,7 @@ public class Target
     public void setId(String value) {
         this.id = value;
     }
-
+    
 //--simple--preserve
     /**
      * Fix coordinates RA and DEC (HMS / DMS formats)
@@ -1551,4 +1554,5 @@ public class Target
     }
 
 //--simple--preserve
+
 }
