@@ -18,6 +18,7 @@ import fr.jmmc.aspro.gui.action.TargetEditorAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
 import fr.jmmc.aspro.interop.SearchCalQueryAction;
+import fr.jmmc.aspro.interop.SendOBAction;
 import fr.jmmc.aspro.interop.SendOIFitsAction;
 import fr.jmmc.aspro.interop.SendVOTableAction;
 import fr.jmmc.aspro.interop.StarListSendAction;
@@ -320,9 +321,11 @@ public final class Aspro2 extends App {
         // export VOTable:
         new ExportVOTableAction();
         // export OB :
-        new ExportOBAction();
+        new ExportOBAction(false);
+        new ExportOBAction(true);
         // export ALl OB :
-        new ExportAllOBAction();
+        new ExportAllOBAction(false);
+        new ExportAllOBAction(true);
         // export actions:
         new AsproExportAction(MimeType.PDF);
         new AsproExportAction(MimeType.PNG);
@@ -347,6 +350,9 @@ public final class Aspro2 extends App {
 
         // Send VOTable (SAMP) :
         new SendVOTableAction();
+        
+        // Send OB (SAMP) :
+        new SendOBAction();
 
         // Help menu:
         new ShowReleaseNotesAction("showConf", "Aspro2 Configuration " + ConfigurationManager.getInstance().getConfDescription().getProgramVersion(), ConfigurationManager.getInstance().getConfDescription());

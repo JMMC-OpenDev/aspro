@@ -31,159 +31,155 @@ import org.slf4j.LoggerFactory;
  */
 public final class ExportOBVLTIAction {
 
-  /** default serial UID for Serializable interface */
-  private static final long serialVersionUID = 1;
-  /** Class logger */
-  private static final Logger logger = LoggerFactory.getLogger(ExportOBVLTIAction.class.getName());
-  /** double formatter for min elevation */
-  private final static NumberFormat df1 = new DecimalFormat("0.#");
-  /** OBX MimeType */
-  private final static MimeType mimeType = MimeType.OBX;
-  /** Eso warning message */
-  public static final String ESO_WARNING = "Please check that your observing blocks \n conform to the current ESO Call for Proposal \n (object magnitudes, instrument limits ...)";
-  /** action singleton */
-  private static final ExportOBVLTIAction instance = new ExportOBVLTIAction();
+    /** Class logger */
+    private static final Logger logger = LoggerFactory.getLogger(ExportOBVLTIAction.class.getName());
+    /** double formatter for min elevation */
+    private final static NumberFormat DF1 = new DecimalFormat("0.#");
+    /** OBX MimeType */
+    private final static MimeType MIMETYPE = MimeType.OBX;
+    /** Eso warning message */
+    public static final String ESO_WARNING = "Please check that your observing blocks \n conform to the current ESO Call for Proposal \n (object magnitudes, instrument limits ...)";
+    /** action singleton */
+    private static final ExportOBVLTIAction INSTANCE = new ExportOBVLTIAction();
 
-  /**
-   * Return the singleton ExportOBVLTIAction instance
-   * @return ExportOBVLTIAction instance
-   */
-  public static ExportOBVLTIAction getInstance() {
-    return instance;
-  }
-
-  /**
-   * Forbidden Constructor
-   */
-  private ExportOBVLTIAction() {
-    super();
-  }
-
-  /**
-   * Execute the action.
-   *
-   * @param targets list of targets to export as VLTI Observing blocks
-   */
-  public void process(final List<Target> targets) {
-    logger.debug("process");
-
-    if (targets.isEmpty()) {
-      return;
+    /**
+     * Return the singleton instance
+     * @return singleton instance
+     */
+    public static ExportOBVLTIAction getInstance() {
+        return INSTANCE;
     }
 
-    final boolean exportAll = targets.size() > 1;
-
-    File file;
-
-    if (exportAll) {
-      file = FileChooser.showDirectoryChooser("Export targets as Observing Blocks", null, mimeType);
-    } else {
-      final Target target = targets.get(0);
-
-      file = FileChooser.showSaveFileChooser("Export the target [" + target.getName() + "] as an Observing Block", null, mimeType, ExportOBVLTI.generateOBFileName(target));
+    /**
+     * Forbidden Constructor
+     */
+    private ExportOBVLTIAction() {
+        super();
     }
 
-    logger.debug("Selected file: {}", file);
+    /**
+     * Execute the action.
+     *
+     * @param targets list of targets to export as VLTI Observing blocks
+     */
+    public void process(final List<Target> targets) {
+        logger.debug("process");
 
-    // If a file was defined (No cancel in the dialog)
-    if (file != null) {
-      final String directory = (exportAll) ? file.getPath() : file.getParent();
-
-      // report buffer :
-      final StringBuilder sb = new StringBuilder(1024);
-
-      // use main observation :
-      final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
-      final double minElev = observation.getInterferometerConfiguration().getMinElevation();
-
-      try {
-
-        // Compute Observability data using astronomical night (-18 deg)
-        // (date and night restrictions depend on the current observation) :
-        final ObservabilityService os = new ObservabilityService(observation);
-
-        // compute observability data:
-        os.compute();
-        
-        final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
-
-        if (exportAll) {
-
-          // report buffer :
-          sb.append("Observing Blocks exported for all targets with following settings:\n");
-          sb.append("  - minimum elevation set to ").append(df1.format(minElev)).append(" deg\n");
-          sb.append("  - output folder :\n").append(directory).append("\n\n");
-
-          // Export all SCI/CAL OBs:
-          for (Target target : targets) {
-            file = new File(directory, ExportOBVLTI.generateOBFileName(target));
-
-            ExportOBVLTI.process(file, observation, os, target);
-
-            sb.append(file.getName()).append('\n');
-          }
-          
-          // Export concatenation OBs:
-          for (Target target : targets) {
-            file = new File(directory, ExportOBVLTI.generateOBFileName(target));
-            
-            final String conFileName = ExportOBVLTI.generateConcatenation(file, targetUserInfos, target);
-            if (conFileName != null) {
-                sb.append(conFileName).append('\n');
-            }            
-          }
-
-          StatusBar.show("Observing blocks saved in " + directory + ".");
-
-        } else {
-          final File mainFile = new File(directory, ExportOBVLTI.fixFileName(file.getName()) 
-                  + '.' + MimeType.OBX.getExtension());
-          final Target target = targets.get(0);
-
-          // report buffer :
-          sb.append("Observing Blocks exported for target [").append(target.getName()).append("] with following settings:\n");
-          sb.append("  - minimum elevation set to ").append(df1.format(minElev)).append(" deg\n");
-          sb.append("  - output folder :\n").append(directory).append("\n\n");
-
-          ExportOBVLTI.process(mainFile, observation, os, target);
-
-          sb.append(mainFile.getName()).append('\n');
-
-          // Generate all calibrator OBs for a science target :
-
-          if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
-            final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
-            if (targetInfo != null) {
-              final List<Target> calibrators = targetInfo.getCalibrators();
-
-              if (!calibrators.isEmpty()) {
-                for (Target calibrator : calibrators) {
-                  file = new File(directory, ExportOBVLTI.generateOBFileName(calibrator));
-
-                  ExportOBVLTI.process(file, observation, os, calibrator);
-                  sb.append(file.getName()).append('\n');
-                }
-                
-                final String conFileName = ExportOBVLTI.generateConcatenation(mainFile, targetUserInfos, target);
-                if (conFileName != null) {
-                    sb.append(conFileName).append('\n');
-                }
-              }
-            }
-          }
-
-          StatusBar.show(mainFile.getName() + " created.");
+        if (targets.isEmpty()) {
+            return;
         }
 
-        // display report message :
-        MessagePane.showMessage(sb.toString());
+        final boolean exportAll = targets.size() > 1;
 
-        // PoP up to validate OB file against ESO CfP :
-        DismissableMessagePane.show(ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
+        File file;
 
-      } catch (IOException ioe) {
-        MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
-      }
+        if (exportAll) {
+            file = FileChooser.showDirectoryChooser("Export targets as Observing Blocks", null, MIMETYPE);
+        } else {
+            final Target target = targets.get(0);
+
+            file = FileChooser.showSaveFileChooser("Export the target [" + target.getName() + "] as an Observing Block", null, MIMETYPE, ExportOBVLTI.generateOBFileName(target));
+        }
+
+        logger.debug("Selected file: {}", file);
+
+        // If a file was defined (No cancel in the dialog)
+        if (file != null) {
+            final String directory = (exportAll) ? file.getPath() : file.getParent();
+
+            // report buffer :
+            final StringBuilder sb = new StringBuilder(1024);
+
+            // use main observation :
+            final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+            final double minElev = observation.getInterferometerConfiguration().getMinElevation();
+
+            try {
+
+                // Compute Observability data using astronomical night (-18 deg)
+                // (date and night restrictions depend on the current observation) :
+                final ObservabilityService os = new ObservabilityService(observation);
+
+                // compute observability data:
+                os.compute();
+
+                final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
+
+                if (exportAll) {
+                    // report buffer :
+                    sb.append("Observing Blocks exported for all targets with following settings:\n");
+                    sb.append("  - minimum elevation set to ").append(DF1.format(minElev)).append(" deg\n");
+                    sb.append("  - output folder :\n").append(directory).append("\n\n");
+
+                    // Export all SCI/CAL OBs:
+                    for (Target target : targets) {
+                        file = new File(directory, ExportOBVLTI.generateOBFileName(target));
+
+                        ExportOBVLTI.process(file, observation, os, target);
+
+                        sb.append(file.getName()).append('\n');
+                    }
+
+                    // Export concatenation OBs:
+                    for (Target target : targets) {
+                        file = new File(directory, ExportOBVLTI.generateOBFileName(target));
+
+                        final String conFileName = ExportOBVLTI.generateConcatenation(file, targetUserInfos, target);
+                        if (conFileName != null) {
+                            sb.append(conFileName).append('\n');
+                        }
+                    }
+
+                    StatusBar.show("Observing blocks saved in " + directory + ".");
+
+                } else {
+                    final File mainFile = new File(directory, ExportOBVLTI.fixFileName(file.getName())
+                            + '.' + MIMETYPE.getExtension());
+                    final Target target = targets.get(0);
+
+                    // report buffer :
+                    sb.append("Observing Blocks exported for target [").append(target.getName()).append("] with following settings:\n");
+                    sb.append("  - minimum elevation set to ").append(DF1.format(minElev)).append(" deg\n");
+                    sb.append("  - output folder :\n").append(directory).append("\n\n");
+
+                    ExportOBVLTI.process(mainFile, observation, os, target);
+
+                    sb.append(mainFile.getName()).append('\n');
+
+                    // Generate all calibrator OBs for a science target :
+                    if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
+                        final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
+                        if (targetInfo != null) {
+                            final List<Target> calibrators = targetInfo.getCalibrators();
+
+                            if (!calibrators.isEmpty()) {
+                                for (Target calibrator : calibrators) {
+                                    file = new File(directory, ExportOBVLTI.generateOBFileName(calibrator));
+
+                                    ExportOBVLTI.process(file, observation, os, calibrator);
+                                    sb.append(file.getName()).append('\n');
+                                }
+
+                                final String conFileName = ExportOBVLTI.generateConcatenation(mainFile, targetUserInfos, target);
+                                if (conFileName != null) {
+                                    sb.append(conFileName).append('\n');
+                                }
+                            }
+                        }
+                    }
+
+                    StatusBar.show(mainFile.getName() + " created.");
+                }
+
+                // display report message :
+                MessagePane.showMessage(sb.toString());
+
+                // PoP up to validate OB file against ESO CfP :
+                DismissableMessagePane.show(ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
+
+            } catch (IOException ioe) {
+                MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
+            }
+        }
     }
-  }
 }

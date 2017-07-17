@@ -11,7 +11,6 @@ import fr.jmmc.jmcs.service.XslTransform;
 import fr.jmmc.jmcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,9 +55,8 @@ public class SendVOTableAction extends SampCapabilityAction {
         URI uri;
         File file = null;
         try {
-            file = File.createTempFile("votable-", ".vot");
+            file = FileUtils.getTempFile("votable-", ".vot");
 
-            file.deleteOnExit();
             uri = file.toURI();
 
             // Save the VOTable:

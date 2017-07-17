@@ -9,6 +9,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
+import fr.jmmc.aspro.gui.action.ExportOBXmlAction;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.EnhancedXYLineAnnotation;
 import fr.jmmc.aspro.gui.chart.ExtendedXYTextAnnotation;
@@ -620,8 +621,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * Export Observing Block(s) (OB)
      * @param evt action event
      * @param mode export OB mode
+     * @param xml true to use new OB output
      */
-    public void performOBAction(final ActionEvent evt, final ExportOBMode mode) {
+    public void performOBAction(final ActionEvent evt, final ExportOBMode mode, final boolean xml) {
 
         // Use main observation to check instrument :
         final ObservationSetting observation = om.getMainObservation();
@@ -631,35 +633,44 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             return;
         }
 
-        final String insName = observation.getInstrumentConfiguration().getName();
-
-        if (AsproConstants.INS_AMBER.equals(insName)
-                || AsproConstants.INS_MIDI.equals(insName)
-                || insName.startsWith(AsproConstants.INS_PIONIER)
-                || insName.startsWith(AsproConstants.INS_GRAVITY)) {
-
-            // set the source with this instance :
-            evt.setSource(this);
-
+        if (xml) {
             switch (mode) {
                 case ALL:
-                    ExportOBVLTIAction.getInstance().process(observation.getTargets());
+                    ExportOBXmlAction.getInstance().process(observation.getTargets());
                     break;
                 case SINGLE:
                     final Target target = getSelectedTarget();
                     if (target != null) {
-                        ExportOBVLTIAction.getInstance().process(Arrays.asList(new Target[]{target}));
+                        ExportOBXmlAction.getInstance().process(Arrays.asList(new Target[]{target}));
                     }
                     break;
                 default:
             }
-
-        } else if (insName.startsWith(AsproConstants.INS_VEGA)) {
-
-            ExportOBVegaAction.getInstance().process();
-
         } else {
-            MessagePane.showMessage("Aspro 2 can not generate an Observing Block for this instrument [" + insName + "] !");
+            final String insName = observation.getInstrumentConfiguration().getName();
+
+            if (AsproConstants.INS_AMBER.equals(insName)
+                    || AsproConstants.INS_MIDI.equals(insName)
+                    || insName.startsWith(AsproConstants.INS_PIONIER)
+                    || insName.startsWith(AsproConstants.INS_GRAVITY)) {
+
+                switch (mode) {
+                    case ALL:
+                        ExportOBVLTIAction.getInstance().process(observation.getTargets());
+                        break;
+                    case SINGLE:
+                        final Target target = getSelectedTarget();
+                        if (target != null) {
+                            ExportOBVLTIAction.getInstance().process(Arrays.asList(new Target[]{target}));
+                        }
+                        break;
+                    default:
+                }
+            } else if (insName.startsWith(AsproConstants.INS_VEGA)) {
+                ExportOBVegaAction.getInstance().process();
+            } else {
+                MessagePane.showMessage("Aspro 2 can not generate an Observing Block for this instrument [" + insName + "] !");
+            }
         }
     }
 

@@ -253,7 +253,7 @@ public final class ObservabilityService {
     }
 
     /**
-     * Specific Constructor to prepare VLTI Observing blocks (LST)
+     * Specific Constructor to prepare VLTI Observing blocks (LST) using astronomical night (-18 deg)
      * Note : This service is statefull so it can not be reused by several calls.
      *
      * @param observation observation settings

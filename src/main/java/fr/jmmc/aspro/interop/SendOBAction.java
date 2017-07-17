@@ -3,10 +3,11 @@
  ******************************************************************************/
 package fr.jmmc.aspro.interop;
 
-import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.ob.ExportOBXml;
+import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.network.interop.SampCapability;
 import fr.jmmc.jmcs.network.interop.SampCapabilityAction;
@@ -19,28 +20,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This action sends the starlist to Pivot
+ * This registered action represents an Interop Menu entry to
+ * send generated OB data to the A2P2 tool (python wrapper to ESO p2web) ...
  *
- * @author bourgesl
+ * @author LAURENT BOURGES
  */
-public final class StarListSendAction extends SampCapabilityAction {
+public final class SendOBAction extends SampCapabilityAction {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
     /** Class name. This name is used to register to the ActionRegistrar */
-    private final static String className = StarListSendAction.class.getName();
+    private final static String CLASS_NAME = SendOBAction.class.getName();
     /** Action name. This name is used to register to the ActionRegistrar */
-    public final static String actionName = "starListSendAction";
+    private final static String ACTION_NAME = "sendOBAction";
     /** Class logger */
-    private static final Logger logger = LoggerFactory.getLogger(className);
-    /** SAMP Parameter 'starlist' */
-    public final static String PARAM_STAR_LIST = "starlist";
+    private static final Logger logger = LoggerFactory.getLogger(CLASS_NAME);
 
     /**
      * Public constructor that automatically register the action in RegisteredAction.
      */
-    public StarListSendAction() {
-        super(className, actionName, SampCapability.LOAD_STAR_LIST);
+    public SendOBAction() {
+        super(CLASS_NAME, ACTION_NAME, SampCapability.LOAD_OB_DATA);
     }
 
     /**
@@ -51,7 +51,6 @@ public final class StarListSendAction extends SampCapabilityAction {
     public Map<?, ?> composeMessage() {
         Map<String, String> parameters = null;
 
-        // Test if chara is the interferometer:
         // Use main observation to check instrument :
         final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
@@ -60,24 +59,31 @@ public final class StarListSendAction extends SampCapabilityAction {
             return null;
         }
 
-        final String insName = observation.getInstrumentConfiguration().getName();
+        // retrieve the selected target from its name:
+        final Target target = observation.getTarget(observation.getSelectedTargetName());
 
-        if (insName.startsWith(AsproConstants.INS_VEGA)) {
-            final File file = FileUtils.getTempFile("starlist.txt");
-            try {
+        if (target == null) {
+            return null;
+        }
 
-                ExportOBVegaAction.process(file);
+        logger.info("composeMessage: target = {}", target);
 
-                parameters = new HashMap<String, String>(4);
-                parameters.put(PARAM_STAR_LIST, file.toURI().toString());
+        // Compute Observability data using astronomical night (-18 deg) without night restrictions :
+        final ObservabilityService os = ExportOBXml.processObservability(observation);
 
-                logger.debug("parameters = \n{}", parameters);
+        final File file = FileUtils.getTempFile("ob-", ".obxml");
+        try {
+            ExportOBXml.process(file, observation, os, target);
 
-            } catch (IOException ioe) {
-                MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
-            }
-        } else {
-            MessagePane.showMessage("Aspro 2 can only send a star list for the VEGA instrument !");
+            parameters = new HashMap<String, String>(4);
+            parameters.put("url", file.toURI().toString());
+
+            logger.debug("parameters = \n{}", parameters);
+
+            logger.info("composeMessage: parameters = {}", parameters);
+
+        } catch (IOException ioe) {
+            MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
         }
 
         return parameters;

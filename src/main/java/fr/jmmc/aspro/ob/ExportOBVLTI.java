@@ -57,9 +57,9 @@ public class ExportOBVLTI {
     /** P2PP file prefix for concatenation containers */
     public static final String OB_CONCAT = "CON";
     /** P2PP LST margin in seconds = 2 minutes */
-    public static final int P2PP_LST_MARGIN = 2; 
+    public static final int P2PP_LST_MARGIN = 2;
     /** P2PP minimal duration = 10 minutes */
-    public static final int P2PP_LST_MIN_DURATION = 10; 
+    public static final int P2PP_LST_MIN_DURATION = 10;
     /** double formatter for magnitudes */
     protected final static NumberFormat df1 = new DecimalFormat("0.0");
     /** double formatter for magnitudes */
@@ -483,19 +483,19 @@ public class ExportOBVLTI {
 
         cal.setTime(end);
         final int sec2 = convertDateToSeconds(cal, -1); // round down
-        
+
         if (end.before(start)) {
             // single interval over midnight splitted into two intervals:
             if (((86400 + sec2) - sec1) > (P2PP_LST_MIN_DURATION * 60)) {
                 valid = true;
-                
+
                 sb.append("{0 ").append(sec2).append(" 0}");     //  from midnight [00:00]
                 sb.append('{').append(sec1).append(" 86400 0}"); // until midnight [00:00]
             }
         } else {
             if ((sec2 - sec1) > (P2PP_LST_MIN_DURATION * 60)) {
                 valid = true;
-                
+
                 sb.append('{').append(sec1).append(' ').append(sec2).append(" 0}");
             }
         }
@@ -586,8 +586,8 @@ public class ExportOBVLTI {
         final boolean useFT = (targetConf != null && targetConf.getFringeTrackerMode() != null);
 
         final String suffix = StringUtils.removeUnderscores(insMode.getName()) + '_' + (useFT ? "FT" : "noFT");
-        final String prefix = (customPrefix != null) ? customPrefix : 
-                (om.isCalibrator(target) ? OB_CALIBRATOR : OB_SCIENCE);
+        final String prefix = (customPrefix != null) ? customPrefix
+                : (om.isCalibrator(target) ? OB_CALIBRATOR : OB_SCIENCE);
 
         return generateFileName(observation, target.getName(), prefix, suffix, MimeType.OBX.getExtension());
     }
@@ -606,7 +606,7 @@ public class ExportOBVLTI {
     private static String generateFileName(final ObservationSetting observation, final String targetName,
                                            final String prefix, final String suffix,
                                            final String extension) {
-        
+
         final StringBuilder sb = new StringBuilder(32);
         if (prefix != null) {
             sb.append(prefix).append('_');
@@ -635,7 +635,7 @@ public class ExportOBVLTI {
         if (sb.length() > 64) {
             sb.setLength(64);
         }
-        
+
         sb.append('.').append(extension);
 
         return sb.toString();

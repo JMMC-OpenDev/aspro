@@ -27,99 +27,97 @@ import org.slf4j.LoggerFactory;
  */
 public final class ExportOBVegaAction {
 
-  /** default serial UID for Serializable interface */
-  private static final long serialVersionUID = 1;
-  /** Class logger */
-  private static final Logger logger = LoggerFactory.getLogger(ExportOBVegaAction.class.getName());
-  /** double formatter for min elevation */
-  private final static NumberFormat df1 = new DecimalFormat("0.#");
-  /** StarList MimeType */
-  private final static MimeType mimeType = MimeType.STAR_LIST;
-  /** action singleton */
-  private static final ExportOBVegaAction instance = new ExportOBVegaAction();
+    /** Class logger */
+    private static final Logger logger = LoggerFactory.getLogger(ExportOBVegaAction.class.getName());
+    /** double formatter for min elevation */
+    private final static NumberFormat DF1 = new DecimalFormat("0.#");
+    /** StarList MimeType */
+    private final static MimeType MIMETYPE = MimeType.STAR_LIST;
+    /** action singleton */
+    private static final ExportOBVegaAction INSTANCE = new ExportOBVegaAction();
 
-  /**
-   * Return the singleton ExportOBVegaAction instance
-   * @return ExportOBVegaAction instance
-   */
-  public static ExportOBVegaAction getInstance() {
-    return instance;
-  }
+    /**
+     * Return the singleton instance
+     * @return singleton instance
+     */
+    public static ExportOBVegaAction getInstance() {
+        return INSTANCE;
+    }
 
-  /**
-   * Forbidden Constructor
-   */
-  private ExportOBVegaAction() {
-    super();
-  }
+    /**
+     * Forbidden Constructor
+     */
+    private ExportOBVegaAction() {
+        super();
+    }
 
-  /**
-   * Execute the action.
-   */
-  public void process() {
-    logger.debug("process");
+    /**
+     * Execute the action.
+     */
+    public void process() {
+        logger.debug("process");
 
-    final File file = FileChooser.showSaveFileChooser("Export targets as one Vega Star List", null, mimeType, getDefaultFileName());
+        final File file = FileChooser.showSaveFileChooser("Export targets as one Vega Star List", null, MIMETYPE, getDefaultFileName());
 
-    // If a file was defined (No cancel in the dialog)
-    if (file != null) {
-      try {
-        process(file);
+        // If a file was defined (No cancel in the dialog)
+        if (file != null) {
+            try {
+                process(file);
+
+                // use main observation :
+                final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+                final double minElev = observation.getInterferometerConfiguration().getMinElevation();
+
+                final String message = "Observing blocks exported with following settings:\n"
+                        + "  - night restrictions disabled\n"
+                        + "  - minimum elevation set to " + DF1.format(minElev) + " deg";
+
+                MessagePane.showMessage(message);
+
+                StatusBar.show(file.getName() + " created.");
+
+            } catch (IOException ioe) {
+                MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
+            }
+        }
+    }
+
+    /**
+     * Generate the Star List for the current observation.
+     * 
+     * Used by:
+     * - ExportOBVegaAction (File/Export to an Observing Block)
+     * - StarListSendAction (Interop/Send StarList to PIVOT)
+     * 
+     * @param file file to save
+     * @throws IOException if an I/O exception occured while writing the observing block
+     */
+    public static void process(final File file) throws IOException {
+        logger.debug("generate file: {}", file);
 
         // use main observation :
         final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
-        final double minElev = observation.getInterferometerConfiguration().getMinElevation();
 
-        final String message = "Observing blocks exported with following settings:\n"
-                + "  - night restrictions disabled\n"
-                + "  - minimum elevation set to " + df1.format(minElev) + " deg";
+        // Compute Observability data using astronomical night (-18 deg) without night restrictions :
+        final ObservabilityService os = new ObservabilityService(observation, true);
+        final ObservabilityData obsData = os.compute();
 
-        MessagePane.showMessage(message);
+        // Generate the StarList content into this buffer:
+        final StringBuilder sb = new StringBuilder(1024);
 
-        StatusBar.show(file.getName() + " created.");
+        ExportOBVega.generate(sb, observation, obsData);
 
-      } catch (IOException ioe) {
-        MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
-      }
+        final String document = sb.toString();
+
+        // Finally, write the file :
+        FileUtils.writeFile(file, document);
     }
-  }
 
-  /**
-   * Generate the Star List for the current observation.
-   * 
-   * Used by:
-   * - ExportOBVegaAction (File/Export to an Observing Block)
-   * - StarListSendAction (Interop/Send StarList to PIVOT)
-   * 
-   * @param file file to save
-   * @throws IOException if an I/O exception occured while writing the observing block
-   */
-  public static void process(final File file) throws IOException {
-    logger.debug("generate file: {}", file);
-
-    // use main observation :
-    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
-
-    // Compute Observability data using astronomical night (-18 deg) without night restrictions :
-    final ObservabilityService os = new ObservabilityService(observation, true);
-    final ObservabilityData obsData = os.compute();
-
-    // Generate the StarList content into this buffer:
-    final StringBuilder sb = new StringBuilder(1024);
-
-    ExportOBVega.generate(sb, observation, obsData);
-
-    final String document = sb.toString();
-
-    // Finally, write the file :
-    FileUtils.writeFile(file, document);
-  }
-
-  /**
-   * Generate a default name
-   * @return default name [StarList_V01.txt]
-   */
-  private String getDefaultFileName() {
-    return "StarList_V01." + mimeType.getExtension();
-  }
+    /**
+     * Generate a default name
+     * @return default name [StarList_V01.txt]
+     */
+    private String getDefaultFileName() {
+        return "StarList_V01." + MIMETYPE.getExtension();
+    }
 }

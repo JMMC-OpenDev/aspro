@@ -19,7 +19,7 @@
     </company>
 
     <program name="Aspro2" version="0.9.9.3 beta 4"/>
-    <compilation date="11/07/2017" compiler="JDK 1.6.0_24"/>
+    <compilation date="17/07/2017" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -166,6 +166,13 @@
             <menu label="Export targets to Observing Blocks" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOB"
                   description="Export your complete observation to Observing blocks"/>
             <menu/> <!-- menu separator -->
+            <menu label="Export to an Observing Block (XML)" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOBXML"
+                  description="Export your observation of the selected target to an Observing block XML file"/>
+<!--            
+            <menu label="Export targets to Observing Blocks (XML)" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOBXML"
+                  description="Export your complete observation to Observing block XML files"/>
+-->                        
+            <menu/> <!-- menu separator -->
             <menu label="Export plot to PDF" classpath="fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction" action="exportPDF" accelerator="P"
                   icon="fr/jmmc/oiexplorer/core/resource/image/icon_pdf.gif" description="Export the current plot to a PDF document"/>
             <menu label="Export plot to PNG" classpath="fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction" action="exportPNG"
@@ -190,10 +197,13 @@
                   description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
             <menu label="Perform model fitting" classpath="fr.jmmc.aspro.interop.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"
                   description="use LITpro to prepare your model fitting and inspect your OIFits files (SAMP)"/>
-            <menu label="Send StarList to PIVOT" classpath="fr.jmmc.aspro.interop.StarListSendAction" action="starListSendAction"
-                  description="send back the star list to PIVOT (SAMP)"/>
             <menu label="Send OIFits data" classpath="fr.jmmc.aspro.interop.SendOIFitsAction" action="sendOIFitsAction"
                   description="send simulated OIFits data file(s) to OIFitsExplorer or other VO Tools (SAMP)"/>
+            <menu/>
+            <menu label="Send StarList to PIVOT" classpath="fr.jmmc.aspro.interop.StarListSendAction" action="starListSendAction"
+                  description="send back the star list to PIVOT (SAMP)"/>
+            <menu label="Send Obs. block(s) to A2p2" classpath="fr.jmmc.aspro.interop.SendOBAction" action="sendOBAction"
+                  description="send observing blocks to the A2p2 tool (SAMP)"/>
         </menu>
 
         <menu label="Help">
@@ -204,7 +214,11 @@
 
     <releasenotes>
         <release version="0.9.9.3">
-            <pubDate>Thu, 04 May 2017 09:00:00 GMT</pubDate>
+            <pubDate>Mon, 17 Jul 2017 15:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.3 beta 5">
+                <change type="FEATURE">Added the preliminary support for the A2p2 tool (Aspro to ESO p2): 
+                    new actions 'Export to an Observing Block (XML)' and 'Send Obs. block(s) to A2p2' (SAMP)</change>
+            </prerelease>
             <prerelease version="0.9.9.3 beta 4">
                 <change type="FEATURE">Set V2 values to theoretical V2 when the checkbox 'Add error noise to data' is disabled</change>
                 <change type="BUGFIX">Improved V2 bias estimation from noise parameters</change>
