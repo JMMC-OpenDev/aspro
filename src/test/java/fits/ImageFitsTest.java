@@ -170,7 +170,7 @@ public class ImageFitsTest {
 
                 FitsImage fitsImage = model.getModelData(0).getFitsImage();
 
-                logger.info("Prepared FitsImage: " + fitsImage.toString(false));
+                logger.info("Prepared FitsImage: " + fitsImage.toString());
 
                 showFitsPanel(fitsImage.getFitsImageIdentifier(), fitsImage);
 
@@ -300,7 +300,7 @@ public class ImageFitsTest {
 
                             FitsImage fitsImage = model.getModelData(0).getFitsImage();
 
-                            logger.info("Prepared FitsImage: " + fitsImage.toString(false));
+                            logger.info("Prepared FitsImage: " + fitsImage.toString());
 
                             showFitsPanel(fitsImage.getFitsImageIdentifier(), fitsImage);
 
@@ -355,7 +355,7 @@ public class ImageFitsTest {
 
         FitsImage fitsImage = model.getModelData(0).getFitsImage();
 
-        logger.info("Prepared FitsImage[" + fastMode + "]: " + fitsImage.toString(false));
+        logger.info("Prepared FitsImage[" + fastMode + "]: " + fitsImage.toString());
 
         showFitsPanel(fitsImage.getFitsImageIdentifier(), fitsImage);
 

@@ -146,7 +146,7 @@ public final class UserModelService {
                 // can throw IllegalArgumentException if image has invalid keyword(s) / data:
                 prepareImage(fitsImage, modelData, useFastMode);
 
-                logger.info("Prepared FitsImage: {}", fitsImage.toString(false));
+                logger.info("Prepared FitsImage: {}", fitsImage.toString());
 
                 modelDataList.add(modelData);
             } catch (IllegalArgumentException iae) {
