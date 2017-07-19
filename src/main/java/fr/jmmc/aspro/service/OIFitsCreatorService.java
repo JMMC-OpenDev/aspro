@@ -88,10 +88,10 @@ public final class OIFitsCreatorService {
     /** SNR threshold to flag values with low SNR */
     private final static double SNR_THRESHOLD = 3.0;
     /** Jmcs Parallel Job executor */
-    private static final ParallelJobExecutor jobExecutor = ParallelJobExecutor.getInstance();
+    private static final ParallelJobExecutor JOB_EXECUTOR = ParallelJobExecutor.getInstance();
 
     /* members */
- /* input */
+    /* input */
     /** selected target */
     private final Target target;
     /** OIFits supersampling preference */
@@ -197,17 +197,17 @@ public final class OIFitsCreatorService {
      * @param warningContainer container for warning messages
      */
     protected OIFitsCreatorService(final ObservationSetting observation,
-            final Target target,
-            final List<Beam> beams,
-            final List<BaseLine> baseLines,
-            final boolean useInstrumentBias,
-            final boolean doDataNoise,
-            final int supersamplingOIFits,
-            final UserModelService.MathMode mathModeOIFits,
-            final TargetPointInfo[] targetPointInfos,
-            final List<UVRangeBaseLineData> targetUVObservability,
-            final AstroSkyCalc sc,
-            final WarningContainer warningContainer) {
+                                   final Target target,
+                                   final List<Beam> beams,
+                                   final List<BaseLine> baseLines,
+                                   final boolean useInstrumentBias,
+                                   final boolean doDataNoise,
+                                   final int supersamplingOIFits,
+                                   final UserModelService.MathMode mathModeOIFits,
+                                   final TargetPointInfo[] targetPointInfos,
+                                   final List<UVRangeBaseLineData> targetUVObservability,
+                                   final AstroSkyCalc sc,
+                                   final WarningContainer warningContainer) {
 
         this.target = target;
         this.beams = beams;
@@ -361,59 +361,6 @@ public final class OIFitsCreatorService {
             this.waveBands = new double[this.nWaveLengths];
             Arrays.fill(waveBands, waveBand);
         }
-    }
-
-    /**
-     * Compute the regularly sampled wavelengths (centered on each spectral channel) given its bounds and spectral channel width
-     * @param min lower bound
-     * @param width spectral channel width
-     * @param nWLen number of wavelengths to compute
-     * @return regularly sampled wavelengths
-     */
-    private static double[] computeWaveLengths(final double min, final double width, final int nWLen) {
-        final double[] wLen = new double[nWLen];
-
-        // effective wavelength corresponds to the channel center:
-        double waveLength = min + 0.5d * width;
-
-        for (int i = 0; i < nWLen; i++) {
-            wLen[i] = waveLength;
-
-            waveLength += width;
-        }
-        return wLen;
-    }
-
-    /**
-     * Compute the regularly sampled wavelengths (centered on each spectral channel) given its bounds and spectral channel width
-     * @param waveLengths wavelengths (central)
-     * @param waveBands bandwidths
-     * @param nSamples number of samples to compute
-     * @return regularly sampled wavelengths
-     */
-    private static double[] resampleWaveLengths(final double[] waveLengths, final double[] waveBands, final int nSamples) {
-        final int nWLen = waveLengths.length;
-        final double[] wLen = new double[nWLen * nSamples];
-
-        double step, lambda;
-
-        for (int i = 0, k = 0; i < nWLen; i++) {
-
-            lambda = waveLengths[i] - 0.5 * waveBands[i];
-            step = waveBands[i] / (nSamples + 1);
-            lambda += step;
-
-            for (int j = 0; j < nSamples; j++) {
-                wLen[k++] = lambda;
-                lambda += step;
-            }
-        }
-        /*        
-        System.out.println("waveLengths: "+Arrays.toString(waveLengths));
-        System.out.println("nSamples: "+nSamples);
-        System.out.println("wLen: "+Arrays.toString(wLen));
-         */
-        return wLen;
     }
 
     /**
@@ -586,30 +533,6 @@ public final class OIFitsCreatorService {
             }
         }
         return true;
-    }
-
-    /**
-     * Find the user model data corresponding only to the given wavelength (within +/- 1/2 increment)
-     * @param wavelength spectral channel wavelength
-     * @param modelDataList user model data
-     * @return user model data corresponding to the given wavelength
-     */
-    private static UserModelData findUserModelData(final double wavelength, final List<UserModelData> modelDataList) {
-
-        final int nImages = modelDataList.size();
-
-        UserModelData modelData;
-
-        // suppose that model image wavelength ranges do not overlap (true for fitscube):
-        for (int i = 0; i < nImages; i++) {
-            modelData = modelDataList.get(i);
-
-            if (modelData.getWaveLengthRange().contains(wavelength)) {
-                return modelData;
-            }
-        }
-        // No user model found:
-        return null;
     }
 
     /**
@@ -994,34 +917,6 @@ public final class OIFitsCreatorService {
                 } // rows
 
             } else {
-                // Accuracy tests (see OIFitsWriterTest) on GRAVITY so VISAMPERR/VISPHIERR are only 'sampled':
-                // FAST provides good accuracy on complete OIFits:
-                /*                
-                 WARNING: WARN:  Column[VISAMP]	    Max Absolute Error=3.122502256758253E-17	Max Relative Error=2.943534976436331E-14
-                 WARNING: WARN:  Column[VISAMPERR]	Max Absolute Error=0.0013869817652312072	Max Relative Error=0.0997510362307679
-                 WARNING: WARN:  Column[VISPHI]	    Max Absolute Error=1.8474111129762605E-12	Max Relative Error=3.3158630356109147E-12
-                 WARNING: WARN:  Column[VISPHIERR]	Max Absolute Error=19.19686940833244	    Max Relative Error=0.9113901536192872
-                 WARNING: WARN:  Column[VIS2DATA]	Max Absolute Error=1.5178830414797062E-18	Max Relative Error=5.915784768102743E-14
-                 WARNING: WARN:  Column[VIS2ERR]	Max Absolute Error=5.421010862427522E-20	Max Relative Error=4.471809116292319E-16
-                 WARNING: WARN:  Column[T3AMP]	    Max Absolute Error=9.740878893424454E-21	Max Relative Error=3.613928543746403E-14
-                 WARNING: WARN:  Column[T3AMPERR]	Max Absolute Error=3.441071348220595E-22	Max Relative Error=3.6192130029721625E-14
-                 WARNING: WARN:  Column[T3PHI]	    Max Absolute Error=1.8332002582610585E-12	Max Relative Error=1.6154567952731343E-13
-                 */
-                // QUICK provides only a preview (not accurate on VISPHI / T3PHI:
-                /*
-                 WARNING: WARN:  Column[VISDATA]	Max Absolute Error=0.21170902252197266	    Max Relative Error=155.32336222596265
-                 WARNING: WARN:  Column[VISERR]	    Max Absolute Error=1.7113983631134033E-5	Max Relative Error=5.123198196063256E-4
-                 WARNING: WARN:  Column[VISAMP]	    Max Absolute Error=0.012389325449663476	    Max Relative Error=0.9827257597222762
-                 WARNING: WARN:  Column[VISAMPERR]	Max Absolute Error=4.3704479622192665E-4	Max Relative Error=0.24928702639103537
-                 WARNING: WARN:  Column[VISPHI]	    Max Absolute Error=357.76365704000574	    Max Relative Error=132.85957062222084
-                 WARNING: WARN:  Column[VISPHIERR]	Max Absolute Error=54.185925961293876	    Max Relative Error=0.9643291278418655
-                 WARNING: WARN:  Column[VIS2DATA]	Max Absolute Error=4.3211132008532375E-4	Max Relative Error=3199.047758503112
-                 WARNING: WARN:  Column[VIS2ERR]	Max Absolute Error=7.815369519747367E-9	    Max Relative Error=6.780968471059581E-5
-                 WARNING: WARN:  Column[T3AMP]	    Max Absolute Error=1.8693429580914967E-7	Max Relative Error=0.11262751096020436
-                 WARNING: WARN:  Column[T3AMPERR]	Max Absolute Error=4.423268697588574E-11	Max Relative Error=0.0016543021640061009
-                 WARNING: WARN:  Column[T3PHI]	    Max Absolute Error=6.734992735788779	    Max Relative Error=6.813763216810152
-                 */
-
                 if (logger.isDebugEnabled()) {
                     logger.debug("computeModelVisibilities: MathMode = {}.", mathMode);
                 }
@@ -1046,7 +941,7 @@ public final class OIFitsCreatorService {
                 }
 
                 // enable parallel jobs if many points using user model:
-                final int nTh = (!jobExecutor.isWorkerThread() && (nPoints > JOB_THRESHOLD_USER_MODELS)) ? jobExecutor.getMaxParallelJob() : 1;
+                final int nTh = (!JOB_EXECUTOR.isWorkerThread() && (nPoints > JOB_THRESHOLD_USER_MODELS)) ? JOB_EXECUTOR.getMaxParallelJob() : 1;
 
                 // Prepare thread context variables:
                 final int[][] nTaskThreads = (SHOW_COMPUTE_STATS) ? new int[nTh][16] : null; // cache line padding
@@ -1145,7 +1040,7 @@ public final class OIFitsCreatorService {
                 final Runnable[] jobs = jobList.toArray(new Runnable[nJobs]);
 
                 // execute jobs in parallel or using current thread if only one job (throws InterruptedJobException if interrupted):
-                jobExecutor.forkAndJoin("OIFitsCreatorService.computeModelVisibilities", jobs);
+                JOB_EXECUTOR.forkAndJoin("OIFitsCreatorService.computeModelVisibilities", jobs);
 
                 if (SHOW_COMPUTE_STATS) {
                     for (int t = 0; t < nTh; t++) {
@@ -1304,148 +1199,6 @@ public final class OIFitsCreatorService {
             logger.info("computeModelVisibilities: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
         return computed;
-    }
-
-    /**
-     * Map user model images on the instrumental spectral channeld
-     * @param modelDataList user model images
-     * @param sampleWaveLengths sampled instrument spectral channels
-     * @return UserModelComputePart list
-     */
-    private List<UserModelComputePart> mapUserModel(final List<UserModelData> modelDataList, final double[] sampleWaveLengths) {
-
-        final int nImages = modelDataList.size();
-        final UserModelData modelDataFirst = modelDataList.get(0);
-
-        // images have wavelength ?
-        final boolean isWL = !Double.isNaN(modelDataFirst.getWaveLength());
-
-        final int nWLen = sampleWaveLengths.length;
-
-        final List<UserModelComputePart> modelParts = new ArrayList<UserModelComputePart>(nWLen);
-
-        if (!isWL && nImages > 1) {
-            // Fits cube without wavelengths => cancel OIFits computation:
-            return null;
-        }
-
-        if (!isWL || nImages == 1) {
-            // use single image only (gray model):
-            final UserModelComputePart part = new UserModelComputePart();
-            part.modelData = modelDataFirst;
-            part.fromWL = 0;
-            part.endWL = nWLen;
-
-            modelParts.add(part);
-
-        } else {
-            // Process wavelength ranges:
-            UserModelComputePart current = null;
-            UserModelData modelData;
-
-            for (int i = 0; i < nWLen; i++) {
-                modelData = findUserModel(sampleWaveLengths[i], modelDataList);
-
-                if (current == null || current.modelData != modelData) {
-                    // different model image:
-                    current = new UserModelComputePart();
-                    current.modelData = modelData;
-                    current.fromWL = i;
-                    current.endWL = i + 1;
-
-                    modelParts.add(current);
-
-                } else {
-                    // increase endWL:
-                    current.endWL = i + 1;
-                }
-            }
-        }
-
-        return modelParts;
-    }
-
-    /**
-     * Find the user model data corresponding to the closest spectral channel
-     * @param wavelength spectral channel wavelength
-     * @param modelDataList user model data
-     * @return user model data corresponding to the closest spectral channel
-     */
-    private static UserModelData findUserModel(final double wavelength, final List<UserModelData> modelDataList) {
-
-        UserModelData modelData = modelDataList.get(0);
-
-        // test first user model image:
-        if (wavelength <= modelData.getWaveLengthRange().getMax()) {
-            return modelData;
-        }
-
-        final int nImages = modelDataList.size();
-
-        modelData = modelDataList.get(nImages - 1);
-
-        if (wavelength >= modelData.getWaveLengthRange().getMin()) {
-            return modelData;
-        }
-
-        // suppose that model image wavelength ranges do not overlap (true for fitscube):
-        for (int i = 0; i < nImages; i++) {
-            modelData = modelDataList.get(i);
-
-            if (modelData.getWaveLengthRange().contains(wavelength)) {
-                return modelData;
-            }
-        }
-        throw new IllegalStateException("findUserModel: unable for find an user model at wavelength = "
-                + convertWL(wavelength) + " " + SpecialChars.UNIT_MICRO_METER);
-    }
-
-    /**
-     * Convert mutable complex array to immutable complex array for safety reasons
-     * @param array mutable complex array
-     * @param length array length
-     * @return immutable complex array
-     */
-    private static ImmutableComplex[] convertArray(final MutableComplex[] array, final int length) {
-        if (array == null) {
-            return null;
-        }
-        final ImmutableComplex[] result = new ImmutableComplex[length];
-
-        for (int i = length - 1; i >= 0; i--) {
-            result[i] = new ImmutableComplex(array[i]); // immutable complex for safety
-        }
-        return result;
-    }
-
-    /**
-     * Copy mutable complex array
-     * @param array mutable complex array
-     * @param dest mutable complex array
-     */
-    private static void copyArray(final MutableComplex[] array, final MutableComplex[] dest) {
-        if (array == null) {
-            return;
-        }
-        final int length = array.length;
-
-        for (int i = length - 1; i >= 0; i--) {
-            dest[i].updateComplex(array[i]);
-        }
-    }
-
-    /**
-     * Create a mutable complex array
-     * @param length array length
-     * @return mutable complex array
-     */
-    private static MutableComplex[] createArray(final int length) {
-        final MutableComplex[] result = new MutableComplex[length];
-
-        for (int i = length - 1; i >= 0; i--) {
-            result[i] = new MutableComplex();
-        }
-        return result;
     }
 
     /**
@@ -1906,7 +1659,7 @@ public final class OIFitsCreatorService {
 
                         if (ns == null) {
                             v2Err = Double.NaN;
-                        } else if (NoiseService.USE_DISTRIB_APPROACH) {
+                        } else {
                             // Sampling complex visibilities:
 
                             // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
@@ -1974,16 +1727,6 @@ public final class OIFitsCreatorService {
                                 v2 = s_v2_mean;
                             }
                             v2Err = s_v2_err;
-
-                        } else {
-                            // Old approach:
-                            // square visibility error :
-                            v2Err = ns.computeVis2Error(i, l, Math.sqrt(v2));
-
-                            if (this.doNoise) {
-                                // add gaussian noise with sigma = err :
-                                v2 += v2Err * this.random.nextGaussian();
-                            }
                         }
 
                         // Set values:
@@ -2429,6 +2172,295 @@ public final class OIFitsCreatorService {
     }
 
     /**
+     * Return the flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid
+     * @return flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid
+     */
+    public boolean isDoNoise() {
+        return doNoise;
+    }
+
+    /**
+     * Return true to use instrument bias; false to compute only theoretical error
+     * @return true to use instrument bias; false to compute only theoretical error
+     */
+    public boolean isUseInstrumentBias() {
+        return useInstrumentBias;
+    }
+
+    /**
+     * Return true if returned errors are valid
+     * @return true if returned errors are valid
+     */
+    public boolean isErrorValid() {
+        return errorValid;
+    }
+
+    /**
+     * Return the noise service
+     * @return noise service
+     */
+    public NoiseService getNoiseService() {
+        return noiseService;
+    }
+
+    /**
+     * Return the OIFits supersampling preference
+     * @return OIFits supersampling preference
+     */
+    public int getSupersamplingOIFits() {
+        return supersamplingOIFits;
+    }
+
+    /**
+     * Return the OIFits MathMode preference
+     * @return OIFits MathMode preference
+     */
+    public MathMode getMathModeOIFits() {
+        return mathModeOIFits;
+    }
+
+    /* --- utility methods --- */
+    /**
+     * Add a warning message in the OIFits file
+     * @param warningContainer warning container to fill
+     * @param msg message to add
+     */
+    private static void addWarning(final WarningContainer warningContainer, final String msg) {
+        warningContainer.addWarningMessage(msg);
+    }
+
+    /**
+     * Add an information message in the OIFits file
+     * @param warningContainer warning container to fill
+     * @param msg message to add
+     */
+    private static void addInformation(final WarningContainer warningContainer, final String msg) {
+        warningContainer.addInformationMessage(msg);
+    }
+
+    private static double distance(final double a1, final double a2) {
+        final double delta = a1 - a2;
+        if (delta > Math.PI) {
+            return delta - (2.0 * Math.PI);
+        } else if (delta < -Math.PI) {
+            return delta + (2.0 * Math.PI);
+        }
+        return delta;
+    }
+
+    /**
+     * Find the user model data corresponding only to the given wavelength (within +/- 1/2 increment)
+     * @param wavelength spectral channel wavelength
+     * @param modelDataList user model data
+     * @return user model data corresponding to the given wavelength
+     */
+    private static UserModelData findUserModelData(final double wavelength, final List<UserModelData> modelDataList) {
+
+        final int nImages = modelDataList.size();
+
+        UserModelData modelData;
+
+        // suppose that model image wavelength ranges do not overlap (true for fitscube):
+        for (int i = 0; i < nImages; i++) {
+            modelData = modelDataList.get(i);
+
+            if (modelData.getWaveLengthRange().contains(wavelength)) {
+                return modelData;
+            }
+        }
+        // No user model found:
+        return null;
+    }
+
+    /**
+     * Map user model images on the instrumental spectral channeld
+     * @param modelDataList user model images
+     * @param sampleWaveLengths sampled instrument spectral channels
+     * @return UserModelComputePart list
+     */
+    private static List<UserModelComputePart> mapUserModel(final List<UserModelData> modelDataList, final double[] sampleWaveLengths) {
+
+        final int nImages = modelDataList.size();
+        final UserModelData modelDataFirst = modelDataList.get(0);
+
+        // images have wavelength ?
+        final boolean isWL = !Double.isNaN(modelDataFirst.getWaveLength());
+
+        final int nWLen = sampleWaveLengths.length;
+
+        final List<UserModelComputePart> modelParts = new ArrayList<UserModelComputePart>(nWLen);
+
+        if (!isWL && nImages > 1) {
+            // Fits cube without wavelengths => cancel OIFits computation:
+            return null;
+        }
+
+        if (!isWL || nImages == 1) {
+            // use single image only (gray model):
+            final UserModelComputePart part = new UserModelComputePart();
+            part.modelData = modelDataFirst;
+            part.fromWL = 0;
+            part.endWL = nWLen;
+
+            modelParts.add(part);
+
+        } else {
+            // Process wavelength ranges:
+            UserModelComputePart current = null;
+            UserModelData modelData;
+
+            for (int i = 0; i < nWLen; i++) {
+                modelData = findUserModel(sampleWaveLengths[i], modelDataList);
+
+                if (current == null || current.modelData != modelData) {
+                    // different model image:
+                    current = new UserModelComputePart();
+                    current.modelData = modelData;
+                    current.fromWL = i;
+                    current.endWL = i + 1;
+
+                    modelParts.add(current);
+
+                } else {
+                    // increase endWL:
+                    current.endWL = i + 1;
+                }
+            }
+        }
+
+        return modelParts;
+    }
+
+    /**
+     * Find the user model data corresponding to the closest spectral channel
+     * @param wavelength spectral channel wavelength
+     * @param modelDataList user model data
+     * @return user model data corresponding to the closest spectral channel
+     */
+    private static UserModelData findUserModel(final double wavelength, final List<UserModelData> modelDataList) {
+
+        UserModelData modelData = modelDataList.get(0);
+
+        // test first user model image:
+        if (wavelength <= modelData.getWaveLengthRange().getMax()) {
+            return modelData;
+        }
+
+        final int nImages = modelDataList.size();
+
+        modelData = modelDataList.get(nImages - 1);
+
+        if (wavelength >= modelData.getWaveLengthRange().getMin()) {
+            return modelData;
+        }
+
+        // suppose that model image wavelength ranges do not overlap (true for fitscube):
+        for (int i = 0; i < nImages; i++) {
+            modelData = modelDataList.get(i);
+
+            if (modelData.getWaveLengthRange().contains(wavelength)) {
+                return modelData;
+            }
+        }
+        throw new IllegalStateException("findUserModel: unable for find an user model at wavelength = "
+                + convertWL(wavelength) + " " + SpecialChars.UNIT_MICRO_METER);
+    }
+
+    /**
+     * Convert mutable complex array to immutable complex array for safety reasons
+     * @param array mutable complex array
+     * @param length array length
+     * @return immutable complex array
+     */
+    private static ImmutableComplex[] convertArray(final MutableComplex[] array, final int length) {
+        if (array == null) {
+            return null;
+        }
+        final ImmutableComplex[] result = new ImmutableComplex[length];
+
+        for (int i = length - 1; i >= 0; i--) {
+            result[i] = new ImmutableComplex(array[i]); // immutable complex for safety
+        }
+        return result;
+    }
+
+    /**
+     * Copy mutable complex array
+     * @param array mutable complex array
+     * @param dest mutable complex array
+     */
+    private static void copyArray(final MutableComplex[] array, final MutableComplex[] dest) {
+        if (array == null) {
+            return;
+        }
+        final int length = array.length;
+
+        for (int i = length - 1; i >= 0; i--) {
+            dest[i].updateComplex(array[i]);
+        }
+    }
+
+    /**
+     * Create a mutable complex array
+     * @param length array length
+     * @return mutable complex array
+     */
+    private static MutableComplex[] createArray(final int length) {
+        final MutableComplex[] result = new MutableComplex[length];
+
+        for (int i = length - 1; i >= 0; i--) {
+            result[i] = new MutableComplex();
+        }
+        return result;
+    }
+
+    /**
+     * Compute the regularly sampled wavelengths (centered on each spectral channel) given its bounds and spectral channel width
+     * @param min lower bound
+     * @param width spectral channel width
+     * @param nWLen number of wavelengths to compute
+     * @return regularly sampled wavelengths
+     */
+    private static double[] computeWaveLengths(final double min, final double width, final int nWLen) {
+        final double[] wLen = new double[nWLen];
+
+        // effective wavelength corresponds to the channel center:
+        double waveLength = min + 0.5d * width;
+
+        for (int i = 0; i < nWLen; i++) {
+            wLen[i] = waveLength;
+            waveLength += width;
+        }
+        return wLen;
+    }
+
+    /**
+     * Compute the regularly sampled wavelengths (centered on each spectral channel) given its bounds and spectral channel width
+     * @param waveLengths wavelengths (central)
+     * @param waveBands bandwidths
+     * @param nSamples number of samples to compute
+     * @return regularly sampled wavelengths
+     */
+    private static double[] resampleWaveLengths(final double[] waveLengths, final double[] waveBands, final int nSamples) {
+        final int nWLen = waveLengths.length;
+        final double[] wLen = new double[nWLen * nSamples];
+
+        double step, lambda;
+
+        for (int i = 0, k = 0; i < nWLen; i++) {
+            lambda = waveLengths[i] - 0.5 * waveBands[i];
+            step = waveBands[i] / (nSamples + 1);
+            lambda += step;
+
+            for (int j = 0; j < nSamples; j++) {
+                wLen[k++] = lambda;
+                lambda += step;
+            }
+        }
+        return wLen;
+    }
+
+    /**
      * Return the station mapping
      * @param stations station list
      * @return station mapping
@@ -2445,7 +2477,6 @@ public final class OIFitsCreatorService {
         }
 
         logger.debug("stationMapping: {}", stationMapping);
-
         return stationMapping;
     }
 
@@ -2465,7 +2496,6 @@ public final class OIFitsCreatorService {
         }
 
         logger.debug("beamMapping: {}", beamMapping);
-
         return beamMapping;
     }
 
@@ -2538,6 +2568,15 @@ public final class OIFitsCreatorService {
 
         return sb.toString();
 
+    }
+
+    /**
+     * Return the given wavelength rounded in microns
+     * @param wl wavelength to toShort
+     * @return given wavelength rounded in microns
+     */
+    private static double convertWL(final double wl) {
+        return NumberUtils.trimTo5Digits(1e6d * wl);
     }
 
     /**
@@ -2683,81 +2722,6 @@ public final class OIFitsCreatorService {
     }
 
     /**
-     * Return the flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid
-     * @return flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid
-     */
-    public boolean isDoNoise() {
-        return doNoise;
-    }
-
-    /**
-     * Return true to use instrument bias; false to compute only theoretical error
-     * @return true to use instrument bias; false to compute only theoretical error
-     */
-    public boolean isUseInstrumentBias() {
-        return useInstrumentBias;
-    }
-
-    /**
-     * Return true if returned errors are valid
-     * @return true if returned errors are valid
-     */
-    public boolean isErrorValid() {
-        return errorValid;
-    }
-
-    /**
-     * Return the noise service
-     * @return noise service
-     */
-    public NoiseService getNoiseService() {
-        return noiseService;
-    }
-
-    /**
-     * Add a warning message in the OIFits file
-     * @param warningContainer warning container to fill
-     * @param msg message to add
-     */
-    private static void addWarning(final WarningContainer warningContainer, final String msg) {
-        warningContainer.addWarningMessage(msg);
-    }
-
-    /**
-     * Add an information message in the OIFits file
-     * @param warningContainer warning container to fill
-     * @param msg message to add
-     */
-    private static void addInformation(final WarningContainer warningContainer, final String msg) {
-        warningContainer.addInformationMessage(msg);
-    }
-
-    /**
-     * Return the OIFits supersampling preference
-     * @return OIFits supersampling preference
-     */
-    public int getSupersamplingOIFits() {
-        return supersamplingOIFits;
-    }
-
-    /**
-     * Return the OIFits MathMode preference
-     * @return OIFits MathMode preference
-     */
-    public MathMode getMathModeOIFits() {
-        return mathModeOIFits;
-    }
-
-    /**
-     * Return the given wavelength rounded in microns
-     * @param wl wavelength to toShort
-     * @return given wavelength rounded in microns
-     */
-    private static double convertWL(final double wl) {
-        return NumberUtils.trimTo5Digits(1e6d * wl);
-    }
-
-    /**
      * UserModel computation part (wavelength indexes)
      */
     private static final class UserModelComputePart {
@@ -2778,15 +2742,5 @@ public final class OIFitsCreatorService {
         public String toString() {
             return "UserModelComputePart[" + fromWL + " - " + endWL + "]: " + modelData;
         }
-    }
-
-    private static double distance(final double a1, final double a2) {
-        final double delta = a1 - a2;
-        if (delta > Math.PI) {
-            return delta - (2.0 * Math.PI);
-        } else if (delta < -Math.PI) {
-            return delta + (2.0 * Math.PI);
-        }
-        return delta;
     }
 }
