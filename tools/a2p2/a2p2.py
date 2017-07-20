@@ -80,25 +80,35 @@ class LoginWindow(Gtk.Window):
         self.tempolabel.set_text("Select the Project Id in the list:")
 
         self.store = Gtk.TreeStore(str,str,int)
-        self.folder = Gtk.TreeStore(str,int)
         self.runName=[]
         self.instrument=[]
         self.containerId=[]
         self.treeiter=[]
+        #one could probably limit the treeView with the instrument supported by ASPRO!!!!
+        supportedInstruments=['GRAVITY','MATISSE','AMBER','PIONIER']
         for i in range(len(runs)):
-            self.runName.append(runs[i]['progId'])
-            self.instrument.append(runs[i]['instrument'])
-            self.containerId.append(runs[i]['runId'])
-            entry_treeiter=self.store.append(None,[self.runName[i],self.instrument[i],self.containerId[i]])
-            self.treeiter.append(entry_treeiter)
-            # if folders, add them
-            containerId=runs[i]['containerId']
-            # FIXME: make it recursive!
-            folders=api.getFolders(containerId)
-            for j in range(len(folders)):
-                name=folders[j]['name']
-                contid=folders[j]['containerId']
-                folder_treeiter_entry=self.store.append(entry_treeiter,['Folder:',name,contid])
+            if supportedInstruments.count(runs[i]['instrument']) == 1:
+                runName=runs[i]['progId']
+                self.runName.append(runName)
+                instrument=runs[i]['instrument']
+                self.instrument.append(instrument)
+                runId=runs[i]['runId']
+                self.containerId.append(runId)
+                entry_run=self.store.append(None,[runName,instrument,runId])
+                self.treeiter.append(entry_run)
+                # if folders, add them
+                containerId=runs[i]['containerId']
+                # FIXME: make it recursive!
+                folders=api.getFolders(containerId)
+                for j in range(len(folders)):
+                    name=folders[j]['name']
+                    contid=folders[j]['containerId']
+                    entry_folder=self.store.append(entry_run,['Folder:',name,contid])
+                    folders2=api.getFolders(contid)
+                    for k in range(len(folders2)):
+                        name2=folders2[k]['name']
+                        contid2=folders2[k]['containerId']
+                        entry_subfolder=self.store.append(entry_folder,['Folder:',name2,contid2])
         self.treeview =  Gtk.TreeView(self.store)
         # create a CellRendererText to render the data
         renderer = Gtk.CellRendererText()
@@ -109,7 +119,21 @@ class LoginWindow(Gtk.Window):
         self.scrollable.add(self.treeview)
         self.treeselect = self.treeview.get_selection()
         self.treeselect.connect("changed", self.on_tree_selection_changed)
+        self.treeview.connect("row-expanded", self.on_row_expanded)
         self.show_all()
+
+    def on_row_expanded(self,view,treeiter,path):
+        index=path[0]
+        id=self.runName[index]
+        if  id != 'Folder:': #get instrument
+            instru=self.instrument[index]
+            self.containerInfo[0]= id #ProjectID
+            self.containerInfo[1]= instru #Instrument
+            runId=self.containerId[index]
+            run, _ = self.api.getRun(runId)
+            containerId = run["containerId"]
+            print ('*** Working with run', run["progId"], run["instrument"], ', containerId: ', containerId, "***")
+            self.containerInfo[2]=containerId #containerID
             
     def on_tree_selection_changed(self, selection):
         model, treeiter = selection.get_selected()
@@ -123,6 +147,8 @@ class LoginWindow(Gtk.Window):
                self.containerInfo[2]=new_containerId_same_run
            else:
                instru=model[treeiter][1]
+               if instru != self.containerInfo[1]:
+                   self.treeview.collapse_all() #otherwise problems!
                self.containerInfo[0]= id #ProjectID
                self.containerInfo[1]= instru #Instrument
                runId=model[treeiter][2]
