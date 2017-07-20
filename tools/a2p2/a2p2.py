@@ -79,7 +79,8 @@ class LoginWindow(Gtk.Window):
         self.buttonabort.set_label("EXIT")
         self.tempolabel.set_text("Select the Project Id in the list:")
 
-        self.store = Gtk.ListStore(str,str,int)
+        self.store = Gtk.TreeStore(str,str,int)
+        self.folder = Gtk.TreeStore(str,int)
         self.runName=[]
         self.instrument=[]
         self.containerId=[]
@@ -88,7 +89,16 @@ class LoginWindow(Gtk.Window):
             self.runName.append(runs[i]['progId'])
             self.instrument.append(runs[i]['instrument'])
             self.containerId.append(runs[i]['runId'])
-            self.treeiter=self.store.append([self.runName[i],self.instrument[i],self.containerId[i]])
+            entry_treeiter=self.store.append(None,[self.runName[i],self.instrument[i],self.containerId[i]])
+            self.treeiter.append(entry_treeiter)
+            # if folders, add them
+            containerId=runs[i]['containerId']
+            # FIXME: make it recursive!
+            folders=api.getFolders(containerId)
+            for j in range(len(folders)):
+                name=folders[j]['name']
+                contid=folders[j]['containerId']
+                folder_treeiter_entry=self.store.append(entry_treeiter,['Folder:',name,contid])
         self.treeview =  Gtk.TreeView(self.store)
         # create a CellRendererText to render the data
         renderer = Gtk.CellRendererText()
@@ -105,13 +115,21 @@ class LoginWindow(Gtk.Window):
         model, treeiter = selection.get_selected()
         if treeiter != None:
            self.flag[0]=1
-           self.containerInfo[0]=(model[treeiter][0]) #ProjectID
-           self.containerInfo[1]=(model[treeiter][1]) #Instrument
-           runId=model[treeiter][2]
-           run, _ = self.api.getRun(runId)
-           containerId = run["containerId"]
-           print ('*** Working with run', run["progId"], run["instrument"], ', containerId: ', containerId, "***")
-           self.containerInfo[2]=containerId #containerID
+           id=model[treeiter][0]
+           if id == 'Folder:': #we have a folder
+               new_containerId_same_run=model[treeiter][2] 
+               folderName = model[treeiter][1]
+               print ('*** Working in Folder', folderName , ', containerId: ', new_containerId_same_run, "***")
+               self.containerInfo[2]=new_containerId_same_run
+           else:
+               instru=model[treeiter][1]
+               self.containerInfo[0]= id #ProjectID
+               self.containerInfo[1]= instru #Instrument
+               runId=model[treeiter][2]
+               run, _ = self.api.getRun(runId)
+               containerId = run["containerId"]
+               print ('*** Working with run', run["progId"], run["instrument"], ', containerId: ', containerId, "***")
+               self.containerInfo[2]=containerId #containerID
 
     def on_buttonabort_clicked(self, widget):
         self.flag[0]=-1
@@ -689,7 +707,7 @@ try:
                 ob_url=r.params['url']
                 if ob_url.startswith("file:") :
                     ob_url=ob_url[5:]
-                print("ob_url: ", ob_url)
+                #print("ob_url: ", ob_url)
                 e = xml.etree.ElementTree.parse(ob_url)
                 parseXmlMessage(e,api,containerInfo, username)
             r.received=False
@@ -701,7 +719,7 @@ try:
             runInstrument=containerInfo[1]
             runName=containerInfo[2]
             #to show that the last choosen arguments are passed
-            print(username, runId, runName, runInstrument)
+            #print(username, runId, runName, runInstrument)
             flag[0]=0
             
 
