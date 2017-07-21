@@ -245,6 +245,17 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             return
 
         instrumentMode=instrumentConfiguration.find('instrumentMode').text
+
+        #if we have more than 1 obs, then better put it in a subfolder waiting for the existence of a block sequence not yet implemented in P2
+        obsconflist=e.findall('observationConfiguration')
+        doFolder=(len(obsconflist) > 1)
+        parentContainerId=containerId
+        if doFolder:
+            folderName=(obsconflist[0].find('SCTarget')).find('name').text
+            folderName=re.sub('[^A-Za-z0-9]+', '_', folderName.strip())
+            folder, _ = api.createFolder(containerId,folderName)
+            containerId=folder['containerId']
+
         for observationConfiguration in e.findall('observationConfiguration'):
         # science. If calibrator, get also DIAMETER (and compute VIS?)
 
@@ -270,12 +281,12 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             PMRA=0.0
             PMDEC=0.0
             #PMRA and DEC may be null without problem.    
-            pmratxt=scienceTarget.find('PMRA').text
-            if len(pmratxt) > 0:
-              PMRA=float(pmratxt)
-            pmdetxt=scienceTarget.find('PMDEC').text
-            if len(pmdetxt) > 0:
-              PMDEC=float(pmdetxt)
+            pmratxt=scienceTarget.find('PMRA')
+            if pmratxt != None :
+              PMRA=float(pmratxt.text)
+            pmdetxt=scienceTarget.find('PMDEC')
+            if pmdetxt != None:
+              PMDEC=float(pmdetxt.text)
 
             #but these should be defined.
             COU_GS_MAG=float(scienceTarget.find('FLUX_V').text)
@@ -291,7 +302,7 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             DIAMETER=0.0
             VIS=1.0
 
-            if OBJTYPE=='CALIBRATOR' and len(scienceTarget.find('DIAMETER').text) > 0:
+            if OBJTYPE=='CALIBRATOR' and scienceTarget.find('DIAMETER') != None > 0:
                DIAMETER=float(scienceTarget.find('DIAMETER').text)
                VIS=1.0 #FIXME
 
@@ -304,77 +315,80 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             SEQ_FT_ROBJ_VIS=-1.0
 
             # if FT Target is not ScTarget, we are in dual-field (TBD)
-            try:
-                ftTarget=observationConfiguration.find('FTTarget')
-                SEQ_FT_ROBJ_NAME=ftTarget.find('name').text
-                FTRA=ftTarget.find('RA').text
-                w=FTRA.rfind('.')
-                l=len(FTRA)
-                if l-w > 4:
-                    FTRA=FTRA[0:w+4]
-                FTDEC=ftTarget.find('DEC').text
-                w=FTDEC.rfind('.')
-                l=len(FTDEC)
-                if l-w > 4:
-                    FTDEC=FTDEC[0:w+4]
-                #no PMRA, PMDE for FT !!
-                SEQ_FI_HMAG=float(ftTarget.find('FLUX_H').text)  #just to say we must treat the case there is no FT Target
-                SEQ_FT_ROBJ_MAG=SEQ_FI_HMAG
-                SEQ_FT_ROBJ_DIAMETER=0.0 #FIXME
-                SEQ_FT_ROBJ_VIS=1.0      #FIXME
-                dualField=True
-            except:
-                pass
+            ftTarget=observationConfiguration.find('FTTarget')
+            if ftTarget != None :
+                try:
+                    SEQ_FT_ROBJ_NAME=ftTarget.find('name').text
+                    FTRA=ftTarget.find('RA').text
+                    w=FTRA.rfind('.')
+                    l=len(FTRA)
+                    if l-w > 4:
+                        FTRA=FTRA[0:w+4]
+                    FTDEC=ftTarget.find('DEC').text
+                    w=FTDEC.rfind('.')
+                    l=len(FTDEC)
+                    if l-w > 4:
+                        FTDEC=FTDEC[0:w+4]
+                    #no PMRA, PMDE for FT !!
+                    SEQ_FI_HMAG=float(ftTarget.find('FLUX_H').text)  #just to say we must treat the case there is no FT Target
+                    SEQ_FT_ROBJ_MAG=SEQ_FI_HMAG
+                    SEQ_FT_ROBJ_DIAMETER=0.0 #FIXME
+                    SEQ_FT_ROBJ_VIS=1.0      #FIXME
+                    dualField=True
+                except:
+                    print("incomplete FT Traget definition!")
 
             #AO target
-            try:
-                aoTarget=observationConfiguration.find('AOTarget')
-                AONAME=aoTarget.find('name').text
-                COU_AG_GSSOURCE='SETUPFILE' #since we have an AO
-                AORA=aoTarget.find('RA').text
-                w=AORA.rfind('.')
-                l=len(AORA)
-                if l-w > 4:
-                    AORA=AORA[0:w+4]
-                AODEC=aoTarget.find('DEC').text
-                w=AODEC.rfind('.')
-                l=len(AODEC)
-                if l-w > 4:
-                    AODEC=AODEC[0:w+4]
+            aoTarget=observationConfiguration.find('AOTarget')
+            if aoTarget != None:
+                try:
+                    AONAME=aoTarget.find('name').text
+                    COU_AG_GSSOURCE='SETUPFILE' #since we have an AO
+                    AORA=aoTarget.find('RA').text
+                    w=AORA.rfind('.')
+                    l=len(AORA)
+                    if l-w > 4:
+                        AORA=AORA[0:w+4]
+                    AODEC=aoTarget.find('DEC').text
+                    w=AODEC.rfind('.')
+                    l=len(AODEC)
+                    if l-w > 4:
+                        AODEC=AODEC[0:w+4]
 
-                COU_AG_PMA=0.0
-                COU_AG_PMD=0.0                 
-                #PMRA and DEC may be null without problem.    
-                pmratxt=aoTarget.find('PMRA').text
-                if len(pmratxt) > 0:
-                  COU_AG_PMA=float(pmratxt)
-                pmdetxt=aoTarget.find('PMDEC').text
-                if len(pmdetxt) > 0:
-                  COU_AG_PMD=float(pmdetxt)
+                    COU_AG_PMA=0.0
+                    COU_AG_PMD=0.0                 
+                    #PMRA and DEC may be null without problem.    
+                    pmratxt=aoTarget.find('PMRA')
+                    if pmratxt != None:
+                      COU_AG_PMA=float(pmratxt.text)
+                    pmdetxt=aoTarget.find('PMDEC')
+                    if pmdetxt != None:
+                      COU_AG_PMD=float(pmdetxt.text)
 
-            except:
-                pass
+                except:
+                    print("incomplete FT Traget definition!")
 
             #Guide Star 
-            try:
-                gsTarget=observationConfiguration.find('GSTarget')
-                GSNAME=gsTarget.find('name').text
-                COU_AG_SOURCE='SETUPFILE' #since we have an GS
-                GSRA=gsTarget.find('RA').text
-                w=GSRA.rfind('.')
-                l=len(GSRA)
-                if l-w > 4:
-                    GSRA=GSRA[0:w+4]
-                GSDEC=gsTarget.find('DEC').text
-                w=GSDEC.rfind('.')
-                l=len(GSDEC)
-                if l-w > 4:
-                    GSDEC=GSDEC[0:w+4]    
-                COU_GS_MAG=float(gsTarget.find('FLUX_V').text)
-                #no PMRA, PMDE for GS !!
+            gsTarget=observationConfiguration.find('GSTarget')
+            if gsTarget != None:
+                try:
+                    GSNAME=gsTarget.find('name').text
+                    COU_AG_SOURCE='SETUPFILE' #since we have an GS
+                    GSRA=gsTarget.find('RA').text
+                    w=GSRA.rfind('.')
+                    l=len(GSRA)
+                    if l-w > 4:
+                        GSRA=GSRA[0:w+4]
+                    GSDEC=gsTarget.find('DEC').text
+                    w=GSDEC.rfind('.')
+                    l=len(GSDEC)
+                    if l-w > 4:
+                        GSDEC=GSDEC[0:w+4]    
+                    COU_GS_MAG=float(gsTarget.find('FLUX_V').text)
+                    #no PMRA, PMDE for GS !!
 
-            except:
-                pass
+                except:
+                    print("incomplete FT Traget definition!")
 
             #LST interval
             try:
@@ -387,10 +401,13 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrumentMode, SCRA, SCDEC, PMRA, PMDEC, SEQ_INS_SOBJ_MAG, SEQ_FI_HMAG, DIAMETER, COU_AG_GSSOURCE, GSRA, GSDEC, COU_GS_MAG, COU_AG_PMA, COU_AG_PMD, dualField, FTRA, FTDEC, SEQ_FT_ROBJ_NAME, SEQ_FT_ROBJ_MAG, SEQ_FT_ROBJ_DIAMETER, SEQ_FT_ROBJ_VIS , LSTINTERVAL)
             win.addToLog("Processed: "+NAME)
         #endfor
-        #
+        if doFolder:
+            containerId=parentContainerId
+            doFolder=False
     except:
         print("General error or Absent Parameter in template (missing magnitude?), OB not set.")
         setProgress(0)
+
 # here dit must be a string since this is what p2 expects. NOT an integer or real/double.
 def getDit(mag,spec,pol,tel,mode):
     string_dit="1"

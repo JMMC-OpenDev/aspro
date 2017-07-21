@@ -76,6 +76,11 @@ class ApiConnection:
         return self.get('/containers/%d/items' % containerId)
     
     def getFolders(self, containerId):
+        """
+        Get a list of *Folder* items in container.
+        usage:
+            folderList = api.getFolders(containerId)
+        """
         result=[]
         itemList, _ = self.getItems(containerId)
         for i in range(len(itemList)):
@@ -117,6 +122,13 @@ class ApiConnection:
             ob, obVersion = api.createItem('OB', containerId, 'OliOB')
         """
         return self.post('/containers/%d/items' % containerId, {'itemType': type, 'name': name})
+      
+    def createFolder(self,containerId,name):
+        """
+        usage:
+            fld = api.createFolder(containerId, 'My New Folder')
+        """
+        return self.createItem('Folder',containerId,name)
 
     def createOB(self, containerId, name):
         """
