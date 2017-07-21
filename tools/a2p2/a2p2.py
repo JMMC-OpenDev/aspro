@@ -5,6 +5,7 @@ import xml.etree.ElementTree
 import p2api
 import gi
 import time
+import re
 from astropy.vo.samp import SAMPIntegratedClient
 from astropy.table import Table
 
@@ -18,7 +19,7 @@ class LoginWindow(Gtk.Window):
 
         self.flag=flag
         Gtk.Window.__init__(self, title="Connect with ESO DATABASE")
-        self.set_size_request(200, 100)
+        self.set_size_request(200, 300)
 
         self.timeout_id = None
 
@@ -50,6 +51,13 @@ class LoginWindow(Gtk.Window):
         self.scrollable.set_vexpand(True)
         vbox.pack_start(self.scrollable,True,True,0)        
 
+        self.progressbar = Gtk.ProgressBar()
+        vbox.pack_start(self.progressbar, False, True, 0)
+        
+        self.log = Gtk.Label()
+        self.log.set_line_wrap(True)
+        vbox.pack_start(self.log, False, True, 0)
+        
         hbox = Gtk.Box(spacing=6)
         vbox.pack_start(hbox, False, False, 0)
 
@@ -60,6 +68,9 @@ class LoginWindow(Gtk.Window):
         self.buttonabort = Gtk.Button(label="ABORT")
         self.buttonabort.connect("clicked", self.on_buttonabort_clicked)
         hbox.pack_start(self.buttonabort, False, True, 0)
+        
+    def addToLog(self,text):
+        self.log.set_label(text)
 
     def on_buttonok_clicked(self, widget):
         self.login[0]=(self.username.get_text())
@@ -72,6 +83,10 @@ class LoginWindow(Gtk.Window):
         self.api = p2api.ApiConnection(type, self.login[0], self.login[1])
         api=self.api
         runs, _ = self.api.getRuns()
+        if len(runs) == 0:
+            self.ShowErrorMessage("No Runs defined, impossible to program ESO's P2 interface.")
+            self.flag[0]=-1
+            return
 
         self.buttonok.destroy()
         self.password_hbox.destroy()
@@ -86,6 +101,7 @@ class LoginWindow(Gtk.Window):
         self.treeiter=[]
         #one could probably limit the treeView with the instrument supported by ASPRO!!!!
         supportedInstruments=['GRAVITY','MATISSE','AMBER','PIONIER']
+            
         for i in range(len(runs)):
             if supportedInstruments.count(runs[i]['instrument']) == 1:
                 runName=runs[i]['progId']
@@ -132,7 +148,7 @@ class LoginWindow(Gtk.Window):
             runId=self.containerId[index]
             run, _ = self.api.getRun(runId)
             containerId = run["containerId"]
-            print ('*** Working with run', run["progId"], run["instrument"], ', containerId: ', containerId, "***")
+#            print ('*** Working with run', run["progId"], run["instrument"], ', containerId: ', containerId, "***")
             self.containerInfo[2]=containerId #containerID
             
     def on_tree_selection_changed(self, selection):
@@ -144,6 +160,7 @@ class LoginWindow(Gtk.Window):
                new_containerId_same_run=model[treeiter][2] 
                folderName = model[treeiter][1]
                print ('*** Working in Folder', folderName , ', containerId: ', new_containerId_same_run, "***")
+               win.addToLog('Folder: '+folderName)
                self.containerInfo[2]=new_containerId_same_run
            else:
                instru=model[treeiter][1]
@@ -155,6 +172,7 @@ class LoginWindow(Gtk.Window):
                run, _ = self.api.getRun(runId)
                containerId = run["containerId"]
                print ('*** Working with run', run["progId"], run["instrument"], ', containerId: ', containerId, "***")
+               win.addToLog('Run: '+id)
                self.containerInfo[2]=containerId #containerID
 
     def on_buttonabort_clicked(self, widget):
@@ -169,6 +187,26 @@ class LoginWindow(Gtk.Window):
     def get_api(self):
         return self.api
 
+    def ShowErrorMessage(self,text):
+        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR,
+            Gtk.ButtonsType.OK, "Error")
+        dialog.format_secondary_text(text)
+        dialog.run()
+        dialog.destroy()
+        
+    def ShowWarningMessage(self,text):
+        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.WARNING,
+            Gtk.ButtonsType.OK, "Warning")
+        dialog.format_secondary_text(text)
+        dialog.run()
+        dialog.destroy()
+        
+    def ShowInfoMessage(self,text):
+        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO,
+            Gtk.ButtonsType.OK, "Success")
+        dialog.format_secondary_markup(text)
+        dialog.run()
+        dialog.destroy()        
 
 def getSkyDiff(ra,dec,ftra,ftdec):
     science=SkyCoord(ra,dec, frame='icrs',unit='deg')
@@ -178,15 +216,18 @@ def getSkyDiff(ra,dec,ftra,ftdec):
     return [ ra_offset.deg*3600*1000, dec_offset.deg*3600*1000] #in mas
 
 def parseXmlMessage(e, api, list, username): #e is parsedTree.
+
+    setProgress(0)
     currentInstrument=list[1]
     containerId=list[2]
-
+    
     try:
         interferometerConfiguration=e.find('interferometerConfiguration')
 
         interferometer=interferometerConfiguration.find('name').text
         if interferometer != "VLTI":
             print("ASPRO not set for VLTI, no action taken.")
+            win.ShowErrorMessage("ASPRO not set for VLTI, no action taken.")
             return
 
         BASELINE=interferometerConfiguration.find('stations').text
@@ -195,12 +236,14 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
         instrument=instrumentConfiguration.find('name').text
         if instrument != currentInstrument:
             print("ASPRO not set for currently selected instrument: "+currentInstrument)
+            win.ShowErrorMessage("ASPRO not set for currently selected instrument: "+currentInstrument)
             return
         # FIXME: TBD CHANGE TO HAVE OTHER INSTRUMENTS THAN GRAVITY!    
         if instrument != "GRAVITY":
             print("ASPRO not set for GRAVITY, no action taken.")
+            win.ShowErrorMessage("ASPRO not set for GRAVITY, no action taken.")
             return
-            
+
         instrumentMode=instrumentConfiguration.find('instrumentMode').text
         for observationConfiguration in e.findall('observationConfiguration'):
         # science. If calibrator, get also DIAMETER (and compute VIS?)
@@ -222,9 +265,19 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             w=SCDEC.rfind('.')
             l=len(SCDEC)
             if l-w > 4:
-                SCDEC=SCDEC[0:w+4]    
-            PMRA=float(scienceTarget.find('PMRA').text)
-            PMDEC=float(scienceTarget.find('PMDEC').text)
+                SCDEC=SCDEC[0:w+4]
+
+            PMRA=0.0
+            PMDEC=0.0
+            #PMRA and DEC may be null without problem.    
+            pmratxt=scienceTarget.find('PMRA').text
+            if len(pmratxt) > 0:
+              PMRA=float(pmratxt)
+            pmdetxt=scienceTarget.find('PMDEC').text
+            if len(pmdetxt) > 0:
+              PMDEC=float(pmdetxt)
+
+            #but these should be defined.
             COU_GS_MAG=float(scienceTarget.find('FLUX_V').text)
             SEQ_INS_SOBJ_MAG=float(scienceTarget.find('FLUX_K').text)
             SEQ_FI_HMAG=float(scienceTarget.find('FLUX_H').text)
@@ -237,9 +290,11 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             dualField=False
             DIAMETER=0.0
             VIS=1.0
-            if OBJTYPE=='CALIBRATOR':
+
+            if OBJTYPE=='CALIBRATOR' and len(scienceTarget.find('DIAMETER').text) > 0:
                DIAMETER=float(scienceTarget.find('DIAMETER').text)
                VIS=1.0 #FIXME
+
             # initialize FT variables (must exist)
             FTRA=""
             FTDEC=""
@@ -261,16 +316,15 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                 w=FTDEC.rfind('.')
                 l=len(FTDEC)
                 if l-w > 4:
-                    FTDEC=FTDEC[0:w+4]    
-                FTPMRA=float(ftTarget.find('PMRA').text)
-                FTPMDEC=float(ftTarget.find('PMDEC').text)
+                    FTDEC=FTDEC[0:w+4]
+                #no PMRA, PMDE for FT !!
                 SEQ_FI_HMAG=float(ftTarget.find('FLUX_H').text)  #just to say we must treat the case there is no FT Target
                 SEQ_FT_ROBJ_MAG=SEQ_FI_HMAG
                 SEQ_FT_ROBJ_DIAMETER=0.0 #FIXME
                 SEQ_FT_ROBJ_VIS=1.0      #FIXME
                 dualField=True
             except:
-                print('No FT')
+                pass
 
             #AO target
             try:
@@ -286,11 +340,20 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                 w=AODEC.rfind('.')
                 l=len(AODEC)
                 if l-w > 4:
-                    AODEC=AODEC[0:w+4]    
-                COU_AG_PMA=float(aoTarget.find('PMRA').text)
-                COU_AG_PMD=float(aoTarget.find('PMDEC').text)
+                    AODEC=AODEC[0:w+4]
+
+                COU_AG_PMA=0.0
+                COU_AG_PMD=0.0                 
+                #PMRA and DEC may be null without problem.    
+                pmratxt=aoTarget.find('PMRA').text
+                if len(pmratxt) > 0:
+                  COU_AG_PMA=float(pmratxt)
+                pmdetxt=aoTarget.find('PMDEC').text
+                if len(pmdetxt) > 0:
+                  COU_AG_PMD=float(pmdetxt)
+
             except:
-                print('No AO')
+                pass
 
             #Guide Star 
             try:
@@ -308,25 +371,26 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                 if l-w > 4:
                     GSDEC=GSDEC[0:w+4]    
                 COU_GS_MAG=float(gsTarget.find('FLUX_V').text)
+                #no PMRA, PMDE for GS !!
 
             except:
-                print('No GS')
+                pass
 
             #LST interval
             try:
                 obsConstraint=observationConfiguration.find('observationConstraints')
                 LSTINTERVAL=obsConstraint.find('LSTinterval').text
             except:
-                print('No LST interval defined')
+                pass
 
             #then call the ob-creation using the API.
             createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrumentMode, SCRA, SCDEC, PMRA, PMDEC, SEQ_INS_SOBJ_MAG, SEQ_FI_HMAG, DIAMETER, COU_AG_GSSOURCE, GSRA, GSDEC, COU_GS_MAG, COU_AG_PMA, COU_AG_PMD, dualField, FTRA, FTDEC, SEQ_FT_ROBJ_NAME, SEQ_FT_ROBJ_MAG, SEQ_FT_ROBJ_DIAMETER, SEQ_FT_ROBJ_VIS , LSTINTERVAL)
-            print("Processed: "+NAME)
+            win.addToLog("Processed: "+NAME)
         #endfor
         #
     except:
-        print("Corrupted XML?, no action taken.")
-
+        print("General error or Absent Parameter in template (missing magnitude?), OB not set.")
+        setProgress(0)
 # here dit must be a string since this is what p2 expects. NOT an integer or real/double.
 def getDit(mag,spec,pol,tel,mode):
     string_dit="1"
@@ -417,6 +481,7 @@ def getDit(mag,spec,pol,tel,mode):
 #define function creating the OB:
 def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrumentMode, SCRA, SCDEC, PMRA, PMDEC, SEQ_INS_SOBJ_MAG, SEQ_FI_HMAG, DIAMETER, COU_AG_GSSOURCE, GSRA, GSDEC, COU_GS_MAG, COU_AG_PMA, COU_AG_PMD, dualField, FTRA, FTDEC, SEQ_FT_ROBJ_NAME, SEQ_FT_ROBJ_MAG, SEQ_FT_ROBJ_DIAMETER, SEQ_FT_ROBJ_VIS, LSTINTERVAL):
 
+    setProgress(0.1)
     # UT or AT?
     isUT = ( BASELINE[0] == "U" )
     if isUT:
@@ -445,10 +510,10 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
         #compute x,y between science and ref beams:
         diff=getSkyDiff(SCRA,SCDEC,FTRA,FTDEC)
         if np.abs(diff[0]) < SCtoREFminDist :
-            print("Dual-Field distance of two stars is  < "+str(SCtoREFminDist)+" mas, Please Correct.")
+            win.ShowErrorMessage("Dual-Field distance of two stars is  < "+str(SCtoREFminDist)+" mas, Please Correct.")
             return
         elif  np.abs(diff[0]) > SCtoREFmaxDist :
-            print("Dual-Field distance of two stars is  > "+str(SCtoREFmaxDist)+" mas, Please Correct.")
+            win.ShowErrorMessage("Dual-Field distance of two stars is  > "+str(SCtoREFmaxDist)+" mas, Please Correct.")
             return
         
     if instrumentMode == 'LOW-COMBINED':
@@ -482,7 +547,7 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
         INS_SPEC_POL='IN'
         string_dit = getDit(SEQ_INS_SOBJ_MAG,2,1,tel,dualmode)
     else:
-        print("Invalid Instrument Mode, Please Correct.")
+        win.ShowErrorMessage("Invalid Instrument Mode, Please Correct.")
         return
 
     #compute ndit, nexp
@@ -512,12 +577,13 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
 
     #everything seems OK
     #create new OB in container:
+    goodName=re.sub('[^A-Za-z0-9]+', '_', NAME.strip())
     if OBJTYPE == 'SCIENCE':
         isCalib=False
-        OBS_DESCR='SCI_'+NAME.replace(' ,:', '_')+'_GRAVITY_'+BASELINE.replace(' ', '')+'_'+instrumentMode
+        OBS_DESCR='SCI_'+goodName+'_GRAVITY_'+BASELINE.replace(' ', '')+'_'+instrumentMode
     else:
         isCalib=True
-        OBS_DESCR='CAL_'+NAME.replace(' ,:', '_')+'_GRAVITY_'+BASELINE.replace(' ', '')+'_'+instrumentMode
+        OBS_DESCR='CAL_'+goodName+'_GRAVITY_'+BASELINE.replace(' ', '')+'_'+instrumentMode
     ob, obVersion = api.createOB(containerId, OBS_DESCR)
     obId = ob['obId']
 #    print ('Created OB', obId)
@@ -561,6 +627,8 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
     ## else:
     api.saveSiderealTimeConstraints(obId,[ { 'from': lstStartSex,  'to': lstEndSex  } ], stcVersion)
 #    print('Saved sidereal time constraints')
+
+    setProgress(0.2)
     
     
     #then, attach acquisition template(s)
@@ -614,6 +682,10 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
             }, tplVersion)
     
     templateId = tpl['templateId']
+    
+    
+    setProgress(0.3)
+
 #    print('Created acquisition template', templateId)
 
 
@@ -630,6 +702,9 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
         else:
             tpl, tplVersion = api.createTemplate(obId, 'GRAVITY_single_obs_exp')
     templateId = tpl['templateId']
+
+    setProgress(0.4)
+    
     #print('Created acquisition template', templateId)
     
     # put values. they are the same except for dual obs science (?)
@@ -656,20 +731,29 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
 
     ## print('Updated parameters for acquisition template',tpl['templateName'])
     
-    
+    setProgress(0.5)
+
     #verify OB online
     response, _ = api.verifyOB(obId, True, obVersion)
+
+    setProgress(1.0)
+
     if response['observable']:
-        print('*** Congratulations. Your OB' , obId, ob['name'], 'is observable!***')
+        win.ShowInfoMessage('OB '+str(obId)+' '+ob['name']+' is OK.')
+        win.addToLog('OB: '+str(obId)+' is ok')
     else:
-        print('OB', obId, 'is >>not observable<<. See messages below.')
+        win.ShowWarningMessage('OB '+str(obId)+' is <b>not observable</b>. Messages are:'+'\n'.join(response['messages']))
     
-    print(' ', '\n '.join(response['messages']))
     
  #   # fetch OB again to confirm its status change
  #   ob, obVersion = api.getOB(obId)
  #   print('Status of verified OB', obId, 'is now', ob['obStatus'])
     
+def setProgress(perc):
+  win.progressbar.set_fraction(perc)
+  while (Gtk.events_pending ()):
+            Gtk.main_iteration ()
+  
 
 #------------------------------------------------------------start & main loop-----------------------
 # Instantiate the client and connect to the hub
@@ -704,6 +788,9 @@ client.bind_receive_notification("ob.load.data", r.receive_notification)
 # bool of status change
 flag=[0]
 
+import getpass
+localuser=getpass.getuser()
+
 username='52052'
 password='tutorial'
 loginList=[username, password] #apparently strings are immutable, so list of strings is next best.
@@ -735,7 +822,7 @@ try:
                     ob_url=ob_url[5:]
                 #print("ob_url: ", ob_url)
                 e = xml.etree.ElementTree.parse(ob_url)
-                parseXmlMessage(e,api,containerInfo, username)
+                parseXmlMessage(e,api,containerInfo, localuser)
             r.received=False
         if flag[0]==1:
             api=win.get_api()
