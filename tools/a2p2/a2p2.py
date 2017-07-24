@@ -12,6 +12,25 @@ from astropy.table import Table
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 
+#help text in Pango Markup syntax https://developer.gnome.org/pango/stable/PangoMarkupFormat.html
+HELPTEXT="""
+This applet provides the link between ASPRO (that you should have started) and ESO's P2 repository for Observing Blocks (OBs).
+
+<span foreground="blue" size="x-large"> <b>Login:</b></span>
+You must log in to the ESO User Portal using your identifiers to access the P2 repository. Please check on the ESO website in case of doubt.
+
+<span foreground="blue" size="x-large"> <b>Select Run ID:</b> </span>
+After successful login, you are presented with the Runs compatible with Aspro's known instruments. Select the Run, and eventually the subfolder of this Run, where you want to create the OB. Each Run corresponds to a specific instrument. This instrument must be the same as the one selected in ASPRO. 
+
+<span foreground="blue" size="x-large"> <b>Send configuration from Aspro:</b></span>
+- In ASPRO, have an object, or an object selected, and check that all important informations (magnitudes, but also Instrument and Fringe Tracker Modes, eventually hour angles), are correctly set.
+- In menu "Interop" select "<b>Send Obs. blocks to A2p2</b>"
+- Block(s) are created and put in the P2 repository.
+- If the source had one or more calibrators, blocks are created for them too.
+- For each block submitted, a report is produced. Warnings are usually not significant.
+- For more than 1 object sent, a <b>folder</b> containing the two or more blocks <b>is created</b>. In the absence of availability of grouping OBs (like for CAL-SCI-CAL) provided by ESO, this is the closets we can do.
+- All the new OBs and folders will be available on <span foreground="blue" > <a href=\"https://eso.org/p2\">p2web</a> </span>
+"""
 class LoginWindow(Gtk.Window):
     def __init__(self,loginlist,containerInfo,flag):  #passing by pointer on list is a GREAT PAIN IN THE...
         self.login=loginlist
@@ -69,6 +88,10 @@ class LoginWindow(Gtk.Window):
         self.buttonabort.connect("clicked", self.on_buttonabort_clicked)
         hbox.pack_start(self.buttonabort, False, True, 0)
         
+        self.buttonhelp = Gtk.Button(label="HELP")
+        self.buttonhelp.connect("clicked", self.on_buttonhelp_clicked)
+        hbox.pack_start(self.buttonhelp, False, True, 0)
+
     def addToLog(self,text):
         self.log.set_label(text)
 
@@ -205,6 +228,13 @@ class LoginWindow(Gtk.Window):
         dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO,
             Gtk.ButtonsType.OK, "Success")
         dialog.format_secondary_markup(text)
+        dialog.run()
+        dialog.destroy()        
+
+    def on_buttonhelp_clicked(self, widget):
+        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO,
+            Gtk.ButtonsType.OK, "A2p2 help")
+        dialog.format_secondary_markup(HELPTEXT)
         dialog.run()
         dialog.destroy()        
 
