@@ -298,13 +298,21 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             scienceTarget=observationConfiguration.find('SCTarget')
             NAME=scienceTarget.find('name').text
             SCRA=scienceTarget.find('RA').text
+            # RA MUST have 3 digits precision and DEC at least 2!!!
             w=SCRA.rfind('.')
             l=len(SCRA)
+            if l-w < 4:
+                win.ShowErrorMessage("Object "+NAME+" has a too low precision in RA to be useable by VLTI, please correct.")
+                return
+                
             if l-w > 4:
                 SCRA=SCRA[0:w+4]
             SCDEC=scienceTarget.find('DEC').text
             w=SCDEC.rfind('.')
             l=len(SCDEC)
+            if l-w < 3:
+                win.ShowErrorMessage("Object "+NAME+" has a too low precision in DEC to be useable by VLTI, please correct.")
+                return
             if l-w > 4:
                 SCDEC=SCDEC[0:w+4]
 
@@ -332,7 +340,7 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             DIAMETER=0.0
             VIS=1.0
 
-            if OBJTYPE=='CALIBRATOR' and scienceTarget.find('DIAMETER') != None > 0:
+            if OBJTYPE=='CALIBRATOR' and scienceTarget.find('DIAMETER') != None :
                DIAMETER=float(scienceTarget.find('DIAMETER').text)
                VIS=1.0 #FIXME
 
@@ -352,11 +360,17 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                     FTRA=ftTarget.find('RA').text
                     w=FTRA.rfind('.')
                     l=len(FTRA)
+                    if l-w < 4:
+                        win.ShowErrorMessage("Object "+SEQ_FT_ROBJ_NAME+" has a too low precision in RA to be useable by VLTI, please correct.")
+                        return
                     if l-w > 4:
                         FTRA=FTRA[0:w+4]
                     FTDEC=ftTarget.find('DEC').text
                     w=FTDEC.rfind('.')
                     l=len(FTDEC)
+                    if l-w < 3:
+                        win.ShowErrorMessage("Object "+SEQ_FT_ROBJ_NAME+" has a too low precision in DEC to be useable by VLTI, please correct.")
+                    return
                     if l-w > 4:
                         FTDEC=FTDEC[0:w+4]
                     #no PMRA, PMDE for FT !!
@@ -366,7 +380,7 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                     SEQ_FT_ROBJ_VIS=1.0      #FIXME
                     dualField=True
                 except:
-                    print("incomplete FT Traget definition!")
+                    print("incomplete Frunge Tracker Target definition!")
 
             #AO target
             aoTarget=observationConfiguration.find('AOTarget')
@@ -396,7 +410,7 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                       COU_AG_PMD=float(pmdetxt.text)
 
                 except:
-                    print("incomplete FT Traget definition!")
+                    print("incomplete Adaptive Optics Target definition!")
 
             #Guide Star 
             gsTarget=observationConfiguration.find('GSTarget')
@@ -418,7 +432,7 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                     #no PMRA, PMDE for GS !!
 
                 except:
-                    print("incomplete FT Traget definition!")
+                    print("incomplete GuideStar Target definition!")
 
             #LST interval
             try:
