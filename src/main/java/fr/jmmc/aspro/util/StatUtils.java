@@ -193,13 +193,7 @@ public final class StatUtils {
         }
     }
 
-    public static double[] moments(final double[] array) {
-        final double[] moments = new double[4];
-        moments(array, moments);
-        return moments;
-    }
-
-    public static void moments(final double[] array, final double[] moments) {
+    public static double mean(final double[] array) {
         double sample, sum = 0.0;
 
         for (int n = 0; n < array.length; n++) {
@@ -207,11 +201,19 @@ public final class StatUtils {
             // No Compensated-summation (double):
             sum += sample;
         }
+        return (sum / array.length);
+    }
 
-        // mean(norm):
-        final double mean = sum / array.length;
+    public static double[] moments(final double[] array) {
+        final double[] moments = new double[4];
+        moments(array, moments);
+        return moments;
+    }
 
-        double diff;
+    public static void moments(final double[] array, final double[] moments) {
+        final double mean = mean(array);
+
+        double sample, diff;
         double sum_diff = 0.0;
         double sum_diff2 = 0.0;
 

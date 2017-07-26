@@ -47,6 +47,7 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -61,6 +62,14 @@ public final class Aspro2 extends App {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(Aspro2.class.getName());
+    /** CLI arg - process */
+    public final static String ARG_PROCESS = "process";
+    /** CLI arg - image (fits) */
+    public final static String ARG_IMAGE = "image";
+    /** CLI arg - input (oifits) */
+    public final static String ARG_INPUT = "input";
+    /** CLI arg - output (oifits) */
+    public final static String ARG_OUTPUT = "output";
 
     /* members */
     /** Setting Panel */
@@ -91,6 +100,21 @@ public final class Aspro2 extends App {
      */
     public Aspro2(final String[] args) {
         super(args);
+    }
+
+    /**
+     * Add addExportListener PDF/PNG/JPG custom command line argument(s)
+     */
+    @Override
+    protected void defineCustomCommandLineArgumentsAndHelp() {
+        addCustomCommandLineArgument(ARG_PROCESS, false, "process an OIFITS file and model to compute observables",
+                App.ExecMode.TTY);
+        addCustomCommandLineArgument(ARG_IMAGE, true, "the input model image to process",
+                App.ExecMode.TTY);
+        addCustomCommandLineArgument(ARG_INPUT, true, "the input OIFITS file to process",
+                App.ExecMode.TTY);
+        addCustomCommandLineArgument(ARG_OUTPUT, true, "the output OIFITS file to write",
+                App.ExecMode.TTY);
     }
 
     /**
@@ -134,7 +158,9 @@ public final class Aspro2 extends App {
 
         prepareFrame();
 
-        createPreferencesView();
+        if (!Bootstrapper.isHeadless()) {
+            createPreferencesView();
+        }
 
         // Create a new observation and update the GUI :
         // even if opening a file in case the file can not be loaded:
@@ -172,7 +198,11 @@ public final class Aspro2 extends App {
             public void run() {
                 logger.debug("Aspro2.execute() handler called.");
 
-                getFrame().setVisible(true);
+                // headless mode:
+                final JFrame appFrame = App.getExistingFrame();
+                if (appFrame != null) {
+                    appFrame.setVisible(true);
+                }
             }
         });
     }
@@ -255,40 +285,44 @@ public final class Aspro2 extends App {
      */
     private void prepareFrame() {
         logger.debug("prepareFrame : enter");
-        final JFrame frame = new JFrame(ApplicationDescription.getInstance().getProgramName());
-
-        // handle frame icon
-        final Image jmmcFavImage = ResourceImage.JMMC_FAVICON.icon().getImage();
-        frame.setIconImage(jmmcFavImage);
-
-        // get screen size to adjust minimum window size :
-        final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-        logger.info("screen size = {} x {}", screenSize.getWidth(), screenSize.getHeight());
-
-        // hack for screens smaller than 1152x864 screens :
-        final int appWidth = 950;
-        final int appHeightMin = 700;
-        final int appHeightPref = (screenSize.getHeight() >= 864) ? 800 : appHeightMin;
-
-        final Dimension dim = new Dimension(appWidth, appHeightMin);
-        frame.setMinimumSize(dim);
-        frame.setPreferredSize(new Dimension(appWidth, appHeightPref));
-        frame.addComponentListener(new ComponentResizeAdapter(dim));
-
-        // setupGui the main panel :
-        final Container container = frame.getContentPane();
-        createContent(container);
 
         // initialize the actions :
         registerActions();
 
-        // Handle status bar
-        container.add(StatusBar.getInstance(), BorderLayout.SOUTH);
+        final Container container;
+
+        if (Bootstrapper.isHeadless()) {
+            container = null;
+        } else {
+            final JFrame frame = new JFrame(ApplicationDescription.getInstance().getProgramName());
+
+            // handle frame icon
+            final Image jmmcFavImage = ResourceImage.JMMC_FAVICON.icon().getImage();
+            frame.setIconImage(jmmcFavImage);
+
+            // get screen size to adjust minimum window size :
+            final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+            logger.info("screen size = {} x {}", screenSize.getWidth(), screenSize.getHeight());
+
+            // hack for screens smaller than 1152x864 screens :
+            final int appWidth = 950;
+            final int appHeightMin = 700;
+            final int appHeightPref = (screenSize.getHeight() >= 864) ? 800 : appHeightMin;
+
+            final Dimension dim = new Dimension(appWidth, appHeightMin);
+            frame.setMinimumSize(dim);
+            frame.setPreferredSize(new Dimension(appWidth, appHeightPref));
+            frame.addComponentListener(new ComponentResizeAdapter(dim));
+
+            App.setFrame(frame);
+
+            container = frame.getContentPane();
+        }
+        // setup Gui the main panel :
+        createContent(container);
 
         StatusBar.show("application started.");
-
-        App.setFrame(frame);
 
         logger.debug("prepareFrame : exit");
     }
@@ -298,11 +332,16 @@ public final class Aspro2 extends App {
      * @param container frame's panel
      */
     private void createContent(final Container container) {
-        this.settingPanel = new SettingPanel();
-        this.settingPanel.setName("settingPanel");
+        if (container != null) {
+            this.settingPanel = new SettingPanel();
+            this.settingPanel.setName("settingPanel");
 
-        // adds the panel in scrollPane
-        container.add(new JScrollPane(this.settingPanel), BorderLayout.CENTER);
+            // adds the panel in scrollPane
+            container.add(new JScrollPane(this.settingPanel), BorderLayout.CENTER);
+
+            // Handle status bar
+            container.add(StatusBar.getInstance(), BorderLayout.SOUTH);
+        }
     }
 
     /**
@@ -350,7 +389,7 @@ public final class Aspro2 extends App {
 
         // Send VOTable (SAMP) :
         new SendVOTableAction();
-        
+
         // Send OB (SAMP) :
         new SendOBAction();
 
@@ -373,5 +412,46 @@ public final class Aspro2 extends App {
      */
     public SettingPanel getSettingPanel() {
         return this.settingPanel;
+    }
+
+    /**
+     * check the arguments given by the user in TTY mode
+     * and performs the requested action (process)
+     * Note: executed by the thread [main]: must block until asynchronous task finishes !
+     * @throws IllegalArgumentException if one (or several) argument is missing or invalid
+     */
+    @Override
+    protected void processShellCommandLine() throws IllegalArgumentException {
+        final Map<String, String> argValues = getCommandLineArguments();
+        logger.debug("processShellCommandLine: {}", argValues);
+
+        // note: open file is ignored 
+        logger.info("processShellCommandLine: {}", argValues);
+
+        if (argValues.get(ARG_PROCESS) != null) {
+            // Process action
+            final String inputFile = argValues.get(ARG_INPUT);
+            final String imageFile = argValues.get(ARG_IMAGE);
+            final String outputFile = argValues.get(ARG_OUTPUT);
+
+            if (inputFile == null) {
+                logger.warn("Missing {} argument !", ARG_INPUT);
+                showArgumentsHelp();
+            }
+            if (imageFile == null) {
+                logger.warn("Missing {} argument !", ARG_IMAGE);
+                showArgumentsHelp();
+            }
+
+            if (inputFile != null && imageFile != null) {
+                // Should perform in background ?
+                OIFitsProcessor job = new OIFitsProcessor(imageFile, inputFile, outputFile);
+
+                job.process();
+
+                // Wait for local launcher to terminate ?
+            }
+        }
+        logger.debug("processShellCommandLine: done.");
     }
 }
