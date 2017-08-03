@@ -947,7 +947,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         // Get OI_VIS table :
         final OIVis vis = this.oiFitsFile.getOiVis()[0];
-        final short nRows = vis.getNbRows();
+        final int nRows = vis.getNbRows();
 
         // Create OI_VIS2 table :
         final OIVis2 vis2 = new OIVis2(this.oiFitsFile, this.insNameKeyword, nRows);
