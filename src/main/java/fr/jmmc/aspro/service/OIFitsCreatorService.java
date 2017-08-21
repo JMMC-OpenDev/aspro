@@ -399,7 +399,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private void createOIArray() {
 
         // Create OI_ARRAY table :
-        final OIArray oiArray = new OIArray(this.oiFitsFile, (short) this.interferometer.getStations().size());
+        final OIArray oiArray = new OIArray(this.oiFitsFile, this.interferometer.getStations().size());
 
         // Array Name :
         oiArray.setArrName(this.arrNameKeyword);
@@ -444,7 +444,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private void createOITarget() {
 
         // Create OI_TARGET table :
-        final OITarget oiTarget = new OITarget(this.oiFitsFile, (short) 1);
+        final OITarget oiTarget = new OITarget(this.oiFitsFile, 1);
         oiTarget.getTargetId()[0] = TARGET_ID;
         oiTarget.getTarget()[0] = this.target.getName();
 
@@ -499,7 +499,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
      */
     private void createOIWaveLength() {
         // Create OI_WAVELENGTH table :
-        final short nWaveLengths = (short) this.waveLengths.length;
+        final int nWaveLengths = this.waveLengths.length;
         final OIWavelength waves = new OIWavelength(this.oiFitsFile, nWaveLengths);
         waves.setInsName(this.insNameKeyword);
 
@@ -582,7 +582,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
 
         // Create OI_VIS table :
-        final OIVis vis = new OIVis(this.oiFitsFile, this.insNameKeyword, (short) (this.nObsPoints * this.nBaseLines));
+        final OIVis vis = new OIVis(this.oiFitsFile, this.insNameKeyword, this.nObsPoints * this.nBaseLines);
         vis.setArrName(this.arrNameKeyword);
 
         // Get target information for each UV point:
@@ -1158,7 +1158,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final OIVis vis = this.oiFitsFile.getOiVis()[0];
 
         // Create OI_T3 table :
-        final OIT3 t3 = new OIT3(this.oiFitsFile, this.insNameKeyword, (short) (this.nObsPoints * nTriplets));
+        final OIT3 t3 = new OIT3(this.oiFitsFile, this.insNameKeyword, this.nObsPoints * nTriplets);
         t3.setArrName(this.arrNameKeyword);
         t3.setDateObs(vis.getDateObs());
 
