@@ -220,7 +220,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                 // U2/V2
                 uCoords[k + 1] = u2Coords[i];
                 vCoords[k + 1] = v2Coords[i];
-                // U3/V3 = (U1+U2)/(V1+V2)
+                // U3/V3 = (U1+U2) (V1+V2)
                 uCoords[k + 2] = u1Coords[i] + u2Coords[i];
                 vCoords[k + 2] = v1Coords[i] + v2Coords[i];
             }
@@ -593,7 +593,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
         final boolean[][] flags = vis2.getFlag();
 
-        final NoiseService ns = null; // No NOISE
+        final NoiseService ns = this.noiseService;
 
         // vars:
         double visRe, visIm, errCVis, bias;
@@ -805,7 +805,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         for (int k = 0, vp, l, n; k < nRows; k++) {
 
             // position in the row group :
-            vp = k;
+            vp = 3 * k;
             /*
             // Use relative positions to get the 3 complex vectors (AB, BC, AC)
             relPos = triplet.getRelativePosition();
