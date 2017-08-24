@@ -32,6 +32,7 @@ import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oitools.OIFitsConstants;
+import fr.jmmc.oitools.meta.OIFitsStandard;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsChecker;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -304,7 +305,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final long start = System.nanoTime();
 
         // create a new EMPTY OIFits structure :
-        this.oiFitsFile = new OIFitsFile();
+        this.oiFitsFile = new OIFitsFile(OIFitsStandard.VERSION_1);
 
         // Create station mappings:
         this.stationMapping = createStationMapping(this.interferometer.getStations());
