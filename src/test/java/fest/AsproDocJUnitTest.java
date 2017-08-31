@@ -14,6 +14,7 @@ import fr.jmmc.jmcs.data.preference.CommonPreferences;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
+import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.Point;
 import static java.awt.event.KeyEvent.*;
@@ -26,6 +27,7 @@ import org.apache.commons.lang.SystemUtils;
 import org.fest.swing.annotation.GUITest;
 import org.fest.swing.core.GenericTypeMatcher;
 import static org.fest.swing.core.KeyPressInfo.*;
+import org.fest.swing.core.matcher.DialogMatcher;
 import static org.fest.swing.core.matcher.DialogMatcher.*;
 import org.fest.swing.core.matcher.FrameMatcher;
 import org.fest.swing.core.matcher.JButtonMatcher;
@@ -41,6 +43,7 @@ import org.fest.swing.fixture.JTextComponentFixture;
 import org.fest.swing.util.Platform;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -400,18 +403,17 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     public void m09_shouldOpenPreferences() {
         window.menuItemWithPath("Edit", "Preferences...").click();
 
-        final Frame prefFrame = robot().finder().find(FrameMatcher.withTitle("Preferences"));
+        final Dialog prefDialog = robot().finder().find(DialogMatcher.withTitle("Preferences"));
 
-        if (prefFrame != null) {
-            final FrameFixture frame = new FrameFixture(robot(), prefFrame);
+        if (prefDialog != null) {
+            final DialogFixture dialog = new DialogFixture(robot(), prefDialog);
 
-            frame.requireVisible();
-            frame.moveToFront();
+            dialog.requireVisible();
+            dialog.moveToFront();
 
-            saveScreenshot(frame, "Aspro2-prefs.png");
+            saveScreenshot(dialog, "Aspro2-prefs.png");
 
-            // close frame :
-            frame.close();
+            dialog.close();
         }
     }
 
@@ -451,6 +453,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     /**
      * Test SearchCal integration : Start SearchCal manually before this test
      */
+    @Ignore
     @Test
     @GUITest
     public void m11_shouldCallSearchCall() {
@@ -473,6 +476,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     /**
      * Test LITpro integration : Start LITpro manually before this test
      */
+    @Ignore
     @Test
     @GUITest
     public void m12_shouldCallLITpro() {
