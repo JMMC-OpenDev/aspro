@@ -193,6 +193,28 @@ public final class StatUtils {
         }
     }
 
+    public static double min(final double[] array) {
+        double min = Double.POSITIVE_INFINITY;
+
+        for (int n = 0; n < array.length; n++) {
+            if (array[n] < min) {
+                min = array[n];
+            }
+        }
+        return min;
+    }
+
+    public static double max(final double[] array) {
+        double max = Double.NEGATIVE_INFINITY;
+
+        for (int n = 0; n < array.length; n++) {
+            if (array[n] > max) {
+                max = array[n];
+            }
+        }
+        return max;
+    }
+
     public static double mean(final double[] array) {
         double sample, sum = 0.0;
 
