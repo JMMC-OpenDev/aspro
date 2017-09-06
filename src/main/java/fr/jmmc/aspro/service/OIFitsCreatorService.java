@@ -598,7 +598,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // Columns :
         final short[] targetIds = vis.getTargetId();
         final double[] times = vis.getTime();
-        final double[] mjds = vis.getMjd();
+        final double[] mjds = vis.getMJD();
         final double[] intTimes = vis.getIntTime();
 
         final float[][][] visData = vis.getVisData();
@@ -958,7 +958,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // Columns :
         System.arraycopy(vis.getTargetId(), 0, vis2.getTargetId(), 0, nRows);
         System.arraycopy(vis.getTime(), 0, vis2.getTime(), 0, nRows);
-        System.arraycopy(vis.getMjd(), 0, vis2.getMjd(), 0, nRows);
+        System.arraycopy(vis.getMJD(), 0, vis2.getMJD(), 0, nRows);
         System.arraycopy(vis.getIntTime(), 0, vis2.getIntTime(), 0, nRows);
 
         final double[][] vis2Data = vis2.getVis2Data();
@@ -1165,7 +1165,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         // OI_VIS Columns :
         final double[] visTimes = vis.getTime();
-        final double[] visMjds = vis.getMjd();
+        final double[] visMjds = vis.getMJD();
 
         final double[] visUCoords = vis.getUCoord();
         final double[] visVCoords = vis.getVCoord();
@@ -1175,7 +1175,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // OI_T3 Columns :
         final short[] t3TargetIds = t3.getTargetId();
         final double[] t3Times = t3.getTime();
-        final double[] t3Mjds = t3.getMjd();
+        final double[] t3Mjds = t3.getMJD();
         final double[] intTimes = t3.getIntTime();
 
         final double[][] t3Amp = t3.getT3Amp();
