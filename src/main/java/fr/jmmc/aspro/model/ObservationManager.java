@@ -126,7 +126,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             logger.debug("ObservationManager.update: checkAndLoadFileReferences ...");
 
             // reload user models (to prepare and validate again):
-            final String message = checkAndLoadFileReferences(getMainObservation());
+            final String message = checkAndLoadFileReferences(null, getMainObservation());
 
             if (message != null) {
                 MessagePane.showMessage(message);
@@ -299,7 +299,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             defineDefaults(observation);
 
             // load user models (to prepare and validate):
-            message = checkAndLoadFileReferences(observation);
+            message = checkAndLoadFileReferences(file, observation);
 
             // ready to use :
             changeObservation(observation);
@@ -1455,15 +1455,16 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // --- USER MODELS ----------------------------------------------------------
     /**
      * Check external file references (target user models) and load these files
+     * @param obsFile observation file (may be null)
      * @param observation observation to process
      * @return optional information message or null
      */
-    private static String checkAndLoadFileReferences(final ObservationSetting observation) {
+    private static String checkAndLoadFileReferences(final File obsFile, final ObservationSetting observation) {
         final StringBuilder sb = new StringBuilder(128);
 
         // Check target user model files (exist and can read):
         for (Target target : observation.getTargets()) {
-            checkTargetUserModel(target, sb);
+            checkTargetUserModel(obsFile, target, sb);
         }
 
         // Load only valid target user model files:
@@ -1509,14 +1510,22 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     /**
      * Check the given target's user model
+     * @param obsFile observation file (may be null)
      * @param target target to check
      * @param sb message buffer
      */
-    private static void checkTargetUserModel(final Target target, final StringBuilder sb) {
+    private static void checkTargetUserModel(final File obsFile, final Target target, final StringBuilder sb) {
         final UserModel userModel = target.getUserModel();
 
         if (userModel != null) {
-            final String filePath = userModel.getFile();
+            String filePath = userModel.getFile();
+
+            if (filePath != null && filePath.startsWith("./")) {
+                filePath = obsFile.getParent() + filePath.substring(1);
+
+                logger.info("Fixed relative path [{}] to [{}]", userModel.getFile(), filePath);
+                userModel.setFile(filePath);
+            }
 
             logger.debug("checking file path [{}]", filePath);
 

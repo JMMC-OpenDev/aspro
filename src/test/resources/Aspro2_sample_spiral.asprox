@@ -136,7 +136,7 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <useAnalyticalModel>false</useAnalyticalModel>
         <userModel>
             <name>HighMass.fits.gz</name>
-            <file>/home/bourgesl/ASPRO2/fits/tests/HighMass.fits.gz</file>
+            <file>./HighMass.fits.gz</file>
             <checksum>2869938388</checksum>
         </userModel>
         <configuration>
