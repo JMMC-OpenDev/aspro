@@ -997,10 +997,9 @@ public abstract class AbstractOIFitsProducer {
         // Note : as Station.hashCode is not implemented, the map acts as an IdentityMap (pointer equality)
         final Map<Station, Short> stationMapping = new IdentityHashMap<Station, Short>(stations.size());
 
-        int i = 0;
+        int i = 1;
         for (Station s : stations) {
-            stationMapping.put(s, Short.valueOf((short) (i + 1)));
-            i++;
+            stationMapping.put(s, Short.valueOf((short) i++));
         }
 
         logger.debug("stationMapping: {}", stationMapping);

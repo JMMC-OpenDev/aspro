@@ -64,7 +64,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     /** target Id */
     private final static short TARGET_ID = (short) 1;
     /** enable the OIFits validation */
-    protected final static boolean DO_VALIDATE_OIFITS = true;
+    private final static boolean DO_VALIDATE_OIFITS = false;
 
     /* members */
 
