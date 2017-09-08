@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.3 beta 5"/>
-    <compilation date="17/07/2017" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.3 beta 6"/>
+    <compilation date="08/09/2017" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -214,7 +214,14 @@
 
     <releasenotes>
         <release version="0.9.9.3">
-            <pubDate>Mon, 17 Jul 2017 15:00:00 GMT</pubDate>
+            <pubDate>Fri, 08 Sep 2017 16:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.3 beta 6">
+                <change type="FEATURE">Added a new command line tool to compute interferometric observables 
+                    from an OIFITS file and a user model image (FITS) (noise modelling disabled). 
+                    Launch the command: java -jar aspro2-xxx.jar -process -input INPUT_OIFITS_FILE -image IMAGE_FITS_FILE -output OUTPUT_OIFITS_FILE
+                </change>
+                <change type="FEATURE">Updated to OITools 2 (OIFITS 2 support) but ASPRO2 writes only OIFITS 1 files</change>
+            </prerelease>
             <prerelease version="0.9.9.3 beta 5">
                 <change type="FEATURE">Added the preliminary support for the A2p2 tool (Aspro to ESO p2): 
                     new actions 'Export to an Observing Block (XML)' and 'Send Obs. block(s) to A2p2' (SAMP)</change>
