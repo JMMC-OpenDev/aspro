@@ -6,6 +6,7 @@ package fr.jmmc.aspro.service;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.oiexplorer.core.util.FitsImageUtils;
 import fr.jmmc.aspro.model.oi.UserModel;
+import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.image.FFTUtils;
@@ -20,6 +21,7 @@ import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageFile;
@@ -62,6 +64,8 @@ public final class UserModelService {
     public static final int MAX_FFT_SIZE = 256 * 1024;
     /** Two PI constant */
     public static final double TWO_PI = 6.28318530717958623199592693708837032d;
+    /** 1 nano arcsec in radians (to compare increments) */
+    private static final double INC_EPSILON_RAD = Math.toRadians(1e-9 * ALX.ARCSEC_IN_DEGREES);
     /** formatter for frequencies */
     private final static DecimalFormat df = new DecimalFormat("0.00#E0");
     /** number of floats per data point */
@@ -223,7 +227,7 @@ public final class UserModelService {
         }
 
         // TODO: support different axis increments on row and column axes ?
-        if (fitsImage.getIncCol() != fitsImage.getIncRow()) {
+        if (!NumberUtils.equals(fitsImage.getIncCol(), fitsImage.getIncRow(), INC_EPSILON_RAD)) {
             throw new IllegalArgumentException("Fits image increments along row and column axes must be equals !");
         }
 
