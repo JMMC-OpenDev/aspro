@@ -168,10 +168,10 @@
             <menu/> <!-- menu separator -->
             <menu label="Export to an Observing Block (XML)" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOBXML"
                   description="Export your observation of the selected target to an Observing block XML file"/>
-<!--            
-            <menu label="Export targets to Observing Blocks (XML)" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOBXML"
-                  description="Export your complete observation to Observing block XML files"/>
--->                        
+            <!--
+                        <menu label="Export targets to Observing Blocks (XML)" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOBXML"
+                              description="Export your complete observation to Observing block XML files"/>
+            -->
             <menu/> <!-- menu separator -->
             <menu label="Export plot to PDF" classpath="fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction" action="exportPDF" accelerator="P"
                   icon="fr/jmmc/oiexplorer/core/resource/image/icon_pdf.gif" description="Export the current plot to a PDF document"/>
@@ -216,14 +216,14 @@
         <release version="0.9.9.3">
             <pubDate>Mon, 11 Sep 2017 12:00:00 GMT</pubDate>
             <prerelease version="0.9.9.3 beta 6">
-                <change type="FEATURE">Added a new command line tool to compute interferometric observables 
-                    from an OIFITS file and a user model image (FITS) (noise modelling disabled). 
+                <change type="FEATURE">Added a new command line tool to compute interferometric observables
+                    from an OIFITS file and a user model image (FITS) (noise modelling disabled).
                     Launch the command: java -jar aspro2-xxx.jar -process -input INPUT_OIFITS_FILE -image IMAGE_FITS_FILE -output OUTPUT_OIFITS_FILE
                 </change>
                 <change type="FEATURE">Updated to OITools 2 (OIFITS 2 support) but ASPRO2 writes only OIFITS 1 files</change>
             </prerelease>
             <prerelease version="0.9.9.3 beta 5">
-                <change type="FEATURE">Added the preliminary support for the A2p2 tool (Aspro to ESO p2): 
+                <change type="FEATURE">Added the preliminary support for the A2p2 tool (Aspro to ESO p2):
                     new actions 'Export to an Observing Block (XML)' and 'Send Obs. block(s) to A2p2' (SAMP)</change>
             </prerelease>
             <prerelease version="0.9.9.3 beta 4">
@@ -1170,8 +1170,24 @@
         </release>
     </releasenotes>
 
-    <acknowledgment><![CDATA[This research has made use of the Jean-Marie Mariotti Center \texttt{Aspro2}
-service \footnote{Available at http://www.jmmc.fr/aspro}.]]>
+    <acknowledgment><![CDATA[This research has made use of the Jean-Marie Mariotti Center \texttt{Aspro2} service \footnote{Available at http://www.jmmc.fr/aspro2}.
+
+It is also appreciated you add the <a href="http://cdsads.u-strasbg.fr/abs/2013ascl.soft10005B"> following reference</a> in your citation list, which translates as the BibTeX text below.
+
+@MISC{2013ascl.soft10005B,
+   author = {{Bourg{\`e}s}, L. and {Mella}, G. and {Lafrasse}, S. and {Duvert}, G.
+	},
+    title = "{ASPRO 2: Astronomical Software to PRepare Observations}",
+ keywords = {Software },
+howpublished = {Astrophysics Source Code Library},
+     year = 2013,
+    month = oct,
+archivePrefix = "ascl",
+   eprint = {1310.005},
+   adsurl = {http://cdsads.u-strasbg.fr/abs/2013ascl.soft10005B},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+]]>
     </acknowledgment>
 
 </ApplicationData>
