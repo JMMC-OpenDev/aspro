@@ -1172,7 +1172,7 @@
 
     <acknowledgment><![CDATA[This research has made use of the Jean-Marie Mariotti Center \texttt{Aspro2} service \footnote{Available at http://www.jmmc.fr/aspro2}.
 
-It is also appreciated you add the <a href="http://cdsads.u-strasbg.fr/abs/2013ascl.soft10005B"> following reference</a> in your citation list, which translates as the BibTeX text below.
+It is also appreciated you add the &t;a href="http://cdsads.u-strasbg.fr/abs/2013ascl.soft10005B"&gt; following reference&lt;/a&gt; in your citation list, which translates as the BibTeX text below.
 
 @MISC{2013ascl.soft10005B,
    author = {{Bourg{\`e}s}, L. and {Mella}, G. and {Lafrasse}, S. and {Duvert}, G.
