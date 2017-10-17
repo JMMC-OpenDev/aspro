@@ -2461,27 +2461,6 @@
         </xsd:attribute>
     </xsd:complexType>
 
-    <xsd:complexType name="FocalInstrumentComposedMode">
-        <xsd:annotation>
-            <xsd:documentation>
-                This type describes a focal instrument mode (MATISSE LM + N)
-                as a composition of several individual instrument modes
-            </xsd:documentation>
-        </xsd:annotation>
-        <xsd:complexContent>
-            <xsd:extension base="FocalInstrumentMode">
-                <xsd:sequence>
-                    <xsd:element name="mode" type="FocalInstrumentMode" minOccurs="1" maxOccurs="unbounded">
-                        <xsd:annotation>
-                            <xsd:documentation>
-                                The list of focal instrument mode associated to this composed instrument mode
-                            </xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:extension>
-        </xsd:complexContent>
-    </xsd:complexType>
 
 
 

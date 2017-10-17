@@ -406,14 +406,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link FocalInstrumentComposedMode }
-     * 
-     */
-    public FocalInstrumentComposedMode createFocalInstrumentComposedMode() {
-        return new FocalInstrumentComposedMode();
-    }
-
-    /**
      * Create an instance of {@link FringeTracker }
      * 
      */

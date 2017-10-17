@@ -8,7 +8,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -56,9 +55,6 @@ import fr.jmmc.aspro.model.OIBase;
     "ditMin",
     "table",
     "parameters"
-})
-@XmlSeeAlso({
-    FocalInstrumentComposedMode.class
 })
 public class FocalInstrumentMode
     extends OIBase
