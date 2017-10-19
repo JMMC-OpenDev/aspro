@@ -61,7 +61,7 @@ public final class UserModelService {
     /** ratio to ignore data values i.e. data value < LIMIT_RATIO * dataLowThreshold */
     public static final float LIMIT_RATIO = 1e-3f;
     /** maximum fft size (power of two) */
-    public static final int MAX_FFT_SIZE = 256 * 1024;
+    public static final int MAX_FFT_SIZE = 1024 * 1024;
     /** Two PI constant */
     public static final double TWO_PI = 6.28318530717958623199592693708837032d;
     /** 1 nano arcsec in radians (to compare increments) */
