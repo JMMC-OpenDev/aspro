@@ -149,26 +149,25 @@ public class SpectralSetup
     }
     
 //--simple--preserve
-    
     /** number of columns (read-only) */
     @javax.xml.bind.annotation.XmlTransient
     protected int nbCols = 0;
-    
+
     public int getNbCols() {
         return this.nbCols;
     }
-    
+
     /** number of rows (read-only) */
     @javax.xml.bind.annotation.XmlTransient
     protected int nbRows = 0;
-    
+
     public int getNbRows() {
         return this.nbRows;
     }
-    
+
     @Override
     public String toString() {
-        return "SpectralSetup[" + getColumns() 
+        return "SpectralSetup[" + getColumns()
                 + ((data != null) ? ("\ndata:\n" + java.util.Arrays.toString(data)) : "")
                 + "]";
     }
@@ -191,10 +190,10 @@ public class SpectralSetup
         }
         // Split 1D array into columns:
         final int nRows = dataLength / nCols;
-        
+
         final double[][] matrix = new double[nCols][nRows];
         final double[] data1D = this.data;
-        
+
         for (int i = 0, offset; i < nRows; i++) {
             offset = i * nCols;
             for (int j = 0; j < nCols; j++) {
@@ -205,21 +204,18 @@ public class SpectralSetup
         for (int j = 0; j < nCols; j++) {
             final SpectralSetupColumn column = cols.get(j);
             if (column.getQuantity() == null) {
-                throw new IllegalStateException("Invalid quantity in column !");
+                throw new IllegalStateException("Invalid quantity for column[" + j + "]!");
             }
-/*            
+            /*            
             System.out.println("getColumns["+j+"]: "+cols.get(j));
             System.out.println("Values: "+Arrays.toString(matrix[j]));
-*/            
+             */
             // define column values:
             column.values = matrix[j];
         }
-        
+
         // TODO: check if lambda are sorted ?
-        
-        // TODO: Convert lambda in microns ONCE
-        
-        
+        // TODO: KEEP lambda in meters ALWAYS !
         SpectralSetupColumn col;
         col = getColumn(SpectralSetupQuantity.LAMBDA);
         if (col == null) {
@@ -237,14 +233,14 @@ public class SpectralSetup
         // update dimensions:
         this.nbCols = nCols;
         this.nbRows = nRows;
-        
+
         // prune data array:
         this.data = null;
     }
-    
+
     private static void convertMeterToMicroMeter(final double[] values) {
         for (int i = 0; i < values.length; i++) {
-            values [i] *= 1e6;
+            values[i] *= 1e6;
         }
     }
 
@@ -275,7 +271,7 @@ public class SpectralSetup
     public SpectralSetupColumn getColumn(final SpectralSetupQuantity quantity) {
         return getColumn(quantity, null);
     }
-    
+
     /**
      * Return the column of the given quantity and optionally matching the given telescope
      * @param quantity quantity to look up
@@ -285,7 +281,7 @@ public class SpectralSetup
     public SpectralSetupColumn getColumn(final SpectralSetupQuantity quantity, final Telescope telescope) {
         for (SpectralSetupColumn c : getColumns()) {
             if (c.getQuantity() == quantity) {
-                if (telescope != null && c.getTelescope() != null 
+                if (telescope != null && c.getTelescope() != null
                         && !c.getTelescope().getName().equals(telescope.getName())) {
                     continue;
                 }

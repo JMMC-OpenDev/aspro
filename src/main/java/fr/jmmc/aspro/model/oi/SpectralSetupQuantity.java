@@ -19,6 +19,8 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="nb_photon_thermal"/&gt;
  *     &lt;enumeration value="transmission"/&gt;
  *     &lt;enumeration value="visibility"/&gt;
+ *     &lt;enumeration value="nb_pix_Interf"/&gt;
+ *     &lt;enumeration value="nb_pix_Photo"/&gt;
  *   &lt;/restriction&gt;
  * &lt;/simpleType&gt;
  * </pre>
@@ -62,7 +64,21 @@ public enum SpectralSetupQuantity {
      * 
      */
     @XmlEnumValue("visibility")
-    VISIBILITY("visibility");
+    VISIBILITY("visibility"),
+
+    /**
+     * 'nb_pix_Interf' = number of pixels to code all fringes together (interferometric channel)
+     * 
+     */
+    @XmlEnumValue("nb_pix_Interf")
+    NB_PIX_INTERF("nb_pix_Interf"),
+
+    /**
+     * 'nb_pix_Photo' = number of pixels to code each photometric channel
+     * 
+     */
+    @XmlEnumValue("nb_pix_Photo")
+    NB_PIX_PHOTO("nb_pix_Photo");
     private final String value;
 
     SpectralSetupQuantity(String v) {

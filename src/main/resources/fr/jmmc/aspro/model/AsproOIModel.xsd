@@ -2350,6 +2350,13 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="waveLengthRef" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The reference wave length of this instrument mode (micrometer) to add noise into background (FFT) image
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
 
             <!-- instrument setup reference -->
             <xsd:element name="setupRef" type="xsd:IDREF" minOccurs="0" maxOccurs="1">
@@ -2735,6 +2742,8 @@
                 - "nb_photon_thermal"
                 - "transmission"
                 - "visibility"
+                - "nb_pix_Interf"
+                - "nb_pix_Photo"
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
@@ -2761,6 +2770,16 @@
             <xsd:enumeration value="visibility">
                 <xsd:annotation>
                     <xsd:documentation>'visibility' = instrumental visibility</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="nb_pix_Interf">
+                <xsd:annotation>
+                    <xsd:documentation>'nb_pix_Interf' = number of pixels to code all fringes together (interferometric channel)</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="nb_pix_Photo">
+                <xsd:annotation>
+                    <xsd:documentation>'nb_pix_Photo' = number of pixels to code each photometric channel</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
         </xsd:restriction>

@@ -31,6 +31,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="resolution" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthMax" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="waveLengthRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="setupRef" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="ditMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
@@ -50,6 +51,7 @@ import fr.jmmc.aspro.model.OIBase;
     "resolution",
     "waveLengthMin",
     "waveLengthMax",
+    "waveLengthRef",
     "setupRef",
     "dit",
     "ditMin",
@@ -65,6 +67,7 @@ public class FocalInstrumentMode
     protected Double resolution;
     protected Double waveLengthMin;
     protected Double waveLengthMax;
+    protected Double waveLengthRef;
     @XmlElement(type = Object.class)
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
@@ -169,6 +172,30 @@ public class FocalInstrumentMode
      */
     public void setWaveLengthMax(Double value) {
         this.waveLengthMax = value;
+    }
+
+    /**
+     * Gets the value of the waveLengthRef property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getWaveLengthRef() {
+        return waveLengthRef;
+    }
+
+    /**
+     * Sets the value of the waveLengthRef property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setWaveLengthRef(Double value) {
+        this.waveLengthRef = value;
     }
 
     /**
@@ -407,6 +434,9 @@ public class FocalInstrumentMode
         if (this.waveLengthMax == null) {
             logger.warn("Invalid waveLengthMax !");
             setWaveLengthMax(Double.NaN);
+        }
+        if (this.waveLengthMax < this.waveLengthMin) {
+            logger.warn("Invalid waveLengthMax < waveLengthMin !");
         }
         if (this.resolution == null) {
             logger.warn("Invalid resolution !");
