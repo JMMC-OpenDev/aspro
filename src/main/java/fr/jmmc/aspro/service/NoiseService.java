@@ -24,6 +24,7 @@ import fr.jmmc.aspro.model.oi.SpectralSetupColumn;
 import fr.jmmc.aspro.model.oi.SpectralSetupQuantity;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
+import fr.jmmc.aspro.util.StatUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmcs.util.NumberUtils;
@@ -114,19 +115,19 @@ public final class NoiseService implements VisNoiseService {
     /** fraction of flux going into the photometric channel */
     private double fracFluxInPhotometry = Double.NaN;
 
-    /** number of pixels to code all fringes together (interferometric channel) */
-    private double nbPixInterf = Double.NaN;
-    /** number of pixels to code each photometric channel */
-    private double nbPixPhoto = Double.NaN;
     /** ratio photometry exposures per photometric channel (chopping) */
     private double ratioPhotoPerBeam = Double.NaN;
 
-    /** (W) Transmission of interferometer+instrument at observed wavelength */
+    /** (W) Transmission of interferometer+instrument at observed wavelength (no strehl, no QE) */
     private double[] transmission = null;
     /** (W) Instrumental Visibility [0.0-1.0] */
     private double[] instrumentalVisibility = null;
     /** (W) Number of thermal photon (background) per beam per second (no strehl, no QE) */
     private double[] nbPhotThermal = null;
+    /** (W) number of pixels to code all fringes together (interferometric channel) */
+    private double[] nbPixInterf = null;
+    /** (W) number of pixels to code each photometric channel */
+    private double[] nbPixPhoto = null;
 
     /* bias */
     /** true to use instrument bias; false to compute only theoretical error */
@@ -198,6 +199,8 @@ public final class NoiseService implements VisNoiseService {
     private double[] nbPhotThermInterf = null;
     /** (W) number of thermal photons per telescope in each photometric channel */
     private double[] nbPhotThermPhoto = null;
+    /* time formatter */
+    private final DecimalFormat df = new DecimalFormat("##0.##");
 
     /**
      * Protected constructor
@@ -222,9 +225,27 @@ public final class NoiseService implements VisNoiseService {
 
         // Get spectral channels:
         this.nSpectralChannels = waveLengths.length;
-        this.iMidChannel = this.nSpectralChannels / 2;
         this.waveLengths = waveLengths;
         this.waveBands = waveBands;
+
+        final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+        if (insMode == null) {
+            throw new IllegalStateException("The instrumentMode is empty !");
+        }
+
+        // Fix mid channel for image noising (MATISSE LM has a large hole at 4 microns):
+        int midChannel = this.nSpectralChannels / 2;
+        if ((nSpectralChannels > 1) && (insMode.getWaveLengthRef() != null)) {
+            final double lambdaRef = 1e-6 * insMode.getWaveLengthRef().doubleValue();
+
+            for (int i = 0, end = waveLengths.length - 1; i < end; i++) {
+                if (Math.abs(waveLengths[i] - lambdaRef) <= Math.abs(waveLengths[i + 1] - lambdaRef)) {
+                    midChannel = i;
+                    break;
+                }
+            }
+        }
+        this.iMidChannel = midChannel;
 
         this.targetPointInfos = targetPointInfos;
         this.nPoints = this.targetPointInfos.length;
@@ -232,9 +253,10 @@ public final class NoiseService implements VisNoiseService {
 
         if (logger.isDebugEnabled()) {
             logger.debug("spectralChannels              : {}", nSpectralChannels);
-            logger.debug("nMidChannel                   : {}", iMidChannel);
+            logger.debug("iMidChannel                   : {}", iMidChannel);
             logger.debug("waveLengths                   : {}", Arrays.toString(waveLengths));
             logger.debug("waveBands                     : {}", Arrays.toString(waveBands));
+            logger.debug("waveLength[iMidChannel]       : {}", waveLengths[iMidChannel]);
         }
 
         // extract parameters in observation and configuration :
@@ -287,8 +309,6 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("nbOfActuators                 : {}", nbOfActuators);
             logger.debug("seeing                        : {}", seeing);
         }
-
-        // TODO: get atm spectra here ...
     }
 
     /**
@@ -317,11 +337,7 @@ public final class NoiseService implements VisNoiseService {
         this.fracFluxInInterferometry = insSetup.getFracFluxInInterferometry();
         this.fracFluxInPhotometry = insSetup.getFracFluxInPhotometry();
 
-        this.nbPixInterf = insSetup.getNbPixInterferometry();
-        this.nbPixPhoto = insSetup.getNbPixPhotometry(); // can be 0
-
         this.useStrehlCorrection = insSetup.isUseStrehlCorrection();
-        this.usePhotometry = (fracFluxInPhotometry > 0.0 && nbPixPhoto > 0.0);
 
         // Use Sequence to get both time & beam ratios:
         final ObservationSequence sequence = insSetup.getSequence();
@@ -331,20 +347,26 @@ public final class NoiseService implements VisNoiseService {
         final double ratioTime = sequence.getRatioTime();
         final double ratioDeadTime = sequence.getRatioDeadTime();
 
-        final double effectiveFrameTime = ratioTime * this.dit + ratioDeadTime * insSetup.getDeadtimeExposure();
-        // + insSetup.getDeadtimeSequence(); // TODO: chopping switch is 2 times per SECOND not per sequence !
+        // Note: chopping switch is 2 times per SECOND not per sequence !
+        final double effectiveFrameTime = ratioTime * this.dit + ratioDeadTime * insSetup.getDeadtimeExposure()
+                + insSetup.getDeadtimeSequence();
 
         final double ratioTimeInterfero = this.dit / effectiveFrameTime;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("ratioPhotoPerBeam: " + ratioPhotoPerBeam);
-            logger.debug("ratioTime: " + ratioTime);
-            logger.debug("ratioDeadTime: " + ratioDeadTime);
-            logger.debug("effectiveFrameTime: " + effectiveFrameTime);
-            logger.debug("efficiency (%): " + (100.0 * ratioTimeInterfero));
+            logger.debug("ratioPhotoPerBeam             : {}", ratioPhotoPerBeam);
+            logger.debug("ratioTime                     : {}", ratioTime);
+            logger.debug("ratioDeadTime                 : {}", ratioDeadTime);
+            logger.debug("effectiveFrameTime            : {}", effectiveFrameTime);
+            logger.debug("efficiency (%)                : {}", (100.0 * ratioTimeInterfero));
             logger.debug("totalObsTime                  : {}", totalObsTime);
             logger.debug("totalOBTime                   : {}", totalObsTime / ratioTimeInterfero);
         }
+
+        final double seqTimeMin = (totalObsTime / ratioTimeInterfero); // s
+
+        addInformation("Min O.B. time: " + df.format(seqTimeMin) + " s (" + df.format(seqTimeMin / 60.0) + " min)"
+                + " - Ratio Interferometry: " + df.format(100.0 * ratioTimeInterfero) + " %");
 
         if (this.useInstrumentBias) {
             /* Convert Phase bias to radians */
@@ -376,17 +398,17 @@ public final class NoiseService implements VisNoiseService {
         }
 
         final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
-        if (insMode == null) {
-            throw new IllegalStateException("The instrumentMode is empty !");
-        }
 
         final SpectralSetup table = insMode.getTable();
         int firstIdx = -1;
         int lastIdx = -1;
 
         if (table != null) {
-            // check WLen range:-
+            // check WLen range:
             final double[] lambda = table.getAndScaleColumn(SpectralSetupQuantity.LAMBDA, 1e-6);
+            if (lambda == null) {
+                throw new IllegalStateException("Missing lambda column within spectral table !");
+            }
 
             final double lambdaMin = this.waveLengths[0];
             final double lambdaMax = this.waveLengths[nSpectralChannels - 1];
@@ -440,6 +462,16 @@ public final class NoiseService implements VisNoiseService {
             if (col != null) {
                 this.nbPhotThermal = Arrays.copyOfRange(col.getValues(), firstIdx, lastIdx);
             }
+
+            // number of pixel per channel:
+            col = table.getColumn(SpectralSetupQuantity.NB_PIX_INTERF);
+            if (col != null) {
+                this.nbPixInterf = Arrays.copyOfRange(col.getValues(), firstIdx, lastIdx);
+            }
+            col = table.getColumn(SpectralSetupQuantity.NB_PIX_PHOTO);
+            if (col != null) {
+                this.nbPixPhoto = Arrays.copyOfRange(col.getValues(), firstIdx, lastIdx);
+            }
         }
 
         if (this.transmission == null) {
@@ -450,6 +482,16 @@ public final class NoiseService implements VisNoiseService {
             this.instrumentalVisibility = new double[nSpectralChannels];
             Arrays.fill(this.instrumentalVisibility, insSetup.getInstrumentVisibility());
         }
+        if (this.nbPixInterf == null) {
+            this.nbPixInterf = new double[nSpectralChannels];
+            Arrays.fill(this.nbPixInterf, insSetup.getNbPixInterferometry());
+        }
+        if (this.nbPixPhoto == null) {
+            this.nbPixPhoto = new double[nSpectralChannels];
+            Arrays.fill(this.nbPixPhoto, insSetup.getNbPixPhotometry());
+        }
+
+        this.usePhotometry = ((fracFluxInPhotometry > 0.0) && (StatUtils.max(nbPixPhoto) > 0.0));
 
         if (logger.isDebugEnabled()) {
             logger.debug("instrumentName                : {}", instrumentName);
@@ -461,13 +503,13 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("quantumEfficiency             : {}", quantumEfficiency);
             logger.debug("fracFluxInInterferometry      : {}", fracFluxInInterferometry);
             logger.debug("fracFluxInPhotometry          : {}", fracFluxInPhotometry);
-            logger.debug("nbPixInterf                   : {}", nbPixInterf);
-            logger.debug("nbPixPhoto                    : {}", nbPixPhoto);
             logger.debug("usePhotometry                 : {}", usePhotometry);
             logger.debug("useStrehlCorrection           : {}", useStrehlCorrection);
             logger.debug("transmission                  : {}", Arrays.toString(transmission));
             logger.debug("instrumentalVisibility        : {}", Arrays.toString(instrumentalVisibility));
             logger.debug("nbPhotThermal                 : {}", Arrays.toString(nbPhotThermal));
+            logger.debug("nbPixInterf                   : {}", Arrays.toString(nbPixInterf));
+            logger.debug("nbPixPhoto                    : {}", Arrays.toString(nbPixPhoto));
             logger.debug("useInstrumentBias             : {}", useInstrumentBias);
             logger.debug("instrumentalVisibilityBias    : {}", instrumentalVis2Bias);
             logger.debug("instrumentalPhaseBias         : {}", instrumentalPhaseBias);
@@ -631,8 +673,8 @@ public final class NoiseService implements VisNoiseService {
 
         final double telSurface = Math.PI * FastMath.pow2(0.5 * telDiam);
 
-        // maximum number of science photons per channel and per second:
-        double maxNbTotalPhotPerSec = 0.0;
+        // maximum number of (science + thermal) photons per pixel in the interferometric channel and per second:
+        double maxNbAllPhotInterfPerPixPerSec = 0.0;
         double nbPhot;
 
         for (int n = 0; n < nObs; n++) {
@@ -652,8 +694,11 @@ public final class NoiseService implements VisNoiseService {
                     nbPhot += nbTotalPhotTherm[i];
                 }
 
-                if (nbPhot > maxNbTotalPhotPerSec) {
-                    maxNbTotalPhotPerSec = nbPhot;
+                // Per pixel in the interferometric channel for the spectral channel:
+                nbPhot /= nbPixInterf[i];
+
+                if (nbPhot > maxNbAllPhotInterfPerPixPerSec) {
+                    maxNbAllPhotInterfPerPixPerSec = nbPhot;
                 }
             }
             if (logger.isDebugEnabled()) {
@@ -663,36 +708,33 @@ public final class NoiseService implements VisNoiseService {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("maxNbTotalPhotPerSec          : {}", maxNbTotalPhotPerSec);
+            logger.debug("maxNbAllPhotInterfPerPixPerSec: {}", maxNbAllPhotInterfPerPixPerSec);
         }
 
         // dit used by this observation:
         double obsDit = dit;
 
-        // maximum number of expected photoevents in dit (for all telescopes):
-        final double maxTotalPhot = (nbTel * maxNbTotalPhotPerSec) * obsDit;
+        // maximum number of expected photoevents in dit (for all telescopes) per pixel:
+        final double maxTotalPhotPerPix = (nbTel * maxNbAllPhotInterfPerPixPerSec) * obsDit;
 
         // fraction of total interferometric flux in the peak pixel :
-// TODO: adjust that code as both science and thermal photons are varying on spectral channels
-// it may saturate few pixels ie do not divide by nbPixInterf as it means average(photons) not MAX !
-// It is correct if 1 pixel = 1 spectral channel:
-        final double peakflux = fracFluxInInterferometry * maxTotalPhot / nbPixInterf;
+        final double peakFluxPix = fracFluxInInterferometry * maxTotalPhotPerPix;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("maxTotalPhot                  : {}", maxTotalPhot);
-            logger.debug("peakflux                      : {}", peakflux);
+            logger.debug("maxTotalPhotPerPix            : {}", maxTotalPhotPerPix);
+            logger.debug("peakfluxPix                   : {}", peakFluxPix);
         }
 
         final int nbFrameToSaturation;
-        if (detectorSaturation < peakflux) {
+        if (detectorSaturation < peakFluxPix) {
             // the dit is too long
-            obsDit *= detectorSaturation / peakflux;
+            obsDit *= detectorSaturation / peakFluxPix;
 
             addWarning("DIT too long (saturation). Adjusting it to (possibly impossible): " + formatTime(obsDit));
 
             nbFrameToSaturation = 1;
         } else {
-            nbFrameToSaturation = (int) Math.floor(detectorSaturation / peakflux);
+            nbFrameToSaturation = (int) Math.floor(detectorSaturation / peakFluxPix);
         }
 
         if (logger.isDebugEnabled()) {
@@ -737,11 +779,8 @@ public final class NoiseService implements VisNoiseService {
             }
         }
 
-        // TODO: handle dead time = dit for MATISSE
         // total number of frames:
         final double nbFrames = totalObsTime / obsDit;
-
-        logger.info("nbFrames: {}", nbFrames);
 
         // total frame correction = 1 / SQRT(nFrames):
         this.totFrameCorrection = 1.0 / Math.sqrt(nbFrames);
@@ -809,8 +848,7 @@ public final class NoiseService implements VisNoiseService {
         }
 
         if (DO_DUMP_VIS2) {
-            if (nWLen < 50) {
-
+            if (false && (nWLen < 50)) {
                 for (int i = 0; i < nWLen; i++) {
                     dumpVis2Error(i);
                 }
@@ -823,7 +861,7 @@ public final class NoiseService implements VisNoiseService {
     }
 
     private void dumpVis2Error(final int iChannel) {
-        logger.debug("channel                       : {}", iChannel);
+        logger.info("channel: {} => {} microns", iChannel, waveLengths[iChannel]);
         dumpVis2ErrorSample(iChannel, 1d);
         dumpVis2ErrorSample(iChannel, 0.75d);
         dumpVis2ErrorSample(iChannel, 0.5d);
@@ -835,7 +873,7 @@ public final class NoiseService implements VisNoiseService {
 
     private void dumpVis2ErrorSample(final int iChannel, final double visAmp) {
         double v2 = visAmp * visAmp;
-        double errV2 = computeVis2ErrorNoBias(iChannel, visAmp);
+        double errV2 = computeVis2ErrorNoBias(iMidPoint, iChannel, visAmp);
         double snr = v2 / errV2;
         double bias = computeVis2Bias(iMidPoint, iChannel);
 
@@ -845,7 +883,6 @@ public final class NoiseService implements VisNoiseService {
 
     double[] computeTargetFlux() {
 
-        // TODO: fix transmission for all instruments (before now):
         final double[] atmTrans = AtmosphereSpectrumService.getInstance().getTransmission(this.waveLengths, this.waveBands);
 
         if (logger.isDebugEnabled()) {
@@ -945,7 +982,7 @@ public final class NoiseService implements VisNoiseService {
             for (int i = 0; i < nWLen; i++) {
                 // variance of the photometric flux in photometric channel:
                 final double varFluxPhot = nbPhotPhoto[i]
-                        + ratioPhotoPerBeam * (nbPhotThermPhoto[i] + nbPixPhoto * FastMath.pow2(ron));
+                        + ratioPhotoPerBeam * (nbPhotThermPhoto[i] + nbPixPhoto[i] * FastMath.pow2(ron));
 
                 // square error contribution of 2 photometric channels on the square visiblity FiFj:
                 sqErrVis2Phot[i] = 2.0 * varFluxPhot / FastMath.pow2(nbPhotPhoto[i]);
@@ -972,18 +1009,18 @@ public final class NoiseService implements VisNoiseService {
 
             // variance of the squared correlated flux = sqCorFlux * coef + constant
             varSqCorFluxCoef[i] = 2.0 * (nbPhot + nbPhotThermInterf[i] * nbTel)
-                    + 4.0 + 2.0 * nbPixInterf * FastMath.pow2(ron);
+                    + 4.0 + 2.0 * nbPixInterf[i] * FastMath.pow2(ron);
 
-            varSqCorFluxConst[i] = nbPhot * (1.0 + nbPhot + 2.0 * nbPixInterf * FastMath.pow2(ron))
-                    + nbPixInterf * (nbPixInterf + 3.0) * FastMath.pow(ron, 4.0);
+            varSqCorFluxConst[i] = nbPhot * (1.0 + nbPhot + 2.0 * nbPixInterf[i] * FastMath.pow2(ron))
+                    + nbPixInterf[i] * (nbPixInterf[i] + 3.0) * FastMath.pow(ron, 4.0);
 
             // normalized bias on V2:
             // ie Fc = 1 pour V2=1 car mesures photo identiques (FiFj / FiFj = 1)
             // correlated flux (include instrumental visibility loss) for vis2 = 1.0:
             nbPhot = nbPhotInterf[i] * vinst[i];
 
-            // use the toal number photons for nbFrames or not ?
-            biasV2[i] = (nbPhot + nbPixInterf * FastMath.pow2(ron)) / FastMath.pow2(nbPhot);
+            // use the total number photons for nbFrames or not ?
+            biasV2[i] = (nbPhot + nbPixInterf[i] * FastMath.pow2(ron)) / FastMath.pow2(nbPhot);
             // repeat OBS measurements to reach totalObsTime minutes:
             biasV2[i] *= totFrameCorrection;
         }
@@ -1122,13 +1159,13 @@ public final class NoiseService implements VisNoiseService {
             t3photCoef3[i] = FastMath.pow3(invNbPhotonInIPerTel);
 
             // detector noise on closure phase
-            t3detConst[i] = FastMath.pow(invNbPhotonInIPerTel, 6d) * (FastMath.pow(nbPixInterf, 3d) * FastMath.pow(ron, 6d)
-                    + 3 * FastMath.pow2(nbPixInterf) * FastMath.pow(ron, 6d));
+            t3detConst[i] = FastMath.pow(invNbPhotonInIPerTel, 6d) * (FastMath.pow(nbPixInterf[i], 3d) * FastMath.pow(ron, 6d)
+                    + 3 * FastMath.pow2(nbPixInterf[i]) * FastMath.pow(ron, 6d));
 
-            t3detCoef1[i] = FastMath.pow(invNbPhotonInIPerTel, 4d) * (3d * nbPixInterf * FastMath.pow(ron, 4d)
-                    + FastMath.pow2(nbPixInterf) * FastMath.pow(ron, 4d));
+            t3detCoef1[i] = FastMath.pow(invNbPhotonInIPerTel, 4d) * (3d * nbPixInterf[i] * FastMath.pow(ron, 4d)
+                    + FastMath.pow2(nbPixInterf[i]) * FastMath.pow(ron, 4d));
 
-            t3detCoef2[i] = FastMath.pow2(invNbPhotonInIPerTel) * nbPixInterf * FastMath.pow2(ron);
+            t3detCoef2[i] = FastMath.pow2(invNbPhotonInIPerTel) * nbPixInterf[i] * FastMath.pow2(ron);
         }
 
         if (logger.isDebugEnabled()) {
@@ -1305,17 +1342,6 @@ public final class NoiseService implements VisNoiseService {
     /**
      * Compute error on square visibility without bias. It returns NaN if the error can not be computed
      *
-     * @param iChannel index of the channel
-     * @param visAmp visibility amplitude
-     * @return square visiblity error or NaN if the error can not be computed
-     */
-    private double computeVis2ErrorNoBias(final int iChannel, final double visAmp) {
-        return computeVis2Error(iMidPoint, iChannel, visAmp, false);
-    }
-
-    /**
-     * Compute error on square visibility without bias. It returns NaN if the error can not be computed
-     *
      * @param iPoint index of the observable point
      * @param iChannel index of the channel
      * @param visAmp visibility amplitude
@@ -1414,7 +1440,6 @@ public final class NoiseService implements VisNoiseService {
             val = value * 1000d;
             unit = " ms";
         }
-        final DecimalFormat df = new DecimalFormat("##0.##");
         return df.format(val) + unit;
     }
 
@@ -1454,7 +1479,6 @@ public final class NoiseService implements VisNoiseService {
         final double[] t3detCoef2;
 
         NoiseWParams(final int nWLen) {
-            // TODO: align to 8 or 16 ? (simd ?)
             this.nbPhotInterf = init(nWLen);
             this.nbPhotPhoto = init(nWLen);
             this.sqErrVis2Phot = init(nWLen);
