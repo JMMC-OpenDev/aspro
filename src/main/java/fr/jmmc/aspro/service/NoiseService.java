@@ -363,10 +363,12 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("totalOBTime                   : {}", totalObsTime / ratioTimeInterfero);
         }
 
-        final double seqTimeMin = (totalObsTime / ratioTimeInterfero); // s
+        if (ratioTimeInterfero < 0.99) {
+            final double seqTimeMin = (totalObsTime / ratioTimeInterfero); // s
 
-        addInformation("Min O.B. time: " + df.format(seqTimeMin) + " s (" + df.format(seqTimeMin / 60.0) + " min)"
-                + " - Ratio Interferometry: " + df.format(100.0 * ratioTimeInterfero) + " %");
+            addInformation("Min O.B. time: " + df.format(seqTimeMin) + " s (" + df.format(seqTimeMin / 60.0) + " min)"
+                    + " - Ratio Interferometry: " + df.format(100.0 * ratioTimeInterfero) + " %");
+        }
 
         if (this.useInstrumentBias) {
             /* Convert Phase bias to radians */
