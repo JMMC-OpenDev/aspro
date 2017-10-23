@@ -105,6 +105,7 @@ import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartRenderingInfo;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.LegendItemCollection;
 import org.jfree.chart.annotations.XYAnnotation;
@@ -809,6 +810,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         if (changeSubset) {
             this.slidingXYPlotAdapter.setUseSubset(useSubset);
         }
+        
+        // update theme at end :
+        ChartUtilities.applyCurrentTheme(this.chart);
     }
 
     /**
@@ -861,6 +865,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         // update the time marker to enable it:
         updateTimeMarker();
+        
+        // update theme at end :
+        ChartUtilities.applyCurrentTheme(this.chart);
     }
 
     /**

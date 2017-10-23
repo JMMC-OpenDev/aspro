@@ -81,6 +81,7 @@ public final class OIFitsProcessor {
             target.setUserModel(userModel);
             target.setUseAnalyticalModel(Boolean.FALSE);
 
+            // TODO: define CLI args for super-sampling & MathMode
             final OIFitsProcessService service = new OIFitsProcessService(
                     target, 9,
                     UserModelService.MathMode.FAST,
