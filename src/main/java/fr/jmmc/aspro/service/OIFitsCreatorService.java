@@ -33,6 +33,7 @@ import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oitools.OIFitsConstants;
 import fr.jmmc.oitools.meta.OIFitsStandard;
+import fr.jmmc.oitools.model.DataModel;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsChecker;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -130,17 +131,17 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
      * @param warningContainer container for warning messages
      */
     protected OIFitsCreatorService(final ObservationSetting observation,
-            final Target target,
-            final List<Beam> beams,
-            final List<BaseLine> baseLines,
-            final boolean useInstrumentBias,
-            final boolean doDataNoise,
-            final int supersamplingOIFits,
-            final MathMode mathModeOIFits,
-            final TargetPointInfo[] targetPointInfos,
-            final List<UVRangeBaseLineData> targetUVObservability,
-            final AstroSkyCalc sc,
-            final WarningContainer warningContainer) {
+                                   final Target target,
+                                   final List<Beam> beams,
+                                   final List<BaseLine> baseLines,
+                                   final boolean useInstrumentBias,
+                                   final boolean doDataNoise,
+                                   final int supersamplingOIFits,
+                                   final MathMode mathModeOIFits,
+                                   final TargetPointInfo[] targetPointInfos,
+                                   final List<UVRangeBaseLineData> targetUVObservability,
+                                   final AstroSkyCalc sc,
+                                   final WarningContainer warningContainer) {
 
         super(target, supersamplingOIFits, mathModeOIFits);
 
@@ -582,6 +583,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // test if the instrument is AMBER to use dedicated diffVis algorithm :
         final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
 
+        final boolean useComplexVis = isAmber || this.instrumentExperimental 
+                || AsproConstants.INS_GRAVITY.equals(this.instrumentName);
+
+        // Update the data model before calling new OIVis():
+        DataModel.setOiVisComplexSupport(useComplexVis);
+
         // Create OI_VIS table :
         final OIVis vis = new OIVis(this.oiFitsFile, this.insNameKeyword, this.nObsPoints * this.nBaseLines);
         vis.setArrName(this.arrNameKeyword);
@@ -604,7 +611,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final float[][][] visData = vis.getVisData();
         final float[][][] visErr = vis.getVisErr();
 
-//TODO: adjust flag for AMBER or GRAVITY ?
         final boolean useVisData = (visData != null && visErr != null);
 
         final double[][] visAmp = vis.getVisAmp();
