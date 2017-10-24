@@ -12,7 +12,7 @@
             <icon href="@GENERATED@/Aspro2.jpg"/>
             <description>Aspro 2 Observation files</description>
         </association>
-        <shortcut>
+        <shortcut online="true" install="true">
             <desktop/>
         </shortcut>
     </information>
