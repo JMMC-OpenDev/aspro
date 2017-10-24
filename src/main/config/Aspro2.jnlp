@@ -15,11 +15,11 @@
         <shortcut online="true" install="true">
             <desktop/>
         </shortcut>
-        <update check="background"/>
     </information>
     <security>
         <all-permissions/>
     </security>
+    <update check="background" policy="prompt-update"/>
     <resources>
         <j2se version="1.6+" initial-heap-size="256m" max-heap-size="1024m"/>
 
