@@ -1,0 +1,10 @@
+Built-By: JMMC (jmmc-tech-group@jmmc.fr)
+Built-Date: ${timestamp}
+Implementation-Title: AsproConfig
+Implementation-Version: ${project.version}
+Implementation-Vendor: www.jmmc.fr
+Implementation-URL: http://www.jmmc.fr/aspro
+Application-Name: Aspro2-conf
+Permissions: all-permissions
+Codebase: *.jmmc.fr
+Application-Library-Allowable-Codebase: *.jmmc.fr
