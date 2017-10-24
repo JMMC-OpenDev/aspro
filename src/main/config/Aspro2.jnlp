@@ -12,8 +12,9 @@
             <icon href="@GENERATED@/Aspro2.jpg"/>
             <description>Aspro 2 Observation files</description>
         </association>
-        <shortcut online="true" install="true">
+        <shortcut online="true" install="false">
             <desktop/>
+            <menu submenu="JMMC"/>
         </shortcut>
     </information>
     <security>
