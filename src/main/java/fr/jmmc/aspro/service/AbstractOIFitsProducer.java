@@ -63,10 +63,10 @@ public abstract class AbstractOIFitsProducer {
  /* input */
     /** selected target */
     protected final Target target;
-    /** OIFits supersampling preference */
-    protected final int supersamplingOIFits;
-    /** OIFits MathMode preference */
-    protected final MathMode mathModeOIFits;
+    /** OIFits supersampling */
+    protected final int supersampling;
+    /** OIFits MathMode */
+    protected final MathMode mathMode;
 
     /* output */
     /** oifits structure */
@@ -100,12 +100,12 @@ public abstract class AbstractOIFitsProducer {
     /**
      * Protected constructor
      * @param target target to process
-     * @param supersamplingOIFits OIFits supersampling preference
-     * @param mathModeOIFits OIFits MathMode preference
+     * @param supersampling OIFits supersampling preference
+     * @param mathMode OIFits MathMode preference
      */
     protected AbstractOIFitsProducer(final Target target,
-                                     final int supersamplingOIFits,
-                                     final MathMode mathModeOIFits) {
+                                     final int supersampling,
+                                     final MathMode mathMode) {
 
         this.target = target;
 
@@ -113,8 +113,8 @@ public abstract class AbstractOIFitsProducer {
         this.hasModel = target.hasModel();
 
         // OIFits preferences:
-        this.supersamplingOIFits = supersamplingOIFits;
-        this.mathModeOIFits = mathModeOIFits;
+        this.supersampling = supersampling;
+        this.mathMode = mathMode;
     }
 
     /**
@@ -260,7 +260,7 @@ public abstract class AbstractOIFitsProducer {
                         // Test sub sampling (less than 1 IMAGE PER CHANNEL)
                         if (nChannels > uniqueModelDatas.size()) {
                             addWarning(warningContainer, "Sub sampling detected: " + nChannels + " channels but only "
-                                    + uniqueModelDatas.size() + " user model images available");
+                                    + uniqueModelDatas.size() + " user model image(s) available");
                         }
 
                         // keep only channels where at least one image is present:
@@ -315,14 +315,13 @@ public abstract class AbstractOIFitsProducer {
             }
 
             // Determine nSamples per spectral channel:
-            // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
-            final UserModelService.MathMode mathMode = this.mathModeOIFits;
-
-            // TODO: determine correctly deltaLambda (object size (FOV) and Bmax/lambda) ie when super sampling is surely necessary
             // number of samples per spectral channel (1, 5, 9 ...) use the preference (SuperSampling)
             // should be an even number to keep wavelengths centered on each sub channels:
             // note: disable super sampling in high resolution:
-            int nSamples = (nChannels > 100 || mathMode == MathMode.QUICK) ? 1 : this.supersamplingOIFits;
+            // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
+
+            // TODO: determine correctly deltaLambda (object size (FOV) and Bmax/lambda) ie when super sampling is surely necessary
+            int nSamples = (nChannels > 100 || this.mathMode == MathMode.QUICK) ? 1 : this.supersampling;
 
 // TODO: fix resampling
             final double waveBand = StatUtils.mean(this.waveBands);
@@ -706,19 +705,19 @@ public abstract class AbstractOIFitsProducer {
     protected abstract UVFreqTable computeSpatialFreqTable(final double[] sampleWaveLengths);
 
     /**
-     * Return the OIFits supersampling preference
-     * @return OIFits supersampling preference
+     * Return the OIFits supersampling
+     * @return OIFits supersampling
      */
-    public int getSupersamplingOIFits() {
-        return supersamplingOIFits;
+    public int getSupersampling() {
+        return supersampling;
     }
 
     /**
-     * Return the OIFits MathMode preference
-     * @return OIFits MathMode preference
+     * Return the OIFits MathMode
+     * @return OIFits MathMode
      */
-    public MathMode getMathModeOIFits() {
-        return mathModeOIFits;
+    public MathMode getMathMode() {
+        return mathMode;
     }
 
     /**
@@ -969,19 +968,24 @@ public abstract class AbstractOIFitsProducer {
      * @return regularly sampled wavelengths
      */
     protected static double[] resampleWaveLengths(final double[] waveLengths, final double[] waveBands, final int nSamples) {
+        // compute interpolation coefficients between ]-0.5, 0.5[
+        final double[] interp = new double[nSamples];
+
+        for (int j = 0; j < nSamples; j++) {
+            interp[j] = -0.5 + ((1.0 + j)) / (1.0 + nSamples);
+        }
+        
         final int nWLen = waveLengths.length;
         final double[] wLen = new double[nWLen * nSamples];
 
-        double step, lambda;
+        double lambda, delta_lambda;
 
         for (int i = 0, k = 0; i < nWLen; i++) {
-            lambda = waveLengths[i] - 0.5 * waveBands[i];
-            step = waveBands[i] / (nSamples + 1);
-            lambda += step;
+            lambda = waveLengths[i];
+            delta_lambda = waveBands[i];
 
             for (int j = 0; j < nSamples; j++) {
-                wLen[k++] = lambda;
-                lambda += step;
+                wLen[k++] = lambda + interp[j] * delta_lambda;
             }
         }
         return wLen;

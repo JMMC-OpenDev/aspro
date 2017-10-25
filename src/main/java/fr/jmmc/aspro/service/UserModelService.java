@@ -119,6 +119,19 @@ public final class UserModelService {
      * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
      */
     public static void prepareUserModel(final UserModel userModel) throws FitsException, IOException, IllegalArgumentException {
+        final boolean useFastMode = Preferences.getInstance().isFastUserModel();
+        prepareUserModel(userModel, useFastMode);
+    }
+
+    /**
+     * Load the given user model file and prepare ONLY the first image for FFT processing and direct Fourier transform
+     * @param userModel user model to load and prepare
+     * @param useFastMode true to ignore useless data (faster); false to have highest precision
+     * @throws FitsException if any FITS error occured
+     * @throws IOException IO failure
+     * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
+     */
+    public static void prepareUserModel(final UserModel userModel, final boolean useFastMode) throws FitsException, IOException, IllegalArgumentException {
         // clear previously cached data:
         userModel.setModelDataList(null);
 
@@ -130,7 +143,6 @@ public final class UserModelService {
             throw new FitsException("The Fits file '" + userModel.getFile() + "' does not contain any supported Fits image !");
         }
 
-        final boolean useFastMode = Preferences.getInstance().isFastUserModel();
         logger.info("useFastMode: {}", useFastMode);
 
         final FitsImageHDU fitsImageHDU = imgFitsFile.getFitsImageHDUs().get(0); // only first HDU
@@ -731,7 +743,7 @@ public final class UserModelService {
      * Update the given FitsImage by the prepared FitsImage ready for FFT and prepared model data for direct Fourier transform
      * @param fitsImage FitsImage to process
      * @param modelData prepared model data for direct Fourier transform
-     * @param useFastMode true to ignore useless data
+     * @param useFastMode true to ignore useless data (faster); false to have highest precision
      * @throws IllegalArgumentException if image has invalid keyword(s) / data
      */
     public static void prepareImage(final FitsImage fitsImage, final UserModelData modelData, final boolean useFastMode) throws IllegalArgumentException {
@@ -1263,7 +1275,7 @@ public final class UserModelService {
          * Max view angle (0.20480000797990483 arcsec) 
          * Area java.awt.geom.Rectangle2D$Double[x=-4.959644151E-7,y=-4.959644151E-7,w=9.928984576E-7,h=9.928984576E-7] Lambda { RefPix 1.0 RefVal NaN Increment NaN} = NaN m.
          */
-        /*
+ /*
          * Gaussian function:
          * g(x,y) = exp(-( (x - x0)^2 + (y - y0)^2 ) / (2 x sigma2) )
          */

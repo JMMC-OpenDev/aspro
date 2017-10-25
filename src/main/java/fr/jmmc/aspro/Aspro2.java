@@ -64,12 +64,6 @@ public final class Aspro2 extends App {
     private static final Logger logger = LoggerFactory.getLogger(Aspro2.class.getName());
     /** CLI arg - process */
     public final static String ARG_PROCESS = "process";
-    /** CLI arg - image (fits) */
-    public final static String ARG_IMAGE = "image";
-    /** CLI arg - input (oifits) */
-    public final static String ARG_INPUT = "input";
-    /** CLI arg - output (oifits) */
-    public final static String ARG_OUTPUT = "output";
 
     /* members */
     /** Setting Panel */
@@ -100,21 +94,6 @@ public final class Aspro2 extends App {
      */
     public Aspro2(final String[] args) {
         super(args);
-    }
-
-    /**
-     * Add addExportListener PDF/PNG/JPG custom command line argument(s)
-     */
-    @Override
-    protected void defineCustomCommandLineArgumentsAndHelp() {
-        addCustomCommandLineArgument(ARG_PROCESS, false, "process an OIFITS file and model to compute observables",
-                App.ExecMode.TTY);
-        addCustomCommandLineArgument(ARG_IMAGE, true, "the input model image to process",
-                App.ExecMode.TTY);
-        addCustomCommandLineArgument(ARG_INPUT, true, "the input OIFITS file to process",
-                App.ExecMode.TTY);
-        addCustomCommandLineArgument(ARG_OUTPUT, true, "the output OIFITS file to write",
-                App.ExecMode.TTY);
     }
 
     /**
@@ -415,6 +394,16 @@ public final class Aspro2 extends App {
     }
 
     /**
+     * Add custom command line arguments for the OIFitsProcessor
+     */
+    @Override
+    protected void defineCustomCommandLineArgumentsAndHelp() {
+        addCustomCommandLineArgument(ARG_PROCESS, false, "process an OIFITS file and model to compute observables", App.ExecMode.TTY);
+        // Append Process arguments:
+        OIFitsProcessor.defineCommandLineArguments(this);
+    }
+
+    /**
      * check the arguments given by the user in TTY mode
      * and performs the requested action (process)
      * Note: executed by the thread [main]: must block until asynchronous task finishes !
@@ -425,32 +414,9 @@ public final class Aspro2 extends App {
         final Map<String, String> argValues = getCommandLineArguments();
         logger.debug("processShellCommandLine: {}", argValues);
 
-        // note: open file is ignored 
-        logger.info("processShellCommandLine: {}", argValues);
-
         if (argValues.get(ARG_PROCESS) != null) {
-            // Process action
-            final String inputFile = argValues.get(ARG_INPUT);
-            final String imageFile = argValues.get(ARG_IMAGE);
-            final String outputFile = argValues.get(ARG_OUTPUT);
-
-            if (inputFile == null) {
-                logger.warn("Missing {} argument !", ARG_INPUT);
-                showArgumentsHelp();
-            }
-            if (imageFile == null) {
-                logger.warn("Missing {} argument !", ARG_IMAGE);
-                showArgumentsHelp();
-            }
-
-            if (inputFile != null && imageFile != null) {
-                // Should perform in background ?
-                OIFitsProcessor job = new OIFitsProcessor(imageFile, inputFile, outputFile);
-
-                job.process();
-
-                // Wait for local launcher to terminate ?
-            }
+            // Process action:
+            OIFitsProcessor.processCommandLine(this, argValues);
         }
         logger.debug("processShellCommandLine: done.");
     }

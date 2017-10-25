@@ -14,6 +14,7 @@ import static fr.jmmc.aspro.util.StatUtils.SAMPLING_FACTOR_VARIANCE;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmcs.util.SpecialChars;
+import fr.jmmc.oitools.model.DataModel;
 import fr.jmmc.oitools.model.OIData;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIT3;
@@ -41,18 +42,18 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
     private OIData oiData = null;
 
     /**
-     * 
-     * @param target
-     * @param supersamplingOIFits
-     * @param mathModeOIFits
-     * @param oifitsFile
+     * Public constructor
+     * @param target target to process
+     * @param supersampling OIFits supersampling preference
+     * @param mathMode OIFits MathMode preference
+     * @param oifitsFile oifits to process
      */
     public OIFitsProcessService(final Target target,
-                                final int supersamplingOIFits,
-                                final UserModelService.MathMode mathModeOIFits,
+                                final int supersampling,
+                                final UserModelService.MathMode mathMode,
                                 final OIFitsFile oifitsFile) {
 
-        super(target, supersamplingOIFits, mathModeOIFits);
+        super(target, supersampling, mathMode);
 
         this.oiFitsFile = oifitsFile;
 
@@ -285,11 +286,16 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         // test if the instrument is AMBER to use dedicated diffVis algorithm :
         final boolean isAmber = vis.getArrName().startsWith(AsproConstants.INS_AMBER);
 
+        // Disable Complex visiblity support:
+        final boolean useComplexVis = false;
+
+        // Update the data model before calling new OIVis():
+        DataModel.setOiVisComplexSupport(useComplexVis);
+
         // Columns :
         final float[][][] visData = vis.getVisData();
         final float[][][] visErr = vis.getVisErr();
 
-//TODO: adjust flag for AMBER or GRAVITY ?
         final boolean useVisData = (visData != null && visErr != null);
 
         final double[][] visAmp = vis.getVisAmp();

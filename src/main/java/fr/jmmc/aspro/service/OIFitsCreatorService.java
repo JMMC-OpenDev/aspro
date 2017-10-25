@@ -123,8 +123,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
      * @param baseLines base line list
      * @param useInstrumentBias true to use instrument bias; false to compute only theoretical error
      * @param doDataNoise flag to add gaussian noise to OIFits data
-     * @param supersamplingOIFits OIFits supersampling preference
-     * @param mathModeOIFits OIFits MathMode preference
+     * @param supersampling OIFits supersampling preference
+     * @param mathMode OIFits MathMode preference
      * @param targetPointInfos target information for each uv point couples
      * @param targetUVObservability list of UV coordinates per baseline
      * @param sc sky calc instance
@@ -136,14 +136,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                    final List<BaseLine> baseLines,
                                    final boolean useInstrumentBias,
                                    final boolean doDataNoise,
-                                   final int supersamplingOIFits,
-                                   final MathMode mathModeOIFits,
+                                   final int supersampling,
+                                   final MathMode mathMode,
                                    final TargetPointInfo[] targetPointInfos,
                                    final List<UVRangeBaseLineData> targetUVObservability,
                                    final AstroSkyCalc sc,
                                    final WarningContainer warningContainer) {
 
-        super(target, supersamplingOIFits, mathModeOIFits);
+        super(target, supersampling, mathMode);
 
         this.beams = beams;
         this.nBeams = this.beams.size();
@@ -583,8 +583,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // test if the instrument is AMBER to use dedicated diffVis algorithm :
         final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
 
-        final boolean useComplexVis = isAmber || this.instrumentExperimental 
-                || AsproConstants.INS_GRAVITY.equals(this.instrumentName);
+        final boolean useComplexVis = isAmber || AsproConstants.INS_GRAVITY.equals(this.instrumentName);
 
         // Update the data model before calling new OIVis():
         DataModel.setOiVisComplexSupport(useComplexVis);
