@@ -29,9 +29,6 @@
         <!-- Application module first (main class) -->
         <jar href="jar/aspro2-TRUNK.jar" main="true"/>
 
-        <!-- Libraries -->
-        <extension href="./Aspro2_libs.jnlp"/>
-
 
         <!-- Configuration module -->
         <extension href="../../AsproConfig/aspro-conf/AsproConfig.jnlp"/>
@@ -41,6 +38,13 @@
         <extension href="../jmcs/Jmcs.jnlp"/>
         <extension href="../jmal/Jmal.jnlp"/>
         <extension href="../oiexplorer-core/OIExplorerCore.jnlp"/>
+
+
+        <!-- Libraries -->
+        <!-- SteelSeries Compass -->
+        <jar href="@SHARED@/SteelSeries-3.9.26.jar" />
+        <jar href="@SHARED@/trident-6.3.jar" />
+
     </resources>
     <application-desc main-class="fr.jmmc.aspro.Aspro2"/>
 </jnlp>
