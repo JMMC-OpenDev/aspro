@@ -15,6 +15,38 @@
 
     <packaging>jar</packaging>
     <name>Aspro2</name>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jnlp-app</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>mf</classifier>
+                            <skipIfEmpty>false</skipIfEmpty>
+                            <includes>
+                                <include>META-INF/**</include>
+                            </includes>                            
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <properties>
         <!-- do make assembly and copy dependencies (JNLP) -->
