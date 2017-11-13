@@ -245,7 +245,7 @@ public final class GenericCalDat implements Cloneable {
         if (style == 0) {
             digits = 0;
         }
-        if (style == 1 | style == 2 | style == 12) {
+        if (style == 1 || style == 2 || style == 12) {
             digits = -2;
         }
 

@@ -76,7 +76,7 @@ public final class HA implements Cloneable {
         String signout = "+";
 
         rounded = sex.roundsex(ndigits);
-        if (rounded.hour == 12 & rounded.sign == -1) {
+        if (rounded.hour == 12 && rounded.sign == -1) {
             rounded.hour = 12;
             rounded.minute = 0;
             rounded.second = 0d;

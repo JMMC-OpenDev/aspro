@@ -1880,7 +1880,7 @@ localXYSeries.add(511D, 4.1497089028083665E-9D);
 
       cumulative += val;
 
-      localXYSeries.addOrUpdate(Double.valueOf(i), new Double(cumulative));
+      localXYSeries.addOrUpdate(Double.valueOf(i), Double.valueOf(cumulative));
 
       if (cumulative > threshold) {
         System.out.println("threshold reached at i = " + i);

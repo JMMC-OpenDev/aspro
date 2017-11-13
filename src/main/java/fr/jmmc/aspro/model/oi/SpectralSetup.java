@@ -132,7 +132,7 @@ public class SpectralSetup
         int len = values.length;
         this.data = ((double[]) new double[len] );
         for (int i = 0; (i<len); i ++) {
-            this.data[i] = new Double(values[i]);
+            this.data[i] = Double.valueOf(values[i]);
         }
     }
 
@@ -145,7 +145,7 @@ public class SpectralSetup
      *     
      */
     public double setData(int idx, double value) {
-        return this.data[idx] = new Double(value);
+        return this.data[idx] = Double.valueOf(value);
     }
     
 //--simple--preserve

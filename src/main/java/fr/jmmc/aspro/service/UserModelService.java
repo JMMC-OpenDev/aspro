@@ -63,7 +63,7 @@ public final class UserModelService {
     /** maximum fft size (power of two) */
     public static final int MAX_FFT_SIZE = 1024 * 1024;
     /** Two PI constant */
-    public static final double TWO_PI = 6.28318530717958623199592693708837032d;
+    public static final double TWO_PI = 2d * Math.PI;
     /** 1 nano arcsec in radians (to compare increments) */
     private static final double INC_EPSILON_RAD = Math.toRadians(1e-9 * ALX.ARCSEC_IN_DEGREES);
     /** formatter for frequencies */

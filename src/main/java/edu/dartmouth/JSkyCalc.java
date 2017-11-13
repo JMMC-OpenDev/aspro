@@ -1532,7 +1532,7 @@ class JSkyCalcWindow {
 
     Color MoonWarningColor(double altmoon,
             double altitude, double altsun, double moonobj, double moonlight) {
-        if (altmoon < 0. | altitude < 0.) {
+        if (altmoon < 0. || altitude < 0.) {
             return outputcolor;
         }
         if (altsun > -12.) {
@@ -2581,7 +2581,7 @@ class JSkyCalcWindow {
         try {
             while ((st = br.readLine()) != null) {
                 obj = new AstrObj(st);
-                if (obj.name != null & obj.c != null) {
+                if (obj.name != null && obj.c != null) {
                     byname.put(obj.name.toLowerCase(), obj);
                     rakey = (Double) obj.c.alpha.value;
                     // ensure unique RA keys by inserting small tie-breaker offset
@@ -3103,7 +3103,7 @@ class JSkyCalcWindow {
             if (i != 2) {  // skip earth ....
                 sepn = Spherical.subtend(o.c, p.PlanetObs[i].c) * Const.DEG_IN_RADIAN;
                 if (sepn < 3.) {
-                    if (i > 0 & i < 6) {  // Venus through Saturn
+                    if (i > 0 && i < 6) {  // Venus through Saturn
                         warningtext = warningtext + String.format(Locale.ENGLISH, "%s - %4.2f deg ", p.names[i], sepn);
                         if (sepn < 1.) {
                             warninglevel = 2;

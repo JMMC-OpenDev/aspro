@@ -136,8 +136,8 @@ public final class Sexagesimal implements Cloneable {
             // read back the result ...
             // System.out.printf("In roundsex, teststr = %s%n",teststr);
             hourback = readback.nextInt();
-            if (hourback < 0d) {
-                hourback *= -1d;
+            if (hourback < 0) {
+                hourback *= -1;
             }
             minuteback = readback.nextInt();
             secondback = readback.nextDouble();
