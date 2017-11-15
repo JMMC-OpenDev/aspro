@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<jnlp spec="6.0+" codebase="@GENERATED@" href="Aspro2.jnlp">
+<jnlp spec="6.0+" codebase="@GENERATED@" href="Aspro2-app.jnlp">
     <information>
         <title>Aspro 2</title>
         <vendor>JMMC (Jean-Marie MARIOTTI Center)</vendor>
@@ -26,15 +26,15 @@
         <!-- MANUALLY EDITED -->
 
         <!-- Application module first (main class) -->
-        <jar href="jar/aspro2-TRUNK.jar" main="true"/>
+        <jar href="aspro/jar/aspro2-TRUNK.jar" main="true"/>
 
         <!-- Configuration module -->
-        <extension href="../../AsproConfig/aspro-conf/AsproConfig.jnlp"/>
+        <extension href="../AsproConfig/aspro-conf/AsproConfig.jnlp"/>
 
         <!-- JMMC modules -->
-        <extension href="../jmcs/Jmcs.jnlp"/>
-        <extension href="../jmal/Jmal.jnlp"/>
-        <extension href="../oiexplorer-core/OIExplorerCore.jnlp"/>
+        <extension href="jmcs/Jmcs.jnlp"/>
+        <extension href="jmal/Jmal.jnlp"/>
+        <extension href="oiexplorer-core/OIExplorerCore.jnlp"/>
 
         <!-- Libraries -->
         <!-- SteelSeries Compass -->
