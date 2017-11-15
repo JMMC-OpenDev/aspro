@@ -400,7 +400,9 @@ public final class Aspro2 extends App {
     protected void defineCustomCommandLineArgumentsAndHelp() {
         addCustomCommandLineArgument(ARG_PROCESS, false, "process an OIFITS file and model to compute observables", App.ExecMode.TTY);
         // Append Process arguments:
+        /*        
         OIFitsProcessor.defineCommandLineArguments(this);
+        */
     }
 
     /**
@@ -416,7 +418,9 @@ public final class Aspro2 extends App {
 
         if (argValues.get(ARG_PROCESS) != null) {
             // Process action:
+/*            
             OIFitsProcessor.processCommandLine(this, argValues);
+*/
         }
         logger.debug("processShellCommandLine: done.");
     }
