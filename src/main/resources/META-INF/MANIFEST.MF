@@ -8,5 +8,4 @@ Application-Name: Aspro 2
 Permissions: all-permissions
 Codebase: *.jmmc.fr
 Application-Library-Allowable-Codebase: *.jmmc.fr
-Trusted-Library: true
 Main-Class: fr.jmmc.aspro.Aspro2
