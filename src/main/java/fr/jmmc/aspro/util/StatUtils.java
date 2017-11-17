@@ -217,13 +217,16 @@ public final class StatUtils {
 
     public static double mean(final double[] array) {
         double sample, sum = 0.0;
-
+        int ns = 0;
         for (int n = 0; n < array.length; n++) {
             sample = array[n];
             // No Compensated-summation (double):
-            sum += sample;
+            if (!Double.isNaN(sample)) {
+                sum += sample;
+                ns++;
+            }
         }
-        return (sum / array.length);
+        return (ns != 0) ? (sum / ns) : 0.0;
     }
 
     public static double[] moments(final double[] array) {
