@@ -30,6 +30,7 @@ import static fr.jmmc.aspro.util.StatUtils.SAMPLING_FACTOR_VARIANCE;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oitools.OIFitsConstants;
 import fr.jmmc.oitools.meta.OIFitsStandard;
@@ -954,6 +955,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // Get OI_VIS table :
         final OIVis vis = this.oiFitsFile.getOiVis()[0];
         final int nRows = vis.getNbRows();
+        final int nWaveLengths = this.waveLengths.length;
 
         // Create OI_VIS2 table :
         final OIVis2 vis2 = new OIVis2(this.oiFitsFile, this.insNameKeyword, nRows);
@@ -971,6 +973,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         final boolean[][] flags = vis2.getFlag();
 
+        final double[][] snrData = new double[nWaveLengths][nRows];
+
         final NoiseService ns = this.noiseService;
 
         // vars:
@@ -983,13 +987,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // try resampling:
         double re, im, sample, diff;
         double v2_sum, v2_sum_diff, v2_sum_diff_square;
-        double s_v2_mean, s_v2_err;
+        double s_v2_mean, s_v2_err, snr;
 
         final double[] v2_samples = new double[N_SAMPLES];
         int[] visRndIdxRow = null;
         boolean doFlag;
-
-        final int nWaveLengths = this.waveLengths.length;
 
         // Iterate on observable UV points :
         for (int i = 0, j, k, l, n; i < this.nObsPoints; i++) {
@@ -1009,6 +1011,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                         // mark this value as invalid :
                         flags[k][l] = true;
+
+                        // snr stats:
+                        snrData[l][k] = Double.NaN;
                     }
 
                 } else {
@@ -1034,11 +1039,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                         if (ns == null) {
                             v2Err = Double.NaN;
+                            snr = Double.NaN;
                         } else {
                             // Sampling complex visibilities:
 
                             // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
                             errCVis = visError[k][l];
+
+                            snr = Math.abs(Math.sqrt(v2) / errCVis);
 
                             if (this.doNoise) {
                                 bias = ns.computeVis2Bias(i, l);
@@ -1090,7 +1098,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                             if (NoiseService.USE_DISTRIB_APPROACH) {
                                 // check SNR:
-                                if ((s_v2_err > 0.1) && Math.abs(s_v2_mean / s_v2_err) < SNR_THRESHOLD) {
+                                if ((s_v2_err > 0.1) && snr < SNR_THRESHOLD) {
                                     doFlag = true;
                                 }
                             }
@@ -1110,6 +1118,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                         // mark this value as valid only if error is valid and SNR is OK:
                         flags[k][l] = doFlag;
+
+                        // snr stats:
+                        snrData[l][k] = snr;
                     }
                 }
 
@@ -1125,6 +1136,28 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         this.oiFitsFile.addOiTable(vis2);
 
+        final double[] snrWL = new double[nWaveLengths];
+
+        // SNR stats per channel:
+        int nValid = 0;
+
+        for (int l = 0; l < nWaveLengths; l++) {
+            snrWL[l] = StatUtils.mean(snrData[l]);
+
+            logger.info("SNR[" + NumberUtils.trimTo3Digits(1e6 * waveLengths[l]) + "] = " + NumberUtils.trimTo3Digits(snrWL[l]));
+
+            if (snrWL[l] < SNR_THRESHOLD) {
+                snrWL[l] = Double.NaN;
+            } else {
+                nValid++;
+            }
+        }
+        final double snrAvg = StatUtils.mean(snrWL);
+        logger.info("SNR average = " + NumberUtils.trimTo3Digits(snrAvg)
+                + " : " + nValid + " / " + nWaveLengths + " channels with SNR > " + SNR_THRESHOLD);
+        
+        // TODO: add information in status log ...
+        
         if (logger.isDebugEnabled()) {
             logger.debug("createOIVis2: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
