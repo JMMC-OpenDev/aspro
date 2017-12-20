@@ -1007,14 +1007,13 @@ public final class NoiseService implements VisNoiseService {
             sqCorFluxCoef[i] = FastMath.pow2(nbPhot * vinst[i]);
 
             // total number of photons for all telescopes:
-            nbPhot *= nbTel;
+            nbPhot = nbTel * (nbPhotInterf[i] + nbPhotThermInterf[i]);
 
             // variance of the squared correlated flux = sqCorFlux * coef + constant
-            varSqCorFluxCoef[i] = 2.0 * (nbPhot + nbPhotThermInterf[i] * nbTel)
-                    + 4.0 + 2.0 * nbPixInterf[i] * FastMath.pow2(ron);
+            varSqCorFluxCoef[i] = 2.0 * nbPhot + 2.0 * nbPixInterf[i] * FastMath.pow2(ron) + 4.0;
 
-            varSqCorFluxConst[i] = nbPhot * (1.0 + nbPhot + 2.0 * nbPixInterf[i] * FastMath.pow2(ron))
-                    + nbPixInterf[i] * (nbPixInterf[i] + 3.0) * FastMath.pow(ron, 4.0);
+            varSqCorFluxConst[i] = nbPhot * (1.0 + 2.0 * nbPixInterf[i] * FastMath.pow2(ron)) + FastMath.pow2(nbPhot) 
+                    + (3.0 + nbPixInterf[i]) * nbPixInterf[i] * FastMath.pow(ron, 4.0);
 
             // normalized bias on V2:
             // ie Fc = 1 pour V2=1 car mesures photo identiques (FiFj / FiFj = 1)
@@ -1101,7 +1100,6 @@ public final class NoiseService implements VisNoiseService {
         // Uncertainty on square visibility per frame:
         double errVis2;
         if (usePhotometry) {
-            // TODO: howto deal with beams ? ie what is the impact of 1 vs 4 beams ?
             errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)) + param.sqErrVis2Phot[iChannel]);
         } else {
             // no photometry...
