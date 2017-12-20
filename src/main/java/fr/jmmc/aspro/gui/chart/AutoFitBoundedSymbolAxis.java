@@ -10,8 +10,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 import org.jfree.chart.axis.AxisState;
 import org.jfree.chart.event.AxisChangeEvent;
-import org.jfree.ui.RectangleEdge;
-import org.jfree.ui.RectangleInsets;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleInsets;
 
 /**
  *

@@ -122,7 +122,6 @@ import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import net.jafama.FastMath;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.AxisLocation;
@@ -136,13 +135,13 @@ import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.PaintScaleLegend;
+import org.jfree.chart.ui.Drawable;
+import org.jfree.chart.ui.Layer;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.Drawable;
-import org.jfree.ui.Layer;
-import org.jfree.ui.RectangleEdge;
-import org.jfree.ui.TextAnchor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -763,28 +762,28 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         final FastXYLineAndShapeRenderer rendererPoints = new FastXYLineAndShapeRenderer(true, false); // DATASET_UV_POINTS
         // force to use the large stroke :
         rendererPoints.setAutoPopulateSeriesStroke(false);
-        rendererPoints.setBaseStroke(ChartUtils.LARGE_STROKE);
-        rendererPoints.setBaseToolTipGenerator(this);
+        rendererPoints.setDefaultStroke(ChartUtils.LARGE_STROKE);
+        rendererPoints.setDefaultToolTipGenerator(this);
         this.xyPlot.setRenderer(DATASET_UV_POINTS, rendererPoints);
 
         final XYLineAndShapeRenderer rendererPointsShadow = new XYLineAndShapeRenderer(true, false); // DATASET_UV_POINTS_SHADOW
         // force to use the very large stroke :
         rendererPointsShadow.setAutoPopulateSeriesStroke(false);
-        rendererPointsShadow.setBaseStroke(ChartUtils.VERY_LARGE_STROKE);
+        rendererPointsShadow.setDefaultStroke(ChartUtils.VERY_LARGE_STROKE);
         this.xyPlot.setRenderer(DATASET_UV_POINTS_SHADOW, rendererPointsShadow);
 
         final XYLineAndShapeRenderer rendererTracks = new XYLineAndShapeRenderer(true, false); // DATASET_UV_TRACKS
         rendererTracks.setDrawSeriesLineAsPath(true);
         // force to use the large stroke :
         rendererTracks.setAutoPopulateSeriesStroke(false);
-        rendererTracks.setBaseStroke(ChartUtils.LARGE_STROKE);
+        rendererTracks.setDefaultStroke(ChartUtils.LARGE_STROKE);
         this.xyPlot.setRenderer(DATASET_UV_TRACKS, rendererTracks);
 
         final XYLineAndShapeRenderer rendererTracksShadow = new XYLineAndShapeRenderer(true, false); // DATASET_UV_TRACKS_SHADOW
         rendererTracksShadow.setDrawSeriesLineAsPath(true);
         // force to use the very large stroke :
         rendererTracksShadow.setAutoPopulateSeriesStroke(false);
-        rendererTracksShadow.setBaseStroke(ChartUtils.VERY_LARGE_STROKE);
+        rendererTracksShadow.setDefaultStroke(ChartUtils.VERY_LARGE_STROKE);
         this.xyPlot.setRenderer(DATASET_UV_TRACKS_SHADOW, rendererTracksShadow);
 
         // Adjust background settings :
@@ -2166,7 +2165,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.resetUVMap();
 
             // update theme at end :
-            ChartUtilities.applyCurrentTheme(this.chart);
+            org.jfree.chart.ChartUtils.applyCurrentTheme(this.chart);
 
             this.xyPlot.setBackgroundPaint(Color.WHITE);
 
@@ -2305,7 +2304,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 updateUVMapData(uvMapData);
 
                 // update theme at end :
-                ChartUtilities.applyCurrentTheme(this.chart);
+                org.jfree.chart.ChartUtils.applyCurrentTheme(this.chart);
 
                 // update the time annotations:
                 updateTimeAnnotations();
@@ -2764,7 +2763,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // points renderer:
         final AbstractRenderer rendererPoints = (AbstractRenderer) this.xyPlot.getRenderer(); // DATASET_UV_POINTS
         // show series in legend:
-        rendererPoints.setBaseSeriesVisibleInLegend(true);
+        rendererPoints.setDefaultSeriesVisibleInLegend(true);
         // side effect with chart theme :
         rendererPoints.setAutoPopulateSeriesPaint(false);
         // reset colors :
@@ -2773,7 +2772,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // tracks renderer:
         final AbstractRenderer rendererTracks = (AbstractRenderer) this.xyPlot.getRenderer(DATASET_UV_TRACKS);
         // hide series in legend:
-        rendererTracks.setBaseSeriesVisibleInLegend(false);
+        rendererTracks.setDefaultSeriesVisibleInLegend(false);
         // side effect with chart theme :
         rendererTracks.setAutoPopulateSeriesPaint(false);
         // reset colors :
@@ -2782,18 +2781,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // points shadow renderer:
         final AbstractRenderer rendererPointsShadow = (AbstractRenderer) this.xyPlot.getRenderer(DATASET_UV_POINTS_SHADOW);
         // hide series in legend:
-        rendererPointsShadow.setBaseSeriesVisibleInLegend(false);
+        rendererPointsShadow.setDefaultSeriesVisibleInLegend(false);
         // side effect with chart theme :
         rendererPointsShadow.setAutoPopulateSeriesPaint(false);
-        rendererPointsShadow.setBasePaint(SHADOW_COLOR);
+        rendererPointsShadow.setDefaultPaint(SHADOW_COLOR);
 
         // points shadow renderer:
         final AbstractRenderer rendererTracksShadow = (AbstractRenderer) this.xyPlot.getRenderer(DATASET_UV_TRACKS_SHADOW);
         // hide series in legend:
-        rendererTracksShadow.setBaseSeriesVisibleInLegend(false);
+        rendererTracksShadow.setDefaultSeriesVisibleInLegend(false);
         // side effect with chart theme :
         rendererTracksShadow.setAutoPopulateSeriesPaint(false);
-        rendererTracksShadow.setBasePaint(SHADOW_COLOR);
+        rendererTracksShadow.setDefaultPaint(SHADOW_COLOR);
 
         // Create dataset with UV coverage data :
         final XYSeriesCollection datasetPoints = prepareDataset(chartData, rendererPoints);
@@ -2822,7 +2821,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.xyPlot.setFixedLegendItems(this.xyPlot.getLegendItems());
 
         // hide series in legend:
-        rendererPoints.setBaseSeriesVisibleInLegend(false);
+        rendererPoints.setDefaultSeriesVisibleInLegend(false);
 
         this.xyPlot.setDataset(DATASET_UV_POINTS_SHADOW, datasetPoints);
         this.xyPlot.setDataset(DATASET_UV_TRACKS, datasetTracks);

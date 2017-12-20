@@ -58,11 +58,11 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.io.SerialUtilities;
-import org.jfree.ui.RectangleEdge;
-import org.jfree.util.ObjectUtilities;
-import org.jfree.util.PaintUtilities;
-import org.jfree.util.PublicCloneable;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.util.ObjectUtils;
+import org.jfree.chart.util.PaintUtils;
+import org.jfree.chart.util.PublicCloneable;
+import org.jfree.chart.util.SerialUtils;
 
 /**
  * A line annotation that can be placed on an {@link XYPlot}.  The line coordinates are specified in data space.
@@ -221,10 +221,10 @@ public final class EnhancedXYLineAnnotation extends AbstractXYAnnotation
         if (!(this.y1 == that.getY1())) {
             return false;
         }
-        if (!ObjectUtilities.equal(this.stroke, that.getStroke())) {
+        if (!ObjectUtils.equal(this.stroke, that.getStroke())) {
             return false;
         }
-        if (!PaintUtilities.equal(this.paint, that.getPaint())) {
+        if (!PaintUtils.equal(this.paint, that.getPaint())) {
             return false;
         }
         // seem to be the same
@@ -273,8 +273,8 @@ public final class EnhancedXYLineAnnotation extends AbstractXYAnnotation
      */
     private void writeObject(final ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
-        SerialUtilities.writeStroke(this.stroke, stream);
-        SerialUtilities.writePaint(this.paint, stream);
+        SerialUtils.writeStroke(this.stroke, stream);
+        SerialUtils.writePaint(this.paint, stream);
     }
 
     /**
@@ -289,8 +289,8 @@ public final class EnhancedXYLineAnnotation extends AbstractXYAnnotation
             throws IOException, ClassNotFoundException {
 
         stream.defaultReadObject();
-        this.stroke = (BasicStroke) SerialUtilities.readStroke(stream);
-        this.paint = SerialUtilities.readPaint(stream);
+        this.stroke = (BasicStroke) SerialUtils.readStroke(stream);
+        this.paint = SerialUtils.readPaint(stream);
     }
 
     /**

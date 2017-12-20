@@ -105,7 +105,6 @@ import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartRenderingInfo;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.LegendItemCollection;
 import org.jfree.chart.annotations.XYAnnotation;
@@ -121,15 +120,15 @@ import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.ui.Drawable;
+import org.jfree.chart.ui.Layer;
+import org.jfree.chart.ui.RectangleAnchor;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.time.DateRange;
-import org.jfree.ui.Drawable;
-import org.jfree.ui.Layer;
-import org.jfree.ui.RectangleAnchor;
-import org.jfree.ui.RectangleInsets;
-import org.jfree.ui.TextAnchor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -812,7 +811,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
         
         // update theme at end :
-        ChartUtilities.applyCurrentTheme(this.chart);
+        org.jfree.chart.ChartUtils.applyCurrentTheme(this.chart);
     }
 
     /**
@@ -867,7 +866,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         updateTimeMarker();
         
         // update theme at end :
-        ChartUtilities.applyCurrentTheme(this.chart);
+        org.jfree.chart.ChartUtils.applyCurrentTheme(this.chart);
     }
 
     /**

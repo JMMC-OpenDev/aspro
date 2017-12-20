@@ -27,7 +27,6 @@ import fr.jmmc.oiexplorer.core.util.Constants;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.event.ChartProgressEvent;
@@ -36,11 +35,11 @@ import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.ui.Drawable;
+import org.jfree.chart.ui.Layer;
+import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.Drawable;
-import org.jfree.ui.Layer;
-import org.jfree.ui.TextAnchor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,7 +161,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
 
         final XYItemRenderer lineRenderer = this.xyPlot.getRenderer();
-        lineRenderer.setBaseStroke(ChartUtils.LARGE_STROKE);
+        lineRenderer.setDefaultStroke(ChartUtils.LARGE_STROKE);
 
         // Use Bubble Renderer for the first dataset :
         this.xyPlot.setRenderer(0, new FastXYBubbleRenderer());
@@ -177,9 +176,9 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         final XYItemRenderer renderer = this.xyPlot.getRenderer();
 
         // station labels :
-        renderer.setBaseItemLabelGenerator(new NameLabelGenerator());
-        renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.BOTTOM_RIGHT));
-        renderer.setBaseItemLabelsVisible(true);
+        renderer.setDefaultItemLabelGenerator(new NameLabelGenerator());
+        renderer.setDefaultPositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.BOTTOM_RIGHT));
+        renderer.setDefaultItemLabelsVisible(true);
 
         // create new JMMC annotation (moving position):
         this.aJMMC = AsproChartUtils.createJMMCAnnotation();
@@ -305,7 +304,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
             updateChart(chartData);
 
             // update theme at end :
-            ChartUtilities.applyCurrentTheme(this.chart);
+            org.jfree.chart.ChartUtils.applyCurrentTheme(this.chart);
 
         } finally {
             // restore chart & plot notifications:

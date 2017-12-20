@@ -128,7 +128,7 @@ public final class AsproChartUtils {
             } else {
                 tt = new StandardXYToolTipGenerator();
             }
-            renderer.setBaseToolTipGenerator(tt);
+            renderer.setDefaultToolTipGenerator(tt);
         }
         if (urls) {
             renderer.setURLGenerator(new StandardXYURLGenerator());

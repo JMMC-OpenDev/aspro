@@ -66,10 +66,10 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.text.TextUtilities;
-import org.jfree.ui.RectangleEdge;
-import org.jfree.ui.TextAnchor;
-import org.jfree.util.PublicCloneable;
+import org.jfree.chart.text.TextUtils;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.TextAnchor;
+import org.jfree.chart.util.PublicCloneable;
 
 /**
  * An arrow and label that can be placed on an {@link XYPlot}.  The arrow is
@@ -277,7 +277,7 @@ public final class XYTickAnnotation extends ExtendedXYTextAnnotation
 
             // only compute text area if needed:
             final Shape hotspot = (background != null || drawOutline || toolTip != null || url != null)
-                    ? TextUtilities.calculateRotatedStringBounds(getText(), g2d, labelX, labelY,
+                    ? TextUtils.calculateRotatedStringBounds(getText(), g2d, labelX, labelY,
                     getTextAnchor(), getRotationAngle(), getRotationAnchor())
                     : null;
 
@@ -287,7 +287,7 @@ public final class XYTickAnnotation extends ExtendedXYTextAnnotation
             }
 
             g2d.setPaint(getPaint());
-            TextUtilities.drawRotatedString(getText(), g2d, labelX, labelY, getTextAnchor(), getRotationAngle(), getRotationAnchor());
+            TextUtils.drawRotatedString(getText(), g2d, labelX, labelY, getTextAnchor(), getRotationAngle(), getRotationAnchor());
 
             if (drawOutline) {
                 g2d.setStroke(getOutlineStroke());

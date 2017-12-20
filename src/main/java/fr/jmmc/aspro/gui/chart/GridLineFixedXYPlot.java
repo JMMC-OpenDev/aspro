@@ -22,10 +22,10 @@ import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.PlotState;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.ui.Layer;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.Layer;
-import org.jfree.ui.RectangleEdge;
-import org.jfree.ui.RectangleInsets;
 
 /**
  * This hacked XYPlot fixes rendering order problem between grid lines (BEFORE) and background markers (AFTER)
@@ -254,7 +254,7 @@ public final class GridLineFixedXYPlot extends XYPlot {
       }
 
     }
-
+/*
     // draw domain crosshair if required...
     if (isDomainCrosshairVisible()) {
       int xAxisIndex = crosshairState.getDomainAxisIndex();
@@ -296,6 +296,49 @@ public final class GridLineFixedXYPlot extends XYPlot {
       Stroke stroke = getRangeCrosshairStroke();
       drawRangeCrosshair(g2, dataArea, orient, y, yAxis, stroke, paint);
     }
+*/
+        // draw domain crosshair if required...
+        int datasetIndex = crosshairState.getDatasetIndex();
+        ValueAxis xAxis = getDomainAxisForDataset(datasetIndex);
+        RectangleEdge xAxisEdge = getDomainAxisEdge(getDomainAxisIndex(xAxis));
+        if (!this.isDomainCrosshairLockedOnData() && anchor != null) {
+            double xx;
+            if (orient == PlotOrientation.VERTICAL) {
+                xx = xAxis.java2DToValue(anchor.getX(), dataArea, xAxisEdge);
+            }
+            else {
+                xx = xAxis.java2DToValue(anchor.getY(), dataArea, xAxisEdge);
+            }
+            crosshairState.setCrosshairX(xx);
+        }
+        setDomainCrosshairValue(crosshairState.getCrosshairX(), false);
+        if (isDomainCrosshairVisible()) {
+            double x = getDomainCrosshairValue();
+            Paint paint = getDomainCrosshairPaint();
+            Stroke stroke = getDomainCrosshairStroke();
+            drawDomainCrosshair(g2, dataArea, orient, x, xAxis, stroke, paint);
+        }
+
+        // draw range crosshair if required...
+        ValueAxis yAxis = getRangeAxisForDataset(datasetIndex);
+        RectangleEdge yAxisEdge = getRangeAxisEdge(getRangeAxisIndex(yAxis));
+        if (!this.isRangeCrosshairLockedOnData() && anchor != null) {
+            double yy;
+            if (orient == PlotOrientation.VERTICAL) {
+                yy = yAxis.java2DToValue(anchor.getY(), dataArea, yAxisEdge);
+            } else {
+                yy = yAxis.java2DToValue(anchor.getX(), dataArea, yAxisEdge);
+            }
+            crosshairState.setCrosshairY(yy);
+        }
+        setRangeCrosshairValue(crosshairState.getCrosshairY(), false);
+        if (isRangeCrosshairVisible()) {
+            double y = getRangeCrosshairValue();
+            Paint paint = getRangeCrosshairPaint();
+            Stroke stroke = getRangeCrosshairStroke();
+            drawRangeCrosshair(g2, dataArea, orient, y, yAxis, stroke, paint);
+        }
+
 
     if (!foundData) {
       drawNoDataMessage(g2, dataArea);

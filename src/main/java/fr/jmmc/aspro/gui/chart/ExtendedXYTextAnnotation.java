@@ -65,20 +65,20 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import org.jfree.chart.HashUtils;
 
-import org.jfree.chart.HashUtilities;
 import org.jfree.chart.annotations.AbstractXYAnnotation;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.io.SerialUtilities;
-import org.jfree.text.TextUtilities;
-import org.jfree.ui.RectangleEdge;
-import org.jfree.ui.TextAnchor;
-import org.jfree.util.PaintUtilities;
-import org.jfree.util.PublicCloneable;
+import org.jfree.chart.text.TextUtils;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.TextAnchor;
+import org.jfree.chart.util.PaintUtils;
+import org.jfree.chart.util.PublicCloneable;
+import org.jfree.chart.util.SerialUtils;
 
 /**
  * A text annotation that can be placed at a particular (x, y) location on an
@@ -521,7 +521,7 @@ public class ExtendedXYTextAnnotation extends AbstractXYAnnotation
         }
 
         g2.setFont(getFont());
-        final Shape hotspot = TextUtilities.calculateRotatedStringBounds(
+        final Shape hotspot = TextUtils.calculateRotatedStringBounds(
                 getText(), g2, anchorX, anchorY, getTextAnchor(),
                 getRotationAngle(), getRotationAnchor());
         if (this.backgroundPaint != null) {
@@ -529,7 +529,7 @@ public class ExtendedXYTextAnnotation extends AbstractXYAnnotation
             g2.fill(hotspot);
         }
         g2.setPaint(getPaint());
-        TextUtilities.drawRotatedString(getText(), g2, anchorX, anchorY,
+        TextUtils.drawRotatedString(getText(), g2, anchorX, anchorY,
                 getTextAnchor(), getRotationAngle(), getRotationAnchor());
         if (this.outlineVisible) {
             g2.setStroke(this.outlineStroke);
@@ -572,7 +572,7 @@ public class ExtendedXYTextAnnotation extends AbstractXYAnnotation
         if (!this.font.equals(that.font)) {
             return false;
         }
-        if (!PaintUtilities.equal(this.paint, that.paint)) {
+        if (!PaintUtils.equal(this.paint, that.paint)) {
             return false;
         }
         if (!this.rotationAnchor.equals(that.rotationAnchor)) {
@@ -587,10 +587,10 @@ public class ExtendedXYTextAnnotation extends AbstractXYAnnotation
         if (this.outlineVisible != that.outlineVisible) {
             return false;
         }
-        if (!PaintUtilities.equal(this.backgroundPaint, that.backgroundPaint)) {
+        if (!PaintUtils.equal(this.backgroundPaint, that.backgroundPaint)) {
             return false;
         }
-        if (!PaintUtilities.equal(this.outlinePaint, that.outlinePaint)) {
+        if (!PaintUtils.equal(this.outlinePaint, that.outlinePaint)) {
             return false;
         }
         if (!(this.outlineStroke.equals(that.outlineStroke))) {
@@ -608,7 +608,7 @@ public class ExtendedXYTextAnnotation extends AbstractXYAnnotation
         int result = 193;
         result = 37 * this.text.hashCode();
         result = 37 * this.font.hashCode();
-        result = 37 * result + HashUtilities.hashCodeForPaint(this.paint);
+        result = 37 * result + HashUtils.hashCodeForPaint(this.paint);
         long temp = Double.doubleToLongBits(this.x);
         result = 37 * result + (int) (temp ^ (temp >>> 32));
         temp = Double.doubleToLongBits(this.y);
@@ -640,10 +640,10 @@ public class ExtendedXYTextAnnotation extends AbstractXYAnnotation
      */
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
-        SerialUtilities.writePaint(this.paint, stream);
-        SerialUtilities.writePaint(this.backgroundPaint, stream);
-        SerialUtilities.writePaint(this.outlinePaint, stream);
-        SerialUtilities.writeStroke(this.outlineStroke, stream);
+        SerialUtils.writePaint(this.paint, stream);
+        SerialUtils.writePaint(this.backgroundPaint, stream);
+        SerialUtils.writePaint(this.outlinePaint, stream);
+        SerialUtils.writeStroke(this.outlineStroke, stream);
     }
 
     /**
@@ -657,10 +657,10 @@ public class ExtendedXYTextAnnotation extends AbstractXYAnnotation
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        this.paint = SerialUtilities.readPaint(stream);
-        this.backgroundPaint = SerialUtilities.readPaint(stream);
-        this.outlinePaint = SerialUtilities.readPaint(stream);
-        this.outlineStroke = SerialUtilities.readStroke(stream);
+        this.paint = SerialUtils.readPaint(stream);
+        this.backgroundPaint = SerialUtils.readPaint(stream);
+        this.outlinePaint = SerialUtils.readPaint(stream);
+        this.outlineStroke = SerialUtils.readStroke(stream);
     }
 
 }

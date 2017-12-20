@@ -22,21 +22,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.ui.Layer;
+import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.Range;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.gantt.XYTaskDataset;
 import org.jfree.data.time.TimePeriod;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.Layer;
-import org.jfree.ui.RectangleInsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +119,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         this.state.maxViewItems = maxElements;
         this.aJMMC = aJMMC;
         this.renderer = (XYBarRenderer) plot.getRenderer();
-        this.renderer.setBaseToolTipGenerator(this);
+        this.renderer.setDefaultToolTipGenerator(this);
     }
 
     /**
@@ -503,7 +502,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             this.xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
 
             // update theme at end :
-            ChartUtilities.applyCurrentTheme(this.chart);
+            org.jfree.chart.ChartUtils.applyCurrentTheme(this.chart);
 
             // hack symbol axis tick margin:
             this.xyPlot.getDomainAxis().setTickLabelInsets(SYMBOL_LABEL_INSETS); // margin set to 1

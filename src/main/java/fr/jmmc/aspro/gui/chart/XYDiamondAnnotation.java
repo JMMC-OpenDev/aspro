@@ -53,8 +53,8 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.ui.RectangleEdge;
-import org.jfree.util.PublicCloneable;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.util.PublicCloneable;
 
 /**
  * Custom annotation to plot a diamond mark that supports also auto scaling 

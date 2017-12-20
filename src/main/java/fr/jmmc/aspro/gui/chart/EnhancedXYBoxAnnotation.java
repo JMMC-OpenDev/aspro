@@ -59,14 +59,14 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.io.SerialUtilities;
-import org.jfree.ui.GradientPaintTransformer;
-import org.jfree.ui.Layer;
-import org.jfree.ui.RectangleEdge;
-import org.jfree.ui.StandardGradientPaintTransformer;
-import org.jfree.util.ObjectUtilities;
-import org.jfree.util.PaintUtilities;
-import org.jfree.util.PublicCloneable;
+import org.jfree.chart.ui.GradientPaintTransformer;
+import org.jfree.chart.ui.Layer;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.StandardGradientPaintTransformer;
+import org.jfree.chart.util.ObjectUtils;
+import org.jfree.chart.util.PaintUtils;
+import org.jfree.chart.util.PublicCloneable;
+import org.jfree.chart.util.SerialUtils;
 
 /**
  * A box annotation that can be placed on an {@link XYPlot}.  The box coordinates are specified in data space.
@@ -346,16 +346,16 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
         if (!(this.y1 == that.getY1())) {
             return false;
         }
-        if (!ObjectUtilities.equal(this.stroke, that.getStroke())) {
+        if (!ObjectUtils.equal(this.stroke, that.getStroke())) {
             return false;
         }
-        if (!PaintUtilities.equal(this.outlinePaint, that.getOutlinePaint())) {
+        if (!PaintUtils.equal(this.outlinePaint, that.getOutlinePaint())) {
             return false;
         }
-        if (!PaintUtilities.equal(this.fillPaint, that.getFillPaint())) {
+        if (!PaintUtils.equal(this.fillPaint, that.getFillPaint())) {
             return false;
         }
-        return ObjectUtilities.equal(this.layer, that.getLayer());
+        return ObjectUtils.equal(this.layer, that.getLayer());
     }
 
     /**
@@ -400,9 +400,9 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      */
     private void writeObject(final ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
-        SerialUtilities.writeStroke(this.stroke, stream);
-        SerialUtilities.writePaint(this.outlinePaint, stream);
-        SerialUtilities.writePaint(this.fillPaint, stream);
+        SerialUtils.writeStroke(this.stroke, stream);
+        SerialUtils.writePaint(this.outlinePaint, stream);
+        SerialUtils.writePaint(this.fillPaint, stream);
     }
 
     /**
@@ -417,9 +417,9 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
             throws IOException, ClassNotFoundException {
 
         stream.defaultReadObject();
-        this.stroke = (BasicStroke) SerialUtilities.readStroke(stream);
-        this.outlinePaint = SerialUtilities.readPaint(stream);
-        this.fillPaint = SerialUtilities.readPaint(stream);
+        this.stroke = (BasicStroke) SerialUtils.readStroke(stream);
+        this.outlinePaint = SerialUtils.readPaint(stream);
+        this.fillPaint = SerialUtils.readPaint(stream);
     }
 
     /**

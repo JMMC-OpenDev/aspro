@@ -26,7 +26,7 @@ import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.BorderLayout;
 import java.util.List;
 import org.jfree.chart.ChartColor;
-import org.jfree.ui.Drawable;
+import org.jfree.chart.ui.Drawable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
