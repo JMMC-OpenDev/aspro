@@ -997,33 +997,28 @@ public final class NoiseService implements VisNoiseService {
             Arrays.fill(sqErrVis2Phot, 0.0);
         }
 
-        double nbPhot;
-
         for (int i = 0; i < nWLen; i++) {
-            // Per telescope
-            nbPhot = nbPhotInterf[i];
-
             // squared correlated flux (include instrumental visibility loss) for vis2 = 1.0:
-            sqCorFluxCoef[i] = FastMath.pow2(nbPhot * vinst[i]);
+            sqCorFluxCoef[i] = FastMath.pow2(nbPhotInterf[i] * vinst[i]);
 
             // total number of photons for all telescopes:
-            nbPhot = nbTel * (nbPhotInterf[i] + nbPhotThermInterf[i]);
+            final double nbTotPhot = nbTel * (nbPhotInterf[i] + nbPhotThermInterf[i]);
 
             // variance of the squared correlated flux = sqCorFlux * coef + constant
-            varSqCorFluxCoef[i] = 2.0 * nbPhot + 2.0 * nbPixInterf[i] * FastMath.pow2(ron) + 4.0;
+            varSqCorFluxCoef[i] = 2.0 * nbTotPhot + 2.0 * nbPixInterf[i] * FastMath.pow2(ron) + 4.0;
 
-            varSqCorFluxConst[i] = nbPhot * (1.0 + 2.0 * nbPixInterf[i] * FastMath.pow2(ron)) + FastMath.pow2(nbPhot) 
+            varSqCorFluxConst[i] = nbTotPhot * (1.0 + 2.0 * nbPixInterf[i] * FastMath.pow2(ron)) 
+                    + FastMath.pow2(nbTel * nbPhotInterf[i])
                     + (3.0 + nbPixInterf[i]) * nbPixInterf[i] * FastMath.pow(ron, 4.0);
 
             // normalized bias on V2:
             // ie Fc = 1 pour V2=1 car mesures photo identiques (FiFj / FiFj = 1)
             // correlated flux (include instrumental visibility loss) for vis2 = 1.0:
-            nbPhot = nbPhotInterf[i] * vinst[i];
 
             // use the total number photons for nbFrames or not ?
-            biasV2[i] = (nbPhot + nbPixInterf[i] * FastMath.pow2(ron)) / FastMath.pow2(nbPhot);
+            biasV2[i] = (nbTotPhot + nbPixInterf[i] * FastMath.pow2(ron)) / sqCorFluxCoef[i];
             // repeat OBS measurements to reach totalObsTime minutes:
-            biasV2[i] *= totFrameCorrection;
+            biasV2[i] *= FastMath.pow2(totFrameCorrection); // bias divided by nbFrames
         }
 
         if (logger.isDebugEnabled()) {
