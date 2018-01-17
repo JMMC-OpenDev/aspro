@@ -3,14 +3,16 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 import xml.etree.ElementTree
 import p2api
-import gi
+import pygtk
+
 import time
 import re
+import cgi
 from astropy.vo.samp import SAMPIntegratedClient
 from astropy.table import Table
 
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GObject
+pygtk.require('2.0')
+import gtk
 
 #help text in Pango Markup syntax https://developer.gnome.org/pango/stable/PangoMarkupFormat.html
 HELPTEXT="""
@@ -30,65 +32,66 @@ After successful login, you are presented with the Runs compatible with Aspro's 
 - For each block submitted, a report is produced. Warnings are usually not significant.
 - For more than 1 object sent, a <b>folder</b> containing the two or more blocks <b>is created</b>. In the absence of availability of grouping OBs (like for CAL-SCI-CAL) provided by ESO, this is the closets we can do.
 - All the new OBs and folders will be available on <span foreground="blue" > <a href=\"https://eso.org/p2\">p2web</a> </span>
-"""
-class LoginWindow(Gtk.Window):
+log"""
+class LoginWindow:
     def __init__(self,loginlist,containerInfo,flag):  #passing by pointer on list is a GREAT PAIN IN THE...
         self.login=loginlist
         self.containerInfo=containerInfo
 
         self.flag=flag
-        Gtk.Window.__init__(self, title="Connect with ESO DATABASE")
-        self.set_size_request(200, 300)
+        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window.set_title("Connect with ESO DATABASE")
+        self.window.set_size_request(200, 300)
 
         self.timeout_id = None
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
-        self.add(vbox)
+        vbox = gtk.VBox(False,0)
+        self.window.add(vbox)
 
-        self.username_hbox = Gtk.Box(spacing=3)
+        self.username_hbox = gtk.HBox(spacing=3)
         vbox.pack_start(self.username_hbox, False, False, 0)
-        label = Gtk.Label("USERNAME")
+        label = gtk.Label("USERNAME")
         self.username_hbox.pack_start(label, True, True, 0)
-        self.username = Gtk.Entry()
+        self.username = gtk.Entry()
         self.username.set_text(self.login[0])
         self.username_hbox.pack_start(self.username, True, True, 0)
 
-        self.password_hbox = Gtk.Box(spacing=6)
+        self.password_hbox = gtk.HBox(spacing=6)
         vbox.pack_start(self.password_hbox, False, False, 0)
-        label = Gtk.Label("PASSWORD")
+        label = gtk.Label("PASSWORD")
         self.password_hbox.pack_start(label, True, True, 0)
-        self.password = Gtk.Entry()
+        self.password = gtk.Entry()
         self.password.set_visibility(False)
         self.password.set_text(self.login[1])
         self.password_hbox.pack_start(self.password, True, True, 0)
 
-        self.tempolabel = Gtk.Label("Please Log In ESO USER PORTAL ")
+        self.tempolabel = gtk.Label("Please Log In ESO USER PORTAL ")
         vbox.pack_start(self.tempolabel, False, False, 0)
 
        
-        self.scrollable = Gtk.ScrolledWindow()
-        self.scrollable.set_vexpand(True)
+        self.scrollable = gtk.ScrolledWindow()
+#        self.scrollable.set_vexpand(True)
         vbox.pack_start(self.scrollable,True,True,0)        
 
-        self.progressbar = Gtk.ProgressBar()
+        self.progressbar = gtk.ProgressBar()
         vbox.pack_start(self.progressbar, False, True, 0)
         
-        self.log = Gtk.Label()
+        self.log = gtk.Label()
         self.log.set_line_wrap(True)
         vbox.pack_start(self.log, False, True, 0)
         
-        hbox = Gtk.Box(spacing=6)
+        hbox = gtk.HBox(spacing=6)
         vbox.pack_start(hbox, False, False, 0)
 
-        self.buttonok = Gtk.Button(label="LOG IN")
+        self.buttonok = gtk.Button(label="LOG IN")
         self.buttonok.connect("clicked", self.on_buttonok_clicked)
         hbox.pack_start(self.buttonok, False, True, 0)
 
-        self.buttonabort = Gtk.Button(label="ABORT")
+        self.buttonabort = gtk.Button(label="ABORT")
         self.buttonabort.connect("clicked", self.on_buttonabort_clicked)
         hbox.pack_start(self.buttonabort, False, True, 0)
         
-        self.buttonhelp = Gtk.Button(label="HELP")
+        self.buttonhelp = gtk.Button(label="HELP")
         self.buttonhelp.connect("clicked", self.on_buttonhelp_clicked)
         hbox.pack_start(self.buttonhelp, False, True, 0)
 
@@ -117,7 +120,7 @@ class LoginWindow(Gtk.Window):
         self.buttonabort.set_label("EXIT")
         self.tempolabel.set_text("Select the Project Id in the list:")
 
-        self.store = Gtk.TreeStore(str,str,int)
+        self.store = gtk.TreeStore(str,str,int)
         self.runName=[]
         self.instrument=[]
         self.containerId=[]
@@ -148,18 +151,18 @@ class LoginWindow(Gtk.Window):
                         name2=folders2[k]['name']
                         contid2=folders2[k]['containerId']
                         entry_subfolder=self.store.append(entry_folder,['Folder:',name2,contid2])
-        self.treeview =  Gtk.TreeView(self.store)
+        self.treeview =  gtk.TreeView(self.store)
         # create a CellRendererText to render the data
-        renderer = Gtk.CellRendererText()
+        renderer = gtk.CellRendererText()
         for i, column_title in enumerate(["Project ID", "Instrument", "Run ID"]):
-            renderer = Gtk.CellRendererText()
-            column = Gtk.TreeViewColumn(column_title, renderer, text=i)
+            renderer = gtk.CellRendererText()
+            column = gtk.TreeViewColumn(column_title, renderer, text=i)
             self.treeview.append_column(column)
         self.scrollable.add(self.treeview)
         self.treeselect = self.treeview.get_selection()
         self.treeselect.connect("changed", self.on_tree_selection_changed)
         self.treeview.connect("row-expanded", self.on_row_expanded)
-        self.show_all()
+        self.window.show_all()
 
     def on_row_expanded(self,view,treeiter,path):
         index=path[0]
@@ -171,7 +174,6 @@ class LoginWindow(Gtk.Window):
             runId=self.containerId[index]
             run, _ = self.api.getRun(runId)
             containerId = run["containerId"]
-#            print ('*** Working with run', run["progId"], run["instrument"], ', containerId: ', containerId, "***")
             self.containerInfo[2]=containerId #containerID
             
     def on_tree_selection_changed(self, selection):
@@ -182,7 +184,7 @@ class LoginWindow(Gtk.Window):
            if id == 'Folder:': #we have a folder
                new_containerId_same_run=model[treeiter][2] 
                folderName = model[treeiter][1]
-               print ('*** Working in Folder', folderName , ', containerId: ', new_containerId_same_run, "***")
+               print "*** Working in Folder %s, containerId: %i ***" % (folderName, new_containerId_same_run)
                win.addToLog('Folder: '+folderName)
                self.containerInfo[2]=new_containerId_same_run
            else:
@@ -194,7 +196,7 @@ class LoginWindow(Gtk.Window):
                runId=model[treeiter][2]
                run, _ = self.api.getRun(runId)
                containerId = run["containerId"]
-               print ('*** Working with run', run["progId"], run["instrument"], ', containerId: ', containerId, "***")
+               print "*** Working with %s run %s, containerId: %i***" % (run["instrument"], run["progId"],  containerId)
                win.addToLog('Run: '+id)
                self.containerInfo[2]=containerId #containerID
 
@@ -211,30 +213,30 @@ class LoginWindow(Gtk.Window):
         return self.api
 
     def ShowErrorMessage(self,text):
-        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR,
-            Gtk.ButtonsType.OK, "Error")
-        dialog.format_secondary_text(text)
+        dialog = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
+            buttons=gtk.BUTTONS_OK)
+        dialog.set_markup(text)
         dialog.run()
         dialog.destroy()
         
     def ShowWarningMessage(self,text):
-        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.WARNING,
-            Gtk.ButtonsType.OK, "Warning")
-        dialog.format_secondary_text(text)
+        dialog = gtk.MessageDialog(type=gtk.MESSAGE_WARNING,
+            buttons=gtk.BUTTONS_OK)
+        dialog.set_markup(text)
         dialog.run()
         dialog.destroy()
         
     def ShowInfoMessage(self,text):
-        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO,
-            Gtk.ButtonsType.OK, "Success")
-        dialog.format_secondary_markup(text)
+        dialog = gtk.MessageDialog(type=gtk.MESSAGE_INFO,
+            buttons=gtk.BUTTONS_OK)
+        dialog.set_markup(text)
         dialog.run()
         dialog.destroy()        
 
     def on_buttonhelp_clicked(self, widget):
-        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO,
-            Gtk.ButtonsType.OK, "A2p2 help")
-        dialog.format_secondary_markup(HELPTEXT)
+        dialog = gtk.MessageDialog(type=gtk.MESSAGE_INFO,
+            buttons=gtk.BUTTONS_OK)
+        dialog.set_markup(HELPTEXT)
         dialog.run()
         dialog.destroy()        
 
@@ -256,8 +258,8 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
 
         interferometer=interferometerConfiguration.find('name').text
         if interferometer != "VLTI":
-            print("ASPRO not set for VLTI, no action taken.")
-            win.ShowErrorMessage("ASPRO not set for VLTI, no action taken.")
+            print "ASPRO not set for VLTI, no action taken."
+            #win.ShowErrorMessage("ASPRO not set for VLTI, no action taken.")
             return
 
         BASELINE=interferometerConfiguration.find('stations').text
@@ -265,12 +267,12 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
         instrumentConfiguration=e.find('instrumentConfiguration')
         instrument=instrumentConfiguration.find('name').text
         if instrument != currentInstrument:
-            print("ASPRO not set for currently selected instrument: "+currentInstrument)
+            #print "ASPRO not set for currently selected instrument: %s" %currentInstrument
             win.ShowErrorMessage("ASPRO not set for currently selected instrument: "+currentInstrument)
             return
         # FIXME: TBD CHANGE TO HAVE OTHER INSTRUMENTS THAN GRAVITY!    
         if instrument != "GRAVITY":
-            print("ASPRO not set for GRAVITY, no action taken.")
+            #print "ASPRO not set for GRAVITY, no action taken."
             win.ShowErrorMessage("ASPRO not set for GRAVITY, no action taken.")
             return
 
@@ -380,7 +382,8 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                     SEQ_FT_ROBJ_VIS=1.0      #FIXME
                     dualField=True
                 except:
-                    print("incomplete Frunge Tracker Target definition!")
+                    #print "incomplete Fringe Tracker Target definition!"
+                    win.ShowErrorMessage("incomplete Fringe Tracker Target definition, OB not set!")
 
             #AO target
             aoTarget=observationConfiguration.find('AOTarget')
@@ -410,8 +413,9 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                       COU_AG_PMD=float(pmdetxt.text)
 
                 except:
-                    print("incomplete Adaptive Optics Target definition!")
-
+                    #print "incomplete Adaptive Optics Target definition!"
+                    win.ShowErrorMessage("incomplete Adaptive Optics Target definition, OB not set!")
+                    
             #Guide Star 
             gsTarget=observationConfiguration.find('GSTarget')
             if gsTarget != None:
@@ -432,8 +436,9 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                     #no PMRA, PMDE for GS !!
 
                 except:
-                    print("incomplete GuideStar Target definition!")
-
+                    #print "incomplete GuideStar Target definition!"
+                    win.ShowErrorMessage("incomplete GuideStar Target definition, OB not set!")
+                    
             #LST interval
             try:
                 obsConstraint=observationConfiguration.find('observationConstraints')
@@ -449,7 +454,8 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             containerId=parentContainerId
             doFolder=False
     except:
-        print("General error or Absent Parameter in template (missing magnitude?), OB not set.")
+        #print "General error or Absent Parameter in template (missing magnitude?), OB not set."
+        win.ShowErrorMessage("General error or Absent Parameter in template (missing magnitude?), OB not set.")
         setProgress(0)
 
 # here dit must be a string since this is what p2 expects. NOT an integer or real/double.
@@ -622,7 +628,7 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
     exptime=int(ndit*dit+40) #40 sec overhead by exp
     nexp=(1800-900)/exptime
     nexp=int(nexp)
-    print('number of exposures to reach 1800 s per OB is '+str(nexp))
+    win.addToLog('number of exposures to reach 1800 s per OB is '+str(nexp))
     if nexp < 3:
         nexp = 3 #min is O S O
         # recompute ndit
@@ -631,7 +637,7 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
         ndit=int(ndit)
         if ndit < 10:
             ndit = 10
-            print("**Warning**, setting NDIT to 10 will result in an OB longer than 1800 s")
+            win.addToLog("**Warning**, OB NDIT has been set to min value=10, but OB will take longer than 1800 s")
     nexp %= 40
     sequence='O S O O S O O S O O S O O S O O S O O S O O S O O S O O S O O S O O S O O S O O'
     my_sequence=sequence[0:2*nexp]
@@ -647,7 +653,6 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
         OBS_DESCR='CAL_'+goodName+'_GRAVITY_'+BASELINE.replace(' ', '')+'_'+instrumentMode
     ob, obVersion = api.createOB(containerId, OBS_DESCR)
     obId = ob['obId']
-#    print ('Created OB', obId)
 
     #we use obId to populate OB
     ob['obsDescription']['name'] = OBS_DESCR[0:min(len(OBS_DESCR),31)]
@@ -672,7 +677,6 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
     #ob['constraints']['fli'] = 1
     
     ob, obVersion = api.saveOB(ob, obVersion)
-#    print ('Saved OB properties', obId)
     
     ##LST constraints
     ##by default, above 40 degree. Will generate a WAIVERABLE ERROR if not.
@@ -687,7 +691,6 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
     ## api.saveSiderealTimeConstraints(obId,[ {'from': lstStartSex, 'to': '00:00'},{'from': '00:00','to': lstEndSex}], stcVersion)
     ## else:
     api.saveSiderealTimeConstraints(obId,[ { 'from': lstStartSex,  'to': lstEndSex  } ], stcVersion)
-#    print('Saved sidereal time constraints')
 
     setProgress(0.2)
     
@@ -747,11 +750,6 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
     
     setProgress(0.3)
 
-#    print('Created acquisition template', templateId)
-
-
-    #print('Updated parameters for acquisition template',tpl['templateName'])
-    
     if isCalib:
         if dualField:
             tpl, tplVersion = api.createTemplate(obId, 'GRAVITY_dual_obs_calibrator')
@@ -765,8 +763,6 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
     templateId = tpl['templateId']
 
     setProgress(0.4)
-    
-    #print('Created acquisition template', templateId)
     
     # put values. they are the same except for dual obs science (?)
     if dualField and not isCalib :
@@ -790,8 +786,6 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
         'SEQ.SKY.Y':  2000
          }, tplVersion)
 
-    ## print('Updated parameters for acquisition template',tpl['templateName'])
-    
     setProgress(0.5)
 
     #verify OB online
@@ -803,27 +797,33 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
         win.ShowInfoMessage('OB '+str(obId)+' '+ob['name']+' is OK.')
         win.addToLog('OB: '+str(obId)+' is ok')
     else:
-        win.ShowWarningMessage('OB '+str(obId)+' is <b>not observable</b>. Messages are:'+'\n'.join(response['messages']))
-    
-    
+        s=""
+        for ss in response['messages']:
+            s+=cgi.escape(ss)+'\n'
+        win.ShowWarningMessage('OB '+str(obId)+' <b>HAS Warnings</b>. ESO says:\n\n'+s)
+        win.addToLog('OB: '+str(obId)+' created with warnings')
+ # (NOTE: we need to escape things like <= in returned text)
+
  #   # fetch OB again to confirm its status change
  #   ob, obVersion = api.getOB(obId)
- #   print('Status of verified OB', obId, 'is now', ob['obStatus'])
+ #   python3: print('Status of verified OB', obId, 'is now', ob['obStatus'])
     
 def setProgress(perc):
   win.progressbar.set_fraction(perc)
-  while (Gtk.events_pending ()):
-            Gtk.main_iteration ()
+  while (gtk.events_pending ()):
+            gtk.main_iteration ()
   
 
 #------------------------------------------------------------start & main loop-----------------------
 # Instantiate the client and connect to the hub
 client=SAMPIntegratedClient("ESO p2 samp hub")
-try:
-    client.connect()
-except:
-    print("Samp Hub Not found (did you start ASPRO?), will exit.")
-    exit()
+connected=0
+#try:
+#    client.connect()
+#except:
+#    print "Samp Hub Not found (did you start ASPRO?), will exit."
+##    win.ShowErrorMessage("Samp Hub Not found (did you start ASPRO?), will exit.")
+#    exit()
     
 # Set up a receiver class
 class Receiver(object):
@@ -839,13 +839,6 @@ class Receiver(object):
         self.received = True
         
 
-# Instantiate the receiver
-r = Receiver(client)
-
-# Listen for any instructions to load a table
-client.bind_receive_call("ob.load.data", r.receive_call)
-client.bind_receive_notification("ob.load.data", r.receive_notification)
-
 # bool of status change
 flag=[0]
 
@@ -858,8 +851,8 @@ loginList=[username, password] #apparently strings are immutable, so list of str
 containerInfo=['0000','0000','0000'] #please make all that less ridiculously written!
 api=None
 win = LoginWindow(loginList,containerInfo,flag)
-win.connect("delete-event", Gtk.main_quit)
-win.show_all()
+win.window.connect("delete-event", gtk.main_quit)
+win.window.show_all()
 
 # We now run the loop to wait for the message in a try/finally block so that if
 # the program is interrupted e.g. by control-C, the client terminates
@@ -868,23 +861,35 @@ try:
 
     # We test every 0.1s to see if the hub has sent a message
     while True:
-        while (Gtk.events_pending ()):
-            Gtk.main_iteration ();
-        if flag[0]==-1:
-            client.disconnect()
-            exit()
-        time.sleep(0.1)
-        if r.received:
-            if api is None:
+        while (gtk.events_pending ()):
+            gtk.main_iteration ();
+        if (connected == 0):
+            try:
+                client.connect()
+                connected = 1
+                # Instantiate the receiver
+                r = Receiver(client)
+                # Listen for any instructions to load a table
+                client.bind_receive_call("ob.load.data", r.receive_call)
+                client.bind_receive_notification("ob.load.data", r.receive_notification)
+                client.notify_all("hello")
+            except:
                 pass
-            else:
-                ob_url=r.params['url']
-                if ob_url.startswith("file:") :
-                    ob_url=ob_url[5:]
-                #print("ob_url: ", ob_url)
-                e = xml.etree.ElementTree.parse(ob_url)
-                parseXmlMessage(e,api,containerInfo, localuser)
-            r.received=False
+        if flag[0]==-1:
+            if (connected == 1): client.disconnect()
+            exit()
+        if (connected == 1):
+            if r.received:
+                if api is None:
+                    win.ShowErrorMessage('a2p2 is not currently connected with ESO P2 database.')
+                    r.received=False
+                else:
+                    ob_url=r.params['url']
+                    if ob_url.startswith("file:") :
+                        ob_url=ob_url[5:]
+                    e = xml.etree.ElementTree.parse(ob_url)
+                    parseXmlMessage(e,api,containerInfo, localuser)
+                    r.received=False
         if flag[0]==1:
             api=win.get_api()
             username=loginList[0]
@@ -893,8 +898,9 @@ try:
             runInstrument=containerInfo[1]
             runName=containerInfo[2]
             #to show that the last choosen arguments are passed
-            #print(username, runId, runName, runInstrument)
             flag[0]=0
+#sleep some...
+        time.sleep(0.1)
             
 
 finally:
