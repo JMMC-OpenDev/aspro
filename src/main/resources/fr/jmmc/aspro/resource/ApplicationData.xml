@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.4 beta 1"/>
-    <compilation date="19/10/2017" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.4 beta 2"/>
+    <compilation date="25/01/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -215,7 +215,10 @@
     <releasenotes>
         
         <release version="0.9.9.4">
-            <pubDate>Thu, 19 Oct 2017 16:00:00 GMT</pubDate>
+            <pubDate>Thu, 25 Jan 2018 17:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.4 beta 2">
+                <change type="FEATURE">Improved Noise modelling: use the appropriate object magnitude for every spectral channel (notably for JHK or LMN instruments)</change>
+            </prerelease>
             <prerelease version="0.9.9.4 beta 1">
                 <change type="FEATURE">Improved Noise modelling for MATISSE: minor changes to noise parameter computation (number of pixel per channel)</change>
             </prerelease>
