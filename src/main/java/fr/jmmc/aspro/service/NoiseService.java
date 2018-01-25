@@ -29,7 +29,10 @@ import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmcs.util.NumberUtils;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
@@ -105,10 +108,8 @@ public final class NoiseService implements VisNoiseService {
     private boolean useStrehlCorrection = true;
 
     /* varying values (spectrally dependent) */
-    /** instrument band */
-    private Band insBand;
-    /** instrument band corresponding to target mags */
-    private SpectralBand insTargetBand;
+    /** (W) instrument band */
+    private Band[] insBand;
 
     /** fraction of flux going into the interferometric channel */
     private double fracFluxInInterferometry = Double.NaN;
@@ -166,9 +167,8 @@ public final class NoiseService implements VisNoiseService {
     private SpectralBand ftBand;
 
     /* object parameters */
-    /** Magnitude in Observing Band (see lambda) (mag) */
-    /* TODO: use band range (previous / next) to interpolate flux (SED like) ? */
-    private double objectMag = Double.NaN;
+    /** (W) Magnitude in Observing Band (mag) */
+    private double[] objectMag = null;
     /** Magnitude in Fringe Tracker's Band of FT ref star (mag) */
     private double fringeTrackerMag = Double.NaN;
     /** Magnitude in V Band (for AO performances / for strehl) (mag) */
@@ -567,55 +567,112 @@ public final class NoiseService implements VisNoiseService {
         // Get band from wavelength range:
         final double lambdaMin = waveLengths[0];
         final double lambdaMax = waveLengths[nSpectralChannels - 1];
-        final double lambdaMid = 0.5 * (lambdaMin + lambdaMax);
 
-        // TODO: use band range to cover lambdaMin / lambdaMax:
+        // use band range to cover lambdaMin / lambdaMax:
         // JHK or LM or BVR
-        final Band band = findBand(lambdaMid / AsproConstants.MICRO_METER); // microns
-        this.insBand = band;
-        this.insTargetBand = SpectralBandUtils.findBand(band);
+        final Band bandMin = findBand(lambdaMin / AsproConstants.MICRO_METER); // microns
+        final Band bandMax = findBand(lambdaMax / AsproConstants.MICRO_METER); // microns
 
         if (logger.isDebugEnabled()) {
             logger.debug("lambdaMin                     : {}", lambdaMin);
-            logger.debug("lambda                        : {}", lambdaMid);
+            logger.debug("bandMin                       : {}", bandMin);
             logger.debug("lambdaMax                     : {}", lambdaMax);
-            logger.debug("insBand                       : {}", insBand);
-            logger.debug("insTargetBand                 : {}", insTargetBand);
+            logger.debug("bandMax                       : {}", bandMax);
         }
 
-        // If a flux / magnitude is missing => user message
-        // and it is impossible to compute any error
-        // TODO: handle B|R vs V for VEGA:
-        flux = target.getFlux(insTargetBand);
-        this.objectMag = (flux != null) ? flux.doubleValue() : Double.NaN;
-        if (logger.isDebugEnabled()) {
-            logger.debug("objectMag                     : {}", objectMag);
+        this.insBand = new Band[nSpectralChannels];
+        this.objectMag = new double[nSpectralChannels];
+
+        final HashSet<SpectralBand> missingMags = new HashSet<SpectralBand>();
+
+        if (bandMin == bandMax) {
+            // same band
+            Arrays.fill(insBand, bandMin);
+
+            /** instrument band corresponding to target mags */
+            final SpectralBand insTargetBand = SpectralBandUtils.findBand(bandMin);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("insTargetBand                 : {}", insTargetBand);
+            }
+
+            // If a flux / magnitude is missing => user message
+            // and it is impossible to compute any error
+            flux = target.getFlux(insTargetBand);
+
+            if (flux == null) {
+                missingMags.add(insTargetBand);
+            }
+
+            Arrays.fill(objectMag, (flux != null) ? flux.doubleValue() : Double.NaN);
+            if (logger.isDebugEnabled()) {
+                logger.debug("objectMag                     : {}", flux);
+            }
+        } else {
+            final int nWLen = nSpectralChannels;
+
+            for (int i = 0; i < nWLen; i++) {
+                final Band band = findBand(waveLengths[i] / AsproConstants.MICRO_METER); // microns
+                insBand[i] = band;
+
+                /** instrument band corresponding to target mags */
+                final SpectralBand insTargetBand = SpectralBandUtils.findBand(band);
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("insTargetBand[" + waveLengths[i] + "] : {}", insTargetBand);
+                }
+
+                // If a flux / magnitude is missing => user message
+                // and it is impossible to compute any error
+                flux = target.getFlux(insTargetBand);
+
+                if (flux == null) {
+                    missingMags.add(insTargetBand);
+                    objectMag[i] = Double.NaN;
+                } else {
+                    objectMag[i] = flux.doubleValue();
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("objectMag                     : {}", flux);
+                }
+            }
         }
 
         if (fringeTrackerPresent) {
             flux = target.getFlux(ftBand);
-            this.fringeTrackerMag = (flux != null) ? flux.doubleValue() : Double.NaN;
+
+            if (flux == null) {
+                missingMags.add(ftBand);
+                fringeTrackerMag = Double.NaN;
+            } else {
+                fringeTrackerMag = flux.doubleValue();
+            }
             if (logger.isDebugEnabled()) {
                 logger.debug("fringeTrackerMag              : {}", fringeTrackerMag);
             }
         }
 
         flux = target.getFlux(aoBand);
-        this.adaptiveOpticsMag = (flux != null) ? flux.doubleValue() : Double.NaN;
+
+        if (flux == null) {
+            missingMags.add(aoBand);
+            adaptiveOpticsMag = Double.NaN;
+        } else {
+            adaptiveOpticsMag = flux.doubleValue();
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("adaptiveOpticsMag             : {}", adaptiveOpticsMag);
         }
 
-        if (Double.isNaN(objectMag)
-                || (fringeTrackerPresent && Double.isNaN(fringeTrackerMag))
-                || Double.isNaN(adaptiveOpticsMag)) {
+        if (!missingMags.isEmpty()) {
             // missing magnitude
             this.invalidParameters = true;
 
-            addWarning(AsproConstants.WARN_MISSING_MAGS + " on target [" + target.getName() + "] in following bands: "
-                    + (Double.isNaN(objectMag) ? insTargetBand : "")
-                    + (fringeTrackerPresent && Double.isNaN(fringeTrackerMag) ? ftBand : "")
-                    + (Double.isNaN(adaptiveOpticsMag) ? aoBand : ""));
+            final ArrayList<SpectralBand> mags = new ArrayList<SpectralBand>(missingMags);
+            Collections.sort(mags);
+
+            addWarning(AsproConstants.WARN_MISSING_MAGS + " on target [" + target.getName() + "] "
+                    + "in following bands: " + mags.toString());
         }
     }
 
@@ -901,25 +958,27 @@ public final class NoiseService implements VisNoiseService {
             System.out.println("#---");
         }
 
-        // nb of photons m^-2.s^-1.m^-1 for an object at magnitude 0:
-        // note: fzero depends on the spectral band:
-        final double fzero = FastMath.pow(10d, insBand.getLogFluxZero()) * (insBand.getLambda() * AsproConstants.MICRO_METER) / (H_PLANCK * C_LIGHT);
-
-        // TODO: source flux may be spectrally dependent:
-        // nb of photons m^-2.s^-1.m^-1 for the target object:
-        final double fsrc = fzero * FastMath.pow(10d, -0.4d * objectMag);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("fzero                         : {}", fzero);
-            logger.debug("fsrc                          : {}", fsrc);
-        }
-
         final int nWLen = nSpectralChannels;
         // nb photons per surface and per second:
         final double[] fluxSrcPerChannel = new double[nWLen];
 
-        /* TODO: use band range (previous / next) to interpolate flux or SED based on spectral type */
         for (int i = 0; i < nWLen; i++) {
+            // nb of photons m^-2.s^-1.m^-1 for an object at magnitude 0:
+            // note: fzero depends on the spectral band:
+            final double fzero = FastMath.pow(10d, insBand[i].getLogFluxZero()) 
+                    * (insBand[i].getLambda() * AsproConstants.MICRO_METER) / (H_PLANCK * C_LIGHT);
+
+            // TODO: source flux may be spectrally dependent:
+            // nb of photons m^-2.s^-1.m^-1 for the target object:
+            final double fsrc = fzero * FastMath.pow(10d, -0.4d * objectMag[i]);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("insBand                       : {}", insBand[i]);
+                logger.debug("objectMag                     : {}", objectMag[i]);
+                logger.debug("fzero                         : {}", fzero);
+                logger.debug("fsrc                          : {}", fsrc);
+            }
+            
             // nb of photons m^-2.s^-1 for the target object:
             fluxSrcPerChannel[i] = atmTrans[i] * fsrc * waveBands[i];
         }
@@ -1007,14 +1066,13 @@ public final class NoiseService implements VisNoiseService {
             // variance of the squared correlated flux = sqCorFlux * coef + constant
             varSqCorFluxCoef[i] = 2.0 * nbTotPhot + 2.0 * nbPixInterf[i] * FastMath.pow2(ron) + 4.0;
 
-            varSqCorFluxConst[i] = nbTotPhot * (1.0 + 2.0 * nbPixInterf[i] * FastMath.pow2(ron)) 
+            varSqCorFluxConst[i] = nbTotPhot * (1.0 + 2.0 * nbPixInterf[i] * FastMath.pow2(ron))
                     + FastMath.pow2(nbTel * nbPhotInterf[i])
                     + (3.0 + nbPixInterf[i]) * nbPixInterf[i] * FastMath.pow(ron, 4.0);
 
             // normalized bias on V2:
             // ie Fc = 1 pour V2=1 car mesures photo identiques (FiFj / FiFj = 1)
             // correlated flux (include instrumental visibility loss) for vis2 = 1.0:
-
             // use the total number photons for nbFrames or not ?
             biasV2[i] = (nbTotPhot + nbPixInterf[i] * FastMath.pow2(ron)) / sqCorFluxCoef[i];
             // repeat OBS measurements to reach totalObsTime minutes:
