@@ -1066,8 +1066,8 @@ public final class NoiseService implements VisNoiseService {
             // variance of the squared correlated flux = sqCorFlux * coef + constant
             varSqCorFluxCoef[i] = 2.0 * nbTotPhot + 2.0 * nbPixInterf[i] * FastMath.pow2(ron) + 4.0;
 
-            varSqCorFluxConst[i] = nbTotPhot * (1.0 + 2.0 * nbPixInterf[i] * FastMath.pow2(ron))
-                    + FastMath.pow2(nbTel * nbPhotInterf[i])
+            varSqCorFluxConst[i] = FastMath.pow2(nbTotPhot)
+                    + nbTotPhot * (1.0 + 2.0 * nbPixInterf[i] * FastMath.pow2(ron))
                     + (3.0 + nbPixInterf[i]) * nbPixInterf[i] * FastMath.pow(ron, 4.0);
 
             // normalized bias on V2:
