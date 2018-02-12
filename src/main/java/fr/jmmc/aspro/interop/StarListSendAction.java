@@ -49,8 +49,6 @@ public final class StarListSendAction extends SampCapabilityAction {
      */
     @Override
     public Map<?, ?> composeMessage() {
-        Map<String, String> parameters = null;
-
         // Test if chara is the interferometer:
         // Use main observation to check instrument :
         final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
@@ -65,21 +63,20 @@ public final class StarListSendAction extends SampCapabilityAction {
         if (insName.startsWith(AsproConstants.INS_VEGA)) {
             final File file = FileUtils.getTempFile("starlist.txt");
             try {
-
                 ExportOBVegaAction.process(file);
-
-                parameters = new HashMap<String, String>(4);
-                parameters.put(PARAM_STAR_LIST, file.toURI().toString());
-
-                logger.debug("parameters = \n{}", parameters);
-
             } catch (IOException ioe) {
                 MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
+                return null;
             }
+
+            // Store parameters into SAMP message:
+            final Map<String, String> parameters = new HashMap<String, String>(4);
+            addUrlParameter(parameters, PARAM_STAR_LIST, file);
+            return parameters;
         } else {
             MessagePane.showMessage("Aspro 2 can only send a star list for the VEGA instrument !");
         }
 
-        return parameters;
+        return null;
     }
 }

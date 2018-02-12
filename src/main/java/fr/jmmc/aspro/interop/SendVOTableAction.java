@@ -11,7 +11,6 @@ import fr.jmmc.jmcs.service.XslTransform;
 import fr.jmmc.jmcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -52,12 +51,9 @@ public class SendVOTableAction extends SampCapabilityAction {
     public Map<?, ?> composeMessage() throws IllegalStateException {
         logger.debug("composeMessage");
 
-        URI uri;
         File file = null;
         try {
             file = FileUtils.getTempFile("votable-", ".vot");
-
-            uri = file.toURI();
 
             // Save the VOTable:
             saveVOTable(file);
@@ -69,8 +65,9 @@ public class SendVOTableAction extends SampCapabilityAction {
             return null;
         }
 
+        // Store parameters into SAMP message:
         final Map<String, String> parameters = new HashMap<String, String>(4);
-        parameters.put("url", uri.toString());
+        addUrlParameter(parameters, file);
         return parameters;
     }
 

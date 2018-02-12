@@ -49,8 +49,6 @@ public final class SendOBAction extends SampCapabilityAction {
      */
     @Override
     public Map<?, ?> composeMessage() {
-        Map<String, String> parameters = null;
-
         // Use main observation to check instrument :
         final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
@@ -75,17 +73,14 @@ public final class SendOBAction extends SampCapabilityAction {
         try {
             ExportOBXml.process(file, observation, os, target);
 
-            parameters = new HashMap<String, String>(4);
-            parameters.put("url", file.toURI().toString());
-
-            logger.debug("parameters = \n{}", parameters);
-
-            logger.info("composeMessage: parameters = {}", parameters);
-
         } catch (IOException ioe) {
             MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
+            return null;
         }
 
+        // Store parameters into SAMP message:
+        final Map<String, String> parameters = new HashMap<String, String>(4);
+        addUrlParameter(parameters, file);
         return parameters;
     }
 }

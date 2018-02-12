@@ -17,7 +17,6 @@ import fr.nom.tam.fits.FitsException;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,12 +115,9 @@ public final class SendOIFitsAction extends SampCapabilityAction {
             throw new IllegalStateException("Could not export to temporary file : " + file.getAbsolutePath(), ioe);
         }
 
-        // Store parameters for reply message
-        final URI uri = file.toURI();
-
+        // Store parameters into SAMP message:
         final Map<String, String> parameters = new HashMap<String, String>(4);
-        parameters.put("url", uri.toString());
-
+        addUrlParameter(parameters, file);
         return parameters;
     }
 }
