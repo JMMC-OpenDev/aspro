@@ -3,6 +3,8 @@
 
 # CHARA:
 #a=["S1","S2","W1","W2","E1","E2"]
+# 2018: beam 1 W1, beam 2 S2, beam 3 S1, beam 4 E1, beam 5 E2, beam 6 W2
+a=["W1","S2","S1","E1","E2","W2"]
 
 # MROI:
 #a = ["W0","W1","W2","W3","W4", "W5", "W6", "W7", "W8", "W9",
@@ -11,11 +13,11 @@
 # ]
 
 # SUSI:
-a=["N1","N3","N4","S1","S2","S3","S4"]
+#a=["N1","N3","N4","S1","S2","S3","S4"]
 
 # NPOI:
 #a=["E2","E3","E5","E6","AE","AC","AN","AW","W3","W5","W6","W7"]
-a=["E6","AE","AC","AN","AW","W7"]
+#a=["E6","AE","AC","AN","AW","W7"]
 # naming convention: east -> AE -> AC -> AN-> north -> AW -> west
 # to avoid too many configuration => only E6 AE AC AN AW W7
 
@@ -50,6 +52,7 @@ for i in range (0,nbStations):
     for k in range(j+1,nbStations):
       for l in range(k+1,nbStations):
         for n in range(l+1,nbStations):
-          print("<configuration><stations>"+a[i]+" "+a[j]+" "+a[k]+" "+a[l]+" "+a[n]+"</stations></configuration>")
+          print("<configuration><stations>"+a[i]+" "+a[j]+" "+a[k]+" "+a[l]+" "+a[n]+"</stations>")
+          print("<channels>V"+str(i+1)+" V"+str(j+1)+" V"+str(k+1)+" V"+str(l+1)+" V"+str(n+1)+"</channels></configuration>")
 
 print("</root>")

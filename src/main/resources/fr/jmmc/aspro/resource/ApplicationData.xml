@@ -215,7 +215,11 @@
     <releasenotes>
         
         <release version="0.9.9.4">
-            <pubDate>Thu, 25 Jan 2018 17:00:00 GMT</pubDate>
+            <pubDate>Fri, 02 Mar 2018 15:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.4 beta 3">
+                <change type="BUGFIX">Fixed exception in the model image mapping to the instrument wavelengths (no image found in the spectral channel)</change>
+                <change type="FEATURE">Improved Java support (9 + mac OS X) but Java 7 minimum is now required</change>
+            </prerelease>
             <prerelease version="0.9.9.4 beta 2">
                 <change type="FEATURE">Improved Noise modelling: use the appropriate object magnitude for every spectral channel (notably for JHK or LMN instruments)</change>
             </prerelease>
