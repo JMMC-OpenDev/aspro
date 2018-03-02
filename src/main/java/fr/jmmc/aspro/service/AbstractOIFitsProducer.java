@@ -221,7 +221,7 @@ public abstract class AbstractOIFitsProducer {
 
                             if (modelWlUpper != null) {
                                 hasUserModelPerChannel[i] = true;
-                                uniqueModelDatas.add(modelWlUpper);
+                                uniqueModelDatas.add(modelWlUpper); 
                             }
                         }
 
@@ -229,6 +229,12 @@ public abstract class AbstractOIFitsProducer {
                             logger.debug("hasUserModelPerChannel: {}", Arrays.toString(hasUserModelPerChannel));
                             logger.debug("nUniqueModelDatas: {}", uniqueModelDatas.size());
                         }
+                        
+                        if (uniqueModelDatas.isEmpty()) {
+                            addWarning(warningContainer, "Incorrect model wavelength range [" + convertWL(wlFirst) + " - " +convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER
+                                    + "] smaller than the typical instrumental wavelength band [" + convertWL(StatUtils.mean(insBands)) + " " + SpecialChars.UNIT_MICRO_METER + ']');
+                            return false;
+                        }                        
 
                         int firstChannel = -1;
 
@@ -781,6 +787,15 @@ public abstract class AbstractOIFitsProducer {
         for (int i = 0; i < nImages; i++) {
             modelData = modelDataList.get(i);
 
+/*
+TODO: refine to lookup the closest model (range overlapping) ?
+            
+If you were dealing with, given two ranges [x1:x2] and [y1:y2], natural order ranges at the same time where:
+    natural order: x1 <= x2 && y1 <= y2
+
+then you may want to use this to check:
+they are overlapped <=> (y2 - x1) * (x2 - y1) >= 0
+*/
             if (modelData.getWaveLengthRange().contains(wavelength)) {
                 return modelData;
             }
@@ -867,6 +882,7 @@ public abstract class AbstractOIFitsProducer {
 
         modelData = modelDataList.get(nImages - 1);
 
+        // test last user model image:
         if (wavelength >= modelData.getWaveLengthRange().getMin()) {
             return modelData;
         }
