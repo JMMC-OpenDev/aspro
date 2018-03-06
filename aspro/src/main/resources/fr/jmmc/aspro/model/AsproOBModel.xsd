@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+*******************************************************************************
+* JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+*******************************************************************************
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://www.jmmc.fr/aspro-ob/0.1"
+            targetNamespace="http://www.jmmc.fr/aspro-ob/0.1"
+            xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+            xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+            jaxb:version="2.1" jaxb:extensionBindingPrefixes="xjc">
+
+    <xsd:annotation>
+        <xsd:documentation>
+            This xml schema describes the observing blocks.
+        </xsd:documentation>
+        <xsd:appinfo>
+            <jaxb:globalBindings>
+                <xjc:superClass name="fr.jmmc.aspro.model.OIBase"/>
+                <xjc:simple />
+            </jaxb:globalBindings>
+
+            <jaxb:schemaBindings>
+                <jaxb:package name="fr.jmmc.aspro.model.ob"/>
+            </jaxb:schemaBindings>
+        </xsd:appinfo>
+    </xsd:annotation>
+
+
+    <!-- Elements -->
+    <xsd:element name="observingBlockDefinition" type="ObservingBlockDefinition">
+        <xsd:annotation>
+            <xsd:documentation>
+                this element contains an observation block
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+
+
+
+    <xsd:complexType name="ObservingBlockDefinition">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the observing block
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="schemaVersion" type="xsd:float">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Schema version for this observing block
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="name" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Identifier for this observing block
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="interferometerConfiguration" type="InterferometerConfiguration">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Selected interferometer
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="instrumentConfiguration" type="InstrumentConfiguration">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Selected instrument mode
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="observationConfiguration" type="ObservationConfiguration" minOccurs="1" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The list of atomic observations used by the observation schedule
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="observationSchedule" type="ObservationSchedule">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The observation schedule (OB sequences)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <xsd:complexType name="InterferometerConfiguration">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the chosen interferometer and its configuration
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The interferometer name
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="version" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The optional version (period)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="stations" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The list of stations (U1 U2 U4)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="pops" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The list of PoPs (124 means PoP1, PoP2, PoP4 respectively for U1, U2, U4 i.e. same ordering).
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="channels" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The list of channels for this configuration (V1 V2) used by CHARA and VLTI (optional)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <xsd:complexType name="InstrumentConfiguration">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the chosen instrument and its mode
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The focal instrument configuration (InterferometerConfiguration identifier)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="instrumentMode" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The instrument mode (FocalInstrumentMode identifier)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- other parameters ? -->
+            <!-- fringe tracker mode (enabled, group track, fringe track ...) -->
+            <!-- total integration time ? -->
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <xsd:complexType name="ObservationConfiguration">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes an atomic observation
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="type" type="ObservationType">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The observation type (CALIBRATION or SCIENCE)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="SCTarget" type="Target">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The science target
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="FTTarget" type="Target" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The target used by the fringe tracker
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="AOTarget" type="Target" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The target used by the adaptive optics system
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="GSTarget" type="Target" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The target used by the telescope guiding
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- finding chart -->
+
+            <xsd:element name="observationConstraints" type="ObservationConstraints">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The constraints on the atomic observation
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+
+        <xsd:attribute name="id" type="xsd:ID" use="required">
+            <xsd:annotation>
+                <xsd:documentation>
+                    Identifier for this atomic observation
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+
+
+
+    <xsd:complexType name="ObservationConstraints">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the observation constraints (LST or HA intervals)
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="HAinterval" type="xsd:string" minOccurs="1" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The observability range expressed in hour angles [-12h; 12h] like "-01:23/04:56"
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="LSTinterval" type="xsd:string" minOccurs="1" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The observability range expressed in LST [0h; 24h] like "00:23/04:56"
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- other parameters ? -->
+            <!-- seeing ? -->
+            <!-- atmosphere quality ? -->
+        </xsd:sequence>
+    </xsd:complexType>
+
+    
+        
+            
+    <xsd:complexType name="ObservationSchedule">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the observation schedule
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="OB" type="OBItem" minOccurs="1" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The OB element
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <xsd:complexType name="OBItem">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes an OB in the observation schedule
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <!-- TODO -->
+        </xsd:sequence>
+        
+        <xsd:attribute name="ref" type="xsd:IDREF">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The identifier of the observation configuration 
+                </xsd:documentation>
+                <xsd:appinfo>
+                    <jaxb:property>
+                        <jaxb:baseType name="ObservationConfiguration" />
+                    </jaxb:property>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+
+
+
+    <!-- Target definition -->
+    <xsd:complexType name="Target">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes a target
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Target name
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- position -->
+            <xsd:element name="RA" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        R.A. at mean equinox (HMS)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="DEC" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Decl. at mean equinox (DMS)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="EQUINOX" type="xsd:float">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The EQUINOX field contains a (ﬂoating point) Julian year, giving both the
+                        epoch of the position (RA and DEC) and the equinox for the celestial
+                        coordinate system in which the position is expressed
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- proper motion -->
+            <xsd:element name="PMRA" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Proper motion in R.A. (mas/yr)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="PMDEC" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Proper motion in decl. (mas/yr)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            
+            <!-- parallax -->
+            <xsd:element name="PARALLAX" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Parallax (mas)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- identifiers -->
+            <xsd:element name="IDS" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Simbad Identifiers (comma separated list)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- object types -->
+            <xsd:element name="OBJTYP" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Object types
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- spectral types -->
+            <xsd:element name="SPECTYP" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Spectral types
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- magnitudes -->
+            <xsd:element name="FLUX_B" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band B
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_V" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band V
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_R" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band R
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_I" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band I
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_J" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band J
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_H" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band H
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_K" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band K
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_L" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band L
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_M" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band M
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_N" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band N
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="DIAMETER" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Optional angular diameter for calibration targets expressed in milliarcseconds
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <!-- ObservationType -->
+    <xsd:simpleType name="ObservationType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Possible values for the Observation type
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="CALIBRATION">
+                <xsd:annotation>
+                    <xsd:documentation>Calibration</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="SCIENCE">
+                <xsd:annotation>
+                    <xsd:documentation>Science</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

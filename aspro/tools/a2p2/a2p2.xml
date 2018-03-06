@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:asproObservingBlockDefinition xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <schemaVersion>2012.02</schemaVersion>
+    <name>standard</name>
+<!-- Defines interferometer name and baselines -->
+    <interferometerConfiguration>
+        <name>VLTI</name>
+        <stations>UT1 UT2 UT3 UT4</stations>
+    </interferometerConfiguration>
+
+<!-- Defines instrument setup: name & resolution (as instrument mode) -->
+    <instrumentConfiguration>
+        <name>GRAVITY</name>
+        <instrumentMode>MEDIUM-SPLIT</instrumentMode>
+    </instrumentConfiguration>
+
+<!-- Defines one atomic observation: -->
+    <observationConfiguration id="Calibrator for UY Aur">
+        <type>CALIBRATION</type> <!-- Observing template will be chose accordingly if CALIBRATION or SCIENCE-->
+        <SCTarget>               <!-- The one photons go into the instrument -->
+          <name>HD 12345</name>
+          <RA>10:10:00.324</RA>
+          <DEC>-57:02:07.33</DEC>
+          <EQUINOX>2000.0</EQUINOX>
+          <PMRA>-10.61</PMRA>
+          <PMDEC>-26.41</PMDEC>
+          <FLUX_V>12.5</FLUX_V>
+          <FLUX_J>10.217</FLUX_J>
+          <FLUX_H>8.36</FLUX_H>
+          <FLUX_K>6.965</FLUX_K>
+	  <DIAMETER>0.33</DIAMETER> <!-- calibrators only -->
+        </SCTarget>
+        <FTTarget>               <!-- for fringe tracker. If absent, use SC values -->
+          <name>HD 3456</name>
+          <RA>10:10:00.511</RA>
+          <DEC>-57:02:06.88</DEC>
+          <EQUINOX>2000.0</EQUINOX>
+          <PMRA>-10.61</PMRA>
+          <PMDEC>-26.41</PMDEC>
+          <FLUX_V>14</FLUX_V>
+          <FLUX_J>10.217</FLUX_J>
+          <FLUX_H>8.36</FLUX_H>
+          <FLUX_K>6.965</FLUX_K>
+        </FTTarget>
+        <AOTarget>               <!-- for adaptive optics. If absent: no AO or other default beahviours (undefined) -->
+          <name>HD 12345</name>
+          <RA>10:10:00.324</RA>
+          <DEC>-57:02:07.33</DEC>
+          <EQUINOX>2000.0</EQUINOX>
+          <PMRA>-10.61</PMRA>
+          <PMDEC>-26.41</PMDEC>
+          <FLUX_V>12.5</FLUX_V>
+          <FLUX_J>10.217</FLUX_J>
+          <FLUX_H>8.36</FLUX_H>
+          <FLUX_K>6.965</FLUX_K>
+        </AOTarget>
+        <GSTarget>           <!-- for telescope guiding. Normally not needed but available/ -->
+          <name>HD 12345</name>
+          <RA>10:10:00.324</RA>
+          <DEC>-57:02:07.33</DEC>
+          <EQUINOX>2000.0</EQUINOX>
+          <PMRA>-10.61</PMRA>
+          <PMDEC>-26.41</PMDEC>
+          <FLUX_V>12.5</FLUX_V>
+          <FLUX_J>10.217</FLUX_J>
+          <FLUX_H>8.36</FLUX_H>
+          <FLUX_K>6.965</FLUX_K>
+        </GSTarget>
+<!-- a finding chart is a jpeg < 1Mo -->
+<!--
+error is: dt not declared.
+        <findingChart dt:dt="binary.base64">000000000000000000</findingChart>
+-->
+     </observationConfiguration>
+    <observationConstraints> <!-- in iso8601 more or less -->
+            <LSTinterval>14:33/18:22</LSTinterval>
+            <LSTinterval>19:12/22:33</LSTinterval>
+    </observationConstraints>
+    <observationSchedule>
+     <OB>"Calibrator for UY Aur"</OB>
+     <OB>"UY Aur"</OB>
+     <OB>"Calibrator for UY Aur"</OB>
+    </observationSchedule>
+</a:asproObservingBlockDefinition>
