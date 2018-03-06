@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.4 beta 3"/>
+    <program name="Aspro2" version="0.9.9.4"/>
     <compilation date="06/03/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -215,7 +215,7 @@
     <releasenotes>
         
         <release version="0.9.9.4">
-            <pubDate>Tue, 06 Mar 2018 13:00:00 GMT</pubDate>
+            <pubDate>Tue, 06 Mar 2018 16:00:00 GMT</pubDate>
             <prerelease version="0.9.9.4 beta 3">
                 <change type="BUGFIX">Fixed exception in the model image mapping to the instrument wavelengths (no image found in the spectral channel)</change>
                 <change type="FEATURE">Improved Java support (9 + mac OS X) but Java 7 minimum is now required</change>
