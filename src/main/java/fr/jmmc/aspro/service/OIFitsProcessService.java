@@ -522,14 +522,6 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                                     );
                                 }
 
-                                if (NoiseService.USE_DISTRIB_APPROACH) {
-                                    // check SNR:
-                                    // PI / 8  = 22.5 deg:
-                                    if ((s_vphi_err > (Math.PI * 0.125)) && (Math.abs(s_vphi_mean / s_vphi_err) < SNR_THRESHOLD)) {
-                                        doFlag = true;
-                                    }
-                                }
-
                                 if (this.doNoise) {
                                     // Use the corresponding sample among vis, vis2, t3 on any baselines !
                                     final int nSample = visRndIdxRow[l];
@@ -541,6 +533,13 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                                 }
                                 errAmp = s_vamp_err;
                                 errPhi = s_vphi_err;
+
+                                if (NoiseService.USE_DISTRIB_APPROACH) {
+                                    // check SNR:
+                                    if ((errPhi > SNR_THRESHOLD_ANGLE) && (Math.abs(vphi / errPhi) < SNR_THRESHOLD)) {
+                                        doFlag = true;
+                                    }
+                                }
                             }
 
                             // Set values:
@@ -713,13 +712,6 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                             );
                         }
 
-                        if (NoiseService.USE_DISTRIB_APPROACH) {
-                            // check SNR:
-                            if ((s_v2_err > 0.1) && Math.abs(s_v2_mean / s_v2_err) < SNR_THRESHOLD) {
-                                doFlag = true;
-                            }
-                        }
-
                         if (this.doNoise) {
                             // Use the corresponding sample:
                             v2 = v2_samples[visRndIdxRow[l]];
@@ -727,6 +719,13 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                             v2 = s_v2_mean;
                         }
                         v2Err = s_v2_err;
+
+                        if (NoiseService.USE_DISTRIB_APPROACH) {
+                            // check SNR:
+                            if ((v2Err > SNR_THRESHOLD_VIS) && Math.abs(v2 / v2Err) < SNR_THRESHOLD) {
+                                doFlag = true;
+                            }
+                        }
                     }
 
                     // Set values:
@@ -1015,14 +1014,6 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                              */
                         }
 
-                        if (NoiseService.USE_DISTRIB_APPROACH) {
-                            // check SNR:
-                            // PI / 8  = 22.5 deg:
-                            if ((s_t3phi_err > (Math.PI * 0.125)) && (Math.abs(s_t3phi_mean / s_t3phi_err) < SNR_THRESHOLD)) {
-                                doFlag = true;
-                            }
-                        }
-
                         if (this.doNoise) {
                             // Use the corresponding sample among vis, vis2, t3 on any baselines !
                             final int nSample = visRndIdxRow[l];
@@ -1034,6 +1025,13 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                         }
                         errAmp = s_t3amp_err;
                         errPhi = s_t3phi_err;
+
+                        if (NoiseService.USE_DISTRIB_APPROACH) {
+                            // check SNR:
+                            if ((errPhi > SNR_THRESHOLD_ANGLE) && (Math.abs(t3phi / errPhi) < SNR_THRESHOLD)) {
+                                doFlag = true;
+                            }
+                        }
                     }
 
                     // Set values:

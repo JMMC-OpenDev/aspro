@@ -67,6 +67,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private final static short TARGET_ID = (short) 1;
     /** enable the OIFits validation */
     private final static boolean DO_VALIDATE_OIFITS = false;
+    /** enable DEBUG mode */
+    private final static boolean DEBUG_SNR = false;
 
     /* members */
 
@@ -873,14 +875,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         );
                                     }
 
-                                    if (NoiseService.USE_DISTRIB_APPROACH) {
-                                        // check SNR:
-                                        // PI / 8  = 22.5 deg:
-                                        if ((s_vphi_err > (Math.PI * 0.125)) && (Math.abs(s_vphi_mean / s_vphi_err) < SNR_THRESHOLD)) {
-                                            doFlag = true;
-                                        }
-                                    }
-
                                     if (this.doNoise) {
                                         // Use the corresponding sample among vis, vis2, t3 on any baselines !
                                         final int nSample = visRndIdxRow[l];
@@ -892,6 +886,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     }
                                     errAmp = s_vamp_err;
                                     errPhi = s_vphi_err;
+
+                                    if (NoiseService.USE_DISTRIB_APPROACH) {
+                                        // check SNR:
+                                        if ((errPhi > SNR_THRESHOLD_ANGLE) && (Math.abs(vphi / errPhi) < SNR_THRESHOLD)) {
+                                            doFlag = true;
+                                        }
+                                    }
                                 }
 
                                 // Set values:
@@ -943,7 +944,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         if (logger.isDebugEnabled()) {
             logger.debug("createOIVis: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
-        logger.info("createOIVis: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
     /**
@@ -973,7 +973,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         final boolean[][] flags = vis2.getFlag();
 
-        final double[][] snrData = new double[nWaveLengths][nRows];
+        final double[][] snrData = (DEBUG_SNR) ? new double[nWaveLengths][nRows] : null;
 
         final NoiseService ns = this.noiseService;
 
@@ -1012,8 +1012,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         // mark this value as invalid :
                         flags[k][l] = true;
 
-                        // snr stats:
-                        snrData[l][k] = Double.NaN;
+                        if (DEBUG_SNR) {
+                            snrData[l][k] = Double.NaN;
+                        }
                     }
 
                 } else {
@@ -1046,11 +1047,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                             // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
                             errCVis = visError[k][l];
 
-                            snr = Math.abs(Math.sqrt(v2) / errCVis);
-
+// TODO: fix all the bias estimation on V2 + calibration ...
                             if (this.doNoise) {
                                 bias = ns.computeVis2Bias(i, l);
-                                // Remove v2 bias:
+                                // Remove v2 bias as the theoretical error also is biased:
                                 v2 -= bias;
                             } else {
                                 // do not debias V2 for theoretical values:
@@ -1065,13 +1065,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 re = visRe + (errCVis * distRe[n]);
                                 im = visIm + (errCVis * distIm[n]);
 
-                                // compute unbiased V2 = re^2 + im^2 - bias:
+                                // compute debiased V2 = re^2 + im^2 - bias:
                                 sample = re * re + im * im - bias;
                                 v2_samples[n] = sample;
 
                                 // Compensated-summation variant for better numeric precision:
                                 v2_sum += sample;
-                                diff = sample - v2;
+                                diff = sample - v2; // no bias (both removed)
                                 v2_sum_diff += diff;
                                 v2_sum_diff_square += diff * diff;
                             }
@@ -1086,6 +1086,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                             );
 
                             if (DEBUG) {
+                                v2 += bias; // remove bias correction
                                 // square visibility error :
                                 v2Err = ns.computeVis2Error(i, l, Math.sqrt(v2));
 
@@ -1094,13 +1095,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         + " avg= " + s_v2_mean + " V2= " + v2 + " ratio: " + (s_v2_mean / v2)
                                         + " stddev= " + s_v2_err + " err(V2)= " + v2Err + " ratio: " + (s_v2_err / v2Err)
                                 );
-                            }
-
-                            if (NoiseService.USE_DISTRIB_APPROACH) {
-                                // check SNR:
-                                if ((s_v2_err > 0.1) && snr < SNR_THRESHOLD) {
-                                    doFlag = true;
-                                }
+                                v2 -= bias; // restore bias correction
                             }
 
                             if (this.doNoise) {
@@ -1110,6 +1105,15 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 v2 = s_v2_mean;
                             }
                             v2Err = s_v2_err;
+
+                            snr = Math.abs(v2 / v2Err);
+
+                            if (NoiseService.USE_DISTRIB_APPROACH) {
+                                // check SNR:
+                                if ((v2Err > SNR_THRESHOLD_VIS) && snr < SNR_THRESHOLD) {
+                                    doFlag = true;
+                                }
+                            }
                         }
 
                         // Set values:
@@ -1119,8 +1123,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         // mark this value as valid only if error is valid and SNR is OK:
                         flags[k][l] = doFlag;
 
-                        // snr stats:
-                        snrData[l][k] = snr;
+                        if (DEBUG_SNR) {
+                            snrData[l][k] = snr;
+                        }
                     }
                 }
 
@@ -1136,32 +1141,41 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         this.oiFitsFile.addOiTable(vis2);
 
-        final double[] snrWL = new double[nWaveLengths];
+        if (DEBUG_SNR) {
+            final double[][] snrWL = new double[3][nWaveLengths];
 
-        // SNR stats per channel:
-        int nValid = 0;
+            // SNR stats per channel:
+            int nValid = 0;
 
-        for (int l = 0; l < nWaveLengths; l++) {
-            snrWL[l] = StatUtils.mean(snrData[l]);
+            for (int l = 0; l < nWaveLengths; l++) {
+                snrWL[0][l] = StatUtils.mean(snrData[l]);
+                snrWL[1][l] = StatUtils.min(snrData[l]);
+                snrWL[2][l] = StatUtils.max(snrData[l]);
 
-            logger.info("SNR[" + NumberUtils.trimTo3Digits(1e6 * waveLengths[l]) + "] = " + NumberUtils.trimTo3Digits(snrWL[l]));
+                logger.info("SNR[" + NumberUtils.trimTo3Digits(1e6 * waveLengths[l]) + "]: average = " + NumberUtils.trimTo3Digits(snrWL[0][l])
+                        + " min = " + NumberUtils.trimTo3Digits(snrWL[1][l])
+                        + " max = " + NumberUtils.trimTo3Digits(snrWL[2][l])
+                );
 
-            if (snrWL[l] < SNR_THRESHOLD) {
-                snrWL[l] = Double.NaN;
-            } else {
-                nValid++;
+                // check mean(SNR):
+                if (snrWL[0][l] < SNR_THRESHOLD) {
+                    snrWL[0][l] = Double.NaN;
+                } else {
+                    nValid++;
+                }
             }
+            if (nValid != 0) {
+                logger.info("SNR: average = " + NumberUtils.trimTo3Digits(StatUtils.mean(snrWL[0]))
+                        + " min = " + NumberUtils.trimTo3Digits(StatUtils.min(snrWL[1]))
+                        + " max = " + NumberUtils.trimTo3Digits(StatUtils.max(snrWL[2]))
+                        + " - [" + nValid + " / " + nWaveLengths + "] channels with SNR >= " + SNR_THRESHOLD);
+            }
+
+            // TODO: add information in status log ...
         }
-        final double snrAvg = StatUtils.mean(snrWL);
-        logger.info("SNR average = " + NumberUtils.trimTo3Digits(snrAvg)
-                + " : " + nValid + " / " + nWaveLengths + " channels with SNR > " + SNR_THRESHOLD);
-        
-        // TODO: add information in status log ...
-        
         if (logger.isDebugEnabled()) {
             logger.debug("createOIVis2: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
-        logger.info("createOIVis2: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
     /**
@@ -1524,14 +1538,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 );
                             }
 
-                            if (NoiseService.USE_DISTRIB_APPROACH) {
-                                // check SNR:
-                                // PI / 8  = 22.5 deg:
-                                if ((s_t3phi_err > (Math.PI * 0.125)) && (Math.abs(s_t3phi_mean / s_t3phi_err) < SNR_THRESHOLD)) {
-                                    doFlag = true;
-                                }
-                            }
-
                             if (this.doNoise) {
                                 // Use the corresponding sample among vis, vis2, t3 on any baselines !
                                 final int nSample = visRndIdxRow[l];
@@ -1543,6 +1549,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                             }
                             errAmp = s_t3amp_err;
                             errPhi = s_t3phi_err;
+
+                            if (NoiseService.USE_DISTRIB_APPROACH) {
+                                // check SNR:
+                                if ((errPhi > SNR_THRESHOLD_ANGLE) && (Math.abs(t3phi / errPhi) < SNR_THRESHOLD)) {
+                                    doFlag = true;
+                                }
+                            }
                         }
 
                         // Set values:
@@ -1578,7 +1591,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         if (logger.isDebugEnabled()) {
             logger.debug("createOIT3: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
-        logger.info("createOIT3: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
     /**

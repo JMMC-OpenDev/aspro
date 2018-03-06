@@ -56,6 +56,10 @@ public abstract class AbstractOIFitsProducer {
     protected final static int JOB_THRESHOLD_USER_MODELS = 32;
     /** SNR threshold to flag values with low SNR */
     protected final static double SNR_THRESHOLD = 3.0;
+    /** minimal V2 error (5%) to check for SNR */
+    protected final static double SNR_THRESHOLD_VIS = 0.05;
+    /** minimal angle error (1 deg) to check for SNR */
+    protected final static double SNR_THRESHOLD_ANGLE = Math.toRadians(1.0);
     /** Jmcs Parallel Job executor */
     protected static final ParallelJobExecutor JOB_EXECUTOR = ParallelJobExecutor.getInstance();
 
@@ -673,7 +677,7 @@ public abstract class AbstractOIFitsProducer {
 
                         if (NoiseService.USE_DISTRIB_APPROACH) {
                             // check SNR:
-                            if ((visErr > 0.1) && Math.abs(visAmp / visErr) < SNR_THRESHOLD) {
+                            if ((visErr > SNR_THRESHOLD_VIS) && Math.abs(visAmp / visErr) < SNR_THRESHOLD) {
                                 cVisSnrFlagRow[l] = true;
                             }
                         }
