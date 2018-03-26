@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.4"/>
-    <compilation date="06/03/2018" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.5 beta 1"/>
+    <compilation date="26/03/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -153,6 +153,9 @@
             <menu label="Save observation" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
                   icon="fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
             <menu/> <!-- menu separator -->
+            <menu label="Import targets from an observation" classpath="fr.jmmc.aspro.gui.action.ImportTargetsAction" action="importTargets"
+                  description="Import targets from an observation file"/>
+            <menu/> <!-- menu separator -->
             <menu label="Import targets from VOTable" classpath="fr.jmmc.aspro.gui.action.ImportVOTableAction" action="importVOTable"
                   description="Import targets (and calibrators) from a VOTable file"/>
             <menu label="Export targets to VOTable" classpath="fr.jmmc.aspro.gui.action.ExportVOTableAction" action="exportVOTable"
@@ -213,7 +216,12 @@
     </menubar>
 
     <releasenotes>
-        
+        <release version="0.9.9.5">
+            <pubDate>Mon, 26 Mar 2018 12:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.5 beta 1">
+                <change type="FEATURE">Added action 'Import targets from an observation' (File menu) to import targets from another observation file (asprox) with their models and calibrator associations</change>
+            </prerelease>
+        </release>        
         <release version="0.9.9.4">
             <pubDate>Tue, 06 Mar 2018 16:00:00 GMT</pubDate>
             <prerelease version="0.9.9.4 beta 3">

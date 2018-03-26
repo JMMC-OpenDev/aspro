@@ -6,6 +6,7 @@ package fr.jmmc.aspro.interop;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.TargetImporter;
 import fr.jmmc.aspro.model.oi.BaseValue;
 import fr.jmmc.aspro.model.oi.CalibratorInformations;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -151,7 +152,7 @@ public final class SearchCalVOTableHandler {
                         return;
                     }
 
-                    if (!AnyVOTableHandler.confirmImport(calibrators.size())) {
+                    if (!TargetImporter.confirmImport(calibrators.size())) {
                         return;
                     }
 

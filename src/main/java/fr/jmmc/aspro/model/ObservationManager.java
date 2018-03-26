@@ -126,10 +126,11 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             logger.debug("ObservationManager.update: checkAndLoadFileReferences ...");
 
             // reload user models (to prepare and validate again):
-            final String message = checkAndLoadFileReferences(null, getMainObservation());
+            final StringBuilder sb = new StringBuilder(128);
+            checkAndLoadFileReferences(null, getMainObservation(), sb);
 
-            if (message != null) {
-                MessagePane.showMessage(message);
+            if (sb.length() > 0) {
+                MessagePane.showMessage(sb.toString());
             }
             logger.debug("ObservationManager.update: done.");
 
@@ -278,19 +279,41 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @throws IllegalArgumentException if the file is not an Observation
      */
     public String load(final File file) throws IOException, IllegalStateException, IllegalArgumentException {
-        String message = null;
+        final StringBuilder sb = new StringBuilder(128);
+
+        final ObservationSetting observation = loadObservation(file, sb);
+
+        if (observation != null) {
+            setObservationFile(file);
+
+            // ready to use :
+            changeObservation(observation);
+        }
+        return (sb.length() > 0) ? sb.toString() : null;
+    }
+
+    /**
+     * Load only the observation from the given file
+     * @param file file to load
+     * @param sb buffer to append optional information messages (user model)
+     * @return loaded observation or null
+     *
+     * @throws IOException if an I/O exception occured
+     * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration) or an unexpected exception occured
+     * @throws IllegalArgumentException if the file is not an Observation
+     */
+    public ObservationSetting loadObservation(final File file, final StringBuilder sb) throws IOException, IllegalStateException, IllegalArgumentException {
+        ObservationSetting observation = null;
         if (file != null) {
             logger.info("Load observation from file: {}", file);
 
             final Object loaded = loadObject(file);
 
             if (!(loaded instanceof ObservationSetting)) {
-                throw new IllegalArgumentException("The loaded file does not correspond to a valid Aspro2 file : " + file);
+                throw new IllegalArgumentException("The loaded file does not correspond to a valid Aspro2 file: " + file);
             }
 
-            setObservationFile(file);
-
-            final ObservationSetting observation = (ObservationSetting) loaded;
+            observation = (ObservationSetting) loaded;
 
             // post load processing :
             ObservationFileProcessor.onLoad(observation);
@@ -299,12 +322,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             defineDefaults(observation);
 
             // load user models (to prepare and validate):
-            message = checkAndLoadFileReferences(file, observation);
+            checkAndLoadFileReferences(file, observation, sb);
 
-            // ready to use :
-            changeObservation(observation);
         }
-        return message;
+        return observation;
     }
 
     /**
@@ -735,6 +756,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         }
         return changed;
     }
+
     /**
      * Set the observation description
      * Used by ObservationForm.updateObservation()
@@ -1457,11 +1479,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * Check external file references (target user models) and load these files
      * @param obsFile observation file (may be null)
      * @param observation observation to process
-     * @return optional information message or null
+     * @param sb message buffer
      */
-    private static String checkAndLoadFileReferences(final File obsFile, final ObservationSetting observation) {
-        final StringBuilder sb = new StringBuilder(128);
-
+    private static void checkAndLoadFileReferences(final File obsFile, final ObservationSetting observation, final StringBuilder sb) {
         // Check target user model files (exist and can read):
         for (Target target : observation.getTargets()) {
             checkTargetUserModel(obsFile, target, sb);
@@ -1504,8 +1524,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 }
             }
         }
-
-        return (sb.length() > 0) ? sb.toString() : null;
     }
 
     /**
