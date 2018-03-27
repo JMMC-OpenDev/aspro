@@ -16,6 +16,7 @@ import fr.jmmc.jmal.star.StarResolverWidget;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -61,7 +62,7 @@ public final class TargetImporter {
         // throws IllegalArgumentException if the document can not be loaded (invalid or unmarshalling exception):
         final ObservationSetting loadedObservation = ObservationManager.getInstance().loadObservation(file, sb);
 
-        processObservation(loadedObservation, forceAddTargets, sb);
+        processObservation(loadedObservation, forceAddTargets, file.getName(), sb);
     }
 
     /**
@@ -80,7 +81,7 @@ public final class TargetImporter {
         // throws IllegalArgumentException if the document can not be loaded (invalid or unmarshalling exception):
         final ObservationSetting loadedObservation = ObservationManager.getInstance().load(new StringReader(document));
 
-        processObservation(loadedObservation, forceAddTargets, sb);
+        processObservation(loadedObservation, forceAddTargets, "VOTable", sb);
     }
 
     /**
@@ -88,13 +89,14 @@ public final class TargetImporter {
      *
      * @param loadedObservation loaded observation
      * @param forceAddTargets true to add targets only
+     * @param origin origin value
      * @param sb report buffer
      * 
      * @throws IOException if an I/O exception occured
      * @throws IllegalArgumentException if the file is not an Observation
      */
     private static void processObservation(final ObservationSetting loadedObservation, final boolean forceAddTargets,
-                                           final StringBuilder sb) throws IOException {
+                                           final String origin, final StringBuilder sb) throws IOException {
         if (loadedObservation != null) {
             final List<Target> targets = loadedObservation.getTargets();
 
@@ -153,7 +155,8 @@ public final class TargetImporter {
                                 }
                             }
 
-                            final String report = mergeTargets(sb, editTargets, editTargetUserInfos, targets, targetUserInfos);
+                            final String report = mergeTargets(sb, origin,
+                                    editTargets, editTargetUserInfos, targets, targetUserInfos);
 
                             if (logger.isDebugEnabled()) {
                                 logger.debug("updated targets:");
@@ -250,13 +253,14 @@ public final class TargetImporter {
     /**
      * Merge targets and calibrators
      * @param sb report buffer
+     * @param origin origin value
      * @param editTargets edited list of targets
      * @param editTargetUserInfos edited target user informations
      * @param targets list of new targets
      * @param targetUserInfos new target user informations
      * @return merge operation report
      */
-    private static String mergeTargets(final StringBuilder sb,
+    private static String mergeTargets(final StringBuilder sb, final String origin,
                                        final List<Target> editTargets, final TargetUserInformations editTargetUserInfos,
                                        final List<Target> targets, final TargetUserInformations targetUserInfos) {
         String targetName;
@@ -267,7 +271,7 @@ public final class TargetImporter {
             newTarget.updateNameAndIdentifier();
             targetName = newTarget.getName();
 
-            newTarget.setOrigin("VOTable");
+            newTarget.setOrigin(origin);
 
             // fix RA/DEC deg vs HMS/DMS formats
             newTarget.fixCoords();
@@ -332,7 +336,7 @@ public final class TargetImporter {
             }
         }
 
-        // Add calibrators to science targets:
+        // Add target notes & calibrators to science targets:
         Target ref;
         for (TargetInformation targetInfo : targetUserInfos.getTargetInfos()) {
             ref = targetInfo.getTargetRef();
@@ -343,6 +347,22 @@ public final class TargetImporter {
             // should not be null as it has been added before:
             if (oldTarget != null) {
                 targetName = oldTarget.getName();
+
+                if (!StringUtils.isEmpty(targetInfo.getDescription())) {
+                    final TargetInformation editTargetInfo = editTargetUserInfos.getOrCreateTargetInformation(oldTarget);
+
+                    if (StringUtils.isEmpty(editTargetInfo.getDescription())) {
+                        editTargetInfo.setDescription(targetInfo.getDescription());
+                    } else if (!targetInfo.getDescription().equals(editTargetInfo.getDescription())) {
+                        sb.append(targetName).append(" notes are in conflict\n");
+
+                        editTargetInfo.setDescription("=== Original ===\n"
+                                + editTargetInfo.getDescription()
+                                + "\n=== Imported ===\n"
+                                + targetInfo.getDescription()
+                        );
+                    }
+                }
 
                 // process calibrator for this science target:
                 if (!editTargetUserInfos.isCalibrator(oldTarget)) {
@@ -360,7 +380,6 @@ public final class TargetImporter {
 
                             // report message:
                             sb.append(calName).append(" added as a calibrator to target ").append(targetName).append('\n');
-
                         }
                     }
                 }
