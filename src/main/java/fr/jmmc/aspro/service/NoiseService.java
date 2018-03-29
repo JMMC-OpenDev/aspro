@@ -1455,12 +1455,17 @@ public final class NoiseService implements VisNoiseService {
         Band band = Band.findBand(waveLength);
         // TODO: fix that logic to use all possible bands within the instrument bandwidth
         switch (band) {
+            case U:
+                // avoid 'band U not supported'
             case B:
             case V:
             case R:
             case I:
                 // always use V for VEGA:
                 return Band.V;
+            case Q:
+                // avoid 'band Q not supported'
+                return Band.N;
             default:
                 return band;
         }
