@@ -202,7 +202,7 @@
             <xsd:element name="SCTarget" type="Target">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The science target
+                        The science target i.e. measured by the instrument
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
