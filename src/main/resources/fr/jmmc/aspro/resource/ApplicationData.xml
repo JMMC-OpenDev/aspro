@@ -223,11 +223,12 @@
             <prerelease version="0.9.9.5 beta 2">
                 <change type="FEATURE">Added SAMP interoperability to export / import 'targets from an observation' between ASPRO instances</change>
                 <change type="BUGFIX">Fixed missing band U in the noise modelling</change>
+                <change type="FEATURE">Added tooltips on all target lists & trees</change>
             </prerelease>
             <prerelease version="0.9.9.5 beta 1">
                 <change type="FEATURE">Added action 'Import targets from an observation' (File menu) to import targets from another observation file (asprox) with their models and calibrator associations</change>
             </prerelease>
-        </release>        
+        </release>
         <release version="0.9.9.4">
             <pubDate>Tue, 06 Mar 2018 16:00:00 GMT</pubDate>
             <prerelease version="0.9.9.4 beta 3">
@@ -241,7 +242,7 @@
             <prerelease version="0.9.9.4 beta 1">
                 <change type="FEATURE">Improved Noise modelling for MATISSE: minor changes to noise parameter computation (number of pixel per channel)</change>
             </prerelease>
-        </release>        
+        </release>
         <release version="0.9.9.3">
             <pubDate>Mon, 11 Sep 2017 12:00:00 GMT</pubDate>
             <prerelease version="0.9.9.3 beta 6">
