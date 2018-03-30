@@ -223,7 +223,7 @@
             <prerelease version="0.9.9.5 beta 2">
                 <change type="FEATURE">Added SAMP interoperability to export / import 'targets from an observation' between ASPRO instances</change>
                 <change type="BUGFIX">Fixed missing band U in the noise modelling</change>
-                <change type="FEATURE">Added tooltips on all target lists & trees</change>
+                <change type="FEATURE">Added tooltips on all target lists and trees</change>
             </prerelease>
             <prerelease version="0.9.9.5 beta 1">
                 <change type="FEATURE">Added action 'Import targets from an observation' (File menu) to import targets from another observation file (asprox) with their models and calibrator associations</change>
