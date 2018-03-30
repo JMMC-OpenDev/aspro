@@ -156,7 +156,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jPanelTargetsLeft = new javax.swing.JPanel();
         starSearchField = new EditableStarResolverWidget(true);
         jScrollPaneTargets = new javax.swing.JScrollPane();
-        jListTargets = createTargetList();
+        jListTargets = TargetForm.createTargetList();
         jButtonDeleteTarget = new javax.swing.JButton();
         jButtonTargetEditor = new javax.swing.JButton();
         jPanelTargetsRight = new javax.swing.JPanel();
@@ -218,11 +218,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
         jPanelTargets.add(starSearchField, gridBagConstraints);
 
-        jListTargets.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Samples:", "HD 1234", "HIP 1234" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
         jListTargets.setToolTipText("Target list : use the Simbad field to enter your targets\n");
         jListTargets.setName("jListTargets"); // NOI18N
         jListTargets.setVisibleRowCount(2);
@@ -1975,68 +1970,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private javax.swing.JFormattedTextField jTextPoPs;
     private fr.jmmc.jmal.star.EditableStarResolverWidget starSearchField;
     // End of variables declaration//GEN-END:variables
-
-    /**
-     * Create the custom JList to support tooltips for targets
-     * @return JList
-     */
-    private static JList createTargetList() {
-        final JList list = new JList() {
-            /** default serial UID for Serializable interface */
-            private static final long serialVersionUID = 1;
-            /* members */
-            /** tooltip buffer */
-            private final StringBuffer sbToolTip = new StringBuffer(512);
-            /** last item index at the mouse position */
-            private int lastIndex;
-            /** last tooltip at item index */
-            private String lastTooltip;
-
-            /** update list model and reset last tooltip */
-            @Override
-            public void setModel(final ListModel model) {
-                super.setModel(model);
-
-                // reset last tooltip:
-                lastIndex = -1;
-                lastTooltip = null;
-            }
-
-            /** This method is called as the cursor moves within the list */
-            @Override
-            public String getToolTipText(final MouseEvent evt) {
-                // Get item index :
-                final int index = locationToIndex(evt.getPoint());
-                if (index != -1) {
-                    String tooltip = null;
-
-                    if (lastIndex == index) {
-                        // use last tooltip:
-                        tooltip = lastTooltip;
-                    } else {
-                        // Get target :
-                        final Target target = (Target) getModel().getElementAt(index);
-                        if (target != null) {
-                            // Return the tool tip text :
-                            tooltip = target.toHtml(sbToolTip);
-                        }
-                        lastIndex = index;
-                        lastTooltip = tooltip;
-                    }
-                    return tooltip;
-                }
-                return getToolTipText();
-            }
-        };
-
-        final Target defTarget = new Target();
-        defTarget.updateNameAndIdentifier("HIP 1234");
-
-        // Useful to define the empty list width and height :
-        list.setPrototypeCellValue(defTarget);
-
-        return list;
-    }
 
     /**
      * Check if the given list selection is empty, then restore the last selected item

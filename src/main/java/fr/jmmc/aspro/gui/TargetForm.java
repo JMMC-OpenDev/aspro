@@ -25,6 +25,8 @@ import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.UrlUtils;
 import java.awt.Component;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
@@ -104,7 +106,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         this.editTargets = targets;
         this.editTargetUserInfos = targetUserInfos;
-        this.mapIDTargetInformations = new HashMap<String, TargetInformation>(targets.size());
+        this.mapIDTargetInformations = new HashMap<String, TargetInformation>(
+                (targets != null) ? targets.size() : 8);
 
         initComponents();
 
@@ -618,7 +621,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jTreeTargets = new TargetJTree(this.editTargetUserInfos);
         jPanelCalibrators = new javax.swing.JPanel();
         jScrollPaneCalibrators = new javax.swing.JScrollPane();
-        jListCalibrators = new javax.swing.JList();
+        jListCalibrators = createTargetList();
         jPanelActions = new javax.swing.JPanel();
         jButtonBefore = new javax.swing.JButton();
         jButtonAfter = new javax.swing.JButton();
@@ -722,10 +725,9 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelCalibrators.setLayout(new java.awt.BorderLayout());
 
         jListCalibrators.setToolTipText("this list contains targets considered as calibrators");
-        jListCalibrators.setCellRenderer(createTargetListCellRenderer());
         jListCalibrators.setDragEnabled(true);
         jListCalibrators.setFixedCellWidth(100);
-        jListCalibrators.setVisibleRowCount(3);
+        jListCalibrators.setVisibleRowCount(4);
         jScrollPaneCalibrators.setViewportView(jListCalibrators);
 
         jPanelCalibrators.add(jScrollPaneCalibrators, java.awt.BorderLayout.CENTER);
@@ -1796,18 +1798,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         targets.remove(target);
 
         // Find ref target position:
-        int refPos = -1;
-
-        final String refName = refTarget.getName();
-
-        int i = 0;
-        for (Target t : targets) {
-            if (t.getName().equals(refName)) {
-                refPos = i;
-                break;
-            }
-            i++;
-        }
+        final int refPos = targets.indexOf(refTarget); // identifier match 
 
         if (refPos != -1) {
             targets.add(refPos + ((after) ? 1 : 0), target);
@@ -1970,50 +1961,75 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     // End of variables declaration//GEN-END:variables
 
     /**
-     * Create a custom list renderer to display target name instead of target.toString()
-     * @return custom list renderer
+     * Create the custom JList to support tooltips for targets
+     * @return JList
      */
-    private static ListCellRenderer createTargetListCellRenderer() {
-        return new DefaultListCellRenderer() {
+    public static JList createTargetList() {
+        final JList list = new JList() {
             /** default serial UID for Serializable interface */
             private static final long serialVersionUID = 1;
+            /* members */
+            /** tooltip buffer */
+            private final StringBuffer sbToolTip = new StringBuffer(512);
+            /** last item index at the mouse position */
+            private int lastIndex;
+            /** last tooltip at item index */
+            private String lastTooltip;
 
-            /**
-             * Return a component that has been configured to display the specified
-             * value. That component's <code>paint</code> method is then called to
-             * "render" the cell.  If it is necessary to compute the dimensions
-             * of a list because the list cells do not have a fixed size, this method
-             * is called to generate a component on which <code>getPreferredSize</code>
-             * can be invoked.
-             *
-             * @param list The JList we're painting.
-             * @param value The value returned by list.getModel().getElementAt(index).
-             * @param index The cells index.
-             * @param isSelected True if the specified cell was selected.
-             * @param cellHasFocus True if the specified cell has the focus.
-             * @return A component whose paint() method will render the specified value.
-             *
-             * @see JList
-             * @see ListSelectionModel
-             * @see ListModel
+            /** 
+             * update model and reset last tooltip
+             * @param model model to set
              */
             @Override
-            public Component getListCellRendererComponent(
-                    final JList list,
-                    final Object value,
-                    final int index,
-                    final boolean isSelected,
-                    final boolean cellHasFocus) {
-                final String val;
-                if (value == null) {
-                    val = null;
-                } else {
-                    final Target target = (Target) value;
-                    val = target.getName();
+            public void setModel(final ListModel model) {
+                super.setModel(model);
+
+                // reset last tooltip:
+                lastIndex = -1;
+                lastTooltip = null;
+            }
+
+            /** 
+             * This method is called as the cursor moves within the component
+             * @param me mouse event
+             * @return tooltip text
+             */
+            @Override
+            public String getToolTipText(final MouseEvent me) {
+                final Point pt = me.getPoint();
+                // Get item index :
+                final int index = locationToIndex(pt);
+                if (index != -1) {
+                    // check cell bounds:
+                    if (getCellBounds(index, index + 1).contains(pt)) {
+                        if (lastIndex == index) {
+                            // use last tooltip:
+                            return lastTooltip;
+                        } else {
+                            String tooltip = null;
+                            // Get target :
+                            final Target target = (Target) getModel().getElementAt(index);
+                            if (target != null) {
+                                // Return the tool tip text :
+                                tooltip = target.toHtml(sbToolTip);
+                            }
+                            lastIndex = index;
+                            lastTooltip = tooltip;
+                            return tooltip;
+                        }
+                    }
                 }
-                return super.getListCellRendererComponent(list, val, index, isSelected, cellHasFocus);
+                return getToolTipText();
             }
         };
+
+        final Target defTarget = new Target();
+        defTarget.updateNameAndIdentifier("HIP 1234");
+
+        // Useful to define the empty list width and height :
+        list.setPrototypeCellValue(defTarget);
+
+        return list;
     }
 
     private DefaultFormatter createFieldNameFormatter() {

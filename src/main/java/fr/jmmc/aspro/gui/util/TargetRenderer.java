@@ -39,8 +39,8 @@ public final class TargetRenderer {
      * @param target target to use
      * @return display name
      */
-    public final String convertTargetToString(final Target target) {
-        return this.targetUserInfos.getTargetDisplayName(target);
+    public String convertTargetToString(final Target target) {
+        return (this.targetUserInfos != null) ? this.targetUserInfos.getTargetDisplayName(target) : null;
     }
 
     /**
@@ -49,7 +49,7 @@ public final class TargetRenderer {
      * @param target target to check
      */
     public void setIcon(final JLabel label,
-            final Target target) {
+                        final Target target) {
 
         if (this.targetUserInfos != null && this.targetUserInfos.isCalibrator(target)) {
             label.setIcon(this.calibratorIcon);

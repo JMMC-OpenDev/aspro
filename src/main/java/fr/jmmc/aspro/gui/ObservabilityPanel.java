@@ -1401,7 +1401,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // Iterate over objects targets :
         for (Target target : targets) {
             targetName = target.getName();
-            // use HashSet for performanced:
+            // use HashSet for performance:
             isCalibrator = calibratorSet.contains(target);
             highlighted = highlightedSet.contains(target);
 
