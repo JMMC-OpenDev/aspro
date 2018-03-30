@@ -45,6 +45,8 @@ public final class NewObservationAction extends RegisteredAction {
             ObservationManager.getInstance().reset();
 
             StatusBar.show("new observation created.");
+
+            Aspro2.updateFrameTitle(null);
         }
     }
 }

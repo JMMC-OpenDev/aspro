@@ -93,6 +93,8 @@ public final class LoadObservationAction extends RegisteredAction {
 
                 StatusBar.show("file loaded : " + file.getName());
 
+                Aspro2.updateFrameTitle(file.getName());
+
                 if (message != null) {
                     MessagePane.showMessage(message);
                 }
