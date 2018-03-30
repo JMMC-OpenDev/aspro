@@ -1368,7 +1368,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         String legendLabel;
         Color paint;
 
-        final StringBuilder sb = new StringBuilder(32);
+        final StringBuffer sb = new StringBuffer(32);
 
         ObservabilityData obsData;
         // current StarObservabilityData used in loops:

@@ -114,313 +114,302 @@ public class TargetUserInformations
     
 //--simple--preserve
   @Override
-  public final String toString() {
-    return "TargetUserInformations : \ncalibrators : " + getCalibrators() + "\ntargets : " + getTargetInfos();
-  }
-
-  /**
-   * Return true if the given target is a calibrator 
-   * i.e. the calibrator list contains the given target 
-   * @param target target to use
-   * @return true if the given target is a calibrator 
-   */
-  public final boolean isCalibrator(final Target target) {
-    return getCalibrators().contains(target);
-  }
-
-  /**
-   * Return the calibrator list as a Set
-   * @return calibrator list as a Set
-   */
-  public final java.util.Set<Target> getCalibratorSet() {
-      final List<Target> calibratorList = getCalibrators();
-      if (calibratorList.isEmpty()) {
-          return java.util.Collections.emptySet();
-      }
-      final java.util.Set<Target> calibratorSet = new java.util.HashSet<Target>(calibratorList.size());
-      calibratorSet.addAll(calibratorList);
-      return calibratorSet;
-  }
-
-  /**
-   * Return the display name of the given target using the format 'name' ( ' (cal)')
-   * @param target target to use
-   * @return display name
-   */
-  public final String getTargetDisplayName(final Target target) {
-      return getTargetDisplayName(target, new StringBuilder(target.getName().length() + 8)).toString();
-  }
-
-  /**
-   * Return the display name of the given target using the format 'name' ( ' (cal)')
-   * @param target target to use
-   * @param sb string buffer to append into
-   * @return display name
-   */
-  public final StringBuilder getTargetDisplayName(final Target target, final StringBuilder sb) {
-      sb.append(target.getName());
-
-    if (isCalibrator(target)) {
-      sb.append(fr.jmmc.aspro.AsproConstants.CAL_SUFFIX);
+    public final String toString() {
+        return "TargetUserInformations : \ncalibrators : " + getCalibrators() + "\ntargets : " + getTargetInfos();
     }
-    return sb;
-  }
 
-  /**
-   * Append the given target to the calibrator list if not present.
-   * @param target calibrator to be added to the calibrator list, if absent
-   * @return <tt>true</tt> if the calibrator was added
-   */
-  public boolean addCalibrator(final Target target) {
-    if (!isCalibrator(target)) {
-      return getCalibrators().add(target);
+    /**
+     * Return true if the given target is a calibrator 
+     * i.e. the calibrator list contains the given target 
+     * @param target target to use
+     * @return true if the given target is a calibrator 
+     */
+    public final boolean isCalibrator(final Target target) {
+        return getCalibrators().contains(target);
     }
-    return false;
-  }
 
-  /**
-   * Remove the given target from the calibrator list if present.
-   * @param target calibrator to be removed from the calibrator list, if present
-   * @return <tt>true</tt> if the calibrator was removed
-   */
-  public boolean removeCalibrator(final Target target) {
-    if (isCalibrator(target)) {
-      return getCalibrators().remove(target);
+    /**
+     * Return the calibrator list as a Set
+     * @return calibrator list as a Set
+     */
+    public final java.util.Set<Target> getCalibratorSet() {
+        final List<Target> calibratorList = getCalibrators();
+        if (calibratorList.isEmpty()) {
+            return java.util.Collections.emptySet();
+        }
+        final java.util.Set<Target> calibratorSet = new java.util.HashSet<Target>(calibratorList.size());
+        calibratorSet.addAll(calibratorList);
+        return calibratorSet;
     }
-    return false;
-  }
 
-  /**
-   * Return the target user information corresponding to the target
-   * or create a new instance if the target is missing
-   * @param target target
-   * @return target user information
-   */
-  public final TargetInformation getOrCreateTargetInformation(final Target target) {
-    TargetInformation targetInfo = getTargetInformation(target);
-    if (targetInfo == null) {
-      // create a new instance if the target is not found :
-      targetInfo = new TargetInformation();
-      targetInfo.setTargetRef(target);
-      getTargetInfos().add(targetInfo);
+    /**
+     * Return the display name of the given target using the format 'name' ( ' (cal)')
+     * @param target target to use
+     * @param sb string buffer to append into
+     * @return display name
+     */
+    public final StringBuffer getTargetDisplayName(final Target target, final StringBuffer sb) {
+        sb.append(target.getName());
+
+        if (isCalibrator(target)) {
+            sb.append(fr.jmmc.aspro.AsproConstants.CAL_SUFFIX);
+        }
+        return sb;
     }
-    return targetInfo;
-  }
 
-  /**
-   * Return the existing target information corresponding to the target
-   * @param target target
-   * @return target user information
-   * @see #getOrCreateTargetInformation(Target)
-   */
-  public final TargetInformation getTargetInformation(final Target target) {
-    final List<TargetInformation> _targetInfos = getTargetInfos();
-    for (int i = 0, len = _targetInfos.size(); i < len; i++) {
-      TargetInformation targetInfo = _targetInfos.get(i);
-      if (targetInfo.getTargetRef().equals(target)) {
+    /**
+     * Append the given target to the calibrator list if not present.
+     * @param target calibrator to be added to the calibrator list, if absent
+     * @return <tt>true</tt> if the calibrator was added
+     */
+    public boolean addCalibrator(final Target target) {
+        if (!isCalibrator(target)) {
+            return getCalibrators().add(target);
+        }
+        return false;
+    }
+
+    /**
+     * Remove the given target from the calibrator list if present.
+     * @param target calibrator to be removed from the calibrator list, if present
+     * @return <tt>true</tt> if the calibrator was removed
+     */
+    public boolean removeCalibrator(final Target target) {
+        if (isCalibrator(target)) {
+            return getCalibrators().remove(target);
+        }
+        return false;
+    }
+
+    /**
+     * Return the target user information corresponding to the target
+     * or create a new instance if the target is missing
+     * @param target target
+     * @return target user information
+     */
+    public final TargetInformation getOrCreateTargetInformation(final Target target) {
+        TargetInformation targetInfo = getTargetInformation(target);
+        if (targetInfo == null) {
+            // create a new instance if the target is not found :
+            targetInfo = new TargetInformation();
+            targetInfo.setTargetRef(target);
+            getTargetInfos().add(targetInfo);
+        }
         return targetInfo;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Return the user target description or null if undefined
-   * @param target target to use
-   * @return user target description or null if undefined
-   */
-  public final String getDescription(final Target target) {
-    final TargetInformation targetInfo = getTargetInformation(target);
-    if (targetInfo != null) {
-      final String description = targetInfo.getDescription();
-      if (description != null && description.length() != 0) {
-        return description;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Return true if the given target has calibrators
-   * @param target target to use
-   * @return true if the given target has calibrators
-   */
-  public final boolean hasCalibrators(final Target target) {
-    final TargetInformation targetInfo = getTargetInformation(target);
-    if (targetInfo != null) {
-      return targetInfo.hasCalibrators();
-    }
-    return false;
-  }
-
-  /**
-   * Return the calibrator list for the given target
-   * @param target target to use
-   * @return calibrator list
-   */
-  public final List<Target> getCalibrators(final Target target) {
-    final TargetInformation targetInfo = getOrCreateTargetInformation(target);
-
-    return targetInfo.getCalibrators();
-  }
-
-  /**
-   * Add the given calibrator target to the given science target
-   * @param target science target to use
-   * @param calibrator calibrator target
-   * @return true if the calibrator was added
-   */
-  public final boolean addCalibratorToTarget(final Target target, final Target calibrator) {
-    // check that the target is a science target :
-    if (!isCalibrator(target) && isCalibrator(calibrator)) {
-      final TargetInformation targetInfo = getOrCreateTargetInformation(target);
-
-      return targetInfo.addCalibrator(calibrator);
-    }
-    return false;
-  }
-
-  /**
-   * Remove the given calibrator target to the given science target
-   * @param target science target to use
-   * @param calibrator calibrator target
-   * @return true if the calibrator was removed
-   */
-  public final boolean removeCalibratorFromTarget(final Target target, final Target calibrator) {
-    // check that the target is a science target :
-    if (!isCalibrator(target) && isCalibrator(calibrator)) {
-      final TargetInformation targetInfo = getOrCreateTargetInformation(target);
-
-      return targetInfo.removeCalibrator(calibrator);
-    }
-    return false;
-  }
-
-  /**
-   * Return a deep "copy" of this instance
-   * @return deep "copy" of this instance
-   */
-  @Override
-  public final Object clone() {
-    final TargetUserInformations copy = (TargetUserInformations) super.clone();
-
-    // note : targets are not cloned as only there (immutable) identifier is useful
-    // see  : updateTargetReferences(Map<ID, Target>) to replace target instances to have a clean object graph
-    // i.e. (no leaking references)
-
-    // Simple copy of calibrators (Target instances) :
-    if (copy.calibrators != null) {
-      copy.calibrators = OIBase.copyList(copy.calibrators);
     }
 
-    // Deep copy of target informations :
-    if (copy.targetInfos != null) {
-      copy.targetInfos = OIBase.deepCopyList(copy.targetInfos);
+    /**
+     * Return the existing target information corresponding to the target
+     * @param target target
+     * @return target user information
+     * @see #getOrCreateTargetInformation(Target)
+     */
+    public final TargetInformation getTargetInformation(final Target target) {
+        final List<TargetInformation> _targetInfos = getTargetInfos();
+        for (int i = 0, len = _targetInfos.size(); i < len; i++) {
+            TargetInformation targetInfo = _targetInfos.get(i);
+            if (targetInfo.getTargetRef().equals(target)) {
+                return targetInfo;
+            }
+        }
+        return null;
     }
 
-    return copy;
-  }
+    /**
+     * Return the user target description or null if undefined
+     * @param target target to use
+     * @return user target description or null if undefined
+     */
+    public final String getDescription(final Target target) {
+        final TargetInformation targetInfo = getTargetInformation(target);
+        if (targetInfo != null) {
+            final String description = targetInfo.getDescription();
+            if (description != null && description.length() != 0) {
+                return description;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return true if the given target has calibrators
+     * @param target target to use
+     * @return true if the given target has calibrators
+     */
+    public final boolean hasCalibrators(final Target target) {
+        final TargetInformation targetInfo = getTargetInformation(target);
+        if (targetInfo != null) {
+            return targetInfo.hasCalibrators();
+        }
+        return false;
+    }
+
+    /**
+     * Return the calibrator list for the given target
+     * @param target target to use
+     * @return calibrator list
+     */
+    public final List<Target> getCalibrators(final Target target) {
+        final TargetInformation targetInfo = getOrCreateTargetInformation(target);
+
+        return targetInfo.getCalibrators();
+    }
+
+    /**
+     * Add the given calibrator target to the given science target
+     * @param target science target to use
+     * @param calibrator calibrator target
+     * @return true if the calibrator was added
+     */
+    public final boolean addCalibratorToTarget(final Target target, final Target calibrator) {
+        // check that the target is a science target :
+        if (!isCalibrator(target) && isCalibrator(calibrator)) {
+            final TargetInformation targetInfo = getOrCreateTargetInformation(target);
+
+            return targetInfo.addCalibrator(calibrator);
+        }
+        return false;
+    }
+
+    /**
+     * Remove the given calibrator target to the given science target
+     * @param target science target to use
+     * @param calibrator calibrator target
+     * @return true if the calibrator was removed
+     */
+    public final boolean removeCalibratorFromTarget(final Target target, final Target calibrator) {
+        // check that the target is a science target :
+        if (!isCalibrator(target) && isCalibrator(calibrator)) {
+            final TargetInformation targetInfo = getOrCreateTargetInformation(target);
+
+            return targetInfo.removeCalibrator(calibrator);
+        }
+        return false;
+    }
+
+    /**
+     * Return a deep "copy" of this instance
+     * @return deep "copy" of this instance
+     */
+    @Override
+    public final Object clone() {
+        final TargetUserInformations copy = (TargetUserInformations) super.clone();
+
+        // note : targets are not cloned as only there (immutable) identifier is useful
+        // see  : updateTargetReferences(Map<ID, Target>) to replace target instances to have a clean object graph
+        // i.e. (no leaking references)
+        // Simple copy of calibrators (Target instances) :
+        if (copy.calibrators != null) {
+            copy.calibrators = OIBase.copyList(copy.calibrators);
+        }
+
+        // Deep copy of target informations :
+        if (copy.targetInfos != null) {
+            copy.targetInfos = OIBase.deepCopyList(copy.targetInfos);
+        }
+
+        return copy;
+    }
 
     @Override
     protected boolean areEquals(final OIBase o) {
         if (!super.areEquals(o)) {
             return false;
         }
-        final TargetUserInformations other = (TargetUserInformations)o;
+        final TargetUserInformations other = (TargetUserInformations) o;
         return (areEqualsStrict(getCalibrators(), other.getCalibrators()) // just identifiers, may create lists
                 && TargetInformation.areEquals(getTargetInfos(), other.getTargetInfos()) // may create lists
-        );
+                );
     }
-    
-  /**
-   * Check bad references and update target references in this instance using the given Map<ID, Target> index
-   * @param mapIDTargets Map<ID, Target> index
-   */
-  protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
-    // create the Map<ID, Target> index for calibrators :
-    final java.util.Map<String, Target> mapIDCalibrators = new java.util.HashMap<String, Target>();
 
-    if (this.calibrators != null) {
-      Target target, newTarget;
+    /**
+     * Check bad references and update target references in this instance using the given Map<ID, Target> index
+     * @param mapIDTargets Map<ID, Target> index
+     */
+    protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
+        // create the Map<ID, Target> index for calibrators :
+        final java.util.Map<String, Target> mapIDCalibrators = new java.util.HashMap<String, Target>();
 
-      for (final java.util.ListIterator<Target> it = this.calibrators.listIterator(); it.hasNext();) {
-        target = it.next();
+        if (this.calibrators != null) {
+            Target target, newTarget;
 
-        newTarget = mapIDTargets.get(target.getIdentifier());
-        if (newTarget != null) {
-          if (newTarget != target) {
-            it.set(newTarget);
-          }
+            for (final java.util.ListIterator<Target> it = this.calibrators.listIterator(); it.hasNext();) {
+                target = it.next();
 
-          mapIDCalibrators.put(newTarget.getIdentifier(), newTarget);
+                newTarget = mapIDTargets.get(target.getIdentifier());
+                if (newTarget != null) {
+                    if (newTarget != target) {
+                        it.set(newTarget);
+                    }
 
-        } else {
-          if (logger.isDebugEnabled()) {
-            logger.debug("Removing missing target reference: {}", target.getIdentifier());
-          }
-          it.remove();
+                    mapIDCalibrators.put(newTarget.getIdentifier(), newTarget);
+
+                } else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Removing missing target reference: {}", target.getIdentifier());
+                    }
+                    it.remove();
+                }
+            }
+            if (this.calibrators.isEmpty()) {
+                this.calibrators = null;
+            }
         }
-      }
-      if (this.calibrators.isEmpty()) {
-        this.calibrators = null;
-      }
-    }
 
-    if (this.targetInfos != null) {
-      TargetInformation targetInfo;
-      Target target, newTarget;
+        if (this.targetInfos != null) {
+            TargetInformation targetInfo;
+            Target target, newTarget;
 
-      for (final java.util.ListIterator<TargetInformation> it = this.targetInfos.listIterator(); it.hasNext();) {
-        targetInfo = it.next();
+            for (final java.util.ListIterator<TargetInformation> it = this.targetInfos.listIterator(); it.hasNext();) {
+                targetInfo = it.next();
 
-        target = targetInfo.getTargetRef();
+                target = targetInfo.getTargetRef();
 
-        if (target == null) {
-          logger.debug("Removing invalid target reference.");
-          it.remove();
-        } else {
-          newTarget = mapIDTargets.get(target.getIdentifier());
-          if (newTarget != null) {
-            if (newTarget != target) {
-              targetInfo.setTargetRef(newTarget);
+                if (target == null) {
+                    logger.debug("Removing invalid target reference.");
+                    it.remove();
+                } else {
+                    newTarget = mapIDTargets.get(target.getIdentifier());
+                    if (newTarget != null) {
+                        if (newTarget != target) {
+                            targetInfo.setTargetRef(newTarget);
+                        }
+
+                        targetInfo.updateTargetReferences(mapIDCalibrators);
+
+                        // remove if empty :
+                        if (targetInfo.isEmpty()) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Removing empty target information: {}", target.getIdentifier());
+                            }
+                            it.remove();
+                        }
+
+                    } else {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Removing missing target reference: {}", target.getIdentifier());
+                        }
+                        it.remove();
+                    }
+                }
             }
-
-            targetInfo.updateTargetReferences(mapIDCalibrators);
-
-            // remove if empty :
-            if (targetInfo.isEmpty()) {
-              if (logger.isDebugEnabled()) {
-                logger.debug("Removing empty target information: {}", target.getIdentifier());
-              }
-              it.remove();
+            if (this.targetInfos.isEmpty()) {
+                this.targetInfos = null;
             }
-
-          } else {
-            if (logger.isDebugEnabled()) {
-              logger.debug("Removing missing target reference: {}", target.getIdentifier());
-            }
-            it.remove();
-          }
         }
-      }
-      if (this.targetInfos.isEmpty()) {
-        this.targetInfos = null;
-      }
     }
-  }
 
-
-  /**
-   * Return true if this target user informations are empty :
-   * target info list is empty and calibrator list is empty
-   * @return true if this target user informations are empty
-   */
-  protected final boolean isEmpty() {
-    if (this.calibrators != null && !this.calibrators.isEmpty()) {
-      return false;
+    /**
+     * Return true if this target user informations are empty :
+     * target info list is empty and calibrator list is empty
+     * @return true if this target user informations are empty
+     */
+    protected final boolean isEmpty() {
+        if (this.calibrators != null && !this.calibrators.isEmpty()) {
+            return false;
+        }
+        return this.targetInfos == null || this.targetInfos.isEmpty();
     }
-    return this.targetInfos == null || this.targetInfos.isEmpty();
-  }
 //--simple--preserve
 
 }

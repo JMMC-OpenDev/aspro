@@ -6,7 +6,7 @@ package fr.jmmc.aspro.gui.util;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.util.ImageUtils;
-import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 /**
@@ -15,21 +15,23 @@ import javax.swing.JLabel;
  */
 public final class TargetRenderer {
 
+    /** Common resource directory containing icon files */
+    private final static String IMAGE_RESOURCE_COMMON_PATH = "fr/jmmc/aspro/gui/icons/";
+
+    private final static ImageIcon IMG_CAL = ImageUtils.loadResourceIcon(IMAGE_RESOURCE_COMMON_PATH + "calibrator.png");
+    private final static ImageIcon IMG_SCI = ImageUtils.loadResourceIcon(IMAGE_RESOURCE_COMMON_PATH + "target.png");
+
     /* members */
-    /** icon for calibrator targets */
-    private final Icon calibratorIcon;
-    /** icon for science targets */
-    private final Icon targetIcon;
     /** target user informations */
     private final TargetUserInformations targetUserInfos;
+    /** temporary buffer */
+    protected final StringBuffer sbTmp = new StringBuffer(32);
 
     /**
      * Public constructor
      * @param targetUserInfos target user informations
      */
     public TargetRenderer(final TargetUserInformations targetUserInfos) {
-        this.calibratorIcon = ImageUtils.loadResourceIcon("fr/jmmc/aspro/gui/icons/calibrator.png");
-        this.targetIcon = ImageUtils.loadResourceIcon("fr/jmmc/aspro/gui/icons/target.png");
         this.targetUserInfos = targetUserInfos;
     }
 
@@ -40,7 +42,13 @@ public final class TargetRenderer {
      * @return display name
      */
     public String convertTargetToString(final Target target) {
-        return (this.targetUserInfos != null) ? this.targetUserInfos.getTargetDisplayName(target) : null;
+        if (this.targetUserInfos != null) {
+            final StringBuffer sb = sbTmp;
+            sb.setLength(0); // clear
+            this.targetUserInfos.getTargetDisplayName(target, sb);
+            return sb.toString();
+        }
+        return null;
     }
 
     /**
@@ -48,13 +56,11 @@ public final class TargetRenderer {
      * @param label to use
      * @param target target to check
      */
-    public void setIcon(final JLabel label,
-                        final Target target) {
-
+    public void setIcon(final JLabel label, final Target target) {
         if (this.targetUserInfos != null && this.targetUserInfos.isCalibrator(target)) {
-            label.setIcon(this.calibratorIcon);
+            label.setIcon(IMG_CAL);
         } else {
-            label.setIcon(this.targetIcon);
+            label.setIcon(IMG_SCI);
         }
     }
 }
