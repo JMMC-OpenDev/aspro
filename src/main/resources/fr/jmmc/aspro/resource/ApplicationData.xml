@@ -195,6 +195,8 @@
         <menu label="Interop">
             <menu label="Send targets as VOTable" classpath="fr.jmmc.aspro.interop.SendVOTableAction" action="sendVOTableAction"
                   description="send your targets to any VOTable application (SAMP)"/>
+            <menu label="Send targets as Observation" classpath="fr.jmmc.aspro.interop.SendObservationAction" action="sendObservationAction"
+                  description="send your targets to another ASPRO2 instance (SAMP)"/>
             <menu/>
             <menu label="Search calibrators" classpath="fr.jmmc.aspro.interop.SearchCalQueryAction" action="searchCalStartQuery"
                   description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
@@ -217,7 +219,10 @@
 
     <releasenotes>
         <release version="0.9.9.5">
-            <pubDate>Mon, 26 Mar 2018 12:00:00 GMT</pubDate>
+            <pubDate>Fri, 30 Mar 2018 10:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.5 beta 2">
+                <change type="FEATURE">Added SAMP interoperability to export / import 'targets from an observation' between ASPRO instances</change>
+            </prerelease>
             <prerelease version="0.9.9.5 beta 1">
                 <change type="FEATURE">Added action 'Import targets from an observation' (File menu) to import targets from another observation file (asprox) with their models and calibrator associations</change>
             </prerelease>

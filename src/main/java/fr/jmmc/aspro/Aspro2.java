@@ -18,9 +18,11 @@ import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.TargetEditorAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
+import fr.jmmc.aspro.interop.ObservationSampMessageHandler;
 import fr.jmmc.aspro.interop.SearchCalQueryAction;
 import fr.jmmc.aspro.interop.SendOBAction;
 import fr.jmmc.aspro.interop.SendOIFitsAction;
+import fr.jmmc.aspro.interop.SendObservationAction;
 import fr.jmmc.aspro.interop.SendVOTableAction;
 import fr.jmmc.aspro.interop.StarListSendAction;
 import fr.jmmc.aspro.interop.VotableSampMessageHandler;
@@ -358,7 +360,9 @@ public final class Aspro2 extends App {
         new TargetEditorAction();
 
         // Interop menu :
-        // use interop with modelfitting :
+        // send observation (SAMP) :
+        new SendObservationAction();
+        // use interop with LITpro (SAMP) :
         new BroadcastToModelFittingAction();
         // searchCal query (SAMP) :
         new SearchCalQueryAction();
@@ -386,6 +390,8 @@ public final class Aspro2 extends App {
     protected void declareInteroperability() {
         // Add handler to load votable (any target list or calibrators)
         new VotableSampMessageHandler();
+        // Add handler to load observations (targets):
+        new ObservationSampMessageHandler();
     }
 
     /**
@@ -422,5 +428,25 @@ public final class Aspro2 extends App {
             OIFitsProcessor.processCommandLine(this, argValues);
         }
         logger.debug("processShellCommandLine: done.");
+    }
+
+    /**
+     * Update the title of the main window
+     * @param fileName optional file name
+     */
+    public static void updateFrameTitle(final String fileName) {
+        // See SampManager that adds SAMP client '[c?]'
+
+        // Update the main frame title:
+        final JFrame frame = App.getExistingFrame();
+        if (frame != null) {
+            final String oldTitle = frame.getTitle();
+            final int pos = oldTitle.indexOf('[');
+            final String suffix = (pos != -1) ? oldTitle.substring(pos, oldTitle.length()) : "";
+
+            frame.setTitle(ApplicationDescription.getInstance().getProgramName()
+                    + ((fileName != null) ? " - " + fileName : "")
+                    + " " + suffix);
+        }
     }
 }

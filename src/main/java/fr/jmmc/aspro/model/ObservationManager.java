@@ -399,7 +399,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @throws IOException if an I/O exception occured
      * @throws IllegalStateException if an unexpected exception occured
      */
-    public void save(final File file) throws IOException, IllegalStateException {
+    public void saveObservation(final File file) throws IOException, IllegalStateException {
         if (file != null) {
             logger.info("Save observation to file: {}", file);
 
@@ -409,6 +409,19 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             ObservationFileProcessor.onSave(observation);
 
             saveObject(file, observation);
+        }
+    }
+
+    /**
+     * Save the current observation in the given file
+     * @param file file to save
+     *
+     * @throws IOException if an I/O exception occured
+     * @throws IllegalStateException if an unexpected exception occured
+     */
+    public void save(final File file) throws IOException, IllegalStateException {
+        if (file != null) {
+            saveObservation(file);
 
             // finally: set the initial state of the main observation (as saved) 
             this.defineInitialObservation();
@@ -426,8 +439,13 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         // Create a 16K buffer for the complete observation setting :
         final StringWriter sw = new StringWriter(16384);
 
+        final ObservationSetting observation = getMainObservation();
+
+        // pre save processing :
+        ObservationFileProcessor.onSave(observation);
+
         // serialize observation to xml :
-        saveObject(sw, getMainObservation());
+        saveObject(sw, observation);
 
         return sw.toString();
     }
