@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.5 beta 2"/>
-    <compilation date="30/03/2018" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.5 beta 3"/>
+    <compilation date="06/04/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -219,7 +219,11 @@
 
     <releasenotes>
         <release version="0.9.9.5">
-            <pubDate>Fri, 30 Mar 2018 11:00:00 GMT</pubDate>
+            <pubDate>Fri, 06 Apr 2018 14:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.5 beta 3">
+                <change type="FEATURE">Restored old approach to estimate V2 / T3 error and noisy data when SNR &lt; 3: numerical approach (sampling) does not work in such degenerated cases,
+                    so the theoretical error are used instead (added noise to V2 / T3 data is uncorrelated)</change>
+            </prerelease>
             <prerelease version="0.9.9.5 beta 2">
                 <change type="FEATURE">Added SAMP interoperability to export / import 'targets from an observation' between ASPRO instances</change>
                 <change type="BUGFIX">Fixed missing band U in the noise modelling</change>
