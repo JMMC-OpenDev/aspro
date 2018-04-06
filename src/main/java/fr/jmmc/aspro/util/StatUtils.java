@@ -344,31 +344,45 @@ public final class StatUtils {
         System.out.println("moments(variance) (re): " + Arrays.toString(moments(vars[0])));
         System.out.println("moments(variance) (im): " + Arrays.toString(moments(vars[1])));
 
-        for (double snr = 100.0; snr > 0.09; snr /= 10.0) {
-            System.out.println("--- SNR: " + snr + " ---");
+        for (double snr = 10.0; snr > 1e-2; ) {
+            /* for (double amp = 1.0; amp > 5e-6; amp /= 10.0) */
+            final double amp = 0.00137;
+            {
 
-            System.out.println("VISAMP");
-            for (int i = 0; i < INITIAL_CAPACITY; i++) {
-                ComplexDistribution d = StatUtils.getInstance().get();
-                if (TEST_DIST) {
-                    test(snr, true, d.getSamples());
-                } else {
-                    test(snr, true);
+                System.out.println("--- SNR: " + snr + " @ AMP = " + amp + "---");
+
+                if (false) {
+                    System.out.println("VISAMP");
+                    for (int i = 0; i < INITIAL_CAPACITY; i++) {
+                        ComplexDistribution d = StatUtils.getInstance().get();
+                        if (TEST_DIST) {
+                            test(amp, snr, true, d.getSamples());
+                        } else {
+                            test(amp, snr, true);
+                        }
+                    }
+                }
+                if (true) {
+                    System.out.println("VIS2:");
+                    for (int i = 0; i < INITIAL_CAPACITY; i++) {
+                        ComplexDistribution d = StatUtils.getInstance().get();
+                        if (TEST_DIST) {
+                            test(amp, snr, false, d.getSamples());
+                        } else {
+                            test(amp, snr, false);
+                        }
+                    }
                 }
             }
-            System.out.println("VIS2:");
-            for (int i = 0; i < INITIAL_CAPACITY; i++) {
-                ComplexDistribution d = StatUtils.getInstance().get();
-                if (TEST_DIST) {
-                    test(snr, false, d.getSamples());
-                } else {
-                    test(snr, false);
-                }
+            if (snr > 2.5) {
+                snr -= 1.0;
+            } else {
+                snr -= 0.1;
             }
         }
     }
 
-    private static void test(final double snr, final boolean amp) {
+    private static void test(final double visRef, final double snr, final boolean amp) {
         /* create a new random generator to have different seed (single thread) */
         final Random random = new Random();
 
@@ -381,21 +395,34 @@ public final class StatUtils {
             samples[0][n] = random.nextGaussian();
             samples[1][n] = random.nextGaussian();
         }
-        test(snr, amp, samples);
+        test(visRef, snr, amp, samples);
     }
 
-    private static void test(final double snr, final boolean amp, double[][] samples) {
-        final double visErr = 10.0;
+    private static void test(final double visRef, final double snr, final boolean amp, double[][] samples) {
+        double visErr = visRef / snr;
+        System.out.println("circular err: "+visErr);
 
-        double ref = snr * visErr;
-        double err = visErr;
-        final double visRe = ref / Math.sqrt(2);
+        double exp_ref = visRef;
+        double exp_err = visErr;
+        final double visRe = exp_ref / Math.sqrt(2);
         final double visIm = visRe;
 
         if (!amp) {
             // d(v2) = 2v * dv 
-            err *= 2.0 * ref;
-            ref *= ref;
+            exp_err = 2.0 * visRef * visErr;
+            exp_ref = visRef * visRef;
+        }
+        
+        if (false) {
+            // try error correction ?
+            if (!amp) {
+                if (exp_err / exp_ref >= 1) {
+                    System.out.println("exp_err: "+exp_err);
+                    System.out.println("exp_ref: "+exp_ref);
+                    visErr = Math.sqrt(exp_err / 2.0); // = SQRT(half deviation)
+                    System.out.println("Fixed circular err: "+visErr);
+                }
+            }
         }
         /*
         System.out.println("ref: " + ref + " err: " + err);
@@ -425,7 +452,7 @@ public final class StatUtils {
 
             // Compensated-summation variant for better numeric precision:
             vis_acc += sample;
-            diff = sample - ref;
+            diff = sample - exp_ref;
             vis_diff_acc += diff;
             vis_sq_diff_acc += diff * diff;
         }
@@ -437,8 +464,8 @@ public final class StatUtils {
         // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
         double stddev = Math.sqrt(SAMPLING_FACTOR_VARIANCE * (vis_sq_diff_acc - (SAMPLING_FACTOR_MEAN * FastMath.pow2(vis_diff_acc))));
 
-        System.out.println("Sampling[" + N_SAMPLES + "] avg= " + avg + " vs expected ref= " + ref + " ratio: " + (avg / ref));
-        System.out.println("Sampling[" + N_SAMPLES + "] stddev= " + stddev + " vs expected Err= " + err + " ratio: " + (stddev / err));
+        System.out.println("Sampling[" + N_SAMPLES + "] avg= " + avg + " vs expected ref= " + exp_ref + " ratio: " + (avg / exp_ref));
+        System.out.println("Sampling[" + N_SAMPLES + "] stddev= " + stddev + " vs expected Err= " + exp_err + " ratio: " + (stddev / exp_err));
     }
 
     // sum tests
