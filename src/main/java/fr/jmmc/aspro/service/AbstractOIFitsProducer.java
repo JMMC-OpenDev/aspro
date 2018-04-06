@@ -679,6 +679,7 @@ public abstract class AbstractOIFitsProducer {
                             // check SNR:
                             if ((visErr > SNR_THRESHOLD_VIS) && Math.abs(visAmp / visErr) < SNR_THRESHOLD) {
                                 cVisSnrFlagRow[l] = true;
+//                                System.out.println("Low SNR["+this.waveLengths[l]+"]: " + Math.abs(visAmp / visErr));
                             }
                         }
                     }
