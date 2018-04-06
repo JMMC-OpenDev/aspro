@@ -1042,69 +1042,83 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                             v2Err = Double.NaN;
                             snr = Double.NaN;
                         } else {
-                            // Sampling complex visibilities:
-
-                            // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
-                            errCVis = visError[k][l];
-
-// TODO: fix all the bias estimation on V2 + calibration ...
-                            if (this.doNoise) {
-                                bias = ns.computeVis2Bias(i, l);
-                                // Remove v2 bias as the theoretical error also is biased:
-                                v2 -= bias;
-                            } else {
-                                // do not debias V2 for theoretical values:
-                                bias = 0.0;
-                            }
-
-                            v2_sum = v2_sum_diff = v2_sum_diff_square = 0.0;
-
-                            // bivariate distribution (complex normal):
-                            for (n = 0; n < N_SAMPLES; n++) {
-                                // update nth sample:
-                                re = visRe + (errCVis * distRe[n]);
-                                im = visIm + (errCVis * distIm[n]);
-
-                                // compute debiased V2 = re^2 + im^2 - bias:
-                                sample = re * re + im * im - bias;
-                                v2_samples[n] = sample;
-
-                                // Compensated-summation variant for better numeric precision:
-                                v2_sum += sample;
-                                diff = sample - v2; // no bias (both removed)
-                                v2_sum_diff += diff;
-                                v2_sum_diff_square += diff * diff;
-                            }
-
-                            // mean(V2):
-                            s_v2_mean = SAMPLING_FACTOR_MEAN * v2_sum;
-
-                            // error(V2):
-                            // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
-                            s_v2_err = Math.sqrt(
-                                    SAMPLING_FACTOR_VARIANCE * (v2_sum_diff_square - (SAMPLING_FACTOR_MEAN * (v2_sum_diff * v2_sum_diff)))
-                            );
-
-                            if (DEBUG) {
-                                v2 += bias; // remove bias correction
+                            if (doFlag) {
+                                // use theoretical value & error if SNR < 3 !
+                                
                                 // square visibility error :
-                                v2Err = ns.computeVis2Error(i, l, Math.sqrt(v2));
+                                v2Err = ns.computeVis2Error(i, l, v2);
 
-                                logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_v2_mean / s_v2_err) + " V2"
-                                        + " (err(re,im)= " + errCVis + ")"
-                                        + " avg= " + s_v2_mean + " V2= " + v2 + " ratio: " + (s_v2_mean / v2)
-                                        + " stddev= " + s_v2_err + " err(V2)= " + v2Err + " ratio: " + (s_v2_err / v2Err)
+                                if (this.doNoise) {
+                                    // update nth sample:
+                                    v2 += v2Err * distRe[visRndIdxRow[l]];                                    
+                                }
+                                
+                            } else {
+                                // Sampling complex visibilities:
+
+                                // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
+                                errCVis = visError[k][l];
+
+                                if (this.doNoise) {
+                                    bias = ns.computeVis2Bias(i, l);
+                                    // Remove v2 bias:
+                                    v2 -= bias;
+                                } else {
+                                    // do not debias V2 for theoretical values:
+                                    bias = 0.0;
+                                }
+
+                                v2_sum = v2_sum_diff = v2_sum_diff_square = 0.0;
+
+                                // bivariate distribution (complex normal):
+                                for (n = 0; n < N_SAMPLES; n++) {
+                                    // update nth sample:
+                                    re = visRe + (errCVis * distRe[n]);
+                                    im = visIm + (errCVis * distIm[n]);
+
+                                    // compute debiased V2 = re^2 + im^2 - bias:
+                                    sample = re * re + im * im - bias;
+                                    v2_samples[n] = sample;
+
+                                    // Compensated-summation variant for better numeric precision:
+                                    v2_sum += sample;
+                                    diff = sample - v2; // no bias (both removed)
+                                    v2_sum_diff += diff;
+                                    v2_sum_diff_square += diff * diff;
+                                }
+
+                                // mean(V2):
+                                s_v2_mean = SAMPLING_FACTOR_MEAN * v2_sum;
+
+                                // error(V2):
+                                // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
+                                s_v2_err = Math.sqrt(
+                                        SAMPLING_FACTOR_VARIANCE * (v2_sum_diff_square - (SAMPLING_FACTOR_MEAN * (v2_sum_diff * v2_sum_diff)))
                                 );
-                                v2 -= bias; // restore bias correction
-                            }
 
-                            if (this.doNoise) {
-                                // Use the corresponding sample:
-                                v2 = v2_samples[visRndIdxRow[l]];
-                            } else if (DO_USE_SAMPLED_MEAN) {
-                                v2 = s_v2_mean;
+                                if (DEBUG) {
+                                    v2 += bias; // remove bias correction
+                                    // square visibility error :
+                                    v2Err = ns.computeVis2Error(i, l, v2);
+                                    
+                                    // logger.info("Bias vs Error: bias = " + bias + " error = "+v2Err + "ratio: " + bias / v2Err);
+
+                                    logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_v2_mean / s_v2_err) + " V2"
+                                            + " (err(re,im)= " + errCVis + ")"
+                                            + " avg= " + s_v2_mean + " V2= " + v2 + " ratio: " + (s_v2_mean / v2)
+                                            + " stddev= " + s_v2_err + " err(V2)= " + v2Err + " ratio: " + (s_v2_err / v2Err)
+                                    );
+                                    v2 -= bias; // restore bias correction
+                                }
+
+                                if (this.doNoise) {
+                                    // Use the corresponding sample:
+                                    v2 = v2_samples[visRndIdxRow[l]];
+                                } else if (DO_USE_SAMPLED_MEAN) {
+                                    v2 = s_v2_mean;
+                                }
+                                v2Err = s_v2_err;
                             }
-                            v2Err = s_v2_err;
 
                             snr = Math.abs(v2 / v2Err);
 
@@ -1252,7 +1266,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // 1 - the number of rows per HA point corresponds to the number of baselines.
         // 2 - OI_VIS rows have the same ordering than the list of baselines per HA points.
         // vars :
-        Complex cvis;
+        Complex cvis12, cvis23, cvis13;
         Complex[] visData12, visData23, visData13;
         double[] visErr12, visErr23, visErr13;
         ComplexDistribution dist12, dist23, dist13;
@@ -1408,23 +1422,22 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                     for (l = 0; l < nWaveLengths; l++) {
 
                         // baseline AB = 12 :
-                        cvis = visData12[l];
-                        visRe12 = cvis.getReal();
-                        visIm12 = cvis.getImaginary();
+                        cvis12 = visData12[l];
+                        visRe12 = cvis12.getReal();
+                        visIm12 = cvis12.getImaginary();
 
                         // baseline BC = 23
-                        cvis = visData23[l];
-                        visRe23 = cvis.getReal();
-                        visIm23 = cvis.getImaginary();
+                        cvis23 = visData23[l];
+                        visRe23 = cvis23.getReal();
+                        visIm23 = cvis23.getImaginary();
 
                         // baseline AC = 13 => conjugate for 31 (im = -im)
-                        cvis = visData13[l];
-                        visRe31 = cvis.getReal();
+                        cvis13 = visData13[l];
+                        visRe31 = cvis13.getReal();
                         // conjugate for 31 (im = -im)
-                        visIm31 = -cvis.getImaginary();
+                        visIm31 = -cvis13.getImaginary();
 
                         // Compute RE/IM bispectrum with C12*C23*~C13 :
-//                        ComplexUtils.bispectrum(vis12, vis23, vis31, t3Data);
                         t3Re = visRe12 * visRe23 * visRe31 - visRe12 * visIm23 * visIm31 - visIm12 * visRe23 * visIm31 - visIm12 * visIm23 * visRe31;
                         t3Im = visRe12 * visRe23 * visIm31 + visRe12 * visIm23 * visRe31 + visIm12 * visRe23 * visRe31 - visIm12 * visIm23 * visIm31;
 
@@ -1439,117 +1452,139 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         if (ns == null) {
                             errAmp = errPhi = Double.NaN;
                         } else {
-                            // Sampling complex visibilities:
-                            // complex visibility errors : visErrRe = visErrIm = visAmpErr or Complex.NaN :
-                            visErrCplx12 = visErr12[l];
-                            visErrCplx23 = visErr23[l];
-                            visErrCplx31 = visErr13[l];
+                            if (doFlag) {
+                                // use theoretical value & error if SNR < 3 !                            
 
-                            t3amp_sum = t3amp_sum_diff = t3amp_sum_diff_square = 0.0;
-                            t3phi_sum_cos = t3phi_sum_sin = 0.0;
-
-                            // bivariate distribution (complex normal):
-                            for (n = 0; n < N_SAMPLES; n++) {
-                                // update nth sample:
-
-                                // baseline AB = 12 :
-                                sRe12 = visRe12 + (visErrCplx12 * distRe_12[n]);
-                                sIm12 = visIm12 + (visErrCplx12 * distIm_12[n]);
-
-                                // baseline BC = 23
-                                sRe23 = visRe23 + (visErrCplx23 * distRe_23[n]);
-                                sIm23 = visIm23 + (visErrCplx23 * distIm_23[n]);
-
-                                // baseline CA = 31
-                                sRe31 = visRe31 + (visErrCplx31 * distRe_31[n]);
-                                // Use conjuguate on distribution too:
-                                sIm31 = visIm31 - (visErrCplx31 * distIm_31[n]);
-
-                                // Compute RE/IM bispectrum with C12*C23*~C13 :
-                                //                        ComplexUtils.bispectrum(vis12, vis23, vis31, t3Data);
-                                t3Re = sRe12 * sRe23 * sRe31 - sRe12 * sIm23 * sIm31 - sIm12 * sRe23 * sIm31 - sIm12 * sIm23 * sRe31;
-                                t3Im = sRe12 * sRe23 * sIm31 + sRe12 * sIm23 * sRe31 + sIm12 * sRe23 * sRe31 - sIm12 * sIm23 * sIm31;
-
-                                // amplitude :
-                                sample = Math.sqrt(t3Re * t3Re + t3Im * t3Im);
-                                t3amp_samples[n] = sample;
-
-                                // Compensated-summation variant for better numeric precision:
-                                t3amp_sum += sample;
-                                diff = sample - t3amp;
-                                t3amp_sum_diff += diff;
-                                t3amp_sum_diff_square += diff * diff;
-
-                                // mean angle: compute sum(cos) and sum(sin):
-                                // note: do not check div 0 (should never happen as distrib != pure 0.0):
-                                t3phi_sum_cos += t3Re / sample;
-                                t3phi_sum_sin += t3Im / sample;
-
-                                // phase in [-PI; PI]:
-                                sample = (t3Im != 0.0) ? FastMath.atan2(t3Im, t3Re) : 0.0;
-                                t3phi_samples[n] = sample;
-                            }
-
-                            // mean(T3amp):
-                            s_t3amp_mean = SAMPLING_FACTOR_MEAN * t3amp_sum;
-
-                            // error(t3amp):
-                            // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
-                            s_t3amp_err = Math.sqrt(
-                                    SAMPLING_FACTOR_VARIANCE * (t3amp_sum_diff_square - (SAMPLING_FACTOR_MEAN * (t3amp_sum_diff * t3amp_sum_diff)))
-                            );
-
-                            // mean(T3phi):
-                            s_t3phi_mean = (t3phi_sum_sin != 0.0) ? FastMath.atan2(t3phi_sum_sin, t3phi_sum_cos) : 0.0;
-
-                            t3phi_sum_diff = t3phi_sum_diff_square = 0.0;
-
-                            // compute angle variance:
-                            for (n = 0; n < N_SAMPLES; n++) {
-                                sample = t3phi_samples[n];
-
-                                // Compensated-summation variant for better numeric precision:
-                                // check if diff is [-PI; PI]:
-                                diff = distance(sample, s_t3phi_mean);
-                                t3phi_sum_diff += diff;
-                                t3phi_sum_diff_square += diff * diff;
-                            }
-
-                            // error(t3phi):
-                            // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
-                            s_t3phi_err = Math.sqrt(
-                                    SAMPLING_FACTOR_VARIANCE * (t3phi_sum_diff_square - (SAMPLING_FACTOR_MEAN * (t3phi_sum_diff * t3phi_sum_diff)))
-                            );
-
-                            if (DEBUG) {
                                 // phase closure error (rad) :
-                                errPhi = ns.computeT3PhiError(i, l, cvis.abs(), cvis.abs(), cvis.abs());
+                                errPhi = ns.computeT3PhiError(i, l, cvis12.abs(), cvis23.abs(), cvis13.abs()); // abs(c13) = abs(c31)
 
                                 // amplitude error t3AmpErr = t3Amp * t3PhiErr :
                                 errAmp = t3amp * errPhi;
+                                
+                                if (this.doNoise) {
+                                    // use the first distribution (sigma = 1):
+                                    final int nSample = visRndIdxRow[l];
+                                    
+                                    // TODO: add noise in a proper manner:
 
-                                logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_t3amp_mean / s_t3amp_err) + " AMP "
-                                        + " avg= " + s_t3amp_mean + " T3amp= " + t3amp + " ratio: " + (s_t3amp_mean / t3amp)
-                                        + " stddev= " + s_t3amp_err + " errAmp= " + errAmp + " ratio: " + (s_t3amp_err / errAmp)
+                                    // add gaussian noise with sigma = errAmp :
+                                    t3amp += errAmp * distRe_12[nSample];
+                                    // add gaussian noise with sigma = errPhi :
+                                    t3phi += errPhi * distIm_12[nSample];
+                                }
+
+                            } else {
+                                // Sampling complex visibilities:
+                                // complex visibility errors : visErrRe = visErrIm = visAmpErr or Complex.NaN :
+                                visErrCplx12 = visErr12[l];
+                                visErrCplx23 = visErr23[l];
+                                visErrCplx31 = visErr13[l];
+
+                                t3amp_sum = t3amp_sum_diff = t3amp_sum_diff_square = 0.0;
+                                t3phi_sum_cos = t3phi_sum_sin = 0.0;
+
+                                // bivariate distribution (complex normal):
+                                for (n = 0; n < N_SAMPLES; n++) {
+                                    // update nth sample:
+
+                                    // baseline AB = 12 :
+                                    sRe12 = visRe12 + (visErrCplx12 * distRe_12[n]);
+                                    sIm12 = visIm12 + (visErrCplx12 * distIm_12[n]);
+
+                                    // baseline BC = 23
+                                    sRe23 = visRe23 + (visErrCplx23 * distRe_23[n]);
+                                    sIm23 = visIm23 + (visErrCplx23 * distIm_23[n]);
+
+                                    // baseline CA = 31
+                                    sRe31 = visRe31 + (visErrCplx31 * distRe_31[n]);
+                                    // Use conjuguate on distribution too:
+                                    sIm31 = visIm31 - (visErrCplx31 * distIm_31[n]);
+
+                                    // Compute RE/IM bispectrum with C12*C23*~C13 :
+                                    //                        ComplexUtils.bispectrum(vis12, vis23, vis31, t3Data);
+                                    t3Re = sRe12 * sRe23 * sRe31 - sRe12 * sIm23 * sIm31 - sIm12 * sRe23 * sIm31 - sIm12 * sIm23 * sRe31;
+                                    t3Im = sRe12 * sRe23 * sIm31 + sRe12 * sIm23 * sRe31 + sIm12 * sRe23 * sRe31 - sIm12 * sIm23 * sIm31;
+
+                                    // amplitude :
+                                    sample = Math.sqrt(t3Re * t3Re + t3Im * t3Im);
+                                    t3amp_samples[n] = sample;
+
+                                    // Compensated-summation variant for better numeric precision:
+                                    t3amp_sum += sample;
+                                    diff = sample - t3amp;
+                                    t3amp_sum_diff += diff;
+                                    t3amp_sum_diff_square += diff * diff;
+
+                                    // mean angle: compute sum(cos) and sum(sin):
+                                    // note: do not check div 0 (should never happen as distrib != pure 0.0):
+                                    t3phi_sum_cos += t3Re / sample;
+                                    t3phi_sum_sin += t3Im / sample;
+
+                                    // phase in [-PI; PI]:
+                                    sample = (t3Im != 0.0) ? FastMath.atan2(t3Im, t3Re) : 0.0;
+                                    t3phi_samples[n] = sample;
+                                }
+
+                                // mean(T3amp):
+                                s_t3amp_mean = SAMPLING_FACTOR_MEAN * t3amp_sum;
+
+                                // error(t3amp):
+                                // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
+                                s_t3amp_err = Math.sqrt(
+                                        SAMPLING_FACTOR_VARIANCE * (t3amp_sum_diff_square - (SAMPLING_FACTOR_MEAN * (t3amp_sum_diff * t3amp_sum_diff)))
                                 );
-                                logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_t3phi_mean / s_t3phi_err) + " PHI "
-                                        + " avg= " + s_t3phi_mean + " T3phi= " + t3phi + " ratio: " + ((PI + s_t3phi_mean) / (PI + t3phi))
-                                        + " stddev= " + s_t3phi_err + " errPhi= " + errPhi + " ratio: " + (s_t3phi_err / errPhi)
+
+                                // mean(T3phi):
+                                s_t3phi_mean = (t3phi_sum_sin != 0.0) ? FastMath.atan2(t3phi_sum_sin, t3phi_sum_cos) : 0.0;
+
+                                t3phi_sum_diff = t3phi_sum_diff_square = 0.0;
+
+                                // compute angle variance:
+                                for (n = 0; n < N_SAMPLES; n++) {
+                                    sample = t3phi_samples[n];
+
+                                    // Compensated-summation variant for better numeric precision:
+                                    // check if diff is [-PI; PI]:
+                                    diff = distance(sample, s_t3phi_mean);
+                                    t3phi_sum_diff += diff;
+                                    t3phi_sum_diff_square += diff * diff;
+                                }
+
+                                // error(t3phi):
+                                // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
+                                s_t3phi_err = Math.sqrt(
+                                        SAMPLING_FACTOR_VARIANCE * (t3phi_sum_diff_square - (SAMPLING_FACTOR_MEAN * (t3phi_sum_diff * t3phi_sum_diff)))
                                 );
-                            }
 
-                            if (this.doNoise) {
-                                // Use the corresponding sample among vis, vis2, t3 on any baselines !
-                                final int nSample = visRndIdxRow[l];
-                                t3amp = t3amp_samples[nSample];
-                                t3phi = t3phi_samples[nSample];
-                            } else if (DO_USE_SAMPLED_MEAN) {
-                                t3amp = s_t3amp_mean;
-                                t3phi = s_t3phi_mean;
-                            }
-                            errAmp = s_t3amp_err;
-                            errPhi = s_t3phi_err;
+                                if (DEBUG) {
+                                    // phase closure error (rad) :
+                                    errPhi = ns.computeT3PhiError(i, l, cvis12.abs(), cvis23.abs(), cvis13.abs()); // abs(c13) = abs(c31)
 
+                                    // amplitude error t3AmpErr = t3Amp * t3PhiErr :
+                                    errAmp = t3amp * errPhi;
+
+                                    logger.info("Sampling[" + N_SAMPLES + "] snr=" + Math.abs(s_t3amp_mean / s_t3amp_err) + " (low: " + doFlag + ") AMP "
+                                            + " avg= " + s_t3amp_mean + " T3amp= " + t3amp + " ratio: " + (s_t3amp_mean / t3amp)
+                                            + " stddev= " + s_t3amp_err + " errAmp= " + errAmp + " ratio: " + (s_t3amp_err / errAmp)
+                                    );
+                                    logger.info("Sampling[" + N_SAMPLES + "] snr=" + Math.abs(s_t3phi_mean / s_t3phi_err) + " (low: " + doFlag + ") PHI "
+                                            + " avg= " + s_t3phi_mean + " T3phi= " + t3phi + " diff: " + distance(s_t3phi_mean, t3phi)
+                                            + " stddev= " + s_t3phi_err + " errPhi= " + errPhi + " ratio: " + (s_t3phi_err / errPhi)
+                                    );
+                                }
+
+                                if (this.doNoise) {
+                                    // Use the corresponding sample among vis, vis2, t3 on any baselines !
+                                    final int nSample = visRndIdxRow[l];
+                                    t3amp = t3amp_samples[nSample];
+                                    t3phi = t3phi_samples[nSample];
+                                } else if (DO_USE_SAMPLED_MEAN) {
+                                    t3amp = s_t3amp_mean;
+                                    t3phi = s_t3phi_mean;
+                                }
+                                errAmp = s_t3amp_err;
+                                errPhi = s_t3phi_err;
+                            }
                             if (NoiseService.USE_DISTRIB_APPROACH) {
                                 // check SNR:
                                 if ((errPhi > SNR_THRESHOLD_ANGLE) && (Math.abs(t3phi / errPhi) < SNR_THRESHOLD)) {
