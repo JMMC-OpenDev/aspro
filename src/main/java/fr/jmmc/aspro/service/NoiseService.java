@@ -932,7 +932,7 @@ public final class NoiseService implements VisNoiseService {
 
     private void dumpVis2ErrorSample(final int iChannel, final double visAmp) {
         double v2 = visAmp * visAmp;
-        double errV2 = computeVis2ErrorNoBias(iMidPoint, iChannel, visAmp);
+        double errV2 = computeVis2ErrorNoBias(iMidPoint, iChannel, v2);
         double snr = v2 / errV2;
         double bias = computeVis2Bias(iMidPoint, iChannel);
 
@@ -1077,7 +1077,7 @@ public final class NoiseService implements VisNoiseService {
             // use the total number photons for nbFrames or not ?
             biasV2[i] = (nbTotPhot + nbPixInterf[i] * FastMath.pow2(ron)) / sqCorFluxCoef[i];
             // repeat OBS measurements to reach totalObsTime minutes:
-            biasV2[i] *= FastMath.pow2(totFrameCorrection); // bias divided by nbFrames
+            biasV2[i] *= totFrameCorrection; // bias divided by SQRT(nbFrames) like error
 
             // Limit excessively large bias:
             biasV2[i] = Math.min(biasV2[i], MAX_ERR_V2);
@@ -1118,12 +1118,12 @@ public final class NoiseService implements VisNoiseService {
      *
      * @param iPoint index of the observable point
      * @param iChannel index of the channel
-     * @param visAmp visibility amplitude
+     * @param vis2 squared visibility
      * @param useBias use instrumentalVisibilityBias and instrumentVis2CalibrationBias
      * @return square visiblity error
      */
     private double computeVis2Error(final int iPoint, final int iChannel,
-                                    final double visAmp, final boolean useBias) {
+                                    final double vis2, final boolean useBias) {
         if (DO_CHECKS) {
             // fast return NaN if invalid configuration :
             if (this.invalidParameters) {
@@ -1133,8 +1133,6 @@ public final class NoiseService implements VisNoiseService {
                 return Double.NaN;
             }
         }
-        // TODO: use V2 as input parameter instead of visAmp:
-        final double vis2 = FastMath.pow2(visAmp);
 
         final NoiseWParams param = this.params[iPoint];
 
@@ -1186,13 +1184,8 @@ public final class NoiseService implements VisNoiseService {
      * Note: this method is statefull and NOT thread safe
      *
      * @param iPoint index of the observable point
-     * 
-     * @deprecated 
      */
     private void prepareT3PhiError(final int iPoint) {
-        if (!OIFitsCreatorService.DEBUG && USE_DISTRIB_APPROACH) {
-            return;
-        }
         final int nWLen = nSpectralChannels;
 
         final NoiseWParams param = this.params[iPoint];
@@ -1245,15 +1238,9 @@ public final class NoiseService implements VisNoiseService {
      * @param visAmp23 visibility amplitude of baseline BC = 23
      * @param visAmp31 visibility amplitude of baseline CA = 31
      * @return error on closure phase in radians or NaN if the error can not be computed
-     * 
-     * @deprecated 
      */
     public double computeT3PhiError(final int iPoint, final int iChannel,
                                     final double visAmp12, final double visAmp23, final double visAmp31) {
-        if (!OIFitsCreatorService.DEBUG && USE_DISTRIB_APPROACH) {
-            logger.info("computeT3PhiError: Unsupported for distributed approach.");
-            return Double.NaN;
-        }
         if (DO_CHECKS) {
             // fast return NaN if invalid configuration :
             if (this.invalidParameters) {
@@ -1374,9 +1361,10 @@ public final class NoiseService implements VisNoiseService {
      */
     private double computeVisError(final int iPoint, final int iChannel, final double visAmp) {
         // vis2 error without bias :
-        final double errV2 = computeVis2ErrorNoBias(iPoint, iChannel, visAmp);
+        final double errV2 = computeVis2ErrorNoBias(iPoint, iChannel, visAmp * visAmp);
 
         // dvis = d(vis2) / (2 * vis) :
+        // in log scale: (dv / v) = (1/2) (dv2 / v2)
         final double visAmpErr = errV2 / (2d * visAmp);
 
         // convert instrumental phase bias as an error too. Use it as a limit:
@@ -1389,11 +1377,11 @@ public final class NoiseService implements VisNoiseService {
      *
      * @param iPoint index of the observable point
      * @param iChannel index of the channel
-     * @param visAmp visibility amplitude
+     * @param vis2 squared visibility
      * @return square visiblity error or NaN if the error can not be computed
      */
-    public double computeVis2Error(final int iPoint, final int iChannel, final double visAmp) {
-        return computeVis2Error(iPoint, iChannel, visAmp, true);
+    public double computeVis2Error(final int iPoint, final int iChannel, final double vis2) {
+        return computeVis2Error(iPoint, iChannel, vis2, true);
     }
 
     /**
@@ -1401,11 +1389,11 @@ public final class NoiseService implements VisNoiseService {
      *
      * @param iPoint index of the observable point
      * @param iChannel index of the channel
-     * @param visAmp visibility amplitude
+     * @param vis2 squared visibility
      * @return square visiblity error or NaN if the error can not be computed
      */
-    private double computeVis2ErrorNoBias(final int iPoint, final int iChannel, final double visAmp) {
-        return computeVis2Error(iPoint, iChannel, visAmp, false);
+    private double computeVis2ErrorNoBias(final int iPoint, final int iChannel, final double vis2) {
+        return computeVis2Error(iPoint, iChannel, vis2, false);
     }
 
     private boolean check(final int iPoint, final int iChannel) {
