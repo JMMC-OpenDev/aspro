@@ -138,140 +138,133 @@ public class TargetInformation
     
 //--simple--preserve
   @Override
-  public final String toString() {
-    return "TargetInformation [" + ((this.getTargetRef() != null) ? this.getTargetRef() : "undefined") + "]" + " : " + getCalibrators();
-  }
-
-  /**
-   * Return true if the calibrator list is not empty
-   * @return true if the calibrator list is not empty
-   */
-  public final boolean hasCalibrators() {
-    if (this.calibrators != null) {
-      return !this.calibrators.isEmpty();
-    }
-    return false;
-  }
-
-  /**
-   * Return true if the given target is a calibrator
-   * i.e. the calibrator list contains the given target
-   * @param target target to use
-   * @return true if the given target is a calibrator
-   */
-  public final boolean isCalibrator(final Target target) {
-    return getCalibrators().contains(target);
-  }
-
-  /**
-   * Append the given target to the calibrator list if not present.
-   * @param target calibrator to be added to the calibrator list, if absent
-   * @return <tt>true</tt> if the calibrator was added
-   */
-  public boolean addCalibrator(final Target target) {
-    if (!isCalibrator(target)) {
-      return getCalibrators().add(target);
-    }
-    return false;
-  }
-
-  /**
-   * Remove the given target to the calibrator list if present.
-   * @param target calibrator to be removed from the calibrator list, if present
-   * @return <tt>true</tt> if the calibrator was removed
-   */
-  public boolean removeCalibrator(final Target target) {
-    if (isCalibrator(target)) {
-      return getCalibrators().remove(target);
-    }
-    return false;
-  }
-
-  /**
-   * Return a deep "copy" of this instance
-   * @return deep "copy" of this instance
-   */
-  @Override
-  public final Object clone() {
-    final TargetInformation copy = (TargetInformation) super.clone();
-
-    // note : targets are not cloned as only there (immutable) identifier is useful
-    // see  : updateTargetReferences(Map<ID, Target>) to replace target instances to have a clean object graph
-    // i.e. (no leaking references)
-
-    // Simple copy of calibrators (Target instances) :
-    if (copy.calibrators != null) {
-      copy.calibrators = OIBase.copyList(copy.calibrators);
+    public final String toString() {
+        return "TargetInformation [" + ((this.getTargetRef() != null) ? this.getTargetRef() : "undefined") + "]" + " : " + getCalibrators();
     }
 
-    return copy;
-  }
+    /**
+     * Return true if the calibrator list is not empty
+     * @return true if the calibrator list is not empty
+     */
+    public final boolean hasCalibrators() {
+        return ((this.calibrators != null) && !this.calibrators.isEmpty());
+    }
+
+    /**
+     * Return true if the given target is a calibrator
+     * i.e. the calibrator list contains the given target
+     * @param target target to use
+     * @return true if the given target is a calibrator
+     */
+    public final boolean isCalibrator(final Target target) {
+        return getCalibrators().contains(target);
+    }
+
+    /**
+     * Append the given target to the calibrator list if not present.
+     * @param target calibrator to be added to the calibrator list, if absent
+     * @return <tt>true</tt> if the calibrator was added
+     */
+    public boolean addCalibrator(final Target target) {
+        if (!isCalibrator(target)) {
+            return getCalibrators().add(target);
+        }
+        return false;
+    }
+
+    /**
+     * Remove the given target to the calibrator list if present.
+     * @param target calibrator to be removed from the calibrator list, if present
+     * @return <tt>true</tt> if the calibrator was removed
+     */
+    public boolean removeCalibrator(final Target target) {
+        if (isCalibrator(target)) {
+            return getCalibrators().remove(target);
+        }
+        return false;
+    }
+
+    /**
+     * Return a deep "copy" of this instance
+     * @return deep "copy" of this instance
+     */
+    @Override
+    public final Object clone() {
+        final TargetInformation copy = (TargetInformation) super.clone();
+
+        // note : targets are not cloned as only there (immutable) identifier is useful
+        // see  : updateTargetReferences(Map<ID, Target>) to replace target instances to have a clean object graph
+        // i.e. (no leaking references)
+        // Simple copy of calibrators (Target instances) :
+        if (copy.calibrators != null) {
+            copy.calibrators = OIBase.copyList(copy.calibrators);
+        }
+
+        return copy;
+    }
 
     @Override
     protected boolean areEquals(final OIBase o) {
         if (!super.areEquals(o)) {
             return false;
         }
-        final TargetInformation other = (TargetInformation)o;
+        final TargetInformation other = (TargetInformation) o;
         return (areEqualsStrict(this.targetRef, other.getTargetRef()) // just identifiers
                 && areEquals(this.description, other.getDescription())
                 && areEqualsStrict(getCalibrators(), other.getCalibrators()) // just identifiers, may create lists
-        );
+                );
     }
 
-  /**
-   * Check bad references and update target references 
-   * and check if referenced calibrators are present in the given mapIDCalibrators
-   * @param mapIDCalibrators Map<ID, Target> index
-   */
-  protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDCalibrators) {
-    // note : targetRef is already updated in TargetUserInformations
+    /**
+     * Check bad references and update target references 
+     * and check if referenced calibrators are present in the given mapIDCalibrators
+     * @param mapIDCalibrators Map<ID, Target> index
+     */
+    protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDCalibrators) {
+        // note : targetRef is already updated in TargetUserInformations
 
-    if (this.description != null) {
-      this.description = this.description.trim();
-      if (this.description.length() == 0) {
-        this.description = null;
-      }
-    }
-
-    if (this.calibrators != null) {
-      Target target, newTarget;
-
-      for (final java.util.ListIterator<Target> it = this.calibrators.listIterator(); it.hasNext();) {
-        target = it.next();
-
-        newTarget = mapIDCalibrators.get(target.getIdentifier());
-        if (newTarget != null) {
-          if (newTarget != target) {
-            it.set(newTarget);
-          }
-        } else {
-          if (logger.isDebugEnabled()) {
-            logger.debug("Removing missing target reference: {}", target.getIdentifier());
-          }
-          it.remove();
+        if (this.description != null) {
+            this.description = this.description.trim();
+            if (this.description.length() == 0) {
+                this.description = null;
+            }
         }
-      }
-      if (this.calibrators.isEmpty()) {
-        this.calibrators = null;
-      }
-    }
-  }
 
-  /**
-   * Return true if this target information is empty :
-   * description is empty and calibrator list is empty
-   * @return true if this target information is empty
-   */
-  protected final boolean isEmpty() {
-    if (this.description != null && this.description.length() != 0) {
-      return false;
+        if (this.calibrators != null) {
+            Target target, newTarget;
+
+            for (final java.util.ListIterator<Target> it = this.calibrators.listIterator(); it.hasNext();) {
+                target = it.next();
+
+                newTarget = mapIDCalibrators.get(target.getIdentifier());
+                if (newTarget != null) {
+                    if (newTarget != target) {
+                        it.set(newTarget);
+                    }
+                } else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Removing missing target reference: {}", target.getIdentifier());
+                    }
+                    it.remove();
+                }
+            }
+            if (this.calibrators.isEmpty()) {
+                this.calibrators = null;
+            }
+        }
     }
-    if (this.calibrators != null && !this.calibrators.isEmpty()) {
-      return false;
+
+    /**
+     * Return true if this target information is empty :
+     * description is empty and calibrator list is empty
+     * @return true if this target information is empty
+     */
+    protected final boolean isEmpty() {
+        if (this.description != null && this.description.length() != 0) {
+            return false;
+        }
+        return this.calibrators == null || this.calibrators.isEmpty();
     }
-    return true;
-  }
 //--simple--preserve
 
 }
