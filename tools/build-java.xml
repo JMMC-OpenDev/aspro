@@ -21,55 +21,19 @@
     -->
     <property file="build.properties" />
 
+    <!-- NOTE: jmcs is supposed to be in the parent folder -->
+    <include file="${jmcs.path}/tools/build-include.xml"/>
+
+
     <!-- define folder properties -->
     <property name="root" location=".."/>
 
-    <!-- JAXB library must be present in the jmcs module nearby -->
-    <property name="jaxb.version" value="2.2.11"/>
-    <property name="jaxb.libs" location="${jmcs.path}/tools/xjc"/>
-    <property name="mvn.libs" location="${root}/target/runtime-libs/"/>
-
-    <!-- Aspro src folder -->
+    <!-- Maven folders -->
     <property name="resources" location="${root}/src/main/resources"/>
     <property name="sources"   location="${root}/src/main/java"/>
 
-    <property name="output" location="${sources}"/>
-
     <!-- Aspro test folder -->
     <property name="test" location="${root}/src/test/java"/>
-
-
-    <!-- custom macro to enhance XJC -->
-    <macrodef name="xjc">
-        <attribute name="destdir"/>
-        <attribute name="schema"/>
-
-        <sequential>
-            <java classname="com.sun.tools.xjc.XJCFacade" classpath="${jaxb.libs}/jaxb-xjc-${jaxb.version}.jar:${mvn.libs}/jaxb-api-${jaxb.version}.jar:${mvn.libs}/jaxb-core-${jaxb.version}.jar:${mvn.libs}/jaxb-impl-${jaxb.version}.jar" fork="true" failonerror="true" maxmemory="256m">
-
-                <jvmarg value="-Djavax.xml.accessExternalSchema=all" />
-
-                <arg value="-classpath"/>
-                <arg value="${jaxb.libs}/simple-regenerator-1.0.jar"/>
-
-                <arg value="-no-header"/>
-
-                <arg value="-extension"/>
-                <!-- preserve code extension -->
-                <arg value="-simple-preserve"/>
-
-                <arg value="-d"/>
-                <arg value="@{destdir}"/>
-
-                <arg value="@{schema}"/>
-                <env key="LANG" value="en_US"/>
-            </java>
-
-            <delete dir="@{destdir}">
-                <include name="**/*.java.backup"/>
-            </delete>
-        </sequential>
-    </macrodef>
 
 
 
@@ -82,7 +46,6 @@
         <echo>-------------------------------------------------------------------------------</echo>
         <echo>  - genXsdCode         : generates the java code from xml schema (xsd)</echo>
         <echo>-------------------------------------------------------------------------------</echo>
-        <echo> jaxb libraries : ${jaxb.libs}</echo>
     </target>
 
 
@@ -91,41 +54,40 @@
     <target name="genXsdCode" description="generate java classes from XSD schemas">
 
         <echo>generating java code for AsproOIModel.xsd</echo>
-        <mkdir dir="${output}/fr/jmmc/aspro/model/oi" />
+        <mkdir dir="${sources}/fr/jmmc/aspro/model/oi" />
 
-        <xjc destdir="${output}"
+        <xjc destdir="${sources}"
              schema="${resources}/fr/jmmc/aspro/model/AsproOIModel.xsd" />
 
-	    <!-- 
-	    remove several @XmlSchemaType in JAXB 2.2.11:
-	    - @XmlSchemaType(name = "string") by '' (bad enum)
-	    - @XmlSchemaType(name = "anySimpleType") by none (bad double[])
-	    -->
-	    <replace summary="true" dir="${output}/fr/jmmc/aspro/model/oi/" includes="*.java" value="">
-		    <replacetoken>@XmlSchemaType(name = "string")</replacetoken>
-	    </replace>
-	    <replace summary="true" dir="${output}/fr/jmmc/aspro/model/oi/" includes="*.java" value="">
-		    <replacetoken>@XmlSchemaType(name = "anySimpleType")</replacetoken>
-	    </replace>
+        <!--
+        remove several @XmlSchemaType in JAXB 2.2+:
+        - @XmlSchemaType(name = "string") by '' (bad enum)
+        - @XmlSchemaType(name = "anySimpleType") by none (bad double[])
+        -->
+        <replace summary="true" dir="${sources}/fr/jmmc/aspro/model/oi/" includes="*.java" value="">
+            <replacetoken>@XmlSchemaType(name = "string")</replacetoken>
+        </replace>
+        <replace summary="true" dir="${sources}/fr/jmmc/aspro/model/oi/" includes="*.java" value="">
+            <replacetoken>@XmlSchemaType(name = "anySimpleType")</replacetoken>
+        </replace>
 
         <!-- remove generated classes for jmal package (target model) -->
-        <delete dir="${output}/fr/jmmc/jmal/" />
+        <delete dir="${sources}/fr/jmmc/jmal/" />
 
 
         <echo>generating java code for AsproOBModel.xsd</echo>
-        <mkdir dir="${output}/fr/jmmc/aspro/model/ob" />
+        <mkdir dir="${sources}/fr/jmmc/aspro/model/ob" />
 
-        <xjc destdir="${output}"
+        <xjc destdir="${sources}"
              schema="${resources}/fr/jmmc/aspro/model/AsproOBModel.xsd" />
 
-	    <!-- 
-	    remove several @XmlSchemaType in JAXB 2.2.11:
-	    - @XmlSchemaType(name = "string") by '' (bad enum)
-	    - @XmlSchemaType(name = "anySimpleType") by none (bad double[])
-	    -->
-	    <replace summary="true" dir="${output}/fr/jmmc/aspro/model/ob/" includes="*.java" value="">
-		    <replacetoken>@XmlSchemaType(name = "string")</replacetoken>
-	    </replace>
+        <!--
+        remove several @XmlSchemaType in JAXB 2.2+:
+        - @XmlSchemaType(name = "string") by '' (bad enum)
+        -->
+        <replace summary="true" dir="${sources}/fr/jmmc/aspro/model/ob/" includes="*.java" value="">
+            <replacetoken>@XmlSchemaType(name = "string")</replacetoken>
+        </replace>
 
     </target>
 
@@ -135,9 +97,9 @@
     <target name="oifits2html" description="convert OIFits xml representation to HTML">
 
         <xslt  in="${test}/oifits/sample.xml"
-              out="${test}/oifits/sample.html"
-              style="${sources}/fr/jmmc/aspro/gui/oiview.xsl"
-              force="true"/>
+               out="${test}/oifits/sample.html"
+               style="${sources}/fr/jmmc/aspro/gui/oiview.xsl"
+               force="true"/>
 
         <echo>XSLT done : ${test}/oifits/sample.html</echo>
 
