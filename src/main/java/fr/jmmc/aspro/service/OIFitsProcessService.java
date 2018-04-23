@@ -533,13 +533,6 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                                 }
                                 errAmp = s_vamp_err;
                                 errPhi = s_vphi_err;
-
-                                if (NoiseService.USE_DISTRIB_APPROACH) {
-                                    // check SNR:
-                                    if ((errPhi > SNR_THRESHOLD_ANGLE) && (Math.abs(vphi / errPhi) < SNR_THRESHOLD)) {
-                                        doFlag = true;
-                                    }
-                                }
                             }
 
                             // Set values:
@@ -719,13 +712,6 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                             v2 = s_v2_mean;
                         }
                         v2Err = s_v2_err;
-
-                        if (NoiseService.USE_DISTRIB_APPROACH) {
-                            // check SNR:
-                            if ((v2Err > SNR_THRESHOLD_VIS) && Math.abs(v2 / v2Err) < SNR_THRESHOLD) {
-                                doFlag = true;
-                            }
-                        }
                     }
 
                     // Set values:
@@ -1025,13 +1011,6 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                         }
                         errAmp = s_t3amp_err;
                         errPhi = s_t3phi_err;
-
-                        if (NoiseService.USE_DISTRIB_APPROACH) {
-                            // check SNR:
-                            if ((errPhi > SNR_THRESHOLD_ANGLE) && (Math.abs(t3phi / errPhi) < SNR_THRESHOLD)) {
-                                doFlag = true;
-                            }
-                        }
                     }
 
                     // Set values:
