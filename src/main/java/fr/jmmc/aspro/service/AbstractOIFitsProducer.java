@@ -58,8 +58,6 @@ public abstract class AbstractOIFitsProducer {
     protected final static double SNR_THRESHOLD = 3.0;
     /** minimal V2 error (5%) to check for SNR */
     protected final static double SNR_THRESHOLD_VIS = 0.05;
-    /** minimal angle error (1 deg) to check for SNR */
-    protected final static double SNR_THRESHOLD_ANGLE = Math.toRadians(1.0);
     /** Jmcs Parallel Job executor */
     protected static final ParallelJobExecutor JOB_EXECUTOR = ParallelJobExecutor.getInstance();
 
@@ -675,12 +673,12 @@ public abstract class AbstractOIFitsProducer {
                         // complex visibility error or Complex.NaN:
                         cVisErrorRow[l] = visErr = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp);
 
-                        if (NoiseService.USE_DISTRIB_APPROACH) {
-                            // check SNR:
-                            if ((visErr > SNR_THRESHOLD_VIS) && Math.abs(visAmp / visErr) < SNR_THRESHOLD) {
-                                cVisSnrFlagRow[l] = true;
-//                                System.out.println("Low SNR["+this.waveLengths[l]+"]: " + Math.abs(visAmp / visErr));
-                            }
+                        // check SNR(V2) without any bias:
+                        final double snrV2 = ns.getSNRVis2NoBias();
+
+                        if (snrV2 < SNR_THRESHOLD) {
+                            cVisSnrFlagRow[l] = true;
+//                            System.out.println("Low SNR["+this.waveLengths[l]+"]: " + snrV2);
                         }
                     }
 

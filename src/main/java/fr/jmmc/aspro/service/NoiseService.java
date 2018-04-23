@@ -183,9 +183,13 @@ public final class NoiseService implements VisNoiseService {
     /* internal */
     /** container for warning messages */
     private final WarningContainer warningContainer;
+    /* time formatter */
+    private final DecimalFormat df = new DecimalFormat("##0.##");
     /** flag to indicate that a parameter is invalid in order the code to return errors as NaN values */
     private boolean invalidParameters = false;
-
+    /** SNR (V2) estimated in computeVis2Error() for the current point (NOT thread safe) without any bias */
+    private double snrV2 = 0.0;
+    
     /** total instrumental visibility (with FT if any) */
     private double[] vinst;
 
@@ -199,8 +203,6 @@ public final class NoiseService implements VisNoiseService {
     private double[] nbPhotThermInterf = null;
     /** (W) number of thermal photons per telescope in each photometric channel */
     private double[] nbPhotThermPhoto = null;
-    /* time formatter */
-    private final DecimalFormat df = new DecimalFormat("##0.##");
 
     /**
      * Protected constructor
@@ -1162,10 +1164,15 @@ public final class NoiseService implements VisNoiseService {
         }
         // repeat OBS measurements to reach totalObsTime minutes:
         errVis2 *= totFrameCorrection;
+        
+        // estimate SNR(V2):
+        snrV2 = vis2 / errVis2;
 
         // Limit excessively large errors (very low transmission or strehl):
         errVis2 = Math.min(errVis2, MAX_ERR_V2);
 
+        // Note: instrumentalVis2Bias is not used when sampling is enabled !
+        // TODO: how to handle bias on observable and noisy data ?
         if (useBias) {
             // Note: bias are normally not a gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
             if (useVis2CalibrationBias) {
@@ -1176,6 +1183,14 @@ public final class NoiseService implements VisNoiseService {
             return Math.max(errVis2, instrumentalVis2Bias);
         }
         return errVis2;
+    }
+    
+    /**
+    * Return the SNR (V2) estimated in computeVis2Error() for the current point (NOT thread safe) without any bias
+    * @return SNR (V2)
+    */
+    public double getSNRVis2NoBias() {
+        return snrV2;
     }
 
     /**
