@@ -3,31 +3,27 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
-import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetGroup;
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 
 /**
- * This custom renderer defines the target icon (calibrator or science)
+ * This custom renderer defines the target group label and color
  * @author bourgesl
  */
-public class TargetTreeCellRenderer extends DefaultTreeCellRenderer {
+public final class TargetGroupTreeCellRenderer extends TargetTreeCellRenderer {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
-
-    /* members */
-    /** delegate */
-    private final TargetRenderer delegate;
 
     /**
      * Public constructor
      * @param renderer target renderer
      */
-    public TargetTreeCellRenderer(final TargetRenderer renderer) {
-        this.delegate = renderer;
+    public TargetGroupTreeCellRenderer(final TargetRenderer renderer) {
+        super(renderer);
     }
 
     /**
@@ -56,8 +52,13 @@ public class TargetTreeCellRenderer extends DefaultTreeCellRenderer {
 
         final DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 
-        if (node.getUserObject() instanceof Target) {
-            delegate.setIcon(this, (Target) node.getUserObject());
+        if (node.getUserObject() instanceof TargetGroup) {
+            final TargetGroup group = (TargetGroup) node.getUserObject();
+
+            final Color color = group.getDecodedColor();
+            if (color != null) {
+                setForeground(color);
+            }
         }
 
         return this;

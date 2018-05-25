@@ -206,6 +206,22 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link TargetGroup }
+     * 
+     */
+    public TargetGroup createTargetGroup() {
+        return new TargetGroup();
+    }
+
+    /**
+     * Create an instance of {@link TargetGroupMembers }
+     * 
+     */
+    public TargetGroupMembers createTargetGroupMembers() {
+        return new TargetGroupMembers();
+    }
+
+    /**
      * Create an instance of {@link FocalInstrumentConfiguration }
      * 
      */

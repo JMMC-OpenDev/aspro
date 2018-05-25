@@ -36,6 +36,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     public static final String TAB_TARGETS = "Targets";
     /** Tab Models */
     public static final String TAB_MODELS = "Models";
+    /** Tab Targets */
+    public static final String TAB_GROUPS = "Groups";
     /** flag indicating that the target editor dialog is active */
     private static boolean targetEditorActive = false;
 
@@ -49,6 +51,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     /* Swing */
     /** dialog window */
     private JDialog dialog;
+    /** current form */
+    private Component currentComponent = null;
 
     /**
      * Return the flag indicating that the target editor dialog is active
@@ -190,15 +194,39 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
             public final void stateChanged(final ChangeEvent ce) {
                 final Component selected = jTabbedPane.getSelectedComponent();
 
-                if (selected == targetModelForm) {
+                if (selected != targetModelForm) {
+                    targetModelForm.disableForm();
+                }
+                
+                final Target target = getCurrentTarget();
+                
+                if (selected == targetForm) {
+                    // select the target :
+                    targetForm.selectTarget(target);
+                } else if (selected == targetModelForm) {
                     // refresh the tree according to the new target / calibrator list
                     // and select the target :
-                    targetModelForm.initialize((targetForm.getCurrentTarget() != null) ? targetForm.getCurrentTarget().getName() : null);
-                } else if (selected == targetForm) {
-                    targetModelForm.disableForm();
+                    targetModelForm.initialize((target != null) ? target.getName() : null);
+                } else  if (selected == targetGroupForm) {
+                     // refresh the tree according to the new target / calibrator list
+                    // and select the target :
+                    targetGroupForm.initialize((target != null) ? target.getName() : null);
+                    // OR
                     // select the target :
-                    targetForm.selectTarget(targetModelForm.getCurrentTarget());
+//                    targetGroupForm.selectTarget(target);
                 }
+                currentComponent = selected;
+            }
+            
+            private Target getCurrentTarget() {
+                if (currentComponent == targetForm) {
+                    return targetForm.getCurrentTarget();
+                } else if (currentComponent == targetModelForm) {
+                    return targetModelForm.getCurrentTarget();
+                } else if (currentComponent == targetGroupForm) {
+                    return targetGroupForm.getCurrentTarget();
+                }
+                return null;
             }
         });
     }
@@ -208,14 +236,17 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
      * @param targetName target name to select
      */
     void initialize(final String targetName) {
+        this.currentComponent = jTabbedPane.getSelectedComponent();
 
         // Generate trees and select the target :
-        if (jTabbedPane.getSelectedComponent() == targetModelForm) {
+        if (currentComponent == targetModelForm) {
             // only initialize Model form (model animator) if displayed:
             this.targetModelForm.initialize(targetName);
         }
 
         this.targetForm.initialize(targetName);
+        
+        this.targetGroupForm.initialize(targetName);
     }
 
     /**
@@ -228,6 +259,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         // GC
         this.targetForm = null;
         this.targetModelForm = null;
+        this.targetGroupForm = null;
+        this.currentComponent = null;
     }
 
     /** This method is called from within the constructor to
@@ -241,8 +274,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         java.awt.GridBagConstraints gridBagConstraints;
 
         jTabbedPane = new javax.swing.JTabbedPane();
-        targetForm = new fr.jmmc.aspro.gui.TargetForm(this.editTargets, this.editTargetUserInfos);
-        targetModelForm = new fr.jmmc.aspro.gui.TargetModelForm(this.editTargets, this.editTargetUserInfos);
+        targetForm = new TargetForm(this.editTargets, this.editTargetUserInfos);
+        targetModelForm = new TargetModelForm(this.editTargets, this.editTargetUserInfos);
+        targetGroupForm = new TargetGroupForm(this.editTargets, this.editTargetUserInfos);
         jPanelButtons = new javax.swing.JPanel();
         jButtonCancel = new javax.swing.JButton();
         jButtonOK = new javax.swing.JButton();
@@ -251,6 +285,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
 
         jTabbedPane.addTab("Targets", null, targetForm, "edit target information and associate calibrators");
         jTabbedPane.addTab("Models", null, targetModelForm, "edit target models");
+        jTabbedPane.addTab("Groups", targetGroupForm);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -292,6 +327,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         if (!this.targetForm.validateForm()) {
             return;
         }
+        if (!this.targetGroupForm.validateForm()) {
+            return;
+        }
 
         // update the validation flag :
         this.result = true;
@@ -312,6 +350,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     private javax.swing.JPanel jPanelButtons;
     private javax.swing.JTabbedPane jTabbedPane;
     private fr.jmmc.aspro.gui.TargetForm targetForm;
+    private fr.jmmc.aspro.gui.TargetGroupForm targetGroupForm;
     private fr.jmmc.aspro.gui.TargetModelForm targetModelForm;
     // End of variables declaration//GEN-END:variables
 

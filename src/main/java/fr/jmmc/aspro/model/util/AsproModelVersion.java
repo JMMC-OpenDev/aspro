@@ -16,7 +16,9 @@ public enum AsproModelVersion {
   /** february 2011 revision : added observation variants and observation collection */
   Feb2011Revision(2011.02f),
   /** february 2012 revision : added user model */
-  Feb2012Revision(2012.02f);
+  Feb2012Revision(2012.02f),
+  /** april 2018 revision :    added target groups */
+  Apr2018Revision(2018.04f);
 
   /* members */
   /** version as a float value */

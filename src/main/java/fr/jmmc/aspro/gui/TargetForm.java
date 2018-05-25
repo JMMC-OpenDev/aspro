@@ -211,33 +211,35 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
      * Generate the tree from the current edited list of targets
      */
     private void generateTree() {
+        final TargetJTree tree = this.getTreeTargets();
 
-        final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
-
+        final DefaultMutableTreeNode rootNode = tree.getRootNode();
         rootNode.removeAllChildren();
 
-        TargetInformation targetInfo;
-        DefaultMutableTreeNode targetNode;
-        for (Target target : this.editTargets) {
+        final List<Target> calTargets = this.editTargetUserInfos.getCalibrators();
 
-            // display only science targets :
+        final ArrayList<Target> sciTargets = new ArrayList<Target>(this.editTargets);
+        sciTargets.removeAll(calTargets);
+
+        // display only science targets :
+        for (Target target : sciTargets) {
             if (!isCalibrator(target)) {
-                targetNode = this.getTreeTargets().addNode(rootNode, target);
+                final DefaultMutableTreeNode targetNode = tree.addNode(rootNode, target);
 
                 // add calibrators as children of the target Node :
-                targetInfo = getTargetUserInformation(target);
+                final TargetInformation targetInfo = getTargetUserInformation(target);
                 for (Target calibrator : targetInfo.getCalibrators()) {
-                    this.getTreeTargets().addNode(targetNode, calibrator);
+                    tree.addNode(targetNode, calibrator);
                 }
             }
         }
 
         // fire node structure changed :
-        this.getTreeTargets().fireNodeChanged(rootNode);
+        tree.fireNodeChanged(rootNode);
     }
 
     /**
-     * Select the target int the target tree or in the calibrator list for the given target
+     * Select the target in the target tree or in the calibrator list for the given target
      * @param target to select
      */
     void selectTarget(final Target target) {
@@ -254,7 +256,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
      */
     @Override
     public void valueChanged(final TreeSelectionEvent e) {
-        final DefaultMutableTreeNode currentNode = this.getTreeTargets().getLastSelectedNode();
+        final TargetJTree tree = (TargetJTree) e.getSource();
+        final DefaultMutableTreeNode currentNode = tree.getLastSelectedNode();
 
         if (currentNode != null) {
             // Use invokeLater to selection change issues with editors :
@@ -265,24 +268,20 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                 @Override
                 public void run() {
                     // Check if it is the root node :
-                    final DefaultMutableTreeNode rootNode = getTreeTargets().getRootNode();
+                    final DefaultMutableTreeNode rootNode = tree.getRootNode();
                     if (currentNode == rootNode) {
-                        getTreeTargets().selectFirstChildNode(rootNode);
+                        tree.selectFirstChildNode(rootNode);
                         return;
                     }
 
                     /* retrieve the node that was selected */
-                    final Object userObject = currentNode.getUserObject();
-
-                    if (userObject instanceof Target) {
+                    if (currentNode.getUserObject() instanceof Target) {
+                        final Target target = (Target) currentNode.getUserObject();
+                        logger.debug("tree selection: {}", target);
 
                         // enable / disable before/after buttons:
                         jButtonBefore.setEnabled(currentNode.getPreviousSibling() != null);
                         jButtonAfter.setEnabled(currentNode.getNextSibling() != null);
-
-                        final Target target = (Target) userObject;
-
-                        logger.debug("tree selection: {}", target);
 
                         final boolean isCalibrator = isCalibrator(target);
 
@@ -334,18 +333,19 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                     boolean found = false;
 
                     // Check if the selected tree node :
-                    final DefaultMutableTreeNode currentNode = getTreeTargets().getLastSelectedNode();
+                    final TargetJTree tree = getTreeTargets();
+                    final DefaultMutableTreeNode currentNode = tree.getLastSelectedNode();
 
                     if (currentNode != null && currentNode.getUserObject() == target) {
                         found = true;
                     } else {
                         // select the first target node having this calibrator :
-                        final DefaultMutableTreeNode targetNode = getTreeTargets().findTreeNode(target);
+                        final DefaultMutableTreeNode targetNode = tree.findTreeNode(target);
 
                         if (targetNode != null) {
                             found = true;
                             // Select the target node that will send later a TreeSelectionEvent :
-                            getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
+                            tree.selectPath(new TreePath(targetNode.getPath()));
                         }
                     }
 
@@ -360,7 +360,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                         jButtonRemoveCalibrator.setEnabled(false);
 
                         // clear tree selection :
-                        getTreeTargets().clearSelection();
+                        tree.clearSelection();
 
                         processTargetSelection(target);
                     }
@@ -637,6 +637,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jScrollPaneTarget = new javax.swing.JScrollPane();
         jPanelTarget = new javax.swing.JPanel();
         jLabelName = new javax.swing.JLabel();
+        jFieldName = new JFormattedTextField(createFieldNameFormatter());
         jPanelTargetActions = new javax.swing.JPanel();
         jButtonSimbad = new javax.swing.JButton();
         jButtonSEDViewer = new javax.swing.JButton();
@@ -688,7 +689,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelCalibratorInfos = new javax.swing.JLabel();
         jScrollPaneCalibratorInfos = new javax.swing.JScrollPane();
         jTableCalibratorInfos = new javax.swing.JTable();
-        jFieldName = new JFormattedTextField(createFieldNameFormatter());
         jPanelDescription = new javax.swing.JPanel();
         jScrollPaneTargetInfos = new javax.swing.JScrollPane();
         jTextAreaTargetInfos = new javax.swing.JTextArea();
@@ -894,6 +894,16 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelName, gridBagConstraints);
+
+        jFieldName.setColumns(10);
+        jFieldName.setName("NAME"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelTarget.add(jFieldName, gridBagConstraints);
 
         jPanelTargetActions.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 2));
 
@@ -1343,16 +1353,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jScrollPaneCalibratorInfos, gridBagConstraints);
 
-        jFieldName.setColumns(10);
-        jFieldName.setName("NAME"); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelTarget.add(jFieldName, gridBagConstraints);
-
         jScrollPaneTarget.setViewportView(jPanelTarget);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1419,16 +1419,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }//GEN-LAST:event_jButtonDeleteTargetActionPerformed
 
     private void jButtonRemoveCalibratorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveCalibratorActionPerformed
-
-        final DefaultMutableTreeNode currentNode = this.getTreeTargets().getLastSelectedNode();
+        final TargetJTree tree = getTreeTargets();
+        final DefaultMutableTreeNode currentNode = tree.getLastSelectedNode();
 
         if (currentNode != null) {
-
             /* retrieve the node that was selected */
-            final Object userObject = currentNode.getUserObject();
-
-            if (userObject instanceof Target) {
-                final Target target = (Target) userObject;
+            if (currentNode.getUserObject() instanceof Target) {
+                final Target target = (Target) currentNode.getUserObject();
 
                 logger.debug("tree selection: {}", target);
 
@@ -1440,14 +1437,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                     }
 
                     // Parent can be a target or null :
-                    final DefaultMutableTreeNode parentNode = this.getTreeTargets().getParentNode(currentNode);
+                    final DefaultMutableTreeNode parentNode = tree.getParentNode(currentNode);
 
                     if (parentNode != null && parentNode.getUserObject() instanceof Target) {
                         final Target parentTarget = (Target) parentNode.getUserObject();
 
                         // Remove calibrator from target :
-                        this.getTreeTargets().removeCalibrator(currentNode, target,
-                                parentNode, parentTarget, true);
+                        tree.removeCalibrator(currentNode, target, parentNode, parentTarget, true);
                     }
                 }
             }
@@ -1460,6 +1456,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         if (logger.isDebugEnabled()) {
             logger.debug("isCalibrator = {} for {}", isCalibrator, this.currentTarget.getName());
         }
+
+        final TargetJTree tree = getTreeTargets();
 
         if (isCalibrator) {
 
@@ -1478,10 +1476,10 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                 this.calibratorsModel.add(this.currentTarget);
 
                 // Remove the calibrator node in the target tree :
-                final DefaultMutableTreeNode targetNode = this.getTreeTargets().findTreeNode(this.currentTarget);
+                final DefaultMutableTreeNode targetNode = tree.findTreeNode(this.currentTarget);
 
                 if (targetNode != null) {
-                    this.getTreeTargets().removeNodeAndRefresh(this.getTreeTargets().getParentNode(targetNode), targetNode, false);
+                    tree.removeNodeAndRefresh(tree.getParentNode(targetNode), targetNode, false);
                 }
 
                 // select the calibrator :
@@ -1491,7 +1489,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         } else {
 
             // determine if the calibrator is really used in a target :
-            final DefaultMutableTreeNode calibratorNode = getTreeTargets().findTreeNode(this.currentTarget);
+            final DefaultMutableTreeNode calibratorNode = tree.findTreeNode(this.currentTarget);
 
             if (calibratorNode == null || MessagePane.showConfirmMessage(this.jToggleButtonCalibrator,
                     "Do you really want to remove associations with this calibrator [" + this.currentTarget.getName() + "] ?")) {
@@ -1502,7 +1500,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                 this.calibratorsModel.remove(this.currentTarget);
 
                 // Restore the calibrator node in the target tree :
-                final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
+                final DefaultMutableTreeNode rootNode = tree.getRootNode();
 
                 int nScienceTargets = 0;
 
@@ -1515,9 +1513,9 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                             rootNode.insert(targetNode, nScienceTargets);
 
                             // fire node structure changed :
-                            this.getTreeTargets().fireNodeChanged(rootNode);
+                            tree.fireNodeChanged(rootNode);
 
-                            this.getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
+                            tree.selectPath(new TreePath(targetNode.getPath()));
 
                             break;
                         }
@@ -1569,14 +1567,12 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
             if (userObject instanceof Target) {
                 final Target target = (Target) userObject;
-
                 logger.debug("tree selection: {}", target);
 
                 userObject = nextNode.getUserObject();
 
                 if (userObject instanceof Target) {
                     final Target refTarget = (Target) userObject;
-
                     logger.debug("tree selection: {}", refTarget);
 
                     // both are calibrators or not (same level in the tree):
@@ -1608,14 +1604,12 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
             if (userObject instanceof Target) {
                 final Target target = (Target) userObject;
-
                 logger.debug("tree selection: {}", target);
 
                 userObject = prevNode.getUserObject();
 
                 if (userObject instanceof Target) {
                     final Target refTarget = (Target) userObject;
-
                     logger.debug("tree selection: {}", refTarget);
 
                     // both are calibrators or not (same level in the tree):
@@ -1719,7 +1713,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
      */
     private void resetForm() {
         // Use a new target to reset form fields:
-        processTargetSelection(new Target());
+        processTargetSelection(Target.EMPTY_TARGET);
 
         // disable buttons:
         this.jButtonSortRA.setEnabled(false);

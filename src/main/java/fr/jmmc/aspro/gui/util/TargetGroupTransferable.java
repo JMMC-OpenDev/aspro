@@ -8,61 +8,48 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * A transferable implementation for the specific Target data transfer of some Swing
- * components (JList / JTree).
+ * A transferable implementation for the specific Target and TargetGroup data transfer of some Swing
+ * components (JTree).
  *
  * @author bourgesl
  */
-public final class TargetTransferable implements Serializable, Transferable {
+public final class TargetGroupTransferable implements Serializable, Transferable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
     /** custom DataFlavor instance to represent this class */
-    public final static DataFlavor TargetIdentifiersDataFlavor = new DataFlavor(TargetTransferable.class, "Target identifiers");
+    public final static DataFlavor TargetGroupIdentifiersDataFlavor = new DataFlavor(TargetGroupTransferable.class, "Target and group identifiers");
     /** supported DataFlavors */
-    private final static DataFlavor[] supportedDataFlavors = new DataFlavor[]{TargetIdentifiersDataFlavor};
+    private final static DataFlavor[] supportedDataFlavors = new DataFlavor[]{TargetGroupIdentifiersDataFlavor};
 
     /* member */
-    /** target identifier(s) */
-    private final List<String> targetIds;
+    /** tree identifier */
+    private final String treeId;
+    /** target identifier */
+    private final String targetId;
+    /** flag indicating if the target node is a leaf (no children) */
+    private final boolean isLeaf;
+    /** optional target group identifier */
+    private final String targetGroupId;
     /** optional parent target identifier */
     private final String parentTargetId;
 
-    private static List<String> asList(final String targetId) {
-        final List<String> targetIds = new ArrayList<String>(1);
-        targetIds.add(targetId);
-        return targetIds;
-    }
-
-    /**
-     * Public constructor with the given target identifier to transfer
-     * @param targetIds target identifier(s)
-     */
-    public TargetTransferable(final List<String> targetIds) {
-        this(targetIds, null);
-    }
-
     /**
      * Public constructor with the given target identifiers to transfer
+     * @param treeId tree identifier
      * @param targetId target identifier
+     * @param isLeaf flag indicating if the target node is a leaf
+     * @param targetGroupId target group identifier
      * @param parentTargetId optional parent target identifier
      */
-    public TargetTransferable(final String targetId, final String parentTargetId) {
-        this.targetIds = asList(targetId);
-        this.parentTargetId = parentTargetId;
-    }
-
-    /**
-     * Private constructor with the given target identifiers to transfer
-     * @param targetIds target identifier(s)
-     * @param parentTargetId optional parent identifier
-     */
-    private TargetTransferable(final List<String> targetIds, final String parentTargetId) {
-        this.targetIds = targetIds;
+    public TargetGroupTransferable(final String treeId, final String targetId, final boolean isLeaf,
+                                   final String targetGroupId, final String parentTargetId) {
+        this.treeId = treeId;
+        this.targetId = targetId;
+        this.isLeaf = isLeaf;
+        this.targetGroupId = targetGroupId;
         this.parentTargetId = parentTargetId;
     }
 
@@ -108,19 +95,35 @@ public final class TargetTransferable implements Serializable, Transferable {
 
     // --- Transfer data ---------------------------------------------------------
     /**
-     * Return the target identifier(s)
-     * @return target identifier(s)
+     * Return the tree identifier
+     * @return tree identifier
      */
-    public List<String> getTargetIds() {
-        return targetIds;
+    public String getTreeId() {
+        return treeId;
     }
 
     /**
-     * Return only the first target identifier
-     * @return first target identifier
+     * Return the target identifier
+     * @return target identifier
      */
-    public String getSingleTargetId() {
-        return targetIds.get(0);
+    public String getTargetId() {
+        return targetId;
+    }
+
+    /**
+     * Return flag indicating if the target node is a leaf (no children)
+     * @return flag indicating if the target node is a leaf (no children)
+     */
+    public boolean isLeaf() {
+        return isLeaf;
+    }
+
+    /**
+     * Return the optional target group identifier
+     * @return optional target group identifier
+     */
+    public String getTargetGroupId() {
+        return targetGroupId;
     }
 
     /**
@@ -133,6 +136,7 @@ public final class TargetTransferable implements Serializable, Transferable {
 
     @Override
     public String toString() {
-        return "TargetTransferable { " + this.targetIds + " <= " + this.parentTargetId + "}";
+        return "TargetGroupTransferable[" + this.treeId + "] { " + this.targetId
+                + "[" + isLeaf + "] (" + this.targetGroupId + ") <= " + this.parentTargetId + "}";
     }
 }

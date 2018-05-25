@@ -3,14 +3,9 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
-import fr.jmmc.jmcs.gui.component.GenericJTree;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import java.awt.event.MouseEvent;
-import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 
 /**
  * This JTree contains Targets and their calibrators

@@ -883,6 +883,9 @@ public class Target
     }
     
 //--simple--preserve
+    /** empty Target instance */
+    public static final Target EMPTY_TARGET = new Target();
+    
     /**
      * Fix coordinates RA and DEC (HMS / DMS formats)
      */
@@ -990,7 +993,7 @@ public class Target
     /**
      * Format and update the name and identifier.
      * Warning: this modified identifier is not updated in relationships
-     * @param name target name
+     * @param name new name to use
      */
     public final void updateNameAndIdentifier(final String name) {
         this.setName(formatName(name));
@@ -1000,7 +1003,7 @@ public class Target
 
     /**
      * This equals method uses the identifier equality
-     * @param obj other object (target)
+     * @param obj other object
      * @return true if the identifiers are equals
      */
     @Override
@@ -1225,7 +1228,7 @@ public class Target
      */
     public final boolean hasModel() {
         if (hasAnalyticalModel()) {
-            return (this.models != null && !this.models.isEmpty());
+            return !isEmpty(this.models);
         } else {
             return (this.userModel != null && this.userModel.isFileValid());
         }
@@ -1398,6 +1401,44 @@ public class Target
                 targetUserInfos.removeCalibratorFromTarget(target, calibrator);
             }
             targetUserInfos.removeCalibrator(calibrator);
+        }
+    }
+
+    /**
+     * Return the Map<ID, Target> index
+     * @param targets
+     * @return Map<ID, Target> index
+     */
+    static java.util.Map<String, Target> createTargetIndex(final List<Target> targets) {
+        // create the Map<ID, Target> index:
+        if (targets == null) {
+            return java.util.Collections.emptyMap();
+        }
+        final java.util.Map<String, Target> mapIDTargets = new java.util.HashMap<String, Target>(targets.size());
+        for (Target target : targets) {
+            mapIDTargets.put(target.getIdentifier(), target);
+        }
+        return mapIDTargets;
+    }
+
+    protected static void updateTargetReferences(final java.util.List<Target> targets,
+                                                 final java.util.Map<String, Target> mapIDTargets) {
+        if (targets != null) {
+            Target target, newTarget;
+
+            for (final java.util.ListIterator<Target> it = targets.listIterator(); it.hasNext();) {
+                target = it.next();
+
+                newTarget = (mapIDTargets != null) ? mapIDTargets.get(target.getIdentifier()) : null;
+                if (newTarget != null) {
+                    if (newTarget != target) {
+                        it.set(newTarget);
+                    }
+                } else {
+                    logger.info("Removing missing target reference: {}", target.getIdentifier());
+                    it.remove();
+                }
+            }
         }
     }
 

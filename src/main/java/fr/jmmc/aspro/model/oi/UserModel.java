@@ -170,7 +170,7 @@ public class UserModel
    * @return true if the Cached model data is not null nor empty
    */
   public boolean isModelDataReady() {
-    return modelDataList != null && !modelDataList.isEmpty();
+    return !isEmpty(modelDataList);
   }
   /**
    * Return the Cached model data given its image index (read only)

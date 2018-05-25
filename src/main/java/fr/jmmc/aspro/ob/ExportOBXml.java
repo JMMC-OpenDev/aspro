@@ -24,6 +24,8 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.TargetGroup;
+import fr.jmmc.aspro.model.oi.TargetGroupMembers;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
@@ -56,14 +58,14 @@ public class ExportOBXml {
     /** OB manager */
     private final static OBManager obm = OBManager.getInstance();
 
-    /** P2PP file prefix for science targets */
+    /** file prefix for science targets */
     public static final String OB_SCIENCE = "SCI";
-    /** P2PP file prefix for calibrator targets */
+    /** file prefix for calibrator targets */
     public static final String OB_CALIBRATOR = "CAL";
     /** time separator */
     public static final char SEP_TIME = '/';
-    /** P2PP minimal duration = 10 minutes in seconds */
-    public static final int P2PP_LST_MIN_DURATION = 10 * 60;
+    /** P2 minimal duration = 10 minutes in seconds */
+    public static final int P2_LST_MIN_DURATION = 10 * 60;
     /** double formatter for HA values */
     private final static NumberFormat df2 = new DecimalFormat("0.00");
     /** time formatter */
@@ -140,13 +142,14 @@ public class ExportOBXml {
         obd.setInstrumentConfiguration(getInstrumentConfiguration(observation));
 
         // Observation configuration - SCI
-        final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
-
         final ObservationConfiguration obSCI = getObservationConfiguration(observation, os, target);
         obd.getObservationConfigurations().add(obSCI);
 
         // Observation configuration - CAL
         Target firstCalibrator = null;
+
+        final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
+
         if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
             // use first calibrator in calibrator list :
             final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
@@ -229,8 +232,9 @@ public class ExportOBXml {
         obsConf.setType(isCalibrator ? ObservationType.CALIBRATION : ObservationType.SCIENCE);
 
         final fr.jmmc.aspro.model.ob.Target obTarget = getTarget(target);
+        obsConf.setSCTarget(obTarget);
 
-        // Calibrator Angular diameter (mas)
+        // Define the calibrator Angular diameter (mas)
         Double diameter = null;
         if (isCalibrator) {
             final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
@@ -241,7 +245,26 @@ public class ExportOBXml {
         }
         obTarget.setDIAMETER(diameter);
 
-        obsConf.setSCTarget(obTarget);
+        if (targetUserInfos != null) {
+            // Handle OB targets (AO / FT / Guide)
+            final TargetInformation targetInfo = targetUserInfos.getOrCreateTargetInformation(target);
+
+            // AO
+            final Target aoTarget = getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+            if (aoTarget != null) {
+                obsConf.setAOTarget(getTarget(aoTarget));
+            }
+            // FT
+            final Target ftTarget = getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
+            if (ftTarget != null) {
+                obsConf.setFTTarget(getTarget(ftTarget));
+            }
+            // GUIDE
+            final Target gsTarget = getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_GUIDE);
+            if (gsTarget != null) {
+                obsConf.setGSTarget(getTarget(gsTarget));
+            }
+        }
 
         // constraints
         final ObservationConstraints obsCons = new ObservationConstraints();
@@ -277,6 +300,19 @@ public class ExportOBXml {
         }
 
         return obsConf;
+    }
+
+    private static Target getFirstTargetForGroup(final TargetUserInformations targetUserInfos,
+                                                 final TargetInformation targetInfo,
+                                                 final String groupId) {
+        final TargetGroup g = targetUserInfos.getGroupById(groupId);
+        if (g != null) {
+            final TargetGroupMembers tgm = targetInfo.getGroupMembers(g);
+            if (tgm != null && !tgm.isEmpty()) {
+                return tgm.getTargets().get(0);
+            }
+        }
+        return null;
     }
 
     private static fr.jmmc.aspro.model.ob.Target getTarget(final Target target) {
@@ -340,11 +376,11 @@ public class ExportOBXml {
 
             if (end.before(start)) {
                 // single interval over midnight:
-                if (((86400 + secEnd) - secStart) > P2PP_LST_MIN_DURATION) {
+                if (((86400 + secEnd) - secStart) > P2_LST_MIN_DURATION) {
                     valid = true;
                 }
             } else {
-                if ((secEnd - secStart) > P2PP_LST_MIN_DURATION) {
+                if ((secEnd - secStart) > P2_LST_MIN_DURATION) {
                     valid = true;
                 }
             }

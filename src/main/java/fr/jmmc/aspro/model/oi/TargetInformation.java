@@ -30,6 +30,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="targetRef" type="{http://www.w3.org/2001/XMLSchema}IDREF"/&gt;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="calibrators" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/&gt;
+ *         &lt;element name="groupMembers" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetGroupMembers" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -42,7 +43,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "TargetInformation", propOrder = {
     "targetRef",
     "description",
-    "calibrators"
+    "calibrators",
+    "groupMembers"
 })
 public class TargetInformation
     extends OIBase
@@ -58,6 +60,7 @@ public class TargetInformation
     @XmlIDREF
     @XmlSchemaType(name = "IDREFS")
     protected List<Target> calibrators;
+    protected List<TargetGroupMembers> groupMembers;
 
     /**
      * Gets the value of the targetRef property.
@@ -135,6 +138,35 @@ public class TargetInformation
         }
         return this.calibrators;
     }
+
+    /**
+     * Gets the value of the groupMembers property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the groupMembers property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getGroupMembers().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link TargetGroupMembers }
+     * 
+     * 
+     */
+    public List<TargetGroupMembers> getGroupMembers() {
+        if (groupMembers == null) {
+            groupMembers = new ArrayList<TargetGroupMembers>();
+        }
+        return this.groupMembers;
+    }
     
 //--simple--preserve
   @Override
@@ -147,7 +179,7 @@ public class TargetInformation
      * @return true if the calibrator list is not empty
      */
     public final boolean hasCalibrators() {
-        return ((this.calibrators != null) && !this.calibrators.isEmpty());
+        return !isEmpty(this.calibrators);
     }
 
     /**
@@ -195,10 +227,16 @@ public class TargetInformation
         // note : targets are not cloned as only there (immutable) identifier is useful
         // see  : updateTargetReferences(Map<ID, Target>) to replace target instances to have a clean object graph
         // i.e. (no leaking references)
+        
         // Simple copy of calibrators (Target instances) :
         if (copy.calibrators != null) {
             copy.calibrators = OIBase.copyList(copy.calibrators);
         }
+
+        // Deep copy of target group members :
+        if (copy.groupMembers != null) {
+            copy.groupMembers = OIBase.deepCopyList(copy.groupMembers);
+        }        
 
         return copy;
     }
@@ -212,6 +250,7 @@ public class TargetInformation
         return (areEqualsStrict(this.targetRef, other.getTargetRef()) // just identifiers
                 && areEquals(this.description, other.getDescription())
                 && areEqualsStrict(getCalibrators(), other.getCalibrators()) // just identifiers, may create lists
+                && areEquals(TargetInformation.this.getGroupMembers(), other.getGroupMembers()) // may create lists
                 );
     }
 
@@ -231,40 +270,119 @@ public class TargetInformation
         }
 
         if (this.calibrators != null) {
-            Target target, newTarget;
+            Target.updateTargetReferences(this.calibrators, mapIDCalibrators);
 
-            for (final java.util.ListIterator<Target> it = this.calibrators.listIterator(); it.hasNext();) {
-                target = it.next();
-
-                newTarget = mapIDCalibrators.get(target.getIdentifier());
-                if (newTarget != null) {
-                    if (newTarget != target) {
-                        it.set(newTarget);
-                    }
-                } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Removing missing target reference: {}", target.getIdentifier());
-                    }
-                    it.remove();
-                }
-            }
             if (this.calibrators.isEmpty()) {
                 this.calibrators = null;
             }
         }
     }
-
+    
+    /**
+     * Check bad references and update group and target references in this instance using the given Map indexes
+     * @param mapIDGroups Map<ID, TargetGroup> index
+     * @param mapIDTargets Map<ID, Target> index
+     * @param mapIDGroupMembers Map<ID TargetGroup, Map<ID, Target> > index (optional)
+     */
+    protected final void updateGroupReferences(final java.util.Map<String, Target> mapIDTargets,
+                                               final java.util.Map<String, TargetGroup> mapIDGroups,
+                                               final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers) {
+        if (this.groupMembers != null) {
+            // fix group ref & target refs in group members:
+            TargetGroupMembers.updateGroupReferences(this.groupMembers, mapIDTargets, mapIDGroups, mapIDGroupMembers);
+            
+            if (this.groupMembers.isEmpty()) {
+                this.groupMembers = null;
+            }
+        }
+    }
+    
     /**
      * Return true if this target information is empty :
      * description is empty and calibrator list is empty
      * @return true if this target information is empty
      */
     protected final boolean isEmpty() {
-        if (this.description != null && this.description.length() != 0) {
+        if (!isEmpty(this.description)) {
             return false;
         }
-        return this.calibrators == null || this.calibrators.isEmpty();
+        if (!isEmpty(this.calibrators)) {
+            return false;
+        }
+        return isEmpty(this.groupMembers);
     }
+
+    /**
+     * Return the existing TargetInformation corresponding to the target
+     * @param target target to look up
+     * @param targetInfos list of TargetInformation instances
+     * @return TargetInformation or null
+     * @see #getOrCreateTargetInformation(target)
+     */
+    protected static final TargetInformation getTargetInformation(final Target target,
+                                                                  final java.util.List<TargetInformation> targetInfos) {
+        for (int i = 0, len = targetInfos.size(); i < len; i++) {
+            TargetInformation gm = targetInfos.get(i);
+            if (gm.getTargetRef().equals(target)) {
+                return gm;
+            }
+        }
+        return null;
+    }      
+
+    /**
+     * Return the TargetGroupMembers corresponding to the group
+     * or create a new instance if the TargetGroupMembers is missing
+     * @param group group
+     * @return TargetGroupMembers
+     */
+    public final TargetGroupMembers getOrCreateGroupMembers(final TargetGroup group) {
+        TargetGroupMembers gm = getGroupMembers(group);
+        if (gm == null) {
+            // create a new instance if the group is not found :
+            gm = new TargetGroupMembers();
+            gm.setGroupRef(group);
+            getGroupMembers().add(gm);
+        }
+        return gm;
+    }
+
+    public final boolean hasGroupMembers() {
+        for (TargetGroupMembers tgm : getGroupMembers()) {
+            if (!tgm.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public final boolean hasTargetInGroupMembers(final TargetGroup group, final Target target) {
+        final TargetGroupMembers gm = getOrCreateGroupMembers(group);
+        return gm.hasTarget(target);
+    }
+    
+    public final boolean addTargetInGroupMembers(final TargetGroup group, final Target target) {
+        final TargetGroupMembers gm = getOrCreateGroupMembers(group);
+        return gm.addTarget(target); // avoid duplicates
+    }
+    
+    public final boolean removeTargetInGroupMembers(final TargetGroup group, final Target target) {
+        final TargetGroupMembers gm = getGroupMembers(group);
+        if (gm != null) {
+            return gm.removeTarget(target);
+        }
+        return false;
+    }
+    
+    /**
+     * Return the existing TargetGroupMembers corresponding to the group
+     * @param group group to look up
+     * @return TargetGroupMembers or null
+     * @see #getOrCreateTargetGroupMembers(group)
+     */
+    public final TargetGroupMembers getGroupMembers(final TargetGroup group) {
+        return TargetGroupMembers.getGroupMembers(group, getGroupMembers());
+    }  
 //--simple--preserve
 
 }

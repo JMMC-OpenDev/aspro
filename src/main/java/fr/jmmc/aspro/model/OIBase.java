@@ -283,4 +283,14 @@ public class OIBase implements Cloneable {
     public static boolean isEmpty(final String value) {
         return (value == null) || value.isEmpty();
     }
+
+    /**
+     * Test if the list is empty
+     * 
+     * @param list any list
+     * @return true if the list is empty
+     */
+    public static boolean isEmpty(final List<?> list) {
+        return (list == null) || list.isEmpty();
+    }
 }

@@ -385,7 +385,7 @@ public class FocalInstrument
             throw new IllegalStateException("Invalid name !");
         }
         
-        if (this.getSetups().isEmpty()) {
+        if (isEmpty(this.setups)) {
             throw new IllegalStateException("Missing setup !");
         }
         

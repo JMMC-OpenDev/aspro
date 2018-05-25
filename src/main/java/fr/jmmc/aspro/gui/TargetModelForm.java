@@ -37,6 +37,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -62,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class TargetModelForm extends javax.swing.JPanel implements ActionListener, TreeSelectionListener, ListSelectionListener,
-        UserModelAnimatorListener, Disposable {
+                                                                         UserModelAnimatorListener, Disposable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -173,8 +174,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         this.selectTarget(Target.getTarget(targetName, this.editTargets));
 
         if (targetName == null) {
-            // Use a new target to reset form fields:
-            processTargetSelection(new Target());
             resetForm();
         }
     }
@@ -184,7 +183,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      */
     private void resetForm() {
         // Use a new target to reset form fields:
-        processTargetSelection(new Target());
+        processTargetSelection(Target.EMPTY_TARGET);
 
         // disable buttons:
         this.jRadioButtonAnalytical.setEnabled(false);
@@ -244,52 +243,52 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * Generate the tree from the current edited list of targets
      */
     private void generateTree() {
+        final ModelJTree tree = this.getTreeModels();
 
-        final DefaultMutableTreeNode rootNode = this.getTreeModels().getRootNode();
-
+        final DefaultMutableTreeNode rootNode = tree.getRootNode();
         rootNode.removeAllChildren();
 
-        DefaultMutableTreeNode targetNode;
-        for (Target target : this.editTargets) {
+        final List<Target> calTargets = this.editTargetUserInfos.getCalibrators();
 
-            // add first science targets :
-            if (!this.editTargetUserInfos.isCalibrator(target)) {
-                targetNode = this.getTreeModels().addNode(rootNode, target);
+        final ArrayList<Target> sciTargets = new ArrayList<Target>(this.editTargets);
+        sciTargets.removeAll(calTargets);
 
-                for (Model model : target.getModels()) {
-                    this.generateModelNodes(targetNode, model);
-                }
+        // add first science targets :
+        for (Target target : sciTargets) {
+            final DefaultMutableTreeNode targetNode = tree.addNode(rootNode, target);
+
+            for (Model model : target.getModels()) {
+                generateModelNodes(tree, targetNode, model);
             }
         }
 
         //  add calibrators :
-        for (Target target : this.editTargetUserInfos.getCalibrators()) {
-
-            targetNode = this.getTreeModels().addNode(rootNode, target);
+        for (Target target : calTargets) {
+            final DefaultMutableTreeNode targetNode = tree.addNode(rootNode, target);
 
             for (Model model : target.getModels()) {
-                this.generateModelNodes(targetNode, model);
+                generateModelNodes(tree, targetNode, model);
             }
         }
 
         // fire node structure changed :
-        this.getTreeModels().fireNodeChanged(rootNode);
+        tree.fireNodeChanged(rootNode);
     }
 
     /**
      * Generate the model nodes recursively
      *
+     * @param tree to update
      * @param parentNode parent node to append nodes
      * @param model model to process
      */
-    private void generateModelNodes(final DefaultMutableTreeNode parentNode, final Model model) {
-
-        final DefaultMutableTreeNode modelNode = this.getTreeModels().addNode(parentNode, model);
+    private static void generateModelNodes(final ModelJTree tree, final DefaultMutableTreeNode parentNode, final Model model) {
+        final DefaultMutableTreeNode modelNode = tree.addNode(parentNode, model);
 
         final List<Model> children = model.getModels();
         if (!children.isEmpty()) {
             for (Model child : children) {
-                generateModelNodes(modelNode, child);
+                generateModelNodes(tree, modelNode, child);
             }
         }
     }
@@ -308,7 +307,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      */
     @Override
     public void valueChanged(final TreeSelectionEvent e) {
-        final DefaultMutableTreeNode currentNode = this.getTreeModels().getLastSelectedNode();
+        final ModelJTree tree = (ModelJTree) e.getSource();
+        final DefaultMutableTreeNode currentNode = tree.getLastSelectedNode();
 
         if (currentNode != null) {
             // Use invokeLater to selection change issues with editors :
@@ -320,9 +320,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 public void run() {
 
                     // Check if it is the root node :
-                    final DefaultMutableTreeNode rootNode = getTreeModels().getRootNode();
+                    final DefaultMutableTreeNode rootNode = tree.getRootNode();
                     if (currentNode == rootNode) {
-                        getTreeModels().selectFirstChildNode(rootNode);
+                        tree.selectFirstChildNode(rootNode);
                         return;
                     }
 
@@ -1052,59 +1052,60 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * @param evt action event
      */
   private void jButtonUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateActionPerformed
-        final DefaultMutableTreeNode currentNode = this.getTreeModels().getLastSelectedNode();
+      final ModelJTree tree = this.getTreeModels();
+      final DefaultMutableTreeNode currentNode = tree.getLastSelectedNode();
 
-        if (currentNode != null) {
-            if (currentNode.getUserObject() instanceof Model) {
-                final Model model = (Model) currentNode.getUserObject();
+      if (currentNode != null) {
+          if (currentNode.getUserObject() instanceof Model) {
+              final Model model = (Model) currentNode.getUserObject();
 
-                final String type = (String) this.jComboBoxModelType.getSelectedItem();
+              final String type = (String) this.jComboBoxModelType.getSelectedItem();
 
-                // check if the type changed :
-                if (model.getType().equals(type)) {
-                    return;
-                }
+              // check if the type changed :
+              if (model.getType().equals(type)) {
+                  return;
+              }
 
-                // Parent can be a target or a model :
-                final DefaultMutableTreeNode parentNode = this.getTreeModels().getParentNode(currentNode);
+              // Parent can be a target or a model :
+              final DefaultMutableTreeNode parentNode = tree.getParentNode(currentNode);
 
-                if (parentNode.getUserObject() instanceof Target) {
-                    final Target target = (Target) parentNode.getUserObject();
+              if (parentNode.getUserObject() instanceof Target) {
+                  final Target target = (Target) parentNode.getUserObject();
 
-                    logger.debug("update model : {}", model);
+                  logger.debug("update model : {}", model);
 
-                    // create a new model with defined names (model and parameters) replacing the selected model :
-                    final Model newModel = ModelManager.getInstance().replaceModel(type, model, target.getModels());
+                  // create a new model with defined names (model and parameters) replacing the selected model :
+                  final Model newModel = ModelManager.getInstance().replaceModel(type, model, target.getModels());
 
-                    logger.debug("new merged model : {}", newModel);
+                  logger.debug("new merged model : {}", newModel);
 
-                    // Remove and add model at the right place :
-                    int idx = target.getModels().indexOf(model);
-                    target.getModels().remove(idx);
-                    target.getModels().add(idx, newModel);
+                  // Remove and add model at the right place :
+                  int idx = target.getModels().indexOf(model);
+                  target.getModels().remove(idx);
+                  target.getModels().add(idx, newModel);
 
-                    // force to refresh table model :
-                    this.currentTarget = null;
+                  // force to refresh table model :
+                  this.currentTarget = null;
 
-                    // Replace node :
-                    final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
-                    idx = parentNode.getIndex(currentNode);
-                    parentNode.remove(idx);
-                    parentNode.insert(newNode, idx);
+                  // Replace node :
+                  final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
+                  idx = parentNode.getIndex(currentNode);
+                  parentNode.remove(idx);
+                  parentNode.insert(newNode, idx);
 
-                    // fire node structure changed :
-                    this.getTreeModels().fireNodeChanged(parentNode);
+                  // fire node structure changed :
+                  tree.fireNodeChanged(parentNode);
 
-                    // Select the new node = model :
-                    this.getTreeModels().selectPath(new TreePath(newNode.getPath()));
+                  // Select the new node = model :
+                  tree.selectPath(new TreePath(newNode.getPath()));
 
-                } else if (parentNode.getUserObject() instanceof Model) {
-                    throw new UnsupportedOperationException("Not implemented !");
-                }
-            } else {
-                logger.warn("invalid selected node to perform the update operation = {}", currentNode);
-            }
-        }
+              } else if (parentNode.getUserObject() instanceof Model) {
+                  throw new UnsupportedOperationException("Not implemented !");
+              }
+          } else {
+              logger.warn("invalid selected node to perform the update operation = {}", currentNode);
+          }
+      }
   }//GEN-LAST:event_jButtonUpdateActionPerformed
 
     /**
@@ -1112,43 +1113,44 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * @param evt action event
      */
   private void jButtonRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveActionPerformed
-        final DefaultMutableTreeNode currentNode = this.getTreeModels().getLastSelectedNode();
+      final ModelJTree tree = this.getTreeModels();
+      final DefaultMutableTreeNode currentNode = tree.getLastSelectedNode();
 
-        if (currentNode != null) {
+      if (currentNode != null) {
 
-            if (currentNode.getUserObject() instanceof Model) {
-                final Model model = (Model) currentNode.getUserObject();
+          if (currentNode.getUserObject() instanceof Model) {
+              final Model model = (Model) currentNode.getUserObject();
 
-                // Parent can be a target or a model :
-                final DefaultMutableTreeNode parentNode = this.getTreeModels().getParentNode(currentNode);
+              // Parent can be a target or a model :
+              final DefaultMutableTreeNode parentNode = tree.getParentNode(currentNode);
 
-                if (parentNode.getUserObject() instanceof Target) {
-                    final Target target = (Target) parentNode.getUserObject();
+              if (parentNode.getUserObject() instanceof Target) {
+                  final Target target = (Target) parentNode.getUserObject();
 
-                    logger.debug("remove model : {}", model);
+                  logger.debug("remove model : {}", model);
 
-                    // Remove model from target :
-                    int idx = target.getModels().indexOf(model);
-                    target.getModels().remove(idx);
+                  // Remove model from target :
+                  int idx = target.getModels().indexOf(model);
+                  target.getModels().remove(idx);
 
-                    if (idx == 0) {
-                        // first model is removed : special case : relocate other models :
-                        ModelManager.relocateModels(target.getModels());
-                    }
+                  if (idx == 0) {
+                      // first model is removed : special case : relocate other models :
+                      ModelManager.relocateModels(target.getModels());
+                  }
 
-                    // force to refresh table model :
-                    this.currentTarget = null;
+                  // force to refresh table model :
+                  this.currentTarget = null;
 
-                    // Remove node and refresh tree :
-                    this.getTreeModels().removeNodeAndRefresh(parentNode, currentNode);
+                  // Remove node and refresh tree :
+                  tree.removeNodeAndRefresh(parentNode, currentNode);
 
-                } else if (parentNode.getUserObject() instanceof Model) {
-                    throw new UnsupportedOperationException("Not implemented !");
-                }
-            } else {
-                logger.warn("invalid selected node to perform the remove operation = {}", currentNode);
-            }
-        }
+              } else if (parentNode.getUserObject() instanceof Model) {
+                  throw new UnsupportedOperationException("Not implemented !");
+              }
+          } else {
+              logger.warn("invalid selected node to perform the remove operation = {}", currentNode);
+          }
+      }
   }//GEN-LAST:event_jButtonRemoveActionPerformed
 
     /**
@@ -1156,99 +1158,100 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * @param evt action event
      */
   private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
-        final DefaultMutableTreeNode currentNode = this.getTreeModels().getLastSelectedNode();
+      final ModelJTree tree = this.getTreeModels();
+      final DefaultMutableTreeNode currentNode = tree.getLastSelectedNode();
 
-        if (currentNode != null) {
+      if (currentNode != null) {
 
-            DefaultMutableTreeNode targetNode = null;
-            Target target = null;
+          DefaultMutableTreeNode targetNode = null;
+          Target target = null;
 
-            if (currentNode.getUserObject() instanceof Target) {
-                targetNode = currentNode;
-                target = (Target) currentNode.getUserObject();
+          if (currentNode.getUserObject() instanceof Target) {
+              targetNode = currentNode;
+              target = (Target) currentNode.getUserObject();
 
-            } else if (currentNode.getUserObject() instanceof Model) {
-                final DefaultMutableTreeNode parentNode = this.getTreeModels().getParentNode(currentNode);
+          } else if (currentNode.getUserObject() instanceof Model) {
+              final DefaultMutableTreeNode parentNode = tree.getParentNode(currentNode);
 
-                // Parent can be a target or a model :
-                if (parentNode.getUserObject() instanceof Target) {
-                    targetNode = parentNode;
-                    target = (Target) parentNode.getUserObject();
+              // Parent can be a target or a model :
+              if (parentNode.getUserObject() instanceof Target) {
+                  targetNode = parentNode;
+                  target = (Target) parentNode.getUserObject();
 
-                } else if (parentNode.getUserObject() instanceof Model) {
-                    throw new UnsupportedOperationException("Not implemented !");
-                }
-            } else {
-                logger.warn("invalid selected node to perform the add operation = {}", currentNode);
-            }
+              } else if (parentNode.getUserObject() instanceof Model) {
+                  throw new UnsupportedOperationException("Not implemented !");
+              }
+          } else {
+              logger.warn("invalid selected node to perform the add operation = {}", currentNode);
+          }
 
-            if (target != null) {
-                final String type = (String) this.jComboBoxModelType.getSelectedItem();
+          if (target != null) {
+              final String type = (String) this.jComboBoxModelType.getSelectedItem();
 
-                // create a new model with defined names (model and parameters) :
-                final Model newModel = ModelManager.getInstance().newModel(type, target.getModels());
+              // create a new model with defined names (model and parameters) :
+              final Model newModel = ModelManager.getInstance().newModel(type, target.getModels());
 
-                logger.debug("add model : {}", newModel);
+              logger.debug("add model : {}", newModel);
 
-                // Add model to target :
-                target.getModels().add(newModel);
+              // Add model to target :
+              target.getModels().add(newModel);
 
-                // force to refresh table model :
-                this.currentTarget = null;
+              // force to refresh table model :
+              this.currentTarget = null;
 
-                // Add node and refresh tree :
-                this.getTreeModels().addNodeAndRefresh(targetNode, newModel);
-            }
-        }
+              // Add node and refresh tree :
+              tree.addNodeAndRefresh(targetNode, newModel);
+          }
+      }
   }//GEN-LAST:event_jButtonAddActionPerformed
 
   private void jButtonNormalizeFluxesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNormalizeFluxesActionPerformed
-        if (this.currentTarget == null) {
-            return;
-        }
+      if (this.currentTarget == null) {
+          return;
+      }
 
-        ModelManager.normalizeFluxes(this.currentTarget.getModels());
+      ModelManager.normalizeFluxes(this.currentTarget.getModels());
 
-        // refresh whole values
-        getModelParameterTableModel().fireTableDataChanged();
+      // refresh whole values
+      getModelParameterTableModel().fireTableDataChanged();
   }//GEN-LAST:event_jButtonNormalizeFluxesActionPerformed
 
   private void jButtonOpenFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenFileActionPerformed
 
-        final UserModel userModel = this.currentTarget.getOrCreateUserModel();
+      final UserModel userModel = this.currentTarget.getOrCreateUserModel();
 
-        final File currentDir;
-        final String defaultFileName;
+      final File currentDir;
+      final String defaultFileName;
 
-        if (userModel.getFile() != null) {
-            final File file = new File(userModel.getFile());
-            currentDir = file.getParentFile();
-            defaultFileName = file.getName();
-        } else {
-            currentDir = null;
-            defaultFileName = null;
-        }
+      if (userModel.getFile() != null) {
+          final File file = new File(userModel.getFile());
+          currentDir = file.getParentFile();
+          defaultFileName = file.getName();
+      } else {
+          currentDir = null;
+          defaultFileName = null;
+      }
 
-        final File file = FileChooser.showOpenFileChooser("Open a FITS image as user model", currentDir, mimeType, defaultFileName);
+      final File file = FileChooser.showOpenFileChooser("Open a FITS image as user model", currentDir, mimeType, defaultFileName);
 
-        // If a file was defined (No cancel in the dialog)
-        if (file != null) {
-            disableAnimator();
+      // If a file was defined (No cancel in the dialog)
+      if (file != null) {
+          disableAnimator();
 
-            userModel.setFile(file.getAbsolutePath());
-            userModel.setName(file.getName());
+          userModel.setFile(file.getAbsolutePath());
+          userModel.setName(file.getName());
 
-            try {
-                prepareAndValidateUserModel(userModel);
-            } finally {
-                if (!userModel.isFileValid()) {
-                    this.jRadioButtonInvalid.setSelected(true);
-                }
-            }
+          try {
+              prepareAndValidateUserModel(userModel);
+          } finally {
+              if (!userModel.isFileValid()) {
+                  this.jRadioButtonInvalid.setSelected(true);
+              }
+          }
 
-            // reselect target to update image:
-            processTargetSelection(currentTarget);
-        }
+          // reselect target to update image:
+          processTargetSelection(currentTarget);
+      }
   }//GEN-LAST:event_jButtonOpenFileActionPerformed
 
     private void jButtonImageInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonImageInfoActionPerformed

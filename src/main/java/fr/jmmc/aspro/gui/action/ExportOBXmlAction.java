@@ -103,6 +103,8 @@ public final class ExportOBXmlAction {
 
                     // Export all SCI/CAL OBs:
                     for (Target target : targets) {
+                        // TODO: generate a single document gathering all targets ?
+                        
                         // generate one XML document per science OB:
                         if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
                             file = new File(directory, ExportOBXml.generateOBFileName(target));

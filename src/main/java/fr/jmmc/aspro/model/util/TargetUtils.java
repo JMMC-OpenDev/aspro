@@ -5,6 +5,8 @@ package fr.jmmc.aspro.model.util;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetGroup;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.CoordUtils;
 import fr.jmmc.jmal.star.Star;
@@ -196,5 +198,29 @@ public final class TargetUtils {
         newTarget.checkValues();
 
         return newTarget;
+    }
+
+    public static void createDefaultTargetGroups(final TargetUserInformations targetUserInfos) {
+        targetUserInfos.addGroup(new TargetGroup(
+                TargetGroup.GROUP_AO,
+                "AO Star",
+                TargetGroup.CATEGORY_OB,
+                "Group indicating stars used by the Adaptive Optics system", 
+                "#F781BF"
+        ));
+        targetUserInfos.addGroup(new TargetGroup(
+                TargetGroup.GROUP_FT,
+                "FT Star",
+                TargetGroup.CATEGORY_OB,
+                "Group gathering stars used by the Fringe Tracking system", 
+                "#75C147"
+        ));
+        targetUserInfos.addGroup(new TargetGroup(
+                TargetGroup.GROUP_GUIDE,
+                "Guide Star",
+                TargetGroup.CATEGORY_OB,
+                "Group indicating stars used by the telescope guiding", 
+                "#5BAFD6"
+        ));
     }
 }

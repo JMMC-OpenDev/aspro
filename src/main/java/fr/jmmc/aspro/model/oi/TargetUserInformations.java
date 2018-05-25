@@ -28,6 +28,8 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
  *         &lt;element name="calibrators" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/&gt;
+ *         &lt;element name="group" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetGroup" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="groupMembers" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetGroupMembers" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="targetInfo" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetInformation" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
@@ -40,6 +42,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TargetUserInformations", propOrder = {
     "calibrators",
+    "groups",
+    "groupMembers",
     "targetInfos"
 })
 public class TargetUserInformations
@@ -51,6 +55,9 @@ public class TargetUserInformations
     @XmlIDREF
     @XmlSchemaType(name = "IDREFS")
     protected List<Target> calibrators;
+    @XmlElement(name = "group")
+    protected List<TargetGroup> groups;
+    protected List<TargetGroupMembers> groupMembers;
     @XmlElement(name = "targetInfo")
     protected List<TargetInformation> targetInfos;
 
@@ -81,6 +88,64 @@ public class TargetUserInformations
             calibrators = new ArrayList<Target>();
         }
         return this.calibrators;
+    }
+
+    /**
+     * Gets the value of the groups property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the groups property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getGroups().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link TargetGroup }
+     * 
+     * 
+     */
+    public List<TargetGroup> getGroups() {
+        if (groups == null) {
+            groups = new ArrayList<TargetGroup>();
+        }
+        return this.groups;
+    }
+
+    /**
+     * Gets the value of the groupMembers property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the groupMembers property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getGroupMembers().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link TargetGroupMembers }
+     * 
+     * 
+     */
+    public List<TargetGroupMembers> getGroupMembers() {
+        if (groupMembers == null) {
+            groupMembers = new ArrayList<TargetGroupMembers>();
+        }
+        return this.groupMembers;
     }
 
     /**
@@ -183,7 +248,7 @@ public class TargetUserInformations
 
     /**
      * Return the target user information corresponding to the target
-     * or create a new instance if the target is missing
+     * or create a new instance if the TargetInformation is missing
      * @param target target
      * @return target user information
      */
@@ -201,18 +266,11 @@ public class TargetUserInformations
     /**
      * Return the existing target information corresponding to the target
      * @param target target
-     * @return target user information
+     * @return target user information or null
      * @see #getOrCreateTargetInformation(Target)
      */
     public final TargetInformation getTargetInformation(final Target target) {
-        final List<TargetInformation> _targetInfos = getTargetInfos();
-        for (int i = 0, len = _targetInfos.size(); i < len; i++) {
-            TargetInformation targetInfo = _targetInfos.get(i);
-            if (targetInfo.getTargetRef().equals(target)) {
-                return targetInfo;
-            }
-        }
-        return null;
+        return TargetInformation.getTargetInformation(target, getTargetInfos());
     }
 
     /**
@@ -302,6 +360,16 @@ public class TargetUserInformations
         if (copy.calibrators != null) {
             copy.calibrators = OIBase.copyList(copy.calibrators);
         }
+        
+        // Deep copy of target groups :
+        if (copy.groups != null) {
+            copy.groups = OIBase.deepCopyList(copy.groups);
+        }
+        
+        // Deep copy of target group members :
+        if (copy.groupMembers != null) {
+            copy.groupMembers = OIBase.deepCopyList(copy.groupMembers);
+        }
 
         // Deep copy of target informations :
         if (copy.targetInfos != null) {
@@ -318,7 +386,9 @@ public class TargetUserInformations
         }
         final TargetUserInformations other = (TargetUserInformations) o;
         return (areEqualsStrict(getCalibrators(), other.getCalibrators()) // just identifiers, may create lists
-                && TargetInformation.areEquals(getTargetInfos(), other.getTargetInfos()) // may create lists
+                && areEquals(getGroups(), other.getGroups()) // may create lists
+                && areEquals(getGroupMembers(), other.getGroupMembers()) // may create lists
+                && areEquals(getTargetInfos(), other.getTargetInfos()) // may create lists
                 );
     }
 
@@ -327,36 +397,35 @@ public class TargetUserInformations
      * @param mapIDTargets Map<ID, Target> index
      */
     protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
-        // create the Map<ID, Target> index for calibrators :
-        final java.util.Map<String, Target> mapIDCalibrators = new java.util.HashMap<String, Target>();
+        // create the Map<ID, TargetGroup> index for groups:
+        final java.util.Map<String, TargetGroup> mapIDGroups = TargetGroup.createTargetGroupIndex(getGroups());
+        
+        if (this.groupMembers != null) {
+            // fix group ref & target refs in group members:
+            TargetGroupMembers.updateGroupReferences(this.groupMembers, mapIDTargets, mapIDGroups, null);
+
+            if (this.groupMembers.isEmpty()) {
+                this.groupMembers = null;
+            }
+        }
 
         if (this.calibrators != null) {
-            Target target, newTarget;
+            // Fix target refs in calibrators:
+            Target.updateTargetReferences(this.calibrators, mapIDTargets);
 
-            for (final java.util.ListIterator<Target> it = this.calibrators.listIterator(); it.hasNext();) {
-                target = it.next();
-
-                newTarget = mapIDTargets.get(target.getIdentifier());
-                if (newTarget != null) {
-                    if (newTarget != target) {
-                        it.set(newTarget);
-                    }
-
-                    mapIDCalibrators.put(newTarget.getIdentifier(), newTarget);
-
-                } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Removing missing target reference: {}", target.getIdentifier());
-                    }
-                    it.remove();
-                }
-            }
             if (this.calibrators.isEmpty()) {
                 this.calibrators = null;
             }
         }
 
         if (this.targetInfos != null) {
+            // create the Map<ID TargetGroup, Map<ID, Target> > index for group members:
+            final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers
+                = TargetGroupMembers.createGroupMemberIndex(this.groupMembers);
+            
+            // create the Map<ID, Target> index for calibrators:
+            final java.util.Map<String, Target> mapIDCalibrators = Target.createTargetIndex(this.calibrators);
+
             TargetInformation targetInfo;
             Target target, newTarget;
 
@@ -366,7 +435,7 @@ public class TargetUserInformations
                 target = targetInfo.getTargetRef();
 
                 if (target == null) {
-                    logger.debug("Removing invalid target reference.");
+                    logger.info("Removing invalid target reference.");
                     it.remove();
                 } else {
                     newTarget = mapIDTargets.get(target.getIdentifier());
@@ -376,6 +445,8 @@ public class TargetUserInformations
                         }
 
                         targetInfo.updateTargetReferences(mapIDCalibrators);
+                        
+                        targetInfo.updateGroupReferences(mapIDTargets, mapIDGroups, mapIDGroupMembers);
 
                         // remove if empty :
                         if (targetInfo.isEmpty()) {
@@ -386,9 +457,7 @@ public class TargetUserInformations
                         }
 
                     } else {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Removing missing target reference: {}", target.getIdentifier());
-                        }
+                        logger.info("Removing missing target reference: {}", target.getIdentifier());
                         it.remove();
                     }
                 }
@@ -400,16 +469,123 @@ public class TargetUserInformations
     }
 
     /**
-     * Return true if this target user informations are empty :
-     * target info list is empty and calibrator list is empty
-     * @return true if this target user informations are empty
+     * Return true if this target user informations is empty :
+     * calibrators, groups & members, target info list are all empty
+     * @return true if this target user informations is empty
      */
     protected final boolean isEmpty() {
-        if (this.calibrators != null && !this.calibrators.isEmpty()) {
+        if (!isEmpty(this.calibrators)) {
             return false;
         }
-        return this.targetInfos == null || this.targetInfos.isEmpty();
+        if (!isEmpty(this.groups)) {
+            return false;
+        }
+        if (!isEmpty(this.groupMembers)) {
+            return false;
+        }
+        return isEmpty(this.targetInfos);
     }
+    
+     /**
+     * Return the group of the given identifier in the given list of groups
+     * @param id group identifier
+     * @return group or null if the group was not found
+     */
+    public final TargetGroup getGroupById(final String id) {
+        return TargetGroup.getGroupById(id, getGroups());
+    }
+    
+     /**
+     * Return the group of the given name
+     * @param name group name
+     * @return group or null if the group was not found
+     */
+    public final TargetGroup getGroupByName(final String name) {
+        return TargetGroup.getGroup(name, getGroups());
+    }
+
+    public void addGroup(final TargetGroup group) {
+        final TargetGroup match = getGroupById(group.getIdentifier());
+        if (match != null) {
+            throw new IllegalStateException("TargetGroup[" + group.getIdentifier() + "] already present !");
+        }
+        getGroups().add(group);
+    }
+
+    public boolean removeGroup(final TargetGroup group) {
+        if (group != null && !group.isCategoryOB()) {
+            // check if used ?
+            TargetGroupMembers tgm = getGroupMembers(group);
+            if (tgm == null || tgm.isEmpty()) {
+                // can remove empty group:
+                if (tgm != null) {
+                    getGroupMembers().remove(tgm);
+                }
+                getGroups().remove(group);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return the TargetGroupMembers corresponding to the group
+     * or create a new instance if the TargetGroupMembers is missing
+     * @param group group
+     * @return TargetGroupMembers
+     */
+    public final TargetGroupMembers getOrCreateGroupMembers(final TargetGroup group) {
+        TargetGroupMembers gm = getGroupMembers(group);
+        if (gm == null) {
+            // create a new instance if the group is not found :
+            gm = new TargetGroupMembers();
+            gm.setGroupRef(group);
+            getGroupMembers().add(gm);
+        }
+        return gm;
+    }
+    
+    /**
+     * Return the existing TargetGroupMembers corresponding to the group
+     * @param group group to look up
+     * @return TargetGroupMembers or null
+     * @see #getOrCreateTargetGroupMembers(group)
+     */
+    public final TargetGroupMembers getGroupMembers(final TargetGroup group) {
+        return TargetGroupMembers.getGroupMembers(group, getGroupMembers());
+    }    
+    
+    public final boolean hasTargetInTargetGroup(final TargetGroup group, final Target target) {
+        return getOrCreateGroupMembers(group).hasTarget(target);
+    }
+
+    public final boolean addTargetToTargetGroup(final TargetGroup group, final Target target) {
+        return getOrCreateGroupMembers(group).addTarget(target);
+    }
+
+    public final boolean removeTargetFromTargetGroup(final TargetGroup group, final Target target) {
+        if (getOrCreateGroupMembers(group).removeTarget(target)) {
+            // remove target links:
+            return removeTargetFromTargetGroupMembers(group, target);
+        }    
+        return false;
+    }
+    
+    public final boolean hasTargetInTargetGroupMembers(final TargetGroup group, final Target target) {
+        for (TargetInformation targetInfo : getTargetInfos()) {
+            return targetInfo.hasTargetInGroupMembers(group, target);
+        }
+        return false;
+    }
+                    
+    public final boolean removeTargetFromTargetGroupMembers(final TargetGroup group, final Target target) {
+        boolean removed = false;
+        for (TargetInformation targetInfo : getTargetInfos()) {
+            removed |= targetInfo.removeTargetInGroupMembers(group, target);
+        }
+        return removed;
+    }
+    
 //--simple--preserve
 
 }

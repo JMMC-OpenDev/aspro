@@ -5,6 +5,7 @@ package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.jmcs.gui.component.GenericJTree;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -99,41 +100,26 @@ public final class TargetTransferHandler extends TransferHandler {
             final TargetJTree tree = (TargetJTree) sourceComponent;
             final DefaultMutableTreeNode sourceNode = tree.getLastSelectedNode();
 
-            if (sourceNode != null) {
-                /* retrieve the node that was selected */
-                final Object userObject = sourceNode.getUserObject();
+            /* retrieve the node that was selected */
+            if (sourceNode != null && sourceNode.getUserObject() instanceof Target) {
+                // Target so not null :
+                final Target sourceTarget = (Target) sourceNode.getUserObject();
 
-                if (userObject != null) {
-                    if (userObject instanceof Target) {
-                        // Target so not null :
-                        final Target sourceTarget = (Target) userObject;
+                // Check if the target is a calibrator ?
+                if (isCalibrator(sourceTarget)) {
+                    logger.debug("JTree DRAG selection: {}", sourceTarget);
 
-                        // Check if the target is a calibrator ?
-                        if (isCalibrator(sourceTarget)) {
-                            logger.debug("JTree DRAG selection: {}", sourceTarget);
+                    Target parentTarget = null;
 
-                            Target parentTarget = null;
+                    // Check the parent node to get the science target :
+                    final DefaultMutableTreeNode parentNode = tree.getParentNode(sourceNode);
 
-                            // Check the parent node to get the science target :
-                            final DefaultMutableTreeNode parentNode = tree.getParentNode(sourceNode);
-
-                            if (parentNode != null) {
-                                final Object parentUserObject = parentNode.getUserObject();
-                                if (parentUserObject instanceof Target) {
-                                    parentTarget = (Target) parentUserObject;
-                                }
-                            }
-
-                            // only 1 identifier for now:
-                            final List<String> targetIds = new ArrayList<String>(1);
-                            targetIds.add(sourceTarget.getIdentifier());
-
-                            // only drag calibrators (not science targets) :
-                            return new TargetTransferable(targetIds, (parentTarget != null) ? parentTarget.getIdentifier() : null);
-                        }
-                    } else {
-                        logger.warn("unsupported object type: {}", userObject);
+                    if (parentNode != null && parentNode.getUserObject() instanceof Target) {
+                        parentTarget = (Target) parentNode.getUserObject();
                     }
+
+                    // only drag calibrators (not science targets) :
+                    return new TargetTransferable(sourceTarget.getIdentifier(), (parentTarget != null) ? parentTarget.getIdentifier() : null);
                 }
             }
 
@@ -206,7 +192,6 @@ public final class TargetTransferHandler extends TransferHandler {
      */
     @Override
     public boolean importData(final JComponent destinationComponent, final Transferable data) {
-
         /* In case of copy/paste action, we must check that the destination component supports the data flavor */
         if (data != null
                 && destinationComponent instanceof TargetJTree
@@ -215,37 +200,28 @@ public final class TargetTransferHandler extends TransferHandler {
             final TargetJTree tree = (TargetJTree) destinationComponent;
             final DefaultMutableTreeNode destinationNode = tree.getLastSelectedNode();
 
-            if (destinationNode != null) {
-                /* retrieve the node that was selected */
-                final Object userObject = destinationNode.getUserObject();
+            /* retrieve the node that was selected */
+            if (destinationNode != null && destinationNode.getUserObject() instanceof Target) {
+                final Target destinationTarget = (Target) destinationNode.getUserObject();
 
-                if (userObject != null) {
-                    if (userObject instanceof Target) {
-                        final Target destinationTarget = (Target) userObject;
+                // Check if the target is NOT a calibrator i.e. a science target ?
+                if (!isCalibrator(destinationTarget)) {
+                    logger.debug("JTree DROP selection: {}", destinationTarget);
 
-                        // Check if the target is NOT a calibrator i.e. a science target ?
-                        if (!isCalibrator(destinationTarget)) {
-                            logger.debug("JTree DROP selection: {}", destinationTarget);
+                    // Extract data :
+                    final TargetTransferable transfer = extractData(data);
+                    if (transfer != null) {
+                        boolean result = false;
 
-                            // Extract data :
-                            final TargetTransferable transfer = extractData(data);
-                            if (transfer != null) {
-                                boolean result = false;
-                                
-                                for (String id : transfer.getTargetIds()) {
-                                    final Target srcTarget = getTargetById(id);
-                                    if (srcTarget != null) {
-                                        logger.debug("target (calibrator): {}", srcTarget);
+                        for (String id : transfer.getTargetIds()) {
+                            final Target srcTarget = getTargetById(id);
+                            if (srcTarget != null) {
+                                logger.debug("target (calibrator): {}", srcTarget);
 
-                                        result |= tree.addCalibrator(srcTarget, destinationNode, destinationTarget);
-                                    }
-                                }
-                                return result;
+                                result |= tree.addCalibrator(srcTarget, destinationNode, destinationTarget);
                             }
                         }
-                    } else {
-                        // can occur on root node ('Targets' string)
-                        logger.debug("unsupported object type: {}", userObject);
+                        return result;
                     }
                 }
             }
@@ -264,7 +240,6 @@ public final class TargetTransferHandler extends TransferHandler {
      */
     @Override
     protected void exportDone(final JComponent sourceComponent, final Transferable data, final int action) {
-
         if (data != null
                 && action == MOVE
                 && sourceComponent instanceof TargetJTree) {
@@ -286,7 +261,7 @@ public final class TargetTransferHandler extends TransferHandler {
 
                         final DefaultMutableTreeNode parentNode = tree.findTreeNode(parentTarget);
                         if (parentNode != null) {
-                            final DefaultMutableTreeNode srcNode = TargetJTree.findTreeNode(parentNode, srcTarget);
+                            final DefaultMutableTreeNode srcNode = GenericJTree.findTreeNode(parentNode, srcTarget);
                             if (srcNode != null) {
                                 // remove the moved node :
                                 tree.removeCalibrator(srcNode, srcTarget, parentNode, parentTarget, false);

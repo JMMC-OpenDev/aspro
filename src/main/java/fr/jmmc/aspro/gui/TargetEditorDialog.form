@@ -27,7 +27,7 @@
       <SubComponents>
         <Component class="fr.jmmc.aspro.gui.TargetForm" name="targetForm">
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new fr.jmmc.aspro.gui.TargetForm(this.editTargets, this.editTargetUserInfos)"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TargetForm(this.editTargets, this.editTargetUserInfos)"/>
           </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
@@ -40,13 +40,25 @@
         </Component>
         <Component class="fr.jmmc.aspro.gui.TargetModelForm" name="targetModelForm">
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new fr.jmmc.aspro.gui.TargetModelForm(this.editTargets, this.editTargetUserInfos)"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TargetModelForm(this.editTargets, this.editTargetUserInfos)"/>
           </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
               <JTabbedPaneConstraints tabName="Models" toolTip="edit target models">
                 <Property name="tabTitle" type="java.lang.String" value="Models"/>
                 <Property name="tabToolTip" type="java.lang.String" value="edit target models"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+        </Component>
+        <Component class="fr.jmmc.aspro.gui.TargetGroupForm" name="targetGroupForm">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TargetGroupForm(this.editTargets, this.editTargetUserInfos)"/>
+          </AuxValues>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="Groups">
+                <Property name="tabTitle" type="java.lang.String" value="Groups"/>
               </JTabbedPaneConstraints>
             </Constraint>
           </Constraints>

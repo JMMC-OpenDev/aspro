@@ -349,175 +349,174 @@ public class ObservationSetting
     
 //--simple--preserve
   /**
-   * Return the number of variants
-   * @return number of variants
-   */
-  public final int getVariantSize() {
-    return getVariants().size();
-  }
-
-  /**
-   * Return true if this observation has only one variant
-   * @return true if this observation has only one variant
-   */
-  public final boolean isSingle() {
-    return getVariantSize() == 1;
-  }
-
-  /**
-   * Return true if the target list is not empty
-   * @return true if the target list is not empty
-   */
-  public final boolean hasTargets() {
-    return !getTargets().isEmpty();
-  }
-
-  /**
-   * Return the target of the given name
-   * @param name target name
-   * @return target or null if the target was not found
-   */
-  public final Target getTarget(final String name) {
-    return Target.getTarget(name, getTargets());
-  }
-
-  /**
-   * Return the target user informations (create a new one if needed)
-   * @return target user informations
-   */
-  public final TargetUserInformations getOrCreateTargetUserInfos() {
-    TargetUserInformations userInfos = getTargetUserInfos();
-    if (userInfos == null) {
-      userInfos = new TargetUserInformations();
-      setTargetUserInfos(userInfos);
-    }
-    return userInfos;
-  }
-
-  /**
-   * Return the target configuration of the target given by its name 
-   * @param name target name
-   * @return target configuration or null if the target was not found
-   */
-  public final TargetConfiguration getTargetConfiguration(final String name) {
-    final Target target = getTarget(name);
-    if (target != null) {
-      TargetConfiguration targetConf = target.getConfiguration();
-      if (targetConf == null) {
-        targetConf = new TargetConfiguration();
-        target.setConfiguration(targetConf);
-      }
-      return targetConf;
-    }
-    return null;
-  }
-  /** observation version (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  fr.jmmc.aspro.model.ObservationVersion version = new fr.jmmc.aspro.model.ObservationVersion();
-
-  /**
-   * Return the observation version
-   * @return observation version
-   */
-  public final fr.jmmc.aspro.model.ObservationVersion getVersion() {
-    return this.version;
-  }
-  
-  /** selected target name (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  String selectedTargetName = null;
-  
-  /**
-   * Return the selected target name
-   * @return selected target name
-   */
-  public final String getSelectedTargetName() {
-    return this.selectedTargetName;
-  }
-  
-  /**
-   * Define the selected target name
-   * @param selectedTargetName selected target name (may be null)
-   */
-  public final void setSelectedTargetName(final String selectedTargetName) {
-    this.selectedTargetName = selectedTargetName;
-  }
-
-  @Override
-  public final String toString() {
-    return "Observation : " + ((this.name != null) ? this.name : "undefined");
-  }
-
-  /**
-   * Return a partial deep "copy" of this instance excluding target / models / target user informations
-   * and clear computed fields and observation variants
-   *
-   * @return deep "copy" of this instance
-   */
-  @Override
-  public final Object clone() {
-    final ObservationSetting copy = (ObservationSetting) super.clone();
-
-    // copy version :
-    copy.version = new fr.jmmc.aspro.model.ObservationVersion(copy.version);
-    
-    // clear observation variants :
-    copy.variants = null;
-
-    // Deep copy child objects :
-    if (copy.when != null) {
-      copy.when = (WhenSetting) copy.when.clone();
-    }
-    if (copy.interferometerConfiguration != null) {
-      copy.interferometerConfiguration = (InterferometerConfigurationChoice) copy.interferometerConfiguration.clone();
-    }
-    if (copy.instrumentConfiguration != null) {
-      copy.instrumentConfiguration = (FocalInstrumentConfigurationChoice) copy.instrumentConfiguration.clone();
+     * Return the number of variants
+     * @return number of variants
+     */
+    public final int getVariantSize() {
+        return getVariants().size();
     }
 
-    // Just copy list of targets (do not clone targets as it is only used by target editor) :
-    if (copy.targets != null) {
-      copy.targets = OIBase.copyList(copy.targets);
+    /**
+     * Return true if this observation has only one variant
+     * @return true if this observation has only one variant
+     */
+    public final boolean isSingle() {
+        return getVariantSize() == 1;
     }
 
-    // Do not copy target user infos (only used by target editor)
-
-    return copy;
-  }
-
-  /**
-   * Return a deep "copy" of this instance including target / models / target user informations
-   * @return deep "copy" of this instance
-   */
-  public final ObservationSetting deepClone() {
-    final ObservationSetting copy = (ObservationSetting) clone();
-
-    // Deep copy of observation variants :
-    copy.variants = OIBase.deepCopyList(getVariants());
-    
-    // Deep copy of targets :
-    if (copy.targets != null) {
-      copy.targets = OIBase.deepCopyList(copy.targets);
+    /**
+     * Return true if the target list is not empty
+     * @return true if the target list is not empty
+     */
+    public final boolean hasTargets() {
+        return !isEmpty(targets);
     }
 
-    // Deep copy of target user infos :
-    if (copy.targetUserInfos != null) {
-      // deep copy objects but not targets (already done previously, only used for id / idref) :
-      copy.targetUserInfos = (TargetUserInformations) copy.targetUserInfos.clone();
-
-      // replace old target instances by cloned target instances :
-      copy.targetUserInfos.updateTargetReferences(copy.createTargetIndex());
+    /**
+     * Return the target of the given name
+     * @param name target name
+     * @return target or null if the target was not found
+     */
+    public final Target getTarget(final String name) {
+        return Target.getTarget(name, getTargets());
     }
 
-    return copy;
-  }
+    /**
+     * Return the target user informations (create a new one if needed)
+     * @return target user informations
+     */
+    public final TargetUserInformations getOrCreateTargetUserInfos() {
+        TargetUserInformations userInfos = getTargetUserInfos();
+        if (userInfos == null) {
+            userInfos = new TargetUserInformations();
+            setTargetUserInfos(userInfos);
+        }
+        return userInfos;
+    }
+
+    /**
+     * Return the target configuration of the target given by its name 
+     * @param name target name
+     * @return target configuration or null if the target was not found
+     */
+    public final TargetConfiguration getTargetConfiguration(final String name) {
+        final Target target = getTarget(name);
+        if (target != null) {
+            TargetConfiguration targetConf = target.getConfiguration();
+            if (targetConf == null) {
+                targetConf = new TargetConfiguration();
+                target.setConfiguration(targetConf);
+            }
+            return targetConf;
+        }
+        return null;
+    }
+    /** observation version (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    fr.jmmc.aspro.model.ObservationVersion version = new fr.jmmc.aspro.model.ObservationVersion();
+
+    /**
+     * Return the observation version
+     * @return observation version
+     */
+    public final fr.jmmc.aspro.model.ObservationVersion getVersion() {
+        return this.version;
+    }
+
+    /** selected target name (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    String selectedTargetName = null;
+
+    /**
+     * Return the selected target name
+     * @return selected target name
+     */
+    public final String getSelectedTargetName() {
+        return this.selectedTargetName;
+    }
+
+    /**
+     * Define the selected target name
+     * @param selectedTargetName selected target name (may be null)
+     */
+    public final void setSelectedTargetName(final String selectedTargetName) {
+        this.selectedTargetName = selectedTargetName;
+    }
+
+    @Override
+    public final String toString() {
+        return "Observation : " + ((this.name != null) ? this.name : "undefined");
+    }
+
+    /**
+     * Return a partial deep "copy" of this instance excluding target / models / target user informations
+     * and clear computed fields and observation variants
+     *
+     * @return deep "copy" of this instance
+     */
+    @Override
+    public final Object clone() {
+        final ObservationSetting copy = (ObservationSetting) super.clone();
+
+        // copy version :
+        copy.version = new fr.jmmc.aspro.model.ObservationVersion(copy.version);
+
+        // clear observation variants :
+        copy.variants = null;
+
+        // Deep copy child objects :
+        if (copy.when != null) {
+            copy.when = (WhenSetting) copy.when.clone();
+        }
+        if (copy.interferometerConfiguration != null) {
+            copy.interferometerConfiguration = (InterferometerConfigurationChoice) copy.interferometerConfiguration.clone();
+        }
+        if (copy.instrumentConfiguration != null) {
+            copy.instrumentConfiguration = (FocalInstrumentConfigurationChoice) copy.instrumentConfiguration.clone();
+        }
+
+        // Just copy list of targets (do not clone targets as it is only used by target editor) :
+        if (copy.targets != null) {
+            copy.targets = OIBase.copyList(copy.targets);
+        }
+
+        // Do not copy target user infos (only used by target editor)
+        return copy;
+    }
+
+    /**
+     * Return a deep "copy" of this instance including target / models / target user informations
+     * @return deep "copy" of this instance
+     */
+    public final ObservationSetting deepClone() {
+        final ObservationSetting copy = (ObservationSetting) clone();
+
+        // Deep copy of observation variants :
+        copy.variants = OIBase.deepCopyList(getVariants());
+
+        // Deep copy of targets :
+        if (copy.targets != null) {
+            copy.targets = OIBase.deepCopyList(copy.targets);
+        }
+
+        // Deep copy of target user infos :
+        if (copy.targetUserInfos != null) {
+            // deep copy objects but not targets (already done previously, only used for id / idref) :
+            copy.targetUserInfos = (TargetUserInformations) copy.targetUserInfos.clone();
+
+            // replace old target instances by cloned target instances :
+            copy.targetUserInfos.updateTargetReferences(Target.createTargetIndex(copy.targets));
+        }
+
+        return copy;
+    }
 
     @Override
     protected boolean areEquals(final OIBase o) {
         if (!super.areEquals(o)) {
             return false;
         }
-        final ObservationSetting other = (ObservationSetting)o;
+        final ObservationSetting other = (ObservationSetting) o;
         // note: ignore schemaVersion, context, extendedConfiguration:
         return (areEquals(this.name, other.getName())
                 && areEquals(this.description, other.getDescription())
@@ -528,151 +527,135 @@ public class ObservationSetting
                 && areEquals(this.targetUserInfos, other.getTargetUserInfos())
                 && areEquals(this.getVariants(), other.getVariants())); // may create lists
     }
-  
-  /**
-   * Check this object for bad reference(s) and removes them if needed.
-   * For now it checks target ID/IDREF consistency (targetUserInformations...)
-   */
-  public void checkReferences() {
-    // check targets:
-    for (Target target : getTargets()) {
-        target.checkValues();
-    }
-    // check target user infos :
-    if (this.targetUserInfos != null) {
-      logger.debug("checkReferences = {}", this.targetUserInfos);
 
-      this.targetUserInfos.updateTargetReferences(this.createTargetIndex());
-
-      // remove if empty :
-      if (this.targetUserInfos.isEmpty()) {
-        logger.debug("Removing empty target user informations.");
-
-        this.targetUserInfos = null;
-      }
-    }
-  }
-
-  /**
-   * Return the Map<ID, Target> index
-   * @return Map<ID, Target> index
-   */
-  private java.util.Map<String, Target> createTargetIndex() {
-    final List<Target> innerTargets = getTargets();
-    // create the Map<ID, Target> index :
-    final java.util.Map<String, Target> mapIDTargets = new java.util.HashMap<String, Target>(innerTargets.size());
-    for (Target target : innerTargets) {
-      mapIDTargets.put(target.getIdentifier(), target);
-    }
-    return mapIDTargets;
-  }
-  
-  /** computed displayable list of targets (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private List<Target> cachedDisplayTargets = null;
-  
-  /** computed set of orphan calibrators (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private java.util.Set<Target> cachedOrphanCalibrators = null;
-
-  /**
-   * Clear any cached value related to targets
-   */
-  public void clearCacheTargets() {
-    this.cachedDisplayTargets = null;
-    this.cachedOrphanCalibrators = null;
-  }
-
-  /**
-   * Return the displayable list of targets containing
-   * - science targets followed by their calibrators
-   * - calibrator orphans
-   * @return displayable list of targets
-   */
-  public List<Target> getDisplayTargets() {
-    if (this.cachedDisplayTargets != null) {
-      return this.cachedDisplayTargets;
-    }
-    computeDisplayTargets();
-
-    return this.cachedDisplayTargets;
-  }
-
-  /**
-   * Return the set of orphan calibrators
-   * @return set of orphan calibrators
-   */
-  public java.util.Set<Target> getOrphanCalibrators() {
-    if (this.cachedOrphanCalibrators != null) {
-      return this.cachedOrphanCalibrators;
-    }
-    computeDisplayTargets();
-
-    return this.cachedOrphanCalibrators;
-  }
-
-  /**
-   * Compute the displayable list of targets containing
-   * - science targets followed by their calibrators
-   * - calibrator orphans
-   * And the set of orphan calibrators
-   */
-  private void computeDisplayTargets() {
-
-    final List<Target> innerTargets = getTargets();
-
-    final List<Target> displayTargets;
-    final java.util.Set<Target> orphans;
-
-    if (innerTargets.isEmpty()) {
-      displayTargets = java.util.Collections.emptyList();
-      orphans = java.util.Collections.emptySet();
-    } else {
-      final int len = innerTargets.size();
-      
-      displayTargets = new ArrayList<Target>(len);
-      orphans = new java.util.HashSet<Target>(4);
-
-      // map of used calibrators :
-      final java.util.Map<Target, Target> usedCalibrators = new java.util.IdentityHashMap<Target, Target>(8);
-
-      // get the existing target user informations (can be null) :
-      final TargetUserInformations localTargetUserInfos = getTargetUserInfos();
-
-      for (Target target : innerTargets) {
-
-        if (localTargetUserInfos == null) {
-          // no calibrator defined, all targets are science targets :
-          displayTargets.add(target);
-        } else if (!localTargetUserInfos.isCalibrator(target)) {
-          // science targets :
-          displayTargets.add(target);
-
-          // add calibrators related to the science target :
-          for (Target calibrator : localTargetUserInfos.getCalibrators(target)) {
-            // calibrator targets :
-            displayTargets.add(calibrator);
-
-            usedCalibrators.put(calibrator, calibrator);
-          }
+    /**
+     * Check this object for bad reference(s) and removes them if needed.
+     * For now it checks target ID/IDREF consistency (targetUserInformations...)
+     */
+    public void checkReferences() {
+        // check targets:
+        for (Target target : getTargets()) {
+            target.checkValues();
         }
-      }
+        // check target user infos :
+        if (this.targetUserInfos != null) {
+            logger.debug("checkReferences = {}", this.targetUserInfos);
 
-      if (localTargetUserInfos != null) {
-        // add calibrator orphans i.e. not associated to a target :
-        for (Target calibrator : localTargetUserInfos.getCalibrators()) {
-          if (!usedCalibrators.containsKey(calibrator)) {
-            displayTargets.add(calibrator);
-            orphans.add(calibrator);
-          }
+            this.targetUserInfos.updateTargetReferences(Target.createTargetIndex(getTargets()));
+
+            if (this.targetUserInfos.isEmpty()) {
+                logger.debug("Removing empty target user informations.");
+                this.targetUserInfos = null;
+            }
         }
-      }
     }
 
-    // cache the computed collections :
-    this.cachedDisplayTargets = displayTargets;
-    this.cachedOrphanCalibrators = orphans;
-  }
+    /** computed displayable list of targets (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private List<Target> cachedDisplayTargets = null;
+
+    /** computed set of orphan calibrators (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private java.util.Set<Target> cachedOrphanCalibrators = null;
+
+    /**
+     * Clear any cached value related to targets
+     */
+    public void clearCacheTargets() {
+        this.cachedDisplayTargets = null;
+        this.cachedOrphanCalibrators = null;
+    }
+
+    /**
+     * Return the displayable list of targets containing
+     * - science targets followed by their calibrators
+     * - calibrator orphans
+     * @return displayable list of targets
+     */
+    public List<Target> getDisplayTargets() {
+        if (this.cachedDisplayTargets != null) {
+            return this.cachedDisplayTargets;
+        }
+        computeDisplayTargets();
+
+        return this.cachedDisplayTargets;
+    }
+
+    /**
+     * Return the set of orphan calibrators
+     * @return set of orphan calibrators
+     */
+    public java.util.Set<Target> getOrphanCalibrators() {
+        if (this.cachedOrphanCalibrators != null) {
+            return this.cachedOrphanCalibrators;
+        }
+        computeDisplayTargets();
+
+        return this.cachedOrphanCalibrators;
+    }
+
+    /**
+     * Compute the displayable list of targets containing
+     * - science targets followed by their calibrators
+     * - calibrator orphans
+     * And the set of orphan calibrators
+     */
+    private void computeDisplayTargets() {
+
+        final List<Target> innerTargets = getTargets();
+
+        final List<Target> displayTargets;
+        final java.util.Set<Target> orphans;
+
+        if (innerTargets.isEmpty()) {
+            displayTargets = java.util.Collections.emptyList();
+            orphans = java.util.Collections.emptySet();
+        } else {
+            final int len = innerTargets.size();
+
+            displayTargets = new ArrayList<Target>(len);
+            orphans = new java.util.HashSet<Target>(4);
+
+            // map of used calibrators :
+            final java.util.Map<Target, Target> usedCalibrators = new java.util.IdentityHashMap<Target, Target>(8);
+
+            // get the existing target user informations (can be null) :
+            final TargetUserInformations localTargetUserInfos = getTargetUserInfos();
+
+            for (Target target : innerTargets) {
+
+                if (localTargetUserInfos == null) {
+                    // no calibrator defined, all targets are science targets :
+                    displayTargets.add(target);
+                } else if (!localTargetUserInfos.isCalibrator(target)) {
+                    // science targets :
+                    displayTargets.add(target);
+
+                    // add calibrators related to the science target :
+                    for (Target calibrator : localTargetUserInfos.getCalibrators(target)) {
+                        // calibrator targets :
+                        displayTargets.add(calibrator);
+
+                        usedCalibrators.put(calibrator, calibrator);
+                    }
+                }
+            }
+
+            if (localTargetUserInfos != null) {
+                // add calibrator orphans i.e. not associated to a target :
+                for (Target calibrator : localTargetUserInfos.getCalibrators()) {
+                    if (!usedCalibrators.containsKey(calibrator)) {
+                        displayTargets.add(calibrator);
+                        orphans.add(calibrator);
+                    }
+                }
+            }
+        }
+
+        // cache the computed collections :
+        this.cachedDisplayTargets = displayTargets;
+        this.cachedOrphanCalibrators = orphans;
+    }
 
 //--simple--preserve
 

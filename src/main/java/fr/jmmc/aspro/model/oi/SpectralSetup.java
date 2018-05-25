@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlList;
-import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -49,7 +48,6 @@ public class SpectralSetup
     protected List<SpectralSetupColumn> columns;
     @XmlList
     @XmlElement(type = Double.class)
-    
     protected double[] data;
 
     /**
@@ -132,7 +130,7 @@ public class SpectralSetup
         int len = values.length;
         this.data = ((double[]) new double[len] );
         for (int i = 0; (i<len); i ++) {
-            this.data[i] = Double.valueOf(values[i]);
+            this.data[i] = new Double(values[i]);
         }
     }
 
@@ -145,7 +143,7 @@ public class SpectralSetup
      *     
      */
     public double setData(int idx, double value) {
-        return this.data[idx] = Double.valueOf(value);
+        return this.data[idx] = new Double(value);
     }
     
 //--simple--preserve

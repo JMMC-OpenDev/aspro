@@ -75,17 +75,12 @@ public class AbstractTargetJTree<E> extends GenericJTree<E> {
                 // use last tooltip:
                 return lastTooltip;
             } else {
-                String tooltip = null;
-                // Get target :
+                // Get user object (target) :
                 final TreePath path = getPathForRow(index);
                 final DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
 
-                final Object userObject = node.getUserObject();
-                if (userObject instanceof Target) {
-                    final Target target = (Target) userObject;
-                    // Return the tool tip text :
-                    tooltip = target.toHtml(sbTmp);
-                }
+                final String tooltip = getTooltipText(node.getUserObject());
+
                 lastIndex = index;
                 lastTooltip = tooltip;
                 return tooltip;
@@ -95,10 +90,43 @@ public class AbstractTargetJTree<E> extends GenericJTree<E> {
     }
 
     /**
-     * Select the target node for the given target name
+     * Return the tooltip text for the given user object
+     * @param userObject user object to get tooltip
+     * @return tooltip of the user object or null
+     */
+    public String getTooltipText(final Object userObject) {
+        return getTooltipText(userObject, sbTmp);
+    }
+
+    /**
+     * Return the tooltip text for the given user object
+     * @param userObject user object to get tooltip
+     * @param sbTmp temporary buffer 
+     * @return tooltip of the user object or null
+     */
+    protected String getTooltipText(final Object userObject, final StringBuffer sbTmp) {
+        if (userObject instanceof Target) {
+            final Target target = (Target) userObject;
+            // Return the tool tip text:
+            return target.toHtml(sbTmp);
+        }
+        return null;
+    }
+
+    /**
+     * Select the target node for the given target
      * @param target target to select
      */
     public final void selectTarget(final E target) {
+        selectTarget(target, true);
+    }
+
+    /**
+     * Select the target node for the given target
+     * @param target target to select
+     * @param selectIfNotFound true to select first child node if the given target is not found
+     */
+    public final void selectTarget(final E target, final boolean selectIfNotFound) {
         if (target != null) {
             final DefaultMutableTreeNode targetNode = this.findTreeNode(target);
 
@@ -106,19 +134,23 @@ public class AbstractTargetJTree<E> extends GenericJTree<E> {
                 // Select the target node :
                 this.selectPath(new TreePath(targetNode.getPath()));
 
-                // expand target node if there is at least one model :
+                // expand target node if there is at least one child node :
                 if (!targetNode.isLeaf()) {
                     final DefaultMutableTreeNode child = (DefaultMutableTreeNode) targetNode.getFirstChild();
 
                     this.scrollPathToVisible(new TreePath(child.getPath()));
                 }
-
                 return;
             }
         }
 
-        // select first target :
-        selectFirstChildNode(getRootNode());
+        if (selectIfNotFound) {
+            // select first target :
+            selectFirstChildNode(getRootNode());
+        } else {
+            // clear selection:
+            clearSelection();
+        }
     }
 
     /**
@@ -129,9 +161,10 @@ public class AbstractTargetJTree<E> extends GenericJTree<E> {
     @Override
     protected String convertUserObjectToString(final E userObject) {
         if (userObject instanceof Target) {
+            final Target target = (Target) userObject;
             final StringBuffer sb = sbTmp;
             sb.setLength(0); // clear
-            this.editTargetUserInfos.getTargetDisplayName((Target) userObject, sb);
+            this.editTargetUserInfos.getTargetDisplayName(target, sb);
             return sb.toString();
         }
         return toString(userObject);
