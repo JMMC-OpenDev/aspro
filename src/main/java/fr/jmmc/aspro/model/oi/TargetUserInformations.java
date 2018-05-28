@@ -545,6 +545,16 @@ public class TargetUserInformations
         return gm;
     }
     
+    public final java.util.Set<TargetGroup> getGroupsUsedByTargetGroupMembers(final Target target) {
+        final java.util.Set<TargetGroup> usedGroups = new java.util.HashSet<TargetGroup>();
+        
+        for (TargetInformation targetInfo : getTargetInfos()) {
+            targetInfo.fillGroupsHavingTargetInAnyGroupMembers(target, usedGroups);
+            
+        }
+        return usedGroups;
+    }
+    
     /**
      * Return the existing TargetGroupMembers corresponding to the group
      * @param group group to look up

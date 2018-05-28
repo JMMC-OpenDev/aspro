@@ -421,6 +421,10 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
 
             // indicates if the target has associated targets (implicitely OB targets):
             final boolean hasGM = this.editTargetUserInfos.getOrCreateTargetInformation(target).hasGroupMembers();
+
+            // get used groups by the target (associated OB target):
+            final Set<TargetGroup> usedGroups = (hasGM) ? null : this.editTargetUserInfos.getGroupsUsedByTargetGroupMembers(target);
+
             boolean shouldScroll = true;
 
             for (TargetGroup group : this.editTargetUserInfos.getGroups()) {
@@ -430,9 +434,11 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
                     this.checkBoxListGroups.addCheckBoxListSelectedValue(group, shouldScroll);
                     shouldScroll = false;
                 }
-                if (group.isCategoryOB() && hasGM) {
-                    // disable the checkbox on this group:
-                    this.disabledGroupsInCheckBoxList.add(group);
+                if (group.isCategoryOB()) {
+                    if (hasGM || usedGroups.contains(group)) {
+                        // disable the checkbox on this group:
+                        this.disabledGroupsInCheckBoxList.add(group);
+                    }
                 }
             }
             // Force repaint:

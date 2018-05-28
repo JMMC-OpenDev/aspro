@@ -356,6 +356,14 @@ public class TargetInformation
         return false;
     }
     
+    public final void fillGroupsHavingTargetInAnyGroupMembers(final Target target, final java.util.Set<TargetGroup> usedGroups) {
+        for (TargetGroupMembers tgm : getGroupMembers()) {
+            if (tgm.hasTarget(target)) {
+                usedGroups.add(tgm.getGroupRef());
+            }
+        }
+    }
+
     public final boolean hasTargetInGroupMembers(final TargetGroup group, final Target target) {
         final TargetGroupMembers gm = getOrCreateGroupMembers(group);
         return gm.hasTarget(target);
