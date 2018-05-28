@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.5 beta 4"/>
-    <compilation date="24/04/2018" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.5 beta 5"/>
+    <compilation date="28/05/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -219,8 +219,12 @@
 
     <releasenotes>
         <release version="0.9.9.5">
-            <pubDate>Tue, 24 Apr 2018 10:00:00 GMT</pubDate>
+            <pubDate>Mon, 28 May 2018 09:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.5 beta 5">
+                <change type="FEATURE">Added support of target groups (OB, user) &amp; their target associations (OB) in the Target Editor</change>
+            </prerelease>
             <prerelease version="0.9.9.5 beta 4">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/921">Fixed application startup on Windows with JDK &gt; 9</change>
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/920">Fixed OIFits data flagging when SNR &lt; to use only the theoretical SNR on squared visibility</change>
             </prerelease>
             <prerelease version="0.9.9.5 beta 3">
