@@ -372,7 +372,7 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
                     l=len(FTDEC)
                     if l-w < 3:
                         win.ShowErrorMessage("Object "+SEQ_FT_ROBJ_NAME+" has a too low precision in DEC to be useable by VLTI, please correct.")
-                    return
+                        return
                     if l-w > 4:
                         FTDEC=FTDEC[0:w+4]
                     #no PMRA, PMDE for FT !!
