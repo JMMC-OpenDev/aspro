@@ -51,7 +51,7 @@ class LoginWindow:
 
 
         self.frame = Frame(window)
-        self.tree = ttk.Treeview(self.frame,columns=('Project Id', 'instrument', 'folder Id'))
+        self.tree = ttk.Treeview(self.frame,columns=('Project Id'))#, 'instrument'))#, 'folder Id'))
         ysb = ttk.Scrollbar(self.frame, orient='vertical', command=self.tree.yview)
         xsb = ttk.Scrollbar(self.frame, orient='horizontal', command=self.tree.xview)
         self.tree.configure(yscroll=ysb.set, xscroll=xsb.set)
@@ -87,7 +87,7 @@ class LoginWindow:
 
         self.loginframe.pack()
        
-        self.progressbar = Scale(window, orient='horizontal', from_=0, to=1, resolution=0.01,showvalue=0,takefocus=0)
+        self.progressbar = ttk.Progressbar(window, orient='horizontal',length=200)#, from_=0, to=1, resolution=0.01,showvalue=0,takefocus=0)
         self.progressbar.pack()
         
         self.log_string = StringVar()
@@ -115,6 +115,25 @@ class LoginWindow:
     def addToLog(self,text):
         self.log_string.set(text)
 
+    def folder_added(self,name,pid,cid):
+        ret=self.tree.item(pid)
+        curinst=ret['values'][0]
+        tag=ret['tags']
+        rid=tag[1]
+        self.tree.insert(pid,'end',cid,text=name,values=(curinst,cid),tags=('folder',rid))
+
+    def folder_explore(self,folders,contid,instrument,rid):
+        for j in range(len(folders)):
+            name=folders[j]['name']
+            contid2=folders[j]['containerId']
+            self.tree.insert(contid,'end',contid2,text=name,values=(instrument,contid2),tags=('folder',rid))
+            folders2=self.api.getFolders(contid2)
+            if len(folders2) > 0 :
+                try:
+                    self.folder_explore(folders2,contid2,instrument,rid)
+                except:
+                    pass
+                
     def on_buttonok_clicked(self):
         self.loginlist[0]=(self.username.get())
         self.loginlist[1]=(self.password.get())
@@ -134,7 +153,7 @@ class LoginWindow:
         self.loginframe.destroy() 
         self.buttonok.destroy()
         self.buttonabort_strval.set("EXIT")
-        self.tempo_strval.set("Select the Project Id in the list:")
+        self.tempo_strval.set("Select a Project Id or Folder in the above list. OBs are not shown")
 
         supportedInstruments=['GRAVITY','MATISSE','AMBER','PIONIER']
 
@@ -144,33 +163,16 @@ class LoginWindow:
                 instrument=runs[i]['instrument']
                 rid=runs[i]['runId']
                 cid=runs[i]['containerId']
-                self.tree.insert('','end',runName,text=runName,values=(instrument, rid),tags=('run',rid))
+                self.tree.insert('','end',cid,text=runName,values=(instrument, cid),tags=('run',rid))
                 # if folders, add them
                 # FIXME: make it recursive!
                 folders=api.getFolders(cid)
-                for j in range(len(folders)):
-                    name=folders[j]['name']
-                    contid=folders[j]['containerId']
-                    self.tree.insert(runName,'end',contid,text=name,values=(instrument,contid),tags=('folder',rid))
-                    folders2=api.getFolders(contid)
-                    for k in range(len(folders2)):
-                        name2=folders2[k]['name']
-                        contid2=folders2[k]['containerId']
-                        self.tree.insert(contid,'end',contid2,text=name,values=(instrument,contid2),tags=('subfolder',rid))
- 
-
-#    def on_row_expanded(self,view,treeiter,path):
-#        index=path[0]
-#        id=self.runName[index]
-#        if  id != 'Folder:': #get instrument
-#            instru=self.instrument[index]
-#            self.containerInfo[0]= id #ProjectId
-#            self.containerInfo[1]= instru #Instrument
-#            runId=self.containerId[index]
-#            run, _ = self.api.getRun(runId)
-#            containerId = run["containerId"]
-#            self.containerInfo[2]=containerId #containerId
-#            
+                if len(folders) > 0 :
+                    try:
+                        self.folder_explore(folders,cid,instrument,rid)
+                    except:
+                        pass
+   
     def on_tree_selection_changed(self, selection):
         curItem = self.tree.focus()
         ret=self.tree.item(curItem)
@@ -181,7 +183,7 @@ class LoginWindow:
         rid=tag[1]
         entryType=tag[0]
         self.flag[0]=1
-        if ( entryType == 'folder' or entryType == 'subfolder' ) : #we have a folder
+        if ( entryType == 'folder' ) : #we have a folder
                new_containerId_same_run=cid
                folderName = curname
                print ("*** Working in Folder",folderName,", containerId: ", new_containerId_same_run, "***")
@@ -201,7 +203,6 @@ class LoginWindow:
 
     def on_buttonabort_clicked(self):
         self.flag[0]=-1
-        quit()
 
     def get_api(self):
         return self.api
@@ -236,8 +237,7 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
 
         interferometer=interferometerConfiguration.find('name').text
         if interferometer != "VLTI":
-            print ( "ASPRO not set for VLTI, no action taken.")
-            #win.ShowErrorMessage("ASPRO not set for VLTI, no action taken.")
+            win.ShowErrorMessage("ASPRO not set for VLTI, no action taken.")
             return
 
         BASELINE=interferometerConfiguration.find('stations').text
@@ -265,6 +265,7 @@ def parseXmlMessage(e, api, list, username): #e is parsedTree.
             folderName=re.sub('[^A-Za-z0-9]+', '_', folderName.strip())
             folder, _ = api.createFolder(containerId,folderName)
             containerId=folder['containerId']
+            win.folder_added(folderName,parentContainerId,containerId)
 
         for observationConfiguration in e.findall('observationConfiguration'):
         # science. If calibrator, get also DIAMETER (and compute VIS?)
@@ -780,14 +781,15 @@ def createGravityOB(username, api, containerId, OBJTYPE, NAME, BASELINE, instrum
             s+=cgi.escape(ss)+'\n'
         win.ShowWarningMessage('OB '+str(obId)+' <b>HAS Warnings</b>. ESO says:\n\n'+s)
         win.addToLog('OB: '+str(obId)+' created with warnings')
- # (NOTE: we need to escape things like <= in returned text)
 
  #   # fetch OB again to confirm its status change
  #   ob, obVersion = api.getOB(obId)
  #   python3: print('Status of verified OB', obId, 'is now', ob['obStatus'])
     
-def setProgress(perc): win.progressbar.set(perc)
+def setProgress(perc):
+  win.progressbar.step(perc*100)
   
+
 #------------------------------------------------------------start & main loop-----------------------
 # Instantiate the client and connect to the hub
 client=SAMPIntegratedClient("ESO p2 samp hub")
@@ -833,7 +835,7 @@ shared=[0,api]
 def task(shared):
     # We now run the loop to wait for the message in a try/finally block so that if
     # the program is interrupted e.g. by control-C, the client terminates
-    # gracefully.
+    # gracefully
     api=shared[1]
     try:
         if (shared[0] == 0):
