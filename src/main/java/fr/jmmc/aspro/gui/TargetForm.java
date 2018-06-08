@@ -71,8 +71,10 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private static final Logger logger = LoggerFactory.getLogger(TargetForm.class.getName());
     /** Simbad URL (query by identifier) */
     private static final String SIMBAD_QUERY_ID = "http://simbad.u-strasbg.fr/simbad/sim-id?Ident=";
-    /** Simbad URL (query by identifier) */
+    /** Vizier SED URL (query by identifier) */
     private static final String VIZIER_SED_QUERY_ID = "http://cdsxmatch.u-strasbg.fr/gadgets/ifr?url=http://cdsxmatch.u-strasbg.fr/widgets/SED_plotter.xml&SED_plot_radius=1&SED_plot_object=";
+    /** GetStar URL (query by identifier) */
+    private static final String GETSTAR_QUERY_ID = "http://apps.jmmc.fr/~sclws/getstar/sclwsGetStarProxy.php?star=";
 
     /* members */
     /** list of edited targets (clone) */
@@ -641,6 +643,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelTargetActions = new javax.swing.JPanel();
         jButtonSimbad = new javax.swing.JButton();
         jButtonSEDViewer = new javax.swing.JButton();
+        jButtonGetStar = new javax.swing.JButton();
         jLabelRA = new javax.swing.JLabel();
         jFieldRA = new javax.swing.JTextField();
         jLabelDEC = new javax.swing.JLabel();
@@ -926,6 +929,16 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             }
         });
         jPanelTargetActions.add(jButtonSEDViewer);
+
+        jButtonGetStar.setText("GetStar");
+        jButtonGetStar.setToolTipText("Open JMMC GetStar web page for this target");
+        jButtonGetStar.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        jButtonGetStar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonGetStarActionPerformed(evt);
+            }
+        });
+        jPanelTargetActions.add(jButtonGetStar);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -1645,6 +1658,14 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         sortAndRefreshForm(TargetDEComparator.getInstance());
     }//GEN-LAST:event_jButtonSortDEActionPerformed
 
+    private void jButtonGetStarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGetStarActionPerformed
+        final String url = GETSTAR_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
+
+        logger.debug("GetStar url = {}", url);
+
+        BrowserLauncher.openURL(url);
+    }//GEN-LAST:event_jButtonGetStarActionPerformed
+
     /**
      * Remove all occurences of the calibrator from the tree
      * @param calibrator calibrator target
@@ -1878,6 +1899,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JButton jButtonAfter;
     private javax.swing.JButton jButtonBefore;
     private javax.swing.JButton jButtonDeleteTarget;
+    private javax.swing.JButton jButtonGetStar;
     private javax.swing.JButton jButtonRemoveCalibrator;
     private javax.swing.JButton jButtonSEDViewer;
     private javax.swing.JButton jButtonSimbad;

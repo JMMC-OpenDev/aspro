@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.5 beta 5"/>
-    <compilation date="28/05/2018" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.5 beta 6"/>
+    <compilation date="08/06/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -219,7 +219,10 @@
 
     <releasenotes>
         <release version="0.9.9.5">
-            <pubDate>Mon, 28 May 2018 09:00:00 GMT</pubDate>
+            <pubDate>Fri, 08 June 2018 13:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.5 beta 6">
+                <change type="FEATURE">Added GetStar action in the Target Editor to open the GetStar web page for the current target</change>
+            </prerelease>
             <prerelease version="0.9.9.5 beta 5">
                 <change type="FEATURE">Added support of target groups (OB, user) &amp; their target associations (OB) in the Target Editor</change>
             </prerelease>
