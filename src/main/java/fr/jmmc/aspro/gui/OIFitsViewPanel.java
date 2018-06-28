@@ -19,7 +19,6 @@ import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import fr.jmmc.oiexplorer.core.model.PlotDefinitionFactory;
 import fr.jmmc.oiexplorer.core.model.oi.SubsetDefinition;
-import fr.jmmc.oiexplorer.core.model.oi.TargetUID;
 import fr.jmmc.oiexplorer.core.model.plot.ColorMapping;
 import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -270,9 +269,9 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
             // get current subset definition (copy):
             final SubsetDefinition subsetCopy = ocm.getCurrentSubsetDefinition();
             // Extract the single target from any OIFitsFile:
-            final TargetUID target = new TargetUID(oiFitsList.get(0).getOiTarget().getTarget()[0]);
+            final String target = oiFitsList.get(0).getOiTarget().getTarget()[0];
 
-            subsetCopy.setTarget(target);
+            subsetCopy.getFilter().setTargetUID(target);
             // use all data files (default):
             // subset.getTables().clear();
 
