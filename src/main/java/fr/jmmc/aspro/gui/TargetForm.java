@@ -75,6 +75,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private static final String VIZIER_SED_QUERY_ID = "http://cdsxmatch.u-strasbg.fr/gadgets/ifr?url=http://cdsxmatch.u-strasbg.fr/widgets/SED_plotter.xml&SED_plot_radius=1&SED_plot_object=";
     /** GetStar URL (query by identifier) */
     private static final String GETSTAR_QUERY_ID = "http://apps.jmmc.fr/~sclws/getstar/sclwsGetStarProxy.php?star=";
+     /** Mag converter URL */
+    private static final String MAG_CONV_ID = "http://ssc.spitzer.caltech.edu/warmmission/propkit/pet/magtojy/#fnu_to_mag";
 
     /* members */
     /** list of edited targets (clone) */
@@ -692,6 +694,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelCalibratorInfos = new javax.swing.JLabel();
         jScrollPaneCalibratorInfos = new javax.swing.JScrollPane();
         jTableCalibratorInfos = new javax.swing.JTable();
+        jButtonMagConv = new javax.swing.JButton();
         jPanelDescription = new javax.swing.JPanel();
         jScrollPaneTargetInfos = new javax.swing.JScrollPane();
         jTextAreaTargetInfos = new javax.swing.JTextArea();
@@ -1366,6 +1369,20 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jScrollPaneCalibratorInfos, gridBagConstraints);
 
+        jButtonMagConv.setText("Mag calc.");
+        jButtonMagConv.setToolTipText("Magnitude to Flux Density converters");
+        jButtonMagConv.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonMagConvActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        jPanelTarget.add(jButtonMagConv, gridBagConstraints);
+
         jScrollPaneTarget.setViewportView(jPanelTarget);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1666,6 +1683,10 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         BrowserLauncher.openURL(url);
     }//GEN-LAST:event_jButtonGetStarActionPerformed
 
+    private void jButtonMagConvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonMagConvActionPerformed
+        BrowserLauncher.openURL(MAG_CONV_ID);      
+    }//GEN-LAST:event_jButtonMagConvActionPerformed
+
     /**
      * Remove all occurences of the calibrator from the tree
      * @param calibrator calibrator target
@@ -1900,6 +1921,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JButton jButtonBefore;
     private javax.swing.JButton jButtonDeleteTarget;
     private javax.swing.JButton jButtonGetStar;
+    private javax.swing.JButton jButtonMagConv;
     private javax.swing.JButton jButtonRemoveCalibrator;
     private javax.swing.JButton jButtonSEDViewer;
     private javax.swing.JButton jButtonSimbad;
