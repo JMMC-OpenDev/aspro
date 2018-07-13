@@ -189,7 +189,7 @@ public final class NoiseService implements VisNoiseService {
     private boolean invalidParameters = false;
     /** SNR (V2) estimated in computeVis2Error() for the current point (NOT thread safe) without any bias */
     private double snrV2 = 0.0;
-    
+
     /** total instrumental visibility (with FT if any) */
     private double[] vinst;
 
@@ -256,9 +256,10 @@ public final class NoiseService implements VisNoiseService {
         if (logger.isDebugEnabled()) {
             logger.debug("spectralChannels              : {}", nSpectralChannels);
             logger.debug("iMidChannel                   : {}", iMidChannel);
-            logger.debug("waveLengths                   : {}", Arrays.toString(waveLengths));
-            logger.debug("waveBands                     : {}", Arrays.toString(waveBands));
             logger.debug("waveLength[iMidChannel]       : {}", waveLengths[iMidChannel]);
+            logger.debug("waveLengths                   : {}", Arrays.toString(waveLengths));
+            logger.debug("waveBands[iMidChannel]        : {}", waveBands[iMidChannel]);
+            logger.debug("waveBands                     : {}", Arrays.toString(waveBands));
         }
 
         // extract parameters in observation and configuration :
@@ -509,10 +510,15 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("fracFluxInPhotometry          : {}", fracFluxInPhotometry);
             logger.debug("usePhotometry                 : {}", usePhotometry);
             logger.debug("useStrehlCorrection           : {}", useStrehlCorrection);
+            logger.debug("transmission[iMidChannel]     : {}", transmission[iMidChannel]);
             logger.debug("transmission                  : {}", Arrays.toString(transmission));
+            logger.debug("instrumentalVis[iMidChannel]  : {}", instrumentalVisibility[iMidChannel]);
             logger.debug("instrumentalVisibility        : {}", Arrays.toString(instrumentalVisibility));
+            logger.debug("nbPhotThermal[iMidChannel]    : {}", nbPhotThermal[iMidChannel]);
             logger.debug("nbPhotThermal                 : {}", Arrays.toString(nbPhotThermal));
+            logger.debug("nbPixInterf[iMidChannel]      : {}", nbPixInterf[iMidChannel]);
             logger.debug("nbPixInterf                   : {}", Arrays.toString(nbPixInterf));
+            logger.debug("nbPixPhoto[iMidChannel]       : {}", nbPixPhoto[iMidChannel]);
             logger.debug("nbPixPhoto                    : {}", Arrays.toString(nbPixPhoto));
             logger.debug("useInstrumentBias             : {}", useInstrumentBias);
             logger.debug("instrumentalVisibilityBias    : {}", instrumentalVis2Bias);
@@ -703,7 +709,8 @@ public final class NoiseService implements VisNoiseService {
 
                 if (logger.isDebugEnabled()) {
                     logger.debug("elevation                     : {}", elevation);
-                    logger.debug("strehl ratio                  : {}", Arrays.toString(strehlPerChannel[n]));
+                    logger.debug("strehlPerChannel[iMidChannel] : {}", strehlPerChannel[n][iMidChannel]);
+                    logger.debug("strehlPerChannel              : {}", Arrays.toString(strehlPerChannel[n]));
                 }
             }
         } else {
@@ -764,6 +771,7 @@ public final class NoiseService implements VisNoiseService {
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("elevation                     : {}", targetPointInfos[n].getElevation());
+                logger.debug("nbTotalPhotPerSec[iMidChannel]: {}", nbTotalPhot[n][iMidChannel]);
                 logger.debug("nbTotalPhotPerSec             : {}", Arrays.toString(nbTotalPhot[n]));
             }
         }
@@ -815,6 +823,7 @@ public final class NoiseService implements VisNoiseService {
                 }
 
                 if (logger.isDebugEnabled()) {
+                    logger.debug("vinst[iMidChannel]            : {}", vinst[iMidChannel]);
                     logger.debug("vinst (FT)                    : {}", Arrays.toString(vinst));
                 }
 
@@ -835,6 +844,7 @@ public final class NoiseService implements VisNoiseService {
                 addWarning("Observation can not use FT (magnitude limit or saturation).");
 
                 if (logger.isDebugEnabled()) {
+                    logger.debug("vinst[iMidChannel]              : {}", vinst[iMidChannel]);
                     logger.debug("vinst (noFT)                    : {}", Arrays.toString(vinst));
                 }
             }
@@ -868,7 +878,9 @@ public final class NoiseService implements VisNoiseService {
             }
 
             if (logger.isDebugEnabled()) {
+                logger.debug("nbPhotThermInterf[iMidChannel]: {}", nbPhotThermInterf[iMidChannel]);
                 logger.debug("nbPhotThermInterf         : {}", Arrays.toString(nbPhotThermInterf));
+                logger.debug("nbPhotThermPhoto[iMidChannel]: {}", nbPhotThermPhoto[iMidChannel]);
                 logger.debug("nbPhotThermPhoto          : {}", Arrays.toString(nbPhotThermPhoto));
             }
         }
@@ -898,8 +910,11 @@ public final class NoiseService implements VisNoiseService {
 
             if (logger.isDebugEnabled()) {
                 logger.debug("elevation                     : {}", targetPointInfos[n].getElevation());
+                logger.debug("nbTotalPhot[iMidChannel]      : {}", nbTotalPhot[n][iMidChannel]);
                 logger.debug("nbTotalPhot                   : {}", Arrays.toString(nbTotalPhot[n]));
+                logger.debug("nbPhotonInI[iMidChannel]      : {}", nbPhotInterf[iMidChannel]);
                 logger.debug("nbPhotonInI                   : {}", Arrays.toString(nbPhotInterf));
+                logger.debug("nbPhotonInP[iMidChannel]      : {}", nbPhotPhoto[iMidChannel]);
                 logger.debug("nbPhotonInP                   : {}", Arrays.toString(nbPhotPhoto));
             }
 
@@ -924,12 +939,9 @@ public final class NoiseService implements VisNoiseService {
     private void dumpVis2Error(final int iChannel) {
         logger.info("channel: {} => {} microns", iChannel, waveLengths[iChannel]);
         dumpVis2ErrorSample(iChannel, 1d);
-        dumpVis2ErrorSample(iChannel, 0.75d);
         dumpVis2ErrorSample(iChannel, 0.5d);
-        dumpVis2ErrorSample(iChannel, 0.25d);
         dumpVis2ErrorSample(iChannel, 0.1d);
         dumpVis2ErrorSample(iChannel, 0.01d);
-        dumpVis2ErrorSample(iChannel, 0.001d);
     }
 
     private void dumpVis2ErrorSample(final int iChannel, final double visAmp) {
@@ -947,7 +959,8 @@ public final class NoiseService implements VisNoiseService {
         final double[] atmTrans = AtmosphereSpectrumService.getInstance().getTransmission(this.waveLengths, this.waveBands);
 
         if (logger.isDebugEnabled()) {
-            logger.debug("atmTrans: {}", Arrays.toString(atmTrans));
+            logger.debug("atmTrans[iMidChannel]         : {}", atmTrans[iMidChannel]);
+            logger.debug("atmTrans                      : {}", Arrays.toString(atmTrans));
         }
 
         if (false) {
@@ -967,7 +980,7 @@ public final class NoiseService implements VisNoiseService {
         for (int i = 0; i < nWLen; i++) {
             // nb of photons m^-2.s^-1.m^-1 for an object at magnitude 0:
             // note: fzero depends on the spectral band:
-            final double fzero = FastMath.pow(10d, insBand[i].getLogFluxZero()) 
+            final double fzero = FastMath.pow(10d, insBand[i].getLogFluxZero())
                     * (insBand[i].getLambda() * AsproConstants.MICRO_METER) / (H_PLANCK * C_LIGHT);
 
             // TODO: source flux may be spectrally dependent:
@@ -980,11 +993,12 @@ public final class NoiseService implements VisNoiseService {
                 logger.debug("fzero                         : {}", fzero);
                 logger.debug("fsrc                          : {}", fsrc);
             }
-            
+
             // nb of photons m^-2.s^-1 for the target object:
             fluxSrcPerChannel[i] = atmTrans[i] * fsrc * waveBands[i];
         }
         if (logger.isDebugEnabled()) {
+            logger.debug("fluxSrcPerChannel[iMidChannel]: {}", fluxSrcPerChannel[iMidChannel]);
             logger.debug("fluxSrcPerChannel             : {}", Arrays.toString(fluxSrcPerChannel));
         }
 
@@ -1052,6 +1066,7 @@ public final class NoiseService implements VisNoiseService {
             }
 
             if (logger.isDebugEnabled()) {
+                logger.debug("sqErrVis2Phot[iMidChannel]    : {}", sqErrVis2Phot[iMidChannel]);
                 logger.debug("sqErrVis2Phot                 : {}", Arrays.toString(sqErrVis2Phot));
             }
         } else {
@@ -1087,9 +1102,13 @@ public final class NoiseService implements VisNoiseService {
 
         if (logger.isDebugEnabled()) {
             logger.debug("elevation                     : {}", targetPointInfos[iPoint].getElevation());
+            logger.debug("sqCorFluxCoef[iMidChannel]    : {}", sqCorFluxCoef[iMidChannel]);
             logger.debug("sqCorFluxCoef                 : {}", Arrays.toString(sqCorFluxCoef));
+            logger.debug("varSqCorFluxCoef[iMidChannel] : {}", varSqCorFluxCoef[iMidChannel]);
             logger.debug("varSqCorFluxCoef              : {}", Arrays.toString(varSqCorFluxCoef));
+            logger.debug("varSqCorFluxConst[iMidChannel]: {}", varSqCorFluxConst[iMidChannel]);
             logger.debug("varSqCorFluxConst             : {}", Arrays.toString(varSqCorFluxConst));
+            logger.debug("biasV2[iMidChannel]           : {}", biasV2[iMidChannel]);
             logger.debug("biasV2                        : {}", Arrays.toString(biasV2));
         }
     }
@@ -1164,7 +1183,7 @@ public final class NoiseService implements VisNoiseService {
         }
         // repeat OBS measurements to reach totalObsTime minutes:
         errVis2 *= totFrameCorrection;
-        
+
         // estimate SNR(V2):
         snrV2 = vis2 / errVis2;
 
@@ -1184,11 +1203,11 @@ public final class NoiseService implements VisNoiseService {
         }
         return errVis2;
     }
-    
+
     /**
-    * Return the SNR (V2) estimated in computeVis2Error() for the current point (NOT thread safe) without any bias
-    * @return SNR (V2)
-    */
+     * Return the SNR (V2) estimated in computeVis2Error() for the current point (NOT thread safe) without any bias
+     * @return SNR (V2)
+     */
     public double getSNRVis2NoBias() {
         return snrV2;
     }
@@ -1459,7 +1478,7 @@ public final class NoiseService implements VisNoiseService {
         // TODO: fix that logic to use all possible bands within the instrument bandwidth
         switch (band) {
             case U:
-                // avoid 'band U not supported'
+            // avoid 'band U not supported'
             case B:
             case V:
             case R:
