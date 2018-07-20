@@ -86,6 +86,8 @@ public final class NoiseService implements VisNoiseService {
     private double seeing = Double.NaN;
     /** Number of Actuators of AO */
     private int nbOfActuators = 0;
+    /** AO Usage limit (mag) */
+    private double adaptiveOpticsLimit = Double.NaN;
     /** AO band */
     private SpectralBand aoBand;
 
@@ -290,15 +292,15 @@ public final class NoiseService implements VisNoiseService {
         if (ao != null) {
             this.aoBand = ao.getBand();
             this.nbOfActuators = ao.getNumberActuators();
+            if (ao.getMagLimit() != null) {
+                this.adaptiveOpticsLimit = ao.getMagLimit();
+            }
         } else {
             // by default: compute strehl ratio on V band with only 1 actuator ?
             this.aoBand = SpectralBand.V;
             this.nbOfActuators = 1;
         }
 
-        // TODO: add AO mag limits like FT
-        // V < 15 for UTs (MACAO)
-        // V < 11 for ATs (STRAP)
         // Seeing :
         final AtmosphereQuality atmQual = observation.getWhen().getAtmosphereQuality();
         if (atmQual != null) {
@@ -667,6 +669,12 @@ public final class NoiseService implements VisNoiseService {
             adaptiveOpticsMag = Double.NaN;
         } else {
             adaptiveOpticsMag = flux.doubleValue();
+
+            // check AO mag limits:
+            if (!Double.isNaN(adaptiveOpticsLimit) && adaptiveOpticsMag > adaptiveOpticsLimit) {
+                this.invalidParameters = true;
+                addWarning("Observation can not use AO (magnitude limit = " + adaptiveOpticsLimit + ").");
+            }
         }
         if (logger.isDebugEnabled()) {
             logger.debug("adaptiveOpticsMag             : {}", adaptiveOpticsMag);
