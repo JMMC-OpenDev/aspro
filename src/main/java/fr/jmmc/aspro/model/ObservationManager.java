@@ -31,6 +31,7 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
+import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.ModelDefinition;
@@ -1701,6 +1702,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             // update references :
             // can throw IllegalStateException if an invalid reference was found :
             updateObservation(observation);
+
+            // always define the default target groups:
+            TargetUtils.createDefaultTargetGroups(observation.getOrCreateTargetUserInfos());
 
             // commit configuration changes:
             changeConfiguration = true;

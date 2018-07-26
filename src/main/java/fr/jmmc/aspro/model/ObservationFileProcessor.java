@@ -110,13 +110,6 @@ public final class ObservationFileProcessor {
                 target.setUseAnalyticalModel(Boolean.TRUE);
             }
         }
-        
-        if (revision.getVersion() < AsproModelVersion.Apr2018Revision.getVersion()) {
-            // update model to Apr2018Revision :
-
-            // define the default target groups :
-            TargetUtils.createDefaultTargetGroups(observation.getOrCreateTargetUserInfos());
-        }
 
         logger.debug("convertModel done : {}", revision);
     }

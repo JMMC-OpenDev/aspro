@@ -205,8 +205,11 @@ public class TargetGroup
 
     /**
      * constructor for internal groups (JMMC)
+     * @param id id
      * @param name name
+     * @param category category
      * @param description description
+     * @param color color
      */
     public TargetGroup(final String id, final String name, final String category, final String description, final String color) {
         super();
@@ -220,6 +223,7 @@ public class TargetGroup
     /**
      * constructor with all fields
      * @param name name
+     * @param category category
      * @param description description
      * @param color color
      */

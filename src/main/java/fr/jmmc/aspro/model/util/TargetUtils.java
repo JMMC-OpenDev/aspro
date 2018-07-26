@@ -201,26 +201,32 @@ public final class TargetUtils {
     }
 
     public static void createDefaultTargetGroups(final TargetUserInformations targetUserInfos) {
-        targetUserInfos.addGroup(new TargetGroup(
-                TargetGroup.GROUP_AO,
-                "AO Star",
-                TargetGroup.CATEGORY_OB,
-                "Group indicating stars used by the Adaptive Optics system", 
-                "#F781BF"
-        ));
-        targetUserInfos.addGroup(new TargetGroup(
-                TargetGroup.GROUP_FT,
-                "FT Star",
-                TargetGroup.CATEGORY_OB,
-                "Group gathering stars used by the Fringe Tracking system", 
-                "#75C147"
-        ));
-        targetUserInfos.addGroup(new TargetGroup(
-                TargetGroup.GROUP_GUIDE,
-                "Guide Star",
-                TargetGroup.CATEGORY_OB,
-                "Group indicating stars used by the telescope guiding", 
-                "#5BAFD6"
-        ));
+        if (targetUserInfos.getGroupById(TargetGroup.GROUP_AO) == null) {
+            targetUserInfos.addGroup(new TargetGroup(
+                    TargetGroup.GROUP_AO,
+                    "AO Star",
+                    TargetGroup.CATEGORY_OB,
+                    "Group indicating stars used by the Adaptive Optics system",
+                    "#F781BF"
+            ));
+        }
+        if (targetUserInfos.getGroupById(TargetGroup.GROUP_FT) == null) {
+            targetUserInfos.addGroup(new TargetGroup(
+                    TargetGroup.GROUP_FT,
+                    "FT Star",
+                    TargetGroup.CATEGORY_OB,
+                    "Group gathering stars used by the Fringe Tracking system",
+                    "#75C147"
+            ));
+        }
+        if (targetUserInfos.getGroupById(TargetGroup.GROUP_GUIDE) == null) {
+            targetUserInfos.addGroup(new TargetGroup(
+                    TargetGroup.GROUP_GUIDE,
+                    "Guide Star",
+                    TargetGroup.CATEGORY_OB,
+                    "Group indicating stars used by the telescope guiding",
+                    "#5BAFD6"
+            ));
+        }
     }
 }
