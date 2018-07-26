@@ -66,6 +66,9 @@
     <logger name="fr.jmmc.aspro.service.ObservabilityService" level="INFO"/>
     <logger name="fr.jmmc.aspro.service.UVCoverageService" level="INFO"/>
 
+    <logger name="fr.jmmc.aspro.service.UserModelService" level="ALL"/>
+    <logger name="fr.jmmc.jmal.model.ModelUVMapService" level="ALL"/>
+
     <logger name="fr.jmmc.aspro.service.NoiseService" level="DEBUG"/>
     -->
 
