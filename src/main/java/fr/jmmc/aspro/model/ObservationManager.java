@@ -1628,7 +1628,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         // Adjust the user uv Max = max base line / minimum wave length
         // note : use the minimum wave length of the instrument to
         // - make all uv segment visible
-        // - avoid to much model computations (when the instrument mode changes)
+        // - avoid too much model computations (when the instrument mode changes)
         uvMax /= instrumentMinWaveLength;
 
         return uvMax;
