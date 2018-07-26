@@ -148,7 +148,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
              */
             @Override
             public void actionPerformed(final ActionEvent ae) {
-                logger.info("timerUserModelReload: FIRED");
+                logger.debug("timerUserModelReload: FIRED");
                 prepareUserModel();
             }
         });
@@ -659,8 +659,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     } else {
                         final double inc = convertMasToRad(val.doubleValue());
                         // check increment:
-                        logger.info("IncCol: {}", fitsImage.getIncCol());
-                        logger.info("inc: {}", inc);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("IncCol: {}", fitsImage.getIncCol());
+                            logger.debug("inc: {}", inc);
+                        }
 
                         if (!NumberUtils.equals(fitsImage.getIncCol(), inc, MAS_EPSILON)) {
                             changed = true;
@@ -671,7 +673,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                             }
                         }
                     }
-                    logger.info("scaleX: {}", userModel.getScaleX());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("scaleX: {}", userModel.getScaleX());
+                    }
 
                     // Handle linked state:
                     if (this.jToggleButtonLinked.isSelected()) {
@@ -688,8 +692,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     } else {
                         final double inc = convertMasToRad(val.doubleValue());
                         // check increment:
-                        logger.info("IncRow: {}", fitsImage.getIncRow());
-                        logger.info("inc: {}", inc);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("IncRow: {}", fitsImage.getIncRow());
+                            logger.debug("inc: {}", inc);
+                        }
 
                         if (!NumberUtils.equals(fitsImage.getIncRow(), inc, MAS_EPSILON)) {
                             changed = true;
@@ -700,7 +706,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                             }
                         }
                     }
-                    logger.info("scaleY: {}", userModel.getScaleY());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("scaleY: {}", userModel.getScaleY());
+                    }
 
                 } else if (e.getSource() == this.jFormattedTextFieldRotation) {
                     Number val = (Number) this.jFormattedTextFieldRotation.getValue();
@@ -712,8 +720,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     } else {
                         final double rot = val.doubleValue();
                         // check rotation:
-                        logger.info("RotAngle: {}", fitsImage.getRotAngle());
-                        logger.info("rot: {}", rot);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("RotAngle: {}", fitsImage.getRotAngle());
+                            logger.debug("rot: {}", rot);
+                        }
 
                         if (!NumberUtils.equals(fitsImage.getRotAngle(), rot)) {
                             changed = true;
@@ -724,7 +734,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                             }
                         }
                     }
-                    logger.info("rotation: {}", userModel.getRotation());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("rotation: {}", userModel.getRotation());
+                    }
                 }
                 if (changed) {
                     // trigger reload user model:
@@ -1736,9 +1748,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private void triggerReloadUserModel(final boolean enable) {
         if (enable) {
             disableAnimator();
-
-            logger.info("triggerReloadUserModel");
-
             if (this.timerUserModelReload.isRunning()) {
                 logger.debug("RE-starting timer: {}", this.timerUserModelReload);
                 this.timerUserModelReload.restart();
