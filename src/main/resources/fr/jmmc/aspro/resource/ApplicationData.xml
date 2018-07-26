@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.5 beta 7"/>
-    <compilation date="13/07/2018" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.5 beta 8"/>
+    <compilation date="26/07/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -219,7 +219,11 @@
 
     <releasenotes>
         <release version="0.9.9.5">
-            <pubDate>Fri, 08 June 2018 13:00:00 GMT</pubDate>
+            <pubDate>Thu, 26 July 2018 14:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.5 beta 8">
+                <change type="FEATURE">Added scale / rotation fields in the 'Target Editor' to adjust user models (FITS images):
+                    these optional fields are taken into account in the Fits image viewer, UV Coverage panel and OIFits viewer</change>
+            </prerelease>
             <prerelease version="0.9.9.5 beta 7">
                 <change type="FEATURE">Added 'Mag conv.' action in the Target Editor to open the Magnitude to Flux converter (Jy to mag), useful for MATISSE fluxes</change>
             </prerelease>
