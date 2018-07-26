@@ -221,8 +221,8 @@
         <release version="0.9.9.5">
             <pubDate>Thu, 26 July 2018 14:00:00 GMT</pubDate>
             <prerelease version="0.9.9.5 beta 8">
-                <change type="FEATURE">Added scale / rotation fields in the 'Target Editor' to adjust user models (FITS images):
-                    these optional fields are taken into account in the Fits image viewer, UV Coverage panel and OIFits viewer</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/296">Added scale / rotation fields in the 'Target Editor' to adjust user models (FITS images):
+                    these optional fields are taken into account in the Fits image viewer, UV Coverage panel and OIFits viewer (GUI) and by the command line tool</change>
             </prerelease>
             <prerelease version="0.9.9.5 beta 7">
                 <change type="FEATURE">Added 'Mag conv.' action in the Target Editor to open the Magnitude to Flux converter (Jy to mag), useful for MATISSE fluxes</change>
