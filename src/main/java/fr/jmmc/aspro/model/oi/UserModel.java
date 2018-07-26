@@ -26,6 +26,9 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="file" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="checksum" type="{http://www.w3.org/2001/XMLSchema}long"/&gt;
+ *         &lt;element name="scaleX" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="scaleY" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="rotation" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -39,7 +42,10 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "description",
     "file",
-    "checksum"
+    "checksum",
+    "scaleX",
+    "scaleY",
+    "rotation"
 })
 public class UserModel
     extends OIBase
@@ -51,6 +57,9 @@ public class UserModel
     @XmlElement(required = true)
     protected String file;
     protected long checksum;
+    protected Double scaleX;
+    protected Double scaleY;
+    protected Double rotation;
 
     /**
      * Gets the value of the name property.
@@ -139,6 +148,78 @@ public class UserModel
     public void setChecksum(long value) {
         this.checksum = value;
     }
+
+    /**
+     * Gets the value of the scaleX property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getScaleX() {
+        return scaleX;
+    }
+
+    /**
+     * Sets the value of the scaleX property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setScaleX(Double value) {
+        this.scaleX = value;
+    }
+
+    /**
+     * Gets the value of the scaleY property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getScaleY() {
+        return scaleY;
+    }
+
+    /**
+     * Sets the value of the scaleY property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setScaleY(Double value) {
+        this.scaleY = value;
+    }
+
+    /**
+     * Gets the value of the rotation property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getRotation() {
+        return rotation;
+    }
+
+    /**
+     * Sets the value of the rotation property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setRotation(Double value) {
+        this.rotation = value;
+    }
     
 //--simple--preserve
   /** flag indicating that the file reference is valid (readable) */
@@ -172,6 +253,7 @@ public class UserModel
   public boolean isModelDataReady() {
     return !isEmpty(modelDataList);
   }
+
   /**
    * Return the Cached model data given its image index (read only)
    * @param index image index [0; n[
@@ -225,7 +307,10 @@ public class UserModel
         return (areEquals(this.name, other.getName())
                 && areEquals(this.description, other.getDescription())
                 && areEquals(this.file, other.getFile())
-                && areEquals(this.checksum, other.getChecksum()));
+                && areEquals(this.checksum, other.getChecksum())
+                && areEquals(this.scaleX, other.getScaleX())
+                && areEquals(this.scaleY, other.getScaleY())
+                && areEquals(this.rotation, other.getRotation()));
     }
 
 //--simple--preserve

@@ -875,6 +875,29 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <!-- User-defined keyword values (scale, rotation) -->
+            <xsd:element name="scaleX" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        image scale (i.e. pixel increments) on the horizontal axis (RA) in rad
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="scaleY" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        image scale (i.e. pixel increments) on the vertical axis (DEC) in rad
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="rotation" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        rotation angle in degrees
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
 
