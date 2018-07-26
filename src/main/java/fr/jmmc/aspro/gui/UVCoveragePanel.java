@@ -1774,14 +1774,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // update uvMax according to UVCoverage Service (wavelength correction):
                 this.uvMax = uvDataFirst.getUvMax();
 
-                // Get the noise service if enabled:
-                // note: it depends on telescopes so it is enabled only for single configuration:
-                final NoiseService noiseService = (this.doImageNoise && uvDataCollection.isSingle()) ? uvDataFirst.getNoiseService() : null;
-
-                final Rectangle2D.Double uvRect = new Rectangle2D.Double();
-                uvRect.setFrameFromDiagonal(-this.uvMax, -this.uvMax, this.uvMax, this.uvMax);
-
                 if (target != null && target.hasModel()) {
+
+                    // Get the noise service if enabled:
+                    // note: it depends on telescopes so it is enabled only for single configuration:
+                    final NoiseService noiseService = (this.doImageNoise && uvDataCollection.isSingle()) ? uvDataFirst.getNoiseService() : null;
+
+                    final Rectangle2D.Double uvRect = new Rectangle2D.Double();
+                    uvRect.setFrameFromDiagonal(-this.uvMax, -this.uvMax, this.uvMax, this.uvMax);
 
                     // Fix image index:
                     final List<UserModelData> modelDataList = (target.hasAnalyticalModel()) ? null : target.getUserModel().getModelDataList();
@@ -2369,6 +2369,23 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                             new UVMapSwingWorker(this, target.getModels(), uvRect, refMin, refMax,
                                     imageMode, imageSize, colorModel, colorScale, noiseService).executeTask();
 
+                        } else if (false) {
+                            // not working: sub region (uvRect) not supported
+
+                            // Fix image index:
+                            final List<UserModelData> modelDataList = (target.hasAnalyticalModel()) ? null : target.getUserModel().getModelDataList();
+
+                            if (modelDataList != null) {
+                                final int imageIdx = uvMapData.getImageIndex();
+
+                                // Get preloaded and prepared fits image at given index:
+                                final FitsImage fitsImage = modelDataList.get(imageIdx).getFitsImage();
+
+                                if (fitsImage != null) {
+                                    new UVMapSwingWorker(this, fitsImage, uvRect, refMin, refMax,
+                                            imageMode, imageSize, colorModel, colorScale, noiseService).executeTask();
+                                }
+                            }
                         }
                     } else // cancel anyway currently running UVMapSwingWorker:
                     {
@@ -2494,9 +2511,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                             this.imageMode, this.imageSize, this.colorModel, this.colorScale, this.noiseService);
 
                 } else if (fitsImage != null) {
-                    // User Model:
-
-                    // Compute Target Model for the UV coverage limits ONCE :
+                    // NOT working: sub region (uvRect) not supported
                     // Note: throws IllegalArgumentException if the fits image is invalid:
                     return UserModelService.computeUVMap(this.fitsImage, this.uvRect, this.imageMode,
                             this.imageSize, this.colorModel, this.colorScale, noiseService, this.refMin, this.refMax, null);
