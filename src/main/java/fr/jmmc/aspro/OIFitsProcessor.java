@@ -45,6 +45,10 @@ public final class OIFitsProcessor {
     public final static String ARG_SUPER_SAMPLING = "supersampling";
     /** CLI arg - math */
     public final static String ARG_MATH = "math";
+    /** CLI arg - scale (mas) */
+    public final static String ARG_SCALE = "scale";
+    /** CLI arg - rotation (deg) */
+    public final static String ARG_ROTATE = "rotate";
 
     public static void defineCommandLineArguments(final App app) {
         app.addCustomCommandLineArgument(ARG_IMAGE, true, "the input FITS model to process", App.ExecMode.TTY);
@@ -55,6 +59,9 @@ public final class OIFitsProcessor {
         app.addCustomCommandLineArgument(ARG_SUPER_SAMPLING, true, "supersampling per spectral channel ["
                 + AsproConstants.DEFAULT_SUPER_SAMPLING + "]", App.ExecMode.TTY);
         app.addCustomCommandLineArgument(ARG_MATH, true, "Math mode: ['FAST'] faster, 'DEFAULT' highest accuracy or 'QUICK' fastest BUT low accuracy", App.ExecMode.TTY);
+        // transform arguments:
+        app.addCustomCommandLineArgument(ARG_SCALE, true, "optional image scale (increment) expressed in milli-arcsec (mas)", App.ExecMode.TTY);
+        app.addCustomCommandLineArgument(ARG_ROTATE, true, "optional image rotation expressed in degrees", App.ExecMode.TTY);
     }
 
     public static void processCommandLine(final App app, final Map<String, String> argValues) {
@@ -75,19 +82,27 @@ public final class OIFitsProcessor {
             // Optional arguments:
             final String outputFile = argValues.get(ARG_OUTPUT);
 
-            final String fastArg = argValues.get(ARG_FAST);
-            final boolean useFastMode = (fastArg != null) ? Boolean.parseBoolean(fastArg) : true;
+            String optArg = argValues.get(ARG_FAST);
+            final boolean useFastMode = (optArg != null) ? Boolean.parseBoolean(optArg) : true;
 
-            final String supersamplingArg = argValues.get(ARG_SUPER_SAMPLING);
-            final int supersampling = (supersamplingArg != null) ? Integer.parseInt(supersamplingArg)
+            optArg = argValues.get(ARG_SUPER_SAMPLING);
+            final int supersampling = (optArg != null) ? Integer.parseInt(optArg)
                     : AsproConstants.DEFAULT_SUPER_SAMPLING.intValue();
 
-            final String mathArg = argValues.get(ARG_MATH);
-            final MathMode mathMode = (mathArg != null) ? MathMode.valueOf(mathArg) : MathMode.FAST;
+            optArg = argValues.get(ARG_MATH);
+            final MathMode mathMode = (optArg != null) ? MathMode.valueOf(optArg) : MathMode.FAST;
+
+            // transform arguments:
+            optArg = argValues.get(ARG_SCALE);
+            final double scale = (optArg != null) ? Double.parseDouble(optArg) : Double.NaN;
+
+            optArg = argValues.get(ARG_ROTATE);
+            final double rotate = (optArg != null) ? Double.parseDouble(optArg) : Double.NaN;
 
             // Process (in sync):
             new OIFitsProcessor(inputFile, modelFile, outputFile,
-                    useFastMode, supersampling, mathMode).process();
+                    useFastMode, supersampling, mathMode,
+                    scale, rotate).process();
         }
     }
 
@@ -104,6 +119,10 @@ public final class OIFitsProcessor {
     private final int supersampling;
     /** OIFits MathMode */
     private final MathMode mathMode;
+    /** scale / increment (mas) */
+    private final double scale;
+    /** rotation angle (deg) */
+    private final double rotate;
 
     /**
      * Constructor
@@ -113,15 +132,20 @@ public final class OIFitsProcessor {
      * @param useFastMode true to ignore useless data (faster); false to have highest precision
      * @param supersampling OIFits supersampling preference
      * @param mathMode OIFits MathMode preference
+     * @param scale scale / increment (mas)
+     * @param rotate rotation angle (deg)
      */
     private OIFitsProcessor(final String inputFile, final String modelFile, final String outputFile,
-                            final boolean useFastMode, final int supersampling, final UserModelService.MathMode mathMode) {
+                            final boolean useFastMode, final int supersampling, final UserModelService.MathMode mathMode,
+                            final double scale, final double rotate) {
         this.inputFile = inputFile;
         this.modelFile = modelFile;
         this.outputFile = (outputFile != null) ? outputFile : (inputFile + "-processed.fits");
         this.useFastMode = useFastMode;
         this.supersampling = supersampling;
         this.mathMode = mathMode;
+        this.scale = scale;
+        this.rotate = rotate;
 
         logSeparator();
         logger.info("OIFitsProcessor arguments:");
@@ -131,6 +155,8 @@ public final class OIFitsProcessor {
         logger.info("useFastMode:   {}", useFastMode);
         logger.info("supersampling: {}", supersampling);
         logger.info("mathMode:      {}", mathMode);
+        logger.info("scale:         {}", scale);
+        logger.info("rotate:        {}", rotate);
     }
 
     public void process() {
@@ -143,6 +169,16 @@ public final class OIFitsProcessor {
             // load and prepare images:
             final UserModel userModel = new UserModel();
             userModel.setFile(modelFile);
+
+            // define optional Transforms:
+            if (!Double.isNaN(scale)) {
+                final double inc = UserModelService.convertMasToRad(scale);
+                userModel.setScaleX(inc);
+                userModel.setScaleY(inc);
+            }
+            if (!Double.isNaN(rotate)) {
+                userModel.setRotation(rotate);
+            }
 
             // throws exceptions if the given fits file or image is incorrect:
             UserModelService.prepareUserModel(userModel, useFastMode);

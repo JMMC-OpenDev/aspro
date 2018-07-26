@@ -440,8 +440,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     final FitsImage fitsImage = modelDataList.get(0).getFitsImage();
 
                     // use only positive increments (no direction)
-                    this.jFormattedTextFieldScaleX.setValue(convertRadToMas(fitsImage.getIncCol()));
-                    this.jFormattedTextFieldScaleY.setValue(convertRadToMas(fitsImage.getIncRow()));
+                    this.jFormattedTextFieldScaleX.setValue(UserModelService.convertRadToMas(fitsImage.getIncCol()));
+                    this.jFormattedTextFieldScaleY.setValue(UserModelService.convertRadToMas(fitsImage.getIncRow()));
                     this.jFormattedTextFieldRotation.setValue(fitsImage.getRotAngle());
 
                     this.fitsImagePanel.setFitsImage(fitsImage);
@@ -657,7 +657,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                             userModel.setScaleX(null);
                         }
                     } else {
-                        final double inc = convertMasToRad(val.doubleValue());
+                        final double inc = UserModelService.convertMasToRad(val.doubleValue());
                         // check increment:
                         if (logger.isDebugEnabled()) {
                             logger.debug("IncCol: {}", fitsImage.getIncCol());
@@ -690,7 +690,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                             userModel.setScaleY(null);
                         }
                     } else {
-                        final double inc = convertMasToRad(val.doubleValue());
+                        final double inc = UserModelService.convertMasToRad(val.doubleValue());
                         // check increment:
                         if (logger.isDebugEnabled()) {
                             logger.debug("IncRow: {}", fitsImage.getIncRow());
@@ -1547,8 +1547,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             final FitsImage fitsImage = userModel.getModelData(0).getFitsImage();
 
             // use only positive increments (no direction)
-            this.jFormattedTextFieldScaleX.setValue(convertRadToMas(fitsImage.getOrigIncCol()));
-            this.jFormattedTextFieldScaleY.setValue(convertRadToMas(fitsImage.getOrigIncRow()));
+            this.jFormattedTextFieldScaleX.setValue(UserModelService.convertRadToMas(fitsImage.getOrigIncCol()));
+            this.jFormattedTextFieldScaleY.setValue(UserModelService.convertRadToMas(fitsImage.getOrigIncRow()));
             this.jFormattedTextFieldRotation.setValue(fitsImage.getOrigRotAngle());
         }
     }//GEN-LAST:event_jButtonResetActionPerformed
@@ -1759,13 +1759,5 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             logger.debug("Stopping timer: {}", this.timerUserModelReload);
             this.timerUserModelReload.stop();
         }
-    }
-
-    private static double convertRadToMas(final double angRad) {
-        return Math.toDegrees(angRad) * ALX.DEG_IN_MILLI_ARCSEC;
-    }
-
-    private static double convertMasToRad(final double angMas) {
-        return Math.toRadians(angMas * ALX.MILLI_ARCSEC_IN_DEGREES);
     }
 }
