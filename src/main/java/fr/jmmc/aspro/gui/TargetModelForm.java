@@ -16,6 +16,7 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.service.UserModelData;
 import fr.jmmc.aspro.service.UserModelService;
+import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.EditMode;
@@ -27,14 +28,18 @@ import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.NumericJTable;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.FitsImagePanel;
+import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageHDU;
 import fr.nom.tam.fits.FitsException;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,6 +50,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -62,7 +68,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author bourgesl
  */
-public final class TargetModelForm extends javax.swing.JPanel implements ActionListener, TreeSelectionListener, ListSelectionListener,
+public final class TargetModelForm extends javax.swing.JPanel implements ActionListener, PropertyChangeListener,
+                                                                         TreeSelectionListener, ListSelectionListener,
                                                                          UserModelAnimatorListener, Disposable {
 
     /** default serial UID for Serializable interface */
@@ -73,6 +80,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private final static MimeType mimeType = MimeType.FITS_IMAGE;
     /** user model animator singleton */
     private final static UserModelAnimator animator = UserModelAnimator.getInstance();
+    /** Smallest positive number used in double comparisons (rounding). */
+    public final static double MAS_EPSILON = 1e-6d * ALX.MILLI_ARCSEC_IN_DEGREES;
+    /** default reload latency = 20 ms */
+    private static final int RELOAD_LATENCY = 20;
 
     /* members */
     /** list of edited targets (clone) */
@@ -89,6 +100,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private AnimatorPanel animatorPanel = null;
     /** current user model to refresh images */
     private UserModel currentUserModel = null;
+    /** flag to enable / disable the automatic update of the user model when any swing component changes */
+    private boolean doAutoUpdateUserModel = true;
+    /** User model reload Swing timer */
+    private final Timer timerUserModelReload;
 
     /**
      * Creates new form TargetModelForm (used by NetBeans editor only)
@@ -125,6 +140,20 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         this.jRadioButtonXY.setSelected(preferXyMode);
 
         postInit();
+
+        // Create the timer:
+        this.timerUserModelReload = new Timer(RELOAD_LATENCY, new ActionListener() {
+            /**
+             * Invoked when the timer action occurs.
+             */
+            @Override
+            public void actionPerformed(final ActionEvent ae) {
+                logger.info("timerUserModelReload: FIRED");
+                prepareUserModel();
+            }
+        });
+        // never repeats
+        this.timerUserModelReload.setRepeats(false);
     }
 
     /**
@@ -158,11 +187,18 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         this.jRadioButtonXY.addActionListener(this);
         this.jRadioButtonSepPosAngle.addActionListener(this);
 
+        // user-defined scale / rotation:
+        this.jFormattedTextFieldScaleX.addPropertyChangeListener("value", this);
+        this.jFormattedTextFieldScaleY.addPropertyChangeListener("value", this);
+        this.jFormattedTextFieldRotation.addPropertyChangeListener("value", this);
+
         // disable column reordering :
         this.jTableModelParameters.getTableHeader().setReorderingAllowed(false);
 
         // Fix row height:
         SwingUtils.adjustRowHeight(jTableModelParameters);
+
+        handleLinkedState();
     }
 
     /**
@@ -214,6 +250,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      */
     void disableForm() {
         disableAnimator();
+        triggerReloadUserModel(false);
     }
 
     /**
@@ -365,61 +402,78 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         boolean enableAnimator = false;
 
-        // User model:
-        final UserModel userModel = target.getUserModel();
-        if (userModel != null) {
-            if (userModel.isFileValid()) {
-                this.jRadioButtonValid.setSelected(true);
-                this.jButtonImageInfo.setEnabled(true);
+        // disable the automatic user model:
+        final boolean prevAutoUpdateUserModel = setAutoUpdateUserModel(false);
+        try {
+            // User model:
+            final UserModel userModel = target.getUserModel();
+            if (userModel != null) {
+                if (userModel.isFileValid()) {
+                    this.jRadioButtonValid.setSelected(true);
+                } else {
+                    this.jRadioButtonInvalid.setSelected(true);
+                }
+                this.jTextFieldFileReference.setText(userModel.getFile());
+                enableUserModelFields(true);
+
+                if (!isAnalytical && userModel.isModelDataReady()) {
+                    // update fits Image:
+                    if (this.fitsImagePanel == null) {
+                        // do not show id but options:
+                        this.fitsImagePanel = new FitsImagePanel(Preferences.getInstance(), false, true) {
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            protected void resetPlot() {
+                                try {
+                                    super.resetPlot();
+                                } finally {
+                                    disableAnimator();
+                                }
+                            }
+                        };
+                    }
+
+                    final List<UserModelData> modelDataList = userModel.getModelDataList();
+
+                    // use first image:
+                    final FitsImage fitsImage = modelDataList.get(0).getFitsImage();
+
+                    // use only positive increments (no direction)
+                    this.jFormattedTextFieldScaleX.setValue(convertRadToMas(fitsImage.getIncCol()));
+                    this.jFormattedTextFieldScaleY.setValue(convertRadToMas(fitsImage.getIncRow()));
+                    this.jFormattedTextFieldRotation.setValue(fitsImage.getRotAngle());
+
+                    this.fitsImagePanel.setFitsImage(fitsImage);
+
+                    if (modelDataList.size() > 1) {
+                        enableAnimator = true;
+                        this.currentUserModel = userModel;
+                    }
+
+                    this.jPanelImage.add(this.fitsImagePanel);
+                }
+
             } else {
                 this.jRadioButtonInvalid.setSelected(true);
-                this.jButtonImageInfo.setEnabled(false);
-            }
-            this.jTextFieldFileReference.setText(userModel.getFile());
+                this.jTextFieldFileReference.setText(null);
+                this.jFormattedTextFieldScaleX.setValue(null);
+                this.jFormattedTextFieldScaleY.setValue(null);
+                this.jFormattedTextFieldRotation.setValue(null);
 
-            if (!isAnalytical && userModel.isModelDataReady()) {
-                // update fits Image:
-                if (this.fitsImagePanel == null) {
-                    // do not show id but options:
-                    this.fitsImagePanel = new FitsImagePanel(Preferences.getInstance(), false, true) {
-                        private static final long serialVersionUID = 1L;
+                enableUserModelFields(false);
 
-                        @Override
-                        protected void resetPlot() {
-                            try {
-                                super.resetPlot();
-                            } finally {
-                                disableAnimator();
-                            }
-                        }
-                    };
+                if (this.fitsImagePanel != null) {
+                    // reset the FitsImage panel:
+                    this.fitsImagePanel.setFitsImage(null);
                 }
 
-                final List<UserModelData> modelDataList = userModel.getModelDataList();
-
-                // use first image:
-                this.fitsImagePanel.setFitsImage(modelDataList.get(0).getFitsImage());
-
-                if (modelDataList.size() > 1) {
-                    enableAnimator = true;
-                    this.currentUserModel = userModel;
-                }
-
-                this.jPanelImage.add(this.fitsImagePanel);
+                // remove the FitsImage panel:
+                this.jPanelImage.removeAll();
             }
-
-        } else {
-            this.jRadioButtonInvalid.setSelected(true);
-            this.jTextFieldFileReference.setText(null);
-            this.jButtonImageInfo.setEnabled(false);
-
-            if (this.fitsImagePanel != null) {
-                // reset the FitsImage panel:
-                this.fitsImagePanel.setFitsImage(null);
-            }
-
-            // remove the FitsImage panel:
-            this.jPanelImage.removeAll();
+        } finally {
+            // restore the automatic update observation :
+            setAutoUpdateUserModel(prevAutoUpdateUserModel);
         }
 
         // anyway enable or disable animator:
@@ -493,6 +547,14 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         this.jPanelImage.setVisible(!isAnalytical);
     }
 
+    private void enableUserModelFields(boolean enabled) {
+        this.jButtonImageInfo.setEnabled(enabled);
+        this.jFormattedTextFieldScaleX.setEnabled(enabled);
+        handleLinkedState();
+        this.jFormattedTextFieldRotation.setEnabled(enabled);
+        this.jButtonReset.setEnabled(enabled);
+    }
+
     /**
      * Define the list of models to use in the table of parameters
      * @param target target models to use
@@ -563,21 +625,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             if (logger.isDebugEnabled()) {
                 logger.debug("enable userModel: {}", this.jRadioButtonValid.isSelected());
             }
-            final UserModel userModel = this.currentTarget.getUserModel();
-            if (userModel == null) {
-                this.jRadioButtonInvalid.setSelected(true);
-            } else {
-                try {
-                    prepareAndValidateUserModel(userModel);
-                } finally {
-                    if (!userModel.isFileValid()) {
-                        this.jRadioButtonInvalid.setSelected(true);
-                    }
-                }
-
-                // reselect target to update image:
-                processTargetSelection(currentTarget);
-            }
+            // trigger reload user model:
+            triggerReloadUserModel(true);
         } else if (e.getSource() == this.jRadioButtonInvalid) {
             if (logger.isDebugEnabled()) {
                 logger.debug("disable userModel: {}", this.jRadioButtonInvalid.isSelected());
@@ -586,6 +635,124 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             if (userModel != null) {
                 userModel.setFileValid(false);
             }
+        }
+    }
+
+    @Override
+    public void propertyChange(final PropertyChangeEvent e) {
+        if (doAutoUpdateUserModel && this.currentTarget != null) {
+            final UserModel userModel = this.currentTarget.getUserModel();
+
+            if (userModel != null && userModel.isModelDataReady()) {
+                boolean changed = false;
+
+                // use first image:
+                final FitsImage fitsImage = userModel.getModelData(0).getFitsImage();
+
+                if (e.getSource() == this.jFormattedTextFieldScaleX) {
+                    final Number val = (Number) this.jFormattedTextFieldScaleX.getValue();
+                    if (val == null) {
+                        if (userModel.getScaleX() != null) {
+                            changed = true;
+                            userModel.setScaleX(null);
+                        }
+                    } else {
+                        final double inc = convertMasToRad(val.doubleValue());
+                        // check increment:
+                        logger.info("IncCol: {}", fitsImage.getIncCol());
+                        logger.info("inc: {}", inc);
+
+                        if (!NumberUtils.equals(fitsImage.getIncCol(), inc, MAS_EPSILON)) {
+                            changed = true;
+                            if (NumberUtils.equals(fitsImage.getOrigIncCol(), inc, MAS_EPSILON)) {
+                                userModel.setScaleX(null);
+                            } else {
+                                userModel.setScaleX(inc);
+                            }
+                        }
+                    }
+                    logger.info("scaleX: {}", userModel.getScaleX());
+
+                    // Handle linked state:
+                    if (this.jToggleButtonLinked.isSelected()) {
+                        this.jFormattedTextFieldScaleY.setValue(this.jFormattedTextFieldScaleX.getValue());
+                    }
+
+                } else if (e.getSource() == this.jFormattedTextFieldScaleY) {
+                    final Number val = (Number) this.jFormattedTextFieldScaleY.getValue();
+                    if (val == null) {
+                        if (userModel.getScaleY() != null) {
+                            changed = true;
+                            userModel.setScaleY(null);
+                        }
+                    } else {
+                        final double inc = convertMasToRad(val.doubleValue());
+                        // check increment:
+                        logger.info("IncRow: {}", fitsImage.getIncRow());
+                        logger.info("inc: {}", inc);
+
+                        if (!NumberUtils.equals(fitsImage.getIncRow(), inc, MAS_EPSILON)) {
+                            changed = true;
+                            if (NumberUtils.equals(fitsImage.getOrigIncRow(), inc, MAS_EPSILON)) {
+                                userModel.setScaleY(null);
+                            } else {
+                                userModel.setScaleY(inc);
+                            }
+                        }
+                    }
+                    logger.info("scaleY: {}", userModel.getScaleY());
+
+                } else if (e.getSource() == this.jFormattedTextFieldRotation) {
+                    Number val = (Number) this.jFormattedTextFieldRotation.getValue();
+                    if (val == null) {
+                        if (userModel.getRotation() != null) {
+                            changed = true;
+                            userModel.setRotation(null);
+                        }
+                    } else {
+                        final double rot = val.doubleValue();
+                        // check rotation:
+                        logger.info("RotAngle: {}", fitsImage.getRotAngle());
+                        logger.info("rot: {}", rot);
+
+                        if (!NumberUtils.equals(fitsImage.getRotAngle(), rot)) {
+                            changed = true;
+                            if (NumberUtils.equals(fitsImage.getOrigRotAngle(), rot)) {
+                                userModel.setRotation(null);
+                            } else {
+                                userModel.setRotation(rot);
+                            }
+                        }
+                    }
+                    logger.info("rotation: {}", userModel.getRotation());
+                }
+                if (changed) {
+                    // trigger reload user model:
+                    triggerReloadUserModel(true);
+                }
+            }
+        }
+    }
+
+    void prepareUserModel() {
+        if (this.currentTarget == null) {
+            return;
+        }
+
+        final UserModel userModel = this.currentTarget.getUserModel();
+        if (userModel == null) {
+            this.jRadioButtonInvalid.setSelected(true);
+        } else {
+            try {
+                prepareAndValidateUserModel(userModel);
+            } finally {
+                if (!userModel.isFileValid()) {
+                    this.jRadioButtonInvalid.setSelected(true);
+                }
+            }
+
+            // reselect target to update image:
+            processTargetSelection(currentTarget);
         }
     }
 
@@ -669,6 +836,13 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jTextFieldFileReference = new javax.swing.JTextField();
         jButtonOpenFile = new javax.swing.JButton();
         jButtonImageInfo = new javax.swing.JButton();
+        jLabelScale = new javax.swing.JLabel();
+        jFormattedTextFieldScaleX = new javax.swing.JFormattedTextField();
+        jLabelRotation = new javax.swing.JLabel();
+        jFormattedTextFieldRotation = new javax.swing.JFormattedTextField();
+        jButtonReset = new javax.swing.JButton();
+        jFormattedTextFieldScaleY = new javax.swing.JFormattedTextField();
+        jToggleButtonLinked = new javax.swing.JToggleButton();
         jPanelDescription = new javax.swing.JPanel();
         jScrollPaneModelDescription = new javax.swing.JScrollPane();
         jLabelModelDescrption = new javax.swing.JLabel();
@@ -696,7 +870,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.3;
-        gridBagConstraints.weighty = 0.2;
+        gridBagConstraints.weighty = 0.1;
         add(jScrollPaneTreeModels, gridBagConstraints);
 
         jPanelModel.setBorder(javax.swing.BorderFactory.createTitledBorder("Model"));
@@ -866,6 +1040,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.6;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jTextFieldFileReference, gridBagConstraints);
 
         jButtonOpenFile.setText("Open");
@@ -893,6 +1068,83 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jButtonImageInfo, gridBagConstraints);
 
+        jLabelScale.setText("Scale");
+        jLabelScale.setToolTipText("image increments in mas");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+        jPanelUserModel.add(jLabelScale, gridBagConstraints);
+
+        jFormattedTextFieldScaleX.setColumns(10);
+        jFormattedTextFieldScaleX.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00##E0"))));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jFormattedTextFieldScaleX, gridBagConstraints);
+
+        jLabelRotation.setText("Rotation");
+        jLabelRotation.setToolTipText("image rotation in degrees");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+        jPanelUserModel.add(jLabelRotation, gridBagConstraints);
+
+        jFormattedTextFieldRotation.setColumns(10);
+        jFormattedTextFieldRotation.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jFormattedTextFieldRotation, gridBagConstraints);
+
+        jButtonReset.setText("reset");
+        jButtonReset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonResetActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jButtonReset, gridBagConstraints);
+
+        jFormattedTextFieldScaleY.setColumns(10);
+        jFormattedTextFieldScaleY.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00##E0"))));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jFormattedTextFieldScaleY, gridBagConstraints);
+
+        jToggleButtonLinked.setSelected(true);
+        jToggleButtonLinked.setText("linked");
+        jToggleButtonLinked.setEnabled(false);
+        jToggleButtonLinked.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jToggleButtonLinked.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButtonLinkedActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jToggleButtonLinked, gridBagConstraints);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -905,7 +1157,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.6;
-        gridBagConstraints.weighty = 0.2;
+        gridBagConstraints.weighty = 0.1;
         add(jPanelModel, gridBagConstraints);
 
         jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Model description"));
@@ -932,7 +1184,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 0.2;
+        gridBagConstraints.weighty = 0.3;
         add(jPanelDescription, gridBagConstraints);
 
         jPanelParameters.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Parameters"));
@@ -1012,7 +1264,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 0.8;
+        gridBagConstraints.weighty = 0.9;
         add(jPanelImage, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -1217,6 +1469,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   }//GEN-LAST:event_jButtonNormalizeFluxesActionPerformed
 
   private void jButtonOpenFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenFileActionPerformed
+      if (this.currentTarget == null) {
+          return;
+      }
 
       final UserModel userModel = this.currentTarget.getOrCreateUserModel();
 
@@ -1241,24 +1496,23 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           userModel.setFile(file.getAbsolutePath());
           userModel.setName(file.getName());
 
-          try {
-              prepareAndValidateUserModel(userModel);
-          } finally {
-              if (!userModel.isFileValid()) {
-                  this.jRadioButtonInvalid.setSelected(true);
-              }
-          }
+          // reset Transforms:
+          userModel.setScaleX(null);
+          userModel.setScaleY(null);
+          userModel.setRotation(null);
 
-          // reselect target to update image:
-          processTargetSelection(currentTarget);
+          // trigger reload user model:
+          triggerReloadUserModel(true);
       }
   }//GEN-LAST:event_jButtonOpenFileActionPerformed
 
     private void jButtonImageInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonImageInfoActionPerformed
+        if (this.currentTarget == null) {
+            return;
+        }
 
         final UserModel userModel = this.currentTarget.getOrCreateUserModel();
 
-        // update checksum before validation:
         if (userModel.isModelDataReady()) {
             // note: only possible with one Fits image or one Fits cube (single HDU):
             final FitsImageHDU fitsImageHDU = userModel.getModelData(0).getFitsImageHDU();
@@ -1269,6 +1523,33 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             MessagePane.showMessage(hduHeader);
         }
     }//GEN-LAST:event_jButtonImageInfoActionPerformed
+
+    private void jButtonResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonResetActionPerformed
+        if (this.currentTarget == null) {
+            return;
+        }
+
+        final UserModel userModel = this.currentTarget.getUserModel();
+        if (userModel != null && userModel.isModelDataReady()) {
+            // use first image:
+            final FitsImage fitsImage = userModel.getModelData(0).getFitsImage();
+
+            // use only positive increments (no direction)
+            this.jFormattedTextFieldScaleX.setValue(convertRadToMas(fitsImage.getOrigIncCol()));
+            this.jFormattedTextFieldScaleY.setValue(convertRadToMas(fitsImage.getOrigIncRow()));
+            this.jFormattedTextFieldRotation.setValue(fitsImage.getOrigRotAngle());
+        }
+    }//GEN-LAST:event_jButtonResetActionPerformed
+
+    private void jToggleButtonLinkedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonLinkedActionPerformed
+        handleLinkedState();
+    }//GEN-LAST:event_jToggleButtonLinkedActionPerformed
+
+    private void handleLinkedState() {
+        // TODO: if linked is OFF, then allow editing scaleY field
+        this.jFormattedTextFieldScaleY.setEnabled(!this.jToggleButtonLinked.isSelected() && this.jFormattedTextFieldScaleX.isEnabled());
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupEditMode;
     private javax.swing.ButtonGroup buttonGroupModelMode;
@@ -1278,13 +1559,19 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private javax.swing.JButton jButtonNormalizeFluxes;
     private javax.swing.JButton jButtonOpenFile;
     private javax.swing.JButton jButtonRemove;
+    private javax.swing.JButton jButtonReset;
     private javax.swing.JButton jButtonUpdate;
     private javax.swing.JComboBox jComboBoxModelType;
+    private javax.swing.JFormattedTextField jFormattedTextFieldRotation;
+    private javax.swing.JFormattedTextField jFormattedTextFieldScaleX;
+    private javax.swing.JFormattedTextField jFormattedTextFieldScaleY;
     private javax.swing.JLabel jLabelFile;
     private javax.swing.JLabel jLabelMode;
     private javax.swing.JLabel jLabelModelDescrption;
     private javax.swing.JLabel jLabelName;
     private javax.swing.JLabel jLabelOffsetEditMode;
+    private javax.swing.JLabel jLabelRotation;
+    private javax.swing.JLabel jLabelScale;
     private javax.swing.JLabel jLabelType;
     private javax.swing.JLabel jLabelValid;
     private javax.swing.JPanel jPanelDescription;
@@ -1306,6 +1593,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private javax.swing.JTable jTableModelParameters;
     private javax.swing.JTextField jTextFieldFileReference;
     private javax.swing.JTextField jTextFieldName;
+    private javax.swing.JToggleButton jToggleButtonLinked;
     private javax.swing.JTree jTreeModels;
     // End of variables declaration//GEN-END:variables
 
@@ -1410,5 +1698,65 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             // show image at given index:
             this.fitsImagePanel.setFitsImage(this.currentUserModel.getModelDataList().get(imageIndex).getFitsImage());
         }
+    }
+
+    /**
+     * Enable / Disable the automatic update of the user model when any swing component changes.
+     * Return its previous value.
+     *
+     * Typical use is as following :
+     * // disable the automatic user model:
+     * final boolean prevAutoUpdateUserModel = setAutoUpdateUserModel(false);
+     * try {
+     *   // operations ...
+     *
+     * } finally {
+     *   // restore the automatic update observation :
+     *   setAutoUpdateUserModel(prevAutoUpdateUserModel);
+     * }
+     *
+     * @param value new value
+     * @return previous value
+     */
+    private boolean setAutoUpdateUserModel(final boolean value) {
+        // first backup the state of the automatic update user model:
+        final boolean previous = doAutoUpdateUserModel;
+
+        // then change its state :
+        doAutoUpdateUserModel = value;
+
+        // return previous state :
+        return previous;
+    }
+
+    /**
+     * Trigger the internal User Model Reload timer
+     * @param enable true to enable it, false otherwise
+     */
+    private void triggerReloadUserModel(final boolean enable) {
+        if (enable) {
+            disableAnimator();
+
+            logger.info("triggerReloadUserModel");
+
+            if (this.timerUserModelReload.isRunning()) {
+                logger.debug("RE-starting timer: {}", this.timerUserModelReload);
+                this.timerUserModelReload.restart();
+            } else {
+                logger.debug("Starting timer: {}", this.timerUserModelReload);
+                this.timerUserModelReload.start();
+            }
+        } else if (this.timerUserModelReload.isRunning()) {
+            logger.debug("Stopping timer: {}", this.timerUserModelReload);
+            this.timerUserModelReload.stop();
+        }
+    }
+
+    private static double convertRadToMas(final double angRad) {
+        return Math.toDegrees(angRad) * ALX.DEG_IN_MILLI_ARCSEC;
+    }
+
+    private static double convertMasToRad(final double angMas) {
+        return Math.toRadians(angMas * ALX.MILLI_ARCSEC_IN_DEGREES);
     }
 }

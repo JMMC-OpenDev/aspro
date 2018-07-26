@@ -12,6 +12,7 @@ import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.image.FFTUtils;
 import fr.jmmc.jmal.image.FloatArrayCache;
 import fr.jmmc.jmal.image.ImageArrayUtils;
+import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmal.image.job.ImageFlipJob;
 import fr.jmmc.jmal.image.job.ImageLowerThresholdJob;
 import fr.jmmc.jmal.image.job.ImageNormalizeJob;
@@ -20,6 +21,7 @@ import fr.jmmc.jmal.model.ImageMode;
 import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.VisNoiseService;
+import fr.jmmc.jmal.model.function.math.Functions;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
@@ -27,6 +29,7 @@ import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageFile;
 import fr.jmmc.oitools.image.FitsImageHDU;
 import fr.nom.tam.fits.FitsException;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
@@ -54,12 +57,10 @@ public final class UserModelService {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(UserModelService.class.getName());
-    /** dev flag: do apodisation */
-    private static final boolean DO_APODISE_DEV = false;
     /** minimum visiblity threshold (1e-2) for direct fourier transform */
-    public static final double MIN_VISIBILITY_DATA = 1e-2d;
+    public static final double MIN_VISIBILITY_DATA = 1e-3d;
     /** ratio to ignore data values i.e. data value < LIMIT_RATIO * dataLowThreshold */
-    public static final float LIMIT_RATIO = 1e-3f;
+    public static final float LIMIT_RATIO = 1e-1f;
     /** maximum fft size (power of two) */
     public static final int MAX_FFT_SIZE = 1024 * 1024;
     /** Two PI constant */
@@ -144,6 +145,9 @@ public final class UserModelService {
         }
 
         logger.info("useFastMode: {}", useFastMode);
+        logger.info("scaleX:      {}", userModel.getScaleX());
+        logger.info("scaleY:      {}", userModel.getScaleY());
+        logger.info("rotation:    {}", userModel.getRotation());
 
         final FitsImageHDU fitsImageHDU = imgFitsFile.getFitsImageHDUs().get(0); // only first HDU
 
@@ -155,6 +159,8 @@ public final class UserModelService {
         final long start = System.nanoTime();
 
         for (final FitsImage fitsImage : fitsImageHDU.getFitsImages()) {
+            // Set User transform (scale & rotation):
+            defineUserTransform(userModel, fitsImage);
             try {
                 final UserModelData modelData = new UserModelData();
 
@@ -186,6 +192,20 @@ public final class UserModelService {
 
         // update cached data if no exception occured:
         userModel.setModelDataList(modelDataList);
+    }
+
+    private static void defineUserTransform(final UserModel userModel, final FitsImage fitsImage) {
+        if (userModel.getScaleX() != null) {
+            final double inc = userModel.getScaleX();
+            fitsImage.setSignedIncCol(fitsImage.isIncColPositive() ? inc : -inc);
+        }
+        if (userModel.getScaleY() != null) {
+            final double inc = userModel.getScaleY();
+            fitsImage.setSignedIncRow(fitsImage.isIncRowPositive() ? inc : -inc);
+        }
+        if (userModel.getRotation() != null) {
+            fitsImage.setRotAngle(userModel.getRotation());
+        }
     }
 
     /**
@@ -249,8 +269,8 @@ public final class UserModelService {
 
         if (maxFreq < uvMax) {
             throw new IllegalArgumentException("The Fits image [" + fitsImage.getFitsImageIdentifier()
-                    + "] must have smaller pixel increments (" + df.format(increment) + " rad) to have a maximum frequency ("
-                    + df.format(maxFreq) + " rad-1) larger than the corrected UV Max (" + df.format(uvMax) + " rad-1) !");
+                    + "] must have smaller pixel increments (" + FitsImage.getAngleAsString(increment, df) + ") to have a maximum frequency ("
+                    + df.format(maxFreq) + " rad-1) larger than the expected UV Max (" + df.format(uvMax) + " rad-1) !");
         }
     }
 
@@ -333,6 +353,7 @@ public final class UserModelService {
                                          final Float refMin, final Float refMax,
                                          final float[][] refVisData) {
 
+        // Note: do not support sub region (uvRect)
         // Get corrected uvMax from uv rectangle (-this.uvMax, -this.uvMax, this.uvMax, this.uvMax):
         final double uvMax = Math.max(Math.max(Math.max(Math.abs(uvRect.getX()), Math.abs(uvRect.getY())),
                 Math.abs(uvRect.getX() + uvRect.getWidth())),
@@ -354,32 +375,67 @@ public final class UserModelService {
         // Start the computations :
         final long start = System.nanoTime();
 
+        final double mapScale;
+        final double rotationAngle;
+
+        if (fitsImage.isRotAngleDefined()) {
+            rotationAngle = fitsImage.getRotAngle();
+            Rectangle2D imgRectRef = new Rectangle2D.Double(0, 0, uvMax, uvMax);
+
+            // angle sign is same direction (North -> East):
+            final double theta = Math.toRadians(rotationAngle);
+
+            final AffineTransform at = AffineTransform.getRotateInstance(theta, 0, 0);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("uv rect: {}", imgRectRef);
+            }
+
+            imgRectRef = ImageUtils.getBoundingBox(at, imgRectRef);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("rotated uv rect: {}", imgRectRef);
+            }
+            mapScale = imgRectRef.getWidth() / uvMax;
+        } else {
+            mapScale = 1.0;
+            rotationAngle = 0.0;
+        }
+        logger.debug("mapScale: {}", mapScale);
+
+        // input image is always squared:
         final int inputSize = fitsImage.getNbRows();
         logger.debug("Image size: {}", inputSize);
 
+        // TODO: handle asymetric increments:
         final double increment = fitsImage.getIncRow();
         logger.debug("Current increment (rad): {}", increment);
 
-        final double maxFreq = 1d / (2d * increment);
-        logger.debug("Max UV (rad-1): {}", maxFreq);
+        final double scaleFreqPerPix = 1d / (2d * increment);
+        logger.debug("Freq scale per Pixel (rad-1): {}", scaleFreqPerPix);
 
-        // UV / maxFreq ratio
-        final double ratio = uvMax / maxFreq;
-        logger.debug("ratio: {}", ratio);
+        // UV / maxFreq ratio per FT pixel:
+        final double ratioFreqPerPix = uvMax / scaleFreqPerPix;
+        logger.debug("Ratio freq per Pixel: {}", ratioFreqPerPix);
 
         // find best FFT size:
-        final int fftSize = findBestFFTSize(ratio, imageSize, inputSize);
+        final int fftSize = findBestFFTSize(ratioFreqPerPix, imageSize, inputSize);
 
-        // use the next even integer for pixel size:
-        final int outputSize = getOutputSize(ratio, fftSize);
-
-        final double mapUvMax = (maxFreq * outputSize) / fftSize;
-        logger.debug("UVMap exact uvMax (m): {}", mapUvMax);
+        // use the next even integer for pixel size & use map scale (larger):
+        final int dataSize = getOutputSize(mapScale * ratioFreqPerPix, fftSize);
 
         // make FFT larger (2 pixels more to avoid boundary errors):
-        final int fftOutputSize = outputSize + 2;
+        final int fftOutputSize = dataSize + 2;
 
         logger.debug("UV plane FFT size (pixels): {}", fftOutputSize);
+
+        final int outputSize = (int) Math.ceil(dataSize / mapScale);
+
+        logger.debug("dataSize:   {}", dataSize);
+        logger.debug("outputSize: {}", outputSize);
+
+        final double mapUvMax = (scaleFreqPerPix * outputSize) / fftSize;
+        logger.debug("UVMap exact uvMax (m): {}", mapUvMax);
 
         // fast interrupt :
         if (currentThread.isInterrupted()) {
@@ -409,9 +465,7 @@ public final class UserModelService {
 
             // 2 - Extract the amplitude/phase/square amplitude to get the uv map :
             // data as float [rows][cols]:
-            imgData = FFTUtils.convert(fftOutputSize, visData, mode, outputSize, noiseService);
-
-            final int dataSize = outputSize;
+            imgData = FFTUtils.convert(fftOutputSize, visData, mode, dataSize, noiseService);
 
             // fast interrupt :
             if (currentThread.isInterrupted()) {
@@ -423,7 +477,7 @@ public final class UserModelService {
             uvMapRect.setFrameFromDiagonal(-mapUvMax, -mapUvMax, mapUvMax, mapUvMax);
 
             final UVMapData uvMapData = ModelUVMapService.computeImage(uvRect, refMin, refMax, mode, imageSize, colorModel, colorScale,
-                    dataSize, visData, imgData, uvMapRect, noiseService);
+                    dataSize, visData, imgData, uvMapRect, noiseService, rotationAngle, outputSize);
 
             logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
@@ -445,22 +499,22 @@ public final class UserModelService {
 
     /**
      * Return the best FFT size (power of two) i.e. giving the output size closest than the expected image size
-     * @param ratio UV / maxFreq ratio
+     * @param ratioFreqPerPix Ratio freq per Pixel
      * @param imageSize expected image size in pixels
      * @param inputSize image input size to check minimum FFT size
      * @return best FFT size (power of two)
      */
-    private static int findBestFFTSize(final double ratio, final int imageSize, final int inputSize) {
+    private static int findBestFFTSize(final double ratioFreqPerPix, final int imageSize, final int inputSize) {
 
-        final int fftSizeMax = getFFTSize(ratio, imageSize, inputSize);
-        final int fftSizeMin = getFFTSize(ratio, imageSize / 2, inputSize);
+        final int fftSizeMax = getFFTSize(ratioFreqPerPix, imageSize, inputSize);
+        final int fftSizeMin = getFFTSize(ratioFreqPerPix, imageSize / 2, inputSize);
 
         if (fftSizeMin == fftSizeMax) {
             return fftSizeMin;
         }
 
-        final int outputSizeMax = getOutputSize(ratio, fftSizeMax);
-        final int outputSizeMin = getOutputSize(ratio, fftSizeMin);
+        final int outputSizeMax = getOutputSize(ratioFreqPerPix, fftSizeMax);
+        final int outputSizeMin = getOutputSize(ratioFreqPerPix, fftSizeMin);
 
         // keep fftSize that gives outputSize closest to imageSize:
         final int fftSize = (imageSize - outputSizeMin < outputSizeMax - imageSize) ? fftSizeMin : fftSizeMax;
@@ -497,13 +551,13 @@ public final class UserModelService {
 
     /**
      * Return the output size (even number) for the given ratio and FFT size
-     * @param ratio UV / maxFreq ratio
+     * @param ratioFreqPerPix Ratio freq per Pixel
      * @param fftSize FFT size (power of two)
      * @return best FFT size (power of two)
      */
-    private static int getOutputSize(final double ratio, final int fftSize) {
+    private static int getOutputSize(final double ratioFreqPerPix, final int fftSize) {
 
-        final double outputExactSize = fftSize * ratio;
+        final double outputExactSize = fftSize * ratioFreqPerPix;
         logger.debug("UV plane exact size (pixels): {}", outputExactSize);
 
         // use the next even integer for pixel size:
@@ -523,17 +577,14 @@ public final class UserModelService {
      * @param increment increment (rad)
      * @return spatial coordinates (rad) (relative to the half length)
      */
-    public static float[] computeSpatialCoords(final int length, final double increment) {
+    public static double[] computeSpatialCoords(final int length, final double increment) {
 
-        final float[] coords = new float[length];
+        final double[] coords = new double[length];
 
-        final int half = length / 2;
+        final double half = length / 2.0;
 
         for (int i = 0; i < length; i++) {
-            coords[i] = (float) increment * (i - half); //in sky (radians).
-            // On peut aussi utiliser les
-            // valeurs du header avec values = (i-xref-1)*xdelt+xval
-            // (fits commence à 1)
+            coords[i] = increment * (i - half); //in sky (radians).
         }
 
         return coords;
@@ -778,15 +829,6 @@ public final class UserModelService {
             FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
         }
 
-        if (DO_APODISE_DEV) {
-            // NEW: multiply by 2D gaussian function (fwhm = 1.22 x lambda / diameter)
-            // TEST ONLY
-            apodise(fitsImage);
-
-            // update boundaries excluding zero values:
-            FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
-        }
-
         // 2 - Normalize data (total flux):
         if (fitsImage.getSum() != 1d) {
             final double normFactor = 1d / fitsImage.getSum();
@@ -801,7 +843,7 @@ public final class UserModelService {
         }
 
         // 2.1 - Determine flux threshold to ignore useless values:
-        final float thresholdImage;
+        float thresholdImage;
         final float thresholdVis;
 
         if (useFastMode) {
@@ -811,7 +853,7 @@ public final class UserModelService {
             final int nData = fitsImage.getNData();
             final float[] data1D = sortData(fitsImage);
 
-            final int thLen = 4; // means MIN_VISIBILITY_DATA / 10^3
+            final int thLen = 3; // means MIN_VISIBILITY_DATA / 10^4 = 10^-6
             final int[] thIdx = new int[thLen];
             int thValid = -1;
 
@@ -850,6 +892,7 @@ public final class UserModelService {
 
                 thresholdVis = data1D[thIdx[0]];
 
+                // TODO: refine thresholds to see which pixels are discarded
                 logger.info("thresholdVis: {}", thresholdVis);
                 logger.info("thresholdImage: {}", thresholdImage);
 
@@ -863,7 +906,7 @@ public final class UserModelService {
             thresholdVis = 0f;
         }
 
-        // 2.2 - Skip too small data values i.e. lower than thresholdImage / 10^6:
+        // 2.2 - Skip too small data values i.e. lower than thresholdImage ie below 10^-6:
         if (useFastMode) {
             final float smallThreshold = LIMIT_RATIO * thresholdImage;
 
@@ -1106,6 +1149,7 @@ public final class UserModelService {
         /** Get the current thread to check if the computation is interrupted */
         final Thread currentThread = Thread.currentThread();
 
+        // note: square image (and even size):
         final int nbRows = fitsImage.getNbRows();
         final int nbCols = fitsImage.getNbCols();
         final int nData = fitsImage.getNData();
@@ -1119,9 +1163,25 @@ public final class UserModelService {
 
         logger.info("prepareModelData: nData: {} / {}", nData, nPixels);
 
+        final double cosTheta;
+        final double sinTheta;
+
+        if (fitsImage.isRotAngleDefined()) {
+            final double rotationAngle = fitsImage.getRotAngle();
+
+            // angle sign is inverse direction (North -> East):
+            final double theta = Math.toRadians(rotationAngle);
+
+            cosTheta = FastMath.cos(theta);
+            sinTheta = FastMath.sin(theta);
+        } else {
+            cosTheta = 1.0;
+            sinTheta = 0.0;
+        }
+
         // prepare spatial coordinates:
-        final float[] rowCoords = UserModelService.computeSpatialCoords(nbRows, fitsImage.getSignedIncRow());
-        final float[] colCoords = UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol());
+        final double[] colCoords = UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol()); // X
+        final double[] rowCoords = UserModelService.computeSpatialCoords(nbRows, fitsImage.getSignedIncRow()); // Y
 
         // prepare 1D data (eliminate values lower than threshold):
         float[] row;
@@ -1131,7 +1191,8 @@ public final class UserModelService {
         final float[] data1D = getArray(nData * DATA_1D_POINT_SIZE);
 
         double totalFlux = 0d;
-        float flux, rowCoord;
+        float flux;
+        double rowCoord, colCoord;
 
         // iterate on rows:
         for (int r = 0, c; r < nbRows; r++) {
@@ -1144,11 +1205,14 @@ public final class UserModelService {
 
                 // skip values lower than threshold:
                 if (flux > threshold) {
+                    colCoord = colCoords[c];
+
+                    // Transform coordinates:
                     // keep this data point:
                     totalFlux += flux;
                     data1D[nUsedData] = flux;
-                    data1D[nUsedData + 1] = colCoords[c];
-                    data1D[nUsedData + 2] = rowCoord;
+                    data1D[nUsedData + 1] = (float) Functions.transformU(colCoord, rowCoord, cosTheta, sinTheta);
+                    data1D[nUsedData + 2] = (float) Functions.transformV(colCoord, rowCoord, cosTheta, sinTheta);
 
                     nUsedData += DATA_1D_POINT_SIZE;
                 }
@@ -1232,92 +1296,6 @@ public final class UserModelService {
             }
         }
         return -1;
-    }
-
-    /**
-     * Make apodisation (telescope airy disk) (DEVELOPMENT ONLY)
-     * @param fitsImage 
-     */
-    private static void apodise(FitsImage fitsImage) {
-
-        /** Get the current thread to check if the computation is interrupted */
-        final Thread currentThread = Thread.currentThread();
-
-        // Start the computations :
-        final long start = System.nanoTime();
-
-        // other idea: spatial resolution = theta = lambda / baseline
-        /*
-         * CHARA samples:
-         B = 330m, θ(λ=0.5μm) = 0.3mas, θ(λ=2.2μm) = 1.4mas
-         B = 34m, θ(λ=0.5μm) = 3.0mas, θ(λ=2.2μm) = 13.4mas
-         */
-        // gaussian = max spatial frequency (diameter, lambda)
-        // VLTI / AMBER:
-        final double lambda = 2e-06d; // R: 0.7µm H: 2µm
-        final double diameter = 1.8d; // VLTI: UT: 8.2, AT: 1.8
-        final double fwhm = 1.22d * lambda / diameter; // max spatial frequence
-
-        logger.info("apodise: lambda   = {}", lambda);
-        logger.info("apodise: diameter = {}", diameter);
-        logger.info("apodise: fwhm     = {}", fwhm);
-
-        logger.info("apodise: fwhm (angle) = {}", FitsImage.getAngleAsString(fwhm));
-
-        logger.info("apodise: row increment (angle) = {}", FitsImage.getAngleAsString(fitsImage.getIncRow()));
-        logger.info("apodise: col increment (angle) = {}", FitsImage.getAngleAsString(fitsImage.getIncCol()));
-
-        logger.info("fitsImage: {}", fitsImage);
-
-        /*
-         FitsImage[HighMass.fits.gz#0][1/1][2048 x 2048] RefPix (1024.0, 1024.0) RefVal (0.0, 0.0) 
-         * Increments (-4.848137E-10, 4.848137E-10) 
-         * Max view angle (0.20480000797990483 arcsec) 
-         * Area java.awt.geom.Rectangle2D$Double[x=-4.959644151E-7,y=-4.959644151E-7,w=9.928984576E-7,h=9.928984576E-7] Lambda { RefPix 1.0 RefVal NaN Increment NaN} = NaN m.
-         */
- /*
-         * Gaussian function:
-         * g(x,y) = exp(-( (x - x0)^2 + (y - y0)^2 ) / (2 x sigma2) )
-         */
-        // precompute normalization factor:
-        final float coeff = (float) (-1d / (2d * fwhm * fwhm));
-
-        final int nbRows = fitsImage.getNbRows();
-        final int nbCols = fitsImage.getNbCols();
-
-        // prepare spatial coordinates:
-        final float[] rowCoords = UserModelService.computeSpatialCoords(nbRows, fitsImage.getSignedIncRow());
-        final float[] colCoords = UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol());
-
-        final float[][] data = fitsImage.getData();
-
-        float[] row;
-        float rowCoord, colCoord, weight;
-
-        // iterate on rows:
-        for (int r = 0, c; r < nbRows; r++) {
-            row = data[r];
-            rowCoord = rowCoords[r];
-
-            // iterate on columns:
-            for (c = 0; c < nbCols; c++) {
-                colCoord = colCoords[c];
-
-                weight = (float) FastMath.exp(coeff * (rowCoord * rowCoord + colCoord * colCoord));
-
-//                logger.info("weight: {}", weight);
-                // multiply by gaussian:
-                row[c] *= weight;
-
-            } // columns
-
-            // fast interrupt :
-            if (currentThread.isInterrupted()) {
-                return;
-            }
-        } // rows
-
-        logger.info("apodise: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
 }
