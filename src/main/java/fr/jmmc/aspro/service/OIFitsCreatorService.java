@@ -248,8 +248,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         if (instrumentMode.getTable() != null) {
             final SpectralSetup table = instrumentMode.getTable();
-            this.waveLengths = table.getAndScaleColumn(SpectralSetupQuantity.LAMBDA, 1e-6);
-            this.waveBands = table.getAndScaleColumn(SpectralSetupQuantity.DELTA_LAMBDA, 1e-6);
+            this.waveLengths = table.getAndScaleColumn(SpectralSetupQuantity.LAMBDA, AsproConstants.MICRO_METER);
+            this.waveBands = table.getAndScaleColumn(SpectralSetupQuantity.DELTA_LAMBDA, AsproConstants.MICRO_METER);
             waveBand = StatUtils.mean(this.waveBands);
         } else {
             // TODO: handle variable bandwdith:
@@ -1152,7 +1152,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 snrWL[1][l] = StatUtils.min(snrData[l]);
                 snrWL[2][l] = StatUtils.max(snrData[l]);
 
-                logger.info("SNR[" + NumberUtils.trimTo3Digits(1e6 * waveLengths[l]) + "]: average = " + NumberUtils.trimTo3Digits(snrWL[0][l])
+                logger.info("SNR[" + NumberUtils.trimTo3Digits(waveLengths[l] / AsproConstants.MICRO_METER) + "]: average = " + NumberUtils.trimTo3Digits(snrWL[0][l])
                         + " min = " + NumberUtils.trimTo3Digits(snrWL[1][l])
                         + " max = " + NumberUtils.trimTo3Digits(snrWL[2][l])
                 );

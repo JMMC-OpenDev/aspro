@@ -238,7 +238,7 @@ public class SpectralSetup
 
     private static void convertMeterToMicroMeter(final double[] values) {
         for (int i = 0; i < values.length; i++) {
-            values[i] *= 1e6;
+            values[i] /= fr.jmmc.aspro.AsproConstants.MICRO_METER;
         }
     }
 
