@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.WarningContainer;
@@ -680,6 +681,8 @@ public abstract class AbstractOIFitsProducer {
                             cVisSnrFlagRow[l] = true;
 //                            System.out.println("Low SNR["+this.waveLengths[l]+"]: " + snrV2);
                         }
+                        /* TODO: make SNR(V2) stats per channel to add warning if no channel is below 3 !
+                        */
                     }
 
                     if (ptIdx[k] != prevPt) {
@@ -1124,7 +1127,7 @@ they are overlapped <=> (y2 - x1) * (x2 - y1) >= 0
      * @return given wavelength rounded in microns
      */
     protected static double convertWL(final double wl) {
-        return NumberUtils.trimTo5Digits(1e6d * wl);
+        return NumberUtils.trimTo5Digits(wl / AsproConstants.MICRO_METER);
     }
 
     protected final static class UVFreqTable {
