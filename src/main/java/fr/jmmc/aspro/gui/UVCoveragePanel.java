@@ -218,9 +218,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
     /* cached data */
     /** current interferometer configuration name to track changes */
-    private String interferometerConfigurationName = null;
+    private String interferometerConfigurationCacheKey = null;
     /** current instrument name to track changes */
-    private String instrumentName = null;
+    private String instrumentCacheKey = null;
     /** selected target name  */
     private String selectedTargetName = null;
     /* cached computed data */
@@ -972,9 +972,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private void updateInteferometerData(final ObservationSetting observation) {
         final String intConfName = observation.getInterferometerConfiguration().getName();
         // test if the interferometer changed :
-        final boolean changed = intConfName != null && !intConfName.equals(this.interferometerConfigurationName);
+        final boolean changed = intConfName != null && !intConfName.equals(this.interferometerConfigurationCacheKey);
         if (changed) {
-            this.interferometerConfigurationName = intConfName;
+            this.interferometerConfigurationCacheKey = intConfName;
 
             final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
 
@@ -1000,20 +1000,27 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private void updateInstrumentData(final ObservationSetting observation) {
         // use the real instrument name (not alias):
         final String insName = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getName();
+        final String insKey = observation.getInterferometerConfiguration().getName() + '@' + insName;
+
         // test if the instrument changed :
-        final boolean changed = insName != null && !insName.equals(this.instrumentName);
+        final boolean changed = (insName != null) && !insKey.equals(this.instrumentCacheKey);
         if (changed) {
-            this.instrumentName = insName;
+            this.instrumentCacheKey = insKey;
 
             logger.debug("instrument changed : {}", insName);
 
             resetSamplingPeriod(observation);
 
-            // update instrument modes :
+            // always update instrument modes (may depend on selected period):
             final Vector<String> v = ConfigurationManager.getInstance().getInstrumentModes(
                     observation.getInterferometerConfiguration().getName(),
                     observation.getInstrumentConfiguration().getName());
             this.jComboBoxInstrumentMode.setModel(new DefaultComboBoxModel(v));
+            
+            // try restoring the selected instrument mode :
+            if (observation.getInstrumentConfiguration().getInstrumentMode() != null) {
+                this.jComboBoxInstrumentMode.setSelectedItem(observation.getInstrumentConfiguration().getInstrumentMode());
+            }            
 
             if (logger.isTraceEnabled()) {
                 logger.trace("jComboBoxInstrumentMode updated: {}", this.jComboBoxInstrumentMode.getSelectedItem());
@@ -1277,11 +1284,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         try {
 
             // update the data related to the interferometer :
-            this.interferometerConfigurationName = null;
+            this.interferometerConfigurationCacheKey = null;
             this.updateInteferometerData(observation);
 
             // refresh data related to the instrument :
-            this.instrumentName = null;
+            this.instrumentCacheKey = null;
             this.updateInstrumentData(observation);
 
             // update the selected instrument mode :
@@ -1382,7 +1389,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // disable the automatic refresh :
         final boolean prevAutoRefresh = this.setAutoRefresh(false);
         try {
-
             // update data related to the interferometer :
             this.updateInteferometerData(event.getObservation());
 
@@ -2290,7 +2296,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 if (uvMapData != null && uvMapData.getWaveLength() != null && !Double.isNaN(uvMapData.getWaveLength())) {
                     // Polychromatic user model only:
                     sb.append(" - Model ").append(SpecialChars.LAMBDA_LOWER).append(": ");
-                    sb.append(NumberUtils.trimTo3Digits(1e6d * uvMapData.getWaveLength())).append(' ').append(SpecialChars.UNIT_MICRO_METER);
+                    sb.append(NumberUtils.trimTo3Digits(uvMapData.getWaveLength() / AsproConstants.MICRO_METER)).append(' ').append(SpecialChars.UNIT_MICRO_METER);
                 }
                 ChartUtils.addSubtitle(this.chart, sb.toString());
 
