@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.jmcs.util.ResourceUtils;
 import fr.jmmc.oitools.fits.FitsUtils;
 import fr.nom.tam.fits.BasicHDU;
@@ -131,7 +132,7 @@ public final class AtmosphereSpectrumService {
 
             // convert lambda to meters:
             for (int i = 0; i < lambda.length; i++) {
-                lambda[i] *= 1e-6;
+                lambda[i] *= AsproConstants.MICRO_METER;
             }
 
             cached = new AtmTransmission(lambda, trans);
