@@ -4,7 +4,6 @@
 package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.model.TimeRef;
-import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmcs.util.NumberUtils;
 import java.util.Arrays;
 import java.util.Vector;
