@@ -28,13 +28,14 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="version" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="resolution" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthMax" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="waveLengthBandRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="setupRef" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
- *         &lt;element name="ditMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="table" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralSetup" minOccurs="0"/&gt;
  *         &lt;element name="parameter" type="{http://www.jmmc.fr/aspro-oi/0.1}Parameter" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
@@ -48,13 +49,14 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FocalInstrumentMode", propOrder = {
     "name",
+    "version",
     "resolution",
     "waveLengthMin",
     "waveLengthMax",
     "waveLengthRef",
+    "waveLengthBandRef",
     "setupRef",
     "dit",
-    "ditMin",
     "table",
     "parameters"
 })
@@ -64,16 +66,17 @@ public class FocalInstrumentMode
 
     @XmlElement(required = true)
     protected String name;
+    protected String version;
     protected Double resolution;
     protected Double waveLengthMin;
     protected Double waveLengthMax;
     protected Double waveLengthRef;
+    protected Double waveLengthBandRef;
     @XmlElement(type = Object.class)
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
     protected FocalInstrumentSetup setupRef;
     protected Double dit;
-    protected Double ditMin;
     protected SpectralSetup table;
     @XmlElement(name = "parameter")
     protected List<Parameter> parameters;
@@ -100,6 +103,30 @@ public class FocalInstrumentMode
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    /**
+     * Gets the value of the version property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * Sets the value of the version property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setVersion(String value) {
+        this.version = value;
     }
 
     /**
@@ -199,6 +226,30 @@ public class FocalInstrumentMode
     }
 
     /**
+     * Gets the value of the waveLengthBandRef property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getWaveLengthBandRef() {
+        return waveLengthBandRef;
+    }
+
+    /**
+     * Sets the value of the waveLengthBandRef property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setWaveLengthBandRef(Double value) {
+        this.waveLengthBandRef = value;
+    }
+
+    /**
      * Gets the value of the setupRef property.
      * 
      * @return
@@ -244,30 +295,6 @@ public class FocalInstrumentMode
      */
     public void setDit(Double value) {
         this.dit = value;
-    }
-
-    /**
-     * Gets the value of the ditMin property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Double }
-     *     
-     */
-    public Double getDitMin() {
-        return ditMin;
-    }
-
-    /**
-     * Sets the value of the ditMin property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Double }
-     *     
-     */
-    public void setDitMin(Double value) {
-        this.ditMin = value;
     }
 
     /**
@@ -457,7 +484,6 @@ public class FocalInstrumentMode
         logger.info("  setup: {}", getSetupRef());
 
         logger.info("  dit: {}", getDit());
-        logger.info("  ditMin: {}", getDitMin());
 
         // computed values:
         logger.info("  waveLength: {}", getWaveLength());

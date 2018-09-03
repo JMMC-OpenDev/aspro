@@ -2466,6 +2466,14 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="version" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The Version which only offers this instrument mode (VLTI)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="resolution" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -2494,6 +2502,13 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="waveLengthBandRef" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The maximal bandwith for the reference wave length of this instrument mode (micrometer) that can be read by the detector within 1 DIT
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
 
             <!-- instrument setup reference -->
             <xsd:element name="setupRef" type="xsd:IDREF" minOccurs="0" maxOccurs="1">
@@ -2513,18 +2528,8 @@
             <xsd:element name="dit" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The detector individual integration time in seconds (typically less than 0.1s)
-                        optimized for this instrument mode
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-
-            <!-- minimum dit -->
-            <xsd:element name="ditMin" type="xsd:double" minOccurs="0">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The minimum detector individual integration time in seconds (typically less than 0.1s)
-                        for this instrument mode (to read once the detector)
+                        The optimal detector individual integration time in seconds (typically less than 0.1s)
+                        for this instrument mode
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
