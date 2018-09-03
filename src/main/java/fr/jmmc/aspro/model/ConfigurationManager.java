@@ -1151,7 +1151,10 @@ public final class ConfigurationManager extends BaseOIManager {
         if (ins != null) {
             final Vector<String> v = new Vector<String>(ins.getModes().size());
             for (FocalInstrumentMode m : ins.getModes()) {
-                v.add(m.getName());
+                // handle modes dedicated to a specific version:
+                if (m.getVersion() == null || configurationName.endsWith(m.getVersion())) {
+                    v.add(m.getName());
+                }
             }
             return v;
         }
