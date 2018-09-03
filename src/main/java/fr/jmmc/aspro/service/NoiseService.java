@@ -28,6 +28,7 @@ import fr.jmmc.aspro.util.StatUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.jmcs.util.SpecialChars;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -240,7 +241,7 @@ public final class NoiseService implements VisNoiseService {
         // Fix mid channel for image noising (MATISSE LM has a large hole at 4 microns):
         int midChannel = this.nSpectralChannels / 2;
         if ((nSpectralChannels > 1) && (insMode.getWaveLengthRef() != null)) {
-            final double lambdaRef = 1e-6 * insMode.getWaveLengthRef().doubleValue();
+            final double lambdaRef = AsproConstants.MICRO_METER * insMode.getWaveLengthRef().doubleValue();
 
             for (int i = 0, end = waveLengths.length - 1; i < end; i++) {
                 if (Math.abs(waveLengths[i] - lambdaRef) <= Math.abs(waveLengths[i + 1] - lambdaRef)) {
@@ -330,13 +331,20 @@ public final class NoiseService implements VisNoiseService {
 
         final FocalInstrumentSetup insSetup = observation.getInstrumentConfiguration().getFocalInstrumentMode().getSetupRef();
 
+        final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+
         // use alias or real instrument name:
         this.instrumentName = instrument.getAliasOrName();
 
-        this.dit = insSetup.getDit();
         this.ron = insSetup.getRon();
         this.detectorSaturation = insSetup.getDetectorSaturation();
         this.quantumEfficiency = insSetup.getQuantumEfficiency();
+        
+        // DIT:
+        this.dit = insSetup.getDit();
+        if (insMode.getDit() != null) {
+            this.dit = insMode.getDit();
+        }
 
         // fractions:
         this.fracFluxInInterferometry = insSetup.getFracFluxInInterferometry();
@@ -388,37 +396,43 @@ public final class NoiseService implements VisNoiseService {
                 this.instrumentVis2CalibrationBias = 0d;
 
                 /* note: instrumentalVis2Bias = instrumentalVisBias (few percents) as there is no specific calibration bias */
- /* Correct Vis2 bias = 1/4 * visBias (peak to peak ~ 4 sigma) */
-                this.instrumentalVis2Bias = 0.25 * instrumentalVisBias;
+                this.instrumentalVis2Bias = instrumentalVisBias;
             } else {
                 this.useVis2CalibrationBias = true;
 
-                /* Get Vis2 calibration bias (percents) (peak to peak ~ 4 sigma) */
-                this.instrumentVis2CalibrationBias = 0.25 * getPercents(vis2CalibrationBias.doubleValue());
-
-                /* Correct Vis2 bias = 1/4 * visBias^2 (peak to peak ~ 4 sigma) */
-                this.instrumentalVis2Bias = 0.25 * instrumentalVisBias * instrumentalVisBias;
+                /* Get Vis2 calibration bias (percents) */
+                this.instrumentVis2CalibrationBias = getPercents(vis2CalibrationBias.doubleValue());
+                this.instrumentalVis2Bias = instrumentalVisBias * instrumentalVisBias;
             }
         } else {
             // disable instrumental bias:
             this.useVis2CalibrationBias = false;
         }
 
-        final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
-
+        // Check wavelength range:
+        final double lambdaMin = this.waveLengths[0];
+        final double lambdaMax = this.waveLengths[nSpectralChannels - 1];   
+        
+        if (insMode.getWaveLengthBandRef() != null) {
+            final double deltaLambda = (lambdaMax - lambdaMin) / AsproConstants.MICRO_METER;
+            final double maxDeltaLambda = insMode.getWaveLengthBandRef();
+            
+            if (deltaLambda > maxDeltaLambda) {
+                  addWarning("Detector can not be read completely within 1 DIT: use a smaller wavelength range up to " 
+                          + df.format(maxDeltaLambda) + " " + SpecialChars.UNIT_MICRO_METER);
+            }
+        }
+        
         final SpectralSetup table = insMode.getTable();
         int firstIdx = -1;
         int lastIdx = -1;
 
         if (table != null) {
             // check WLen range:
-            final double[] lambda = table.getAndScaleColumn(SpectralSetupQuantity.LAMBDA, 1e-6);
+            final double[] lambda = table.getAndScaleColumn(SpectralSetupQuantity.LAMBDA, AsproConstants.MICRO_METER);
             if (lambda == null) {
                 throw new IllegalStateException("Missing lambda column within spectral table !");
             }
-
-            final double lambdaMin = this.waveLengths[0];
-            final double lambdaMax = this.waveLengths[nSpectralChannels - 1];
 
             for (int i = 0; i < lambda.length; i++) {
                 if (Math.abs(lambda[i] - lambdaMin) < 1e-15) {
@@ -516,8 +530,10 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("transmission                  : {}", Arrays.toString(transmission));
             logger.debug("instrumentalVis[iMidChannel]  : {}", instrumentalVisibility[iMidChannel]);
             logger.debug("instrumentalVisibility        : {}", Arrays.toString(instrumentalVisibility));
-            logger.debug("nbPhotThermal[iMidChannel]    : {}", nbPhotThermal[iMidChannel]);
-            logger.debug("nbPhotThermal                 : {}", Arrays.toString(nbPhotThermal));
+            if (nbPhotThermal != null) {
+                logger.debug("nbPhotThermal[iMidChannel]    : {}", nbPhotThermal[iMidChannel]);
+                logger.debug("nbPhotThermal                 : {}", Arrays.toString(nbPhotThermal));
+            }
             logger.debug("nbPixInterf[iMidChannel]      : {}", nbPixInterf[iMidChannel]);
             logger.debug("nbPixInterf                   : {}", Arrays.toString(nbPixInterf));
             logger.debug("nbPixPhoto[iMidChannel]       : {}", nbPixPhoto[iMidChannel]);
@@ -846,16 +862,18 @@ public final class NoiseService implements VisNoiseService {
 
                     addInformation("Observation can take advantage of FT. Adjusting DIT to: " + formatTime(obsDit));
                 } else {
-                    addInformation("Observation can take advantage of FT (Group track).");
+                    addInformation("Observation can take advantage of FT (Group track). DIT set to: " + formatTime(obsDit));
                 }
             } else {
-                addWarning("Observation can not use FT (magnitude limit or saturation).");
+                addWarning("Observation can not use FT (magnitude limit or saturation). DIT set to: " + formatTime(obsDit));
 
                 if (logger.isDebugEnabled()) {
                     logger.debug("vinst[iMidChannel]              : {}", vinst[iMidChannel]);
                     logger.debug("vinst (noFT)                    : {}", Arrays.toString(vinst));
                 }
             }
+        } else {
+            addInformation("Observation without FT. DIT set to: " + formatTime(obsDit));
         }
 
         // total number of frames:
@@ -988,8 +1006,7 @@ public final class NoiseService implements VisNoiseService {
         for (int i = 0; i < nWLen; i++) {
             // nb of photons m^-2.s^-1.m^-1 for an object at magnitude 0:
             // note: fzero depends on the spectral band:
-            final double fzero = FastMath.pow(10d, insBand[i].getLogFluxZero())
-                    * (insBand[i].getLambda() * AsproConstants.MICRO_METER) / (H_PLANCK * C_LIGHT);
+            final double fzero = FastMath.pow(10d, insBand[i].getLogFluxZero()) * waveLengths[i] / (H_PLANCK * C_LIGHT);
 
             // TODO: source flux may be spectrally dependent:
             // nb of photons m^-2.s^-1.m^-1 for the target object:
