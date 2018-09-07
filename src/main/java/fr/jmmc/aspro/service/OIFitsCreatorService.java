@@ -68,7 +68,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     /** enable the OIFits validation */
     private final static boolean DO_VALIDATE_OIFITS = false;
     /** enable DEBUG mode */
-    private final static boolean DEBUG_SNR = false;
+    private final static boolean DEBUG_SNR = true;
 
     /* members */
 
@@ -780,7 +780,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                         if (!isAmber) {
                             if (instrumentExperimental) {
-
                                 // For experimental instruments: VisAmp/Phi are only amplitude and phase of complex visibility:
                                 if (ns == null) {
                                     vamp = visComplex[k][l].abs();
@@ -886,6 +885,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     }
                                     errAmp = s_vamp_err;
                                     errPhi = s_vphi_err;
+                                }
+
+                                if (useInstrumentBias && (ns != null)) {
+                                    errPhi = ns.computeBiasedVisPhiError(vphi, errPhi);
+                                    errAmp = Math.max(errAmp, errPhi);
                                 }
 
                                 // Set values:
@@ -1037,15 +1041,15 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         } else {
                             if (doFlag) {
                                 // use theoretical value & error if SNR < 3 !
-                                
+
                                 // square visibility error :
                                 v2Err = ns.computeVis2Error(i, l, v2);
 
                                 if (this.doNoise) {
                                     // update nth sample:
-                                    v2 += v2Err * distRe[visRndIdxRow[l]];                                    
+                                    v2 += v2Err * distRe[visRndIdxRow[l]];
                                 }
-                                
+
                             } else {
                                 // Sampling complex visibilities:
 
@@ -1093,9 +1097,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     v2 += bias; // remove bias correction
                                     // square visibility error :
                                     v2Err = ns.computeVis2Error(i, l, v2);
-                                    
-                                    // logger.info("Bias vs Error: bias = " + bias + " error = "+v2Err + "ratio: " + bias / v2Err);
 
+                                    // logger.info("Bias vs Error: bias = " + bias + " error = "+v2Err + "ratio: " + bias / v2Err);
                                     logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_v2_mean / s_v2_err) + " V2"
                                             + " (err(re,im)= " + errCVis + ")"
                                             + " avg= " + s_v2_mean + " V2= " + v2 + " ratio: " + (s_v2_mean / v2)
@@ -1111,6 +1114,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     v2 = s_v2_mean;
                                 }
                                 v2Err = s_v2_err;
+                            }
+
+                            if (useInstrumentBias && (ns != null)) {
+                                v2Err = ns.computeBiasedVis2Error(v2, v2Err);
                             }
 
                             snr = Math.abs(v2 / v2Err);
@@ -1446,13 +1453,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                                 // amplitude error t3AmpErr = t3Amp * t3PhiErr :
                                 errAmp = t3amp * errPhi;
-                                
+
                                 if (this.doNoise) {
                                     // use the first distribution (sigma = 1):
                                     final int nSample = visRndIdxRow[l];
-                                    
-                                    // TODO: add noise in a proper manner:
 
+                                    // TODO: add noise in a proper manner:
                                     // add gaussian noise with sigma = errAmp :
                                     t3amp += errAmp * distRe_12[nSample];
                                     // add gaussian noise with sigma = errPhi :
@@ -1570,6 +1576,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 }
                                 errAmp = s_t3amp_err;
                                 errPhi = s_t3phi_err;
+                            }
+
+                            if (useInstrumentBias && (ns != null)) {
+                                errPhi = ns.computeBiasedT3PhiError(t3phi, errPhi);
+                                errAmp = Math.max(errAmp, errPhi);
                             }
                         }
 

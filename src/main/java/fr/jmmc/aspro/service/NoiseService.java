@@ -136,14 +136,12 @@ public final class NoiseService implements VisNoiseService {
     /* bias */
     /** true to use instrument bias; false to compute only theoretical error */
     private final boolean useInstrumentBias;
-    /** Typical Vis2 Bias (absolute) */
+    /** Typical Vis/Vis2 Bias (absolute) */
     private double instrumentalVis2Bias = 0d;
-    /** Typical Phase/Phase Closure Bias (rad) */
-    private double instrumentalPhaseBias = 0d;
-    /** flag to use the Vis2 Calibration Bias */
-    private boolean useVis2CalibrationBias = false;
-    /** Vis2 Calibration Bias (proportional to square visibility) */
-    private double instrumentVis2CalibrationBias = 0d;
+    /** Typical Vis. Phase Bias (rad) */
+    private double instrumentalVisPhaseBias = 0d;
+    /** Typical Phase Closure Bias (rad) */
+    private double instrumentalT3PhaseBias = 0d;
 
     /* instrument mode parameters */
     /** number of spectral channels */
@@ -339,7 +337,7 @@ public final class NoiseService implements VisNoiseService {
         this.ron = insSetup.getRon();
         this.detectorSaturation = insSetup.getDetectorSaturation();
         this.quantumEfficiency = insSetup.getQuantumEfficiency();
-        
+
         // DIT:
         this.dit = insSetup.getDit();
         if (insMode.getDit() != null) {
@@ -375,51 +373,36 @@ public final class NoiseService implements VisNoiseService {
         if (ratioTimeInterfero < 0.99) {
             final double seqTimeMin = (totalObsTime / ratioTimeInterfero); // s
 
-            addInformation("Min O.B. time: " + df.format(Math.round(seqTimeMin)) + " s (" 
+            addInformation("Min O.B. time: " + df.format(Math.round(seqTimeMin)) + " s ("
                     + df.format(Math.round(seqTimeMin / 60.0)) + " min) on acquisition"
                     + " - Ratio Interferometry: " + df.format(100.0 * ratioTimeInterfero) + " %");
         }
 
         if (this.useInstrumentBias) {
             /* Convert Phase bias to radians */
-            this.instrumentalPhaseBias = FastMath.toRadians(insSetup.getInstrumentPhaseBias());
+            this.instrumentalT3PhaseBias = FastMath.toRadians(insSetup.getInstrumentPhaseBias());
 
-            /* Get Vis bias (percents) */
-            final double instrumentalVisBias = getPercents(insSetup.getInstrumentVisibilityBias());
+            // TODO: add bias in config
+            this.instrumentalVisPhaseBias = this.instrumentalT3PhaseBias;
 
-            final Double vis2CalibrationBias = insSetup.getInstrumentVis2CalibrationBias();
-            if (vis2CalibrationBias == null) {
-                this.useVis2CalibrationBias = false;
-                this.instrumentVis2CalibrationBias = 0d;
-
-                /* note: instrumentalVis2Bias = instrumentalVisBias (few percents) as there is no specific calibration bias */
-                this.instrumentalVis2Bias = instrumentalVisBias;
-            } else {
-                this.useVis2CalibrationBias = true;
-
-                /* Get Vis2 calibration bias (percents) */
-                this.instrumentVis2CalibrationBias = getPercents(vis2CalibrationBias.doubleValue());
-                this.instrumentalVis2Bias = instrumentalVisBias * instrumentalVisBias;
-            }
-        } else {
-            // disable instrumental bias:
-            this.useVis2CalibrationBias = false;
+            /* Get Vis2 bias (percents) */
+            this.instrumentalVis2Bias = getPercents(insSetup.getInstrumentVisibilityBias());
         }
 
         // Check wavelength range:
         final double lambdaMin = this.waveLengths[0];
-        final double lambdaMax = this.waveLengths[nSpectralChannels - 1];   
-        
+        final double lambdaMax = this.waveLengths[nSpectralChannels - 1];
+
         if (insMode.getWaveLengthBandRef() != null) {
             final double deltaLambda = (lambdaMax - lambdaMin) / AsproConstants.MICRO_METER;
             final double maxDeltaLambda = insMode.getWaveLengthBandRef();
-            
+
             if (deltaLambda > maxDeltaLambda) {
-                  addWarning("Detector can not be read completely within 1 DIT: the wavelength range is restricted to " 
-                          + df.format(maxDeltaLambda) + " " + SpecialChars.UNIT_MICRO_METER);
+                addWarning("Detector can not be read completely within 1 DIT: the wavelength range is restricted to "
+                        + df.format(maxDeltaLambda) + " " + SpecialChars.UNIT_MICRO_METER);
             }
         }
-        
+
         final SpectralSetup table = insMode.getTable();
         int firstIdx = -1;
         int lastIdx = -1;
@@ -537,9 +520,7 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("nbPixPhoto                    : {}", Arrays.toString(nbPixPhoto));
             logger.debug("useInstrumentBias             : {}", useInstrumentBias);
             logger.debug("instrumentalVisibilityBias    : {}", instrumentalVis2Bias);
-            logger.debug("instrumentalPhaseBias         : {}", instrumentalPhaseBias);
-            logger.debug("useVis2CalibrationBias        : {}", useVis2CalibrationBias);
-            logger.debug("instrumentVis2CalibrationBias : {}", instrumentVis2CalibrationBias);
+            logger.debug("instrumentalT3PhaseBias       : {}", instrumentalT3PhaseBias);
         }
     }
 
@@ -969,7 +950,7 @@ public final class NoiseService implements VisNoiseService {
 
     private void dumpVis2ErrorSample(final int iChannel, final double visAmp) {
         double v2 = visAmp * visAmp;
-        double errV2 = computeVis2ErrorNoBias(iMidPoint, iChannel, v2);
+        double errV2 = computeVis2Error(iMidPoint, iChannel, v2);
         double snr = v2 / errV2;
         double bias = computeVis2Bias(iMidPoint, iChannel);
 
@@ -1157,16 +1138,14 @@ public final class NoiseService implements VisNoiseService {
     }
 
     /**
-     * Compute error on square visibility
+     * Compute error on square visibility. It returns NaN if the error can not be computed
      *
      * @param iPoint index of the observable point
      * @param iChannel index of the channel
      * @param vis2 squared visibility
-     * @param useBias use instrumentalVisibilityBias and instrumentVis2CalibrationBias
-     * @return square visiblity error
+     * @return square visiblity error or NaN if the error can not be computed
      */
-    private double computeVis2Error(final int iPoint, final int iChannel,
-                                    final double vis2, final boolean useBias) {
+    public double computeVis2Error(final int iPoint, final int iChannel, final double vis2) {
         if (DO_CHECKS) {
             // fast return NaN if invalid configuration :
             if (this.invalidParameters) {
@@ -1212,18 +1191,14 @@ public final class NoiseService implements VisNoiseService {
         // Limit excessively large errors (very low transmission or strehl):
         errVis2 = Math.min(errVis2, MAX_ERR_V2);
 
-        // Note: instrumentalVis2Bias is not used when sampling is enabled !
-        // TODO: how to handle bias on observable and noisy data ?
-        if (useBias) {
-            // Note: bias are normally not a gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
-            if (useVis2CalibrationBias) {
-                // JBLB: bias estimation (first order for PIONIER):
-                return Math.max(errVis2, instrumentVis2CalibrationBias * vis2 + instrumentalVis2Bias);
-            }
-            // TODO: find correct coefficients for instruments AMBER, MIDI, VEGA and use instrumentVis2CalibrationBias in estimation.
-            return Math.max(errVis2, instrumentalVis2Bias);
-        }
         return errVis2;
+    }
+
+    public double computeBiasedVis2Error(final double vis2, final double errVis2) {
+        // Note: bias are normally not a gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
+
+        // use min or sqrt(err^2 + bias^2)
+        return Math.max(errVis2, instrumentalVis2Bias);
     }
 
     /**
@@ -1365,9 +1340,13 @@ public final class NoiseService implements VisNoiseService {
         // repeat OBS measurements to reach totalObsTime minutes
         sclosph *= totFrameCorrection;
 
-        // t3PhiErr and t3AmpErr = t3Amp * t3PhiErr :
+        return sclosph;
+    }
+
+    public double computeBiasedT3PhiError(final double t3Phi, final double errT3Phi) {
         // Note: bias are normally not a gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
-        return Math.max(sclosph, instrumentalPhaseBias);
+
+        return Math.max(errT3Phi, instrumentalT3PhaseBias);
     }
 
     /**
@@ -1417,39 +1396,19 @@ public final class NoiseService implements VisNoiseService {
      */
     private double computeVisError(final int iPoint, final int iChannel, final double visAmp) {
         // vis2 error without bias :
-        final double errV2 = computeVis2ErrorNoBias(iPoint, iChannel, visAmp * visAmp);
+        final double errV2 = computeVis2Error(iPoint, iChannel, visAmp * visAmp);
 
         // dvis = d(vis2) / (2 * vis) :
         // in log scale: (dv / v) = (1/2) (dv2 / v2)
         final double visAmpErr = errV2 / (2d * visAmp);
 
-        // convert instrumental phase bias as an error too. Use it as a limit:
+        return visAmpErr;
+    }
+
+    public double computeBiasedVisPhiError(final double visPhi, final double errVisPhi) {
         // Note: bias are normally not a gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
-        return Math.max(visAmpErr, visAmp * instrumentalPhaseBias);
-    }
 
-    /**
-     * Compute error on square visibility. It returns NaN if the error can not be computed
-     *
-     * @param iPoint index of the observable point
-     * @param iChannel index of the channel
-     * @param vis2 squared visibility
-     * @return square visiblity error or NaN if the error can not be computed
-     */
-    public double computeVis2Error(final int iPoint, final int iChannel, final double vis2) {
-        return computeVis2Error(iPoint, iChannel, vis2, true);
-    }
-
-    /**
-     * Compute error on square visibility without bias. It returns NaN if the error can not be computed
-     *
-     * @param iPoint index of the observable point
-     * @param iChannel index of the channel
-     * @param vis2 squared visibility
-     * @return square visiblity error or NaN if the error can not be computed
-     */
-    private double computeVis2ErrorNoBias(final int iPoint, final int iChannel, final double vis2) {
-        return computeVis2Error(iPoint, iChannel, vis2, false);
+        return Math.max(errVisPhi, instrumentalVisPhaseBias);
     }
 
     private boolean check(final int iPoint, final int iChannel) {
@@ -1510,7 +1469,7 @@ public final class NoiseService implements VisNoiseService {
             // M ] 4.2 - 7.0 [
             return Band.M;
         }
-        
+
         Band band = Band.findBand(waveLength);
         // TODO: fix that logic to use all possible bands within the instrument bandwidth
         switch (band) {
