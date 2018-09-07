@@ -355,21 +355,17 @@ public final class NoiseService implements VisNoiseService {
         // Use Sequence to get both time & beam ratios:
         final ObservationSequence sequence = insSetup.getSequence();
 
+        final double ratioInterfero = sequence.getRatioInterferometry(); // [0..1]
+
         this.ratioPhotoPerBeam = sequence.getRatioPhotoPerBeam();
 
-        final double ratioTime = sequence.getRatioTime();
-        final double ratioDeadTime = sequence.getRatioDeadTime();
-
-        // Note: chopping switch is 2 times per SECOND not per sequence !
-        final double effectiveFrameTime = ratioTime * this.dit + ratioDeadTime * insSetup.getDeadtimeExposure()
-                + insSetup.getDeadtimeSequence();
-
-        final double ratioTimeInterfero = this.dit / effectiveFrameTime;
+        final double effectiveFrameTime = insSetup.getFrameRatio() * this.dit;
+        // ratio in time [0..1]
+        final double ratioTimeInterfero = ratioInterfero / insSetup.getFrameRatio();
 
         if (logger.isDebugEnabled()) {
+            logger.debug("ratioInterfero                : {}", ratioInterfero);
             logger.debug("ratioPhotoPerBeam             : {}", ratioPhotoPerBeam);
-            logger.debug("ratioTime                     : {}", ratioTime);
-            logger.debug("ratioDeadTime                 : {}", ratioDeadTime);
             logger.debug("effectiveFrameTime            : {}", effectiveFrameTime);
             logger.debug("efficiency (%)                : {}", (100.0 * ratioTimeInterfero));
             logger.debug("totalObsTime                  : {}", totalObsTime);
@@ -379,7 +375,8 @@ public final class NoiseService implements VisNoiseService {
         if (ratioTimeInterfero < 0.99) {
             final double seqTimeMin = (totalObsTime / ratioTimeInterfero); // s
 
-            addInformation("Min O.B. time: " + df.format(seqTimeMin) + " s (" + df.format(seqTimeMin / 60.0) + " min)"
+            addInformation("Min O.B. time: " + df.format(Math.round(seqTimeMin)) + " s (" 
+                    + df.format(Math.round(seqTimeMin / 60.0)) + " min) on acquisition"
                     + " - Ratio Interferometry: " + df.format(100.0 * ratioTimeInterfero) + " %");
         }
 
@@ -418,7 +415,7 @@ public final class NoiseService implements VisNoiseService {
             final double maxDeltaLambda = insMode.getWaveLengthBandRef();
             
             if (deltaLambda > maxDeltaLambda) {
-                  addWarning("Detector can not be read completely within 1 DIT: use a smaller wavelength range up to " 
+                  addWarning("Detector can not be read completely within 1 DIT: the wavelength range is restricted to " 
                           + df.format(maxDeltaLambda) + " " + SpecialChars.UNIT_MICRO_METER);
             }
         }
@@ -596,8 +593,8 @@ public final class NoiseService implements VisNoiseService {
 
         // use band range to cover lambdaMin / lambdaMax:
         // JHK or LM or BVR
-        final Band bandMin = findBand(lambdaMin / AsproConstants.MICRO_METER); // microns
-        final Band bandMax = findBand(lambdaMax / AsproConstants.MICRO_METER); // microns
+        final Band bandMin = findBand(instrumentName, lambdaMin / AsproConstants.MICRO_METER); // microns
+        final Band bandMax = findBand(instrumentName, lambdaMax / AsproConstants.MICRO_METER); // microns
 
         if (logger.isDebugEnabled()) {
             logger.debug("lambdaMin                     : {}", lambdaMin);
@@ -638,7 +635,7 @@ public final class NoiseService implements VisNoiseService {
             final int nWLen = nSpectralChannels;
 
             for (int i = 0; i < nWLen; i++) {
-                final Band band = findBand(waveLengths[i] / AsproConstants.MICRO_METER); // microns
+                final Band band = findBand(instrumentName, waveLengths[i] / AsproConstants.MICRO_METER); // microns
                 insBand[i] = band;
 
                 /** instrument band corresponding to target mags */
@@ -1494,11 +1491,26 @@ public final class NoiseService implements VisNoiseService {
      * Find the band corresponding to the given wavelength
      * but always use V band instead of I & R bands
      *
+     * @param instrumentName instrument name
      * @param waveLength wave length in microns
      * @return corresponding band
      * @throws IllegalArgumentException if no band found
      */
-    public static Band findBand(final double waveLength) throws IllegalArgumentException {
+    public static Band findBand(final String instrumentName, final double waveLength) throws IllegalArgumentException {
+        // MATISSE: use specific bands:
+        if (instrumentName.startsWith(AsproConstants.INS_MATISSE)) {
+            // L <= 4.2
+            if (waveLength <= 4.2) {
+                return Band.L;
+            }
+            // N >= 7.0
+            if (waveLength >= 7.0) {
+                return Band.N;
+            }
+            // M ] 4.2 - 7.0 [
+            return Band.M;
+        }
+        
         Band band = Band.findBand(waveLength);
         // TODO: fix that logic to use all possible bands within the instrument bandwidth
         switch (band) {

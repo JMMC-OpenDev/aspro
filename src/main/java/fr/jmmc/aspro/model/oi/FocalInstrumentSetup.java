@@ -32,8 +32,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="defaultTotalIntegrationTime" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/&gt;
  *         &lt;element name="defaultSamplingTime" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/&gt;
  *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
- *         &lt;element name="deadtimeExposure" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
- *         &lt;element name="deadtimeSequence" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="frameRatio" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="ron" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="detectorSaturation" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="quantumEfficiency" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
@@ -64,8 +63,7 @@ import fr.jmmc.aspro.model.OIBase;
     "defaultTotalIntegrationTime",
     "defaultSamplingTime",
     "dit",
-    "deadtimeExposure",
-    "deadtimeSequence",
+    "frameRatio",
     "ron",
     "detectorSaturation",
     "quantumEfficiency",
@@ -94,8 +92,7 @@ public class FocalInstrumentSetup
     protected Integer defaultTotalIntegrationTime;
     protected Integer defaultSamplingTime;
     protected Double dit;
-    protected Double deadtimeExposure;
-    protected Double deadtimeSequence;
+    protected Double frameRatio;
     protected Double ron;
     protected Double detectorSaturation;
     protected Double quantumEfficiency;
@@ -235,51 +232,27 @@ public class FocalInstrumentSetup
     }
 
     /**
-     * Gets the value of the deadtimeExposure property.
+     * Gets the value of the frameRatio property.
      * 
      * @return
      *     possible object is
      *     {@link Double }
      *     
      */
-    public Double getDeadtimeExposure() {
-        return deadtimeExposure;
+    public Double getFrameRatio() {
+        return frameRatio;
     }
 
     /**
-     * Sets the value of the deadtimeExposure property.
+     * Sets the value of the frameRatio property.
      * 
      * @param value
      *     allowed object is
      *     {@link Double }
      *     
      */
-    public void setDeadtimeExposure(Double value) {
-        this.deadtimeExposure = value;
-    }
-
-    /**
-     * Gets the value of the deadtimeSequence property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Double }
-     *     
-     */
-    public Double getDeadtimeSequence() {
-        return deadtimeSequence;
-    }
-
-    /**
-     * Sets the value of the deadtimeSequence property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Double }
-     *     
-     */
-    public void setDeadtimeSequence(Double value) {
-        this.deadtimeSequence = value;
+    public void setFrameRatio(Double value) {
+        this.frameRatio = value;
     }
 
     /**
@@ -719,11 +692,8 @@ public class FocalInstrumentSetup
         if (this.defaultSamplingTime == null) {
             setDefaultSamplingTime(Integer.valueOf(60)); // 60min
         }
-        if (this.deadtimeExposure == null) {
-            setDeadtimeExposure(0.0);
-        }
-        if (this.deadtimeSequence == null) {
-            setDeadtimeSequence(0.0);
+        if (this.frameRatio == null) {
+            setFrameRatio(1.0);
         }
         if (this.quantumEfficiency == null) {
             setQuantumEfficiency(1.0);
@@ -744,7 +714,7 @@ public class FocalInstrumentSetup
         }
         
         // Initialize the sequence:
-        this.sequence.init(logger);
+        this.sequence.init(logger, name);
     }
 
     public void dump(final org.slf4j.Logger logger) {
@@ -759,8 +729,7 @@ public class FocalInstrumentSetup
         logger.info("    defaultSamplingTime: {}", getDefaultSamplingTime());
 
         logger.info("    dit: {}", getDit());
-        logger.info("    deadtimeExposure: {}", getDeadtimeExposure());
-        logger.info("    deadtimeSequence: {}", getDeadtimeSequence());
+        logger.info("    frameRatio: {}", getFrameRatio());
 
         logger.info("    ron: {}", getRon());
         logger.info("    detectorSaturation: {}", getDetectorSaturation());

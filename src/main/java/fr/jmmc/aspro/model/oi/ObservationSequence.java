@@ -75,18 +75,18 @@ public class ObservationSequence
     }
     
 //--simple--preserve
-    /** ratio total time vs interferometry in time units (read-only) */
+    /** ratio interferometry vs total time in time units (read-only) */
     @javax.xml.bind.annotation.XmlTransient
-    protected double ratioTime = 0.0;
-    /** ratio between photometry vs interferometry per beam (read-only) */
+    protected double ratioInterfero = 0.0;
+    /** ratio between total photometry vs Science photometry per beam (read-only) */
     @javax.xml.bind.annotation.XmlTransient
     protected double ratioPhotoPerBeam = 0.0;
     /** ratio between dead vs interferometry in time units (read-only) */
     @javax.xml.bind.annotation.XmlTransient
     protected double ratioDeadTime = 0.0;
 
-    public double getRatioTime() {
-        return ratioTime;
+    public double getRatioInterferometry() {
+        return ratioInterfero;
     }
 
     public double getRatioPhotoPerBeam() {
@@ -105,9 +105,10 @@ public class ObservationSequence
     /**
      * Initialize and check this instance
      * @param logger logger to use
+     * @param setupName setup name
      * @throws IllegalStateException if the configuration is severly invalid !
      */
-    public void init(final org.slf4j.Logger logger) throws IllegalStateException {
+    public void init(final org.slf4j.Logger logger, final String setupName) throws IllegalStateException {
         // Check sequence:
         for (Exposure exp : getExposures()) {
             switch (exp.getType()) {
@@ -120,42 +121,32 @@ public class ObservationSequence
                 default:
             }
         }
-        /*
-        Sequences:
-            <sequence>
-              <exposure type="SCIENCE" mode="ALL" beams="4"/>
-              <exposure type="SKY" mode="PHOTOMETRY" beams="4"/>
-              <exposure type="DEAD_TIME" unit="2"/> <!-- 2 exposures -->
-            </sequence>
-        
-            <!--
-                1. <sequence type=SCIENCE mode=INTERFEROMETRY unit=1> (1 seul frame ou 10?)
-                2. <sequence type=SCIENCE mode=PHOTO unit=4 beams=1> (4T)
-                3. <sequence type=SKY mode=PHOTO unit=4 beams=1> (chopping sur chaque mesure photom\ufffd\ufffdtrique)
-                4. <sequence type=DEAD_TIME unit=9> (total overheads)
-            -->
-         */
 
         final double totalInterfero = getTotalUnits(ExposureMode.INTERFEROMETRY);
         final double totalPhoto = getTotalUnits(ExposureMode.PHOTOMETRY);
+        final double total = getTotalExposures();
 
-        this.ratioTime = getTotalExposures();
+        this.ratioInterfero = totalInterfero / total;
 
         final double totalDead = getTotalUnits(ExposureMode.NONE);
 
         this.ratioDeadTime = totalDead / totalInterfero;
 
         final double totalPhotoPerBeam = getTotalPerBeam(ExposureMode.PHOTOMETRY);
+        final double totalPhotoSciPerBeam = getTotalPerBeam(ExposureMode.PHOTOMETRY, ExposureType.SCIENCE);
 
-        this.ratioPhotoPerBeam = totalPhotoPerBeam / totalInterfero;
+        this.ratioPhotoPerBeam = totalPhotoPerBeam / totalPhotoSciPerBeam;
 /*
-        logger.info("totalInterfero: " + totalInterfero);
-        logger.info("totalPhoto: " + totalPhoto);
-        logger.info("ratioTime: " + ratioTime);
-        logger.info("totalDead: " + totalDead);
-        logger.info("ratioDeadTime: " + ratioDeadTime);
-        logger.info("totalPhotoPerBeam: " + totalPhotoPerBeam);
-        logger.info("ratioPhotoPerBeam: " + ratioPhotoPerBeam);
+        logger.info("--- Setup: "+setupName);
+        logger.info("totalInterfero:       " + totalInterfero);
+        logger.info("totalPhoto:           " + totalPhoto);
+        logger.info("total:                " + total);
+        logger.info("ratioInterfero:       " + ratioInterfero);
+        logger.info("totalDead:            " + totalDead);
+        logger.info("ratioDeadTime:        " + ratioDeadTime);
+        logger.info("totalPhotoSciPerBeam: " + totalPhotoSciPerBeam);
+        logger.info("totalPhotoPerBeam:    " + totalPhotoPerBeam);
+        logger.info("ratioPhotoPerBeam:    " + ratioPhotoPerBeam);
 */
     }
     
@@ -182,9 +173,14 @@ public class ObservationSequence
     }
 
     private double getTotalPerBeam(final ExposureMode mode) {
+        return getTotalPerBeam(mode, null);
+    }
+    
+    private double getTotalPerBeam(final ExposureMode mode, final ExposureType type) {
         double total = 0.0;
         for (Exposure exp : getExposures()) {
-            if (exp.getMode() == mode || (mode != ExposureMode.NONE && exp.getMode() == ExposureMode.ALL)) {
+            if ((exp.getMode() == mode || (mode != ExposureMode.NONE && exp.getMode() == ExposureMode.ALL))
+                    && (type == null || exp.getType() == type)) {
                 // matching exposure:
 
                 // check beams:

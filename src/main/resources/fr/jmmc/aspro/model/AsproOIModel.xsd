@@ -2166,17 +2166,10 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="deadtimeExposure" type="xsd:double" minOccurs="0">
+            <xsd:element name="frameRatio" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The individual dead time per exposure in seconds (typically less than 0.01s)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="deadtimeSequence" type="xsd:double" minOccurs="0">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The individual dead time per sequence (several exposure) in seconds (typically less than 0.05s)
+                        The ratio giving the real Frame time vs DIT (typically &gt; 1.0) to include overheads
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
