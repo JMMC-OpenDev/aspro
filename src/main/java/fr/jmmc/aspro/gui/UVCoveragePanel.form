@@ -210,7 +210,7 @@
                 <Component class="javax.swing.JLabel" name="jLabelObsDuration">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Total Integration time (s)"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Time REALLY spent on-source, in seconds, per calibrated point"/>
+                    <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Time REALLY spent on source&lt;/b&gt;, in seconds, per calibrated point&#xa;&lt;br&gt;Default values corresponds to the typical time according to the instrument (1 OB)&#xa;&lt;/html&gt;"/>
                   </Properties>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

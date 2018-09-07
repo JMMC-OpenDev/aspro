@@ -413,7 +413,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jPanelLeft.add(jFieldUVMax, gridBagConstraints);
 
         jLabelSamplingPeriod.setText("Sampling Periodicity (min)");
-        jLabelSamplingPeriod.setToolTipText("One set of calibrated visibilities in the u-v plane is taken at this interval (minutes)"); // NOI18N
+        jLabelSamplingPeriod.setToolTipText("One set of calibrated visibilities in the u-v plane is taken at this interval (minutes)");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 13;
@@ -431,7 +431,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jPanelLeft.add(jFieldSamplingPeriod, gridBagConstraints);
 
         jLabelObsDuration.setText("Total Integration time (s)");
-        jLabelObsDuration.setToolTipText("Time REALLY spent on-source, in seconds, per calibrated point");
+        jLabelObsDuration.setToolTipText("<html><b>Time REALLY spent on source</b>, in seconds, per calibrated point\n<br>Default values corresponds to the typical time according to the instrument (1 OB)\n</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 15;
@@ -833,31 +833,32 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.jFieldSamplingPeriod.addPropertyChangeListener("value", new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
-                final double newValue = ((Number) jFieldSamplingPeriod.getValue()).doubleValue();
+                final int newValue = ((Number) jFieldSamplingPeriod.getValue()).intValue();
 
-                if (newValue <= 0d) {
+                if (newValue <= 0) {
                     // invalid value :
                     resetSamplingPeriod(om.getMainObservation());
                 }
 
-                // Check that obs duration is less than jFieldSamplingPeriod / 2:
-                final double halfSamplingSec = ((Number) jFieldSamplingPeriod.getValue()).doubleValue() * 60d * 0.5d;
-                final double obsDurationSec = ((Number) jFieldObsDuration.getValue()).doubleValue();
+                if (jFieldObsDuration.getValue() != null) {
+                    // Check that obs duration is less than jFieldSamplingPeriod / 2:
+                    final double halfSamplingSec = ((Number) jFieldSamplingPeriod.getValue()).doubleValue() * 60d * 0.5d;
+                    final double obsDurationSec = ((Number) jFieldObsDuration.getValue()).doubleValue();
 
-                if (obsDurationSec > halfSamplingSec) {
-                    // update obs duration:
-                    jFieldObsDuration.setValue(Double.valueOf(halfSamplingSec));
+                    if (obsDurationSec > halfSamplingSec) {
+                        // update obs duration:
+                        jFieldObsDuration.setValue(Double.valueOf(halfSamplingSec));
+                    }
                 }
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("samplingPeriod changed: {}", newValue);
+                    logger.debug("samplingPeriod changed: {}", jFieldSamplingPeriod.getValue());
                 }
                 fireObservationUpdateEvent();
             }
         });
 
-        // default obs duration and property change listener :
-        this.jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
+        // define property change listener :
         this.jFieldObsDuration.addPropertyChangeListener("value", new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
@@ -865,9 +866,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 if (newValue <= 0d) {
                     // invalid value :
-                    jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
+                    resetTotalIntegrationTime(om.getMainObservation());
                 }
 
+                // TODO: check again: obs duration is less than jFieldSamplingPeriod / 2:
                 if (logger.isDebugEnabled()) {
                     logger.debug("obsDuration changed: {}", newValue);
                 }
@@ -1016,11 +1018,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     observation.getInterferometerConfiguration().getName(),
                     observation.getInstrumentConfiguration().getName());
             this.jComboBoxInstrumentMode.setModel(new DefaultComboBoxModel(v));
-            
+
             // try restoring the selected instrument mode :
             if (observation.getInstrumentConfiguration().getInstrumentMode() != null) {
                 this.jComboBoxInstrumentMode.setSelectedItem(observation.getInstrumentConfiguration().getInstrumentMode());
-            }            
+            }
 
             if (logger.isTraceEnabled()) {
                 logger.trace("jComboBoxInstrumentMode updated: {}", this.jComboBoxInstrumentMode.getSelectedItem());
@@ -1041,11 +1043,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         final int defaultSamplingTime = getInstrumentDefaultSamplingTime(observation);
 
         this.jFieldSamplingPeriod.setValue(Double.valueOf(defaultSamplingTime));
-        this.jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
 
         if (logger.isDebugEnabled()) {
             logger.debug("defaultSamplingTime: {}", defaultSamplingTime);
         }
+        resetTotalIntegrationTime(observation);
     }
 
     /**
@@ -1056,6 +1058,33 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private int getInstrumentDefaultSamplingTime(final ObservationSetting observation) {
         // get the default sampling time of the instrument :
         return ConfigurationManager.getInstance().getInstrumentSamplingTime(
+                observation.getInterferometerConfiguration().getName(),
+                observation.getInstrumentConfiguration().getName());
+    }
+
+    /**
+     * Reset the total integration time to the default total integration time of the selected instrument
+     * @param observation observation to use
+     */
+    private void resetTotalIntegrationTime(final ObservationSetting observation) {
+        // reset the total integration time to the default total integration time of the instrument :
+        final int defaultTotalIntegrationTime = getInstrumentTotalIntegrationTime(observation);
+
+        this.jFieldObsDuration.setValue(Double.valueOf(defaultTotalIntegrationTime));
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("defaultTotalIntegrationTime: {}", defaultTotalIntegrationTime);
+        }
+    }
+
+    /**
+     * Return the default total integration time of the selected instrument
+     * @param observation observation to use
+     * @return default total integration time
+     */
+    private int getInstrumentTotalIntegrationTime(final ObservationSetting observation) {
+        // get the default sampling time of the instrument :
+        return ConfigurationManager.getInstance().getInstrumentTotalIntegrationTime(
                 observation.getInterferometerConfiguration().getName(),
                 observation.getInstrumentConfiguration().getName());
     }
@@ -1304,8 +1333,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // update the acquisition time :
             if (observation.getInstrumentConfiguration().getAcquisitionTime() != null) {
                 this.jFieldObsDuration.setValue(observation.getInstrumentConfiguration().getAcquisitionTime());
-            } else {
-                this.jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
             }
 
             // update atmQuality :

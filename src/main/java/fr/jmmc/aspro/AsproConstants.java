@@ -41,8 +41,6 @@ public interface AsproConstants {
     public static final double DEFAULT_MIN_ELEVATION = 45d;
     /** default maximum elevation = 85 degrees */
     public static final double DEFAULT_MAX_ELEVATION = 85d;
-    /** default observation duration per calibrated point = 300 seconds i.e. 5 minutes */
-    public static final double DEFAULT_OBSERVATION_DURATION = 300d;
     /** default value for checkbox Night Limit = true */
     public static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
     /** default image size */
@@ -85,6 +83,8 @@ public interface AsproConstants {
     public static final String INS_PIONIER = "PIONIER";
     /** VLTI GRAVITY */
     public static final String INS_GRAVITY = "GRAVITY";
+    /** VLTI MATISSE LM/N */
+    public static final String INS_MATISSE = "MATISSE_";
     /** CHARA VEGA (2T/3T) */
     public static final String INS_VEGA = "VEGA_";
     /** JMMC legal notice on plots */

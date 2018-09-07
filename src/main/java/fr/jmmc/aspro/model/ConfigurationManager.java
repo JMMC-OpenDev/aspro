@@ -1132,9 +1132,26 @@ public final class ConfigurationManager extends BaseOIManager {
     public int getInstrumentSamplingTime(final String configurationName, final String instrumentName) {
         final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
         if (ins != null) {
-            // TODO: use appropriate sampling time and do the same for total integration time:
             if (ins.getSetups() != null) {
+                // TODO: use appropriate setup corresponding to the selected instrument mode (useless for now)
                 return ins.getSetups().get(0).getDefaultSamplingTime();
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Return the default total integration time for the given interferometer configuration and instrument name
+     * @param configurationName name of the interferometer configuration
+     * @param instrumentName name of the instrument
+     * @return default total integration time
+     */
+    public int getInstrumentTotalIntegrationTime(final String configurationName, final String instrumentName) {
+        final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
+        if (ins != null) {
+            if (ins.getSetups() != null) {
+                // TODO: use appropriate setup corresponding to the selected instrument mode (useless for now)
+                return ins.getSetups().get(0).getDefaultTotalIntegrationTime();
             }
         }
         return -1;
