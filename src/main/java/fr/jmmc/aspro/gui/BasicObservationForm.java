@@ -53,6 +53,7 @@ import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.StringUtils;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -572,9 +573,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.weighty = 0.5;
         add(jPanelOptions, gridBagConstraints);
 
-        jPanelStatus.setMinimumSize(new java.awt.Dimension(57, 30));
         jPanelStatus.setName("jPanelStatus"); // NOI18N
-        jPanelStatus.setPreferredSize(new java.awt.Dimension(100, 30));
         jPanelStatus.setLayout(new java.awt.GridBagLayout());
 
         jLabelState.setText("Status: ");
@@ -582,6 +581,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
         jPanelStatus.add(jLabelState, gridBagConstraints);
 
@@ -605,6 +605,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         add(jPanelStatus, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -853,8 +855,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridheight = 4; // 4 rows (including spacer)
         gridBagConstraints.fill = GridBagConstraints.BOTH;
         gridBagConstraints.insets = new Insets(0, 0, 2, 2);
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weighty = 0.1;
         jPanelOptions.add(windWidget, gridBagConstraints);
 
         windWidget.addPropertyChangeListener(WindWidget.PROPERTY_VALUE, new PropertyChangeListener() {
@@ -874,6 +876,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         jCheckBoxWind.setSelected(false);
         windWidget.setEnabled(false);
+        
+        jLabelStatus.setFont(new Font("Dialog", Font.BOLD, SwingUtils.adjustUISize(18)));
     }
 
     /**
