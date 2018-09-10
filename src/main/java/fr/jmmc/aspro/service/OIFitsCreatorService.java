@@ -68,7 +68,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     /** enable the OIFits validation */
     private final static boolean DO_VALIDATE_OIFITS = false;
     /** enable DEBUG mode */
-    private final static boolean DEBUG_SNR = true;
+    private final static boolean DEBUG_SNR = false;
 
     /* members */
 
