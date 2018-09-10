@@ -428,7 +428,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         window.menuItemWithPath("Interop", "Show Hub Status").click();
 
-        final Frame hubFrame = robot().finder().find(FrameMatcher.withTitle("SAMP Hub"));
+        final Frame hubFrame = robot().finder().find(FrameMatcher.withTitle("SAMP Status"));
 
         if (hubFrame != null) {
             final FrameFixture frame = new FrameFixture(robot(), hubFrame);
