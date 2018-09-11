@@ -300,7 +300,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.weightx = 0.3;
         gridBagConstraints.weighty = 1.0;
         add(jPanelTargets, gridBagConstraints);
 
@@ -424,14 +424,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.weightx = 0.1;
         add(jPanelMain, gridBagConstraints);
 
         jPanelConfigurations.setBorder(javax.swing.BorderFactory.createTitledBorder("Configuration(s)"));
         jPanelConfigurations.setName("jPanelConfigurations"); // NOI18N
         jPanelConfigurations.setLayout(new java.awt.GridBagLayout());
 
-        jScrollPaneInstrumentConfigurations.setPreferredSize(new java.awt.Dimension(120, 50));
+        jScrollPaneInstrumentConfigurations.setPreferredSize(new java.awt.Dimension(150, 50));
 
         jListInstrumentConfigurations.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Samples:", "UT1 UT2 UT3 UT4", "E1 E2 W1 W2" };
@@ -451,7 +451,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.8;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         jPanelConfigurations.add(jScrollPaneInstrumentConfigurations, gridBagConstraints);
 
@@ -478,7 +478,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.weightx = 0.3;
         gridBagConstraints.weighty = 0.5;
         add(jPanelConfigurations, gridBagConstraints);
 
@@ -507,7 +507,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
         jPanelOptions.add(jLabelDate, gridBagConstraints);
 
         jDateSpinner.setModel(new javax.swing.SpinnerDateModel());
@@ -529,7 +529,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 2, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
         jPanelOptions.add(jLabelMinElev, gridBagConstraints);
 
         jFieldMinElev.setColumns(2);
@@ -540,7 +540,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
         jPanelOptions.add(jFieldMinElev, gridBagConstraints);
 
         jCheckBoxWind.setText("Wind");
@@ -552,11 +551,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         jPanelOptions.add(jCheckBoxWind, gridBagConstraints);
 
-        jPanelOptBottom.setMinimumSize(new java.awt.Dimension(4, 4));
-        jPanelOptBottom.setPreferredSize(new java.awt.Dimension(4, 4));
+        jPanelOptBottom.setMinimumSize(new java.awt.Dimension(1, 1));
+        jPanelOptBottom.setPreferredSize(new java.awt.Dimension(1, 1));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -582,7 +580,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 0.2;
-        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
         jPanelStatus.add(jLabelState, gridBagConstraints);
 
         jLabelStatus.setText("Ok");
