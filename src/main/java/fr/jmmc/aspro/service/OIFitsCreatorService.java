@@ -586,7 +586,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // test if the instrument is AMBER to use dedicated diffVis algorithm :
         final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
 
-        final boolean useComplexVis = isAmber || AsproConstants.INS_GRAVITY.equals(this.instrumentName);
+        // generate squared correlated fluxes (VIS2DATA):
+        final boolean useComplexVis = isAmber
+                || AsproConstants.INS_GRAVITY.equals(this.instrumentName)
+                || this.instrumentName.startsWith(AsproConstants.INS_MATISSE);
 
         // Update the data model before calling new OIVis():
         DataModel.setOiVisComplexSupport(useComplexVis);
