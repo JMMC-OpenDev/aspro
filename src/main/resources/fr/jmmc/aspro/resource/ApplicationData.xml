@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.5 beta 10"/>
-    <compilation date="07/09/2018" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.5"/>
+    <compilation date="11/09/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -219,7 +219,7 @@
 
     <releasenotes>
         <release version="0.9.9.5">
-            <pubDate>Fri, 07 Sep 2018 18:00:00 GMT</pubDate>
+            <pubDate>Tue, 11 Sep 2018 14:00:00 GMT</pubDate>
             <prerelease version="0.9.9.5 beta 10">
                 <change type="FEATURE">Added new information messages for MATISSE (DIT, wavelength restrictions)</change>
                 <change type="FEATURE">Always use the instrument default value for the Total Integration Time on the UV Coverage Panel</change>
