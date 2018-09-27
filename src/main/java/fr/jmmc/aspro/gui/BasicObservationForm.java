@@ -46,10 +46,10 @@ import fr.jmmc.jmal.star.StarResolverResult;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.SearchPanel;
+import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.logging.LogbackGui;
 import fr.jmmc.jmcs.logging.LoggingService;
-import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.StringUtils;
@@ -95,7 +95,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener,
-                                                                              StarResolverListener, ObservationListener {
+        StarResolverListener, ObservationListener {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -241,7 +241,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         jButtonDeleteTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
         jButtonDeleteTarget.setToolTipText("delete the selected target(s)");
-        jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
         jButtonDeleteTarget.setName("jButtonDeleteTarget"); // NOI18N
         jButtonDeleteTarget.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -257,7 +256,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         jButtonTargetEditor.setText("Editor");
         jButtonTargetEditor.setToolTipText("Open the Target Editor");
-        jButtonTargetEditor.setMargin(new java.awt.Insets(0, 0, 0, 0));
         jButtonTargetEditor.setName("jButtonTargetEditor"); // NOI18N
         jButtonTargetEditor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -283,7 +281,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         jButtonSkyCalc.setText("Sky");
         jButtonSkyCalc.setToolTipText("Open the JSkyCalc Window");
-        jButtonSkyCalc.setMargin(new java.awt.Insets(0, 0, 0, 0));
         jButtonSkyCalc.setName("jButtonSkyCalc"); // NOI18N
         jButtonSkyCalc.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -519,6 +516,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 2;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         jPanelOptions.add(jDateSpinner, gridBagConstraints);
 
@@ -540,6 +538,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 0.1;
         jPanelOptions.add(jFieldMinElev, gridBagConstraints);
 
         jCheckBoxWind.setText("Wind");
@@ -609,33 +608,33 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }// </editor-fold>//GEN-END:initComponents
 
   private void jButtonSkyCalcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSkyCalcActionPerformed
-      final Target selectedTarget = getSelectedTarget();
-      if (selectedTarget != null) {
-          final ObservationSetting observation = om.getMainObservation();
-          final InterferometerDescription interferometer = observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
+        final Target selectedTarget = getSelectedTarget();
+        if (selectedTarget != null) {
+            final ObservationSetting observation = om.getMainObservation();
+            final InterferometerDescription interferometer = observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
 
-          final Site site = AstroSkyCalc.createSite(interferometer.getName(), interferometer.getPosSph());
+            final Site site = AstroSkyCalc.createSite(interferometer.getName(), interferometer.getPosSph());
 
-          final List<Target> displayTargets = om.getDisplayTargets();
+            final List<Target> displayTargets = om.getDisplayTargets();
 
-          final int size = displayTargets.size();
-          final String[] name = new String[size];
-          final String[] ra = new String[size];
-          final String[] dec = new String[size];
+            final int size = displayTargets.size();
+            final String[] name = new String[size];
+            final String[] ra = new String[size];
+            final String[] dec = new String[size];
 
-          for (int i = 0; i < size; i++) {
-              final Target target = displayTargets.get(i);
-              name[i] = target.getName();
+            for (int i = 0; i < size; i++) {
+                final Target target = displayTargets.get(i);
+                name[i] = target.getName();
 
-              // convert RA/DEC in HH:MM:SS.sss or DD:MM:SS.sss :
-              final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
+                // convert RA/DEC in HH:MM:SS.sss or DD:MM:SS.sss :
+                final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
 
-              ra[i] = raDec[0];
-              dec[i] = raDec[1];
-          }
+                ra[i] = raDec[0];
+                dec[i] = raDec[1];
+            }
 
-          JSkyCalc.showJSkyCalc(site, name, ra, dec, selectedTarget.getName(), observation.getWhen().getDate());
-      }
+            JSkyCalc.showJSkyCalc(site, name, ra, dec, selectedTarget.getName(), observation.getWhen().getDate());
+        }
   }//GEN-LAST:event_jButtonSkyCalcActionPerformed
 
     /**
@@ -874,7 +873,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         jCheckBoxWind.setSelected(false);
         windWidget.setEnabled(false);
-        
+
         jLabelStatus.setFont(new Font("Dialog", Font.BOLD, SwingUtils.adjustUISize(18)));
     }
 
@@ -1342,7 +1341,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     /**
-     * Synchronize Pops (text field / Combo box) with configuration pops 
+     * Synchronize Pops (text field / Combo box) with configuration pops
      * and optionally reset PoPs text field
      * @param forceReset true to force clearing pops
      */
@@ -1458,7 +1457,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     /**
-     * Handle the star resolver result (EDT) to 
+     * Handle the star resolver result (EDT) to
      * create new Target(s) object with the retrieved data from Simbad and
      * fire a single ObservationTargetsChanged event
      * @param result star resolver result
