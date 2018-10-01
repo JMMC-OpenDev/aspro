@@ -192,6 +192,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jLabelState = new javax.swing.JLabel();
         jLabelStatus = new javax.swing.JLabel();
 
+        setMinimumSize(new java.awt.Dimension(640, 160));
+        setPreferredSize(new java.awt.Dimension(800, 160));
         setLayout(new java.awt.GridBagLayout());
 
         jPanelTargets.setBorder(javax.swing.BorderFactory.createTitledBorder("Targets"));
