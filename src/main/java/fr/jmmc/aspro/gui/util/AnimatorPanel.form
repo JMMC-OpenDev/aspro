@@ -18,7 +18,7 @@
   <SubComponents>
     <Component class="javax.swing.JSlider" name="jSliderPeriod">
       <Properties>
-        <Property name="maximum" type="int" value="25"/>
+        <Property name="maximum" type="int" value="250"/>
         <Property name="minimum" type="int" value="1"/>
         <Property name="toolTipText" type="java.lang.String" value="auto refresh periodicity (200ms to 5s)"/>
         <Property name="value" type="int" value="1"/>
@@ -35,7 +35,7 @@
     <Component class="javax.swing.JTextField" name="jTextFieldPeriod">
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
-        <Property name="columns" type="int" value="3"/>
+        <Property name="columns" type="int" value="4"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

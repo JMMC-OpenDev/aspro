@@ -1,12 +1,6 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: AnimatorPanel.java,v $"
- *
- * History
- * -------
- * $Log: AnimatorPanel.java,v $
- */
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.gui.util.UserModelAnimator.UserModelAnimatorListener;
@@ -31,9 +25,9 @@ public final class AnimatorPanel extends javax.swing.JPanel implements ActionLis
     /** Class logger */
     private static final Logger _logger = LoggerFactory.getLogger(AnimatorPanel.class.getName());
     /** milliseconds per tick unit */
-    private final static int TICK_UNIT_MS = 200;
+    private final static int TICK_UNIT_MS = 20;
     /** double formatter for auto refresh period */
-    private final static NumberFormat _df1 = new DecimalFormat("0.0");
+    private final static NumberFormat _df1 = new DecimalFormat("0.0#");
     /** user model animator singleton */
     private final static UserModelAnimator animator = UserModelAnimator.getInstance();
 
@@ -130,7 +124,7 @@ public final class AnimatorPanel extends javax.swing.JPanel implements ActionLis
 
         setLayout(new java.awt.GridBagLayout());
 
-        jSliderPeriod.setMaximum(25);
+        jSliderPeriod.setMaximum(250);
         jSliderPeriod.setMinimum(1);
         jSliderPeriod.setToolTipText("auto refresh periodicity (200ms to 5s)");
         jSliderPeriod.setValue(1);
@@ -143,7 +137,7 @@ public final class AnimatorPanel extends javax.swing.JPanel implements ActionLis
         add(jSliderPeriod, gridBagConstraints);
 
         jTextFieldPeriod.setEditable(false);
-        jTextFieldPeriod.setColumns(3);
+        jTextFieldPeriod.setColumns(4);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
