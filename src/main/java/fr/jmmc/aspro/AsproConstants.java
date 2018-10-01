@@ -48,6 +48,8 @@ public interface AsproConstants {
     /** image size choices */
     public final static Vector<Integer> IMAGE_SIZES = new Vector<Integer>(Arrays.asList(
             new Integer[]{
+                NumberUtils.valueOf(64),
+                NumberUtils.valueOf(128),
                 NumberUtils.valueOf(256),
                 NumberUtils.valueOf(384),
                 DEFAULT_IMAGE_SIZE,
