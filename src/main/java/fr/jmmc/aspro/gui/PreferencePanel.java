@@ -11,6 +11,7 @@ import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
+import fr.jmmc.jmal.image.ImageUtils.ImageInterpolation;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.oiexplorer.core.gui.IconComboBoxRenderer;
@@ -60,6 +61,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         this.jComboBoxImageSize.setModel(new DefaultComboBoxModel(AsproConstants.IMAGE_SIZES));
         this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
         this.jComboBoxColorScale.setModel(new DefaultComboBoxModel(ColorScale.values()));
+        this.jComboBoxInterpolation.setModel(new DefaultComboBoxModel(ImageInterpolation.values()));
 
         this.jComboBoxBestPopsAlgorithm.setModel(new DefaultComboBoxModel(Algorithm.values()));
         this.jComboBoxBestPopsCriteriaSigma.setModel(new DefaultComboBoxModel(Criteria.values()));
@@ -175,6 +177,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jLabelImageNoise = new javax.swing.JLabel();
         jRadioButtonImageNoiseYes = new javax.swing.JRadioButton();
         jRadioButtonImageNoiseNo = new javax.swing.JRadioButton();
+        jLabelInterpolation = new javax.swing.JLabel();
+        jComboBoxInterpolation = new javax.swing.JComboBox();
         jPanelUserModel = new javax.swing.JPanel();
         jLabelFastUserModel = new javax.swing.JLabel();
         jRadioButtonFastUserModelYes = new javax.swing.JRadioButton();
@@ -479,7 +483,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.weightx = 0.5;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
         jPanelModelImage.add(jComboBoxLUT, gridBagConstraints);
 
         jLabelImageSize.setText("Image size");
@@ -500,7 +504,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
         jPanelModelImage.add(jComboBoxImageSize, gridBagConstraints);
 
         jLabelColorScale.setText("Color scale");
@@ -521,13 +525,13 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
         jPanelModelImage.add(jComboBoxColorScale, gridBagConstraints);
 
         jLabelImageNoise.setText("Add error noise to image");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
@@ -542,7 +546,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.weightx = 0.4;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jRadioButtonImageNoiseYes, gridBagConstraints);
@@ -556,10 +560,31 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.weightx = 0.4;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jRadioButtonImageNoiseNo, gridBagConstraints);
+
+        jLabelInterpolation.setText("Interpolation");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+        jPanelModelImage.add(jLabelInterpolation, gridBagConstraints);
+
+        jComboBoxInterpolation.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxInterpolationActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
+        jPanelModelImage.add(jComboBoxInterpolation, gridBagConstraints);
 
         jPanelLayout.add(jPanelModelImage);
 
@@ -905,6 +930,15 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         }
     }//GEN-LAST:event_jRadioButtonBypassGuiRestrictionsActionPerformed
 
+    private void jComboBoxInterpolationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxInterpolationActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_INTERPOLATION, this.jComboBoxInterpolation.getSelectedItem().toString());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxInterpolationActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupAddNoise;
@@ -921,6 +955,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JComboBox jComboBoxBestPopsCriteriaSigma;
     private javax.swing.JComboBox jComboBoxColorScale;
     private javax.swing.JComboBox jComboBoxImageSize;
+    private javax.swing.JComboBox jComboBoxInterpolation;
     private javax.swing.JComboBox jComboBoxLUT;
     private javax.swing.JComboBox jComboBoxSuperSampling;
     private javax.swing.JComboBox jComboBoxTwilight;
@@ -935,6 +970,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JLabel jLabelGuiRestrictions;
     private javax.swing.JLabel jLabelImageNoise;
     private javax.swing.JLabel jLabelImageSize;
+    private javax.swing.JLabel jLabelInterpolation;
     private javax.swing.JLabel jLabelLutTable;
     private javax.swing.JLabel jLabelMinElev;
     private javax.swing.JLabel jLabelNightOnly;
@@ -1023,10 +1059,11 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         this.jComboBoxImageSize.setSelectedItem(this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE));
         this.jComboBoxLUT.setSelectedItem(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
         this.jComboBoxColorScale.setSelectedItem(this.myPreferences.getImageColorScale());
+        this.jComboBoxInterpolation.setSelectedItem(this.myPreferences.getImageInterpolation());
 
-        final boolean preferImageNoide = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_NOISE);
-        this.jRadioButtonImageNoiseYes.setSelected(preferImageNoide);
-        this.jRadioButtonImageNoiseNo.setSelected(!preferImageNoide);
+        final boolean preferImageNoise = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_NOISE);
+        this.jRadioButtonImageNoiseYes.setSelected(preferImageNoise);
+        this.jRadioButtonImageNoiseNo.setSelected(!preferImageNoise);
 
         // User model:
         final boolean useFastUserModel = this.myPreferences.isFastUserModel();

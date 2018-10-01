@@ -81,7 +81,7 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
             _singleton = new Preferences(false);
 
             // register color palette observer:
-            _singleton.addColorPaletteObserver();
+            _singleton.addPreferenceObserver();
 
             // enable future notifications:
             _singleton.setNotify(true);
