@@ -855,7 +855,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                                         // Compensated-summation variant for better numeric precision:
                                         // check if diff is [-PI; PI]:
-                                        diff = distance(sample, s_vphi_mean);
+                                        diff = distanceAngle(sample, s_vphi_mean);
                                         vphi_sum_diff += diff;
                                         vphi_sum_diff_square += diff * diff;
                                     }
@@ -1540,7 +1540,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                                     // Compensated-summation variant for better numeric precision:
                                     // check if diff is [-PI; PI]:
-                                    diff = distance(sample, s_t3phi_mean);
+                                    diff = distanceAngle(sample, s_t3phi_mean);
                                     t3phi_sum_diff += diff;
                                     t3phi_sum_diff_square += diff * diff;
                                 }
@@ -1563,7 +1563,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                             + " stddev= " + s_t3amp_err + " errAmp= " + errAmp + " ratio: " + (s_t3amp_err / errAmp)
                                     );
                                     logger.info("Sampling[" + N_SAMPLES + "] snr=" + Math.abs(s_t3phi_mean / s_t3phi_err) + " (low: " + doFlag + ") PHI "
-                                            + " avg= " + s_t3phi_mean + " T3phi= " + t3phi + " diff: " + distance(s_t3phi_mean, t3phi)
+                                            + " avg= " + s_t3phi_mean + " T3phi= " + t3phi + " diff: " + distanceAngle(s_t3phi_mean, t3phi)
                                             + " stddev= " + s_t3phi_err + " errPhi= " + errPhi + " ratio: " + (s_t3phi_err / errPhi)
                                     );
                                 }

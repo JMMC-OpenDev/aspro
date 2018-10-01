@@ -500,7 +500,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
                                     // Compensated-summation variant for better numeric precision:
                                     // check if diff is [-PI; PI]:
-                                    diff = distance(sample, s_vphi_mean);
+                                    diff = distanceAngle(sample, s_vphi_mean);
                                     vphi_sum_diff += diff;
                                     vphi_sum_diff_square += diff * diff;
                                 }
@@ -970,7 +970,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
                             // Compensated-summation variant for better numeric precision:
                             // check if diff is [-PI; PI]:
-                            diff = distance(sample, s_t3phi_mean);
+                            diff = distanceAngle(sample, s_t3phi_mean);
                             t3phi_sum_diff += diff;
                             t3phi_sum_diff_square += diff * diff;
                         }

@@ -767,7 +767,7 @@ public abstract class AbstractOIFitsProducer {
         warningContainer.addInformationMessage(msg);
     }
 
-    protected static double distance(final double a1, final double a2) {
+    protected static double distanceAngle(final double a1, final double a2) {
         final double delta = a1 - a2;
         if (delta > Math.PI) {
             return delta - (2.0 * Math.PI);
