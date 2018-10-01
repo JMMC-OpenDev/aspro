@@ -262,7 +262,6 @@ public final class UserModelService {
         if (!NumberUtils.equals(fitsImage.getIncCol(), fitsImage.getIncRow(), INC_EPSILON_RAD)) {
             throw new IllegalArgumentException("Fits image increments along row and column axes must be equals !");
         }
-
         final double increment = fitsImage.getIncRow();
 
         final double maxFreq = 1d / (2d * increment);
@@ -295,7 +294,7 @@ public final class UserModelService {
                                          final int imageSize,
                                          final IndexColorModel colorModel,
                                          final ColorScale colorScale) {
-        return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, null, null, null, null);
+        return computeUVMap(fitsImage, uvRect, 0.0, mode, imageSize, colorModel, colorScale, null, null, null, null);
     }
 
     /**
@@ -303,6 +302,7 @@ public final class UserModelService {
      *
      * @param fitsImage user model as FitsImage
      * @param uvRect expected UV frequency area in rad-1
+     * @param uvMaxStrict strictly required UV frequency area in rad-1 (to check against image)
      * @param mode image mode (amplitude or phase)
      * @param imageSize expected number of pixels for both width and height of the generated image
      * @param colorModel color model to use
@@ -316,12 +316,13 @@ public final class UserModelService {
      */
     public static UVMapData computeUVMap(final FitsImage fitsImage,
                                          final Rectangle2D.Double uvRect,
+                                         final double uvMaxStrict,
                                          final ImageMode mode,
                                          final int imageSize,
                                          final IndexColorModel colorModel,
                                          final ColorScale colorScale,
                                          final VisNoiseService noiseService) {
-        return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, noiseService, null, null, null);
+        return computeUVMap(fitsImage, uvRect, uvMaxStrict, mode, imageSize, colorModel, colorScale, noiseService, null, null, null);
     }
 
     /**
@@ -329,6 +330,7 @@ public final class UserModelService {
      *
      * @param fitsImage user model as FitsImage
      * @param uvRect expected UV frequency area in rad-1
+     * @param uvMaxStrict strictly required UV frequency area in rad-1 (to check against image)
      * @param mode image mode (amplitude or phase)
      * @param imageSize expected number of pixels for both width and height of the generated image
      * @param colorModel color model to use
@@ -345,6 +347,7 @@ public final class UserModelService {
      */
     public static UVMapData computeUVMap(final FitsImage fitsImage,
                                          final Rectangle2D.Double uvRect,
+                                         final double uvMaxStrict,
                                          final ImageMode mode,
                                          final int imageSize,
                                          final IndexColorModel colorModel,
@@ -361,9 +364,11 @@ public final class UserModelService {
 
         // todo enhance image size to fit sub image!
         logger.debug("UserModelService.computeUVMap: uvMax (rad-1): {}", uvMax);
+        logger.debug("UserModelService.computeUVMap: uvMaxStrict (rad-1): {}", uvMaxStrict);
 
         // throws exceptions:
-        checkFitsImage(fitsImage, uvMax);
+        // only check the strict UV max, as the output UV max is adjusted below:
+        checkFitsImage(fitsImage, uvMaxStrict);
 
         if (fitsImage == null) {
             return null;
@@ -422,12 +427,19 @@ public final class UserModelService {
         final int fftSize = findBestFFTSize(ratioFreqPerPix, imageSize, inputSize);
 
         // use the next even integer for pixel size & use map scale (larger):
-        final int dataSize = getOutputSize(mapScale * ratioFreqPerPix, fftSize);
+        int dataSize = getOutputSize(mapScale * ratioFreqPerPix, fftSize);
 
         // make FFT larger (2 pixels more to avoid boundary errors):
-        final int fftOutputSize = dataSize + 2;
+        int fftOutputSize = dataSize + 2;
 
         logger.debug("UV plane FFT size (pixels): {}", fftOutputSize);
+
+        // Fix FFT size due to map scale:
+        if (fftSize < fftOutputSize) {
+            // use all possible FFT pixels => reduce UV max:
+            fftOutputSize = fftSize;
+            dataSize = fftOutputSize - 2;
+        }
 
         final int outputSize = (int) Math.ceil(dataSize / mapScale);
 
@@ -544,7 +556,7 @@ public final class UserModelService {
         }
         if (fftSize < inputSize) {
             fftSize = FFTUtils.getPowerOfTwo(inputSize);
-            logger.info("Min FFT size reached (pixels): {}", fftSize);
+            logger.info("Min FFT size reached (input pixels): {}", fftSize);
         }
         return fftSize;
     }
@@ -954,7 +966,9 @@ public final class UserModelService {
         logger.info("ImageRegionThresholdJob: rowDistToCenter: {}", rowDistToCenter);
         logger.info("ImageRegionThresholdJob: colDistToCenter: {}", colDistToCenter);
 
-        distToCenter = Math.max(rowDistToCenter, colDistToCenter);
+        // ensure minimum size to 1 pixel:
+// TODO: handle empty images in GUI !!        
+        distToCenter = Math.max(1.5f, Math.max(rowDistToCenter, colDistToCenter));
         logger.info("ImageRegionThresholdJob: distToCenter: {}", distToCenter);
 
         // range check ?
@@ -1263,7 +1277,7 @@ public final class UserModelService {
      * @param data1D sorted data (ascending order)
      * @param total total of all values
      * @param error upper threshold
-     * @return threshold value or 0.0 if not found
+     * @return threshold value or -1 if not found
      */
     private static int findThresholdIndex(final float[] data1D, final double total, final double error) {
         final double upperThreshold = total * (1d - error);

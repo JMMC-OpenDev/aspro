@@ -415,7 +415,6 @@ public final class ConfigurationManager extends BaseOIManager {
      * @param intConf interferometer configuration
      */
     private static void computeBaselineUVWBounds(final InterferometerConfiguration intConf) {
-
         double maxUV = 0d;
         double minUV = Double.POSITIVE_INFINITY;
 
@@ -426,8 +425,8 @@ public final class ConfigurationManager extends BaseOIManager {
 
             // for each instrument configuration:
             for (FocalInstrumentConfigurationItem c : insConf.getConfigurations()) {
-
                 computeBaselineUVWBounds(c.getStations(), minMax);
+                c.setMaxBaseLine(minMax[1]);
 
                 minUV = Math.min(minUV, minMax[0]);
                 maxUV = Math.max(maxUV, minMax[1]);
@@ -1029,6 +1028,20 @@ public final class ConfigurationManager extends BaseOIManager {
             return c.getStations();
         }
         return null;
+    }
+
+    /**
+     * Return the max baseline for the given interferometer configuration, instrument configuration
+     * @param insConf instrument configuration
+     * @param instrumentConfigurationName name of the instrument configuration
+     * @return list of stations
+     */
+    public static double getInstrumentConfigurationMaxBaseline(final FocalInstrumentConfiguration insConf, final String instrumentConfigurationName) {
+        final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(insConf, instrumentConfigurationName);
+        if (c != null) {
+            return c.getMaxBaseLine();
+        }
+        return Double.NaN;
     }
 
     /**

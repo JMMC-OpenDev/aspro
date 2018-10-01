@@ -23,6 +23,8 @@ public final class UVCoverageData {
     private String targetName;
     /** maximum U and V coordinate (lambda scale) */
     private double uvMax;
+    /** maximum U and V coordinate (lambda scale) for max baselines */
+    private double uvMaxBaselines;
     /** central wave length (meter) */
     private double lambda;
     /** configuration i.e. station names */
@@ -91,6 +93,22 @@ public final class UVCoverageData {
      */
     public void setUvMax(final double uvMax) {
         this.uvMax = uvMax;
+    }
+
+    /**
+     * Return the maximum U and V coordinate (lambda scale) for max baselines
+     * @return maximum U and V coordinate (lambda scale) for max baselines
+     */
+    public double getUvMaxBaselines() {
+        return uvMaxBaselines;
+    }
+
+    /**
+     * Define the maximum U and V coordinate (lambda scale) for max baselines
+     * @param uvMax maximum U and V coordinate (lambda scale) for max baselines
+     */
+    public void setUvMaxBaselines(final double uvMax) {
+        this.uvMaxBaselines = uvMax;
     }
 
     /**

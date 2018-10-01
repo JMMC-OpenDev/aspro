@@ -1609,28 +1609,23 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @return maximum UV frequency (rad-1)
      */
     private static double getUVMax(final ObservationSetting observation) {
+        final FocalInstrumentConfiguration insConf = observation.getInstrumentConfiguration().getInstrumentConfiguration();
 
-        final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
-
-        final double maxBaseLine = intConf.getMaxBaseLine();
+        final double maxBaseLines = ConfigurationManager.getInstrumentConfigurationMaxBaseline(insConf,
+                observation.getInstrumentConfiguration().getStations());
 
         if (logger.isDebugEnabled()) {
-            logger.debug("interferometer configuration: {}; baseline max = {}", intConf.getName(), maxBaseLine);
+            logger.debug("instrument configuration: {}; baseline max = {}", observation.getInstrumentConfiguration().getStations(), maxBaseLines);
         }
 
-        // TODO: get correct value in the UVCoveragePanel instead ...
-        // use default value for UVMax slider (see UVCoveragePanel):
-        double uvMax = 1.05d * maxBaseLine;
-
-        // Get lower wavelength for the selected instrument (see UVCoverageService):
-        final double instrumentMinWaveLength = AsproConstants.MICRO_METER
-                * observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
+        final FocalInstrumentMode instrumentMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+        final double lambdaMin = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin();
 
         // Adjust the user uv Max = max base line / minimum wave length
         // note : use the minimum wave length of the instrument to
         // - make all uv segment visible
         // - avoid too much model computations (when the instrument mode changes)
-        uvMax /= instrumentMinWaveLength;
+        final double uvMax = maxBaseLines / lambdaMin;
 
         return uvMax;
     }

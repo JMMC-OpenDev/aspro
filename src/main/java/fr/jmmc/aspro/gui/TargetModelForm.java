@@ -1291,6 +1291,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 if (target.hasAnalyticalModel()) {
                     // validate only analytical models for target using them:
                     ModelManager.getInstance().validateModels(target.getModels());
+                } else {
+                    // validate user model:
+                    prepareUserModel();
                 }
             } catch (IllegalArgumentException iae) {
                 // display an error message for the first error found :

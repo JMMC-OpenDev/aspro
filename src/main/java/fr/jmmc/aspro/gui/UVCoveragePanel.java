@@ -989,9 +989,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                         intConfName, minBaseLine, maxBaseLine);
             }
 
-            // adjust uv max range to [0.5 * minBaseLine; 2 * maxBaseLine] and
+            // adjust uv max range to [0.25 * minBaseLine; 4 * maxBaseLine] and
             // set value to maxBaseLine + 5% (margin):
-            this.uvMaxAdapter.reset(0.5 * minBaseLine, 2.0d * maxBaseLine, 1.05d * maxBaseLine);
+            this.uvMaxAdapter.reset(0.25 * minBaseLine, 4.0d * maxBaseLine, 1.05d * maxBaseLine);
         }
     }
 
@@ -1807,6 +1807,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // update uvMax according to UVCoverage Service (wavelength correction):
                 this.uvMax = uvDataFirst.getUvMax();
 
+                final double uvMaxBaselines = uvDataFirst.getUvMaxBaselines();
+
                 if (target != null && target.hasModel()) {
 
                     // Get the noise service if enabled:
@@ -1887,7 +1889,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                                             // Compute only image using existing complex visibility data :
                                             uvMapData = UserModelService.computeUVMap(fitsImage,
-                                                    uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService,
+                                                    uvRect, uvMaxBaselines, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService,
                                                     null, null, this.currentUVMapData.getData());
 
                                         } else {
@@ -1897,7 +1899,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                                 // Compute Target Model for the UV coverage limits ONCE :
                                                 // Note: throws IllegalArgumentException if the fits image is invalid:
                                                 uvMapData = UserModelService.computeUVMap(fitsImage,
-                                                        uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
+                                                        uvRect, uvMaxBaselines, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
 
                                             } catch (IllegalArgumentException iae) {
                                                 _logger.warn("Incorrect fits image in file [{}]", target.getUserModel().getFile(), iae);
@@ -2546,7 +2548,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 } else if (fitsImage != null) {
                     // NOT working: sub region (uvRect) not supported
                     // Note: throws IllegalArgumentException if the fits image is invalid:
-                    return UserModelService.computeUVMap(this.fitsImage, this.uvRect, this.imageMode,
+                    return UserModelService.computeUVMap(this.fitsImage, this.uvRect, 0.0, this.imageMode,
                             this.imageSize, this.colorModel, this.colorScale, noiseService, this.refMin, this.refMax, null);
                 }
 

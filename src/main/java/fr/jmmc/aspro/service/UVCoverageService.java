@@ -8,11 +8,13 @@ import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
+import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.observability.TargetPointInfo;
 import fr.jmmc.aspro.model.oi.AzEl;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
@@ -47,7 +49,7 @@ public final class UVCoverageService {
 
     /* members */
 
-    /* output */
+ /* output */
     /** uv coverage data */
     private final UVCoverageData data;
 
@@ -60,6 +62,8 @@ public final class UVCoverageService {
     private final String targetName;
     /** maximum U or V coordinate in rad-1 (corrected by the minimal wavelength) */
     private double uvMax;
+    /** maximum U or V coordinate in rad-1 (corrected by the minimal wavelength) for the max baselines */
+    private double uvMaxBaselines;
     /** flag to compute the UV support */
     private final boolean doUVSupport;
     /** true to use instrument bias; false to compute only theoretical error */
@@ -193,6 +197,7 @@ public final class UVCoverageService {
 
             // uv Max = max base line / minimum wave length
             this.data.setUvMax(this.uvMax);
+            this.data.setUvMaxBaselines(this.uvMaxBaselines);
 
             // fast interrupt :
             if (this.currentThread.isInterrupted()) {
@@ -394,7 +399,7 @@ public final class UVCoverageService {
                 System.arraycopy(ptInfos, 0, targetPointInfos, 0, nPoints);
 
                 this.data.setTargetPointInfos(targetPointInfos);
-                
+
                 // Get wavelength range for the selected instrument mode :
                 final double lambdaMin = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin();
                 final double lambdaMax = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMax();
@@ -403,7 +408,7 @@ public final class UVCoverageService {
                     logger.debug("lambdaMin: {}", lambdaMin);
                     logger.debug("lambdaMax: {}", lambdaMax);
                 }
-                
+
                 // Second pass : extract UV values for HA points :
                 final double invLambdaMin = 1.0 / lambdaMin;
                 final double invLambdaMax = 1.0 / lambdaMax;
@@ -535,8 +540,22 @@ public final class UVCoverageService {
         // - avoid to much model computations (when the instrument mode changes)
         this.uvMax /= this.instrumentMinWaveLength;
 
+        // Define precisely the maxUV for maxBaselines:
+        final FocalInstrumentConfiguration insConf = observation.getInstrumentConfiguration().getInstrumentConfiguration();
+
+        final double maxBaseLines = ConfigurationManager.getInstrumentConfigurationMaxBaseline(insConf,
+                observation.getInstrumentConfiguration().getStations());
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("instrument configuration: {}; baseline max = {}", observation.getInstrumentConfiguration().getStations(), maxBaseLines);
+        }
+
+        final double lambdaMin = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin();
+        this.uvMaxBaselines = maxBaseLines / lambdaMin;
+
         if (logger.isDebugEnabled()) {
             logger.debug("Corrected uvMax: {}", this.uvMax);
+            logger.debug("MaxBaselines uvMax: {}", this.uvMaxBaselines);
         }
     }
 

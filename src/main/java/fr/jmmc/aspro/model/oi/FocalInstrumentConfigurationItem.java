@@ -188,46 +188,66 @@ public class FocalInstrumentConfigurationItem
     }
     
 //--simple--preserve
-  /** computed name */
-  @javax.xml.bind.annotation.XmlTransient
-  private String name = null;
+    /** computed name */
+    @javax.xml.bind.annotation.XmlTransient
+    private String name = null;
 
-  /**
-   * Return the name of this configuration i.e. 'XX YY ZZ' where station names are XX, YY and ZZ
-   * @return name i.e. 'XX YY ZZ'
-   */
-  public final String getName() {
-    String s = this.name;
-    if (s == null) {
-      s = generateName();
-    }
-    return s;
-  }
-
-  /**
-   * Generate the name as a string containing station names like 'XX YY ZZ'
-   * @return generated name
-   */
-  private final String generateName() {
-    synchronized (this) {
-      String s = this.name;
-      if (s == null) {
-        final StringBuilder sb = new StringBuilder();
-        for (Station station : getStations()) {
-          sb.append(station.getName()).append(' ');
+    /**
+     * Return the name of this configuration i.e. 'XX YY ZZ' where station names are XX, YY and ZZ
+     * @return name i.e. 'XX YY ZZ'
+     */
+    public final String getName() {
+        String s = this.name;
+        if (s == null) {
+            s = generateName();
         }
-        sb.deleteCharAt(sb.length() - 1);
-        s = sb.toString();
-        this.name = s;
-      }
-      return s;
+        return s;
     }
-  }
-  
-  @Override
-  public final String toString() {
-    return "FocalInstrumentConfigurationItem [ stations: " + getName() + " - pops: " + getPops() + " - channels: " + getChannels() + " ]";
-  }
+
+    /**
+     * Generate the name as a string containing station names like 'XX YY ZZ'
+     * @return generated name
+     */
+    private final String generateName() {
+        synchronized (this) {
+            String s = this.name;
+            if (s == null) {
+                final StringBuilder sb = new StringBuilder();
+                for (Station station : getStations()) {
+                    sb.append(station.getName()).append(' ');
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                s = sb.toString();
+                this.name = s;
+            }
+            return s;
+        }
+    }
+    /** maximum distance between 2 stations in meter */
+    @javax.xml.bind.annotation.XmlTransient
+    private double maxBaseLine = 0d;
+
+    /**
+     * Return the maximum distance between 2 stations in meter
+     * @return maximum distance between 2 stations in meter
+     */
+    public final double getMaxBaseLine() {
+        return maxBaseLine;
+    }
+
+    /**
+     * Define the maximum distance between 2 stations in meter
+     * @param maxBaseLine maximum distance between 2 stations in meter
+     */
+    public final void setMaxBaseLine(final double maxBaseLine) {
+        this.maxBaseLine = maxBaseLine;
+    }
+
+    @Override
+    public final String toString() {
+        return "FocalInstrumentConfigurationItem [ stations: " + getName() + " - pops: " + getPops() + " - channels: " + getChannels() + " - "
+                + getMaxBaseLine() + " m]";
+    }
 //--simple--preserve
 
 }
