@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.5"/>
-    <compilation date="11/09/2018" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.6 beta 1"/>
+    <compilation date="01/10/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -218,6 +218,13 @@
     </menubar>
 
     <releasenotes>
+        <release version="0.9.9.6">
+            <pubDate>Mon, 01 Oct 2018 17:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.6 beta 1">
+                <change type="FEATURE">Always check the max UV needed against the selected base lines and instrument mode when validating user models</change>
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/964">Fixed FFT processing (subsize &lt; rotated size)</change>
+            </prerelease>
+        </release>
         <release version="0.9.9.5">
             <pubDate>Tue, 11 Sep 2018 14:00:00 GMT</pubDate>
             <prerelease version="0.9.9.5 beta 10">

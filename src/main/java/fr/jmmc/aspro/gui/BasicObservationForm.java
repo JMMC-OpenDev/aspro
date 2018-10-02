@@ -192,8 +192,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jLabelState = new javax.swing.JLabel();
         jLabelStatus = new javax.swing.JLabel();
 
-        setMinimumSize(new java.awt.Dimension(640, 160));
-        setPreferredSize(new java.awt.Dimension(800, 160));
+        setMinimumSize(new java.awt.Dimension(640, 180));
+        setPreferredSize(new java.awt.Dimension(800, 180));
         setLayout(new java.awt.GridBagLayout());
 
         jPanelTargets.setBorder(javax.swing.BorderFactory.createTitledBorder("Targets"));
@@ -323,7 +323,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
         jPanelMain.add(jLabelInterferometer, gridBagConstraints);
 
         jComboBoxInterferometer.setName("jComboBoxInterferometer"); // NOI18N
@@ -333,7 +333,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.5;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         jPanelMain.add(jComboBoxInterferometer, gridBagConstraints);
 
         jLabelPeriod.setText("Period");
@@ -341,7 +341,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
         jPanelMain.add(jLabelPeriod, gridBagConstraints);
 
         jComboBoxInterferometerConfiguration.setName("jComboBoxInterferometerConfiguration"); // NOI18N
@@ -350,7 +350,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         jPanelMain.add(jComboBoxInterferometerConfiguration, gridBagConstraints);
 
         jLabelInstrument.setLabelFor(jComboBoxInstrument);
@@ -359,7 +359,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
         jPanelMain.add(jLabelInstrument, gridBagConstraints);
 
         jComboBoxInstrument.setName("jComboBoxInstrument"); // NOI18N
@@ -368,7 +368,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         jPanelMain.add(jComboBoxInstrument, gridBagConstraints);
 
         jLabelPops.setLabelFor(jTextPoPs);
@@ -388,6 +388,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
         jPanelMain.add(jTextPoPs, gridBagConstraints);
 
@@ -415,7 +416,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         jPanelMain.add(jComboBoxPops, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
