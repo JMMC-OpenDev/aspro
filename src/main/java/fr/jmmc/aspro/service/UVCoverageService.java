@@ -10,6 +10,7 @@ import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.Range;
+import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.observability.TargetPointInfo;
@@ -62,8 +63,6 @@ public final class UVCoverageService {
     private final String targetName;
     /** maximum U or V coordinate in rad-1 (corrected by the minimal wavelength) */
     private double uvMax;
-    /** maximum U or V coordinate in rad-1 (corrected by the minimal wavelength) for the max baselines */
-    private double uvMaxBaselines;
     /** flag to compute the UV support */
     private final boolean doUVSupport;
     /** true to use instrument bias; false to compute only theoretical error */
@@ -197,7 +196,6 @@ public final class UVCoverageService {
 
             // uv Max = max base line / minimum wave length
             this.data.setUvMax(this.uvMax);
-            this.data.setUvMaxBaselines(this.uvMaxBaselines);
 
             // fast interrupt :
             if (this.currentThread.isInterrupted()) {
@@ -550,12 +548,8 @@ public final class UVCoverageService {
             logger.debug("instrument configuration: {}; baseline max = {}", observation.getInstrumentConfiguration().getStations(), maxBaseLines);
         }
 
-        final double lambdaMin = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin();
-        this.uvMaxBaselines = maxBaseLines / lambdaMin;
-
         if (logger.isDebugEnabled()) {
             logger.debug("Corrected uvMax: {}", this.uvMax);
-            logger.debug("MaxBaselines uvMax: {}", this.uvMaxBaselines);
         }
     }
 
@@ -580,18 +574,22 @@ public final class UVCoverageService {
                 // parameter: supersamplingOIFits, doDataNoise, useInstrumentBias
                 // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
                 // and warning container
-                final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
-                        this.beams, this.baseLines,
-                        this.useInstrumentBias, this.doDataNoise,
-                        this.supersamplingOIFits, this.mathModeOIFits,
-                        this.data.getTargetPointInfos(), this.data.getTargetUVObservability(),
-                        this.sc, this.data.getWarningContainer());
+                try {
+                    final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
+                            this.beams, this.baseLines,
+                            this.useInstrumentBias, this.doDataNoise,
+                            this.supersamplingOIFits, this.mathModeOIFits,
+                            this.data.getTargetPointInfos(), this.data.getTargetUVObservability(),
+                            this.sc, this.data.getWarningContainer());
 
-                // TODO: create elsewhere the OIFitsCreatorService:
-                this.data.setOiFitsCreator(oiFitsCreator);
+                    // TODO: create elsewhere the OIFitsCreatorService:
+                    this.data.setOiFitsCreator(oiFitsCreator);
 
-                // get noise service to compute noise on model image (if enabled):
-                this.data.setNoiseService(oiFitsCreator.getNoiseService());
+                    // get noise service to compute noise on model image (if enabled):
+                    this.data.setNoiseService(oiFitsCreator.getNoiseService());
+                } catch (IllegalArgumentException iae) {
+                    addWarning(iae.getMessage());
+                }
             }
         }
     }

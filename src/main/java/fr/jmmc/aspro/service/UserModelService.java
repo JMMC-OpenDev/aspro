@@ -62,7 +62,7 @@ public final class UserModelService {
     /** ratio to ignore data values i.e. data value < LIMIT_RATIO * dataLowThreshold */
     public static final float LIMIT_RATIO = 1e-1f;
     /** maximum fft size (power of two) */
-    public static final int MAX_FFT_SIZE = 512 * 1024;
+    public static final int MAX_FFT_SIZE = 128 * 1024;
     /** Two PI constant */
     public static final double TWO_PI = 2d * Math.PI;
     /** 1 nano arcsec in radians (to compare increments) */
@@ -262,15 +262,25 @@ public final class UserModelService {
         if (!NumberUtils.equals(fitsImage.getIncCol(), fitsImage.getIncRow(), INC_EPSILON_RAD)) {
             throw new IllegalArgumentException("Fits image increments along row and column axes must be equals !");
         }
-        final double increment = fitsImage.getIncRow();
+        if (uvMax > 0.0) {
+            final double increment = fitsImage.getIncRow();
+            final double maxFreq = getMaxFreq(fitsImage);
 
-        final double maxFreq = 1d / (2d * increment);
+            if (maxFreq < uvMax) {
+                final double minIncrement = (maxFreq / uvMax) * increment;
 
-        if (maxFreq < uvMax) {
-            throw new IllegalArgumentException("The Fits image [" + fitsImage.getFitsImageIdentifier()
-                    + "] must have smaller pixel increments (" + FitsImage.getAngleAsString(increment, df) + ") to have a maximum frequency ("
-                    + df.format(maxFreq) + " rad-1) larger than the expected UV Max (" + df.format(uvMax) + " rad-1) !");
+                throw new IllegalArgumentException("Fits image [" + fitsImage.getFitsImageIdentifier()
+                        + "] must have smaller pixel increments [expected "
+                        + FitsImage.getAngleAsString(minIncrement, df) + " < "
+                        + FitsImage.getAngleAsString(increment, df) + "] to have a maximum frequency [expected "
+                        + df.format(uvMax) + " rad-1 > " + df.format(maxFreq) + " rad-1 ] !");
+            }
         }
+    }
+
+    public static double getMaxFreq(final FitsImage fitsImage) {
+        final double increment = fitsImage.getIncRow();
+        return 1.0 / (2.0 * increment);
     }
 
     /**
@@ -294,7 +304,7 @@ public final class UserModelService {
                                          final int imageSize,
                                          final IndexColorModel colorModel,
                                          final ColorScale colorScale) {
-        return computeUVMap(fitsImage, uvRect, 0.0, mode, imageSize, colorModel, colorScale, null, null, null, null);
+        return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, null, null, null, null);
     }
 
     /**
@@ -302,7 +312,6 @@ public final class UserModelService {
      *
      * @param fitsImage user model as FitsImage
      * @param uvRect expected UV frequency area in rad-1
-     * @param uvMaxStrict strictly required UV frequency area in rad-1 (to check against image)
      * @param mode image mode (amplitude or phase)
      * @param imageSize expected number of pixels for both width and height of the generated image
      * @param colorModel color model to use
@@ -316,13 +325,12 @@ public final class UserModelService {
      */
     public static UVMapData computeUVMap(final FitsImage fitsImage,
                                          final Rectangle2D.Double uvRect,
-                                         final double uvMaxStrict,
                                          final ImageMode mode,
                                          final int imageSize,
                                          final IndexColorModel colorModel,
                                          final ColorScale colorScale,
                                          final VisNoiseService noiseService) {
-        return computeUVMap(fitsImage, uvRect, uvMaxStrict, mode, imageSize, colorModel, colorScale, noiseService, null, null, null);
+        return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, noiseService, null, null, null);
     }
 
     /**
@@ -330,7 +338,6 @@ public final class UserModelService {
      *
      * @param fitsImage user model as FitsImage
      * @param uvRect expected UV frequency area in rad-1
-     * @param uvMaxStrict strictly required UV frequency area in rad-1 (to check against image)
      * @param mode image mode (amplitude or phase)
      * @param imageSize expected number of pixels for both width and height of the generated image
      * @param colorModel color model to use
@@ -347,7 +354,6 @@ public final class UserModelService {
      */
     public static UVMapData computeUVMap(final FitsImage fitsImage,
                                          final Rectangle2D.Double uvRect,
-                                         final double uvMaxStrict,
                                          final ImageMode mode,
                                          final int imageSize,
                                          final IndexColorModel colorModel,
@@ -358,21 +364,26 @@ public final class UserModelService {
 
         // Note: do not support sub region (uvRect)
         // Get corrected uvMax from uv rectangle (-this.uvMax, -this.uvMax, this.uvMax, this.uvMax):
-        final double uvMax = Math.max(Math.max(Math.max(Math.abs(uvRect.getX()), Math.abs(uvRect.getY())),
+        final double uvMaxFreq = Math.max(Math.max(Math.max(Math.abs(uvRect.getX()), Math.abs(uvRect.getY())),
                 Math.abs(uvRect.getX() + uvRect.getWidth())),
                 Math.abs(uvRect.getY() + uvRect.getHeight()));
 
         // todo enhance image size to fit sub image!
-        logger.debug("UserModelService.computeUVMap: uvMax (rad-1): {}", uvMax);
-        logger.debug("UserModelService.computeUVMap: uvMaxStrict (rad-1): {}", uvMaxStrict);
+        logger.debug("UserModelService.computeUVMap: uvMaxFreq (rad-1): {}", uvMaxFreq);
 
         // throws exceptions:
-        // only check the strict UV max, as the output UV max is adjusted below:
-        checkFitsImage(fitsImage, uvMaxStrict);
+        // do not check uv max:
+        checkFitsImage(fitsImage, 0.0);
 
         if (fitsImage == null) {
             return null;
         }
+
+        // Fix uv max according to the image max frequency:
+        final double imgMaxFreq = getMaxFreq(fitsImage);
+
+        final double uvMax = (uvMaxFreq < imgMaxFreq) ? uvMaxFreq : imgMaxFreq;
+        logger.debug("UserModelService.computeUVMap: Fixed uvMax (rad-1): {}", uvMax);
 
         /** Get the current thread to check if the computation is interrupted */
         final Thread currentThread = Thread.currentThread();
@@ -855,8 +866,7 @@ public final class UserModelService {
         }
 
         // 2.1 - Determine flux threshold to ignore useless values:
-        float thresholdImage;
-        final float thresholdVis;
+        final float thresholdFlux;
 
         if (useFastMode) {
             final double totalFlux = fitsImage.getSum();
@@ -865,67 +875,32 @@ public final class UserModelService {
             final int nData = fitsImage.getNData();
             final float[] data1D = sortData(fitsImage);
 
-            final int thLen = 3; // means MIN_VISIBILITY_DATA / 10^4 = 10^-6
-            final int[] thIdx = new int[thLen];
-            int thValid = -1;
-
+            // TODO: use preference to define flux threshold:
             double error = MIN_VISIBILITY_DATA;
-            for (int i = 0; i < thLen; i++) {
-                thIdx[i] = findThresholdIndex(data1D, totalFlux, error);
-                if (thIdx[i] == -1) {
-                    break;
-                }
-                thValid++;
-                error *= 1e-1d;
-            }
 
-            if (thValid != -1) {
-                final int[] thPixRatio = new int[thValid + 1];
+            final int thIdx = findThresholdIndex(data1D, totalFlux, error);
 
-                for (int i = thValid; i >= 0; i--) {
-                    thPixRatio[i] = (100 * (nData - thIdx[i])) / nData;
-                }
+            if (thIdx != -1) {
+                final double thPixRatio = (100.0 * (nData - thIdx)) / nData;
 
-                logger.info("threshold ratios: {}", Arrays.toString(thPixRatio));
+                logger.info("threshold ratio: {} %", NumberUtils.trimTo3Digits(thPixRatio));
 
-                // decide which valid threshold use (empirical):
-                // idea: keep more pixels when the image is diluted:
-                final int[] thPixLimits = new int[]{100, 95, 85, 50};
-                int thLim = 0;
-                for (int i = thValid; i >= 1; i--) {
-                    if (thPixRatio[i] < thPixLimits[i]) {
-                        thLim = i;
-                        break;
-                    }
-                }
-                logger.info("selected threshold ratio: {}", thPixRatio[thLim]);
+                thresholdFlux = data1D[thIdx];
 
-                thresholdImage = data1D[thIdx[thLim]];
-
-                thresholdVis = data1D[thIdx[0]];
-
-                // TODO: refine thresholds to see which pixels are discarded
-                logger.info("thresholdVis: {}", thresholdVis);
-                logger.info("thresholdImage: {}", thresholdImage);
-
+                logger.info("thresholdFlux: {}", thresholdFlux);
             } else {
-                thresholdImage = 0f;
-                thresholdVis = 0f;
+                thresholdFlux = 0f;
             }
-
         } else {
-            thresholdImage = 0f;
-            thresholdVis = 0f;
+            thresholdFlux = 0f;
         }
 
         // 2.2 - Skip too small data values i.e. lower than thresholdImage ie below 10^-6:
         if (useFastMode) {
-            final float smallThreshold = LIMIT_RATIO * thresholdImage;
+            if (thresholdFlux > 0f && fitsImage.getDataMin() < thresholdFlux) {
 
-            if (fitsImage.getDataMin() < smallThreshold) {
-
-                final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, smallThreshold, 0f);
-                logger.info("ImageLowerThresholdJob - threshold: {}", smallThreshold);
+                final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, thresholdFlux, 0f);
+                logger.info("ImageLowerThresholdJob - threshold: {}", thresholdFlux);
 
                 thresholdJob.forkAndJoin();
 
@@ -937,9 +912,9 @@ public final class UserModelService {
         }
 
         // 3 - Locate useful data values inside image:
-        final ImageRegionThresholdJob regionJob = new ImageRegionThresholdJob(data, nbCols, nbRows, thresholdImage);
+        final ImageRegionThresholdJob regionJob = new ImageRegionThresholdJob(data, nbCols, nbRows, thresholdFlux);
 
-        logger.info("ImageRegionThresholdJob: thresholdImage: {}", thresholdImage);
+        logger.info("ImageRegionThresholdJob: thresholdImage: {}", thresholdFlux);
         regionJob.forkAndJoin();
 
         // 4 - Extract ROI:
@@ -966,8 +941,7 @@ public final class UserModelService {
         logger.info("ImageRegionThresholdJob: rowDistToCenter: {}", rowDistToCenter);
         logger.info("ImageRegionThresholdJob: colDistToCenter: {}", colDistToCenter);
 
-        // ensure minimum size to 1 pixel:
-// TODO: handle empty images in GUI !!        
+        // ensure minimum size to 2 pixels:
         distToCenter = Math.max(1.5f, Math.max(rowDistToCenter, colDistToCenter));
         logger.info("ImageRegionThresholdJob: distToCenter: {}", distToCenter);
 
@@ -1065,7 +1039,7 @@ public final class UserModelService {
         modelData.setFitsImage(fitsImage);
 
         // 7 - prepare model data to compute direct Fourier transform:
-        prepareModelData(fitsImage, modelData, thresholdVis);
+        prepareModelData(fitsImage, modelData, thresholdFlux);
     }
 
     /**
@@ -1115,10 +1089,14 @@ public final class UserModelService {
 
         logger.info("FitsImage: used pixels = {} / {}", n1D, nData);
 
-        Arrays.sort(data1D);
+        Arrays.sort(data1D, 0, n1D);
 
         logger.info("FitsImage: {} float sorted.", n1D);
 
+        if (n1D != nData) {
+            System.out.println("TEST");
+            return Arrays.copyOf(data1D, n1D);
+        }
         return data1D;
     }
 

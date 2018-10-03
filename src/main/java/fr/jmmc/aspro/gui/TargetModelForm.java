@@ -762,7 +762,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     this.jRadioButtonInvalid.setSelected(true);
                 }
             }
-
             // reselect target to update image:
             processTargetSelection(currentTarget);
         }
@@ -1285,7 +1284,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * @return true only if the data are valid
      */
     boolean validateForm() {
-        // Validate only analytical models :
+        // Validate models :
         for (Target target : this.editTargets) {
             try {
                 if (target.hasAnalyticalModel()) {

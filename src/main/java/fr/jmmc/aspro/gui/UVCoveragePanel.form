@@ -147,9 +147,10 @@
                 </Component>
                 <Component class="javax.swing.JSlider" name="jSliderUVMax">
                   <Properties>
-                    <Property name="majorTickSpacing" type="int" value="10"/>
+                    <Property name="majorTickSpacing" type="int" value="100"/>
+                    <Property name="maximum" type="int" value="1000"/>
                     <Property name="paintTicks" type="boolean" value="true"/>
-                    <Property name="value" type="int" value="100"/>
+                    <Property name="value" type="int" value="500"/>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[80, 32767]"/>
                     </Property>

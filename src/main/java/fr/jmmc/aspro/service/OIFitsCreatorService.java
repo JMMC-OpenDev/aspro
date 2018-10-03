@@ -7,6 +7,7 @@ import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
+import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.observability.TargetPointInfo;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
@@ -20,6 +21,7 @@ import fr.jmmc.aspro.model.oi.SpectralSetupQuantity;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
+import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.aspro.util.StatUtils;
@@ -144,7 +146,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                    final TargetPointInfo[] targetPointInfos,
                                    final List<UVRangeBaseLineData> targetUVObservability,
                                    final AstroSkyCalc sc,
-                                   final WarningContainer warningContainer) {
+                                   final WarningContainer warningContainer) throws IllegalArgumentException {
 
         super(target, supersampling, mathMode);
 
@@ -191,7 +193,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
      * @param observation observation to use
      * @param warningContainer warning container to use if needed
      */
-    private void prepare(final ObservationSetting observation, final WarningContainer warningContainer) {
+    private void prepare(final ObservationSetting observation, final WarningContainer warningContainer) throws IllegalArgumentException {
 
         final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
 
@@ -219,6 +221,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         this.instrumentMode = insMode;
 
         prepareInstrumentMode(warningContainer);
+
+        // user model if defined:
+        final UserModel userModel = (!target.hasAnalyticalModel()) ? target.getUserModel() : null;
+
+        if (userModel != null && userModel.isFileValid()) {
+            // validate image against the given observation:
+            ObservationManager.validateUserModel(observation, userModel);
+        }
     }
 
     /**
