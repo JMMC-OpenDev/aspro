@@ -95,7 +95,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener,
-        StarResolverListener, ObservationListener {
+                                                                              StarResolverListener, ObservationListener {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -611,33 +611,33 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }// </editor-fold>//GEN-END:initComponents
 
   private void jButtonSkyCalcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSkyCalcActionPerformed
-        final Target selectedTarget = getSelectedTarget();
-        if (selectedTarget != null) {
-            final ObservationSetting observation = om.getMainObservation();
-            final InterferometerDescription interferometer = observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
+      final Target selectedTarget = getSelectedTarget();
+      if (selectedTarget != null) {
+          final ObservationSetting observation = om.getMainObservation();
+          final InterferometerDescription interferometer = observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
 
-            final Site site = AstroSkyCalc.createSite(interferometer.getName(), interferometer.getPosSph());
+          final Site site = AstroSkyCalc.createSite(interferometer.getName(), interferometer.getPosSph());
 
-            final List<Target> displayTargets = om.getDisplayTargets();
+          final List<Target> displayTargets = om.getDisplayTargets();
 
-            final int size = displayTargets.size();
-            final String[] name = new String[size];
-            final String[] ra = new String[size];
-            final String[] dec = new String[size];
+          final int size = displayTargets.size();
+          final String[] name = new String[size];
+          final String[] ra = new String[size];
+          final String[] dec = new String[size];
 
-            for (int i = 0; i < size; i++) {
-                final Target target = displayTargets.get(i);
-                name[i] = target.getName();
+          for (int i = 0; i < size; i++) {
+              final Target target = displayTargets.get(i);
+              name[i] = target.getName();
 
-                // convert RA/DEC in HH:MM:SS.sss or DD:MM:SS.sss :
-                final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
+              // convert RA/DEC in HH:MM:SS.sss or DD:MM:SS.sss :
+              final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
 
-                ra[i] = raDec[0];
-                dec[i] = raDec[1];
-            }
+              ra[i] = raDec[0];
+              dec[i] = raDec[1];
+          }
 
-            JSkyCalc.showJSkyCalc(site, name, ra, dec, selectedTarget.getName(), observation.getWhen().getDate());
-        }
+          JSkyCalc.showJSkyCalc(site, name, ra, dec, selectedTarget.getName(), observation.getWhen().getDate());
+      }
   }//GEN-LAST:event_jButtonSkyCalcActionPerformed
 
     /**
@@ -1913,7 +1913,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             for (WarningMessage message : warningContainer.getWarningMessages()) {
                 msg = message.getMessage();
 
-                sb.append(msg).append("<br>");
+                sb.append(StringUtils.encodeTagContent(msg)).append("<br>");
 
                 // avoid redudant logs of the same message:
                 if (!message.isLogged()) {

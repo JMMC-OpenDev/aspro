@@ -56,7 +56,8 @@ public interface AsproConstants {
                 NumberUtils.valueOf(768),
                 NumberUtils.valueOf(1024),
                 NumberUtils.valueOf(1536),
-                NumberUtils.valueOf(2048)}));
+                NumberUtils.valueOf(2048)
+            }));
     /** default super sampling = 3 */
     public final static Integer DEFAULT_SUPER_SAMPLING = NumberUtils.valueOf(3);
     /** supersampling choices */
