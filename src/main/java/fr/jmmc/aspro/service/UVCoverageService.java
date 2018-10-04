@@ -62,7 +62,7 @@ public final class UVCoverageService {
     /** target to use */
     private final String targetName;
     /** maximum U or V coordinate in rad-1 (corrected by the minimal wavelength) */
-    private double uvMax;
+    private double uvMaxFreq;
     /** flag to compute the UV support */
     private final boolean doUVSupport;
     /** true to use instrument bias; false to compute only theoretical error */
@@ -122,7 +122,7 @@ public final class UVCoverageService {
         this.observation = observation;
         this.obsData = obsData;
         this.targetName = targetName;
-        this.uvMax = uvMax;
+        this.uvMaxFreq = uvMax;
         this.doUVSupport = doUVSupport;
         this.useInstrumentBias = useInstrumentBias;
         this.doDataNoise = doDataNoise;
@@ -191,11 +191,11 @@ public final class UVCoverageService {
                 return null;
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("UV coordinate maximum: {}", this.uvMax);
+                logger.debug("UV coordinate maximum: {}", this.uvMaxFreq);
             }
 
             // uv Max = max base line / minimum wave length
-            this.data.setUvMax(this.uvMax);
+            this.data.setUvMaxFreq(this.uvMaxFreq);
 
             // fast interrupt :
             if (this.currentThread.isInterrupted()) {
@@ -536,7 +536,7 @@ public final class UVCoverageService {
         // note : use the lower wave length of the instrument to
         // - make all uv segment visible
         // - avoid to much model computations (when the instrument mode changes)
-        this.uvMax /= this.instrumentMinWaveLength;
+        this.uvMaxFreq /= this.instrumentMinWaveLength;
 
         // Define precisely the maxUV for maxBaselines:
         final FocalInstrumentConfiguration insConf = observation.getInstrumentConfiguration().getInstrumentConfiguration();
@@ -549,7 +549,7 @@ public final class UVCoverageService {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Corrected uvMax: {}", this.uvMax);
+            logger.debug("uvMaxFreq: {}", this.uvMaxFreq);
         }
     }
 

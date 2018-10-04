@@ -1677,7 +1677,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         private final List<ObservabilityData> obsDataList;
         /** target name */
         private final String targetName;
-        /** maximum U or V coordinate (lambda scale) */
+        /** maximum U or V coordinate */
         private double uvMax;
         /** flag to compute the UV support */
         private final boolean doUVSupport;
@@ -1806,7 +1806,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // compute the uv map data :
 
                 // update uvMax according to UVCoverage Service (wavelength correction):
-                this.uvMax = uvDataFirst.getUvMax();
+                final double uvMaxFreq = uvDataFirst.getUvMaxFreq();
 
                 if (target != null && target.hasModel()) {
 
@@ -1815,7 +1815,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     final NoiseService noiseService = (this.doImageNoise && uvDataCollection.isSingle()) ? uvDataFirst.getNoiseService() : null;
 
                     final Rectangle2D.Double uvRect = new Rectangle2D.Double();
-                    uvRect.setFrameFromDiagonal(-this.uvMax, -this.uvMax, this.uvMax, this.uvMax);
+                    uvRect.setFrameFromDiagonal(-uvMaxFreq, -uvMaxFreq, uvMaxFreq, uvMaxFreq);
 
                     // Fix image index:
                     final List<UserModelData> modelDataList = (target.hasAnalyticalModel()) ? null : target.getUserModel().getModelDataList();
@@ -2854,7 +2854,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         final UVCoverageData uvData = chartData.getFirstUVData();
 
         // Get the correct uv max from the model image because FFTs have gridding issue => smaller max frequency
-        final double uvMaxInLambda = (uvMapData != null) ? -uvMapData.getUvMapRect().getMinX() : uvData.getUvMax();
+        final double uvMaxInLambda = (uvMapData != null) ? -uvMapData.getUvMapRect().getMinX() : uvData.getUvMaxFreq();
         // uv in megalambda:
         this.xyPlot.defineBounds(toUVPlotScale(uvMaxInLambda));
         // uv in meters (megalambda to meter conversion):

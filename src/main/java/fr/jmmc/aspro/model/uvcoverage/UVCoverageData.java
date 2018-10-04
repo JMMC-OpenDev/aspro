@@ -21,8 +21,8 @@ public final class UVCoverageData {
     private final ObservationVersion version;
     /** name of the target */
     private String targetName;
-    /** maximum U and V coordinate (lambda scale) */
-    private double uvMax;
+    /** maximum U and V coordinate (lambda scale) in rad-1 */
+    private double uvMaxFreq;
     /** central wave length (meter) */
     private double lambda;
     /** configuration i.e. station names */
@@ -78,19 +78,19 @@ public final class UVCoverageData {
     }
 
     /**
-     * Return the maximum U and V coordinate (lambda scale)
-     * @return maximum U and V coordinate (lambda scale)
+     * Return the maximum U and V coordinate (lambda scale) in rad-1
+     * @return maximum U and V coordinate (lambda scale) in rad-1
      */
-    public double getUvMax() {
-        return uvMax;
+    public double getUvMaxFreq() {
+        return uvMaxFreq;
     }
 
     /**
-     * Define the maximum U and V coordinate (lambda scale)
-     * @param uvMax maximum U and V coordinate (lambda scale)
+     * Define the maximum U and V coordinate (lambda scale) in rad-1
+     * @param uvMaxFreq maximum U and V coordinate (lambda scale) in rad-1
      */
-    public void setUvMax(final double uvMax) {
-        this.uvMax = uvMax;
+    public void setUvMaxFreq(final double uvMaxFreq) {
+        this.uvMaxFreq = uvMaxFreq;
     }
 
     /**
