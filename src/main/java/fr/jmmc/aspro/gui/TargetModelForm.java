@@ -28,6 +28,7 @@ import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.NumericJTable;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.FitsImagePanel;
@@ -84,6 +85,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     public final static double MAS_EPSILON = 1e-6d * ALX.MILLI_ARCSEC_IN_DEGREES;
     /** default reload latency = 20 ms */
     private static final int RELOAD_LATENCY = 20;
+    /** AMHRA portal */
+    private static final String AMHRA_URL = "https://amhra.oca.eu/";
 
     /* members */
     /** list of edited targets (clone) */
@@ -854,6 +857,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jButtonReset = new javax.swing.JButton();
         jFormattedTextFieldScaleY = new javax.swing.JFormattedTextField();
         jToggleButtonLinked = new javax.swing.JToggleButton();
+        jButtonAmhra = new javax.swing.JButton();
         jPanelDescription = new javax.swing.JPanel();
         jScrollPaneModelDescription = new javax.swing.JScrollPane();
         jLabelModelDescrption = new javax.swing.JLabel();
@@ -1155,6 +1159,18 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jToggleButtonLinked, gridBagConstraints);
+
+        jButtonAmhra.setText("AMHRA");
+        jButtonAmhra.setToolTipText("Open the AMHRA web portal to get a model image");
+        jButtonAmhra.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAmhraActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 3;
+        jPanelUserModel.add(jButtonAmhra, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1559,6 +1575,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         handleLinkedState();
     }//GEN-LAST:event_jToggleButtonLinkedActionPerformed
 
+    private void jButtonAmhraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAmhraActionPerformed
+        BrowserLauncher.openURL(AMHRA_URL);
+    }//GEN-LAST:event_jButtonAmhraActionPerformed
+
     private void handleLinkedState() {
         // TODO: if linked is OFF, then allow editing scaleY field
         this.jFormattedTextFieldScaleY.setEnabled(!this.jToggleButtonLinked.isSelected() && this.jFormattedTextFieldScaleX.isEnabled());
@@ -1569,6 +1589,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private javax.swing.ButtonGroup buttonGroupModelMode;
     private javax.swing.ButtonGroup buttonGroupUserModelValid;
     private javax.swing.JButton jButtonAdd;
+    private javax.swing.JButton jButtonAmhra;
     private javax.swing.JButton jButtonImageInfo;
     private javax.swing.JButton jButtonNormalizeFluxes;
     private javax.swing.JButton jButtonOpenFile;

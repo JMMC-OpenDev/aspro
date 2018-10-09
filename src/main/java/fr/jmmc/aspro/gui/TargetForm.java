@@ -75,7 +75,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private static final String VIZIER_SED_QUERY_ID = "http://cdsxmatch.u-strasbg.fr/gadgets/ifr?url=http://cdsxmatch.u-strasbg.fr/widgets/SED_plotter.xml&SED_plot_radius=1&SED_plot_object=";
     /** GetStar URL (query by identifier) */
     private static final String GETSTAR_QUERY_ID = "http://apps.jmmc.fr/~sclws/getstar/sclwsGetStarProxy.php?star=";
-     /** Mag converter URL */
+    /** Mag converter URL */
     private static final String MAG_CONV_ID = "http://ssc.spitzer.caltech.edu/warmmission/propkit/pet/magtojy/#fnu_to_mag";
 
     /* members */
@@ -1684,7 +1684,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }//GEN-LAST:event_jButtonGetStarActionPerformed
 
     private void jButtonMagConvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonMagConvActionPerformed
-        BrowserLauncher.openURL(MAG_CONV_ID);      
+        BrowserLauncher.openURL(MAG_CONV_ID);
     }//GEN-LAST:event_jButtonMagConvActionPerformed
 
     /**
