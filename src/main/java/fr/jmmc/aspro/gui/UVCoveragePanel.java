@@ -1805,7 +1805,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             if (this.doModelImage) {
                 // compute the uv map data :
 
-                // update uvMax according to UVCoverage Service (wavelength correction):
+                // update uvMaxFreq according to UVCoverage Service (wavelength correction):
                 final double uvMaxFreq = uvDataFirst.getUvMaxFreq();
 
                 if (target != null && target.hasModel()) {
@@ -2854,11 +2854,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         final UVCoverageData uvData = chartData.getFirstUVData();
 
         // Get the correct uv max from the model image because FFTs have gridding issue => smaller max frequency
-        final double uvMaxInLambda = (uvMapData != null) ? -uvMapData.getUvMapRect().getMinX() : uvData.getUvMaxFreq();
+        final double uvMaxFreq = (uvMapData != null) ? -uvMapData.getUvMapRect().getMinX() : uvData.getUvMaxFreq();
         // uv in megalambda:
-        this.xyPlot.defineBounds(toUVPlotScale(uvMaxInLambda));
+        this.xyPlot.defineBounds(toUVPlotScale(uvMaxFreq));
         // uv in meters (megalambda to meter conversion):
-        this.xyPlot.defineAxisBounds(1, uvMaxInLambda * uvData.getLambda());
+        this.xyPlot.defineAxisBounds(1, uvMaxFreq * uvData.getLambda());
 
         // Reset Fixed legend items:
         this.xyPlot.setFixedLegendItems(null);

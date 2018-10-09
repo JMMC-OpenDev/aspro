@@ -212,11 +212,11 @@ public final class UserModelService {
      * Validate the given user model i.e. both file and image values are valid
      *
      * @param model user model to validate
-     * @param uvMax maximum UV frequency (rad-1)
+     * @param uvMaxFreq maximum UV frequency (rad-1)
      *
      * @throws IllegalArgumentException if the file or the image is invalid !
      */
-    public static void validateModel(final UserModel model, final double uvMax) throws IllegalArgumentException {
+    public static void validateModel(final UserModel model, final double uvMaxFreq) throws IllegalArgumentException {
         if (model == null) {
             throw new IllegalStateException("User model is empty !");
         }
@@ -232,19 +232,19 @@ public final class UserModelService {
             if (model.getChecksum() != fitsImage.getFitsImageHDU().getChecksum()) {
                 throw new IllegalArgumentException("Fits image checksum is incorrect; please verify your file (probably modified) !");
             }
-            checkFitsImage(fitsImage, uvMax);
+            checkFitsImage(fitsImage, uvMaxFreq);
         }
     }
 
     /**
      * Check the given fits image with the given corrected UV Max (rad-1)
      * @param fitsImage fits image to check
-     * @param uvMax maximum UV frequency (rad-1)
+     * @param uvMaxFreq maximum UV frequency (rad-1)
      *
      * @throws IllegalArgumentException if the fits image is invalid (undefined increments or too small increments)
      * @throws IllegalStateException if the image is invalid (null or not square)
      */
-    private static void checkFitsImage(final FitsImage fitsImage, final double uvMax) {
+    private static void checkFitsImage(final FitsImage fitsImage, final double uvMaxFreq) {
         if (fitsImage == null) {
             throw new IllegalStateException("Fits image is empty !");
         }
@@ -262,18 +262,18 @@ public final class UserModelService {
         if (!NumberUtils.equals(fitsImage.getIncCol(), fitsImage.getIncRow(), INC_EPSILON_RAD)) {
             throw new IllegalArgumentException("Fits image increments along row and column axes must be equals !");
         }
-        if (uvMax > 0.0) {
+        if (uvMaxFreq > 0.0) {
             final double increment = fitsImage.getIncRow();
             final double maxFreq = getMaxFreq(fitsImage);
 
-            if (maxFreq < uvMax) {
-                final double minIncrement = (maxFreq / uvMax) * increment;
+            if (maxFreq < uvMaxFreq) {
+                final double minIncrement = (maxFreq / uvMaxFreq) * increment;
 
                 throw new IllegalArgumentException("Fits image [" + fitsImage.getFitsImageIdentifier()
                         + "] must have smaller pixel increments [expected "
                         + FitsImage.getAngleAsString(minIncrement, df) + " < "
                         + FitsImage.getAngleAsString(increment, df) + "] to have a maximum frequency [expected "
-                        + df.format(uvMax) + " rad-1 > " + df.format(maxFreq) + " rad-1 ] !");
+                        + df.format(uvMaxFreq) + " rad-1 > " + df.format(maxFreq) + " rad-1 ] !");
             }
         }
     }
@@ -363,13 +363,13 @@ public final class UserModelService {
                                          final float[][] refVisData) {
 
         // Note: do not support sub region (uvRect)
-        // Get corrected uvMax from uv rectangle (-this.uvMax, -this.uvMax, this.uvMax, this.uvMax):
-        final double uvMaxFreq = Math.max(Math.max(Math.max(Math.abs(uvRect.getX()), Math.abs(uvRect.getY())),
+        // Get uvMaxFreq from uv rectangle:
+        final double rectUvMaxFreq = Math.max(Math.max(Math.max(Math.abs(uvRect.getX()), Math.abs(uvRect.getY())),
                 Math.abs(uvRect.getX() + uvRect.getWidth())),
                 Math.abs(uvRect.getY() + uvRect.getHeight()));
 
         // todo enhance image size to fit sub image!
-        logger.debug("UserModelService.computeUVMap: uvMaxFreq (rad-1): {}", uvMaxFreq);
+        logger.debug("UserModelService.computeUVMap: rectUvMaxFreq (rad-1): {}", rectUvMaxFreq);
 
         // throws exceptions:
         // do not check uv max:
@@ -382,8 +382,8 @@ public final class UserModelService {
         // Fix uv max according to the image max frequency:
         final double imgMaxFreq = getMaxFreq(fitsImage);
 
-        final double uvMax = (uvMaxFreq < imgMaxFreq) ? uvMaxFreq : imgMaxFreq;
-        logger.debug("UserModelService.computeUVMap: Fixed uvMax (rad-1): {}", uvMax);
+        final double uvMaxFreq = (rectUvMaxFreq < imgMaxFreq) ? rectUvMaxFreq : imgMaxFreq;
+        logger.debug("UserModelService.computeUVMap: Fixed uvMaxFreq (rad-1): {}", uvMaxFreq);
 
         /** Get the current thread to check if the computation is interrupted */
         final Thread currentThread = Thread.currentThread();
@@ -396,7 +396,7 @@ public final class UserModelService {
 
         if (fitsImage.isRotAngleDefined()) {
             rotationAngle = fitsImage.getRotAngle();
-            Rectangle2D imgRectRef = new Rectangle2D.Double(0, 0, uvMax, uvMax);
+            Rectangle2D imgRectRef = new Rectangle2D.Double(0, 0, uvMaxFreq, uvMaxFreq);
 
             // angle sign is same direction (North -> East):
             final double theta = Math.toRadians(rotationAngle);
@@ -412,7 +412,7 @@ public final class UserModelService {
             if (logger.isDebugEnabled()) {
                 logger.debug("rotated uv rect: {}", imgRectRef);
             }
-            mapScale = imgRectRef.getWidth() / uvMax;
+            mapScale = imgRectRef.getWidth() / uvMaxFreq;
         } else {
             mapScale = 1.0;
             rotationAngle = 0.0;
@@ -431,7 +431,7 @@ public final class UserModelService {
         logger.debug("Freq scale per Pixel (rad-1): {}", scaleFreqPerPix);
 
         // UV / maxFreq ratio per FT pixel:
-        final double ratioFreqPerPix = uvMax / scaleFreqPerPix;
+        final double ratioFreqPerPix = uvMaxFreq / scaleFreqPerPix;
         logger.debug("Ratio freq per Pixel: {}", ratioFreqPerPix);
 
         // find best FFT size:
@@ -457,8 +457,8 @@ public final class UserModelService {
         logger.debug("dataSize:   {}", dataSize);
         logger.debug("outputSize: {}", outputSize);
 
-        final double mapUvMax = (scaleFreqPerPix * outputSize) / fftSize;
-        logger.debug("UVMap exact uvMax (m): {}", mapUvMax);
+        final double mapUvMaxFreq = (scaleFreqPerPix * outputSize) / fftSize;
+        logger.debug("UVMap exact uvMaxFreq (m): {}", mapUvMaxFreq);
 
         // fast interrupt :
         if (currentThread.isInterrupted()) {
@@ -497,7 +497,7 @@ public final class UserModelService {
 
             // 3 - Get the image with the given color model and color scale :
             final Rectangle2D.Double uvMapRect = new Rectangle2D.Double();
-            uvMapRect.setFrameFromDiagonal(-mapUvMax, -mapUvMax, mapUvMax, mapUvMax);
+            uvMapRect.setFrameFromDiagonal(-mapUvMaxFreq, -mapUvMaxFreq, mapUvMaxFreq, mapUvMaxFreq);
 
             final UVMapData uvMapData = ModelUVMapService.computeImage(uvRect, refMin, refMax, mode, imageSize, colorModel, colorScale,
                     dataSize, visData, imgData, uvMapRect, noiseService, rotationAngle, outputSize);

@@ -195,7 +195,7 @@ public final class OIFitsProcessor {
                 userModel.setChecksum(fitsImageHDU.getChecksum());
             }
             // Validate user model with the max frequency from the OIFITS file:
-            UserModelService.validateModel(userModel, getFreqMax(oiFitsFile));
+            UserModelService.validateModel(userModel, getMaxFreq(oiFitsFile));
 
             // anyway, update the valid flag:
             userModel.setFileValid(true);
@@ -231,7 +231,7 @@ public final class OIFitsProcessor {
         }
     }
 
-    private double getFreqMax(final OIFitsFile oiFitsFile) {
+    private double getMaxFreq(final OIFitsFile oiFitsFile) {
         double freqMax = Double.NEGATIVE_INFINITY;
 
         for (OIData oiData : oiFitsFile.getOiDataList()) {

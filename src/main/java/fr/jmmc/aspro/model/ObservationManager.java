@@ -1600,7 +1600,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param model user model to validate
      */
     public static void validateUserModel(final ObservationSetting observation, final UserModel model) {
-        UserModelService.validateModel(model, getUVMax(observation));
+        UserModelService.validateModel(model, getUVMaxFreq(observation));
     }
 
     /**
@@ -1608,7 +1608,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param observation observation to get interferometer and instrument configurations
      * @return maximum UV frequency (rad-1)
      */
-    private static double getUVMax(final ObservationSetting observation) {
+    private static double getUVMaxFreq(final ObservationSetting observation) {
         final FocalInstrumentConfiguration insConf = observation.getInstrumentConfiguration().getInstrumentConfiguration();
 
         final double maxBaseLines = ConfigurationManager.getInstrumentConfigurationMaxBaseline(insConf,
@@ -1625,9 +1625,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         // note : use the minimum wave length of the instrument to
         // - make all uv segment visible
         // - avoid too much model computations (when the instrument mode changes)
-        final double uvMax = maxBaseLines / lambdaMin;
+        final double uvMaxFreq = maxBaseLines / lambdaMin;
 
-        return uvMax;
+        return uvMaxFreq;
     }
 
     // --- INTERNAL METHODS ------------------------------------------------------
