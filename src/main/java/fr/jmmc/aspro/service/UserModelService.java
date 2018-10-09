@@ -1094,7 +1094,6 @@ public final class UserModelService {
         logger.info("FitsImage: {} float sorted.", n1D);
 
         if (n1D != nData) {
-            System.out.println("TEST");
             return Arrays.copyOf(data1D, n1D);
         }
         return data1D;
