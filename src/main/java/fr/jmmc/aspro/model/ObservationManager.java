@@ -19,7 +19,6 @@ import fr.jmmc.aspro.model.oi.BaseValue;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
-import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -489,18 +488,19 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * Listeners : SettingPanel / BasicObservationForm
      */
     private void fireObservationTargetsChanged() {
-        final ObservationVersion version = getMainObservation().getVersion();
+        final ObservationSetting observation = getMainObservation();
+        final ObservationVersion version = observation.getVersion();
 
         // Increment target and main versions :
         version.incTargetVersion();
         version.incMainVersion();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("fireObservationTargetsChanged: {}", toString(getMainObservation()));
-            logger.debug("observation version: {}", getMainObservation().getVersion());
+            logger.debug("fireObservationTargetsChanged: {}", toString(observation));
+            logger.debug("observation version: {}", observation.getVersion());
         }
 
-        fireEvent(new ObservationEvent(ObservationEventType.TARGET_CHANGED, getMainObservation()));
+        fireEvent(new ObservationEvent(ObservationEventType.TARGET_CHANGED, observation));
     }
 
     /**
@@ -561,11 +561,12 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param forceRefresh flag to force an observation refresh event (MAIN)
      */
     private void fireObservationUpdate(final boolean forceRefresh) {
+        final ObservationSetting observation = getMainObservation();
         if (logger.isDebugEnabled()) {
-            logger.debug("fireObservationUpdate: {}", toString(getMainObservation()));
+            logger.debug("fireObservationUpdate: {}", toString(observation));
         }
 
-        final UpdateObservationEvent event = new UpdateObservationEvent(getMainObservation());
+        final UpdateObservationEvent event = new UpdateObservationEvent(observation);
 
         fireEvent(event);
 
@@ -581,7 +582,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         // Handle event result :
         if (event.getChanged() != UpdateObservationEvent.ChangeType.NONE) {
 
-            final ObservationVersion version = getMainObservation().getVersion();
+            final ObservationVersion version = observation.getVersion();
 
             // Update versions first :
             switch (event.getChanged()) {
@@ -1015,7 +1016,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @return true if the value changed
      */
     public boolean setInstrumentConfigurationPoPs(final String pops) {
-        final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
+        final ObservationSetting observation = getMainObservation();
+        final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
 
         // pops can be null :
         final boolean changed = isChanged(pops, instrumentChoice.getPops());
@@ -1024,9 +1026,11 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 logger.trace("setInstrumentConfigurationPoPs: {}", pops);
             }
             instrumentChoice.setPops(pops);
+
             instrumentChoice.setPopList(cm.parseInstrumentPoPs(
-                    getMainObservation().getInterferometerConfiguration().getName(),
-                    getMainObservation().getInstrumentConfiguration().getName(), pops));
+                    observation.getInterferometerConfiguration().getName(),
+                    observation.getInstrumentConfiguration().getName(),
+                    observation.getInstrumentConfiguration().getStations(), pops, null));
         }
         return changed;
     }
@@ -1040,7 +1044,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @return true if the value changed
      */
     public boolean setInstrumentMode(final String mode) {
-        final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
+        final ObservationSetting observation = getMainObservation();
+        final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
 
         // mode can be null :
         final boolean changed = isChanged(mode, instrumentChoice.getInstrumentMode());
@@ -1050,8 +1055,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             }
             instrumentChoice.setInstrumentMode(mode);
             instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(
-                    getMainObservation().getInterferometerConfiguration().getName(),
-                    getMainObservation().getInstrumentConfiguration().getName(), mode));
+                    observation.getInterferometerConfiguration().getName(),
+                    observation.getInstrumentConfiguration().getName(), mode));
         }
         return changed;
     }
@@ -1231,21 +1236,22 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      */
     public boolean defineCalibratorDiameter(final List<Target> calibrators) {
         boolean changed = false;
+        final ObservationSetting observation = getMainObservation();
 
         // Find instrument band from main observation :
-        FocalInstrumentMode insMode = getMainObservation().getInstrumentConfiguration().getFocalInstrumentMode();
+        FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
         if (insMode == null) {
             // use the first instrument mode of the instrument:
             final Vector<String> instrumentModes = ConfigurationManager.getInstance().getInstrumentModes(
-                    getMainObservation().getInterferometerConfiguration().getName(),
-                    getMainObservation().getInstrumentConfiguration().getName());
+                    observation.getInterferometerConfiguration().getName(),
+                    observation.getInstrumentConfiguration().getName());
 
             if (instrumentModes.isEmpty()) {
                 throw new IllegalStateException("The instrumentMode is empty !");
             }
             insMode = ConfigurationManager.getInstance().getInstrumentMode(
-                    getMainObservation().getInterferometerConfiguration().getName(),
-                    getMainObservation().getInstrumentConfiguration().getName(),
+                    observation.getInterferometerConfiguration().getName(),
+                    observation.getInstrumentConfiguration().getName(),
                     instrumentModes.get(0));
 
             logger.info("The instrumentMode is empty; using first instrument Mode {}", insMode.getName());
@@ -1776,7 +1782,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         instrumentChoice.setStationList(obsVariant.getStationList());
 
         // pops can be undefined :
-        instrumentChoice.setPopList(cm.parseInstrumentPoPs(interferometerConfiguration, instrumentAlias, instrumentChoice.getPops()));
+        instrumentChoice.setPopList(cm.parseInstrumentPoPs(interferometerConfiguration, instrumentAlias, obsVariant.getStations(),
+                instrumentChoice.getPops(), null));
 
         // instrument mode can be undefined :
         instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(interferometerConfiguration, instrumentAlias, instrumentChoice.getInstrumentMode()));
