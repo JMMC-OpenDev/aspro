@@ -5,6 +5,8 @@
 #a=["S1","S2","W1","W2","E1","E2"]
 # 2018: beam 1 W1, beam 2 S2, beam 3 S1, beam 4 E1, beam 5 E2, beam 6 W2
 a=["W1","S2","S1","E1","E2","W2"]
+# 2018B (MIRCX): beam 1 E1, beam 2 W2, beam 3 W1, beam 4 S2, beam 5 S1, beam 6 E2
+a=["E1","W2","W1","S2","S1","E2"]
 
 # MROI:
 #a = ["W0","W1","W2","W3","W4", "W5", "W6", "W7", "W8", "W9",
@@ -29,24 +31,32 @@ nbStations=len(a)
 print("<root>")
 
 # 2 telescopes:
+print("<!-- 2T -->");
 for i in range (0,nbStations):
   for j in range(i+1,nbStations):
-    print("<configuration><stations>"+a[i]+" "+a[j]+"</stations></configuration>")
+    print("<configuration><stations>"+a[i]+" "+a[j]+"</stations>")
+    print("<channels>V"+str(i+1)+" V"+str(j+1)+"</channels></configuration>")
+
 
 # 3 telescopes:
+print("<!-- 3T -->");
 for i in range (0,nbStations):
   for j in range(i+1,nbStations):
     for k in range(j+1,nbStations):
-      print("<configuration><stations>"+a[i]+" "+a[j]+" "+a[k]+"</stations></configuration>")
+      print("<configuration><stations>"+a[i]+" "+a[j]+" "+a[k]+"</stations>")
+      print("<channels>V"+str(i+1)+" V"+str(j+1)+" V"+str(k+1)+"</channels></configuration>")
 
 # 4 telescopes:
+print("<!-- 4T -->");
 for i in range (0,nbStations):
   for j in range(i+1,nbStations):
     for k in range(j+1,nbStations):
       for l in range(k+1,nbStations):
-        print("<configuration><stations>"+a[i]+" "+a[j]+" "+a[k]+" "+a[l]+"</stations></configuration>")
+        print("<configuration><stations>"+a[i]+" "+a[j]+" "+a[k]+" "+a[l]+"</stations>")
+        print("<channels>V"+str(i+1)+" V"+str(j+1)+" V"+str(k+1)+" V"+str(l+1)+"</channels></configuration>")
 
 # 5 telescopes (MIRC_5T):
+print("<!-- 5T -->");
 for i in range (0,nbStations):
   for j in range(i+1,nbStations):
     for k in range(j+1,nbStations):
