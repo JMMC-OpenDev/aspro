@@ -129,6 +129,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private String currentInstrumentConfiguration = null;
     /** last Pop config given by the interferometer configuration */
     private String lastConfPopConfig = null;
+    /** last configuration compatible with manual PoPs */
+    private String lastConfCompatibleWithPopConfig = null;
     /** Wind widget */
     private WindWidget windWidget = null;
     /** Dedicated panel for target quick search */
@@ -1282,21 +1284,29 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     private void validateTextPoPs(final String value) {
+        String popConfig = value;
         if (value != null) {
-            final String popConfig = value.toString();
+            // 1st selected configuration:
+            final String lastInstrumentConfiguration = lastConfCompatibleWithPopConfig;
+            logger.debug("Last Instrument Config: {}", lastInstrumentConfiguration);
 
             // parse the configuration (instrument = number of channels) + (interferometer = pop indexes [1-5]) :
             final List<Pop> listPoPs = cm.parseInstrumentPoPs((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
-                    (String) jComboBoxInstrument.getSelectedItem(), popConfig);
+                    (String) jComboBoxInstrument.getSelectedItem(), currentInstrumentConfiguration,
+                    popConfig, lastInstrumentConfiguration);
 
             if (listPoPs == null) {
                 // invalid, reset the field to empty :
                 synchronizePops(true);
+                popConfig = jTextPoPs.getText();
+            } else {
+                popConfig = Pop.toString(listPoPs);
+                logger.debug("fixed popConfig: {}", popConfig);
             }
         }
 
         // update combo box:
-        updatePops(jTextPoPs.getText(), false);
+        updatePops(popConfig, false);
     }
 
     /**
@@ -1322,6 +1332,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         // note : setText() does not fire a property change event:
         jTextPoPs.setText((value != null) ? value.toString() : null);
+
+        if (value != null) {
+            this.lastConfCompatibleWithPopConfig = currentInstrumentConfiguration;
+            logger.debug("Last Config set: {} with PoPs: {}", lastConfCompatibleWithPopConfig, value);
+        }
 
         final String text = jTextPoPs.getText();
 
@@ -1602,6 +1617,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             currentTarget = null;
             currentInstrumentConfiguration = null;
             lastConfPopConfig = null;
+            lastConfCompatibleWithPopConfig = null;
             loadedObsSetup = null;
 
             // use observation context to enable/disable POPS FIRST (event ordering issue):

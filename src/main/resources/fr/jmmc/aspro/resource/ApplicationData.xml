@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.6 beta 2"/>
-    <compilation date="09/10/2018" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.6 beta 3"/>
+    <compilation date="17/10/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -219,7 +219,10 @@
 
     <releasenotes>
         <release version="0.9.9.6">
-            <pubDate>Tue, 09 Oct 2018 12:00:00 GMT</pubDate>
+            <pubDate>Wed, 17 Oct 2018 12:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.6 beta 3">
+                <change type="FEATURE">Improved manual PoPs handling to preserve compatible PoP set for same telescopes (MIRC 6T to 5T/4T)</change>
+            </prerelease>
             <prerelease version="0.9.9.6 beta 2">
                 <change type="FEATURE">Added link to the AMHRA web portal on the Target Model Editor</change>
             </prerelease>
