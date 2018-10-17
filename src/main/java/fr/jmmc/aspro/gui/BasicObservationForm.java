@@ -424,7 +424,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weightx = 0.2;
         add(jPanelMain, gridBagConstraints);
 
         jPanelConfigurations.setBorder(javax.swing.BorderFactory.createTitledBorder("Configuration(s)"));
@@ -478,7 +478,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.3;
+        gridBagConstraints.weightx = 0.2;
         gridBagConstraints.weighty = 0.5;
         add(jPanelConfigurations, gridBagConstraints);
 
@@ -877,7 +877,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jCheckBoxWind.setSelected(false);
         windWidget.setEnabled(false);
 
-        jLabelStatus.setFont(new Font("Dialog", Font.BOLD, SwingUtils.adjustUISize(18)));
+        // Adjust fonts:
+        jLabelStatus.setFont(new Font(Font.DIALOG, Font.BOLD, SwingUtils.adjustUISize(18)));
+        final Font fixedFont = new Font(Font.MONOSPACED, Font.PLAIN, SwingUtils.adjustUISize(12));
+        jListTargets.setFont(fixedFont);
+        jListInstrumentConfigurations.setFont(fixedFont);
+        jComboBoxPops.setFont(fixedFont);
+        jTextPoPs.setFont(fixedFont);
     }
 
     /**

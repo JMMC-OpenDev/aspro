@@ -91,7 +91,7 @@ public class ExtendedXYTextAnnotation extends AbstractXYAnnotation
     private static final long serialVersionUID = -2946063342782506328L;
 
     /** The default font. */
-    public static final Font DEFAULT_FONT = new Font("SansSerif", Font.PLAIN, 10);
+    public static final Font DEFAULT_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
 
     /** The default paint. */
     public static final Paint DEFAULT_PAINT = Color.black;
