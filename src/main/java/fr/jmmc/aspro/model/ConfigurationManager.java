@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -1221,23 +1222,67 @@ public final class ConfigurationManager extends BaseOIManager {
      * @param configPoPs Pops string
      * @return list of PoPs
      */
-    public List<Pop> parseInstrumentPoPs(final String configurationName, final String instrumentName, final String configPoPs) {
+    public List<Pop> parseInstrumentPoPs(final String configurationName, final String instrumentName,
+                                         final String stations,
+                                         String configPoPs,
+                                         final String prevStations) {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("parseInstrumentPoPs: [{}] for {} + {} @ {} (prev @ {})", configPoPs, configurationName, instrumentName,
+                    stations, prevStations);
+        }
+
         if (configPoPs != null && configPoPs.length() > 0) {
             final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
             if (ins != null) {
-                // number of channels :
-                final int numChannels = ins.getNumberChannels();
+                final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
+                if (c != null) {
+                    // number of channels :
+                    final int numChannels = ins.getNumberChannels();
 
-                if (configPoPs.length() == numChannels) {
-                    // valid length :
+                    if (configPoPs.length() != numChannels) {
+                        // try parsing mapping [pop <=> telescope]
 
-                    final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
-                    if (c != null) {
-                        final List<Pop> listPoPs = c.getInterferometer().getPops();
+                        /*
+                        [551511] for CHARA + MIRC_5T @ S1 S2 W1 W2 E1 (prev @ S1 S2 W1 W2 E1 E2)
+                         */
+                        final String[] splitPrevStaNames = (prevStations != null) ? prevStations.split(" ") : null;
 
-                        final List<Pop> config = new ArrayList<Pop>(numChannels);
+                        if (splitPrevStaNames != null && splitPrevStaNames.length == configPoPs.length()) {
+                            final String[] splitStaNames = (stations != null) ? stations.split(" ") : null;
 
-                        int idx;
+                            if (splitStaNames != null && splitStaNames.length == numChannels) {
+                                final Map<String, String> mapping = new HashMap<String, String>(8);
+
+                                final char[] pops = configPoPs.toCharArray();
+
+                                for (int i = 0; i < splitPrevStaNames.length; i++) {
+                                    final String staName = splitPrevStaNames[i];
+                                    final char pop = pops[i];
+                                    mapping.put(staName, Character.toString(pop));
+                                }
+
+                                final StringBuilder sbPops = new StringBuilder(numChannels);
+
+                                for (int i = 0; i < splitStaNames.length; i++) {
+                                    final String staName = splitStaNames[i];
+                                    final String pop = mapping.get(staName);
+                                    sbPops.append(pop != null ? pop : "*");
+                                }
+
+                                configPoPs = sbPops.toString();
+
+                                logger.debug("Fixed PoPs to: {}, for {}", configPoPs, stations);
+                            }
+                        }
+                    }
+
+                    final List<Pop> listPoPs = c.getInterferometer().getPops();
+                    final List<Pop> config = new ArrayList<Pop>(numChannels);
+                    int idx;
+
+                    if (configPoPs.length() == numChannels) {
+                        // valid length :
                         for (char ch : configPoPs.toCharArray()) {
                             idx = Character.digit(ch, 10);
                             if (idx <= 0) {
