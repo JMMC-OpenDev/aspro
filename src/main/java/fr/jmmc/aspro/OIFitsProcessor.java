@@ -12,6 +12,7 @@ import fr.jmmc.aspro.service.UserModelData;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.aspro.util.StatUtils;
+import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageHDU;
@@ -172,7 +173,7 @@ public final class OIFitsProcessor {
 
             // define optional Transforms:
             if (!Double.isNaN(scale)) {
-                final double inc = UserModelService.convertMasToRad(scale);
+                final double inc = ALX.convertMasToRad(scale);
                 userModel.setScaleX(inc);
                 userModel.setScaleY(inc);
             }

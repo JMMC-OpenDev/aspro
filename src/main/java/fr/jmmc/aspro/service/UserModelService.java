@@ -1000,8 +1000,8 @@ public final class UserModelService {
             FitsImageUtils.updateFitsImage(fitsImage, data, fitsImage.getDataMin(), fitsImage.getDataMax());
 
             // update ref pixel:
-            fitsImage.setPixRefRow(fitsImage.getPixRefRow() + 0.5d * (newSize - nbRows));
-            fitsImage.setPixRefCol(fitsImage.getPixRefCol() + 0.5d * (newSize - nbCols));
+            fitsImage.setPixRefRow(fitsImage.getPixRefRow() + ((newSize - nbRows) / 2));
+            fitsImage.setPixRefCol(fitsImage.getPixRefCol() + ((newSize - nbCols) / 2));
 
             nbRows = fitsImage.getNbRows();
             nbCols = fitsImage.getNbCols();
@@ -1289,11 +1289,4 @@ public final class UserModelService {
         return -1;
     }
 
-    public static double convertRadToMas(final double angRad) {
-        return Math.toDegrees(angRad) * ALX.DEG_IN_MILLI_ARCSEC;
-    }
-
-    public static double convertMasToRad(final double angMas) {
-        return Math.toRadians(angMas * ALX.MILLI_ARCSEC_IN_DEGREES);
-    }
 }
