@@ -2376,11 +2376,31 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                     final Rectangle2D.Double uvRect = new Rectangle2D.Double();
                     uvRect.setFrameFromDiagonal(
-                            fromUVPlotScale(ze.getDomainLowerBound()), fromUVPlotScale(ze.getRangeLowerBound()),
-                            fromUVPlotScale(ze.getDomainUpperBound()), fromUVPlotScale(ze.getRangeUpperBound()));
+                            fromUVPlotScale(ze.getDomainLowerBound()),
+                            fromUVPlotScale(ze.getRangeLowerBound()),
+                            fromUVPlotScale(ze.getDomainUpperBound()),
+                            fromUVPlotScale(ze.getRangeUpperBound()));
 
                     // compute an approximated uv map from the reference UV Map :
                     if (computeSubUVMap(uvMapData, uvRect)) {
+                        {
+                            // adjust axis bounds to exact viewed rectangle (i.e. avoid rounding errors)
+                            final UVCoverageData uvData = this.getChartData().getFirstUVData();
+
+                            // uv in megalambda:
+                            ValueAxis axis = this.xyPlot.getDomainAxis();
+                            axis.setRange(toUVPlotScale(uvRect.getMinX()), toUVPlotScale(uvRect.getMaxX()));
+
+                            axis = this.xyPlot.getRangeAxis();
+                            axis.setRange(toUVPlotScale(uvRect.getMinY()), toUVPlotScale(uvRect.getMaxY()));
+
+                            // uv in meters (megalambda to meter conversion):
+                            axis = this.xyPlot.getDomainAxis(1);
+                            axis.setRange(uvRect.getMinX() * uvData.getLambda(), uvRect.getMaxX() * uvData.getLambda());
+
+                            axis = this.xyPlot.getRangeAxis(1);
+                            axis.setRange(uvRect.getMinY() * uvData.getLambda(), uvRect.getMaxY() * uvData.getLambda());
+                        }
 
                         // visibility reference extrema :
                         final Float refMin = uvMapData.getMin();
@@ -2602,8 +2622,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         final Rectangle2D.Double uvRect = new Rectangle2D.Double();
         uvRect.setFrameFromDiagonal(
-                fromUVPlotScale(domainAxis.getLowerBound()), fromUVPlotScale(rangeAxis.getLowerBound()),
-                fromUVPlotScale(domainAxis.getUpperBound()), fromUVPlotScale(rangeAxis.getUpperBound()));
+                fromUVPlotScale(domainAxis.getLowerBound()),
+                fromUVPlotScale(rangeAxis.getLowerBound()),
+                fromUVPlotScale(domainAxis.getUpperBound()),
+                fromUVPlotScale(rangeAxis.getUpperBound()));
 
         return uvRect;
     }
@@ -2615,8 +2637,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @return true if the given uvRect is smaller than uvRect of the reference image
      */
     private boolean computeSubUVMap(final UVMapData uvMapData, final Rectangle2D.Double uvRect) {
-        boolean doCrop;
-
         final int imageSize = uvMapData.getUvMapSize();
 
         // uv area reference :
@@ -2627,16 +2647,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             logger.debug("uv map rect REF = {}", uvRectRef);
         }
 
-        // note : floor/ceil to be sure to have at least 1x1 pixel image
-        int x = (int) Math.floor(imageSize * (uvRect.getX() - uvRectRef.getX()) / uvRectRef.getWidth());
-        int y = (int) Math.floor(imageSize * (uvRect.getY() - uvRectRef.getY()) / uvRectRef.getHeight());
-        int w = (int) Math.ceil(imageSize * uvRect.getWidth() / uvRectRef.getWidth());
-        int h = (int) Math.ceil(imageSize * uvRect.getHeight() / uvRectRef.getHeight());
+        final double pixRatioX = ((double) imageSize) / uvRectRef.getWidth();
+        final double pixRatioY = ((double) imageSize) / uvRectRef.getHeight();
 
-        // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
-        // whereas it corresponds in UV to the lower U and Upper V coordinates => inverse the V axis
-        // Inverse V axis issue :
-        y = imageSize - y - h;
+        // note : floor/ceil to be sure to have at least 1x1 pixel image
+        int x = (int) Math.floor(pixRatioX * (uvRect.getX() - uvRectRef.getX()));
+        int y = (int) Math.floor(pixRatioY * (uvRect.getY() - uvRectRef.getY()));
+        int w = (int) Math.ceil(pixRatioX * uvRect.getWidth());
+        int h = (int) Math.ceil(pixRatioY * uvRect.getHeight());
 
         // check bounds:
         x = checkBounds(x, 0, imageSize - 1);
@@ -2644,15 +2662,31 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         w = checkBounds(w, 1, imageSize - x);
         h = checkBounds(h, 1, imageSize - y);
 
-        doCrop = ((x != 0) || (y != 0) || (w != imageSize) || (h != imageSize));
+        final boolean doCrop = ((x != 0) || (y != 0) || (w != imageSize) || (h != imageSize));
 
         if (logger.isDebugEnabled()) {
-            logger.debug("sub image [{}, {} - {}, {}] - doCrop = {}", x, y, w, h, doCrop);
+            logger.debug("sub image [{}, {} - {}, {}] - doCrop = {}", new Object[]{x, y, w, h, doCrop});
         }
 
-        // crop a small sub image displayed while the correct model image is computed:
         // check reset zoom to avoid computing sub image == ref image:
         if (doCrop) {
+            // adjust rounded data coords:
+            logger.debug("uv rect (IN) = {}", uvRect);
+
+            uvRect.setRect(
+                    ((double) x) / pixRatioX + uvRectRef.getX(),
+                    ((double) y) / pixRatioY + uvRectRef.getY(),
+                    ((double) w) / pixRatioX,
+                    ((double) h) / pixRatioY
+            );
+            logger.debug("uv rect (OUT) = {}", uvRect);
+
+            // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
+            // whereas it corresponds in UV to the lower U and Upper V coordinates => inverse the V axis
+            // Inverse V axis issue :
+            y = imageSize - y - h;
+
+            // crop a small sub image displayed while the correct model image is computed:
             final Image subUVMap = uvMapData.getUvMap().getSubimage(x, y, w, h);
 
             // update the background image only:
@@ -2663,7 +2697,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax(), uvMapData.getColorScale());
         }
 
-        // TODO: adjust axis bounds to exact viewed rectangle (i.e. avoid rounding errors) !!
         return doCrop;
     }
 
