@@ -87,6 +87,7 @@ import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
 import fr.jmmc.oiexplorer.core.gui.chart.ZoomEventListener;
 import fr.jmmc.oiexplorer.core.gui.chart.dataset.SharedSeriesAttributes;
 import fr.jmmc.oiexplorer.core.util.Constants;
+import static fr.jmmc.oiexplorer.core.util.FitsImageUtils.checkBounds;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.Color;
@@ -2698,23 +2699,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         }
 
         return doCrop;
-    }
-
-    /**
-     * Return the value or the closest bound
-     * @param value value to check
-     * @param min minimum value
-     * @param max maximum value
-     * @return value or the closest bound
-     */
-    private static int checkBounds(final int value, final int min, final int max) {
-        if (value < min) {
-            return min;
-        }
-        if (value > max) {
-            return max;
-        }
-        return value;
     }
 
     /**
