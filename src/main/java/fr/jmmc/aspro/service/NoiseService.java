@@ -51,10 +51,6 @@ public final class NoiseService implements VisNoiseService {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(NoiseService.class.getName());
-    /** Planck's constant in standard units (6.6262e-34) */
-    public final static double H_PLANCK = 6.62606896e-34d;
-    /** Speed of light (2.99792458e8) */
-    public final static double C_LIGHT = 2.99792458e8d;
 
     /** flag to use the new numeric approach = statistical distributions */
     public final static boolean USE_DISTRIB_APPROACH = true;
@@ -148,7 +144,7 @@ public final class NoiseService implements VisNoiseService {
     private final int nSpectralChannels;
     /** index of central spectral channel */
     private final int iMidChannel;
-    /** spectral channel central wavelength */
+    /** spectral channel central wavelength (meters) */
     private final double[] waveLengths;
     /** spectral channel widths */
     private final double[] waveBands;
@@ -984,7 +980,7 @@ public final class NoiseService implements VisNoiseService {
         for (int i = 0; i < nWLen; i++) {
             // nb of photons m^-2.s^-1.m^-1 for an object at magnitude 0:
             // note: fzero depends on the spectral band:
-            final double fzero = FastMath.pow(10d, insBand[i].getLogFluxZero()) * waveLengths[i] / (H_PLANCK * C_LIGHT);
+            final double fzero = insBand[i].getNbPhotZero(waveLengths[i]);
 
             // TODO: source flux may be spectrally dependent:
             // nb of photons m^-2.s^-1.m^-1 for the target object:
