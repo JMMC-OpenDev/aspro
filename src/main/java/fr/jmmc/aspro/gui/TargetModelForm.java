@@ -32,6 +32,7 @@ import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.FitsImagePanel;
+import static fr.jmmc.oiexplorer.core.util.FitsImageUtils.MAS_EPSILON;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageHDU;
 import fr.nom.tam.fits.FitsException;
@@ -81,8 +82,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private final static MimeType mimeType = MimeType.FITS_IMAGE;
     /** user model animator singleton */
     private final static UserModelAnimator animator = UserModelAnimator.getInstance();
-    /** Smallest positive number used in double comparisons (rounding). */
-    public final static double MAS_EPSILON = 1e-6d * ALX.MILLI_ARCSEC_IN_DEGREES;
     /** default reload latency = 20 ms */
     private static final int RELOAD_LATENCY = 20;
     /** AMHRA portal */

@@ -195,14 +195,10 @@ public final class UserModelService {
     }
 
     private static void defineUserTransform(final UserModel userModel, final FitsImage fitsImage) {
-        if (userModel.getScaleX() != null) {
-            final double inc = userModel.getScaleX();
-            fitsImage.setSignedIncCol(fitsImage.isIncColPositive() ? inc : -inc);
-        }
-        if (userModel.getScaleY() != null) {
-            final double inc = userModel.getScaleY();
-            fitsImage.setSignedIncRow(fitsImage.isIncRowPositive() ? inc : -inc);
-        }
+        final double incCol = (userModel.getScaleX() != null) ? userModel.getScaleX() : Double.NaN;
+        final double incRow = (userModel.getScaleY() != null) ? userModel.getScaleY() : Double.NaN;
+        FitsImageUtils.rescaleImage(fitsImage, incCol, incRow);
+        
         if (userModel.getRotation() != null) {
             fitsImage.setRotAngle(userModel.getRotation());
         }
