@@ -1,11 +1,16 @@
 
 package fr.jmmc.aspro.model.oi;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
 
 
@@ -23,9 +28,10 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
  *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/&gt;
- *         &lt;element name="numberActuators" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
- *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="setup" type="{http://www.jmmc.fr/aspro-oi/0.1}AdaptiveOpticsSetup" maxOccurs="unbounded"/&gt;
+ *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -36,8 +42,9 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AdaptiveOptics", propOrder = {
+    "name",
     "band",
-    "numberActuators",
+    "setups",
     "magLimit"
 })
 public class AdaptiveOptics
@@ -45,10 +52,40 @@ public class AdaptiveOptics
 {
 
     @XmlElement(required = true)
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlID
+    @XmlSchemaType(name = "ID")
+    protected String name;
+    @XmlElement(required = true)
     
     protected SpectralBand band;
-    protected int numberActuators;
-    protected Double magLimit;
+    @XmlElement(name = "setup", required = true)
+    protected List<AdaptiveOpticsSetup> setups;
+    protected double magLimit;
+
+    /**
+     * Gets the value of the name property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(String value) {
+        this.name = value;
+    }
 
     /**
      * Gets the value of the band property.
@@ -75,42 +112,47 @@ public class AdaptiveOptics
     }
 
     /**
-     * Gets the value of the numberActuators property.
+     * Gets the value of the setups property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the setups property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getSetups().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link AdaptiveOpticsSetup }
+     * 
      * 
      */
-    public int getNumberActuators() {
-        return numberActuators;
-    }
-
-    /**
-     * Sets the value of the numberActuators property.
-     * 
-     */
-    public void setNumberActuators(int value) {
-        this.numberActuators = value;
+    public List<AdaptiveOpticsSetup> getSetups() {
+        if (setups == null) {
+            setups = new ArrayList<AdaptiveOpticsSetup>();
+        }
+        return this.setups;
     }
 
     /**
      * Gets the value of the magLimit property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Double }
-     *     
      */
-    public Double getMagLimit() {
+    public double getMagLimit() {
         return magLimit;
     }
 
     /**
      * Sets the value of the magLimit property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link Double }
-     *     
      */
-    public void setMagLimit(Double value) {
+    public void setMagLimit(double value) {
         this.magLimit = value;
     }
 

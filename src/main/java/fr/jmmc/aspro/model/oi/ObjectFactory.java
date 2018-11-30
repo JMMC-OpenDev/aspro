@@ -254,6 +254,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link AdaptiveOpticsSetup }
+     * 
+     */
+    public AdaptiveOpticsSetup createAdaptiveOpticsSetup() {
+        return new AdaptiveOpticsSetup();
+    }
+
+    /**
      * Create an instance of {@link MoonPointingRestriction }
      * 
      */

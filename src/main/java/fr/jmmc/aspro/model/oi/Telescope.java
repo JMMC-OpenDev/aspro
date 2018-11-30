@@ -1,6 +1,8 @@
 
 package fr.jmmc.aspro.model.oi;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -29,7 +31,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
  *         &lt;element name="diameter" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *         &lt;element name="maxElevation" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
- *         &lt;element name="adaptiveOptics" type="{http://www.jmmc.fr/aspro-oi/0.1}AdaptiveOptics" minOccurs="0"/&gt;
+ *         &lt;element name="adaptiveOptics" type="{http://www.jmmc.fr/aspro-oi/0.1}AdaptiveOptics" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="moonPointingRestriction" type="{http://www.jmmc.fr/aspro-oi/0.1}MoonPointingRestriction" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
@@ -58,7 +60,7 @@ public class Telescope
     protected String name;
     protected double diameter;
     protected double maxElevation;
-    protected AdaptiveOptics adaptiveOptics;
+    protected List<AdaptiveOptics> adaptiveOptics;
     protected MoonPointingRestriction moonPointingRestriction;
 
     /**
@@ -120,25 +122,30 @@ public class Telescope
     /**
      * Gets the value of the adaptiveOptics property.
      * 
-     * @return
-     *     possible object is
-     *     {@link AdaptiveOptics }
-     *     
-     */
-    public AdaptiveOptics getAdaptiveOptics() {
-        return adaptiveOptics;
-    }
-
-    /**
-     * Sets the value of the adaptiveOptics property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the adaptiveOptics property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link AdaptiveOptics }
-     *     
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getAdaptiveOptics().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link AdaptiveOptics }
+     * 
+     * 
      */
-    public void setAdaptiveOptics(AdaptiveOptics value) {
-        this.adaptiveOptics = value;
+    public List<AdaptiveOptics> getAdaptiveOptics() {
+        if (adaptiveOptics == null) {
+            adaptiveOptics = new ArrayList<AdaptiveOptics>();
+        }
+        return this.adaptiveOptics;
     }
 
     /**

@@ -401,7 +401,8 @@ public class ExportOBVLTI {
         final Telescope tel = stations.get(0).getTelescope();
 
         // AO :
-        final AdaptiveOptics ao = tel.getAdaptiveOptics();
+// TODO: FIX AO handling        
+        final AdaptiveOptics ao = tel.getAdaptiveOptics().get(0); // FIRST AO
 
         final SpectralBand aoBand = (ao != null) ? ao.getBand() : null;
         if (logger.isDebugEnabled()) {

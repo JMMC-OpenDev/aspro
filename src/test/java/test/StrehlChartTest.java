@@ -77,7 +77,7 @@ public class StrehlChartTest {
                 if (true) {
                     // OK
                     // UT:
-                    final double qe = 0.90;
+                    final double qe = 0.70;
                     final double ron = 1.0;
 
                     Band b = Band.K;
@@ -145,6 +145,7 @@ public class StrehlChartTest {
                     td = 2.0;
                     t0 = 2.5 * td;
                     effRon = ron / 40.0; // gain = g * KI = 100 * 0.4 = 40
+                    System.out.println("effRon: " + NumberUtils.trimTo3Digits(effRon));
 
                     createChartFrame("AT (NAOMI ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
                             StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, td, t0, qe, effRon));
@@ -155,6 +156,7 @@ public class StrehlChartTest {
                     td = 5.0;
                     t0 = 1.3 * td;
                     effRon = ron / 90.0; // gain = g * KI = 100 * 0.9 = 90
+                    System.out.println("effRon: " + NumberUtils.trimTo3Digits(effRon));
 
                     createChartFrame("AT (NAOMI ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
                             StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, td, t0, qe, effRon));
@@ -283,7 +285,7 @@ public class StrehlChartTest {
             for (double mag : MAGS) {
                 final double strehl = (USE_STREHL_OLD) ? strehl(aoBand, mag, LAMBDA, telDiameter, seeing, nbSubPupils, td, (t0 > 0.0) ? t0 : t0(seeing))[0]
                         : strehl(aoBand, mag, LAMBDA, telDiameter, seeing, nbSubPupils, td, (t0 > 0.0) ? t0 : t0(seeing),
-                                (qe > 0.0) ? qe : Band.DEFAULT_QE, (ron > 0.0) ? ron : Band.DEFAULT_RON)[0];
+                                (qe > 0.0) ? qe : 0.9, (ron > 0.0) ? ron : 1.0)[0];
                 xySeries.add(mag, strehl);
             }
 
@@ -371,7 +373,7 @@ public class StrehlChartTest {
         if (USE_STREHL_OLD) {
             return Band.strehlOLD(magnitude, waveLengths, diameter, seeing, nbSubPupils, 90.0);
         }
-        return Band.strehl(aoBand, magnitude, waveLengths, diameter, seeing, nbSubPupils, td, t0, 90.0);
+        return Band.strehl(aoBand, magnitude, waveLengths, diameter, seeing, nbSubPupils, td, t0, 0.9, 1.0, 90.0);
     }
 
     static double[] strehl(final Band aoBand, final double magnitude, final double[] waveLengths,

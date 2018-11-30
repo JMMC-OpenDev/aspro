@@ -56,4 +56,5 @@ public final class SpectralBandUtils {
                 return null;
         }
     }
+
 }

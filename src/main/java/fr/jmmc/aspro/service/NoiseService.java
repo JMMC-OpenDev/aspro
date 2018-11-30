@@ -16,6 +16,7 @@ import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.observability.TargetPointInfo;
+import fr.jmmc.aspro.model.oi.AdaptiveOpticsSetup;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.FocalInstrumentSetup;
 import fr.jmmc.aspro.model.oi.ObservationSequence;
@@ -81,8 +82,10 @@ public final class NoiseService implements VisNoiseService {
     /* adaptive optics parameters */
     /** seeing (arc sec) */
     private double seeing = Double.NaN;
-    /** Number of Actuators of AO */
-    private int nbOfActuators = 0;
+    /** coherence time (ms) */
+    private double t0 = Double.NaN;
+    /** AO setup */
+    private AdaptiveOpticsSetup aoSetup = null;
     /** AO Usage limit (mag) */
     private double adaptiveOpticsLimit = Double.NaN;
     /** AO band */
@@ -282,32 +285,34 @@ public final class NoiseService implements VisNoiseService {
 
         this.telDiam = telescope.getDiameter();
 
-        // AO :
-        final AdaptiveOptics ao = telescope.getAdaptiveOptics();
+// TODO: FIX AO handling        
+        final AdaptiveOptics ao = telescope.getAdaptiveOptics().get(0); // FIRST AO
         if (ao != null) {
             this.aoBand = ao.getBand();
-            this.nbOfActuators = ao.getNumberActuators();
-            if (ao.getMagLimit() != null) {
-                this.adaptiveOpticsLimit = ao.getMagLimit();
-            }
+            this.aoSetup = ao.getSetups().get(0); // FIRST SETUP
+            this.adaptiveOpticsLimit = ao.getMagLimit();
+
+            addInformation("AO: " + ao.getName() + "(" + aoBand + ")");
         } else {
             // by default: compute strehl ratio on V band with only 1 actuator ?
             this.aoBand = SpectralBand.V;
-            this.nbOfActuators = 1;
+            this.aoSetup = null;
         }
 
         // Seeing :
         final AtmosphereQuality atmQual = observation.getWhen().getAtmosphereQuality();
         if (atmQual != null) {
             this.seeing = AtmosphereQualityUtils.getSeeing(atmQual);
+            this.t0 = AtmosphereQualityUtils.getCoherenceTime(atmQual);
         }
 
         if (logger.isDebugEnabled()) {
             logger.debug("nbTel                         : {}", nbTel);
             logger.debug("telDiam                       : {}", telDiam);
             logger.debug("aoBand                        : {}", aoBand);
-            logger.debug("nbOfActuators                 : {}", nbOfActuators);
+            logger.debug("aoSetup                       : {}", aoSetup);
             logger.debug("seeing                        : {}", seeing);
+            logger.debug("t0                            : {}", t0);
         }
     }
 
@@ -700,10 +705,30 @@ public final class NoiseService implements VisNoiseService {
         if (useStrehlCorrection) {
             strehlPerChannel = new double[nObs][];
 
+            Band band = Band.V;
+            int nbSubPupils = 1;
+            double td = 1.0;
+            double ron = 1.0;
+            double qe = 0.9;
+
+            if (aoSetup != null) {
+                band = Band.valueOf(aoBand.name());
+                nbSubPupils = aoSetup.getNumberSubPupils();
+                td = aoSetup.getDit();
+                ron = aoSetup.getRon();
+                qe = aoSetup.getQuantumEfficiency();
+
+                // TODO: transmission on target flux (remainder)
+                if (aoSetup.getTransmission() != null) {
+                    qe *= aoSetup.getTransmission();
+                }
+            }
+
             for (int n = 0; n < nObs; n++) {
                 double elevation = targetPointInfos[n].getElevation();
 
-                strehlPerChannel[n] = Band.strehl(adaptiveOpticsMag, waveLengths, telDiam, seeing, nbOfActuators, elevation);
+                strehlPerChannel[n] = Band.strehl(band, adaptiveOpticsMag, waveLengths, telDiam, seeing,
+                        nbSubPupils, td, t0, qe, ron, elevation);
 
                 if (logger.isDebugEnabled()) {
                     logger.debug("elevation                     : {}", elevation);

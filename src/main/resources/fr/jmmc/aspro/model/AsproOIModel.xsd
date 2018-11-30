@@ -1563,7 +1563,7 @@
                 </xsd:annotation>
             </xsd:element>
 
-            <xsd:element name="adaptiveOptics" type="AdaptiveOptics" minOccurs="0">
+            <xsd:element name="adaptiveOptics" type="AdaptiveOptics" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
                         Telescope has an Adaptive Optics system (optional)
@@ -1593,6 +1593,13 @@
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
+            <xsd:element name="name" type="xsd:ID">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The name of this Adaptive Optics system (MACAO, CIAO for VLTI UT, NAOMI for VLTI AT ...)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="band" type="SpectralBand">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -1600,17 +1607,74 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="numberActuators" type="xsd:int">
+
+            <!-- AO setup(s) -->
+            <xsd:element name="setup" type="AdaptiveOpticsSetup" minOccurs="1" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Number of actuators
+                        The list of instrument setups for this Adaptive Optics system
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="magLimit" type="xsd:double" minOccurs="0">
+
+            <xsd:element name="magLimit" type="xsd:double">
                 <xsd:annotation>
                     <xsd:documentation>
                         The usage limit (mag) (values TBD)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- AdaptiveOpticsSetup -->
+    <xsd:complexType name="AdaptiveOpticsSetup">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes an AO setup
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:ID">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The name of this AO setup
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="numberSubPupils" type="xsd:int">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Number of sub-pupils (interesting pixels on the camera)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="dit" type="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The detector integration time in milli-secondes (typically ~1ms ie 1000Hz AO)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <!-- general detector parameters -->
+            <xsd:element name="ron" type="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The AO detector readout noise (typically 1e-)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="quantumEfficiency" type="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The AO detector quantum efficiency (90%)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="transmission" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The (optional) AO transmission (50% for AO flux on-axis CIAO, remainder in instrument)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
