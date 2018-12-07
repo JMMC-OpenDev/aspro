@@ -263,7 +263,7 @@ public final class NoiseService implements VisNoiseService {
         }
 
         // extract parameters in observation and configuration :
-        prepareInterferometer(observation);
+        prepareInterferometer(observation, target);
         prepareInstrument(observation);
         prepareFringeTracker(observation, target);
         prepareTarget(target);
@@ -273,8 +273,9 @@ public final class NoiseService implements VisNoiseService {
     /**
      * Prepare interferometer and AO parameters (related to telescopes so to each configuration)
      * @param observation observation settings
+     * @param target target to use
      */
-    private void prepareInterferometer(final ObservationSetting observation) {
+    private void prepareInterferometer(final ObservationSetting observation, final Target target) {
 
         final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
 
@@ -285,14 +286,29 @@ public final class NoiseService implements VisNoiseService {
 
         this.telDiam = telescope.getDiameter();
 
-// TODO: FIX AO handling        
-        final AdaptiveOptics ao = telescope.getAdaptiveOptics().get(0); // FIRST AO
+        // AO handling
+        AdaptiveOptics ao = null;
+        
+        final TargetConfiguration targetConf = target.getConfiguration();
+
+        if (targetConf != null && targetConf.getAoSetup()!= null) {
+            this.aoSetup = telescope.findAOSetup(targetConf.getAoSetup());
+            if (this.aoSetup != null) {
+                ao = this.aoSetup.getAdaptiveOptics();
+            }
+        } else {
+            if (!telescope.getAdaptiveOptics().isEmpty()) {
+                // use default AO for the telescope:
+                ao = telescope.getAdaptiveOptics().get(0);
+                this.aoSetup = ao.getSetups().get(0); // FIRST SETUP
+            }
+        }
+
         if (ao != null) {
             this.aoBand = ao.getBand();
-            this.aoSetup = ao.getSetups().get(0); // FIRST SETUP
             this.adaptiveOpticsLimit = ao.getMagLimit();
 
-            addInformation("AO: " + ao.getName() + "(" + aoBand + ")");
+            addInformation("AO: " + ao.getName() + "(" + aoBand + ") setup: " + aoSetup.getName());
         } else {
             // by default: compute strehl ratio on V band with only 1 actuator ?
             this.aoBand = SpectralBand.V;

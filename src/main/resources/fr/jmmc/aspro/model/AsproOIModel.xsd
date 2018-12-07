@@ -931,6 +931,15 @@
             </xsd:element>
 
             <!-- fringe tracker mode -->
+            <xsd:element name="aoSetup" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The Adaptive Optics Setup (among possible Adaptive Optics available)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- fringe tracker mode -->
             <xsd:element name="fringeTrackerMode" type="xsd:string" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -1603,7 +1612,14 @@
             <xsd:element name="band" type="SpectralBand">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Spectral Band used by the Adaptive Optics system
+                        Spectral Band used by this Adaptive Optics system
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="instrumentBand" type="SpectralBand" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Spectral Band required for the Instrument to let this Adaptive Optics system work
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>

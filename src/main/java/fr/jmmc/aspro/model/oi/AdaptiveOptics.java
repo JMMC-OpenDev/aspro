@@ -30,6 +30,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
  *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/&gt;
+ *         &lt;element name="instrumentBand" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand" minOccurs="0"/&gt;
  *         &lt;element name="setup" type="{http://www.jmmc.fr/aspro-oi/0.1}AdaptiveOpticsSetup" maxOccurs="unbounded"/&gt;
  *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *       &lt;/sequence&gt;
@@ -44,6 +45,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "AdaptiveOptics", propOrder = {
     "name",
     "band",
+    "instrumentBand",
     "setups",
     "magLimit"
 })
@@ -59,6 +61,8 @@ public class AdaptiveOptics
     @XmlElement(required = true)
     
     protected SpectralBand band;
+    
+    protected SpectralBand instrumentBand;
     @XmlElement(name = "setup", required = true)
     protected List<AdaptiveOpticsSetup> setups;
     protected double magLimit;
@@ -109,6 +113,30 @@ public class AdaptiveOptics
      */
     public void setBand(SpectralBand value) {
         this.band = value;
+    }
+
+    /**
+     * Gets the value of the instrumentBand property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link SpectralBand }
+     *     
+     */
+    public SpectralBand getInstrumentBand() {
+        return instrumentBand;
+    }
+
+    /**
+     * Sets the value of the instrumentBand property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link SpectralBand }
+     *     
+     */
+    public void setInstrumentBand(SpectralBand value) {
+        this.instrumentBand = value;
     }
 
     /**

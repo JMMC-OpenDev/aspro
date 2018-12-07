@@ -67,7 +67,7 @@ public class StrehlChartTest {
                 double td;
 
                 if (false) {
-                    if (true) {
+                    if (false) {
                         // OK
                         // UT MACAO:
                         aoBand = Band.V;
@@ -75,7 +75,7 @@ public class StrehlChartTest {
                                 StrehlChartTest.createUTMacaoStrehlvsSeeingChart(aoBand, LAMBDA_K));
                     }
 
-                    if (true) {
+                    if (false) {
                         // OK
                         // UT:
                         final double qe = 0.70;
@@ -93,7 +93,7 @@ public class StrehlChartTest {
                                 StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 60, td, -1, qe, ron)); // auto t0
                     }
 
-                    if (true) {
+                    if (false) {
                         ZENITH_ANGLE = 30.0;
                         // OK
                         double qe = 0.70;
@@ -117,12 +117,13 @@ public class StrehlChartTest {
                         final Band b = Band.H;
                         // AT:
                         if (true) {
+                             // STRAP
                             aoBand = Band.V;
-                            nbSubPupils = 2;
+                            nbSubPupils = 4;
 
                             final double qe = 0.8;
-                            final double ron = 1.0;
-                            td = 1.0; // STRAP ??
+                            final double ron = 0.1;
+                            td = 1.5;
 
                             USE_STREHL_OLD = true;
                             createChartFrame("AT (Tip tilt) - OLD - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
@@ -162,6 +163,7 @@ public class StrehlChartTest {
                         createChartFrame("AT (NAOMI ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
                                 StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, td, t0, qe, effRon));
                     }
+                    return;
                 }
 
                 final double[] lambda = new double[1];
@@ -200,12 +202,13 @@ public class StrehlChartTest {
                     if (true) {
                         // AT:
                         if (true) {
+                             // STRAP
                             aoBand = Band.V;
-                            nbSubPupils = 2;
+                            nbSubPupils = 4;
 
                             final double qe = 0.8;
-                            final double ron = 1.0;
-                            td = 1.0; // STRAP ??
+                            final double ron = 0.1;
+                            td = 1.5;
 
                             createChartFrame("AT (Tip tilt) - NEW - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
                                     StrehlChartTest.createATStrehlvsMagChart(aoBand, lambda, nbSubPupils, td, -1, qe, ron)); // auto t0

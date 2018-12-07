@@ -175,11 +175,24 @@ public class AdaptiveOpticsSetup
     public void setTransmission(Double value) {
         this.transmission = value;
     }
-
+    
 //--simple--preserve
+    /** parent AdaptiveOptics */
+    @javax.xml.bind.annotation.XmlTransient
+    private AdaptiveOptics ao = null;
+
+    public AdaptiveOptics getAdaptiveOptics() {
+        return ao;
+    }
+
+    public void setAdaptiveOptics(final AdaptiveOptics ao) {
+        this.ao = ao;
+    }
+
     @Override
     public final String toString() {
         return "AdaptiveOpticsSetup : " + ((this.name != null) ? this.name : "undefined");
     }
 //--simple--preserve
+
 }

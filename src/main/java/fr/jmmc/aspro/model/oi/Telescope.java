@@ -173,6 +173,18 @@ public class Telescope
     }
     
 //--simple--preserve
+    
+    public AdaptiveOpticsSetup findAOSetup(final String aoSetupName) {
+        for (AdaptiveOptics a : getAdaptiveOptics()) {
+            for (AdaptiveOpticsSetup aos : a.getSetups()) {
+                if (aos.getName().equals(aoSetupName)) {
+                    return aos;
+                }
+            }
+        }
+        return null;
+    }
+    
     @Override
     public String toString() {
         return "Telescope[" + ((this.name != null) ? this.name : "undefined") + "]";

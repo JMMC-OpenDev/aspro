@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.6 beta 4"/>
-    <compilation date="30/11/2018" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.6 beta 5"/>
+    <compilation date="07/12/2018" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -219,7 +219,11 @@
 
     <releasenotes>
         <release version="0.9.9.6">
-            <pubDate>Fri, 30 Nov 2018 16:00:00 GMT</pubDate>
+            <pubDate>Fri, 07 Dec 2018 14:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.6 beta 5">
+                <change type="FEATURE">Added AO setup combo box in the UV Coverage panel
+                    to select the Adaptive Optics system best suited to observe the science target</change>
+            </prerelease>
             <prerelease version="0.9.9.6 beta 4">
                 <change type="FEATURE">Improved Strehl estimation for VLTI AO systems (MACAO, STRAP, CIAO, NAOMI)</change>
             </prerelease>

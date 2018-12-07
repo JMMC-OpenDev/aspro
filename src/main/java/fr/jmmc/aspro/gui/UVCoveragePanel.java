@@ -220,8 +220,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     /* cached data */
     /** current interferometer configuration name to track changes */
     private String interferometerConfigurationCacheKey = null;
-    /** current instrument name to track changes */
+    /** current instrument key to track changes */
     private String instrumentCacheKey = null;
+    /** current AO key to track changes */
+    private String aoCacheKey = null;
     /** selected target name  */
     private String selectedTargetName = null;
     /* cached computed data */
@@ -281,6 +283,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jSplitPane = new javax.swing.JSplitPane();
         jScrollPaneForm = new javax.swing.JScrollPane();
         jPanelLeft = new javax.swing.JPanel();
+        jLabelAOSetup = new javax.swing.JLabel();
+        jComboBoxAOSetup = new javax.swing.JComboBox();
         jLabelInstrumentMode = new javax.swing.JLabel();
         jComboBoxInstrumentMode = new javax.swing.JComboBox();
         jLabelAtmQual = new javax.swing.JLabel();
@@ -328,17 +332,33 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jPanelLeft.setMinimumSize(new java.awt.Dimension(185, 550));
         jPanelLeft.setLayout(new java.awt.GridBagLayout());
 
+        jLabelAOSetup.setText("AO setup");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
+        jPanelLeft.add(jLabelAOSetup, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        jPanelLeft.add(jComboBoxAOSetup, gridBagConstraints);
+
         jLabelInstrumentMode.setText("Instrument mode");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
         jPanelLeft.add(jLabelInstrumentMode, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
@@ -826,6 +846,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // define change listeners :
         this.jComboBoxInstrumentMode.addActionListener(this);
         this.jComboBoxFTMode.addActionListener(this);
+        this.jComboBoxAOSetup.addActionListener(this);
         this.jComboBoxAtmQual.addActionListener(this);
 
         this.uvMaxAdapter = new FieldSliderAdapter(jSliderUVMax, jFieldUVMax, 0d, 0d, 0d);
@@ -998,6 +1019,46 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     }
 
     /**
+     * Refresh the information relative to the AO setups
+     * @param observation current observation settings
+     */
+    private void updateAdaptiveOpticsData(final ObservationSetting observation) {
+        // use the real instrument name (not alias):
+        final String stations = observation.getInstrumentConfiguration().getStations();
+        final String insName = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getName();
+        final String aoKey = observation.getInterferometerConfiguration().getName() + '@' + insName + '@' + stations;
+
+        // test if the instrument changed :
+        final boolean changed = (insName != null) && !aoKey.equals(this.aoCacheKey);
+        if (changed) {
+            this.aoCacheKey = aoKey;
+
+            logger.debug("AO changed : {}", aoKey);
+
+            // always update instrument modes (may depend on selected period):
+            final Vector<String> aoSetups = ConfigurationManager.getInstance().getAdaptiveOpticsSetups(
+                    observation.getInterferometerConfiguration().getName(),
+                    observation.getInstrumentConfiguration().getName(),
+                    stations
+            );
+            this.jComboBoxAOSetup.setModel(new DefaultComboBoxModel(aoSetups));
+            /*
+            // try restoring the selected instrument mode :
+            if (observation.getInstrumentConfiguration().getInstrumentMode() != null) {
+                this.jComboBoxAOSetup.setSelectedItem(observation.getInstrumentConfiguration().getInstrumentMode());
+            }
+             */
+            if (logger.isTraceEnabled()) {
+                logger.trace("jComboBoxAOSetup updated: {}", this.jComboBoxAOSetup.getSelectedItem());
+            }
+
+            final boolean visible = !aoSetups.isEmpty();
+            this.jComboBoxAOSetup.setVisible(visible);
+            this.jLabelAOSetup.setVisible(visible);
+        }
+    }
+
+    /**
      * Refresh the information relative to the instrument : sampling time and instrument modes
      * @param observation current observation settings
      */
@@ -1091,6 +1152,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 observation.getInstrumentConfiguration().getName());
     }
 
+    // TODO getAdaptiveOpticsSetups
     /**
      * Refresh the fringe tracker modes
      * @param observation current observation settings
@@ -1208,6 +1270,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             }
             fireObservationUpdateEvent();
 
+        } else if (e.getSource() == this.jComboBoxAOSetup) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("ao changed: {}", this.jComboBoxAOSetup.getSelectedItem());
+            }
+            fireObservationUpdateEvent();
+
         } else if (e.getSource() == this.jComboBoxFTMode) {
             if (logger.isDebugEnabled()) {
                 logger.debug("ft mode changed: {}", this.jComboBoxFTMode.getSelectedItem());
@@ -1318,6 +1386,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.interferometerConfigurationCacheKey = null;
             this.updateInteferometerData(observation);
 
+            // update the data related to the AO :
+            this.aoCacheKey = null;
+            this.updateAdaptiveOpticsData(observation);
+
             // refresh data related to the instrument :
             this.instrumentCacheKey = null;
             this.updateInstrumentData(observation);
@@ -1421,6 +1493,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // update data related to the interferometer :
             this.updateInteferometerData(event.getObservation());
 
+            // update the data related to the AO :
+            this.updateAdaptiveOpticsData(event.getObservation());
+
             // refresh data related to the instrument :
             this.updateInstrumentData(event.getObservation());
 
@@ -1467,6 +1542,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     changed = true;
                     changeType = ChangeType.MAIN;
                 }
+
+                // update AO :
+                changed |= om.setTargetAOSetup(targetName, (String) this.jComboBoxAOSetup.getSelectedItem());
 
                 // update ft mode :
                 changed |= om.setTargetFTMode(targetName, (String) this.jComboBoxFTMode.getSelectedItem());
@@ -3227,6 +3305,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private javax.swing.JCheckBox jCheckBoxModelImage;
     private javax.swing.JCheckBox jCheckBoxPlotUVSupport;
     private javax.swing.JCheckBox jCheckBoxUseBias;
+    private javax.swing.JComboBox jComboBoxAOSetup;
     private javax.swing.JComboBox jComboBoxAtmQual;
     private javax.swing.JComboBox jComboBoxFTMode;
     private javax.swing.JComboBox jComboBoxImageMode;
@@ -3236,6 +3315,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private javax.swing.JFormattedTextField jFieldObsDuration;
     private javax.swing.JFormattedTextField jFieldSamplingPeriod;
     private javax.swing.JFormattedTextField jFieldUVMax;
+    private javax.swing.JLabel jLabelAOSetup;
     private javax.swing.JLabel jLabelAtmQual;
     private javax.swing.JLabel jLabelFTMode;
     private javax.swing.JLabel jLabelHAMax;

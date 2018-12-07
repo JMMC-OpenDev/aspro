@@ -6,6 +6,8 @@ package fr.jmmc.aspro.model;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.conf.AsproConf;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
+import fr.jmmc.aspro.model.oi.AdaptiveOptics;
+import fr.jmmc.aspro.model.oi.AdaptiveOpticsSetup;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.Configurations;
@@ -24,12 +26,15 @@ import fr.jmmc.aspro.model.oi.InterferometerSetting;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Position3D;
+import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.SwitchYard;
 import fr.jmmc.aspro.model.oi.Telescope;
+import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.AtmosphereSpectrumService;
 import fr.jmmc.aspro.service.GeocentricCoords;
+import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.util.MathUtils;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.FeedbackReport;
@@ -45,8 +50,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -303,6 +310,7 @@ public final class ConfigurationManager extends BaseOIManager {
         computeInterferometerLocation(id);
         computeInstrumentWaveLengthRange(id);
         adjustStationHorizons(name, id.getStations());
+        associateAdaptiveOpticsSetup(id);
 
         configuration.getInterferometerDescriptions().put(name, id);
     }
@@ -561,6 +569,20 @@ public final class ConfigurationManager extends BaseOIManager {
 
                 // define fake horizon :
                 station.setHorizon(horizon);
+            }
+        }
+    }
+
+    /**
+     * Associate the AdaptiveOpticsSetup to their AdaptiveOptics parent
+     * @param id interferometer description
+     */
+    private static void associateAdaptiveOpticsSetup(final InterferometerDescription id) {
+        for (Telescope tel : id.getTelescopes()) {
+            for (AdaptiveOptics ao : tel.getAdaptiveOptics()) {
+                for (AdaptiveOpticsSetup aos : ao.getSetups()) {
+                    aos.setAdaptiveOptics(ao);
+                }
             }
         }
     }
@@ -1112,6 +1134,49 @@ public final class ConfigurationManager extends BaseOIManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Return the list of all adaptive optics setups available for the given interferometer configuration and instrument name
+     * @param configurationName name of the interferometer configuration
+     * @param instrumentAlias name or alias of the instrument
+     * @return list of all adaptive optics setups
+     */
+    public Vector<String> getAdaptiveOpticsSetups(final String configurationName, final String instrumentAlias, final String instrumentConfigurationName) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
+        if (ic != null) {
+            final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
+            if (c != null) {
+                final FocalInstrument instrument = ic.getFocalInstrument();
+                final double lambda = 0.5 * (instrument.getWaveLengthMin() + instrument.getWaveLengthMax());
+                final SpectralBand insBand = SpectralBandUtils.findBand(Band.findBand(lambda));
+
+                final Set<Telescope> telescopes = new HashSet<Telescope>();
+                for (Station station : c.getStations()) {
+                    telescopes.add(station.getTelescope());
+                }
+
+                final Vector<String> v = new Vector<String>(telescopes.size() * 2);
+                for (Telescope tel : telescopes) {
+                    for (AdaptiveOptics ao : tel.getAdaptiveOptics()) {
+
+                        if (ao.getInstrumentBand() != null) {
+                            // check wavelength range
+                            if (ao.getInstrumentBand() != insBand) {
+                                logger.debug("skip {} band {} <> band {}", ao.getName(), ao.getInstrumentBand(), insBand);
+                                continue;
+                            }
+                        }
+
+                        for (AdaptiveOpticsSetup aos : ao.getSetups()) {
+                            v.add(aos.getName());
+                        }
+                    }
+                }
+                return v;
+            }
+        }
+        return EMPTY_VECTOR;
     }
 
     /**

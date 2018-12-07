@@ -24,6 +24,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence&gt;
  *         &lt;element name="HAMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="HAMax" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="aoSetup" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="fringeTrackerMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
@@ -37,6 +38,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "TargetConfiguration", propOrder = {
     "haMin",
     "haMax",
+    "aoSetup",
     "fringeTrackerMode"
 })
 public class TargetConfiguration
@@ -47,6 +49,7 @@ public class TargetConfiguration
     protected Double haMin;
     @XmlElement(name = "HAMax")
     protected Double haMax;
+    protected String aoSetup;
     protected String fringeTrackerMode;
 
     /**
@@ -95,6 +98,30 @@ public class TargetConfiguration
      */
     public void setHAMax(Double value) {
         this.haMax = value;
+    }
+
+    /**
+     * Gets the value of the aoSetup property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getAoSetup() {
+        return aoSetup;
+    }
+
+    /**
+     * Sets the value of the aoSetup property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setAoSetup(String value) {
+        this.aoSetup = value;
     }
 
     /**

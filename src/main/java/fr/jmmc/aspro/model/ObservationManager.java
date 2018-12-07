@@ -31,6 +31,7 @@ import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.model.util.TargetUtils;
+import fr.jmmc.aspro.service.NoiseService;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.ModelDefinition;
@@ -1412,6 +1413,33 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 logger.trace("setTargetHAMax: {}", haMax);
             }
             targetConf.setHAMax(haMax);
+        }
+        return changed;
+    }
+
+    /**
+     * Set the AO setup for the given target name
+     * Used by UVCoveragePanel.updateObservation()
+     *
+     * @param name name of the target
+     * @param aoSetupName AO setup or null
+     * @return true if the value changed
+     */
+    public boolean setTargetAOSetup(final String name, final String aoSetupName) {
+        final TargetConfiguration targetConf = getTargetConfiguration(name);
+        if (targetConf == null) {
+            return false;
+        }
+        // special case :
+        final String aoSetup = (aoSetupName != null && aoSetupName.isEmpty()) ? null : aoSetupName;
+
+        // ftMode can be null :
+        final boolean changed = isChanged(aoSetup, targetConf.getAoSetup());
+        if (changed) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("setTargetAOSetup: {}", aoSetup);
+            }
+            targetConf.setAoSetup(aoSetup);
         }
         return changed;
     }
