@@ -32,7 +32,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/&gt;
  *         &lt;element name="instrumentBand" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand" minOccurs="0"/&gt;
  *         &lt;element name="setup" type="{http://www.jmmc.fr/aspro-oi/0.1}AdaptiveOpticsSetup" maxOccurs="unbounded"/&gt;
- *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
+ *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -65,7 +65,7 @@ public class AdaptiveOptics
     protected SpectralBand instrumentBand;
     @XmlElement(name = "setup", required = true)
     protected List<AdaptiveOpticsSetup> setups;
-    protected double magLimit;
+    protected Double magLimit;
 
     /**
      * Gets the value of the name property.
@@ -171,16 +171,24 @@ public class AdaptiveOptics
     /**
      * Gets the value of the magLimit property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
      */
-    public double getMagLimit() {
+    public Double getMagLimit() {
         return magLimit;
     }
 
     /**
      * Sets the value of the magLimit property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
      */
-    public void setMagLimit(double value) {
+    public void setMagLimit(Double value) {
         this.magLimit = value;
     }
 

@@ -288,10 +288,10 @@ public final class NoiseService implements VisNoiseService {
 
         // AO handling
         AdaptiveOptics ao = null;
-        
+
         final TargetConfiguration targetConf = target.getConfiguration();
 
-        if (targetConf != null && targetConf.getAoSetup()!= null) {
+        if (targetConf != null && targetConf.getAoSetup() != null) {
             this.aoSetup = telescope.findAOSetup(targetConf.getAoSetup());
             if (this.aoSetup != null) {
                 ao = this.aoSetup.getAdaptiveOptics();
@@ -300,19 +300,23 @@ public final class NoiseService implements VisNoiseService {
             if (!telescope.getAdaptiveOptics().isEmpty()) {
                 // use default AO for the telescope:
                 ao = telescope.getAdaptiveOptics().get(0);
-                this.aoSetup = ao.getSetups().get(0); // FIRST SETUP
+                if (!ao.getSetups().isEmpty()) {
+                    this.aoSetup = ao.getSetups().get(0); // FIRST SETUP if present
+                }
             }
         }
 
         if (ao != null) {
             this.aoBand = ao.getBand();
-            this.adaptiveOpticsLimit = ao.getMagLimit();
+            this.adaptiveOpticsLimit = (ao.getMagLimit() != null) ? ao.getMagLimit().doubleValue() : Double.NaN;
 
-            addInformation("AO: " + ao.getName() + "(" + aoBand + ") setup: " + aoSetup.getName());
+            if (ao.getName() != null) {
+                addInformation("AO: " + ao.getName() + " (" + aoBand + " band)"
+                        + ((this.aoSetup != null) ? (" setup: " + aoSetup.getName()) : ""));
+            }
         } else {
             // by default: compute strehl ratio on V band with only 1 actuator ?
             this.aoBand = SpectralBand.V;
-            this.aoSetup = null;
         }
 
         // Seeing :
