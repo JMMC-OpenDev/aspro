@@ -41,7 +41,7 @@
             <Property name="model" type="javax.swing.tree.TreeModel" editor="org.netbeans.modules.form.editors2.TreeModelEditor">
               <TreeModel code="Targets"/>
             </Property>
-            <Property name="toolTipText" type="java.lang.String" value="Only science targets (SCI / CAL), not OB stars (AO / FT/ Guide)"/>
+            <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;this tree contains only science targets (SCI / CAL), with their ancillary stars (AO / FT/ Guide).&lt;br&gt;&#xa;Use &lt;b&gt;Drag &amp;amp; Drop&lt;/b&gt; to make target associations (groups) or link any ancillary star to the science target&#xa;&lt;/html&gt;&#xa;"/>
             <Property name="dragEnabled" type="boolean" value="true"/>
             <Property name="name" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="TREE_TARGETS" type="code"/>
@@ -78,6 +78,7 @@
             <Property name="model" type="javax.swing.tree.TreeModel" editor="org.netbeans.modules.form.editors2.TreeModelEditor">
               <TreeModel code="Groups&#xa;"/>
             </Property>
+            <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;this tree lists target groups, like ancillary stars (AO / FT/ Guide) or user-defined groups.&lt;br&gt;&#xa;Use &lt;b&gt;Drag &amp;amp; Drop&lt;/b&gt; to add / move targets within groups or link any ancillary star to the science target&#xa;&lt;/html&gt;&#xa;"/>
             <Property name="dragEnabled" type="boolean" value="true"/>
             <Property name="name" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="TREE_GROUPS" type="code"/>

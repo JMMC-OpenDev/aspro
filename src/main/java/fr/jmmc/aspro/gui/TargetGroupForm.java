@@ -708,7 +708,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Targets");
         jTreeTargets.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-        jTreeTargets.setToolTipText("Only science targets (SCI / CAL), not OB stars (AO / FT/ Guide)");
+        jTreeTargets.setToolTipText("<html>\nthis tree contains only science targets (SCI / CAL), with their ancillary stars (AO / FT/ Guide).<br>\nUse <b>Drag &amp; Drop</b> to make target associations (groups) or link any ancillary star to the science target\n</html>\n");
         jTreeTargets.setDragEnabled(true);
         jTreeTargets.setName(TREE_TARGETS);
         jScrollPaneTreeTargets.setViewportView(jTreeTargets);
@@ -728,6 +728,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
 
         treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Groups");
         jTreeGroups.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        jTreeGroups.setToolTipText("<html>\nthis tree lists target groups, like ancillary stars (AO / FT/ Guide) or user-defined groups.<br>\nUse <b>Drag &amp; Drop</b> to add / move targets within groups or link any ancillary star to the science target\n</html>\n");
         jTreeGroups.setDragEnabled(true);
         jTreeGroups.setName(TREE_GROUPS);
         jScrollPaneTreeGroups.setViewportView(jTreeGroups);

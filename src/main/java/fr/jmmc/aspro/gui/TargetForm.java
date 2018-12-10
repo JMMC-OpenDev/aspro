@@ -730,7 +730,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelCalibrators.setBorder(javax.swing.BorderFactory.createTitledBorder("Calibrators"));
         jPanelCalibrators.setLayout(new java.awt.BorderLayout());
 
-        jListCalibrators.setToolTipText("this list contains targets considered as calibrators");
+        jListCalibrators.setToolTipText("<html>\nthis list contains targets considered as calibrators<br>\nUse <b>Drag &amp; Drop</b> to associate a calibrator to the science target\n</html>");
         jListCalibrators.setDragEnabled(true);
         jListCalibrators.setFixedCellWidth(100);
         jListCalibrators.setVisibleRowCount(4);
@@ -911,7 +911,9 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jFieldName, gridBagConstraints);
 
-        jPanelTargetActions.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 2));
+        java.awt.FlowLayout flowLayout1 = new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 4, 2);
+        flowLayout1.setAlignOnBaseline(true);
+        jPanelTargetActions.setLayout(flowLayout1);
 
         jButtonSimbad.setText("Simbad");
         jButtonSimbad.setToolTipText("Open CDS Simbad web page for this target");
@@ -946,7 +948,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelTarget.add(jPanelTargetActions, gridBagConstraints);
 
         jLabelRA.setText("RA [HMS]");
@@ -1036,7 +1038,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
         jPanelTarget.add(jLabelMag, gridBagConstraints);
 
         jLabelMagB.setText("B");
@@ -1377,10 +1378,11 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
         jPanelTarget.add(jButtonMagConv, gridBagConstraints);
 
         jScrollPaneTarget.setViewportView(jPanelTarget);
@@ -1390,7 +1392,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.6;
-        gridBagConstraints.weighty = 0.8;
+        gridBagConstraints.weighty = 0.7;
         add(jScrollPaneTarget, gridBagConstraints);
 
         jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Target notes" + ObservabilityPanel.SUFFIX_INFO));
@@ -1412,7 +1414,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 0.1;
+        gridBagConstraints.weighty = 0.3;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         add(jPanelDescription, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
