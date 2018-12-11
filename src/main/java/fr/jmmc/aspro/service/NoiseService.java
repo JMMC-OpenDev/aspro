@@ -23,6 +23,10 @@ import fr.jmmc.aspro.model.oi.ObservationSequence;
 import fr.jmmc.aspro.model.oi.SpectralSetup;
 import fr.jmmc.aspro.model.oi.SpectralSetupColumn;
 import fr.jmmc.aspro.model.oi.SpectralSetupQuantity;
+import fr.jmmc.aspro.model.oi.TargetGroup;
+import fr.jmmc.aspro.model.oi.TargetGroupMembers;
+import fr.jmmc.aspro.model.oi.TargetInformation;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.util.StatUtils;
@@ -88,6 +92,9 @@ public final class NoiseService implements VisNoiseService {
     private AdaptiveOpticsSetup aoSetup = null;
     /** AO Usage limit (mag) */
     private double adaptiveOpticsLimit = Double.NaN;
+    /** AO (multiplicative) Instrumental Visibility */
+    private double aoInstrumentalVisibility = Double.NaN;
+
     /** AO band */
     private SpectralBand aoBand;
 
@@ -266,7 +273,7 @@ public final class NoiseService implements VisNoiseService {
         prepareInterferometer(observation, target);
         prepareInstrument(observation);
         prepareFringeTracker(observation, target);
-        prepareTarget(target);
+        prepareTarget(observation, target);
         initParameters();
     }
 
@@ -309,11 +316,6 @@ public final class NoiseService implements VisNoiseService {
         if (ao != null) {
             this.aoBand = ao.getBand();
             this.adaptiveOpticsLimit = (ao.getMagLimit() != null) ? ao.getMagLimit().doubleValue() : Double.NaN;
-
-            if (ao.getName() != null) {
-                addInformation("AO: " + ao.getName() + " (" + aoBand + " band)"
-                        + ((this.aoSetup != null) ? (" setup: " + aoSetup.getName()) : ""));
-            }
         } else {
             // by default: compute strehl ratio on V band with only 1 actuator ?
             this.aoBand = SpectralBand.V;
@@ -586,7 +588,7 @@ public final class NoiseService implements VisNoiseService {
      * Prepare object parameters
      * @param target target to use
      */
-    private void prepareTarget(final Target target) {
+    private void prepareTarget(final ObservationSetting observation, final Target target) {
         Double flux;
 
         // Get band from wavelength range:
@@ -608,6 +610,7 @@ public final class NoiseService implements VisNoiseService {
         this.insBand = new Band[nSpectralChannels];
         this.objectMag = new double[nSpectralChannels];
 
+        // For science target only:
         final HashSet<SpectralBand> missingMags = new HashSet<SpectralBand>();
 
         if (bandMin == bandMax) {
@@ -663,24 +666,62 @@ public final class NoiseService implements VisNoiseService {
             }
         }
 
+        Target ftTarget = null;
+        Target aoTarget = null;
+
+        final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
+
+        if (targetUserInfos != null) {
+            // Handle OB targets (AO / FT)
+            final TargetInformation targetInfo = targetUserInfos.getOrCreateTargetInformation(target);
+
+            // FT
+            ftTarget = getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
+            // AO
+            aoTarget = getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+        }
+        if (ftTarget == null) {
+            ftTarget = target;
+        }
+        if (aoTarget == null) {
+            aoTarget = target;
+        }
+
+        logger.info("ftTarget                      : {}", ftTarget);
+        logger.info("aoTarget                      : {}", aoTarget);
+
         if (fringeTrackerPresent) {
-            flux = target.getFlux(ftBand);
+            flux = ftTarget.getFlux(ftBand);
 
             if (flux == null) {
-                missingMags.add(ftBand);
+                if (ftTarget == target) {
+                    missingMags.add(ftBand);
+                } else {
+                    addWarning(AsproConstants.WARN_MISSING_MAGS + " on FT target [" + ftTarget.getName() + "] "
+                            + "in band " + ftBand);
+                }
                 fringeTrackerMag = Double.NaN;
             } else {
                 fringeTrackerMag = flux.doubleValue();
+                if (ftTarget != target) {
+                    addInformation("FT associated to target [" + ftTarget.getName() + "]: "
+                            + df.format(fringeTrackerMag) + " mag");
+                }
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("fringeTrackerMag              : {}", fringeTrackerMag);
             }
         }
 
-        flux = target.getFlux(aoBand);
+        flux = aoTarget.getFlux(aoBand);
 
         if (flux == null) {
-            missingMags.add(aoBand);
+            if (aoTarget == target) {
+                missingMags.add(aoBand);
+            } else {
+                addWarning(AsproConstants.WARN_MISSING_MAGS + " on AO target [" + aoTarget.getName() + "] "
+                        + "in band " + aoBand);
+            }
             adaptiveOpticsMag = Double.NaN;
         } else {
             adaptiveOpticsMag = flux.doubleValue();
@@ -688,7 +729,15 @@ public final class NoiseService implements VisNoiseService {
             // check AO mag limits:
             if (!Double.isNaN(adaptiveOpticsLimit) && adaptiveOpticsMag > adaptiveOpticsLimit) {
                 this.invalidParameters = true;
-                addWarning("Observation can not use AO (magnitude limit = " + adaptiveOpticsLimit + ").");
+                addWarning("Observation can not use AO (magnitude limit = " + adaptiveOpticsLimit + ") in " + aoBand + " band");
+            } else {
+                if (this.aoSetup != null) {
+                    addInformation("AO setup: " + aoSetup.getName() + " in " + aoBand + " band");
+                }
+                if (aoTarget != target) {
+                    addInformation("AO associated to target [" + aoTarget.getName() + "]: "
+                            + df.format(adaptiveOpticsMag) + " mag");
+                }
             }
         }
         if (logger.isDebugEnabled()) {
@@ -705,6 +754,20 @@ public final class NoiseService implements VisNoiseService {
             addWarning(AsproConstants.WARN_MISSING_MAGS + " on target [" + target.getName() + "] "
                     + "in following bands: " + mags.toString());
         }
+    }
+
+    // TODO: refactor this method (same in ExportOBXml)
+    private static Target getFirstTargetForGroup(final TargetUserInformations targetUserInfos,
+                                                 final TargetInformation targetInfo,
+                                                 final String groupId) {
+        final TargetGroup g = targetUserInfos.getGroupById(groupId);
+        if (g != null) {
+            final TargetGroupMembers tgm = targetInfo.getGroupMembers(g);
+            if (tgm != null && !tgm.isEmpty()) {
+                return tgm.getTargets().get(0);
+            }
+        }
+        return null;
     }
 
     /**
@@ -741,6 +804,10 @@ public final class NoiseService implements VisNoiseService {
                 // TODO: transmission on target flux (remainder)
                 if (aoSetup.getTransmission() != null) {
                     qe *= aoSetup.getTransmission();
+                    aoInstrumentalVisibility = 1.0 - aoSetup.getTransmission();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("aoInstrumentalVisibility      : {}", aoInstrumentalVisibility);
+                    }
                 }
             }
 
@@ -857,9 +924,17 @@ public final class NoiseService implements VisNoiseService {
         // Adjust instrumental visibility:
         this.vinst = instrumentalVisibility;
 
+        if (!Double.isNaN(aoInstrumentalVisibility)) {
+            // correct instrumental visibility due to AO flux loss:
+            // TODO: may be depend on the spectral band (H != K != N) ?
+            for (int i = 0; i < this.vinst.length; i++) {
+                this.vinst[i] *= aoInstrumentalVisibility;
+            }
+        }
+
         if (fringeTrackerPresent) {
             if ((fringeTrackerMag <= fringeTrackerLimit) && (nbFrameToSaturation > 1)) {
-                // correct instrumental visibility:
+                // correct instrumental visibility due to FT flux loss:
                 // TODO: may be depend on the spectral band (H != K != N) ?
                 for (int i = 0; i < this.vinst.length; i++) {
                     this.vinst[i] *= fringeTrackerInstrumentalVisibility;

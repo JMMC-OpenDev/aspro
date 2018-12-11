@@ -224,7 +224,7 @@ public class ExportOBXml {
                                                                         final ObservabilityService os,
                                                                         final Target target) {
 
-        final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
+        final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
         final boolean isCalibrator = (targetUserInfos != null && targetUserInfos.isCalibrator(target));
 
         final ObservationConfiguration obsConf = new ObservationConfiguration();
