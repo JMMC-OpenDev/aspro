@@ -66,7 +66,7 @@ public class StrehlChartTest {
                 Band aoBand;
                 double td;
 
-                if (false) {
+                if (true) {
                     if (false) {
                         // OK
                         // UT MACAO:
@@ -75,7 +75,7 @@ public class StrehlChartTest {
                                 StrehlChartTest.createUTMacaoStrehlvsSeeingChart(aoBand, LAMBDA_K));
                     }
 
-                    if (false) {
+                    if (true) {
                         // OK
                         // UT:
                         final double qe = 0.70;
@@ -83,17 +83,19 @@ public class StrehlChartTest {
 
                         Band b = Band.K;
                         aoBand = Band.V;
-                        USE_STREHL_OLD = true;
-                        createChartFrame("UT (MACAO) - OLD - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 60, -1, -1, 0, 0)); // td, t0 not used
-                        USE_STREHL_OLD = false;
+                        if (false) {
+                            USE_STREHL_OLD = true;
+                            createChartFrame("UT (MACAO) - OLD - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
+                                    StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 60, -1, -1, 0, 0)); // td, t0 not used
+                            USE_STREHL_OLD = false;
+                        }
 
                         td = 0.80; // 1050 Hz
                         createChartFrame("UT (MACAO) - NEW - Strehl " + b.getName() + " vs mag" + aoBand.getName() + " td: " + td,
                                 StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 60, td, -1, qe, ron)); // auto t0
                     }
 
-                    if (false) {
+                    if (true) {
                         ZENITH_ANGLE = 30.0;
                         // OK
                         double qe = 0.70;
@@ -117,7 +119,7 @@ public class StrehlChartTest {
                         final Band b = Band.H;
                         // AT:
                         if (true) {
-                             // STRAP
+                            // STRAP
                             aoBand = Band.V;
                             nbSubPupils = 4;
 
@@ -202,7 +204,7 @@ public class StrehlChartTest {
                     if (true) {
                         // AT:
                         if (true) {
-                             // STRAP
+                            // STRAP
                             aoBand = Band.V;
                             nbSubPupils = 4;
 
@@ -248,7 +250,7 @@ public class StrehlChartTest {
 
     private static void createChartFrame(String title, JPanel panel) {
         final JFrame frame = new JFrame(title);
-        frame.setPreferredSize(new Dimension(1800, 1000));
+        frame.setPreferredSize(new Dimension(1200, 800));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.add(panel);
