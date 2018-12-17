@@ -8,13 +8,19 @@ import com.mortennobel.imagescaling.ResampleOp;
 import fest.common.JmcsFestSwingJUnitTestCase;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.SettingPanel;
+import fr.jmmc.aspro.gui.TargetEditorDialog;
+import fr.jmmc.aspro.gui.TargetGroupForm;
 import fr.jmmc.aspro.gui.util.WindWidget;
+import fr.jmmc.aspro.model.oi.TargetGroup;
+import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.preference.CommonPreferences;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.MessagePane;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import java.awt.Dialog;
+import java.awt.DisplayMode;
 import java.awt.Frame;
 import java.awt.Point;
 import static java.awt.event.KeyEvent.*;
@@ -93,6 +99,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // reset Preferences:
         Preferences.getInstance().resetToDefaultPreferences();
         try {
+            Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_SIZE, NumberUtils.valueOf(1024));
+
             CommonPreferences.getInstance().setPreference(CommonPreferences.SHOW_STARTUP_SPLASHSCREEN, false);
         } catch (PreferencesException pe) {
             logger.error("setPreference failed", pe);
@@ -241,18 +249,20 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // Capture observability plot :
         getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
-        enableTooltips(true);
+        try {
+            enableTooltips(true);
 
-        // move the mouse on the first observability interval (top right corner):
-        // note: check window margin issue (gnome3):
-        robot().moveMouse(window.component(), 415, 390);    
+            // move the mouse on the first observability interval (top right corner):
+            // note: check window margin issue (gnome3):
+            robot().moveMouse(window.component(), 415, 390);
 
-        // let tooltip appear:
-        pauseMedium();
+            // let tooltip appear:
+            pauseMedium();
 
-        saveScreenshot(window, "Aspro2-obs.png");
-
-        enableTooltips(false);
+            saveScreenshot(window, "Aspro2-obs.png");
+        } finally {
+            enableTooltips(false);
+        }
 
         // export PDF :
         exportPDF();
@@ -299,18 +309,21 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         BufferedImage image = takeScreenshotOf(window);
 
-        enableTooltips(true);
+        try {
+            enableTooltips(true);
 
-        // move the mouse on one uv measurement:
-        // note: check window margin issue (gnome3):
-        robot().moveMouse(window.component(), 675, 545);
+            // move the mouse on one uv measurement:
+            // note: check window margin issue (gnome3):
+            robot().moveMouse(window.component(), 675, 545);
 
-        // let tooltip appear:
-        pauseMedium();
+            // let tooltip appear:
+            pauseMedium();
 
-        saveImage(takeScreenshotOf(window), "Aspro2-uv.png");
+            saveImage(takeScreenshotOf(window), "Aspro2-uv.png");
 
-        enableTooltips(false);
+        } finally {
+            enableTooltips(false);
+        }
 
         saveImage(image, "Aspro2-screen.png");
 
@@ -379,13 +392,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         dialog.requireVisible();
         dialog.moveToFront();
 
-        dialog.tabbedPane().selectTab("Models");
+        dialog.tabbedPane().selectTab(TargetEditorDialog.TAB_MODELS);
 
         dialog.tree().selectPath("Models/HIP1234/elong_disk1");
 
         saveScreenshot(dialog, "Aspro2-Model.png");
 
-        dialog.tabbedPane().selectTab("Targets");
+        dialog.tabbedPane().selectTab(TargetEditorDialog.TAB_TARGETS);
 
         dialog.tree().selectPath("Targets/HD 1234");
 
@@ -418,7 +431,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     }
 
     /**
-     * Test Interop menu : Start SearchCal and LITpro manually before this test
+     * Test Interop menu : Start AppLauncher & A2P2 manually before this test
      */
     @Test
     @GUITest
@@ -451,9 +464,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     }
 
     /**
-     * Test SearchCal integration : Start SearchCal manually before this test
+     * Test SearchCal integration : Start AppLauncher manually before this test
      */
-    @Ignore
     @Test
     @GUITest
     public void m11_shouldCallSearchCall() {
@@ -474,9 +486,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     }
 
     /**
-     * Test LITpro integration : Start LITpro manually before this test
+     * Test LITpro integration : Start AppLauncher manually before this test
      */
-    @Ignore
     @Test
     @GUITest
     public void m12_shouldCallLITpro() {
@@ -548,7 +559,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             @Override
             protected void executeInEDT() {
                 // Integer field :
-                jTextPoPs.setValue(Integer.valueOf(34));
+                jTextPoPs.setValue(NumberUtils.valueOf(34));
             }
         });
 
@@ -603,13 +614,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         dialog.requireVisible();
         dialog.moveToFront();
 
-        dialog.tabbedPane().selectTab("Models");
+        dialog.tabbedPane().selectTab(TargetEditorDialog.TAB_MODELS);
 
         dialog.tree().selectPath("Models/HD 3546 (cal)/disk1");
 
         saveScreenshot(dialog, "Aspro2-calibrators-Model.png");
 
-        dialog.tabbedPane().selectTab("Targets");
+        dialog.tabbedPane().selectTab(TargetEditorDialog.TAB_TARGETS);
 
         dialog.tree().selectPath("Targets/HIP1234/HD 3546 (cal)");
 
@@ -651,55 +662,158 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     @GUITest
     public void m16_shouldOpenSampleWithUserModel() {
         try {
-            Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, "heat");
-            Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_SIZE, Integer.valueOf(1024));
+            Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, ColorModels.COLOR_MODEL_HEAT);
+
+            openObservation("Aspro2_sample_spiral.asprox");
+
+            // target editor with calibrators :
+            window.button("jButtonTargetEditor").click();
+
+            final DialogFixture dialog = window.dialog(withTitle("Target Editor").andShowing());
+
+            dialog.requireVisible();
+            dialog.moveToFront();
+
+            dialog.tabbedPane().selectTab(TargetEditorDialog.TAB_MODELS);
+
+            dialog.tree().selectPath("Models/HD 1234");
+
+            // waits for computation to finish :
+            AsproTestUtils.checkRunningTasks();
+
+            saveScreenshot(dialog, "Aspro2-UserModel.png");
+
+            // close dialog :
+            dialog.button(JButtonMatcher.withText("Cancel")).click();
+
+            window.list("jListTargets").selectItem("HD 1234");
+
+            // select UV tab:
+            getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+
+            final JPanelFixture panel = window.panel("uvCoveragePanel");
+
+            // disable Compute OIFits data :
+            panel.checkBox("jCheckBoxDoOIFits").uncheck();
+
+            // zoom uv max (trigger uv model to compute again):
+            panel.textBox("jFieldUVMax").setText("20.00");
+
+            // select UV tab to let fields lost focus (trigger change listeners):
+            getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+
+            // waits for computation to finish :
+            AsproTestUtils.checkRunningTasks();
+
+            // Capture UV Coverage plot :
+            showPlotTab(SettingPanel.TAB_UV_COVERAGE, "Aspro2-UserModel-uv.png");
+
         } catch (PreferencesException pe) {
             logger.error("setPreference failed", pe);
+        } finally {
+            try {
+                Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, Preferences.DEFAULT_IMAGE_LUT);
+            } catch (PreferencesException pe) {
+                logger.error("setPreference failed", pe);
+            }
         }
+    }
 
-        openObservation("Aspro2_sample_spiral.asprox");
+    /**
+     * Test Open file "Aspro2_sample_AO_on_SiriusB.asprox" (Target Group Form)
+     */
+    @Test
+    @GUITest
+    public void m17_shouldOpenSampleWithAOTargetGroup() {
+        final Frame frame = window.target;
+        final Point ref = frame.getLocation();
+        final DisplayMode mode = frame.getGraphicsConfiguration().getDevice().getDisplayMode();
 
-        // target editor with calibrators :
-        window.button("jButtonTargetEditor").click();
+        System.out.println("display mode: " + mode);
 
-        final DialogFixture dialog = window.dialog(withTitle("Target Editor").andShowing());
+        try {
+            window.moveTo(new Point(mode.getWidth() - frame.getWidth(), ref.y));
 
-        dialog.requireVisible();
-        dialog.moveToFront();
+            Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, ColorModels.COLOR_MODEL_ASPRO);
 
-        dialog.tabbedPane().selectTab("Models");
+            openObservation("Aspro2_sample_AO_on_SiriusB.asprox");
 
-        dialog.tree().selectPath("Models/HD 1234");
-        
-        // waits for computation to finish :
-        AsproTestUtils.checkRunningTasks();
+            // target editor with calibrators :
+            window.button("jButtonTargetEditor").click();
 
-        saveScreenshot(dialog, "Aspro2-UserModel.png");
+            final DialogFixture dialog = window.dialog(withTitle("Target Editor").andShowing());
 
-        // close dialog :
-        dialog.button(JButtonMatcher.withText("Cancel")).click();
+            dialog.requireVisible();
+            dialog.moveToFront();
 
-        window.list("jListTargets").selectItem("HD 1234");
+            dialog.tabbedPane().selectTab(TargetEditorDialog.TAB_GROUPS);
 
-        // select UV tab:
-        getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+            dialog.tree(TargetGroupForm.TREE_GROUPS).selectPath("Groups/AO Star/Sirius A");
 
-        final JPanelFixture panel = window.panel("uvCoveragePanel");
+            // highlight group information:
+            dialog.tree(TargetGroupForm.TREE_GROUPS).selectPath("Groups/AO Star");
 
-        // disable Compute OIFits data :
-        panel.checkBox("jCheckBoxDoOIFits").uncheck();
+            // waits for computation to finish :
+            AsproTestUtils.checkRunningTasks();
 
-        // zoom uv max (trigger uv model to compute again):
-        panel.textBox("jFieldUVMax").setText("20.00");
+            saveScreenshot(dialog, "Aspro2-GroupAO.png");
 
-        // select UV tab to let fields lost focus (trigger change listeners):
-        getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+            // close dialog :
+            dialog.button(JButtonMatcher.withText("Cancel")).click();
 
-        // waits for computation to finish :
-        AsproTestUtils.checkRunningTasks();
+            window.list("jListTargets").selectItem("Sirius B");
 
-        // Capture UV Coverage plot :
-        showPlotTab(SettingPanel.TAB_UV_COVERAGE, "Aspro2-UserModel-uv.png");
+            // select UV tab:
+            getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+
+            // waits for computation to finish :
+            AsproTestUtils.checkRunningTasks();
+
+            enableTooltips(true);
+
+            // move the mouse on Status Warning:
+            // note: check window margin issue (gnome3):
+            robot().moveMouse(window.component(), 760, 265);
+
+            // let tooltip appear:
+            pauseMedium();
+
+            saveImage(takeScreenshotOf(window), "Aspro2-GroupAO-status.png");
+
+        } catch (PreferencesException pe) {
+            logger.error("setPreference failed", pe);
+        } finally {
+            enableTooltips(false);
+            try {
+                Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, Preferences.DEFAULT_IMAGE_LUT);
+            } catch (PreferencesException pe) {
+                logger.error("setPreference failed", pe);
+            }
+            // restore position:
+            window.moveTo(ref);
+        }
+    }
+
+    /**
+     * Test A2P2 integration : Start A2P2 manually before this test
+     */
+    @Test
+    @GUITest
+    public void m18_shouldCallA2P2() {
+        // hack to solve focus trouble in menu items :
+        window.menuItemWithPath("Interop").focus();
+
+        try {
+            enableTooltips(true);
+
+            window.menuItemWithPath("Interop", "Send Obs. block(s) to A2p2").click();
+            window.menuItemWithPath("Interop", "Send Obs. block(s) to A2p2", "A2P2 samp relay").focus();
+
+            captureMainForm("Aspro2-a2p2-SendOB.png");
+
+        } finally {
+            enableTooltips(false);
+        }
     }
 
     /**
