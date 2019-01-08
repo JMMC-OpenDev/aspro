@@ -1032,8 +1032,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         final boolean changed = (insName != null) && !aoKey.equals(this.aoCacheKey);
         if (changed) {
             this.aoCacheKey = aoKey;
-
             logger.debug("AO changed : {}", aoKey);
+            
+            final Object oldValue = this.jComboBoxAOSetup.getSelectedItem();
 
             // always update instrument modes (may depend on selected period):
             final Vector<String> aoSetups = ConfigurationManager.getInstance().getAdaptiveOpticsSetups(
@@ -1042,14 +1043,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     stations
             );
             this.jComboBoxAOSetup.setModel(new DefaultComboBoxModel(aoSetups));
-            /*
-            // try restoring the selected instrument mode :
-            if (observation.getInstrumentConfiguration().getInstrumentMode() != null) {
-                this.jComboBoxAOSetup.setSelectedItem(observation.getInstrumentConfiguration().getInstrumentMode());
-            }
-             */
-            if (logger.isTraceEnabled()) {
-                logger.trace("jComboBoxAOSetup updated: {}", this.jComboBoxAOSetup.getSelectedItem());
+
+            // restore previous selected item :
+            if (oldValue != null) {
+                this.jComboBoxAOSetup.setSelectedItem(oldValue);
             }
 
             final boolean visible = !aoSetups.isEmpty();
@@ -1152,7 +1149,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 observation.getInstrumentConfiguration().getName());
     }
 
-    // TODO getAdaptiveOpticsSetups
     /**
      * Refresh the fringe tracker modes
      * @param observation current observation settings
@@ -1193,14 +1189,20 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // disable the automatic update observation :
             final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
             try {
-                // update HA Min / Max :
+                // update HA min / max:
                 final Double haMin = targetConf.getHAMin();
                 this.haMinAdapter.setValue((haMin != null) ? haMin.doubleValue() : AsproConstants.HA_MIN);
 
                 final Double haMax = targetConf.getHAMax();
                 this.haMaxAdapter.setValue((haMax != null) ? haMax.doubleValue() : AsproConstants.HA_MAX);
 
-                // update ft mode :
+                // update AO setup:
+                if (this.jComboBoxAOSetup.getModel().getSize() > 0) {
+                    final String aoSetup = targetConf.getAoSetup();
+                    this.jComboBoxAOSetup.setSelectedItem((aoSetup != null) ? aoSetup : this.jComboBoxAOSetup.getModel().getElementAt(0));
+                }
+
+                // update FT mode:
                 if (this.jComboBoxFTMode.getModel().getSize() > 0) {
                     final String ftMode = targetConf.getFringeTrackerMode();
                     this.jComboBoxFTMode.setSelectedItem((ftMode != null) ? ftMode : AsproConstants.NONE);
