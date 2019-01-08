@@ -687,8 +687,8 @@ public final class NoiseService implements VisNoiseService {
             aoTarget = target;
         }
 
-        logger.info("ftTarget                      : {}", ftTarget);
-        logger.info("aoTarget                      : {}", aoTarget);
+        logger.debug("ftTarget                      : {}", ftTarget);
+        logger.debug("aoTarget                      : {}", aoTarget);
 
         if (fringeTrackerPresent) {
             flux = ftTarget.getFlux(ftBand);
