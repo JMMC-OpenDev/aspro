@@ -849,7 +849,7 @@ public final class UserModelService {
         }
 
         // 2 - Normalize data (total flux):
-        if (fitsImage.getSum() != 1d) {
+        if (!NumberUtils.equals(fitsImage.getSum(), 1.0, MIN_VISIBILITY_DATA)) {
             final double normFactor = 1d / fitsImage.getSum();
 
             final ImageNormalizeJob normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
