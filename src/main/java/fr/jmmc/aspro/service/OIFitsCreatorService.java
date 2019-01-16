@@ -924,7 +924,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                             }
                         }
 
-                        // mark this value as valid only if error is valid and SNR is OK:
+                        // mark this value as valid only if observables are not NaN, error is valid and SNR is OK:
+                        if (!doFlag && (Double.isNaN(visAmp[k][l]) || Double.isNaN(visAmpErr[k][l])
+                                || Double.isNaN(visPhi[k][l]) || Double.isNaN(visPhiErr[k][l]))) {
+                            doFlag = true;
+                        }
                         flags[k][l] = doFlag;
                     }
                 }
@@ -1133,14 +1137,19 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 v2Err = ns.computeBiasedVis2Error(v2, v2Err);
                             }
 
-                            snr = Math.abs(v2 / v2Err);
+                            if (DEBUG_SNR) {
+                                snr = Math.abs(v2 / v2Err);
+                            }
                         }
 
                         // Set values:
                         vis2Data[k][l] = v2;
                         vis2Err[k][l] = v2Err;
 
-                        // mark this value as valid only if error is valid and SNR is OK:
+                        // mark this value as valid only if observables are not NaN, error is valid and SNR is OK:
+                        if (!doFlag && (Double.isNaN(vis2Data[k][l]) || Double.isNaN(vis2Err[k][l]))) {
+                            doFlag = true;
+                        }
                         flags[k][l] = doFlag;
 
                         if (DEBUG_SNR) {
@@ -1605,7 +1614,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         t3Phi[k][l] = FastMath.toDegrees(t3phi);
                         t3PhiErr[k][l] = FastMath.toDegrees(errPhi);
 
-                        // mark this value as valid only if error is valid and SNR is OK:
+                        // mark this value as valid only if observables are not NaN, error is valid and SNR is OK:
+                        if (!doFlag && (Double.isNaN(t3Amp[k][l]) || Double.isNaN(t3AmpErr[k][l])
+                                || Double.isNaN(t3Phi[k][l]) || Double.isNaN(t3PhiErr[k][l]))) {
+                            doFlag = true;
+                        }
                         flags[k][l] = doFlag;
                     }
                 }
