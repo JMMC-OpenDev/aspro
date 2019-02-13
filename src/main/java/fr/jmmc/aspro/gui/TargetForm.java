@@ -72,7 +72,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     /** Simbad URL (query by identifier) */
     private static final String SIMBAD_QUERY_ID = "http://simbad.u-strasbg.fr/simbad/sim-id?Ident=";
     /** Vizier SED URL (query by identifier) */
-    private static final String VIZIER_SED_QUERY_ID = "http://cdsxmatch.u-strasbg.fr/gadgets/ifr?url=http://cdsxmatch.u-strasbg.fr/widgets/SED_plotter.xml&SED_plot_radius=1&SED_plot_object=";
+    private static final String VIZIER_SED_QUERY_ID = "http://cdsportal.u-strasbg.fr/gadgets/ifr?url=http://cdsportal.unistra.fr/widgets/SED_plotter.xml&SED_plot_radius=1&SED_plot_object=";
     /** GetStar URL (query by identifier) */
     private static final String GETSTAR_QUERY_ID = "http://apps.jmmc.fr/~sclws/getstar/sclwsGetStarProxy.php?star=";
     /** Mag converter URL */

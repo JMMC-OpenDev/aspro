@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.6 beta 8"/>
-    <compilation date="16/01/2019" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.6 beta 9"/>
+    <compilation date="13/02/2019" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -219,7 +219,10 @@
 
     <releasenotes>
         <release version="0.9.9.6">
-            <pubDate>Wed, 16 Jan 2019 10:00:00 GMT</pubDate>
+            <pubDate>Wed, 13 Feb 2019 12:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.6 beta 9">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/986">Fixed URL of the CDS Photometry viewer in the Target editor</change>
+            </prerelease>
             <prerelease version="0.9.9.6 beta 8">
                 <change type="BUGFIX">OIFits computation: ensure flagging data if any observable quantity is NaN</change>
             </prerelease>
