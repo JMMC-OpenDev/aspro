@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handles preferences for Aspro.
- *
- * Note : There is a special preference 'splash.screen.show' used to disable the splash screen (dev mode) if its value is 'false'.
  */
 public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
 
