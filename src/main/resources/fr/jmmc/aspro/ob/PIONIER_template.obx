@@ -25,7 +25,7 @@ LineNumber                       "0"
 
 CONSTRAINT.SET.NAME              "No name"
 seeing                           "2.0"
-sky_transparency                 "Photometric"
+sky_transparency                 "Clear"
 air_mass                         "5.0"
 fractional_lunar_illumination    "1.0"
 moon_angular_distance            "30"

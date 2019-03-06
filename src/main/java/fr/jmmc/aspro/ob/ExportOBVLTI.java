@@ -420,12 +420,12 @@ public class ExportOBVLTI {
         // [+/-]DDMM
         sb.append(raDec[1], 0, 3).append(raDec[1], 4, 6).append(' ');
 
-        sb.append(insBand.name()).append('=');
+        sb.append(insBand.name()).append('_');
         sb.append(df1.format(ExportOBVLTI.getMagnitude(insMag)));
 
         if (aoBand != null) {
             sb.append(' ');
-            sb.append(aoBand.name()).append('=');
+            sb.append(aoBand.name()).append('_');
             sb.append(df1.format(ExportOBVLTI.getMagnitude(aoMag)));
         }
 
@@ -445,7 +445,7 @@ public class ExportOBVLTI {
             logger.debug("OBName: {}", OBName);
         }
 
-        return document.replaceFirst(KEY_OB_NAME, OBName); // 64 chars max
+        return document.replaceFirst(KEY_OB_NAME, OBName); // 32 chars max
     }
 
     /**
