@@ -137,7 +137,6 @@ public abstract class WindWidget extends JPanel {
             this.compass = new CustomCompass();
             this.compass.setNiceScale(true);
             this.compass.setThreshold(5d);
-            this.compass.setMinimumSize(new Dimension(16, 16));
 
             this.compass.addMouseListener(new MouseAdapter() {
                 @Override

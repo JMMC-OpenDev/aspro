@@ -1,6 +1,5 @@
 package fr.jmmc.aspro.gui.util;
 
-
 import static eu.hansolo.steelseries.tools.FrameType.ROUND;
 import static eu.hansolo.steelseries.tools.FrameType.SQUARE;
 import static eu.hansolo.steelseries.tools.PointerType.TYPE1;
@@ -13,9 +12,11 @@ import eu.hansolo.steelseries.tools.ColorDef;
 import eu.hansolo.steelseries.tools.PostPosition;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
@@ -28,17 +29,18 @@ import java.awt.image.BufferedImage;
 import org.pushingpixels.trident.Timeline;
 import org.pushingpixels.trident.ease.Spline;
 
-
 /**
  * LBO: fixed stroke for tick marks (not rounded)
  * @author hansolo
  */
 public final class CustomCompass extends AbstractRadial {
+
     // <editor-fold defaultstate="collapsed" desc="Variable declaration">
+    private static final long serialVersionUID = 1L;
     private static final double MIN_VALUE = 0;
     private static final double MAX_VALUE = 360;
+    private static final double angleStep = (2.0 * Math.PI) / (MAX_VALUE - MIN_VALUE);
     private double value = 0;
-    private double angleStep = (2 * Math.PI) / (MAX_VALUE - MIN_VALUE);
     private final Point2D CENTER = new Point2D.Double();
     // Images used to combine layers for background and foreground
     private BufferedImage bImage;
@@ -50,21 +52,40 @@ public final class CustomCompass extends AbstractRadial {
     private Timeline timeline = new Timeline(this);
     private final Spline EASE = new Spline(0.5f);
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Constructor">
     public CustomCompass() {
         super();
-        setPointerColor(ColorDef.RED);
-        init(getInnerBounds().width, getInnerBounds().height);
+        getModel().setPointerColor(ColorDef.RED);
     }
     // </editor-fold>
-    
+
+    // <editor-fold defaultstate="collapsed" desc="Resize hacks">    
+    @Override
+    public void componentResized(final ComponentEvent EVENT) {
+        final int SIZE = getWidth() <= getHeight() ? getWidth() : getHeight();
+
+        if (SIZE < getMinimumSize().width || SIZE < getMinimumSize().height) {
+            setPreferredSize(getMinimumSize());
+        }
+    }
+
+    @Override
+    public void setPreferredSize(final Dimension DIM) {
+        final Dimension old = getPreferredSize();
+        // avoid redundant calls:
+        if (!DIM.equals(old)) {
+            super.setPreferredSize(DIM);
+        }
+    }
+    // </editor-fold>
+
     // <editor-fold defaultstate="collapsed" desc="Initialization">
     @Override
     public AbstractGauge init(final int WIDTH, final int HEIGHT) {
         final int GAUGE_WIDTH = isFrameVisible() ? WIDTH : getGaugeBounds().width;
         final int GAUGE_HEIGHT = isFrameVisible() ? HEIGHT : getGaugeBounds().height;
-        
+
         if (GAUGE_WIDTH <= 1 || GAUGE_HEIGHT <= 1) {
             return this;
         }
@@ -74,9 +95,13 @@ public final class CustomCompass extends AbstractRadial {
         } else {
             setFramelessOffset(getGaugeBounds().x, getGaugeBounds().y);
         }
-        
+
         // Create Background Image
         if (bImage != null) {
+            // avoid redundant calls:
+            if (bImage.getWidth() == GAUGE_WIDTH && bImage.getHeight() == GAUGE_HEIGHT) {
+                return this;
+            }
             bImage.flush();
         }
         bImage = UTIL.createImage(GAUGE_WIDTH, GAUGE_WIDTH, java.awt.Transparency.TRANSLUCENT);
@@ -144,7 +169,7 @@ public final class CustomCompass extends AbstractRadial {
         return this;
     }
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Visualization">
     @Override
     protected void paintComponent(java.awt.Graphics g) {
@@ -162,7 +187,7 @@ public final class CustomCompass extends AbstractRadial {
         G2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         // Translate the coordinate system related to the insets
-        G2.translate(getFramelessOffset().getX(), getFramelessOffset().getY());        
+        G2.translate(getFramelessOffset().getX(), getFramelessOffset().getY());
 
         final AffineTransform OLD_TRANSFORM = G2.getTransform();
 
@@ -193,7 +218,7 @@ public final class CustomCompass extends AbstractRadial {
         G2.dispose();
     }
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Getters and Setters">
     /**
      * Sets the direction of the needle in degrees (0 - 360°)
@@ -238,13 +263,13 @@ public final class CustomCompass extends AbstractRadial {
     public Rectangle2D getBounds2D() {
         return new Rectangle2D.Double(bImage.getMinX(), bImage.getMinY(), bImage.getWidth(), bImage.getHeight());
     }
-    
+
     @Override
     public Rectangle getLcdBounds() {
         return new Rectangle();
     }
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Image related">
     private BufferedImage create_BIG_ROSE_POINTER_Image(final int WIDTH) {
         final BufferedImage IMAGE = UTIL.createImage((int) (WIDTH * 0.0546875f), (int) (WIDTH * 0.2f), java.awt.Transparency.TRANSLUCENT);
@@ -295,7 +320,6 @@ public final class CustomCompass extends AbstractRadial {
     private BufferedImage create_SMALL_ROSE_POINTER_Image(final int WIDTH) {
         final BufferedImage IMAGE = UTIL.createImage((int) (WIDTH * 0.0546875f), (int) (WIDTH * 0.2f), java.awt.Transparency.TRANSLUCENT);
         final Graphics2D G2 = IMAGE.createGraphics();
-
 
         G2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         G2.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
@@ -440,7 +464,6 @@ public final class CustomCompass extends AbstractRadial {
         G2.rotate(Math.PI / 4f, COMPASS_CENTER.getX() - OFFSET.getX(), COMPASS_CENTER.getY() - OFFSET.getY());
         G2.drawImage(SMALL_ROSE_POINTER, 0, 0, this);
 
-
         // W
         G2.rotate(Math.PI / 4f, COMPASS_CENTER.getX() - OFFSET.getX(), COMPASS_CENTER.getY() - OFFSET.getY());
         G2.drawImage(BIG_ROSE_POINTER, 0, 0, this);
@@ -462,7 +485,6 @@ public final class CustomCompass extends AbstractRadial {
         final java.awt.Shape INNER_ROSE_ELLIPSE = new Ellipse2D.Double(COMPASS_CENTER.getX() - (IMAGE_WIDTH * 0.095f), COMPASS_CENTER.getY() - (IMAGE_WIDTH * 0.095f), IMAGE_WIDTH * 0.19f, IMAGE_WIDTH * 0.19f);
         G2.draw(INNER_ROSE_ELLIPSE);
 
-
         // ******************* TICKMARKS ****************************************************
         create_TICKMARKS(G2, IMAGE_WIDTH);
 
@@ -478,11 +500,11 @@ public final class CustomCompass extends AbstractRadial {
         /*
         final BasicStroke MEDIUM_STROKE = new BasicStroke(0.005859375f * IMAGE_WIDTH, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL);
         final BasicStroke THIN_STROKE = new BasicStroke(0.00390625f * IMAGE_WIDTH, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL);
-        */
+         */
         // LBO: use CAP_BUT for performance reasons (no added decoration)
         final BasicStroke MEDIUM_STROKE = new BasicStroke(0.005859375f * IMAGE_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
         final BasicStroke THIN_STROKE = new BasicStroke(0.00390625f * IMAGE_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
-        
+
         final java.awt.Font BIG_FONT = new java.awt.Font("Serif", java.awt.Font.PLAIN, (int) (0.12f * IMAGE_WIDTH));
         final java.awt.Font SMALL_FONT = new java.awt.Font("Serif", java.awt.Font.PLAIN, (int) (0.06f * IMAGE_WIDTH));
         final float TEXT_DISTANCE = 0.0750f * IMAGE_WIDTH;
@@ -894,7 +916,7 @@ public final class CustomCompass extends AbstractRadial {
         return IMAGE;
     }
     // </editor-fold>
-    
+
     @Override
     public String toString() {
         return "Compass";

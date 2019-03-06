@@ -53,6 +53,7 @@ import fr.jmmc.jmcs.logging.LoggingService;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.StringUtils;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -521,7 +522,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 2;
-        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         jPanelOptions.add(jDateSpinner, gridBagConstraints);
 
@@ -572,7 +573,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.weighty = 0.5;
+        gridBagConstraints.weighty = 0.8;
         add(jPanelOptions, gridBagConstraints);
 
         jPanelStatus.setName("jPanelStatus"); // NOI18N
@@ -583,12 +584,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
         jPanelStatus.add(jLabelState, gridBagConstraints);
 
         jLabelStatus.setText("Ok");
         jLabelStatus.setName("jLabelStatus"); // NOI18N
+        jLabelStatus.setPreferredSize(new java.awt.Dimension(40, 40));
         jLabelStatus.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabelStatusMouseClicked(evt);
@@ -600,14 +601,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
         jPanelStatus.add(jLabelStatus, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 0.1;
+        gridBagConstraints.weighty = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         add(jPanelStatus, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
@@ -856,9 +856,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 4; // 4 rows (including spacer)
         gridBagConstraints.fill = GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new Insets(0, 0, 2, 2);
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.weighty = 0.1;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
         jPanelOptions.add(windWidget, gridBagConstraints);
 
         windWidget.addPropertyChangeListener(WindWidget.PROPERTY_VALUE, new PropertyChangeListener() {
