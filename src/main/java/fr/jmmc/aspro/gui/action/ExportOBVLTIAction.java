@@ -37,8 +37,6 @@ public final class ExportOBVLTIAction {
     private final static NumberFormat DF1 = new DecimalFormat("0.#");
     /** OBX MimeType */
     private final static MimeType MIMETYPE = MimeType.OBX;
-    /** Eso warning message */
-    public static final String ESO_WARNING = "Please check that your observing blocks \n conform to the current ESO Call for Proposal \n (object magnitudes, instrument limits ...)";
     /** action singleton */
     private static final ExportOBVLTIAction INSTANCE = new ExportOBVLTIAction();
 
@@ -175,7 +173,9 @@ public final class ExportOBVLTIAction {
                 MessagePane.showMessage(sb.toString());
 
                 // PoP up to validate OB file against ESO CfP :
-                DismissableMessagePane.show(ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
+                DismissableMessagePane.show("Please check that your observing blocks \n"
+                        + "conform to the current ESO Call for Proposal \n (object magnitudes, instrument limits ...)",
+                        Preferences.getInstance(), "ESO_OB_WARNING");
 
             } catch (IOException ioe) {
                 MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);

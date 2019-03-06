@@ -61,6 +61,7 @@ import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.util.MathUtils;
+import fr.jmmc.jmcs.gui.component.DismissableMessagePane;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
@@ -668,6 +669,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 default:
             }
         } else {
+            // PoP up to indicate OBX export is deprecated:
+            DismissableMessagePane.show("Please consider using the a2p2 software instead"
+                    + "\nas this export feature is deprecated and will be removed soon (Fall 2019)\n\nSee https://github.com/JMMC-OpenDev/a2p2",
+                    Preferences.getInstance(), "DEPRECATED_OBX_WARNING");
+            
             final String insName = observation.getInstrumentConfiguration().getName();
 
             if (AsproConstants.INS_AMBER.equals(insName)
