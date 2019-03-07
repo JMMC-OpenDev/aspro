@@ -1352,6 +1352,13 @@
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
+            <xsd:element name="altName" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The alternative name for this configuration (Small, Large...) known at the interferometer (optional)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="stations" type="xsd:IDREFS">
                 <xsd:annotation>
                     <xsd:documentation>

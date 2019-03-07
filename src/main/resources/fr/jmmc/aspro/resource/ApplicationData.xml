@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.6 beta 10"/>
-    <compilation date="06/03/2019" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.6 beta 11"/>
+    <compilation date="07/03/2019" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -220,9 +220,12 @@
     <releasenotes>
         <release version="0.9.9.6">
             <pubDate>Wed, 06 Mar 2019 16:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.6 beta 11">
+                <change type="FEATURE">Added a tooltip on interferometer configurations to indicate alternative names (VLTI small/medium/large...)</change>
+            </prerelease>
             <prerelease version="0.9.9.6 beta 10">
                 <change type="FEATURE">Added a deprecation message when using the Export OB action in favor to promote A2p2 usage</change>
-                <change type="FEATURE">Updated GRAVITY OB template (ESO P103)</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/988">Updated GRAVITY OB template (ESO P103)</change>
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/989">Fixed a GUI layout bug in the top right panel (varying compass size)</change>
             </prerelease>
             <prerelease version="0.9.9.6 beta 9">

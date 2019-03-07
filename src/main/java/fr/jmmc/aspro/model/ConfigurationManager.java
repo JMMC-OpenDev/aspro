@@ -1005,7 +1005,7 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
-     * Return the list of all instrument configuration names (station list) for the given interferometer configuration and instrument name
+     * Return the list of all instrument configuration names for the given interferometer configuration and instrument name
      * @param configurationName name of the interferometer configuration
      * @param instrumentAlias name or alias of the instrument
      * @return list of all instrument configuration names
@@ -1016,6 +1016,25 @@ public final class ConfigurationManager extends BaseOIManager {
             final Vector<String> v = new Vector<String>(ic.getConfigurations().size());
             for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
                 v.add(c.getName());
+            }
+            return v;
+        }
+        return EMPTY_VECTOR;
+    }
+
+    /**
+     * Return the list of all instrument configuration alternative names for the given interferometer configuration and instrument name
+     * @param configurationName name of the interferometer configuration
+     * @param instrumentAlias name or alias of the instrument
+     * @return list of all instrument configuration alternative names
+     */
+    public Vector<String> getInstrumentConfigurationAltNames(final String configurationName, final String instrumentAlias) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
+        if (ic != null) {
+            final Vector<String> v = new Vector<String>(ic.getConfigurations().size());
+            for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
+                // may be null
+                v.add(c.getAltName());
             }
             return v;
         }

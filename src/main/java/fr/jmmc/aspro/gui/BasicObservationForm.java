@@ -53,10 +53,9 @@ import fr.jmmc.jmcs.logging.LoggingService;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.StringUtils;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
-import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -180,7 +179,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jComboBoxPops = new javax.swing.JComboBox();
         jPanelConfigurations = new javax.swing.JPanel();
         jScrollPaneInstrumentConfigurations = new javax.swing.JScrollPane();
-        jListInstrumentConfigurations = new javax.swing.JList();
+        jListInstrumentConfigurations = createConfigurationList();
         jPanelConfLeft = new javax.swing.JPanel();
         jPanelConfRight = new javax.swing.JPanel();
         jPanelOptions = new javax.swing.JPanel();
@@ -437,7 +436,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jScrollPaneInstrumentConfigurations.setPreferredSize(new java.awt.Dimension(150, 50));
 
         jListInstrumentConfigurations.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Samples:", "UT1 UT2 UT3 UT4", "E1 E2 W1 W2" };
+            String[] strings = { "UT1 UT2 UT3 UT4" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
@@ -932,7 +931,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * Refresh the list of instrument configurations : depends on the chosen instrument (also the interferometer configuration)
      */
     private void updateComboInstrumentConfiguration() {
-        final Vector<String> v = cm.getInstrumentConfigurationNames((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
+        final Vector<String> names = cm.getInstrumentConfigurationNames((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
                 (String) jComboBoxInstrument.getSelectedItem());
 
         final Object[] oldValues = getInstrumentConfigurations();
@@ -940,7 +939,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         // disable the automatic selection check of the instrument configuration :
         final boolean prevAutoCheckConfigurations = setAutoCheckConfigurations(false);
         try {
-            jListInstrumentConfigurations.setModel(new GenericListModel<String>(v));
+            jListInstrumentConfigurations.setModel(new GenericListModel<String>(names));
+
+            // define alternative names for tooltips:
+            ((ConfigurationJList) jListInstrumentConfigurations).setAltNames(
+                    cm.getInstrumentConfigurationAltNames((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
+                            (String) jComboBoxInstrument.getSelectedItem())
+            );
 
             // restore previous selected item(s) :
             selectInstrumentConfigurations(oldValues);
@@ -1926,7 +1931,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
             // Add initial setup:
             if (this.loadedObsSetup != null) {
-                sb.append("( loaded obs. setup: ").append(loadedObsSetup).append(")<br>");
+                sb.append("(loaded obs. setup: ").append(loadedObsSetup).append(")<br>");
             }
 
             String msg;
@@ -1995,6 +2000,56 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private javax.swing.JFormattedTextField jTextPoPs;
     private fr.jmmc.jmal.star.EditableStarResolverWidget starSearchField;
     // End of variables declaration//GEN-END:variables
+
+    static abstract class ConfigurationJList extends JList {
+
+        /** default serial UID for Serializable interface */
+        protected static final long serialVersionUID = 1;
+
+        abstract void setAltNames(final List<String> altNames);
+    };
+
+    /**
+     * Create the custom JList to support tooltips for targets
+     * @return JList
+     */
+    public static JList createConfigurationList() {
+        final JList list = new ConfigurationJList() {
+            /* members */
+            private List<String> altNames;
+
+            void setAltNames(final List<String> altNames) {
+                this.altNames = altNames;
+            }
+
+            /** 
+             * This method is called as the cursor moves within the component
+             * @param me mouse event
+             * @return tooltip text
+             */
+            @Override
+            public String getToolTipText(final MouseEvent me) {
+                final Point pt = me.getPoint();
+                // Get item index :
+                final int index = locationToIndex(pt);
+                if (index != -1) {
+                    // check cell bounds:
+                    if (getCellBounds(index, index + 1).contains(pt)) {
+                        if (altNames != null && altNames.size() > index) {
+                            // Get alternative name:
+                            final String altName = altNames.get(index);
+                            if (altName != null) {
+                                return "Configuration '" + altName + "' (" + getModel().getElementAt(index) + ")";
+                            }
+                        }
+                    }
+                }
+                return getToolTipText();
+            }
+        };
+
+        return list;
+    }
 
     /**
      * Check if the given list selection is empty, then restore the last selected item

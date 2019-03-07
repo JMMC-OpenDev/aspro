@@ -1653,7 +1653,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         }
 
         final FocalInstrumentMode instrumentMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
-        final double lambdaMin = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin();
+        // In case of invalid instrument mode, use 1.0 microns instead:
+        final double lambdaMin = (instrumentMode != null) ? AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin() : 1.0;
 
         // Adjust the user uv Max = max base line / minimum wave length
         // note : use the minimum wave length of the instrument to

@@ -27,6 +27,7 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
+ *         &lt;element name="altName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}IDREFS"/&gt;
  *         &lt;element name="channels" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/&gt;
  *         &lt;element name="delayLines" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/&gt;
@@ -41,6 +42,7 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FocalInstrumentConfigurationItem", propOrder = {
+    "altName",
     "stations",
     "channels",
     "delayLines",
@@ -50,6 +52,7 @@ public class FocalInstrumentConfigurationItem
     extends OIBase
 {
 
+    protected String altName;
     @XmlList
     @XmlElement(required = true, type = Object.class)
     @XmlIDREF
@@ -70,6 +73,30 @@ public class FocalInstrumentConfigurationItem
     @XmlIDREF
     @XmlSchemaType(name = "IDREFS")
     protected List<Pop> pops;
+
+    /**
+     * Gets the value of the altName property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getAltName() {
+        return altName;
+    }
+
+    /**
+     * Sets the value of the altName property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setAltName(String value) {
+        this.altName = value;
+    }
 
     /**
      * Gets the value of the stations property.
