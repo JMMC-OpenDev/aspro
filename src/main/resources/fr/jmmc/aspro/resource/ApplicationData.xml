@@ -219,7 +219,7 @@
 
     <releasenotes>
         <release version="0.9.9.6">
-            <pubDate>Wed, 06 Mar 2019 16:00:00 GMT</pubDate>
+            <pubDate>Thu, 07 Mar 2019 16:00:00 GMT</pubDate>
             <prerelease version="0.9.9.6 beta 11">
                 <change type="FEATURE">Added a tooltip on interferometer configurations to indicate alternative names (VLTI small/medium/large...)</change>
             </prerelease>
