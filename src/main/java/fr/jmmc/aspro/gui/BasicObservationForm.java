@@ -194,8 +194,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jLabelState = new javax.swing.JLabel();
         jLabelStatus = new javax.swing.JLabel();
 
-        setMinimumSize(new java.awt.Dimension(640, 180));
-        setPreferredSize(new java.awt.Dimension(800, 180));
+        setMinimumSize(new java.awt.Dimension(700, 130));
+        setPreferredSize(new java.awt.Dimension(900, 130));
         setLayout(new java.awt.GridBagLayout());
 
         jPanelTargets.setBorder(javax.swing.BorderFactory.createTitledBorder("Targets"));
@@ -588,7 +588,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         jLabelStatus.setText("Ok");
         jLabelStatus.setName("jLabelStatus"); // NOI18N
-        jLabelStatus.setPreferredSize(new java.awt.Dimension(40, 40));
+        jLabelStatus.setPreferredSize(new java.awt.Dimension(32, 32));
         jLabelStatus.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabelStatusMouseClicked(evt);
@@ -607,7 +607,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 0.2;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         add(jPanelStatus, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 

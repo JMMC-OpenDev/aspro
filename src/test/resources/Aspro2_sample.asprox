@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <schemaVersion>2012.02</schemaVersion>
+    <schemaVersion>2018.04</schemaVersion>
     <name>default</name>
     <when>
         <date>2015-10-28</date>
@@ -95,12 +95,13 @@
         <configuration>
             <HAMin>-12.0</HAMin>
             <HAMax>12.0</HAMax>
+            <aoSetup>STRAP</aoSetup>
         </configuration>
     </target>
     <target id="ETA_TAU">
         <name>ETA TAU</name>
-        <RA>03:47:29.0765</RA>
-        <DEC>+24:06:18.494</DEC>
+        <RA>03 47 29.08</RA>
+        <DEC>+18 06 18.5</DEC>
         <EQUINOX>2000.0</EQUINOX>
         <SYSVEL>10.1</SYSVEL>
         <PMRA>19.35</PMRA>
@@ -115,7 +116,10 @@
         <FLUX_H>2.735</FLUX_H>
         <FLUX_K>2.636</FLUX_K>
         <useAnalyticalModel>true</useAnalyticalModel>
-        <configuration/>
+        <configuration>
+            <HAMin>-12.0</HAMin>
+            <aoSetup>STRAP</aoSetup>
+        </configuration>
     </target>
     <target id="HD_1234">
         <name>HD 1234</name>
@@ -185,8 +189,29 @@
         <configuration>
             <HAMin>-4.0</HAMin>
             <HAMax>4.0</HAMax>
+            <aoSetup>STRAP</aoSetup>
         </configuration>
     </target>
+    <targetUserInfos>
+        <group id="JMMC_AO">
+            <name>AO Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the Adaptive Optics system</description>
+            <color>#F781BF</color>
+        </group>
+        <group id="JMMC_FT">
+            <name>FT Star</name>
+            <category>[OB]</category>
+            <description>Group gathering stars used by the Fringe Tracking system</description>
+            <color>#75C147</color>
+        </group>
+        <group id="JMMC_GUIDE">
+            <name>Guide Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the telescope guiding</description>
+            <color>#5BAFD6</color>
+        </group>
+    </targetUserInfos>
     <variant>
         <stations>K0 G2 D0</stations>
     </variant>

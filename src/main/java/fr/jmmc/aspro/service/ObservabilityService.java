@@ -2351,7 +2351,7 @@ public final class ObservabilityService {
                 sb.append("Moon separation is ");
                 FormatterUtils.format(df1, sb, minSeparation).append(" deg at ");
                 FormatterUtils.format(timeFormatter, sb, convertJDToDate(minJd));
-                sb.append(" for target [").append(target.getName()).append("]<br> Please check pointing restrictions.");
+                sb.append(" for target [").append(target.getName()).append("]. Please check pointing restrictions.");
 
                 this.addWarning(sb.toString());
             }

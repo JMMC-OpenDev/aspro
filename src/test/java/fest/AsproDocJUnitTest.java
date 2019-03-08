@@ -11,7 +11,6 @@ import fr.jmmc.aspro.gui.SettingPanel;
 import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.gui.TargetGroupForm;
 import fr.jmmc.aspro.gui.util.WindWidget;
-import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.preference.CommonPreferences;
@@ -49,7 +48,6 @@ import org.fest.swing.fixture.JTextComponentFixture;
 import org.fest.swing.util.Platform;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -86,10 +84,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
 
-        // NOTE: Use 'Debug Test File' in netbeans to ensure correct test order ...
-        // Test JDK 1.7+
-        if (!SystemUtils.isJavaVersionAtLeast(1.7f)) {
-            MessagePane.showErrorMessage("Please use a JVM 1.7+ (Oracle) before running tests (fonts and LAF may be wrong) !");
+        // Test JDK 1.8+
+        if (!SystemUtils.isJavaVersionAtLeast(1.8f)) {
+            MessagePane.showErrorMessage("Please use a JVM 1.8 (Oracle) before running tests (fonts and LAF may be wrong) !");
             Bootstrapper.stopApp(1);
         }
 
@@ -314,7 +311,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
             // move the mouse on one uv measurement:
             // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 675, 545);
+            robot().moveMouse(window.component(), 685, 595);
 
             // let tooltip appear:
             pauseMedium();
@@ -773,7 +770,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
             // move the mouse on Status Warning:
             // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 760, 265);
+            robot().moveMouse(window.component(), 760, 215);
 
             // let tooltip appear:
             pauseMedium();
@@ -860,6 +857,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // export OB file :
         window.pressAndReleaseKey(keyCode(VK_B).modifiers(Platform.controlOrCommandMask()));
 
+        // close deprecation message:
+        closeMessage();
+        
         // close warning on OIFITS message:
         closeOIFitsMessage();
 
@@ -909,7 +909,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     }
 
     /**
-     * Close any option pane by cliking Yes
+     * Close any option pane by clicking Yes
      * @return true if a message was closed
      */
     protected final boolean closeOIFitsMessage() {

@@ -290,7 +290,7 @@ public final class Aspro2 extends App {
             // hack for screens smaller than 1152x864 screens :
             final int appWidth = 950;
             final int appHeightMin = 700;
-            final int appHeightPref = (screenSize.getHeight() >= 864) ? 800 : appHeightMin;
+            final int appHeightPref = (screenSize.getHeight() >= 864) ? 850 : appHeightMin;
 
             final Dimension dim = new Dimension(appWidth, appHeightMin);
             frame.setMinimumSize(dim);
