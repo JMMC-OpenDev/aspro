@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <schemaVersion>2012.02</schemaVersion>
+    <schemaVersion>2018.04</schemaVersion>
     <name>default</name>
     <when>
         <date>2015-10-28</date>
@@ -35,29 +35,29 @@
         <FLUX_V>7.347</FLUX_V>
         <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_disk1" type="elong_disk">
-            <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter, 
-elong_ratio, major_axis_pos_angle) 
+            <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter,
+elong_ratio, major_axis_pos_angle)
 
-Returns the Fourier transform, at spatial frequencies (UFREQ,VFREQ) 
-given in 1/rad, of a normalized ellipse centered at coordinates (X,Y) (milliarcsecond) 
-with a ratio ELONG_RATIO between the major diameter and the minor one MINOR_AXIS_DIAMETER, 
-turned from the positive vertical semi-axis (i.e. North direction) with angle 
-MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis 
-(i.e. East direction). (the elongation is along the major_axis) 
+Returns the Fourier transform, at spatial frequencies (UFREQ,VFREQ)
+given in 1/rad, of a normalized ellipse centered at coordinates (X,Y) (milliarcsecond)
+with a ratio ELONG_RATIO between the major diameter and the minor one MINOR_AXIS_DIAMETER,
+turned from the positive vertical semi-axis (i.e. North direction) with angle
+MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis
+(i.e. East direction). (the elongation is along the major_axis)
 
-|North 
-|               For avoiding degenerescence, the domain of variation 
-|---&gt;East       of MAJOR_AXIS_POS_ANGLE is 180 degrees, 
-|               for ex. from 0 to 180 degrees. 
+|North
+|               For avoiding degenerescence, the domain of variation
+|---&gt;East       of MAJOR_AXIS_POS_ANGLE is 180 degrees,
+|               for ex. from 0 to 180 degrees.
 
-ELONG_RATIO = major_axis / minor_axis 
+ELONG_RATIO = major_axis / minor_axis
 
-FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
-The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO 
-is smaller than 1. 
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
+The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO
+is smaller than 1.
 
-UFREQ and VFREQ must be conformable. The returned array is always 
-complex and with dimensions dimsof(UFREQ,VFREQ). 
+UFREQ and VFREQ must be conformable. The returned array is always
+complex and with dimensions dimsof(UFREQ,VFREQ).
 </desc>
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
@@ -95,6 +95,7 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <configuration>
             <HAMin>-12.0</HAMin>
             <HAMax>12.0</HAMax>
+            <aoSetup>STRAP</aoSetup>
         </configuration>
     </target>
     <target id="ETA_TAU">
@@ -115,7 +116,10 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <FLUX_H>2.735</FLUX_H>
         <FLUX_K>2.636</FLUX_K>
         <useAnalyticalModel>true</useAnalyticalModel>
-        <configuration/>
+        <configuration>
+            <HAMin>-12.0</HAMin>
+            <aoSetup>STRAP</aoSetup>
+        </configuration>
     </target>
     <target id="HD_1234">
         <name>HD 1234</name>
@@ -138,12 +142,35 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
             <name>HighMass.fits.gz</name>
             <file>./HighMass.fits.gz</file>
             <checksum>2869938388</checksum>
+            <scaleX>2.42406840554768E-10</scaleX>
+            <scaleY>2.42406840554768E-10</scaleY>
         </userModel>
         <configuration>
             <HAMin>-4.0</HAMin>
             <HAMax>4.0</HAMax>
+            <aoSetup>STRAP</aoSetup>
         </configuration>
     </target>
+    <targetUserInfos>
+        <group id="JMMC_AO">
+            <name>AO Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the Adaptive Optics system</description>
+            <color>#F781BF</color>
+        </group>
+        <group id="JMMC_FT">
+            <name>FT Star</name>
+            <category>[OB]</category>
+            <description>Group gathering stars used by the Fringe Tracking system</description>
+            <color>#75C147</color>
+        </group>
+        <group id="JMMC_GUIDE">
+            <name>Guide Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the telescope guiding</description>
+            <color>#5BAFD6</color>
+        </group>
+    </targetUserInfos>
     <variant>
         <stations>B2 D0 C1</stations>
     </variant>

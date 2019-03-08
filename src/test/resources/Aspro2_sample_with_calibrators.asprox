@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <schemaVersion>2012.02</schemaVersion>
+    <schemaVersion>2018.04</schemaVersion>
     <name>default</name>
     <when>
         <date>2015-10-28</date>
@@ -96,6 +96,7 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <configuration>
             <HAMin>-12.0</HAMin>
             <HAMax>12.0</HAMax>
+            <aoSetup>STRAP</aoSetup>
         </configuration>
     </target>
     <target id="ETA_TAU">
@@ -230,6 +231,10 @@ smaller than 1.</desc>
                 <hasFixedValue>false</hasFixedValue>
             </tm:parameter>
         </tm:model>
+        <configuration>
+            <HAMin>-12.0</HAMin>
+            <aoSetup>STRAP</aoSetup>
+        </configuration>
         <calibratorInfos>
             <parameter xsi:type="a:StringValue" value="SearchCal v3.7.5" name="SearchCalServerVersion"/>
             <parameter xsi:type="a:StringValue" value="K" name="band"/>
@@ -344,6 +349,7 @@ smaller than 1.</desc>
                 <hasFixedValue>false</hasFixedValue>
             </tm:parameter>
         </tm:model>
+        <configuration/>
         <calibratorInfos>
             <parameter xsi:type="a:StringValue" value="SearchCal v3.7.5" name="SearchCalServerVersion"/>
             <parameter xsi:type="a:StringValue" value="K" name="band"/>
@@ -434,6 +440,7 @@ smaller than 1.</desc>
                 <hasFixedValue>false</hasFixedValue>
             </tm:parameter>
         </tm:model>
+        <configuration/>
         <calibratorInfos>
             <parameter xsi:type="a:StringValue" value="SearchCal v3.7.5" name="SearchCalServerVersion"/>
             <parameter xsi:type="a:StringValue" value="K" name="band"/>
@@ -944,6 +951,24 @@ smaller than 1.</desc>
     </target>
     <targetUserInfos>
         <calibrators>HD_3546 HD_3590 HD_2767 HD_3421 HD_3651 HD_2910 HD_2841</calibrators>
+        <group id="JMMC_AO">
+            <name>AO Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the Adaptive Optics system</description>
+            <color>#F781BF</color>
+        </group>
+        <group id="JMMC_FT">
+            <name>FT Star</name>
+            <category>[OB]</category>
+            <description>Group gathering stars used by the Fringe Tracking system</description>
+            <color>#75C147</color>
+        </group>
+        <group id="JMMC_GUIDE">
+            <name>Guide Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the telescope guiding</description>
+            <color>#5BAFD6</color>
+        </group>
         <targetInfo>
             <targetRef>HIP1234</targetRef>
             <calibrators>HD_3546 HD_3590 HD_2767 HD_3421 HD_3651 HD_2910 HD_2841</calibrators>

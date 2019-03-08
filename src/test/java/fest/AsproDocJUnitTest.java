@@ -694,7 +694,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             panel.checkBox("jCheckBoxDoOIFits").uncheck();
 
             // zoom uv max (trigger uv model to compute again):
-            panel.textBox("jFieldUVMax").setText("20.00");
+            panel.textBox("jFieldUVMax").setText("40.00");
 
             // select UV tab to let fields lost focus (trigger change listeners):
             getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
