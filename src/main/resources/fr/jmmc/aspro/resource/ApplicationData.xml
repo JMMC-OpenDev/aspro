@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.6 beta 11"/>
-    <compilation date="07/03/2019" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.6 beta 12"/>
+    <compilation date="11/03/2019" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -219,7 +219,10 @@
 
     <releasenotes>
         <release version="0.9.9.6">
-            <pubDate>Thu, 07 Mar 2019 16:00:00 GMT</pubDate>
+            <pubDate>Mon, 11 Mar 2019 14:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.6 beta 12">
+                <change type="BUGFIX">Minor GUI fixes to capture documentation screen shots</change>
+            </prerelease>
             <prerelease version="0.9.9.6 beta 11">
                 <change type="FEATURE">Added a tooltip on interferometer configurations to indicate alternative names (VLTI small/medium/large...)</change>
             </prerelease>
