@@ -195,7 +195,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jLabelStatus = new javax.swing.JLabel();
 
         setMinimumSize(new java.awt.Dimension(700, 130));
-        setPreferredSize(new java.awt.Dimension(900, 130));
+        setPreferredSize(new java.awt.Dimension(900, getPreferredHeight()));
         setLayout(new java.awt.GridBagLayout());
 
         jPanelTargets.setBorder(javax.swing.BorderFactory.createTitledBorder("Targets"));
@@ -2180,5 +2180,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     private boolean isGuiRestrictionEnabled() {
         return Preferences.getInstance().getPreferenceAsBoolean(Preferences.GUI_RESTRICTIONS);
+    }
+    
+    static int getPreferredHeight() {
+        return Math.max(130, Math.min(200, SwingUtils.adjustUISize(130)));
     }
 }
