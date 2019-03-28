@@ -14,6 +14,7 @@ import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
+import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.SpectralSetup;
@@ -427,6 +428,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         oiArray.setArrayXYZ(position.getPosX(), position.getPosY(), position.getPosZ());
 
         // Stations :
+        final LonLatAlt posCenter = this.interferometer.getPosSph();
+        final Position3D geocentricPos = new Position3D();
+        
         int i = 0;
         Telescope tel;
 
@@ -439,12 +443,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             oiArray.getStaName()[i] = station.getName();
             oiArray.getStaIndex()[i] = this.stationMapping.get(station).shortValue();
 
-            // TODO : rotate the horizontal position to geocentric :
-            position = station.getRelativePosition();
+            // rotate the equatorial local coordinates to geocentric frame:
+            GeocentricCoords.convertEquatorialToGeocentric(station.getRelativePosition(), geocentricPos, posCenter);
 
-            //MAYBE DONT RUN
-            oiArray.setStaXYZ(i, position.getPosX(), position.getPosY(), position.getPosZ());
-
+            oiArray.setStaXYZ(i, geocentricPos.getPosX(), geocentricPos.getPosY(), geocentricPos.getPosZ());
             i++;
         }
 

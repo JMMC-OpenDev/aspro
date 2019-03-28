@@ -1083,18 +1083,6 @@ public final class AsproGenConfig {
         }
     }
 
-    private static double geocentricLatitude(final double geodeticLatitude) {
-        // geocentricLatitude = tan-1( (1-e^2) * tan geodeticLatitude)
-        // e^2 = 2 x f - f^2
-        // f = 1/(298.257,223,563)
-
-        final double geocentricLatitude = Math.atan((1.0 - EARTH_SQUARE_EXCENTRICITY) * Math.tan(geodeticLatitude));
-
-        logger.info("geodeticLatitude: {} => geocentricLatitude: {}", Math.toDegrees(geodeticLatitude), Math.toDegrees(geocentricLatitude));
-
-        return geocentricLatitude;
-    }
-
     /**
      * Convert horizontal coordinates to equatorial coordinates
      *
@@ -1117,8 +1105,7 @@ public final class AsproGenConfig {
         final double y = yOffset * 1e-6;
         final double z = zOffset * 1e-6;
 
-        // Should convert from horizontal (local plane) to equatorial using ellipsoid correction ?
-//        final double latitude = geocentricLatitude(geodeticLatitude);
+        // use geodetic latitude
         final double xx = -Math.sin(latitude) * y + Math.cos(latitude) * z;
         final double yy = x;
         final double zz = Math.cos(latitude) * y + Math.sin(latitude) * z;
@@ -1469,22 +1456,17 @@ public final class AsproGenConfig {
 
         final double alt = 1725.21;
 
-        final double[] pos = computeInterferometerPosition(lonDeg, latDeg, alt, sb);
-
-        final Position3D position = new Position3D();
-        position.setPosX(pos[0]);
-        position.setPosY(pos[1]);
-        position.setPosZ(pos[2]);
+        final Position3D position = computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
         final LonLatAlt coords = GeocentricCoords.getLonLatAlt(position);
 
         logger.info("CHARA position : " + coords.toString());
 
         /*
-         15:59:20.578 [main] INFO  AsproGenConfig - CHARA longitude (deg) : -118.0570313111111
-         15:59:20.578 [main] INFO  AsproGenConfig - CHARA latitude (deg)  : 34.22438369444445
-         15:59:20.578 [main] INFO  AsproGenConfig - position (x,y,z) : -2476998.047780274, -4647390.089884061, 3582240.6122966344
-         15:59:20.784 [main] INFO  AsproGenConfig - CHARA position : [-118:03:25,313, 34:13:27,781, 1725.2099999999627 m]
+        14:25:39.671 INFO  [main] AsproGenConfig - CHARA longitude (deg) : -118.0570313111111
+        14:25:39.671 INFO  [main] AsproGenConfig - CHARA latitude (deg)  : 34.22438369444445
+        14:25:39.671 INFO  [main] AsproGenConfig - position (x,y,z) : [-2483801.164432058, -4660154.224654438, 3568032.552411753]
+        14:25:39.671 INFO  [main] AsproGenConfig - CHARA position : [-118:03:25.3127, +34:13:27.7813, 1725.209 m][-118.0570313111111, 34.22438369444445]
          */
         return new double[]{lonDeg, latDeg};
     }
@@ -1628,29 +1610,32 @@ public final class AsproGenConfig {
     private static void VLTIPosition() {
 
         final StringBuilder sb = new StringBuilder(128);
-
+        
         // ASPRO1: 17/04/2012:
-        final double lonDeg = -70.40498688;
-        final double latDeg = -24.62743941;
-        logger.info("VLTI longitude / latitude (deg) : " + lonDeg + " - " + latDeg);
+        final double lonDeg = -70.40498688; // VLTI site longitude (UV zero) [deg].     
+        final double latDeg = -24.62743941; // VLTI site latitude (UV zero) [deg].
+        logger.info("VLTI geodetic longitude / latitude (deg) : " + lonDeg + " - " + latDeg);
 
-        final double alt = 2681.0;
-        final double[] pos = computeInterferometerPosition(lonDeg, latDeg, alt, sb);
-
-        final Position3D position = new Position3D();
-        position.setPosX(pos[0]);
-        position.setPosY(pos[1]);
-        position.setPosZ(pos[2]);
+        final double alt = 2669.0; // VLTI ground site height above WGS84 [m].
+        
+        final Position3D position = computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
         final LonLatAlt coords = GeocentricCoords.getLonLatAlt(position);
 
         logger.info("VLTI position : " + coords.toString());
 
         /*    
-         10:55:19.679 [main] INFO  AsproGenConfig - VLTI longitude / latitude (deg) : -70.40498688 - -24.62743941
-         10:55:19.685 [main] INFO  AsproGenConfig - position (x,y,z) : 1942014.1545180853, -5455311.818167002, -2654530.4375114734
-         10:55:19.690 [main] INFO  AsproGenConfig - VLTI position : [-70:24:17,953, -24:37:38,782, 2681.0000000009313 m]
+14:16:41.368 INFO  [main] AsproGenConfig - VLTI geodetic longitude / latitude (deg) : -70.40498688 - -24.62743941
+14:16:41.370 INFO  [main] AsproGenConfig - position (x,y,z) : [1946409.9709899623, -5467660.10589381, -2642728.3998888675]
+14:16:41.720 INFO  [main] AsproGenConfig - VLTI position : [-70:24:17.9528, -24:37:38.7819, 2669.0 m][-70.40498688, -24.62743941]
          */
+        
+        /*
+2018.3: ISS gives (as does astropy):        
+ARRAYX  =    1946404.341038839
+ARRAYY  =   -5467644.290798524
+ARRAYZ  =   -2642728.201444249
+        */
         logger.info("Generated VLTI position:\n" + sb.toString());
     }
 
@@ -1679,26 +1664,19 @@ public final class AsproGenConfig {
      * @param sb buffer
      * @return positions (x,y,z)
      */
-    private static double[] computeInterferometerPosition(final double lon, final double lat, final double alt, final StringBuilder sb) {
+    private static Position3D computeInterferometerPosition(final double lon, final double lat, final double alt, final StringBuilder sb) {
+        
+        final Position3D geoXYZ = GeocentricCoords.getGeocentric(Math.toRadians(lon), Math.toRadians(lat), alt);
 
-        final double theta = Math.toRadians(90.0 - lat);
-        final double phi = Math.toRadians(lon);
-
-        final double r = AsproConstants.EARTH_RADIUS + alt;
-
-        final double x = r * Math.sin(theta) * Math.cos(phi);
-        final double y = r * Math.sin(theta) * Math.sin(phi);
-        final double z = r * Math.cos(theta);
-
-        logger.info("position (x,y,z) : " + x + ", " + y + ", " + z);
+        logger.info("position (x,y,z) : " + geoXYZ);
 
         sb.append("    <position>\n");
-        sb.append("      <posX>").append(x).append("</posX>\n");
-        sb.append("      <posY>").append(y).append("</posY>\n");
-        sb.append("      <posZ>").append(z).append("</posZ>\n");
+        sb.append("      <posX>").append(geoXYZ.getPosX()).append("</posX>\n");
+        sb.append("      <posY>").append(geoXYZ.getPosY()).append("</posY>\n");
+        sb.append("      <posZ>").append(geoXYZ.getPosZ()).append("</posZ>\n");
         sb.append("    </position>\n\n");
 
-        return new double[]{x, y, z};
+        return geoXYZ;
     }
 
     /**
@@ -2160,16 +2138,34 @@ public final class AsproGenConfig {
          */
         final StringBuilder sb = new StringBuilder(128);
 
-        final double lonDeg = +(20.0 + 48.0 / 60.0 + 39.3 / 3600.0);
+        double lonDeg = +(20.0 + 48.0 / 60.0 + 39.3 / 3600.0);
         logger.info("Sutherland longitude (deg) : " + lonDeg);
 
-        final double latDeg = -(32.0 + 22.0 / 60.0 + 47.9 / 3600.0);
+        double latDeg = -(32.0 + 22.0 / 60.0 + 47.9 / 3600.0);
         logger.info("Sutherland  latitude (deg) : " + latDeg);
 
-        final double alt = 1798.0;
+        double alt = 1798.0;
         computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
         logger.info("Generated Sutherland position:\n" + sb.toString());
+        
+        sb.setLength(0);
+        
+        /*
+        OHP:
+         5° 42' 44" E Latitude = +43° 55' 54" (Télescope de 1m93) IAU Observatory Code 511
+        altitude moyenne est de 650 mètres
+        */
+        lonDeg = +(5.0 + 42.0 / 60.0 + 44.0 / 3600.0);
+        logger.info("OHP longitude (deg) : " + lonDeg);
+
+        latDeg = -(43.0 + 55.0 / 60.0 + 54.0 / 3600.0);
+        logger.info("OHP  latitude (deg) : " + latDeg);
+
+        alt = 650.0;
+        computeInterferometerPosition(lonDeg, latDeg, alt, sb);
+
+        logger.info("Generated OHP position:\n" + sb.toString());
     }
 
     static double trimTo4Digits(final double value) {
@@ -2197,6 +2193,20 @@ public final class AsproGenConfig {
 
         // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
+        
+        // Recompute site positions:
+        if (false) {
+            VLTIPosition();
+            final StringBuilder sb = new StringBuilder(128);
+            CHARAposition(sb);
+            MROIposition();
+            sb.setLength(0);
+            SUSIposition(sb);
+            sb.setLength(0);
+            NPOIposition(sb);
+            SingleDishes();
+            return;
+        }
 
         final String userHome = SystemUtils.USER_HOME;
 
@@ -2205,7 +2215,7 @@ public final class AsproGenConfig {
 
         final String asproTestPath = userHome + "/dev/aspro/src/test/resources/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.VLTI;
+        final INTERFEROMETER selected = INTERFEROMETER.CHARA;
 
         switch (selected) {
             case VLTI:
