@@ -39,7 +39,7 @@ layout = {
 'M0':(112.0130, -48.0000),
 'U1':(-16.0000, -16.0000),
 'U2':( 24.0000,  24.0000),
-'U3':( 64.0000,  47.9725),
+'U3':( 64.0013,  47.9725),
 'U4':(112.0000,   8.0000)}
 
 # AT at 4.5397m
@@ -93,6 +93,7 @@ for sta in sorted(layout):
 
    #print sta, " ",xh, " ",yh," ",zh
 
+   # Equatorial local:
    print("<station>")
    print("    <name>{}</name>".format(sta))
    print("    <relativePosition>")
