@@ -293,9 +293,9 @@ public final class DelayLineService {
                                         final double[] w) {
         // A = Y
         final double a = baseLine.getY();
-        // B = (2 Y)
+        // B = -2 X
         final double b = -2d * baseLine.getX();
-        // C = (C - X)
+        // C = - Y
         final double c = -baseLine.getY();
 
         // note: w contains ha solutions:
