@@ -92,11 +92,12 @@ public final class InterferometerMapService {
                     maxDiam = diam[i];
                 }
 
-                // convert XYZ station coordinates to XY plan :
+                // convert XYZ station coordinates (local equatorial) to XY plan (local):
                 x = s.getRelativePosition().getPosX();
                 y = s.getRelativePosition().getPosY();
                 z = s.getRelativePosition().getPosZ();
 
+                // rotate XZ by (-latitude) ie around y axis:
                 mapX[i] = y;
                 mapY[i] = z * cosLat - x * sinLat;
             }
