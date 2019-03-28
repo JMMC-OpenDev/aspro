@@ -47,8 +47,8 @@ layout = {
 
 layout_orientation = -18.984 # degrees
 
-cosPsi = np.cos(np.radians(layout_orientation)) 
-sinPsi = np.sin(np.radians(layout_orientation)) 
+cosPsi = np.cos(np.radians(layout_orientation))
+sinPsi = np.sin(np.radians(layout_orientation))
 
 
 # -- from FITS header:
@@ -57,19 +57,19 @@ vlti_longitude = -70.40498688
 
 zAT = 4.5397  # 4.5m for AT
 
-cosLat = np.cos(np.radians(vlti_latitude)) 
-sinLat = np.sin(np.radians(vlti_latitude)) 
+cosLat = np.cos(np.radians(vlti_latitude))
+sinLat = np.sin(np.radians(vlti_latitude))
 
 # geocentricLatitude: -0.427291058117218
 deltaLat = -0.427291058117218 - np.radians(vlti_latitude)
-cosDLat = np.cos(deltaLat) 
-sinDLat = np.sin(deltaLat) 
+cosDLat = np.cos(deltaLat)
+sinDLat = np.sin(deltaLat)
 
 
 # inverse longitude rotation for geocentric:
 vlti_longitude=-vlti_longitude
-cosLon = np.cos(np.radians(vlti_longitude)) 
-sinLon = np.sin(np.radians(vlti_longitude)) 
+cosLon = np.cos(np.radians(vlti_longitude))
+sinLon = np.sin(np.radians(vlti_longitude))
 
 
 for sta in sorted(layout):
@@ -85,11 +85,11 @@ for sta in sorted(layout):
    e =  cosPsi * p + sinPsi * q
    n = -sinPsi * p + cosPsi * q
 
-   # print e, " vs ",layout[sta][2], " : ", n, " vs ",layout[sta][3]
+   # print "E,N: ",e, " ", n
 
    xh = -sinLat * n + cosLat * z
    yh = e
-   zh =  cosLat * n + sinLat * z 
+   zh =  cosLat * n + sinLat * z
 
    #print sta, " ",xh, " ",yh," ",zh
 
@@ -111,7 +111,7 @@ for sta in sorted(layout):
 
            # fix geocentric lat
         #   xc =  cosDLat * xc + sinDLat * zc
-        #   zc = -sinDLat * xc + cosDLat * zc 
+        #   zc = -sinDLat * xc + cosDLat * zc
 
            print "GC lat:",sta, " ",xc, " ",yc," ",zc
 
