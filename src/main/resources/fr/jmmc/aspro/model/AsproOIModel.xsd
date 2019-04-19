@@ -215,6 +215,13 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="targetVersion" type="xsd:float">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Target update (simbad) version for this observation
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
 
             <xsd:element name="name" type="xsd:string">
                 <xsd:annotation>

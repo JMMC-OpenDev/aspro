@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.7 beta 1"/>
-    <compilation date="28/03/2019" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.7 beta 2"/>
+    <compilation date="19/04/2019" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -190,6 +190,9 @@
             </menu>
             <menu/>
             <menu label="Target editor" classpath="fr.jmmc.aspro.gui.action.TargetEditorAction" action="targetEditor" accelerator="T"/>
+            <menu/>
+            <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction" action="updateSimbad"
+                  description="update all targets with the latest information from the CDS Simbad service"/>
         </menu>
 
         <menu label="Interop">
@@ -219,9 +222,13 @@
 
     <releasenotes>
         <release version="0.9.9.7">
-            <pubDate>Thu, 28 Mar 2019 16:00:00 GMT</pubDate>
+            <pubDate>Fri, 19 Apr 2019 14:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.7 beta 2">
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/985">Added actions in the 'Edit' menu and in the 'Target Editor' to update target(s) with latest Simbad information;
+                added an auto-update check when loading an asprox file to propose the update of all targets</change>
+            </prerelease>
             <prerelease version="0.9.9.7 beta 1">
-                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/992">use proper geocentric positions for stations and array center in OI_ARRAY (FITS)</change>
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/992">Use proper geocentric positions for stations and array center in OI_ARRAY (FITS)</change>
             </prerelease>
         </release>
         <release version="0.9.9.6">

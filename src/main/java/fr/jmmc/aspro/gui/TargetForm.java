@@ -14,6 +14,7 @@ import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.TargetDEComparator;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
+import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmal.star.StarResolverListener;
 import fr.jmmc.jmal.star.StarResolverResult;
 import fr.jmmc.jmcs.gui.component.GenericJTree;
@@ -24,7 +25,6 @@ import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.UrlUtils;
-import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
@@ -37,10 +37,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
@@ -601,7 +599,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                         this.initialize(getCurrentTarget().getName());
                     }
                     if (sb.length() != 0) {
-                        MessagePane.showWarning(sb.toString());
+                        MessagePane.showWarning(sb.toString(), "Simbad resolver");
                     }
                 }
             }
@@ -643,6 +641,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelName = new javax.swing.JLabel();
         jFieldName = new JFormattedTextField(createFieldNameFormatter());
         jPanelTargetActions = new javax.swing.JPanel();
+        refreshButton = new javax.swing.JButton();
         jButtonSimbad = new javax.swing.JButton();
         jButtonSEDViewer = new javax.swing.JButton();
         jButtonGetStar = new javax.swing.JButton();
@@ -915,6 +914,16 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         flowLayout1.setAlignOnBaseline(true);
         jPanelTargetActions.setLayout(flowLayout1);
 
+        refreshButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/jmcs/resource/image/refresh.png"))); // NOI18N
+        refreshButton.setToolTipText("Update Simbad information");
+        refreshButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        refreshButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateSimbad(evt);
+            }
+        });
+        jPanelTargetActions.add(refreshButton);
+
         jButtonSimbad.setText("Simbad");
         jButtonSimbad.setToolTipText("Open CDS Simbad web page for this target");
         jButtonSimbad.setMargin(new java.awt.Insets(2, 2, 2, 2));
@@ -961,7 +970,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelTarget.add(jLabelRA, gridBagConstraints);
 
         jFieldRA.setEditable(false);
-        jFieldRA.setColumns(5);
+        jFieldRA.setColumns(12);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -980,7 +989,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelTarget.add(jLabelDEC, gridBagConstraints);
 
         jFieldDEC.setEditable(false);
-        jFieldDEC.setColumns(5);
+        jFieldDEC.setColumns(12);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
@@ -1689,6 +1698,21 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         BrowserLauncher.openURL(MAG_CONV_ID);
     }//GEN-LAST:event_jButtonMagConvActionPerformed
 
+    private void updateSimbad(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateSimbad
+        try {
+            starSearchField.setText(this.currentTarget.getName());
+
+            // set flag to ignore fixing star name:
+            starSearchField.setFlags(StarResolver.FLAG_SKIP_FIX_NAME);
+            // asynchronous event:
+            starSearchField.postActionEvent();
+        } finally {
+            // anyway reset flags & text:
+            starSearchField.resetFlags();
+            starSearchField.setText(null);
+        }
+    }//GEN-LAST:event_updateSimbad
+
     /**
      * Remove all occurences of the calibrator from the tree
      * @param calibrator calibrator target
@@ -1997,6 +2021,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JTextArea jTextAreaTargetInfos;
     private javax.swing.JToggleButton jToggleButtonCalibrator;
     private javax.swing.JTree jTreeTargets;
+    private javax.swing.JButton refreshButton;
     private fr.jmmc.jmal.star.EditableStarResolverWidget starSearchField;
     // End of variables declaration//GEN-END:variables
 

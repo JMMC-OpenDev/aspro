@@ -1453,6 +1453,44 @@ public class Target
     }
 
     /**
+     * Merge target information on the given target with information from the simbad target
+     * @param target target to update
+     * @param source Simbad target where information comes from
+     */
+    public static void mergeSimbadTarget(final Target target, final Target source) {
+        // Reset fields that must be overriden if present in simbad target
+        // (coords, PM, Parallax, sptype, Obj types, identifiers)
+        target.setCoords(source.getRA(), source.getDEC(), source.getEQUINOX());
+
+        if (source.getSYSVEL() != null) {
+            target.setSYSVEL(null);
+            target.setVELTYP(null);
+        }
+        
+        if (source.getPMRA() != null && source.getPMDEC() != null) {
+            target.setPMRA(null);
+            target.setPMDEC(null);
+        }
+
+        if (source.getPARALLAX() != null) {
+            target.setPARALLAX(null);
+            target.setPARAERR(null);
+        }
+        
+        if (!isEmpty(source.getIDS())) {
+            target.setIDS(null);
+        }
+        if (!isEmpty(source.getOBJTYP())) {
+            target.setOBJTYP(null);
+        }
+        if (!isEmpty(source.getSPECTYP())) {
+            target.setSPECTYP(null);
+        }        
+        
+        mergeTarget(target, source);
+    }
+    
+    /**
      * Merge target information on the given target with information from the source target
      * @param target target to update
      * @param source target where information comes from

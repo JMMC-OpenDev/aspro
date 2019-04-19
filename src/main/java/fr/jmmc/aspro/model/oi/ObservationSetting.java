@@ -26,6 +26,7 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
  *         &lt;element name="schemaVersion" type="{http://www.w3.org/2001/XMLSchema}float"/&gt;
+ *         &lt;element name="targetVersion" type="{http://www.w3.org/2001/XMLSchema}float"/&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="when" type="{http://www.jmmc.fr/aspro-oi/0.1}WhenSetting"/&gt;
@@ -47,6 +48,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ObservationSetting", propOrder = {
     "schemaVersion",
+    "targetVersion",
     "name",
     "description",
     "when",
@@ -64,6 +66,7 @@ public class ObservationSetting
 {
 
     protected float schemaVersion;
+    protected float targetVersion;
     @XmlElement(required = true)
     protected String name;
     protected String description;
@@ -95,6 +98,22 @@ public class ObservationSetting
      */
     public void setSchemaVersion(float value) {
         this.schemaVersion = value;
+    }
+
+    /**
+     * Gets the value of the targetVersion property.
+     * 
+     */
+    public float getTargetVersion() {
+        return targetVersion;
+    }
+
+    /**
+     * Sets the value of the targetVersion property.
+     * 
+     */
+    public void setTargetVersion(float value) {
+        this.targetVersion = value;
     }
 
     /**

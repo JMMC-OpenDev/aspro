@@ -16,6 +16,7 @@ import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.NewObservationAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.TargetEditorAction;
+import fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
 import fr.jmmc.aspro.interop.ObservationSampMessageHandler;
@@ -358,6 +359,8 @@ public final class Aspro2 extends App {
         // Edit menu :
         // target editor :
         new TargetEditorAction();
+        // update simbad:
+        new TargetUpdateSimbadAction();
 
         // Interop menu :
         // send observation (SAMP) :

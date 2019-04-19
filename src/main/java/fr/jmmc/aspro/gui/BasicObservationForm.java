@@ -41,6 +41,7 @@ import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.star.EditableStarResolverWidget;
 import fr.jmmc.jmal.star.Star;
+import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmal.star.StarResolverListener;
 import fr.jmmc.jmal.star.StarResolverResult;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
@@ -69,6 +70,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -1519,7 +1521,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                         om.fireTargetChangedEvents();
                     }
                     if (sb.length() != 0) {
-                        MessagePane.showWarning(sb.toString());
+                        MessagePane.showWarning(sb.toString(), "Simbad resolver");
                     }
                 }
             }
@@ -1530,6 +1532,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         boolean changed = false;
         if (star != null) {
             final Target newTarget = TargetUtils.convert(star);
+            
+            // TODO: if update ? then use queryName instead
 
             // update the data model or throw exception ?
             if (newTarget != null) {
@@ -1544,8 +1548,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
                     // exact match:
                     if (match.getDistance() == 0.0) {
+                        logger.info("Merge [{}] with [{}]", t, newTarget);
+                        msg = "Target[" + t.getName() + "] updated.";
+
+                        Target.mergeSimbadTarget(t, newTarget);
+
                         add = false;
-                        msg = "Target[" + newTarget.getName() + "] already defined [" + t.getName() + "].";
+                        changed = true;
                     } else {
                         msg = "Target[" + newTarget.getName() + "](" + newTarget.getRA() + " , " + newTarget.getDEC()
                                 + ") too close to Target[" + t.getName() + "](" + t.getRA() + " , " + t.getDEC()
@@ -1737,6 +1746,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jListTargets.setEnabled(targetEditable);
         jButtonTargetEditor.setEnabled(targetEditable);
         jButtonDeleteTarget.setEnabled(targetEditable);
+
+        // auto-update coords when loading an asprox file:
+        SwingUtils.invokeLaterEDT(new Runnable() {
+            @Override
+            public void run() {
+                updateSimbad(true);
+            }
+        });
     }
 
     private void updateInitialSetup() {
@@ -1959,6 +1976,56 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             jLabelStatus.setToolTipText(sb.toString());
         }
     }
+
+    public void updateSimbad() {
+        updateSimbad(false);
+    }
+
+    private void updateSimbad(final boolean onLoad) {
+        final List<Target> editTargets = om.getTargets();
+
+        if (editTargets.isEmpty()) {
+            // set initial target version (avoid repeats):
+            om.updateTargetVersion();
+        } else {
+            // check version:
+            if (om.checkTargetVersion()) {
+                // version is OK, skip update
+                return;
+            }
+
+            if (onLoad) {
+                // TODO: test last simbad date ?
+                if (!MessagePane.showConfirmMessage(this, "Do you want to update targets with the latest CDS Simbad information (coordinates ...) ?")) {
+                    return;
+                }
+            }
+            
+            // update target version (avoid repeats):
+            om.updateTargetVersion();
+
+            try {
+                final StringBuilder sb = new StringBuilder(256);
+
+                for (Target t : editTargets) {
+                    sb.append(t.getName()).append(StarResolver.SEPARATOR_SEMI_COLON);
+                }
+                sb.setLength(sb.length() - 1);
+
+                starSearchField.setText(sb.toString());
+                
+                // set flag to ignore fixing star name:
+                starSearchField.setFlags(StarResolver.FLAG_SKIP_FIX_NAME);
+                // asynchronous event:
+                starSearchField.postActionEvent();
+            } finally {
+                // anyway reset flags & text:
+                starSearchField.resetFlags();
+                starSearchField.setText(null);
+            }
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonDeleteTarget;
     private javax.swing.JButton jButtonSkyCalc;
@@ -2181,7 +2248,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private boolean isGuiRestrictionEnabled() {
         return Preferences.getInstance().getPreferenceAsBoolean(Preferences.GUI_RESTRICTIONS);
     }
-    
+
     static int getPreferredHeight() {
         return Math.max(130, Math.min(200, SwingUtils.adjustUISize(130)));
     }

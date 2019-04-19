@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;
@@ -67,6 +68,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(ObservationManager.class.getName());
+    /** minimum target version to force a simbad update */
+    public final static float TARGET_VERSION_MUST_UPDATE = 2019.04f;
     /** flag to log a stack trace in method fireEvent() to debug events */
     private final static boolean DEBUG_FIRE_EVENT = false;
     /** configuration manager */
@@ -257,6 +260,31 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     }
 
     // --- MAIN FUNCTIONS --------------------------------------------------------
+    /**
+     * Check the current target version
+     * @return true if valid; false otherwise
+     */
+    public boolean checkTargetVersion() {
+        // undefined gives 0.0
+        final float version = getMainObservation().getTargetVersion();
+
+        return (version - TARGET_VERSION_MUST_UPDATE) >= -0.01f;
+    }
+
+    /**
+     * Update the target version to 'YYYY.MM' at the present date
+     */
+    public void updateTargetVersion() {
+        final Calendar cal = Calendar.getInstance();
+
+        float version = cal.get(Calendar.YEAR) + (1f + cal.get(Calendar.MONTH)) / 100f;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("updateTargetVersion : {}", version);
+        }
+        getMainObservation().setTargetVersion(version);
+    }
+
     /**
      * Reset the current observation
      *
