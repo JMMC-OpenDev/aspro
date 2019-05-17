@@ -300,15 +300,20 @@ public final class NoiseService implements VisNoiseService {
 
         if (targetConf != null && targetConf.getAoSetup() != null) {
             this.aoSetup = telescope.findAOSetup(targetConf.getAoSetup());
-            if (this.aoSetup != null) {
+            if (this.aoSetup == null) {
+                // TODO: support multi-config VLTI UT and AT confs:
+                logger.info("Invalid AO[{}] for telescope {}", targetConf.getAoSetup(), telescope.getName());
+            } else {
                 ao = this.aoSetup.getAdaptiveOptics();
             }
-        } else {
+        }
+        if (ao == null) {
             if (!telescope.getAdaptiveOptics().isEmpty()) {
                 // use default AO for the telescope:
                 ao = telescope.getAdaptiveOptics().get(0);
                 if (!ao.getSetups().isEmpty()) {
                     this.aoSetup = ao.getSetups().get(0); // FIRST SETUP if present
+                    logger.info("Using default AO setup[{}] for telescope {}", aoSetup.getName(), telescope.getName());
                 }
             }
         }
