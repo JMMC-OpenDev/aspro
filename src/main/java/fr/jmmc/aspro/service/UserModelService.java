@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
-import edu.sorting.DualPivotQuicksort;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.oiexplorer.core.util.FitsImageUtils;
 import fr.jmmc.aspro.model.oi.UserModel;
@@ -1140,8 +1139,10 @@ public final class UserModelService {
 
         logger.info("FitsImage: used pixels = {} / {}", n1D, nData);
 
-        // Use parallel sort:
-        DualPivotQuicksort.sort(data1D, ParallelJobExecutor.getInstance().getMaxParallelJob(), 0, n1D);
+        // Ideally use parallel sort (JDK 1.8+):
+//        edu.sorting.DualPivotQuicksort.sort(data1D, ParallelJobExecutor.getInstance().getMaxParallelJob(), 0, n1D);
+        // For now use JDK sort (compatible with JDK 6/7):
+        Arrays.sort(data1D, 0, n1D);
 
         logger.info("FitsImage: {} float sorted.", n1D);
 
