@@ -3521,7 +3521,7 @@ public final class ObservabilityService {
      * @param msg message to add
      */
     private void addWarning(final String msg) {
-        this.data.getWarningContainer().addWarningMessage(msg);
+        this.data.getWarningContainer().addWarning(msg);
     }
 
     /**
@@ -3529,7 +3529,7 @@ public final class ObservabilityService {
      * @param msg message to add
      */
     private void addInformation(final String msg) {
-        this.data.getWarningContainer().addInformationMessage(msg);
+        this.data.getWarningContainer().addInformation(msg);
     }
 
     /**

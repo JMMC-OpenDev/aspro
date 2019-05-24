@@ -29,9 +29,9 @@ public final class WarningContainer {
      * Add the given warning container to this warning container only if the new message does not already exist in this container
      * @param container messages to add
      */
-    public void addWarningMessages(final WarningContainer container) {
-        if (container.hasWarningMessages()) {
-            for (WarningMessage message : container.getWarningMessages()) {
+    public void addWarnings(final WarningContainer container) {
+        if (container.hasWarning()) {
+            for (WarningMessage message : container.getWarnings()) {
                 addMessage(message);
             }
         }
@@ -41,7 +41,7 @@ public final class WarningContainer {
      * Add the given message to the warning messages
      * @param msg message to add
      */
-    public void addWarningMessage(final String msg) {
+    public void addWarning(final String msg) {
         addMessage(new WarningMessage(msg));
     }
 
@@ -49,7 +49,7 @@ public final class WarningContainer {
      * Add the given message to the information messages
      * @param msg message to add
      */
-    public void addInformationMessage(final String msg) {
+    public void addInformation(final String msg) {
         addMessage(new WarningMessage(msg, WarningMessage.Level.Information));
     }
 
@@ -71,7 +71,7 @@ public final class WarningContainer {
      * Return true if there are warning messages
      * @return true if there are warning messages
      */
-    public boolean hasWarningMessages() {
+    public boolean hasWarning() {
         return this.warningMessages != null && !this.warningMessages.isEmpty();
     }
 
@@ -80,9 +80,9 @@ public final class WarningContainer {
      * @param match matching string
      * @return first warning message in this warning container that contains the given string or null if not found
      */
-    public String getMatchingWarningMessage(final String match) {
-        if (hasWarningMessages()) {
-            for (WarningMessage message : getWarningMessages()) {
+    public String getMatchingWarning(final String match) {
+        if (hasWarning()) {
+            for (WarningMessage message : getWarnings()) {
                 if (message.getMessage().contains(match)) {
                     return message.getMessage();
                 }
@@ -103,7 +103,7 @@ public final class WarningContainer {
      * Return the list of warning messages
      * @return warning messages or null
      */
-    public List<WarningMessage> getWarningMessages() {
+    public List<WarningMessage> getWarnings() {
         return this.warningMessages;
     }
 }

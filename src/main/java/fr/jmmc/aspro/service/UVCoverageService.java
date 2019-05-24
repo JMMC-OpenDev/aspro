@@ -598,7 +598,7 @@ public final class UVCoverageService {
      * @param msg message to add
      */
     private void addWarning(final String msg) {
-        this.data.getWarningContainer().addWarningMessage(msg);
+        this.data.getWarningContainer().addWarning(msg);
     }
 
     /**

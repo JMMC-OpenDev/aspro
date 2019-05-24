@@ -1929,7 +1929,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * @param warningContainer warning container or null to reset content
      */
     private void updateStatus(final WarningContainer warningContainer) {
-        if (warningContainer == null || !warningContainer.hasWarningMessages()) {
+        if (warningContainer == null || !warningContainer.hasWarning()) {
             // reset
             if (jLabelStatus.getIcon() != null) {
                 jLabelStatus.setIcon(null);
@@ -1942,7 +1942,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             jLabelStatus.setIcon((level == Level.Warning) ? ResourceImage.WARNING_ICON.icon() : ResourceImage.INFO_ICON.icon());
             jLabelStatus.setText(level.toString());
 
-            final StringBuilder sb = new StringBuilder(100 * warningContainer.getWarningMessages().size());
+            final StringBuilder sb = new StringBuilder(100 * warningContainer.getWarnings().size());
             sb.append("<html>");
 
             // Add initial setup:
@@ -1952,7 +1952,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
             String msg;
 
-            for (WarningMessage message : warningContainer.getWarningMessages()) {
+            for (WarningMessage message : warningContainer.getWarnings()) {
                 msg = message.getMessage();
 
                 sb.append(StringUtils.encodeTagContent(msg)).append("<br>");

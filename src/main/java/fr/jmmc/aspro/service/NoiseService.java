@@ -1615,7 +1615,7 @@ public final class NoiseService implements VisNoiseService {
      * @param msg message to add
      */
     private void addWarning(final String msg) {
-        this.warningContainer.addWarningMessage(msg);
+        this.warningContainer.addWarning(msg);
     }
 
     /**
@@ -1623,7 +1623,7 @@ public final class NoiseService implements VisNoiseService {
      * @param msg message to add
      */
     private void addInformation(final String msg) {
-        this.warningContainer.addInformationMessage(msg);
+        this.warningContainer.addInformation(msg);
     }
 
     /**
