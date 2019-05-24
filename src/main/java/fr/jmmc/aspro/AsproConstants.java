@@ -68,7 +68,21 @@ public interface AsproConstants {
                 NumberUtils.valueOf(5),
                 NumberUtils.valueOf(9),
                 NumberUtils.valueOf(15),
-                NumberUtils.valueOf(25)}));
+                NumberUtils.valueOf(25)
+            }));
+    /** default fast user mode error */
+    public final static Double DEFAULT_FAST_ERROR = Double.valueOf(1.0);
+    /** fast user mode error choices */
+    public final static Vector<Double> FAST_ERROR = new Vector<Double>(Arrays.asList(
+            new Double[]{
+                Double.valueOf(0.1),
+                Double.valueOf(0.2),
+                Double.valueOf(0.5),
+                DEFAULT_FAST_ERROR,
+                Double.valueOf(2.0),
+                Double.valueOf(5.0)
+            }));
+
     /** no value for combo boxes */
     public static final String NONE = "None";
 
@@ -101,7 +115,7 @@ public interface AsproConstants {
     /** label to display when multiple configurations are in use (file names, chart titles ...) */
     public static final String MULTI_CONF = "MULTI CONFIGURATION";
 
-    /* Warning matchers */    
+    /* Warning matchers */
     /** Prefix for the warning message 'Missing photometry ...' */
     public final static String WARN_MISSING_MAGS = "Missing photometry";
 }

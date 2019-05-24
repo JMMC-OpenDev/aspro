@@ -67,17 +67,19 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         this.jComboBoxBestPopsCriteriaSigma.setModel(new DefaultComboBoxModel(Criteria.values()));
         this.jComboBoxBestPopsCriteriaAverageWeight.setModel(new DefaultComboBoxModel(Criteria.values()));
 
+        this.jComboBoxFastError.setModel(new DefaultComboBoxModel(AsproConstants.FAST_ERROR));
         this.jComboBoxSuperSampling.setModel(new DefaultComboBoxModel(AsproConstants.SUPER_SAMPLING));
 
         // Custom renderer for LUT:
         this.jComboBoxLUT.setRenderer(new IconComboBoxRenderer() {
             private static final long serialVersionUID = 1L;
+
             @Override
             protected Image getImage(final String name) {
                 return ColorModels.getColorModelImage(name);
             }
         });
-        
+
         // Set the Aspro Preferences:
         this.chartPreferencesView.setPreferences(myPreferences);
 
@@ -138,6 +140,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         buttonGroupAddNoise = new javax.swing.ButtonGroup();
         buttonGroupImageNoise = new javax.swing.ButtonGroup();
         buttonGroupGuiRestrictions = new javax.swing.ButtonGroup();
+        buttonGroupApodization = new javax.swing.ButtonGroup();
         jScrollPane = new javax.swing.JScrollPane();
         jPanelLayout = new javax.swing.JPanel();
         jPanelObservability = new javax.swing.JPanel();
@@ -183,6 +186,11 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jLabelFastUserModel = new javax.swing.JLabel();
         jRadioButtonFastUserModelYes = new javax.swing.JRadioButton();
         jRadioButtonFastUserModelNo = new javax.swing.JRadioButton();
+        jComboBoxFastError = new javax.swing.JComboBox();
+        jLabelApodization = new javax.swing.JLabel();
+        jLabelFastError = new javax.swing.JLabel();
+        jRadioButtonApodizationYes = new javax.swing.JRadioButton();
+        jRadioButtonApodizationNo = new javax.swing.JRadioButton();
         jPanelOIFits = new javax.swing.JPanel();
         jLabelSuperSampling = new javax.swing.JLabel();
         jComboBoxSuperSampling = new javax.swing.JComboBox();
@@ -593,6 +601,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
 
         jLabelFastUserModel.setText("Fast mode (optimize image)");
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelUserModel.add(jLabelFastUserModel, gridBagConstraints);
@@ -620,6 +629,62 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.weightx = 0.4;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jRadioButtonFastUserModelNo, gridBagConstraints);
+
+        jComboBoxFastError.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxFastErrorActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.weightx = 0.1;
+        jPanelUserModel.add(jComboBoxFastError, gridBagConstraints);
+
+        jLabelApodization.setText("Apodization (telescope)");
+        jLabelApodization.setToolTipText("");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelUserModel.add(jLabelApodization, gridBagConstraints);
+
+        jLabelFastError.setText("Fast mode Error (%)");
+        jLabelFastError.setToolTipText("");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelUserModel.add(jLabelFastError, gridBagConstraints);
+
+        buttonGroupApodization.add(jRadioButtonApodizationYes);
+        jRadioButtonApodizationYes.setText("yes");
+        jRadioButtonApodizationYes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonApodizationActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        jPanelUserModel.add(jRadioButtonApodizationYes, gridBagConstraints);
+
+        buttonGroupApodization.add(jRadioButtonApodizationNo);
+        jRadioButtonApodizationNo.setText("no");
+        jRadioButtonApodizationNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonApodizationActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        jPanelUserModel.add(jRadioButtonApodizationNo, gridBagConstraints);
 
         jPanelLayout.add(jPanelUserModel);
 
@@ -939,9 +1004,28 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         }
     }//GEN-LAST:event_jComboBoxInterpolationActionPerformed
 
+    private void jComboBoxFastErrorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxFastErrorActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_USER_FAST_ERROR, (Double) this.jComboBoxFastError.getSelectedItem());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxFastErrorActionPerformed
+
+    private void jRadioButtonApodizationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonApodizationActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_USER_APODIZE, Boolean.valueOf(this.jRadioButtonApodizationYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonApodizationActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupAddNoise;
+    private javax.swing.ButtonGroup buttonGroupApodization;
     private javax.swing.ButtonGroup buttonGroupFastUserModel;
     private javax.swing.ButtonGroup buttonGroupGuiRestrictions;
     private javax.swing.ButtonGroup buttonGroupImageNoise;
@@ -954,6 +1038,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JComboBox jComboBoxBestPopsCriteriaAverageWeight;
     private javax.swing.JComboBox jComboBoxBestPopsCriteriaSigma;
     private javax.swing.JComboBox jComboBoxColorScale;
+    private javax.swing.JComboBox jComboBoxFastError;
     private javax.swing.JComboBox jComboBoxImageSize;
     private javax.swing.JComboBox jComboBoxInterpolation;
     private javax.swing.JComboBox jComboBoxLUT;
@@ -961,11 +1046,13 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JComboBox jComboBoxTwilight;
     private javax.swing.JFormattedTextField jFieldMinElev;
     private javax.swing.JLabel jLabelAddNoise;
+    private javax.swing.JLabel jLabelApodization;
     private javax.swing.JLabel jLabelBestPopsAlgorithm;
     private javax.swing.JLabel jLabelBestPopsCriteriaAverageWeight;
     private javax.swing.JLabel jLabelBestPopsCriteriaSigma;
     private javax.swing.JLabel jLabelCenterNight;
     private javax.swing.JLabel jLabelColorScale;
+    private javax.swing.JLabel jLabelFastError;
     private javax.swing.JLabel jLabelFastUserModel;
     private javax.swing.JLabel jLabelGuiRestrictions;
     private javax.swing.JLabel jLabelImageNoise;
@@ -989,6 +1076,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JPanel jPanelUserModel;
     private javax.swing.JRadioButton jRadioButtonAddNoiseNo;
     private javax.swing.JRadioButton jRadioButtonAddNoiseYes;
+    private javax.swing.JRadioButton jRadioButtonApodizationNo;
+    private javax.swing.JRadioButton jRadioButtonApodizationYes;
     private javax.swing.JRadioButton jRadioButtonBypassGuiRestrictionsNo;
     private javax.swing.JRadioButton jRadioButtonBypassGuiRestrictionsYes;
     private javax.swing.JRadioButton jRadioButtonCenterNightNo;
@@ -1069,6 +1158,10 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         final boolean useFastUserModel = this.myPreferences.isFastUserModel();
         this.jRadioButtonFastUserModelYes.setSelected(useFastUserModel);
         this.jRadioButtonFastUserModelNo.setSelected(!useFastUserModel);
+        this.jComboBoxFastError.setSelectedItem(this.myPreferences.getPreferenceAsDouble(Preferences.MODEL_USER_FAST_ERROR));
+        final boolean useApodization = this.myPreferences.isDoUserModelApodization();
+        this.jRadioButtonApodizationYes.setSelected(useApodization);
+        this.jRadioButtonApodizationNo.setSelected(!useApodization);
 
         // OIFits:
         this.jComboBoxSuperSampling.setSelectedItem(this.myPreferences.getPreferenceAsInt(Preferences.OIFITS_SUPER_SAMPLING));

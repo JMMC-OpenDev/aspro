@@ -32,6 +32,10 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
     public final static String MODEL_IMAGE_NOISE = "model.image.noise";
     /** Preference : Enable fast user model (optimize FFT and direct FT i.e. skip useless data) */
     public final static String MODEL_USER_FAST = "model.user.fast";
+    /** Preference : Fast mode threshold in percents */
+    public final static String MODEL_USER_FAST_ERROR = "model.user.fast.error";
+    /** Preference : Enable apodization of user model images */
+    public final static String MODEL_USER_APODIZE = "model.user.apodize";
     /** Preference : time reference (LST/UTC) */
     public final static String TIME_REFERENCE = "time.reference";
     /** Preference : minimum elevation */
@@ -111,6 +115,8 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
 
         // User model:
         setDefaultPreference(MODEL_USER_FAST, Boolean.TRUE);
+        setDefaultPreference(MODEL_USER_FAST_ERROR, AsproConstants.DEFAULT_FAST_ERROR);
+        setDefaultPreference(MODEL_USER_APODIZE, Boolean.TRUE);
 
         // Time reference:
         setDefaultPreference(TIME_REFERENCE, TimeRef.LST.getDisplayName());
@@ -179,6 +185,22 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
      */
     public boolean isFastUserModel() {
         return getPreferenceAsBoolean(Preferences.MODEL_USER_FAST);
+    }
+
+    /**
+     * Return the fast mode threshold in percents
+     * @return fast mode threshold in percents
+     */
+    public double getFastError() {
+        return 0.01 * getPreferenceAsDouble(Preferences.MODEL_USER_FAST_ERROR);
+    }
+
+    /**
+     * Return true if the apodization of user model images is enabled
+     * @return true if the apodization of user model images is enabled
+     */
+    public boolean isDoUserModelApodization() {
+        return getPreferenceAsBoolean(Preferences.MODEL_USER_APODIZE);
     }
 
     /**
