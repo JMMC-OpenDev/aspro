@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROCESS_ARGS="-fast=false -supersampling 25 -math DEFAULT"
+PROCESS_ARGS="-v 3 -fast=true -supersampling=5 -math DEFAULT -apodize true -diameter 1.8"
 
 DIR=./src/test/resources/amhra/
 INPUT=Achernar_all_Pionier_oiDataCalib_2012-09-17.fits
@@ -22,5 +22,5 @@ OUTPUT="$INPUT--$IMAGE"
 #java -Djava.awt.headless -jar target/aspro2-TRUNK-jar-with-dependencies.jar -process -input $DIR/$INPUT -image $DIR/$IMAGE -output $DIR/$OUTPUT $PROCESS_ARGS
 
 # Test scale / rotate:
-java -Djava.awt.headless -jar target/aspro2-TRUNK-jar-with-dependencies.jar -process -input $DIR/$INPUT -image $DIR/$IMAGE -output $DIR/$OUTPUT $PROCESS_ARGS -scale 0.02 -rotate 24.5
+java -Djava.awt.headless -jar target/aspro2-TRUNK-jar-with-dependencies.jar -process -input $DIR/$INPUT -image $DIR/$IMAGE -output $DIR/$OUTPUT $PROCESS_ARGS -scale 1.02 -rotate 24.5
 
