@@ -222,88 +222,88 @@ public class UserModel
     }
     
 //--simple--preserve
-  /** flag indicating that the file reference is valid (readable) */
-  @javax.xml.bind.annotation.XmlTransient
-  private boolean fileValid = false;
+    /** flag indicating that the file reference is valid (readable) */
+    @javax.xml.bind.annotation.XmlTransient
+    private boolean fileValid = false;
 
-  /**
-   * Return the true if the file reference is valid (readable)
-   * @return true if the file reference is valid (readable)
-   */
-  public final boolean isFileValid() {
-    return this.fileValid;
-  }
-
-  /**
-   * Return the true if the file reference is valid (readable)
-   * @param valid true if the file reference is valid (readable)
-   */
-  public final void setFileValid(final boolean valid) {
-    this.fileValid = valid;
-  }
-  
-  /** Cached list of prepared model data corresponding to the file reference (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private java.util.List<fr.jmmc.aspro.service.UserModelData> modelDataList = null;
-
-  /**
-   * Return true if the Cached model data is not null nor empty
-   * @return true if the Cached model data is not null nor empty
-   */
-  public boolean isModelDataReady() {
-    return !isEmpty(modelDataList);
-  }
-
-  /**
-   * Return the Cached model data given its image index (read only)
-   * @param index image index [0; n[
-   * @return Cached model data (read only)
-   */
-  public fr.jmmc.aspro.service.UserModelData getModelData(final int index) {
-      if (isModelDataReady() && index < modelDataList.size()) {
-          return modelDataList.get(index);
-      }
-    return null;
-  }
-
-  /**
-   * Return the Cached model data corresponding to the file reference (read only)
-   * @return Cached model data corresponding to the file reference (read only)
-   */
-  public java.util.List<fr.jmmc.aspro.service.UserModelData> getModelDataList() {
-    return modelDataList;
-  }
-
-  /**
-   * Define the Cached model data corresponding to the file reference (read only)
-   * @param modelData Cached model data corresponding to the file reference (read only)
-   */
-  public void setModelDataList(final java.util.List<fr.jmmc.aspro.service.UserModelData> modelData) {
-    this.modelDataList = modelData;
-  }
-  
-  /**
-   * Return a shallow "copy" of this instance
-   * @return shallow "copy" of this instance
-   */
-  @Override
-  public final Object clone() {
-    final UserModel copy = (UserModel) super.clone();
-
-    // Note: modelData instances are shallow copies
-    if (copy.getModelDataList() != null) {
-      copy.setModelDataList(OIBase.copyList(copy.getModelDataList()));
+    /**
+     * Return the true if the file reference is valid (readable)
+     * @return true if the file reference is valid (readable)
+     */
+    public final boolean isFileValid() {
+        return this.fileValid;
     }
 
-    return copy;
-  }
+    /**
+     * Return the true if the file reference is valid (readable)
+     * @param valid true if the file reference is valid (readable)
+     */
+    public final void setFileValid(final boolean valid) {
+        this.fileValid = valid;
+    }
+
+    /** Cached list of prepared model data corresponding to the file reference (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private java.util.List<fr.jmmc.aspro.service.UserModelData> modelDataList = null;
+
+    /**
+     * Return true if the Cached model data is not null nor empty
+     * @return true if the Cached model data is not null nor empty
+     */
+    public boolean isModelDataReady() {
+        return !isEmpty(modelDataList);
+    }
+
+    /**
+     * Return the Cached model data given its image index (read only)
+     * @param index image index [0; n[
+     * @return Cached model data (read only)
+     */
+    public fr.jmmc.aspro.service.UserModelData getModelData(final int index) {
+        if (isModelDataReady() && index < modelDataList.size()) {
+            return modelDataList.get(index);
+        }
+        return null;
+    }
+
+    /**
+     * Return the Cached model data corresponding to the file reference (read only)
+     * @return Cached model data corresponding to the file reference (read only)
+     */
+    public java.util.List<fr.jmmc.aspro.service.UserModelData> getModelDataList() {
+        return modelDataList;
+    }
+
+    /**
+     * Define the Cached model data corresponding to the file reference (read only)
+     * @param modelData Cached model data corresponding to the file reference (read only)
+     */
+    public void setModelDataList(final java.util.List<fr.jmmc.aspro.service.UserModelData> modelData) {
+        this.modelDataList = modelData;
+    }
+
+    /**
+     * Return a shallow "copy" of this instance
+     * @return shallow "copy" of this instance
+     */
+    @Override
+    public final Object clone() {
+        final UserModel copy = (UserModel) super.clone();
+
+        // Note: modelData instances are shallow copies
+        if (copy.getModelDataList() != null) {
+            copy.setModelDataList(OIBase.copyList(copy.getModelDataList()));
+        }
+
+        return copy;
+    }
 
     @Override
     protected boolean areEquals(final OIBase o) {
         if (!super.areEquals(o)) {
             return false;
         }
-        final UserModel other = (UserModel)o;
+        final UserModel other = (UserModel) o;
         return (areEquals(this.name, other.getName())
                 && areEquals(this.description, other.getDescription())
                 && areEquals(this.file, other.getFile())
