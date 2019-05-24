@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.AnimatorPanel;
 import fr.jmmc.aspro.gui.util.ModelJTree;
@@ -11,6 +12,9 @@ import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
 import fr.jmmc.aspro.gui.util.UserModelAnimator;
 import fr.jmmc.aspro.gui.util.UserModelAnimator.UserModelAnimatorListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
+import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
@@ -27,6 +31,7 @@ import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.NumericJTable;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.NumberUtils;
@@ -1307,6 +1312,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     ModelManager.getInstance().validateModels(target.getModels());
                 } else {
                     // validate user model:
+// TODO: it always validates the current target not the target from loop (editTargets):
                     prepareUserModel();
                 }
             } catch (IllegalArgumentException iae) {
@@ -1690,10 +1696,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      */
     private static void prepareAndValidateUserModel(final UserModel userModel) {
         // see ObservationManager.checkAndLoadFileReferences()
+        final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+
         boolean valid = false;
         try {
             // throws exceptions if the given fits file or image is incorrect:
-            UserModelService.prepareUserModel(userModel);
+            ObservationManager.validateOrPrepareUserModel(observation, userModel, true);
 
             // update checksum before validation:
             if (userModel.isModelDataReady()) {

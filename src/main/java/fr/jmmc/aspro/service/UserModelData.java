@@ -25,6 +25,9 @@ public final class UserModelData extends OIBase {
      */
     private float[] data1D = null;
 
+    /** airy radius (apodization) */
+    private double airyRadius = Double.NaN;
+
     /**
      * Public constructor
      */
@@ -109,6 +112,22 @@ public final class UserModelData extends OIBase {
      */
     public float[] getData1D() {
         return data1D;
+    }
+
+    /**
+    * Return the airy radius (apodization)
+    * @return airy radius (apodization)
+    */
+    public double getAiryRadius() {
+        return airyRadius;
+    }
+
+    /**
+    * Define the airy radius (apodization)
+    * @param airyRadius airy radius (apodization)
+    */
+    public void setAiryRadius(final double airyRadius) {
+        this.airyRadius = airyRadius;
     }
 
     /**

@@ -51,6 +51,7 @@ import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.aspro.service.UserModelData;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
+import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.image.FloatArrayCache;
@@ -65,6 +66,7 @@ import fr.jmmc.jmcs.gui.component.DismissableMessagePane;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.jmcs.gui.task.InterruptableThread;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.util.FieldSliderAdapter;
@@ -91,6 +93,7 @@ import fr.jmmc.oiexplorer.core.util.Constants;
 import static fr.jmmc.oiexplorer.core.util.FitsImageUtils.checkBounds;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
+import fr.nom.tam.fits.FitsException;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -103,6 +106,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -673,7 +677,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             DismissableMessagePane.show("Please consider using the a2p2 software instead"
                     + "\nas this export feature is deprecated and will be removed soon (Fall 2019)\n\nSee https://github.com/JMMC-OpenDev/a2p2",
                     Preferences.getInstance(), "DEPRECATED_OBX_WARNING");
-            
+
             final String insName = observation.getInstrumentConfiguration().getName();
 
             if (AsproConstants.INS_AMBER.equals(insName)
@@ -1039,7 +1043,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         if (changed) {
             this.aoCacheKey = aoKey;
             logger.debug("AO changed : {}", aoKey);
-            
+
             final Object oldValue = this.jComboBoxAOSetup.getSelectedItem();
 
             // always update instrument modes (may depend on selected period):
@@ -1855,7 +1859,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @return UV Coverage data
          */
         @Override
-        public ObservationCollectionUVData computeInBackground() {
+        public ObservationCollectionUVData computeInBackground() throws IllegalArgumentException {
 
             // TODO: externalize NoiseService and OIFitsCreatorService from UVCoverageService (IMPORTANT)
             // Start the computations :
@@ -1867,12 +1871,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             final List<ObservationSetting> observations = getObservationCollection().getObservations();
             final List<UVCoverageData> uvDataList = new ArrayList<UVCoverageData>(observations.size());
 
-            ObservationSetting observation;
-            ObservabilityData obsData;
-
             for (int i = 0, len = observations.size(); i < len; i++) {
-                observation = observations.get(i);
-                obsData = this.obsDataList.get(i);
+                final ObservationSetting observation = observations.get(i);
+                final ObservabilityData obsData = this.obsDataList.get(i);
 
                 // compute the uv coverage data :
                 uvDataList.add(new UVCoverageService(observation, obsData, targetName, this.uvMax, this.doUVSupport,
@@ -1889,6 +1890,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // first UVCoverageData i.e. corresponding to the first observation:
             final UVCoverageData uvDataFirst = uvDataCollection.getFirstUVData();
 
+            double airyRadius = Double.NaN;
+
             if (this.doModelImage) {
                 // compute the uv map data :
 
@@ -1903,6 +1906,45 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                     final Rectangle2D.Double uvRect = new Rectangle2D.Double();
                     uvRect.setFrameFromDiagonal(-uvMaxFreq, -uvMaxFreq, uvMaxFreq, uvMaxFreq);
+
+                    // Check user model:
+                    if (!target.hasAnalyticalModel() && target.getUserModel().isFileValid()) {
+                        final UserModel userModel = target.getUserModel();
+
+                        boolean valid = false;
+                        try {
+                            // Inhibits thread interrupt:
+                            InterruptableThread.setThreadMayInterruptIfRunning(false);
+
+                            ObservationManager.validateOrPrepareUserModel(getObservationCollection().getFirstObservation(), target.getUserModel());
+
+                            final UserModelData modelData = userModel.getModelData(0);
+                            if (modelData != null) {
+                                airyRadius = modelData.getAiryRadius();
+                            }
+
+                            // model is valid:
+                            valid = true;
+
+                        } catch (FitsException fe) {
+                            throw new IllegalArgumentException("Could not read file: " + userModel.getFile(), fe);
+                        } catch (IOException ioe) {
+                            throw new IllegalArgumentException("Could not read file: " + userModel.getFile(), ioe);
+                        } catch (IllegalArgumentException iae) {
+                            throw iae;
+                        } finally {
+                            // anyway, update the valid flag:
+                            userModel.setFileValid(valid);
+
+                            // Restore thread interrupt, maybe now:
+                            InterruptableThread.setThreadMayInterruptIfRunning(true);
+                        }
+                    }
+
+                    // fast interrupt :
+                    if (Thread.currentThread().isInterrupted()) {
+                        return null;
+                    }
 
                     // Fix image index:
                     final List<UserModelData> modelDataList = (target.hasAnalyticalModel()) ? null : target.getUserModel().getModelDataList();
@@ -1920,7 +1962,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     // Check if the previously computed UV Map Data is still valid :
                     if (this.currentUVMapData != null
                             && this.currentUVMapData.isValid(targetName, targetVersion, uvRect,
-                                    this.imageMode, this.imageSize, this.colorModel, this.colorScale, imageIdx, noiseService)) {
+                                    this.imageMode, this.imageSize, this.colorModel, this.colorScale,
+                                    imageIdx, noiseService, airyRadius)) {
 
                         _logger.debug("Reuse model image.");
 
@@ -1941,7 +1984,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                                 // Check if the previously computed visiblity Data is still valid :
                                 if (this.currentUVMapData != null
-                                        && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize, imageIdx)) {
+                                        && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize,
+                                                imageIdx, airyRadius)) {
 
                                     _logger.debug("Reuse model complex visibility.");
 
@@ -1966,7 +2010,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                     if (fitsImage != null) {
                                         // Check if the previously computed visiblity Data is still valid :
                                         if (this.currentUVMapData != null
-                                                && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize, imageIdx)) {
+                                                && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize,
+                                                        imageIdx, airyRadius)) {
 
                                             _logger.debug("Reuse model visiblity.");
 
@@ -2003,8 +2048,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                         uvMapData.setImageCount(modelDataList.size());
                                         uvMapData.setWaveLength(fitsImage.getWaveLength());
                                         uvMapData.setUserModel(target.getUserModel());
+                                        uvMapData.setAiryRadius(airyRadius);
                                     }
-
                                 }
                             }
 
@@ -2043,26 +2088,26 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // merge warning messages:
             if (uvDataCollection.isSingle()) {
                 // ObservabilityService warnings:
-                mergedWarningContainer.addWarningMessages(uvDataCollection.getFirstObsData().getWarningContainer());
+                mergedWarningContainer.addWarnings(uvDataCollection.getFirstObsData().getWarningContainer());
                 // UVCoverageService warnings:
-                mergedWarningContainer.addWarningMessages(uvDataFirst.getWarningContainer());
+                mergedWarningContainer.addWarnings(uvDataFirst.getWarningContainer());
 
             } else {
                 if (uvDataCollection.getFirstObservation().getWhen().isNightRestriction()) {
-                    mergedWarningContainer.addWarningMessage("Multiple configurations cannot be done in one night"
+                    mergedWarningContainer.addWarning("Multiple configurations cannot be done in one night"
                             + " (night restrictions are only valid for "
                             + uvDataCollection.getFirstObservation().getWhen().getDate().toString() + ")");
                 }
 
                 // ObservabilityService warnings:
                 for (int i = 0, len = observations.size(); i < len; i++) {
-                    obsData = this.obsDataList.get(i);
-                    mergedWarningContainer.addWarningMessages(obsData.getWarningContainer());
+                    final ObservabilityData obsData = this.obsDataList.get(i);
+                    mergedWarningContainer.addWarnings(obsData.getWarningContainer());
                 }
 
                 // UVCoverageService warnings:
                 for (UVCoverageData uvData : uvDataList) {
-                    mergedWarningContainer.addWarningMessages(uvData.getWarningContainer());
+                    mergedWarningContainer.addWarnings(uvData.getWarningContainer());
                 }
             }
 
@@ -2071,7 +2116,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 if (target != null && !target.hasAnalyticalModel()) {
                     final UserModel userModel = target.getUserModel();
                     if (userModel != null && !userModel.isFileValid()) {
-                        mergedWarningContainer.addWarningMessage("User model [" + userModel.getName() + "] is disabled");
+                        mergedWarningContainer.addWarning("User model [" + userModel.getName() + "] is disabled");
+                    } else {
+                        // May be inaccurate for multiple configurations (use first only):
+                        if (!Double.isNaN(airyRadius)) {
+                            final double angMas = Math.toDegrees(airyRadius) * ALX.DEG_IN_MILLI_ARCSEC;
+                            mergedWarningContainer.addInformation("Apodization: airy radius = " + NumberUtils.trimTo3Digits(angMas) + " mas");
+                        }
                     }
                 }
             }
@@ -2126,7 +2177,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             if (!doOIFits) {
                 // add warning to indicate that OIFits are disabled:
-                uvDataCollection.getWarningContainer().addWarningMessage("OIFits data computation is disabled");
+                uvDataCollection.getWarningContainer().addWarning("OIFits data computation is disabled");
             }
 
             // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
@@ -3251,7 +3302,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @return OIFitsFiles OIFitsFile results
          */
         @Override
-        public List<OIFitsFile> computeInBackground() {
+        public List<OIFitsFile> computeInBackground() throws IllegalArgumentException {
             _logger.debug("Computing oifits data ...");
 
             List<OIFitsFile> result = null;
@@ -3304,6 +3355,21 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // update the status bar:
             StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits done.");
+        }
+
+        /**
+         * Handle the execution exception that occured in the compute operation @see #computeInBackground()
+         * This implementation opens a message dialog or the feedback report depending on the cause.
+         *
+         * @param ee execution exception
+         */
+        @Override
+        public void handleException(final ExecutionException ee) {
+            if (ee.getCause() instanceof IllegalArgumentException) {
+                MessagePane.showErrorMessage(ee.getCause().getMessage());
+            } else {
+                super.handleException(ee);
+            }
         }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables

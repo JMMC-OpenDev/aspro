@@ -5,6 +5,7 @@ package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
+import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
@@ -24,6 +25,7 @@ import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.SpectralBand;
+import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
@@ -31,17 +33,18 @@ import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.model.util.TargetUtils;
-import fr.jmmc.aspro.service.NoiseService;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.model.targetmodel.Parameter;
 import fr.jmmc.jmcs.gui.component.MessagePane;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.service.RecentFilesManager;
 import fr.jmmc.jmcs.util.CollectionUtils;
 import fr.jmmc.jmcs.util.FileUtils;
+import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.nom.tam.fits.FitsException;
 import java.io.File;
@@ -92,7 +95,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     /** computed OIFits data */
     private OIFitsData oiFitsData = null;
     /** (cached) flag to use fast user model (preference) */
-    private boolean useFastUserModel;
+    private boolean lastUseFastUserModel;
+    /** (cached) fast error (preference) */
+    private double lastFastError;
 
     /**
      * Return the ObservationManager singleton
@@ -108,8 +113,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     private ObservationManager() {
         super();
 
-        // copy fast user model preference:
-        this.useFastUserModel = this.myPreferences.isFastUserModel();
+        // set cached preferences:
+        this.lastUseFastUserModel = this.myPreferences.isFastUserModel();
+        this.lastFastError = this.myPreferences.getFastError();
 
         this.myPreferences.addObserver(this);
     }
@@ -124,8 +130,11 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         logger.debug("Preferences updated on : {}", this);
 
         final boolean newFastUserModel = this.myPreferences.isFastUserModel();
-        if (this.useFastUserModel != newFastUserModel) {
-            this.useFastUserModel = newFastUserModel;
+        final double newFastError = this.myPreferences.getFastError();
+
+        if (this.lastUseFastUserModel != newFastUserModel || this.lastFastError != newFastError) {
+            this.lastUseFastUserModel = newFastUserModel;
+            this.lastFastError = newFastError;
 
             logger.debug("ObservationManager.update: checkAndLoadFileReferences ...");
 
@@ -141,6 +150,11 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             // fire change events :
             this.fireTargetChangedEvents();
         }
+    }
+
+    private static void cancelAnyBackgroundTask() {
+        // Must cancel any pending task using the user model data:
+        TaskSwingWorkerExecutor.cancelTaskAndRelated(AsproTaskRegistry.TASK_OBSERVABILITY);
     }
 
     /**
@@ -352,7 +366,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
             // load user models (to prepare and validate):
             checkAndLoadFileReferences(file, observation, sb);
-
         }
         return observation;
     }
@@ -408,6 +421,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param observation observation to use
      */
     private void changeObservation(final ObservationSetting observation) {
+        // Must cancel any pending task using the observation:
+        cancelAnyBackgroundTask();
+
         // change the current observation :
         setMainObservation(observation);
 
@@ -1563,23 +1579,24 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param sb message buffer
      */
     private static void checkAndLoadFileReferences(final File obsFile, final ObservationSetting observation, final StringBuilder sb) {
+        // Must cancel any pending task using the observation:
+        cancelAnyBackgroundTask();
+
         // Check target user model files (exist and can read):
         for (Target target : observation.getTargets()) {
             checkTargetUserModel(obsFile, target, sb);
         }
 
         // Load only valid target user model files:
-        UserModel userModel;
-
         for (Target target : observation.getTargets()) {
-            userModel = target.getUserModel();
+            final UserModel userModel = target.getUserModel();
 
             if (userModel != null && userModel.isFileValid()) {
                 // see TargetModelForm.prepareAndValidateUserModel()
                 boolean valid = false;
                 try {
                     // throws exceptions if the given fits file or image is incorrect:
-                    UserModelService.prepareUserModel(userModel);
+                    ObservationManager.validateOrPrepareUserModel(observation, userModel, true);
 
                     // validate image against the given observation:
                     ObservationManager.validateUserModel(observation, userModel);
@@ -1650,19 +1667,19 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     /**
      * Validate the given user model using the main observation to get the maximum UV frequency (rad-1) possible
-     * @param model user model to validate
+     * @param userModel user model to validate
      */
-    public void validateUserModel(final UserModel model) {
-        validateUserModel(getMainObservation(), model);
+    public void validateUserModel(final UserModel userModel) {
+        validateUserModel(getMainObservation(), userModel);
     }
 
     /**
      * Validate the given user model using the given observation to get the maximum UV frequency (rad-1) possible
      * @param observation observation to get interferometer and instrument configurations
-     * @param model user model to validate
+     * @param userModel user model to validate
      */
-    public static void validateUserModel(final ObservationSetting observation, final UserModel model) {
-        UserModelService.validateModel(model, getUVMaxFreq(observation));
+    public static void validateUserModel(final ObservationSetting observation, final UserModel userModel) {
+        UserModelService.validateModel(userModel, getUVMaxFreq(observation));
     }
 
     /**
@@ -1691,6 +1708,64 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         final double uvMaxFreq = maxBaseLines / lambdaMin;
 
         return uvMaxFreq;
+    }
+
+    /**
+     * Validate the given user model images using the given observation to perform apodisation if needed
+     * @param observation observation to get interferometer and instrument configurations
+     * @param userModel user model to validate
+     * @throws FitsException if any FITS error occured
+     * @throws IOException IO failure
+     * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
+     */
+    public static void validateOrPrepareUserModel(final ObservationSetting observation, final UserModel userModel) throws FitsException, IOException, IllegalArgumentException {
+        validateOrPrepareUserModel(observation, userModel, false);
+    }
+
+    /**
+     * Validate the given user model images using the given observation to perform apodisation if needed
+     * @param observation observation to get interferometer and instrument configurations
+     * @param userModel user model to validate
+     * @param reload true to force loading user model now
+     * @throws FitsException if any FITS error occured
+     * @throws IOException IO failure
+     * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
+     */
+    public static void validateOrPrepareUserModel(final ObservationSetting observation, final UserModel userModel,
+                                                  final boolean reload) throws FitsException, IOException, IllegalArgumentException {
+
+        logger.debug("validateOrPrepareUserModel: reload = {}", reload);
+
+        // Note: no synchonization is really required as callers are swing or background tasks (single-threaded)
+        // but both 1 swing and 1 background tasks may happen at the same time
+        synchronized (userModel) {
+            // Apodization: get Telescope diameter and instrument wavelength:
+            double diameter = Double.NaN;
+            double lambdaMin = Double.NaN;
+
+            if (Preferences.getInstance().isDoUserModelApodization()) {
+                final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
+                if (instrumentChoice != null) {
+                    final List<Station> stations = instrumentChoice.getStationList();
+                    if (stations != null) {
+                        // All telescopes in a configuration have the same diameter:
+                        diameter = stations.get(0).getTelescope().getDiameter();
+                    }
+                    lambdaMin = AsproConstants.MICRO_METER
+                            * instrumentChoice.getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
+                }
+            }
+
+            // IF needed reload (or process again apodization + image preparation...)
+            if (reload || !UserModelService.checkAiryRadius(userModel, diameter, lambdaMin)) {
+                logger.debug("validateOrPrepareUserModel: prepare model ...");
+
+                // throws exceptions if the given fits file or image is incorrect:
+                UserModelService.prepareUserModel(userModel, diameter, lambdaMin);
+
+                logger.debug("validateOrPrepareUserModel: model prepared.");
+            }
+        }
     }
 
     // --- INTERNAL METHODS ------------------------------------------------------

@@ -33,6 +33,7 @@ import static fr.jmmc.aspro.util.StatUtils.SAMPLING_FACTOR_VARIANCE;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
+import fr.jmmc.jmcs.gui.task.InterruptableThread;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oitools.OIFitsConstants;
@@ -47,6 +48,8 @@ import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.OIWavelength;
 import fr.jmmc.oitools.util.CombUtils;
+import fr.nom.tam.fits.FitsException;
+import java.io.IOException;
 import static java.lang.Math.PI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,6 +99,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private final List<UVRangeBaseLineData> targetUVObservability;
 
     /* internal */
+    private ObservationSetting cObservation = null;
+    private UserModel cUserModel = null;
+
     /** selected instrument mode */
     private FocalInstrumentMode instrumentMode = null;
     /** flag indicating if the target model wavelengths are compatible with the instrument mode */
@@ -229,6 +235,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         if (userModel != null && userModel.isFileValid()) {
             // validate image against the given observation:
             ObservationManager.validateUserModel(observation, userModel);
+
+            // prepare later image according to apodization
+            this.cObservation = observation;
+            this.cUserModel = userModel;
         }
     }
 
@@ -307,15 +317,53 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         }
     }
 
+    private void prepareUserModel(final ObservationSetting observation, final UserModel userModel) throws IllegalArgumentException {
+        if (userModel != null && userModel.isFileValid()) {
+            boolean valid = false;
+            try {
+                // Inhibits thread interrupt:
+                InterruptableThread.setThreadMayInterruptIfRunning(false);
+
+                ObservationManager.validateOrPrepareUserModel(observation, userModel);
+
+                // model is valid:
+                valid = true;
+
+            } catch (FitsException fe) {
+                throw new IllegalArgumentException("Could not read file: " + userModel.getFile(), fe);
+            } catch (IOException ioe) {
+                throw new IllegalArgumentException("Could not read file: " + userModel.getFile(), ioe);
+            } catch (IllegalArgumentException iae) {
+                throw iae;
+            } finally {
+                // anyway, update the valid flag:
+                userModel.setFileValid(valid);
+
+                // Restore thread interrupt, maybe now:
+                InterruptableThread.setThreadMayInterruptIfRunning(true);
+            }
+        }
+    }
+
     /**
      * Create the OIFits structure with OI_ARRAY, OI_TARGET, OI_WAVELENGTH, OI_VIS tables
      * @return OIFits structure
      */
-    public OIFitsFile createOIFits() {
+    public OIFitsFile createOIFits() throws IllegalArgumentException {
         if (!this.isModelWLValid) {
             // invalid user model against instrumental spectral configuration:
             return null;
         }
+        if (cUserModel != null) {
+            // defered user model preparation for proper apodization according to current observation (telescope):
+            prepareUserModel(cObservation, cUserModel);
+
+            // fast interrupt :
+            if (Thread.currentThread().isInterrupted()) {
+                return null;
+            }
+        }
+
         // Start the computations :
         final long start = System.nanoTime();
 
@@ -430,7 +478,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // Stations :
         final LonLatAlt posCenter = this.interferometer.getPosSph();
         final Position3D geocentricPos = new Position3D();
-        
+
         int i = 0;
         Telescope tel;
 

@@ -74,7 +74,7 @@ public final class OIFitsData {
         if (this.oiFitsWarningContainer != null) {
             List<String> messages = null;
 
-            final String msg = this.oiFitsWarningContainer.getMatchingWarningMessage(AsproConstants.WARN_MISSING_MAGS);
+            final String msg = this.oiFitsWarningContainer.getMatchingWarning(AsproConstants.WARN_MISSING_MAGS);
             if (msg != null) {
                 if (messages == null) {
                     messages = new ArrayList<String>(2);

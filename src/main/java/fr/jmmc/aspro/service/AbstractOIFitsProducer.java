@@ -224,7 +224,7 @@ public abstract class AbstractOIFitsProducer {
 
                             if (modelWlUpper != null) {
                                 hasUserModelPerChannel[i] = true;
-                                uniqueModelDatas.add(modelWlUpper); 
+                                uniqueModelDatas.add(modelWlUpper);
                             }
                         }
 
@@ -232,12 +232,12 @@ public abstract class AbstractOIFitsProducer {
                             logger.debug("hasUserModelPerChannel: {}", Arrays.toString(hasUserModelPerChannel));
                             logger.debug("nUniqueModelDatas: {}", uniqueModelDatas.size());
                         }
-                        
+
                         if (uniqueModelDatas.isEmpty()) {
-                            addWarning(warningContainer, "Incorrect model wavelength range [" + convertWL(wlFirst) + " - " +convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER
+                            addWarning(warningContainer, "Incorrect model wavelength range [" + convertWL(wlFirst) + " - " + convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER
                                     + "] smaller than the typical instrumental wavelength band [" + convertWL(StatUtils.mean(insBands)) + " " + SpecialChars.UNIT_MICRO_METER + ']');
                             return false;
-                        }                        
+                        }
 
                         int firstChannel = -1;
 
@@ -328,11 +328,10 @@ public abstract class AbstractOIFitsProducer {
             // should be an even number to keep wavelengths centered on each sub channels:
             // note: disable super sampling in high resolution:
             // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
-
             // TODO: determine correctly deltaLambda (object size (FOV) and Bmax/lambda) ie when super sampling is surely necessary
             int nSamples = (nChannels > 100 || this.mathMode == MathMode.QUICK) ? 1 : this.supersampling;
 
-// TODO: fix resampling
+            // TODO: fix resampling
             final double waveBand = StatUtils.mean(this.waveBands);
 
             double deltaLambda = waveBand / nSamples;
@@ -455,7 +454,7 @@ public abstract class AbstractOIFitsProducer {
                 final int[][] nTaskThreads = (SHOW_COMPUTE_STATS) ? new int[nTh][16] : null; // cache line padding
 
                 // adjust largest chunk size:
-                final int nPixels = 80000; // less than 1 Mb
+                final int maxPixelsPerChunk = 80000; // to ensure chunk less than 1 Mb (and fit in L3 cache)
 
                 // computation tasks = 1 job per row and chunk (work stealing):
                 final List<Runnable> jobList = new ArrayList<Runnable>(nRows * 2 * modelParts.size()); // 2 chunks by default
@@ -476,12 +475,13 @@ public abstract class AbstractOIFitsProducer {
 
                     // This will change for each image in the Fits cube:
                     final int n1D = modelData.getNData(); // data, xfreq, yfreq
+                    final float[] data1D = modelData.getData1D();
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("computeModelVisibilities: {} bytes for image arrays", 4 * n1D); // (float) array
                     }
 
-                    int chunk = nPixels * UserModelService.DATA_1D_POINT_SIZE;
+                    int chunk = maxPixelsPerChunk * UserModelService.DATA_1D_POINT_SIZE;
 
                     final int nChunks = 1 + n1D / chunk;
 
@@ -515,7 +515,6 @@ public abstract class AbstractOIFitsProducer {
                         for (int k = 0; k < nRows; k++) {
                             // rows index to be processed by this task:
                             final int rowIndex = k;
-                            final float[] data1D = modelData.getData1D();
                             final double[] ufreqRow = ufreq[rowIndex];
                             final double[] vfreqRow = vfreq[rowIndex];
                             final MutableComplex[] cmVisRow = cmVis[rowIndex];
@@ -681,8 +680,7 @@ public abstract class AbstractOIFitsProducer {
                             cVisSnrFlagRow[l] = true;
 //                            System.out.println("Low SNR["+this.waveLengths[l]+"]: " + snrV2);
                         }
-                        /* TODO: make SNR(V2) stats per channel to add warning if no channel is below 3 !
-                        */
+                        // TODO: make SNR(V2) stats per channel to add warning if no channel is below 3 !
                     }
 
                     if (ptIdx[k] != prevPt) {
@@ -755,7 +753,7 @@ public abstract class AbstractOIFitsProducer {
      * @param msg message to add
      */
     protected static void addWarning(final WarningContainer warningContainer, final String msg) {
-        warningContainer.addWarningMessage(msg);
+        warningContainer.addWarning(msg);
     }
 
     /**
@@ -764,7 +762,7 @@ public abstract class AbstractOIFitsProducer {
      * @param msg message to add
      */
     protected static void addInformation(final WarningContainer warningContainer, final String msg) {
-        warningContainer.addInformationMessage(msg);
+        warningContainer.addInformation(msg);
     }
 
     protected static double distanceAngle(final double a1, final double a2) {
@@ -793,7 +791,7 @@ public abstract class AbstractOIFitsProducer {
         for (int i = 0; i < nImages; i++) {
             modelData = modelDataList.get(i);
 
-/*
+            /*
 TODO: refine to lookup the closest model (range overlapping) ?
             
 If you were dealing with, given two ranges [x1:x2] and [y1:y2], natural order ranges at the same time where:
@@ -801,7 +799,7 @@ If you were dealing with, given two ranges [x1:x2] and [y1:y2], natural order ra
 
 then you may want to use this to check:
 they are overlapped <=> (y2 - x1) * (x2 - y1) >= 0
-*/
+             */
             if (modelData.getWaveLengthRange().contains(wavelength)) {
                 return modelData;
             }
@@ -996,7 +994,7 @@ they are overlapped <=> (y2 - x1) * (x2 - y1) >= 0
         for (int j = 0; j < nSamples; j++) {
             interp[j] = -0.5 + ((1.0 + j)) / (1.0 + nSamples);
         }
-        
+
         final int nWLen = waveLengths.length;
         final double[] wLen = new double[nWLen * nSamples];
 

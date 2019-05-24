@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
+import edu.sorting.DualPivotQuicksort;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.oiexplorer.core.util.FitsImageUtils;
 import fr.jmmc.aspro.model.oi.UserModel;
@@ -14,6 +15,7 @@ import fr.jmmc.jmal.image.FloatArrayCache;
 import fr.jmmc.jmal.image.ImageArrayUtils;
 import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmal.image.job.ImageFlipJob;
+import fr.jmmc.jmal.image.job.ImageGaussianFilterJob;
 import fr.jmmc.jmal.image.job.ImageLowerThresholdJob;
 import fr.jmmc.jmal.image.job.ImageNormalizeJob;
 import fr.jmmc.jmal.image.job.ImageRegionThresholdJob;
@@ -25,6 +27,7 @@ import fr.jmmc.jmal.model.function.math.Functions;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
+import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageFile;
 import fr.jmmc.oitools.image.FitsImageHDU;
@@ -57,10 +60,6 @@ public final class UserModelService {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(UserModelService.class.getName());
-    /** minimum visiblity threshold (1e-2) for direct fourier transform */
-    public static final double MIN_VISIBILITY_DATA = 1e-3d;
-    /** ratio to ignore data values i.e. data value < LIMIT_RATIO * dataLowThreshold */
-    public static final float LIMIT_RATIO = 1e-1f;
     /** maximum fft size (power of two) */
     public static final int MAX_FFT_SIZE = 128 * 1024;
     /** Two PI constant */
@@ -69,6 +68,8 @@ public final class UserModelService {
     private static final double INC_EPSILON_RAD = Math.toRadians(1e-9 * ALX.ARCSEC_IN_DEGREES);
     /** formatter for frequencies */
     private final static DecimalFormat df = new DecimalFormat("0.00#E0");
+    /** formatter for angles */
+    private final static DecimalFormat df3 = new DecimalFormat("0.0##");
     /** number of floats per data point */
     public final static int DATA_1D_POINT_SIZE = 3;
     /** shared InterruptedJobException instance */
@@ -120,19 +121,52 @@ public final class UserModelService {
      * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
      */
     public static void prepareUserModel(final UserModel userModel) throws FitsException, IOException, IllegalArgumentException {
-        final boolean useFastMode = Preferences.getInstance().isFastUserModel();
-        prepareUserModel(userModel, useFastMode);
+        prepareUserModel(userModel, Preferences.getInstance().isFastUserModel(), Preferences.getInstance().getFastError());
     }
 
     /**
      * Load the given user model file and prepare ONLY the first image for FFT processing and direct Fourier transform
      * @param userModel user model to load and prepare
      * @param useFastMode true to ignore useless data (faster); false to have highest precision
+     * @param fastError fast mode threshold in percents
      * @throws FitsException if any FITS error occured
      * @throws IOException IO failure
      * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
      */
-    public static void prepareUserModel(final UserModel userModel, final boolean useFastMode) throws FitsException, IOException, IllegalArgumentException {
+    public static void prepareUserModel(final UserModel userModel, final boolean useFastMode, final double fastError) throws FitsException, IOException, IllegalArgumentException {
+        prepareUserModel(userModel, useFastMode, fastError, false, Double.NaN, Double.NaN);
+    }
+
+    /**
+     * Load the given user model file and prepare ONLY the first image for FFT processing and direct Fourier transform
+     * @param userModel user model to load and prepare
+     * @param diameter telescope diameter in meters (apodization)
+     * @param lambdaMin minimum wavelength in meters (used only for gray images) (apodization)
+     * @throws FitsException if any FITS error occured
+     * @throws IOException IO failure
+     * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
+     */
+    public static void prepareUserModel(final UserModel userModel, final double diameter, final double lambdaMin) throws FitsException, IOException, IllegalArgumentException {
+        prepareUserModel(userModel,
+                Preferences.getInstance().isFastUserModel(), Preferences.getInstance().getFastError(),
+                Preferences.getInstance().isDoUserModelApodization(), diameter, lambdaMin
+        );
+    }
+
+    /**
+     * Load the given user model file and prepare ONLY the first image for FFT processing and direct Fourier transform
+     * @param userModel user model to load and prepare
+     * @param useFastMode true to ignore useless data (faster); false to have highest precision
+     * @param fastError fast mode threshold in percents
+     * @param doApodise true to perform image apodization
+     * @param diameter telescope diameter in meters (apodization)
+     * @param lambdaMin minimum wavelength in meters (used only for gray images) (apodization)
+     * @throws FitsException if any FITS error occured
+     * @throws IOException IO failure
+     * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
+     */
+    public static void prepareUserModel(final UserModel userModel, final boolean useFastMode, final double fastError,
+                                        final boolean doApodise, final double diameter, final double lambdaMin) throws FitsException, IOException, IllegalArgumentException {
         // clear previously cached data:
         userModel.setModelDataList(null);
 
@@ -145,9 +179,16 @@ public final class UserModelService {
         }
 
         logger.info("useFastMode: {}", useFastMode);
-        logger.info("scaleX:      {}", userModel.getScaleX());
-        logger.info("scaleY:      {}", userModel.getScaleY());
-        logger.info("rotation:    {}", userModel.getRotation());
+
+        if (userModel.getScaleX() != null) {
+            logger.info("scaleX:      {}", userModel.getScaleX());
+        }
+        if (userModel.getScaleY() != null) {
+            logger.info("scaleY:      {}", userModel.getScaleY());
+        }
+        if (userModel.getRotation() != null) {
+            logger.info("rotation:    {}", userModel.getRotation());
+        }
 
         final FitsImageHDU fitsImageHDU = imgFitsFile.getFitsImageHDUs().get(0); // only first HDU
 
@@ -166,7 +207,7 @@ public final class UserModelService {
 
                 // note: fits image instance can be modified by image preparation:
                 // can throw IllegalArgumentException if image has invalid keyword(s) / data:
-                prepareImage(fitsImage, modelData, useFastMode);
+                prepareImage(fitsImage, modelData, useFastMode, fastError, doApodise, diameter, lambdaMin);
 
                 logger.info("Prepared FitsImage: {}", fitsImage.toString());
 
@@ -179,7 +220,7 @@ public final class UserModelService {
             }
         }
 
-        logger.info("prepareFitsFile: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        logger.info("prepareUserModel: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         // exception occured during image preparation(s):
         if (firstException != null) {
@@ -198,7 +239,7 @@ public final class UserModelService {
         final double incCol = (userModel.getScaleX() != null) ? userModel.getScaleX() : Double.NaN;
         final double incRow = (userModel.getScaleY() != null) ? userModel.getScaleY() : Double.NaN;
         FitsImageUtils.rescaleImage(fitsImage, incCol, incRow);
-        
+
         if (userModel.getRotation() != null) {
             fitsImage.setRotAngle(userModel.getRotation());
         }
@@ -267,8 +308,8 @@ public final class UserModelService {
 
                 throw new IllegalArgumentException("Fits image [" + fitsImage.getFitsImageIdentifier()
                         + "] must have smaller pixel increments [expected "
-                        + FitsImage.getAngleAsString(minIncrement, df) + " < "
-                        + FitsImage.getAngleAsString(increment, df) + "] to have a maximum frequency [expected "
+                        + FitsImage.getAngleAsString(minIncrement, df3) + " < "
+                        + FitsImage.getAngleAsString(increment, df3) + "] to have a maximum frequency [expected "
                         + df.format(uvMaxFreq) + " rad-1 > " + df.format(maxFreq) + " rad-1 ] !");
             }
         }
@@ -716,8 +757,8 @@ public final class UserModelService {
                 kwRow = TWO_PI * vfreq[i];
 
                 // reset:
-                re = 0d;
-                im = 0d;
+                re = 0.0;
+                im = 0.0;
 
                 // iterate on data points:
                 for (j = fromData; j <= lenData; j += DATA_1D_POINT_SIZE) {
@@ -739,7 +780,6 @@ public final class UserModelService {
             } // vis
         } else if (mathMode == MathMode.FAST) {
 
-            // TODO: use context or thread local
             final DoubleWrapper[] dw = localDoubleWrappers.get();
             final DoubleWrapper cw = dw[0];
 
@@ -750,8 +790,8 @@ public final class UserModelService {
                 kwRow = TWO_PI * vfreq[i];
 
                 // reset:
-                re = 0d;
-                im = 0d;
+                re = 0.0;
+                im = 0.0;
 
                 // iterate on data points:
                 for (j = fromData; j <= lenData; j += DATA_1D_POINT_SIZE) {
@@ -780,8 +820,8 @@ public final class UserModelService {
                 kwRow = TWO_PI * vfreq[i];
 
                 // reset:
-                re = 0d;
-                im = 0d;
+                re = 0.0;
+                im = 0.0;
 
                 // iterate on data points:
                 for (j = fromData; j <= lenData; j += DATA_1D_POINT_SIZE) {
@@ -814,9 +854,15 @@ public final class UserModelService {
      * @param fitsImage FitsImage to process
      * @param modelData prepared model data for direct Fourier transform
      * @param useFastMode true to ignore useless data (faster); false to have highest precision
+     * @param fastError fast mode threshold in percents
+     * @param doApodise true to perform image apodization
+     * @param diameter telescope diameter in meters (apodization)
+     * @param lambdaMin minimum wavelength in meters (used only for gray images) (apodization)
      * @throws IllegalArgumentException if image has invalid keyword(s) / data
      */
-    public static void prepareImage(final FitsImage fitsImage, final UserModelData modelData, final boolean useFastMode) throws IllegalArgumentException {
+    public static void prepareImage(final FitsImage fitsImage, final UserModelData modelData,
+                                    final boolean useFastMode, final double fastError,
+                                    final boolean doApodise, final double diameter, final double lambdaMin) throws IllegalArgumentException {
 
         if (!fitsImage.isDataRangeDefined()) {
             // update boundaries excluding zero values:
@@ -828,16 +874,17 @@ public final class UserModelService {
         int nbRows = fitsImage.getNbRows();
         int nbCols = fitsImage.getNbCols();
 
-        logger.info("Image size: {} x {}", nbRows, nbCols);
-
         // 1 - Ignore negative values:
-        if (fitsImage.getDataMax() <= 0d) {
+        if (fitsImage.getDataMax() <= 0.0) {
             throw new IllegalArgumentException("Fits image [" + fitsImage.getFitsImageIdentifier() + "] has only negative data !");
         }
-        if (fitsImage.getDataMin() < 0d) {
-            final float threshold = 0f;
 
-            final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, threshold, 0f);
+        logger.info("Image size: {} x {}", nbRows, nbCols);
+
+        if (fitsImage.getDataMin() < 0.0) {
+            final float threshold = 0.0f;
+
+            final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, threshold, 0.0f);
             logger.info("ImageLowerThresholdJob - threshold = {} (ignore negative values)", threshold);
 
             thresholdJob.forkAndJoin();
@@ -848,9 +895,26 @@ public final class UserModelService {
             FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
         }
 
+        if (doApodise) {
+            // Perform image apodization
+            final double airyRadius = apodize(fitsImage, diameter, lambdaMin);
+
+            // Store radius:
+            modelData.setAiryRadius(airyRadius);
+
+            if (!Double.isNaN(airyRadius)) {
+                // update boundaries excluding zero values:
+                FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
+            }
+        }
+
+        // TODO: keep initial total flux (before normalization) ?
+        final double initialTotalFlux = fitsImage.getSum();
+        logger.info("Total flux: {}", initialTotalFlux);
+
         // 2 - Normalize data (total flux):
-        if (!NumberUtils.equals(fitsImage.getSum(), 1.0, MIN_VISIBILITY_DATA)) {
-            final double normFactor = 1d / fitsImage.getSum();
+        if (!NumberUtils.equals(initialTotalFlux, 1.0, 0.01)) {
+            final double normFactor = 1.0 / initialTotalFlux;
 
             final ImageNormalizeJob normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
             logger.info("ImageNormalizeJob - factor: {}", normFactor);
@@ -865,37 +929,34 @@ public final class UserModelService {
         final float thresholdFlux;
 
         if (useFastMode) {
+            final double error = Math.max(0.0, Math.min(fastError, 0.1)); // clamp error between [0% - 10%]
+            logger.info("Fast error: {} %", 100.0 * error);
+
             final double totalFlux = fitsImage.getSum();
             logger.info("Total flux: {}", totalFlux);
 
             final int nData = fitsImage.getNData();
             final float[] data1D = sortData(fitsImage);
 
-            // TODO: use preference to define flux threshold:
-            double error = MIN_VISIBILITY_DATA;
+            final double upperThreshold = totalFlux * (1.0 - error);
+            logger.info("UpperThreshold: {}", upperThreshold);
 
-            final int thIdx = findThresholdIndex(data1D, totalFlux, error);
+            final int thIdx = findThresholdIndex(data1D, upperThreshold);
 
             if (thIdx != -1) {
                 final double thPixRatio = (100.0 * (nData - thIdx)) / nData;
-
-                logger.info("threshold ratio: {} %", NumberUtils.trimTo3Digits(thPixRatio));
+                logger.info("Ratio: {} % selected pixels", NumberUtils.trimTo3Digits(thPixRatio));
 
                 thresholdFlux = data1D[thIdx];
-
-                logger.info("thresholdFlux: {}", thresholdFlux);
+                logger.info("ThresholdFlux: {}", thresholdFlux);
             } else {
-                thresholdFlux = 0f;
+                thresholdFlux = 0.0f;
             }
-        } else {
-            thresholdFlux = 0f;
-        }
 
-        // 2.2 - Skip too small data values i.e. lower than thresholdImage ie below 10^-6:
-        if (useFastMode) {
-            if (thresholdFlux > 0f && fitsImage.getDataMin() < thresholdFlux) {
+            // 2.2 - Skip too small data values i.e. lower than thresholdImage ie below 10^-6:
+            if (thresholdFlux > 0.0f && fitsImage.getDataMin() < thresholdFlux) {
 
-                final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, thresholdFlux, 0f);
+                final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, thresholdFlux, 0.0f);
                 logger.info("ImageLowerThresholdJob - threshold: {}", thresholdFlux);
 
                 thresholdJob.forkAndJoin();
@@ -905,6 +966,8 @@ public final class UserModelService {
                 // update boundaries excluding zero values:
                 FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
             }
+        } else {
+            thresholdFlux = 0.0f;
         }
 
         // 3 - Locate useful data values inside image:
@@ -937,8 +1000,8 @@ public final class UserModelService {
         logger.info("ImageRegionThresholdJob: rowDistToCenter: {}", rowDistToCenter);
         logger.info("ImageRegionThresholdJob: colDistToCenter: {}", colDistToCenter);
 
-        // ensure minimum size to 2 pixels:
-        distToCenter = Math.max(1.5f, Math.max(rowDistToCenter, colDistToCenter));
+        // ensure minimum size to 2 pixels + proper rounding:
+        distToCenter = Math.max(1f, Math.max(rowDistToCenter, colDistToCenter)) + 0.5f;
         logger.info("ImageRegionThresholdJob: distToCenter: {}", distToCenter);
 
         // range check ?
@@ -1008,7 +1071,7 @@ public final class UserModelService {
         // 6 - flip axes to have positive increments (left to right for the column axis and bottom to top for the row axis)
         // note: flip operation requires image size to be an even number
         final double incRow = fitsImage.getSignedIncRow();
-        if (incRow < 0d) {
+        if (incRow < 0.0) {
             // flip row axis:
             final ImageFlipJob flipJob = new ImageFlipJob(data, nbCols, nbRows, false);
 
@@ -1020,7 +1083,7 @@ public final class UserModelService {
         }
 
         final double incCol = fitsImage.getSignedIncCol();
-        if (incCol < 0d) {
+        if (incCol < 0.0) {
             // flip column axis:
             final ImageFlipJob flipJob = new ImageFlipJob(data, nbCols, nbRows, true);
 
@@ -1046,9 +1109,6 @@ public final class UserModelService {
      */
     public static float[] sortData(final FitsImage fitsImage) {
 
-        /** Get the current thread to check if the computation is interrupted */
-        final Thread currentThread = Thread.currentThread();
-
         final int nbRows = fitsImage.getNbRows();
         final int nbCols = fitsImage.getNbCols();
         final int nData = fitsImage.getNData();
@@ -1070,22 +1130,18 @@ public final class UserModelService {
                 flux = row[c];
 
                 // skip values different from zero:
-                if (flux > 0f) {
+                if (flux > 0.0f) {
                     // keep this data point:
                     data1D[n1D] = flux;
                     n1D++;
                 }
             } // columns
-
-            // fast interrupt :
-            if (currentThread.isInterrupted()) {
-                return null;
-            }
         } // rows
 
         logger.info("FitsImage: used pixels = {} / {}", n1D, nData);
 
-        Arrays.sort(data1D, 0, n1D);
+        // Use parallel sort:
+        DualPivotQuicksort.sort(data1D, ParallelJobExecutor.getInstance().getMaxParallelJob(), 0, n1D);
 
         logger.info("FitsImage: {} float sorted.", n1D);
 
@@ -1133,9 +1189,6 @@ public final class UserModelService {
 
         logger.info("prepareModelData: threshold: {}", threshold);
 
-        /** Get the current thread to check if the computation is interrupted */
-        final Thread currentThread = Thread.currentThread();
-
         // note: square image (and even size):
         final int nbRows = fitsImage.getNbRows();
         final int nbCols = fitsImage.getNbCols();
@@ -1177,7 +1230,7 @@ public final class UserModelService {
         // Recycle large data arrays (weak reference cache) for fits cubes (many spectral channels having roughly same nData)
         final float[] data1D = getArray(nData * DATA_1D_POINT_SIZE);
 
-        double totalFlux = 0d;
+        double totalFlux = 0.0;
         float flux;
         double rowCoord, colCoord;
 
@@ -1196,19 +1249,14 @@ public final class UserModelService {
 
                     // Transform coordinates:
                     // keep this data point:
-                    totalFlux += flux;
                     data1D[nUsedData] = flux;
                     data1D[nUsedData + 1] = (float) Functions.transformU(colCoord, rowCoord, cosTheta, sinTheta);
                     data1D[nUsedData + 2] = (float) Functions.transformV(colCoord, rowCoord, cosTheta, sinTheta);
 
+                    totalFlux += flux;
                     nUsedData += DATA_1D_POINT_SIZE;
                 }
             } // columns
-
-            // fast interrupt :
-            if (currentThread.isInterrupted()) {
-                return;
-            }
         } // rows
 
         logger.info("prepareModelData: used pixels = {} / {}", nUsedData / DATA_1D_POINT_SIZE, nPixels);
@@ -1216,15 +1264,12 @@ public final class UserModelService {
         // normalize flux to 1.0:
         logger.info("prepareModelData: totalFlux: {}", totalFlux);
 
-        if (threshold != 0f) {
-            final double normFactor = 1d / totalFlux;
+        if (threshold != 0.0f) {
+            final double normFactor = 1.0 / totalFlux;
+            totalFlux = 0.0;
 
             for (int i = 0; i < nUsedData; i += DATA_1D_POINT_SIZE) {
                 data1D[i] = (float) (normFactor * data1D[i]);
-            }
-
-            totalFlux = 0d;
-            for (int i = 0; i < nUsedData; i += DATA_1D_POINT_SIZE) {
                 totalFlux += data1D[i];
             }
             logger.info("prepareModelData: totalFlux after normalization: {}", totalFlux);
@@ -1246,22 +1291,19 @@ public final class UserModelService {
     }
 
     /**
-     * Find the threshold index when the sum of values becomes higher than the given upper threshold
+     * Find the threshold index when the sum of values becomes strictly higher than the given upper threshold
      * @param data1D sorted data (ascending order)
-     * @param total total of all values
-     * @param error upper threshold
+     * @param upperThreshold upper threshold to use
      * @return threshold value or -1 if not found
      */
-    private static int findThresholdIndex(final float[] data1D, final double total, final double error) {
-        final double upperThreshold = total * (1d - error);
-
+    private static int findThresholdIndex(final float[] data1D, final double upperThreshold) {
         if (logger.isDebugEnabled()) {
             logger.debug("findThresholdIndex: upperThreshold: {}", upperThreshold);
         }
 
         float value;
-        float lastValue = 0f;
-        double partialFlux = 0d;
+        float lastValue = 0.0f;
+        double partialFlux = 0.0;
 
         for (int i = data1D.length - 1; i >= 0; i--) {
             value = data1D[i];
@@ -1269,7 +1311,7 @@ public final class UserModelService {
 
             if (partialFlux > upperThreshold) {
                 // keep equal values
-                if (lastValue != 0f) {
+                if (lastValue != 0.0f) {
                     if (value != lastValue) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("findThresholdValue: threshold reached: {} > {} - value = {} - nPixels = {}",
@@ -1283,6 +1325,110 @@ public final class UserModelService {
             }
         }
         return -1;
+    }
+
+    public static boolean checkAiryRadius(final UserModel userModel, final double diameter, final double lambdaMin) {
+        if (!userModel.isModelDataReady()) {
+            return false;
+        }
+        final UserModelData modelData = userModel.getModelData(0);
+
+        final FitsImage fitsImage = modelData.getFitsImage();
+
+        // check real lambda ie airy radius of the first image: 
+        final double lambda = (!Double.isNaN(fitsImage.getWaveLength())) ? fitsImage.getWaveLength() : lambdaMin;
+
+        final double airyRadius = getAiryRadius(fitsImage, diameter, lambda);
+
+        final boolean valid = (Double.isNaN(airyRadius) && Double.isNaN(modelData.getAiryRadius()))
+                || (airyRadius == modelData.getAiryRadius());
+
+        logger.debug("checkAiryRadius: lambda: {} - diameter: {}", lambda, diameter);
+        logger.info("checkAiryRadius[{}]: airy radius expected = {} - model = {}", valid,
+                FitsImage.getAngleAsString(airyRadius, df3),
+                FitsImage.getAngleAsString(modelData.getAiryRadius(), df3)
+        );
+
+        return valid;
+    }
+
+    private static double getAiryRadius(final FitsImage fitsImage, final double diameter, final double lambda) {
+        if (Double.isNaN(diameter) || (diameter <= 0.0) || Double.isNaN(lambda) || (lambda <= 0.0)) {
+            return Double.NaN;
+        }
+
+        // see https://en.wikipedia.org/wiki/Airy_disk
+        // airy disk: zero  at 1.22 lambda / diameter
+        final double airyRadius = 1.22d * lambda / diameter;
+
+        // check airy radius vs image Fov:
+        final double imageRadius = 0.5 * fitsImage.getOrigMaxAngle();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("getAiryRadius: airy radius  = {}", FitsImage.getAngleAsString(airyRadius, df3));
+            logger.debug("getAiryRadius: image radius = {}", FitsImage.getAngleAsString(imageRadius, df3));
+
+            // check weight (see apodize method)
+            final double fwhm = 0.42d * lambda / diameter;
+
+            // min(gaussian weight) on image boundaries:
+            final double weight = FastMath.exp(-1.0 / (2.0 * fwhm * fwhm) * (imageRadius * imageRadius));
+
+            logger.debug("weight[{}] = {}", NumberUtils.trimTo3Digits(imageRadius / airyRadius), weight);
+        }
+
+        // if ratio (image radius / airy radius) > 15% then gaussian weight (equiv airy) becomes below 0.9 at image boundaries
+        if (imageRadius < 0.15 * airyRadius) {
+            // skip apodization:
+            return Double.NaN;
+        }
+
+        return airyRadius;
+    }
+
+    /**
+     * Performs image apodization ie multiply image by the telescope airy disk (gaussian profile in fact)
+     * @param fitsImage image to transform (in-place)
+     * @param diameter telescope diameter in meters
+     * @param lambdaMin minimum wavelength in meters (used only for gray images)
+     */
+    private static double apodize(final FitsImage fitsImage, final double diameter, final double lambdaMin) {
+        final double lambda = !Double.isNaN(fitsImage.getWaveLength()) ? fitsImage.getWaveLength() : lambdaMin;
+
+        final double airyRadius = getAiryRadius(fitsImage, diameter, lambda);
+
+        // check if apodization is necessary according to the image FOV >> radius
+        // e.g. airyRadius is NaN:
+        if (!Double.isNaN(airyRadius)) {
+            // Start the computations :
+            final long start = System.nanoTime();
+
+            // equivalent gaussian profile: sigma = 0.42 lambda / diameter
+            final double fwhm = 0.42d * lambda / diameter;
+
+            logger.info("apodize: airy radius = {}", FitsImage.getAngleAsString(airyRadius, df3));
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("apodize: lambda: {} - diameter: {}", lambda, diameter);
+                logger.debug("apodize: airy FOV  = {}", FitsImage.getAngleAsString(2.0 * airyRadius, df3));
+                logger.debug("apodize: fwhm      = {}", fwhm);
+            }
+
+            final int nbRows = fitsImage.getNbRows();
+            final int nbCols = fitsImage.getNbCols();
+
+            final ImageGaussianFilterJob filterJob = new ImageGaussianFilterJob(
+                    fitsImage.getData(), nbCols, nbRows,
+                    UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol()),
+                    UserModelService.computeSpatialCoords(nbRows, fitsImage.getSignedIncRow()),
+                    fwhm
+            );
+
+            filterJob.forkAndJoin();
+
+            logger.info("apodize: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        }
+        return airyRadius;
     }
 
 }

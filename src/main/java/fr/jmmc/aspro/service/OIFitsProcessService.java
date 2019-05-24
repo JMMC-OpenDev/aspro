@@ -6,6 +6,7 @@ package fr.jmmc.aspro.service;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.util.StatUtils;
 import fr.jmmc.aspro.util.StatUtils.ComplexDistribution;
 import static fr.jmmc.aspro.util.StatUtils.N_SAMPLES;
@@ -13,14 +14,18 @@ import static fr.jmmc.aspro.util.StatUtils.SAMPLING_FACTOR_MEAN;
 import static fr.jmmc.aspro.util.StatUtils.SAMPLING_FACTOR_VARIANCE;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oitools.model.DataModel;
+import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIData;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIT3;
 import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.OIWavelength;
+import fr.nom.tam.fits.FitsException;
+import java.io.IOException;
 import static java.lang.Math.PI;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
@@ -39,23 +44,47 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
     protected final static boolean DO_VALIDATE_OIFITS = true;
 
     /* members */
+    /** fast mode: true to ignore useless data (faster); false to have highest precision */
+    private final boolean useFastMode;
+    /** fast mode error in percents */
+    private final double fastError;
+    /** apodization flag: true to perform image apodization; false to disable */
+    private final boolean doApodization;
+    /** optional telescope diameter (meters) used by image apodization (m) */
+    private final double diameter;
+    /** temporary OIDATA table */
     private OIData oiData = null;
 
     /**
      * Public constructor
      * @param target target to process
+     * @param oifitsFile oifits to process
+     * @param useFastMode true to ignore useless data (faster); false to have highest precision
+     * @param fastError fast mode threshold in percents
      * @param supersampling OIFits supersampling preference
      * @param mathMode OIFits MathMode preference
-     * @param oifitsFile oifits to process
+     * @param doApodization true to perform image apodization; false to disable
+     * @param diameter default telescope diameter (meters) used by image apodization (m)
      */
     public OIFitsProcessService(final Target target,
+                                final OIFitsFile oifitsFile,
+                                final boolean useFastMode, final double fastError,
                                 final int supersampling,
                                 final UserModelService.MathMode mathMode,
-                                final OIFitsFile oifitsFile) {
+                                final boolean doApodization, final double diameter) {
 
         super(target, supersampling, mathMode);
 
         this.oiFitsFile = oifitsFile;
+
+        // Perform analysis:
+        oifitsFile.analyze();
+
+        this.useFastMode = useFastMode;
+        this.fastError = fastError;
+
+        this.doApodization = doApodization;
+        this.diameter = diameter;
 
         // Noise Service is null (disabled)
     }
@@ -82,6 +111,11 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                 if (table.getOiWavelength() == oiWaveLength) {
                     this.oiData = table;
 
+                    // Check user model:
+                    validateOrPrepareUserModel(oiData, target.getUserModel(),
+                            useFastMode, fastError, doApodization, diameter, waveLengths[0]
+                    );
+
                     // Compute complex visibilities:
                     if (this.computeModelVisibilities()) {
                         // use complex visibilities
@@ -96,6 +130,73 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
             }
         }
         return true;
+    }
+
+    private static void validateOrPrepareUserModel(final OIData oiData, final UserModel userModel,
+                                                   final boolean useFastMode, final double fastError,
+                                                   final boolean doApodization, final double defDiameter,
+                                                   final double lambdaMin) throws IllegalArgumentException {
+
+        // Apodization: get Telescope diameter and instrument wavelength:
+        double diameter = Double.NaN;
+
+        if (doApodization) {
+            final OIArray oiArray = oiData.getOiArray();
+
+            double diameterMin = Double.POSITIVE_INFINITY;
+            double diameterMax = Double.NEGATIVE_INFINITY;
+
+            for (short[] staIndexes : oiData.getDistinctStaConf()) {
+                for (short staIndex : staIndexes) {
+                    final Integer i = oiArray.getRowIndex(Short.valueOf(staIndex));
+                    if (i != null) {
+                        final double telDiam = oiArray.getDiameter()[i];
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Station: {} diameter: {}", oiArray.getStaName()[i], telDiam);
+                        }
+                        if (telDiam < diameterMin) {
+                            diameterMin = telDiam;
+                        }
+                        if (telDiam > diameterMax) {
+                            diameterMax = telDiam;
+                        }
+                    }
+                }
+            }
+            logger.debug("diameters: {} - {}", diameterMin, diameterMax);
+
+            // check range if diameterMin != diameterMax ?
+            if (!NumberUtils.equals(diameterMin, diameterMax)) {
+                logger.warn("Telescope diameters are varying among configurations in [{} - {} m] (apodization)", diameterMin, diameterMax);
+            }
+            if (diameterMax > 0.0) {
+                diameter = diameterMax;
+                logger.debug("Using diameter: {}", diameter);
+            } else {
+                logger.warn("Missing telescope diameter values in OI_ARRAY tables");
+                if (defDiameter > 0.0) {
+                    logger.warn("Using default diameter = {} m", defDiameter);
+                    diameter = defDiameter;
+                } else {
+                    logger.warn("Apodization is disabled (use CLI argument -diameter to set default diameter value)");
+                }
+            }
+        }
+
+        // IF needed reload (or process again apodization + image preparation...)
+        if (!UserModelService.checkAiryRadius(userModel, diameter, lambdaMin)) {
+            try {
+                // throws exceptions if the given fits file or image is incorrect:
+                UserModelService.prepareUserModel(userModel, useFastMode, fastError, doApodization, diameter, lambdaMin);
+            } catch (FitsException fe) {
+                throw new RuntimeException("Could not read file: " + userModel.getFile(), fe);
+            } catch (IOException ioe) {
+                throw new RuntimeException("Could not read file: " + userModel.getFile(), ioe);
+            } catch (IllegalArgumentException iae) {
+                throw iae;
+            }
+        }
     }
 
     private void computeOIData() {

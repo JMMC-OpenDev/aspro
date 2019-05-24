@@ -42,6 +42,8 @@ public final class OIFitsProcessor {
     public final static String ARG_OUTPUT = "output";
     /** CLI arg - fast */
     public final static String ARG_FAST = "fast";
+    /** CLI arg - fast error */
+    public final static String ARG_FAST_ERROR = "fastError";
     /** CLI arg - supersampling */
     public final static String ARG_SUPER_SAMPLING = "supersampling";
     /** CLI arg - math */
@@ -50,6 +52,10 @@ public final class OIFitsProcessor {
     public final static String ARG_SCALE = "scale";
     /** CLI arg - rotation (deg) */
     public final static String ARG_ROTATE = "rotate";
+    /** CLI arg - apodize */
+    public final static String ARG_APODIZE = "apodize";
+    /** CLI arg - apodization diameter */
+    public final static String ARG_DIAMETER = "diameter";
 
     public static void defineCommandLineArguments(final App app) {
         app.addCustomCommandLineArgument(ARG_IMAGE, true, "the input FITS model to process", App.ExecMode.TTY);
@@ -57,12 +63,16 @@ public final class OIFitsProcessor {
         app.addCustomCommandLineArgument(ARG_OUTPUT, true, "the output OIFITS file to write", App.ExecMode.TTY);
         // optional arguments:
         app.addCustomCommandLineArgument(ARG_FAST, true, "[true] to ignore useless data; false to have highest precision", App.ExecMode.TTY);
+        app.addCustomCommandLineArgument(ARG_FAST_ERROR, true, "optional Fast mode error in percents [0 - 10 %]; 1% by default", App.ExecMode.TTY);
         app.addCustomCommandLineArgument(ARG_SUPER_SAMPLING, true, "supersampling per spectral channel ["
                 + AsproConstants.DEFAULT_SUPER_SAMPLING + "]", App.ExecMode.TTY);
         app.addCustomCommandLineArgument(ARG_MATH, true, "Math mode: ['FAST'] faster, 'DEFAULT' highest accuracy or 'QUICK' fastest BUT low accuracy", App.ExecMode.TTY);
         // transform arguments:
         app.addCustomCommandLineArgument(ARG_SCALE, true, "optional image scale (increment) expressed in milli-arcsec (mas)", App.ExecMode.TTY);
         app.addCustomCommandLineArgument(ARG_ROTATE, true, "optional image rotation expressed in degrees", App.ExecMode.TTY);
+        // apodization arguments:
+        app.addCustomCommandLineArgument(ARG_APODIZE, true, "[true] to perform image apodization; false to disable", App.ExecMode.TTY);
+        app.addCustomCommandLineArgument(ARG_DIAMETER, true, "optional telescope diameter (meters) used by image apodization", App.ExecMode.TTY);
     }
 
     public static void processCommandLine(final App app, final Map<String, String> argValues) {
@@ -86,6 +96,9 @@ public final class OIFitsProcessor {
             String optArg = argValues.get(ARG_FAST);
             final boolean useFastMode = (optArg != null) ? Boolean.parseBoolean(optArg) : true;
 
+            optArg = argValues.get(ARG_FAST_ERROR);
+            final double fastError = (optArg != null) ? Double.parseDouble(optArg) : AsproConstants.DEFAULT_FAST_ERROR;
+
             optArg = argValues.get(ARG_SUPER_SAMPLING);
             final int supersampling = (optArg != null) ? Integer.parseInt(optArg)
                     : AsproConstants.DEFAULT_SUPER_SAMPLING.intValue();
@@ -100,10 +113,18 @@ public final class OIFitsProcessor {
             optArg = argValues.get(ARG_ROTATE);
             final double rotate = (optArg != null) ? Double.parseDouble(optArg) : Double.NaN;
 
+            optArg = argValues.get(ARG_APODIZE);
+            final boolean doApodization = (optArg != null) ? Boolean.parseBoolean(optArg) : true;
+
+            optArg = argValues.get(ARG_DIAMETER);
+            final double diameter = (optArg != null) ? Double.parseDouble(optArg) : Double.NaN;
+
             // Process (in sync):
             new OIFitsProcessor(inputFile, modelFile, outputFile,
-                    useFastMode, supersampling, mathMode,
-                    scale, rotate).process();
+                    useFastMode, fastError, supersampling, mathMode,
+                    doApodization, diameter,
+                    scale, rotate
+            ).process();
         }
     }
 
@@ -116,10 +137,16 @@ public final class OIFitsProcessor {
     private final String outputFile;
     /** fast mode: true to ignore useless data (faster); false to have highest precision */
     private final boolean useFastMode;
+    /** fast mode error in percents */
+    private final double fastError;
     /** OIFits supersampling */
     private final int supersampling;
     /** OIFits MathMode */
     private final MathMode mathMode;
+    /** apodization flag: true to perform image apodization; false to disable */
+    private final boolean doApodization;
+    /** optional telescope diameter (meters) used by image apodization (m) */
+    private final double diameter;
     /** scale / increment (mas) */
     private final double scale;
     /** rotation angle (deg) */
@@ -131,20 +158,29 @@ public final class OIFitsProcessor {
      * @param modelFile model file (FITS)
      * @param outputFile output file (OIFITS)
      * @param useFastMode true to ignore useless data (faster); false to have highest precision
+     * @param fastError fast mode threshold in percents
      * @param supersampling OIFits supersampling preference
      * @param mathMode OIFits MathMode preference
+     * @param doApodization true to perform image apodization; false to disable
+     * @param diameter optional telescope diameter (meters) used by image apodization (m)
      * @param scale scale / increment (mas)
      * @param rotate rotation angle (deg)
      */
     private OIFitsProcessor(final String inputFile, final String modelFile, final String outputFile,
-                            final boolean useFastMode, final int supersampling, final UserModelService.MathMode mathMode,
+                            final boolean useFastMode, final double fastError,
+                            final int supersampling, final UserModelService.MathMode mathMode,
+                            final boolean doApodization, final double diameter,
                             final double scale, final double rotate) {
+
         this.inputFile = inputFile;
         this.modelFile = modelFile;
         this.outputFile = (outputFile != null) ? outputFile : (inputFile + "-processed.fits");
         this.useFastMode = useFastMode;
+        this.fastError = 0.01 * fastError; // as percents
         this.supersampling = supersampling;
         this.mathMode = mathMode;
+        this.doApodization = doApodization;
+        this.diameter = diameter;
         this.scale = scale;
         this.rotate = rotate;
 
@@ -154,8 +190,11 @@ public final class OIFitsProcessor {
         logger.info("modelFile:     {}", modelFile);
         logger.info("outputFile:    {}", outputFile);
         logger.info("useFastMode:   {}", useFastMode);
+        logger.info("fastError:     {}", fastError);
         logger.info("supersampling: {}", supersampling);
         logger.info("mathMode:      {}", mathMode);
+        logger.info("doApodization: {}", doApodization);
+        logger.info("diameter:      {}", diameter);
         logger.info("scale:         {}", scale);
         logger.info("rotate:        {}", rotate);
     }
@@ -182,7 +221,8 @@ public final class OIFitsProcessor {
             }
 
             // throws exceptions if the given fits file or image is incorrect:
-            UserModelService.prepareUserModel(userModel, useFastMode);
+            // note: apodization is defered to use appropriate wavelength
+            UserModelService.prepareUserModel(userModel, useFastMode, fastError);
 
             final UserModelData modelData = userModel.getModelData(0);
             final FitsImage fitsImage = modelData.getFitsImage();
@@ -207,7 +247,8 @@ public final class OIFitsProcessor {
             target.setUserModel(userModel);
             target.setUseAnalyticalModel(Boolean.FALSE);
 
-            final OIFitsProcessService service = new OIFitsProcessService(target, supersampling, mathMode, oiFitsFile);
+            final OIFitsProcessService service = new OIFitsProcessService(target, oiFitsFile,
+                    useFastMode, fastError, supersampling, mathMode, doApodization, diameter);
 
             if (service.processOIFits(warningContainer)) {
                 logger.info("Writing {}", outputFile);
@@ -221,10 +262,10 @@ public final class OIFitsProcessor {
         } catch (IOException ioe) {
             logger.info("IO failure", ioe);
         } finally {
-            if (warningContainer.hasWarningMessages()) {
+            if (warningContainer.hasWarning()) {
                 logSeparator();
                 logger.info("OIFitsProcessService messages:");
-                for (WarningMessage message : warningContainer.getWarningMessages()) {
+                for (WarningMessage message : warningContainer.getWarnings()) {
                     logger.info("{}: {}", message.getLevel(), message.getMessage());
                 }
             }
@@ -238,10 +279,13 @@ public final class OIFitsProcessor {
         for (OIData oiData : oiFitsFile.getOiDataList()) {
             final double[][] spatialFreqs = oiData.getSpatialFreq();
 
-            for (int i = 0; i < spatialFreqs.length; i++) {
-                final double max = StatUtils.max(spatialFreqs[i]);
-                if (max > freqMax) {
-                    freqMax = max;
+            // special case: OIFlux does not compute spatial frequencies:
+            if (spatialFreqs != null) {
+                for (int i = 0; i < spatialFreqs.length; i++) {
+                    final double max = StatUtils.max(spatialFreqs[i]);
+                    if (max > freqMax) {
+                        freqMax = max;
+                    }
                 }
             }
         }
