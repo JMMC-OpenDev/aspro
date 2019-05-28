@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -584,6 +585,128 @@ public final class AsproGenConfig {
 
         sb.append("\n</horizon>\n");
         sb.append("</station>\n");
+    }
+
+    private static void convertHorizonTable(final String path, final String tableFileName) {
+        final String absFileName = new File(path, tableFileName).getAbsolutePath();
+
+        // outputs :
+        final List<String> headers = new ArrayList<String>();
+        final List<String> columns = new ArrayList<String>();
+        final Map<String, ArrayList<String>> datas = new LinkedHashMap<String, ArrayList<String>>();
+
+        // column separator :
+        String delimiter = " ";
+
+        // load data from file :
+        BufferedReader reader = null;
+        try {
+            final File data = new File(absFileName);
+
+            System.out.println("reading: " + absFileName);
+
+            reader = new BufferedReader(new FileReader(data));
+
+            String line;
+            StringTokenizer tok;
+
+            boolean header = true;
+
+            while ((line = reader.readLine()) != null) {
+//                System.out.println("line: [" + line + "]");
+
+                if (line.startsWith("#")) {
+                    if (header) {
+                        // locate # az
+                        if (header && line.startsWith("# az")) {
+                            // parse columns:
+                            tok = new StringTokenizer(line.substring(2), delimiter);
+
+                            while (tok.hasMoreTokens()) {
+                                columns.add(tok.nextToken());
+                            }
+
+                            logger.info("columns: {}", columns);
+
+                            for (String c : columns) {
+                                datas.put(c, new ArrayList<String>(361 * 2)); // step = 0.5 deg
+                            }
+
+                            // table header found:
+                            header = false;
+                        } else {
+                            // keep header:
+                            headers.add(line);
+                        }
+                    }
+                } else {
+                    if (header) {
+                        System.err.println("Missing header; stop");
+                        break;
+                    }
+                    // replace multiple delimiters :
+                    tok = new StringTokenizer(line, delimiter);
+
+                    int i = 0;
+                    while (tok.hasMoreTokens()) {
+                        datas.get(columns.get(i++)).add(tok.nextToken());
+                    }
+
+                }
+            }
+
+        } catch (FileNotFoundException fnfe) {
+            logger.error("File not found", fnfe);
+        } catch (IOException ioe) {
+            logger.error("IO failure", ioe);
+        } finally {
+            FileUtils.closeFile(reader);
+        }
+
+        if (false) {
+            logger.info("headers: {}", headers);
+            logger.info("columns: {}", columns);
+
+            for (String c : columns) {
+                logger.info("column[{}]: {}", c, datas.get(c));
+            }
+        }
+
+        final String AZ = "az";
+        delimiter = "\t";
+
+        for (String c : columns) {
+            if (!c.equals(AZ)) {
+                final File output = new File(path, c + ".horizon");
+
+                System.out.println("writing: " + output);
+
+                final Writer w = FileUtils.openFile(output);
+                try {
+                    for (String line : headers) {
+                        w.write(line);
+                        w.write("\n");
+                    }
+                    w.write("# az\televation_limit");
+                    w.write("\n");
+
+                    final ArrayList<String> az = datas.get(AZ);
+                    final ArrayList<String> el = datas.get(c);
+
+                    for (int i = 0, len = az.size(); i < len; i++) {
+                        w.write(az.get(i));
+                        w.write(delimiter);
+                        w.write(el.get(i));
+                        w.write("\n");
+                    }
+
+                } catch (IOException ioe) {
+                    logger.error("IO failure", ioe);
+                } finally {
+                    FileUtils.closeFile(w);
+                }
+            }
+        }
     }
 
     /**
@@ -1610,14 +1733,14 @@ public final class AsproGenConfig {
     private static void VLTIPosition() {
 
         final StringBuilder sb = new StringBuilder(128);
-        
+
         // ASPRO1: 17/04/2012:
         final double lonDeg = -70.40498688; // VLTI site longitude (UV zero) [deg].     
         final double latDeg = -24.62743941; // VLTI site latitude (UV zero) [deg].
         logger.info("VLTI geodetic longitude / latitude (deg) : " + lonDeg + " - " + latDeg);
 
         final double alt = 2669.0; // VLTI ground site height above WGS84 [m].
-        
+
         final Position3D position = computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
         final LonLatAlt coords = GeocentricCoords.getLonLatAlt(position);
@@ -1629,13 +1752,12 @@ public final class AsproGenConfig {
 14:16:41.370 INFO  [main] AsproGenConfig - position (x,y,z) : [1946409.9709899623, -5467660.10589381, -2642728.3998888675]
 14:16:41.720 INFO  [main] AsproGenConfig - VLTI position : [-70:24:17.9528, -24:37:38.7819, 2669.0 m][-70.40498688, -24.62743941]
          */
-        
-        /*
+ /*
 2018.3: ISS gives (as does astropy):        
 ARRAYX  =    1946404.341038839
 ARRAYY  =   -5467644.290798524
 ARRAYZ  =   -2642728.201444249
-        */
+         */
         logger.info("Generated VLTI position:\n" + sb.toString());
     }
 
@@ -1665,7 +1787,7 @@ ARRAYZ  =   -2642728.201444249
      * @return positions (x,y,z)
      */
     private static Position3D computeInterferometerPosition(final double lon, final double lat, final double alt, final StringBuilder sb) {
-        
+
         final Position3D geoXYZ = GeocentricCoords.getGeocentric(Math.toRadians(lon), Math.toRadians(lat), alt);
 
         logger.info("position (x,y,z) : " + geoXYZ);
@@ -2148,14 +2270,14 @@ ARRAYZ  =   -2642728.201444249
         computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
         logger.info("Generated Sutherland position:\n" + sb.toString());
-        
+
         sb.setLength(0);
-        
+
         /*
         OHP:
          5° 42' 44" E Latitude = +43° 55' 54" (Télescope de 1m93) IAU Observatory Code 511
         altitude moyenne est de 650 mètres
-        */
+         */
         lonDeg = +(5.0 + 42.0 / 60.0 + 44.0 / 3600.0);
         logger.info("OHP longitude (deg) : " + lonDeg);
 
@@ -2193,7 +2315,7 @@ ARRAYZ  =   -2642728.201444249
 
         // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
-        
+
         // Recompute site positions:
         if (false) {
             VLTIPosition();
@@ -2215,7 +2337,7 @@ ARRAYZ  =   -2642728.201444249
 
         final String asproTestPath = userHome + "/dev/aspro/src/test/resources/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.CHARA;
+        final INTERFEROMETER selected = INTERFEROMETER.VLTI;
 
         switch (selected) {
             case VLTI:
@@ -2236,6 +2358,9 @@ ARRAYZ  =   -2642728.201444249
                         asproTestPath + "vlti_vcm_no_limit.txt",
                         asproTestPath + "vlti_vcm_no_limit.txt");
 
+                // 2019.5: convert ESO vlti table to 1 file per station:
+                convertHorizonTable(vltiHorizonPath, "newVltiHzn_obsDoors.txt");
+
                 final String[] vltStations = {
                     "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
                     "C0", "C1", "C2", "C3", "D0", "D1", "D2", "E0", "G0", "G1", "G2", "H0",
@@ -2249,8 +2374,10 @@ ARRAYZ  =   -2642728.201444249
                 logger.info("convertHorizons : \n" + sb.toString());
 
                 // convert arrayList to get DLx and channels (IPn)
-                convertArrayList(asproTestPath + "vlti_arrayList_2016.txt",
-                        new String[]{"Period 98", "Future"});
+                if (false) {
+                    convertArrayList(asproTestPath + "vlti_arrayList_2016.txt",
+                            new String[]{"Period 98", "Future"});
+                }
 
                 break;
             case CHARA:
