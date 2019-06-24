@@ -35,9 +35,12 @@ public final class StatUtils {
     /** initial cache size = number of baselines (15 for 6 telescopes) */
     private final static int INITIAL_CAPACITY = 15;
     /** singleton */
-    private final static StatUtils INSTANCE = new StatUtils();
+    private static StatUtils INSTANCE = null;
 
-    public static StatUtils getInstance() {
+    public synchronized static StatUtils getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new StatUtils();
+        }
         return INSTANCE;
     }
 
@@ -344,7 +347,7 @@ public final class StatUtils {
         System.out.println("moments(variance) (re): " + Arrays.toString(moments(vars[0])));
         System.out.println("moments(variance) (im): " + Arrays.toString(moments(vars[1])));
 
-        for (double snr = 10.0; snr > 1e-2; ) {
+        for (double snr = 10.0; snr > 1e-2;) {
             /* for (double amp = 1.0; amp > 5e-6; amp /= 10.0) */
             final double amp = 0.00137;
             {
@@ -400,7 +403,7 @@ public final class StatUtils {
 
     private static void test(final double visRef, final double snr, final boolean amp, double[][] samples) {
         double visErr = visRef / snr;
-        System.out.println("circular err: "+visErr);
+        System.out.println("circular err: " + visErr);
 
         double exp_ref = visRef;
         double exp_err = visErr;
@@ -412,15 +415,15 @@ public final class StatUtils {
             exp_err = 2.0 * visRef * visErr;
             exp_ref = visRef * visRef;
         }
-        
+
         if (false) {
             // try error correction ?
             if (!amp) {
                 if (exp_err / exp_ref >= 1) {
-                    System.out.println("exp_err: "+exp_err);
-                    System.out.println("exp_ref: "+exp_ref);
+                    System.out.println("exp_err: " + exp_err);
+                    System.out.println("exp_ref: " + exp_ref);
                     visErr = Math.sqrt(exp_err / 2.0); // = SQRT(half deviation)
-                    System.out.println("Fixed circular err: "+visErr);
+                    System.out.println("Fixed circular err: " + visErr);
                 }
             }
         }

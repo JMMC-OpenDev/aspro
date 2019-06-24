@@ -634,10 +634,13 @@ public abstract class AbstractOIFitsProducer {
                 }
             }
 
-            final StatUtils stat = StatUtils.getInstance();
             final NoiseService ns = this.noiseService;
+            final StatUtils stat;
 
-            if (ns != null) {
+            if (ns == null) {
+                stat = null;
+            } else {
+                stat = StatUtils.getInstance();
                 // prepare enough distributions for all baselines:
                 stat.prepare(nBl);
             }
@@ -665,13 +668,13 @@ public abstract class AbstractOIFitsProducer {
                     // select a different complex distribution per row:
                     cVisRndDist[k] = stat.get();
 
-                    double visAmp, visErr;
+                    double visAmp;
                     // Iterate on spectral channels:
                     for (l = 0; l < nChannels; l++) {
                         visAmp = cVisRow[l].abs();
 
                         // complex visibility error or Complex.NaN:
-                        cVisErrorRow[l] = visErr = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp);
+                        cVisErrorRow[l] = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp);
 
                         // check SNR(V2) without any bias:
                         final double snrV2 = ns.getSNRVis2NoBias();
