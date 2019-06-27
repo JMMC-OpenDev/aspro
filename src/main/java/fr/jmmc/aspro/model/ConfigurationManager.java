@@ -36,6 +36,7 @@ import fr.jmmc.aspro.service.AtmosphereSpectrumService;
 import fr.jmmc.aspro.service.GeocentricCoords;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.util.MathUtils;
+import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.FeedbackReport;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -157,6 +158,12 @@ public final class ConfigurationManager extends BaseOIManager {
 
         // reset anyway:
         configuration.clear();
+
+        // skip loading configuration for CLI processing:
+        if (Bootstrapper.isHeadless()) {
+            logger.info("initializeConfiguration: skipped (headless)");
+            return;
+        }
 
         boolean isConfValid = true;
 

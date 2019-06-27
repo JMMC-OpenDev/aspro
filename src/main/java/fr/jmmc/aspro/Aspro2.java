@@ -143,11 +143,11 @@ public final class Aspro2 extends App {
 
         if (!Bootstrapper.isHeadless()) {
             createPreferencesView();
-        }
 
-        // Create a new observation and update the GUI :
-        // even if opening a file in case the file can not be loaded:
-        ObservationManager.getInstance().reset();
+            // Create a new observation and update the GUI :
+            // even if opening a file in case the file can not be loaded:
+            ObservationManager.getInstance().reset();
+        }
 
         logger.debug("Aspro2.setupGui() handler exit");
     }

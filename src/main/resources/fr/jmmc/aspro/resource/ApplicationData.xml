@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.7 beta 4"/>
-    <compilation date="24/05/2019" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.7 beta 5"/>
+    <compilation date="27/06/2019" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -222,7 +222,10 @@
 
     <releasenotes>
         <release version="0.9.9.7">
-            <pubDate>Fri, 24 May 2019 14:00:00 GMT</pubDate>
+            <pubDate>Thu, 27 Jun 2019 12:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.7 beta 5">
+                <change type="FEATURE">Optimized startup of the command line tool to compute interferometric observables</change>
+            </prerelease>
             <prerelease version="0.9.9.7 beta 4">
                 <change type="FEATURE">Added user preferences for Fast mode error (1% by default) and Apodization in the Preferences panel</change>
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/1000">Optimized apodization of user model images (performance and concurrency issues)</change>
