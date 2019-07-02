@@ -26,9 +26,12 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="RA" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="DEC" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="EQUINOX" type="{http://www.w3.org/2001/XMLSchema}float"/&gt;
+ *         &lt;element name="SYSVEL" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="VELTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="PMRA" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="PMDEC" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="PARALLAX" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="PARA_ERR" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="IDS" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="OBJTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="SPECTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
@@ -57,9 +60,12 @@ import fr.jmmc.aspro.model.OIBase;
     "ra",
     "dec",
     "equinox",
+    "sysvel",
+    "veltyp",
     "pmra",
     "pmdec",
     "parallax",
+    "paraerr",
     "ids",
     "objtyp",
     "spectyp",
@@ -87,12 +93,18 @@ public class Target
     protected String dec;
     @XmlElement(name = "EQUINOX")
     protected float equinox;
+    @XmlElement(name = "SYSVEL")
+    protected Double sysvel;
+    @XmlElement(name = "VELTYP")
+    protected String veltyp;
     @XmlElement(name = "PMRA")
     protected Double pmra;
     @XmlElement(name = "PMDEC")
     protected Double pmdec;
     @XmlElement(name = "PARALLAX")
     protected Double parallax;
+    @XmlElement(name = "PARA_ERR")
+    protected Double paraerr;
     @XmlElement(name = "IDS")
     protected String ids;
     @XmlElement(name = "OBJTYP")
@@ -211,6 +223,54 @@ public class Target
     }
 
     /**
+     * Gets the value of the sysvel property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getSYSVEL() {
+        return sysvel;
+    }
+
+    /**
+     * Sets the value of the sysvel property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setSYSVEL(Double value) {
+        this.sysvel = value;
+    }
+
+    /**
+     * Gets the value of the veltyp property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getVELTYP() {
+        return veltyp;
+    }
+
+    /**
+     * Sets the value of the veltyp property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setVELTYP(String value) {
+        this.veltyp = value;
+    }
+
+    /**
      * Gets the value of the pmra property.
      * 
      * @return
@@ -280,6 +340,30 @@ public class Target
      */
     public void setPARALLAX(Double value) {
         this.parallax = value;
+    }
+
+    /**
+     * Gets the value of the paraerr property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getPARAERR() {
+        return paraerr;
+    }
+
+    /**
+     * Sets the value of the paraerr property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setPARAERR(Double value) {
+        this.paraerr = value;
     }
 
     /**

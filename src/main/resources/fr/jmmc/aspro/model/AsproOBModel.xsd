@@ -280,9 +280,9 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    
-        
-            
+
+
+
     <xsd:complexType name="ObservationSchedule">
         <xsd:annotation>
             <xsd:documentation>
@@ -312,11 +312,11 @@
         <xsd:sequence>
             <!-- TODO -->
         </xsd:sequence>
-        
+
         <xsd:attribute name="ref" type="xsd:IDREF">
             <xsd:annotation>
                 <xsd:documentation>
-                    The identifier of the observation configuration 
+                    The identifier of the observation configuration
                 </xsd:documentation>
                 <xsd:appinfo>
                     <jaxb:property>
@@ -372,6 +372,23 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <!-- radial velocity -->
+            <xsd:element name="SYSVEL" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Radial velocity (km/s)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="VELTYP" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Radial Velocity type (Radio, IR, Visible, UV, X, gamma)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <!-- proper motion -->
             <xsd:element name="PMRA" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
@@ -387,12 +404,19 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            
+
             <!-- parallax -->
             <xsd:element name="PARALLAX" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
                         Parallax (mas)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="PARA_ERR" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Error in parallax (mas)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>

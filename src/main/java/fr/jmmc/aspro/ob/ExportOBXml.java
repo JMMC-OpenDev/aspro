@@ -322,9 +322,12 @@ public class ExportOBXml {
         t.setRA(target.getRA());
         t.setDEC(target.getDEC());
         t.setEQUINOX(target.getEQUINOX());
+        t.setSYSVEL(target.getSYSVEL());
+        t.setVELTYP(target.getVELTYP());
         t.setPMRA(target.getPMRA());
         t.setPMDEC(target.getPMDEC());
         t.setPARALLAX(target.getPARALLAX());
+        t.setPARAERR(target.getPARAERR());
         t.setIDS(target.getIDS());
         t.setOBJTYP(target.getOBJTYP());
         t.setSPECTYP(target.getSPECTYP());
