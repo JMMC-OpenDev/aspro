@@ -4,7 +4,6 @@
 package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.model.oi.TargetGroup;
-import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -55,10 +54,8 @@ public final class TargetGroupTreeCellRenderer extends TargetTreeCellRenderer {
         if (node.getUserObject() instanceof TargetGroup) {
             final TargetGroup group = (TargetGroup) node.getUserObject();
 
-            final Color color = group.getDecodedColor();
-            if (color != null) {
-                setForeground(color);
-            }
+            // Using background on JTree is not recommended, so just set foreground:
+            setForeground(group.getDecodedColor());
         }
 
         return this;

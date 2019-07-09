@@ -4,7 +4,6 @@
 package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.model.oi.TargetGroup;
-import java.awt.Color;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
@@ -73,15 +72,9 @@ public final class TargetGroupRenderer extends DefaultListCellRenderer {
                 isSelected, cellHasFocus);
 
         if (group != null) {
-            final String desc = group.getDescription();
-            if (desc != null) {
-                setToolTipText(desc);
-            }
-
-            final Color color = group.getDecodedColor();
-            if (color != null) {
-                setBackground(color);
-            }
+            setToolTipText(group.getTooltip());
+            setBackground(group.getDecodedColor());
+            setForeground(group.getOverDecodedColor());
         }
 
         return this;

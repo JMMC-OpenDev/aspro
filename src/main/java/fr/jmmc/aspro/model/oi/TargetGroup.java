@@ -275,12 +275,17 @@ public class TargetGroup
     @javax.xml.bind.annotation.XmlTransient
     private java.awt.Color decColor = null;
 
+    /** another color over the decoded color */
+    @javax.xml.bind.annotation.XmlTransient
+    private java.awt.Color overDecColor = null;
+
     /**
      * Set and reset the decoded color.
      */
     public final void updateColor(final String color) {
         setColor(color);
         decColor = null;
+        overDecColor = null;
     }
     
     public final java.awt.Color getDecodedColor() {
@@ -299,6 +304,30 @@ public class TargetGroup
             }
         }
         return decColor;
+    }
+    
+    public final java.awt.Color getOverDecodedColor() {
+        if (overDecColor != null) {
+            return overDecColor;
+        }
+        
+        final java.awt.Color color = getDecodedColor();
+        
+        overDecColor = (fr.jmmc.oiexplorer.core.util.ColorUtils.lum(color.getRGB()) > 0.5f) ? java.awt.Color.BLACK : java.awt.Color.WHITE;
+
+        return overDecColor;
+    }
+    
+    /**
+    * Return the tooltip describing this group
+    * @return tooltip text
+    */
+    public final String getTooltip() {
+        String desc = getDescription();
+        if (desc == null || desc.length() == 0) {
+            return "Missing description for [" + getName() + ']';
+        }
+        return desc;
     }
 
     /**

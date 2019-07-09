@@ -33,8 +33,7 @@ public final class TargetGroupJTree extends AbstractTargetJTree<Object> {
     protected String getTooltipText(final Object userObject, final StringBuffer sbTmp) {
         if (userObject instanceof TargetGroup) {
             final TargetGroup group = (TargetGroup) userObject;
-            // Return the description:
-            return group.getDescription();
+            return group.getTooltip();
         }
         return super.getTooltipText(userObject, sbTmp);
     }
