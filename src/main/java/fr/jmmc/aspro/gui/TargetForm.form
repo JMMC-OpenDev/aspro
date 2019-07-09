@@ -107,7 +107,7 @@
                     <Property name="visibleRowCount" type="int" value="4"/>
                   </Properties>
                   <AuxValues>
-                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="createTargetList()"/>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TargetList()"/>
                   </AuxValues>
                 </Component>
               </SubComponents>

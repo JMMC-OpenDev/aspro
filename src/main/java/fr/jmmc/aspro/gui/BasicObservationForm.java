@@ -10,6 +10,7 @@ import edu.dartmouth.Site;
 import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
+import fr.jmmc.aspro.gui.util.TargetList;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.WindWidget;
@@ -70,7 +71,6 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -161,7 +161,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jPanelTargetsLeft = new javax.swing.JPanel();
         starSearchField = new EditableStarResolverWidget(true);
         jScrollPaneTargets = new javax.swing.JScrollPane();
-        jListTargets = TargetForm.createTargetList();
+        jListTargets = new TargetList();
         jButtonDeleteTarget = new javax.swing.JButton();
         jButtonTargetEditor = new javax.swing.JButton();
         jPanelTargetsRight = new javax.swing.JPanel();
@@ -981,6 +981,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         final boolean prevAutoCheckTargets = setAutoCheckTargets(false);
         try {
             jListTargets.setModel(new GenericListModel<Target>(displayTargets));
+            ((TargetList)this.jListTargets).setTargetUserInfos(targetUserInfos);
             jListTargets.setCellRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
 
             // restore previous selected item :

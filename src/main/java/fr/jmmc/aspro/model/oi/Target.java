@@ -1041,19 +1041,6 @@ public class Target
     }
 
     /**
-     * Return an HTML representation of the target used by tooltips (full information)
-     * @param sb string buffer to use (cleared)
-     * @return HTML representation as String
-     */
-    public final String toHtml(final StringBuffer sb) {
-        sb.setLength(0); // clear
-        sb.append("<html>");
-        toHtml(sb, true);
-        sb.append("</html>");
-        return sb.toString();
-    }
-
-    /**
      * Return an HTML representation of the target used by tooltips in the given string buffer
      * @param sb string buffer to fill
      * @param full flag to display full information

@@ -5,6 +5,7 @@ package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.util.CalibratorInfoTableModel;
 import fr.jmmc.aspro.gui.util.TargetJTree;
+import fr.jmmc.aspro.gui.util.TargetList;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.TargetTransferHandler;
@@ -25,8 +26,6 @@ import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.UrlUtils;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
@@ -195,6 +193,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     void initialize(final String targetName) {
         this.calibratorsModel = new GenericListModel<Target>(this.editTargetUserInfos.getCalibrators());
         this.jListCalibrators.setModel(this.calibratorsModel);
+        ((TargetList)this.jListCalibrators).setTargetUserInfos(this.editTargetUserInfos);
 
         this.generateTree();
         this.selectTarget(Target.getTarget(targetName, this.editTargets));
@@ -623,7 +622,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jTreeTargets = new TargetJTree(this.editTargetUserInfos);
         jPanelCalibrators = new javax.swing.JPanel();
         jScrollPaneCalibrators = new javax.swing.JScrollPane();
-        jListCalibrators = createTargetList();
+        jListCalibrators = new TargetList();
         jPanelActions = new javax.swing.JPanel();
         jButtonBefore = new javax.swing.JButton();
         jButtonAfter = new javax.swing.JButton();
@@ -2024,78 +2023,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JButton refreshButton;
     private fr.jmmc.jmal.star.EditableStarResolverWidget starSearchField;
     // End of variables declaration//GEN-END:variables
-
-    /**
-     * Create the custom JList to support tooltips for targets
-     * @return JList
-     */
-    public static JList createTargetList() {
-        final JList list = new JList() {
-            /** default serial UID for Serializable interface */
-            private static final long serialVersionUID = 1;
-            /* members */
-            /** tooltip buffer */
-            private final StringBuffer sbToolTip = new StringBuffer(512);
-            /** last item index at the mouse position */
-            private int lastIndex;
-            /** last tooltip at item index */
-            private String lastTooltip;
-
-            /** 
-             * update model and reset last tooltip
-             * @param model model to set
-             */
-            @Override
-            public void setModel(final ListModel model) {
-                super.setModel(model);
-
-                // reset last tooltip:
-                lastIndex = -1;
-                lastTooltip = null;
-            }
-
-            /** 
-             * This method is called as the cursor moves within the component
-             * @param me mouse event
-             * @return tooltip text
-             */
-            @Override
-            public String getToolTipText(final MouseEvent me) {
-                final Point pt = me.getPoint();
-                // Get item index :
-                final int index = locationToIndex(pt);
-                if (index != -1) {
-                    // check cell bounds:
-                    if (getCellBounds(index, index + 1).contains(pt)) {
-                        if (lastIndex == index) {
-                            // use last tooltip:
-                            return lastTooltip;
-                        } else {
-                            String tooltip = null;
-                            // Get target :
-                            final Target target = (Target) getModel().getElementAt(index);
-                            if (target != null) {
-                                // Return the tool tip text :
-                                tooltip = target.toHtml(sbToolTip);
-                            }
-                            lastIndex = index;
-                            lastTooltip = tooltip;
-                            return tooltip;
-                        }
-                    }
-                }
-                return getToolTipText();
-            }
-        };
-
-        final Target defTarget = new Target();
-        defTarget.updateNameAndIdentifier("HIP 1234");
-
-        // Useful to define the empty list width and height :
-        list.setPrototypeCellValue(defTarget);
-
-        return list;
-    }
 
     private DefaultFormatter createFieldNameFormatter() {
         final DefaultFormatter df = new DefaultFormatter() {

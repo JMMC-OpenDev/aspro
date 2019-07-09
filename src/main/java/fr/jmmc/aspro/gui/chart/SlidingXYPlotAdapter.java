@@ -3,13 +3,13 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
+import fr.jmmc.aspro.gui.util.TargetList;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
-import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
 import java.awt.Color;
 import java.awt.GradientPaint;
@@ -666,14 +666,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             sb.append("<hr>");
         }
 
-        target.toHtml(sb, false);
+        TargetList.getTooltipPart(sb, false, target, om.getTargetUserInfos());
 
-        // Target user info:
-        final String userDescription = om.getTargetUserInfos().getDescription(target);
-
-        if (userDescription != null) {
-            sb.append("<hr><b>Notes</b>:<br>").append(StringUtils.replaceCR(userDescription, "<br>"));
-        }
         sb.append("</html>");
 
         return sb.toString();

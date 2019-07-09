@@ -108,7 +108,7 @@ public class AbstractTargetJTree<E> extends GenericJTree<E> {
         if (userObject instanceof Target) {
             final Target target = (Target) userObject;
             // Return the tool tip text:
-            return target.toHtml(sbTmp);
+            return TargetList.getTooltip(sbTmp, target, editTargetUserInfos);
         }
         return null;
     }
