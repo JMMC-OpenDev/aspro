@@ -4,10 +4,10 @@
 package fr.jmmc.aspro.gui.chart;
 
 import fr.jmmc.aspro.gui.util.TargetList;
-import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
@@ -59,8 +59,6 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     private static final Map<Color, Paint> HIGHLIGHT_PAINTS = new HashMap<Color, Paint>(8);
     /** 15% transparent white color */
     private static final Color WHITE_75 = new Color(255, 255, 255, 224);
-    /** observation manager */
-    private final static ObservationManager om = ObservationManager.getInstance();
     /* members */
     /** jFreeChart instance */
     private final JFreeChart chart;
@@ -83,6 +81,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     /* tooltip information */
     /** target list for tooltip generation */
     private List<Target> targetList = null;
+    /** (optional) target user informations */
+    private TargetUserInformations targetUserInfos = null;
     /** data labels (legend) */
     private List<String> labels = null;
     /** StarObservabilityData list for tooltip generation */
@@ -120,6 +120,14 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         this.aJMMC = aJMMC;
         this.renderer = (XYBarRenderer) plot.getRenderer();
         this.renderer.setDefaultToolTipGenerator(this);
+    }
+
+    public TargetUserInformations getTargetUserInfos() {
+        return targetUserInfos;
+    }
+
+    public void setTargetUserInfos(final TargetUserInformations targetUserInfos) {
+        this.targetUserInfos = targetUserInfos;
     }
 
     /**
@@ -666,7 +674,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             sb.append("<hr>");
         }
 
-        TargetList.getTooltipPart(sb, false, target, om.getTargetUserInfos());
+        TargetList.getTooltipPart(sb, false, target, this.targetUserInfos);
 
         sb.append("</html>");
 

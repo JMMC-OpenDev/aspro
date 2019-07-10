@@ -11,7 +11,6 @@ import fr.jmmc.jmcs.util.ColorEncoder;
 import fr.jmmc.jmcs.util.StringUtils;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
-import java.util.Set;
 import javax.swing.JList;
 import javax.swing.ListModel;
 
@@ -58,6 +57,10 @@ public final class TargetList extends JList {
         // reset last tooltip:
         lastIndex = -1;
         lastTooltip = null;
+    }
+
+    public TargetUserInformations getTargetUserInfos() {
+        return targetUserInfos;
     }
 
     public void setTargetUserInfos(final TargetUserInformations targetUserInfos) {
@@ -116,36 +119,38 @@ public final class TargetList extends JList {
         target.toHtml(sb, full);
 
         // Target user info:
-        final String userDescription = targetUserInfos.getDescription(target);
+        if (targetUserInfos != null) {
+            // Add group list:
+            boolean startGroups = true;
+            int n = 0;
 
-        // List groups:
-        boolean startGroups = true;
-        int n = 0;
+            for (TargetGroup group : targetUserInfos.getGroups()) {
+                TargetGroupMembers gm = targetUserInfos.getGroupMembers(group);
 
-        for (TargetGroup group : targetUserInfos.getGroups()) {
-            TargetGroupMembers gm = targetUserInfos.getGroupMembers(group);
-
-            if (gm != null && gm.hasTarget(target)) {
-                if (startGroups) {
-                    startGroups = false;
-                    sb.append("<hr><b>Groups</b>:");
-                }
-                sb.append("&nbsp;<span style=\"color:")
-                        .append(ColorEncoder.encode(group.getOverDecodedColor()))
-                        .append(";background:")
-                        .append(ColorEncoder.encode(group.getDecodedColor()))
-                        .append("\">&nbsp;")
-                        .append(group.getName())
-                        .append("&nbsp;</span>");
-                if (++n == 4) {
-                    sb.append("<br>");
-                    n = 0;
+                if (gm != null && gm.hasTarget(target)) {
+                    if (startGroups) {
+                        startGroups = false;
+                        sb.append("<hr><b>Groups</b>:");
+                    }
+                    sb.append("&nbsp;<span style=\"color:")
+                            .append(ColorEncoder.encode(group.getOverDecodedColor()))
+                            .append(";background:")
+                            .append(ColorEncoder.encode(group.getDecodedColor()))
+                            .append("\">&nbsp;")
+                            .append(group.getName())
+                            .append("&nbsp;</span>");
+                    if (++n == 4) {
+                        sb.append("<br>");
+                        n = 0;
+                    }
                 }
             }
-        }
 
-        if (userDescription != null) {
-            sb.append("<hr><b>Notes</b>:<br>").append(StringUtils.replaceCR(userDescription, "<br>"));
+            // Add target notes:
+            final String userDescription = targetUserInfos.getDescription(target);
+            if (userDescription != null) {
+                sb.append("<hr><b>Notes</b>:<br>").append(StringUtils.replaceCR(userDescription, "<br>"));
+            }
         }
     }
 }

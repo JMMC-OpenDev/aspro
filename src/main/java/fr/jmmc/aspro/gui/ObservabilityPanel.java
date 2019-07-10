@@ -809,7 +809,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         if (changeSubset) {
             this.slidingXYPlotAdapter.setUseSubset(useSubset);
         }
-        
+
         // update theme at end :
         org.jfree.chart.ChartUtils.applyCurrentTheme(this.chart);
     }
@@ -864,7 +864,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         // update the time marker to enable it:
         updateTimeMarker();
-        
+
         // update theme at end :
         org.jfree.chart.ChartUtils.applyCurrentTheme(this.chart);
     }
@@ -1311,10 +1311,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         // Get Global SharedSeriesAttributes:
         final SharedSeriesAttributes globalAttrs = SharedSeriesAttributes.INSTANCE;
-
         final ColorPalette palette = ColorPalette.getColorPalette();
-
-        final XYBarRenderer xyBarRenderer = (XYBarRenderer) this.xyPlot.getRenderer();
 
         final boolean single = chartData.isSingle();
         final int obsLen = chartData.size();
@@ -1377,6 +1374,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         List<List<DateTimeInterval>> visibleVcmLimits;
         List<DateTimeInterval> intervals;
         DateTimeInterval interval;
+
+        // Update target user infos before any call to generateToolTip():
+        this.slidingXYPlotAdapter.setTargetUserInfos(targetUserInfos);
 
         final Set<Target> calibratorSet = targetUserInfos.getCalibratorSet();
 
@@ -1511,12 +1511,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             // 1 color per StarObservabilityData type (star, calibrator, rise_set, horizon, baselines ...) :
                             // note : uses so.getInfo() to get baseline ...
                             legendLabel = so.getLegendLabel(colorIndex);
-                            /*                            
-                            if (colorIndex >= StarObservabilityData.TYPE_BASE_LINE) {
-                                // TODO: decide to shift colors for baselines (detailled observability):
-                                colorIndex = globalAttrs.getColorIndex(legendLabel);
-                            }
-                             */
                         } else {
                             // configuration 'CONF + PoPs':
                             legendLabel = chartData.getConfigurationLabel().get(c);
@@ -1719,6 +1713,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // define fixed Legend :
         final LegendItemCollection legendCollection = new LegendItemCollection();
         if (!legendItems.isEmpty()) {
+            final XYBarRenderer xyBarRenderer = (XYBarRenderer) this.xyPlot.getRenderer();
+
             for (Map.Entry<String, Paint> legend : legendItems.entrySet()) {
                 legendCollection.add(ChartUtils.createLegendItem(xyBarRenderer, legend.getKey(), legend.getValue()));
             }
