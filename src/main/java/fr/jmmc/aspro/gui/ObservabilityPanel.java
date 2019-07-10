@@ -32,6 +32,7 @@ import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
@@ -185,17 +186,38 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private static final Filter CALIBRATOR_FILTER = new Filter("CalibratorFilter", "Hide calibrators",
             "hide all targets flagged as calibrator and orphaned calibrators") {
         @Override
-        protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
+        protected boolean apply(final TargetUserInformations targetUserInfos, final Target target, final boolean calibrator, final StarObservabilityData so) {
             // if calibrator, filter item:
             return calibrator;
+        }
+    };
+    /** acillary star filter */
+    private static final Filter ANCILLARY_STAR_FILTER = new Filter("AncillaryStarFilter", "Hide ancillary stars",
+            "hide all ancillary stars (FT, AO, Guide stars)") {
+        @Override
+        protected boolean apply(final TargetUserInformations targetUserInfos, final Target target, final boolean calibrator, final StarObservabilityData so) {
+
+            if (targetUserInfos.hasTargetInTargetGroup(TargetGroup.GROUP_AO, target)) {
+                // if AO, filter item:
+                return true;
+            }
+            if (targetUserInfos.hasTargetInTargetGroup(TargetGroup.GROUP_FT, target)) {
+                // if FT, filter item:
+                return true;
+            }
+            if (targetUserInfos.hasTargetInTargetGroup(TargetGroup.GROUP_GUIDE, target)) {
+                // if GS, filter item:
+                return true;
+            }
+            return false;
         }
     };
     /** unobservable filter */
     private static final Filter UNOBSERVABLE_FILTER = new Filter("UnobservableFilter", "Hide unobservable",
             "hide all targets that are not observable or never rise") {
         @Override
-        protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
-            return so != null && so.getVisible().isEmpty();
+        protected boolean apply(final TargetUserInformations targetUserInfos, final Target target, final boolean calibrator, final StarObservabilityData so) {
+            return (so != null) && so.getVisible().isEmpty();
         }
     };
 
@@ -495,7 +517,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         panelOptions.add(this.jCheckBoxDetailedOutput);
 
-        this.jCheckBoxListFilters = new CheckBoxList(new Object[]{CALIBRATOR_FILTER, UNOBSERVABLE_FILTER}) {
+        this.jCheckBoxListFilters = new CheckBoxList(new Object[]{CALIBRATOR_FILTER, ANCILLARY_STAR_FILTER, UNOBSERVABLE_FILTER}) {
             /** default serial UID for Serializable interface */
             private static final long serialVersionUID = 1;
 
@@ -1316,6 +1338,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final boolean single = chartData.isSingle();
         final int obsLen = chartData.size();
 
+        final boolean colorByGroup = single && !doBaseLineLimits && !chartData.getFirstObsData().isDoDetailedOutput();
+
         // Target list :
         final List<Target> targets;
         if (doBaseLineLimits) {
@@ -1355,11 +1379,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final List<String> labelList = new ArrayList<String>(initialSize);
         final List<StarObservabilityData> soTargetList = new ArrayList<StarObservabilityData>(initialSize);
 
-        String targetName, name;
+        String targetName, symbol;
         TaskSeries taskSeries;
         Task task;
         int colorIndex;
-        boolean calibrator;
         Integer pos;
         int n = 0;
         String legendLabel;
@@ -1397,10 +1420,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         boolean isCalibrator;
         boolean highlighted;
         boolean filtered;
+        TargetGroup group = null;
 
         // Iterate over objects targets :
         for (Target target : targets) {
             targetName = target.getName();
+
             // use HashSet for performance:
             isCalibrator = calibratorSet.contains(target);
             highlighted = highlightedSet.contains(target);
@@ -1408,8 +1433,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             if (hasFilters && !highlighted) {
                 filtered = false;
                 for (int k = 0, len = selectedFilters.length; k < len; k++) {
-                    Filter filter = selectedFilters[k];
-                    if (filter.apply(target, isCalibrator, null)) {
+                    if (selectedFilters[k].apply(targetUserInfos, target, isCalibrator, null)) {
                         filtered = true;
                         break;
                     }
@@ -1422,6 +1446,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                     // skip target
                     continue;
                 }
+            }
+
+            if (colorByGroup) {
+                // get first group (user group only ?)
+                group = targetUserInfos.getFirstTargetGroup(target);
             }
 
             // Iterate over Observability data (multi conf) :
@@ -1444,8 +1473,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                         if (hasFilters && !highlighted) {
                             filtered = false;
                             for (int k = 0, len = selectedFilters.length; k < len; k++) {
-                                Filter filter = selectedFilters[k];
-                                if (filter.apply(target, isCalibrator, so)) {
+                                if (selectedFilters[k].apply(targetUserInfos, target, isCalibrator, so)) {
                                     filtered = true;
                                     break;
                                 }
@@ -1459,8 +1487,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                         // add target:
                         targetList.add(target);
 
+                        // define symbol (name + ...):
                         if (doBaseLineLimits) {
-                            name = so.getTargetName();
+                            symbol = so.getTargetName();
                         } else {
                             // compute display name:
                             targetUserInfos.getTargetDisplayName(target, sb);
@@ -1469,18 +1498,19 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             if (targetUserInfos.getDescription(target) != null) {
                                 sb.append(SUFFIX_INFO);
                             }
-                            name = sb.toString();
+                            symbol = sb.toString();
                             sb.setLength(0); // recycle buffer
                         }
-                        symbolList.add(name);
+                        symbolList.add(symbol);
 
                         // add tooltip info:
                         soTargetList.add(so);
 
-                        // use the target name as the name of the serie :
-                        taskSeries = new TaskSeries(name);
+                        // use the symbol as the name of the serie :
+                        taskSeries = new TaskSeries(symbol);
                         taskSeries.setNotify(false);
 
+                        // define observability intervals:
                         int j = 1;
                         intervals = so.getVisible();
                         if (intervals != null) {
@@ -1492,25 +1522,48 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 j++;
                             }
                         }
-
                         taskSeriesCollection.add(taskSeries);
 
-                        // color :
-                        // note: these colors are independent from the SharedSeriesAttributes
-                        // and are inconsistent for baselines ... for compatibility.
-                        colorIndex = so.getType();
-                        calibrator = false;
-
-                        if (!doBaseLineLimits && colorIndex == StarObservabilityData.TYPE_STAR && isCalibrator) {
-                            // use different color for calibrators :
-                            colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
-                            calibrator = true;
-                        }
+                        // define color mapping / label :
+                        paint = null;
+                        legendLabel = null;
 
                         if (single) {
                             // 1 color per StarObservabilityData type (star, calibrator, rise_set, horizon, baselines ...) :
-                            // note : uses so.getInfo() to get baseline ...
-                            legendLabel = so.getLegendLabel(colorIndex);
+
+                            // note: these colors are independent from the SharedSeriesAttributes
+                            // and are inconsistent for baselines ... for compatibility.
+                            colorIndex = so.getType();
+
+                            /*                            
+                            if (colorIndex >= StarObservabilityData.TYPE_BASE_LINE) {
+                                // TODO: decide to shift colors for baselines (detailled observability):
+                                colorIndex = globalAttrs.getColorIndex(legendLabel);
+                            }
+                             */
+                            if (!doBaseLineLimits && (colorIndex == StarObservabilityData.TYPE_STAR) && isCalibrator) {
+                                // use different color for calibrators :
+                                colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
+
+                                // display differently orphan calibrators:
+                                if (orphanCalibrators.contains(target)) {
+                                    legendLabel = StarObservabilityData.LABEL_CALIBRATOR_ORPHAN;
+                                    paint = Color.ORANGE;
+                                }
+                            }
+
+                            // Not orphan calibrator case:
+                            if (paint == null) {
+                                if (colorByGroup && (group != null)) {
+                                    // Color by first group:
+                                    legendLabel = group.getName();
+                                    paint = group.getDecodedColor();
+                                } else {
+                                    // Main case: use original color index mapping:
+                                    // note : uses so.getInfo() to get baseline ...
+                                    legendLabel = so.getLegendLabel(colorIndex);
+                                }
+                            }
                         } else {
                             // configuration 'CONF + PoPs':
                             legendLabel = chartData.getConfigurationLabel().get(c);
@@ -1521,11 +1574,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             colorIndex = globalAttrs.getColorIndex(legendLabel);
                         }
 
-                        // display differently orphan calibrators:
-                        if (calibrator && orphanCalibrators.contains(target)) {
-                            legendLabel = "Orphan calibrator";
-                            paint = Color.ORANGE;
-                        } else {
+                        if (paint == null) {
                             paint = palette.getColor(colorIndex);
                         }
                         colorList.add(paint);
@@ -1575,7 +1624,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             }
 
                         } else {
-                            // define legend :
+                            // define legend entries:
                             legendItems.put(legendLabel, paint);
 
                             // add the Annotations :
@@ -2481,12 +2530,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         /**
          * Apply the filter on the given target, its calibrator flag and star observability data
+         * @param targetUserInfos TargetUserInformations instance
          * @param target target instance
          * @param calibrator calibrator flag
          * @param so star observability data
          * @return true if that item should be filtered; false otherwise
          */
-        protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
+        protected boolean apply(final TargetUserInformations targetUserInfos,
+                                final Target target, final boolean calibrator, final StarObservabilityData so) {
             // default; do not filter
             return false;
         }

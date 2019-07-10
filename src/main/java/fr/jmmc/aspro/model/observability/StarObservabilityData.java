@@ -15,8 +15,8 @@ import java.util.Map;
  * @author bourgesl
  */
 public final class StarObservabilityData {
-    /* type of data */
 
+    /* type of data */
     /** star observability */
     public final static int TYPE_STAR = 0; // red
     /** calibrator observability */
@@ -31,6 +31,11 @@ public final class StarObservabilityData {
     public final static int TYPE_WIND = 5; // cyan
     /** baseline intervals */
     public final static int TYPE_BASE_LINE = 6; // automatic color
+
+    /* label of main types */
+    public final static String LABEL_STAR = "Science";
+    public final static String LABEL_CALIBRATOR = "Calibrator";
+    public final static String LABEL_CALIBRATOR_ORPHAN = "Orphan calibrator";
 
     /* members */
     /** name of the target */
@@ -97,9 +102,9 @@ public final class StarObservabilityData {
     public String getLegendLabel(final int idx) {
         switch (idx) {
             case TYPE_STAR:
-                return "Science";
+                return LABEL_STAR;
             case TYPE_CALIBRATOR:
-                return "Calibrator";
+                return LABEL_CALIBRATOR;
             default:
         }
         return this.getInfo();

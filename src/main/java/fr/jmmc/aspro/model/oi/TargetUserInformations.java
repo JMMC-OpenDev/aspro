@@ -178,7 +178,7 @@ public class TargetUserInformations
     }
     
 //--simple--preserve
-  @Override
+    @Override
     public final String toString() {
         return "TargetUserInformations : \ncalibrators : " + getCalibrators() + "\ntargets : " + getTargetInfos();
     }
@@ -360,12 +360,12 @@ public class TargetUserInformations
         if (copy.calibrators != null) {
             copy.calibrators = OIBase.copyList(copy.calibrators);
         }
-        
+
         // Deep copy of target groups :
         if (copy.groups != null) {
             copy.groups = OIBase.deepCopyList(copy.groups);
         }
-        
+
         // Deep copy of target group members :
         if (copy.groupMembers != null) {
             copy.groupMembers = OIBase.deepCopyList(copy.groupMembers);
@@ -399,7 +399,7 @@ public class TargetUserInformations
     protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
         // create the Map<ID, TargetGroup> index for groups:
         final java.util.Map<String, TargetGroup> mapIDGroups = TargetGroup.createTargetGroupIndex(getGroups());
-        
+
         if (this.groupMembers != null) {
             // fix group ref & target refs in group members:
             TargetGroupMembers.updateGroupReferences(this.groupMembers, mapIDTargets, mapIDGroups, null);
@@ -421,8 +421,8 @@ public class TargetUserInformations
         if (this.targetInfos != null) {
             // create the Map<ID TargetGroup, Map<ID, Target> > index for group members:
             final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers
-                = TargetGroupMembers.createGroupMemberIndex(this.groupMembers);
-            
+                                                                       = TargetGroupMembers.createGroupMemberIndex(this.groupMembers);
+
             // create the Map<ID, Target> index for calibrators:
             final java.util.Map<String, Target> mapIDCalibrators = Target.createTargetIndex(this.calibrators);
 
@@ -445,7 +445,7 @@ public class TargetUserInformations
                         }
 
                         targetInfo.updateTargetReferences(mapIDCalibrators);
-                        
+
                         targetInfo.updateGroupReferences(mapIDTargets, mapIDGroups, mapIDGroupMembers);
 
                         // remove if empty :
@@ -485,8 +485,8 @@ public class TargetUserInformations
         }
         return isEmpty(this.targetInfos);
     }
-    
-     /**
+
+    /**
      * Return the group of the given identifier in the given list of groups
      * @param id group identifier
      * @return group or null if the group was not found
@@ -494,8 +494,8 @@ public class TargetUserInformations
     public final TargetGroup getGroupById(final String id) {
         return TargetGroup.getGroupById(id, getGroups());
     }
-    
-     /**
+
+    /**
      * Return the group of the given name
      * @param name group name
      * @return group or null if the group was not found
@@ -544,17 +544,28 @@ public class TargetUserInformations
         }
         return gm;
     }
-    
+
     public final java.util.Set<TargetGroup> getGroupsUsedByTargetGroupMembers(final Target target) {
         final java.util.Set<TargetGroup> usedGroups = new java.util.HashSet<TargetGroup>();
-        
+
         for (TargetInformation targetInfo : getTargetInfos()) {
             targetInfo.fillGroupsHavingTargetInAnyGroupMembers(target, usedGroups);
-            
+
         }
         return usedGroups;
     }
-    
+
+    public final TargetGroup getFirstTargetGroup(final Target target) {
+        for (TargetGroup group : getGroups()) {
+            final TargetGroupMembers gm = getGroupMembers(group);
+
+            if (gm != null && gm.hasTarget(target)) {
+                return group;
+            }
+        }
+        return null;
+    }
+
     /**
      * Return the existing TargetGroupMembers corresponding to the group
      * @param group group to look up
@@ -563,10 +574,22 @@ public class TargetUserInformations
      */
     public final TargetGroupMembers getGroupMembers(final TargetGroup group) {
         return TargetGroupMembers.getGroupMembers(group, getGroupMembers());
-    }    
-    
+    }
+
+    public boolean hasTargetInTargetGroup(final String groupId, final Target target) {
+        final TargetGroup g = getGroupById(groupId);
+        if (g != null) {
+            return hasTargetInTargetGroup(g, target);
+        }
+        return false;
+    }
+
     public final boolean hasTargetInTargetGroup(final TargetGroup group, final Target target) {
-        return getOrCreateGroupMembers(group).hasTarget(target);
+        TargetGroupMembers gm = getGroupMembers(group);
+        if (gm != null) {
+            return gm.hasTarget(target);
+        }
+        return false;
     }
 
     public final boolean addTargetToTargetGroup(final TargetGroup group, final Target target) {
@@ -577,17 +600,17 @@ public class TargetUserInformations
         if (getOrCreateGroupMembers(group).removeTarget(target)) {
             // remove target links:
             return removeTargetFromTargetGroupMembers(group, target);
-        }    
+        }
         return false;
     }
-    
+
     public final boolean hasTargetInTargetGroupMembers(final TargetGroup group, final Target target) {
         for (TargetInformation targetInfo : getTargetInfos()) {
             return targetInfo.hasTargetInGroupMembers(group, target);
         }
         return false;
     }
-                    
+
     public final boolean removeTargetFromTargetGroupMembers(final TargetGroup group, final Target target) {
         boolean removed = false;
         for (TargetInformation targetInfo : getTargetInfos()) {
@@ -595,7 +618,6 @@ public class TargetUserInformations
         }
         return removed;
     }
-    
-//--simple--preserve
 
+//--simple--preserve
 }

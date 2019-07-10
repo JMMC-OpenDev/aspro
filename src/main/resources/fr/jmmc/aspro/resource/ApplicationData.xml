@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.7 beta 5"/>
-    <compilation date="27/06/2019" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.9.7 beta 6"/>
+    <compilation date="10/07/2019" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -222,7 +222,12 @@
 
     <releasenotes>
         <release version="0.9.9.7">
-            <pubDate>Thu, 27 Jun 2019 12:00:00 GMT</pubDate>
+            <pubDate>Wed, 10 Jul 2019 16:00:00 GMT</pubDate>
+            <prerelease version="0.9.9.7 beta 6">
+                <change type="FEATURE">Improved observability plot to support the new 'Hide ancillary stars' filter (any FT, AO, Guide star)</change>
+                <change type="FEATURE">Improved observability plot to use the color of the first target group (if any) as shown in the legend</change>
+                <change type="FEATURE">Improved tooltips on targets to always indicate target groups and show target notes</change>
+            </prerelease>
             <prerelease version="0.9.9.7 beta 5">
                 <change type="FEATURE">Optimized startup of the command line tool to compute interferometric observables</change>
             </prerelease>
