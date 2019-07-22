@@ -46,6 +46,7 @@ import fr.jmmc.jmal.model.targetmodel.Model;
  *         &lt;element name="SPECTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_B" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_V" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_G" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_R" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_I" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_J" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
@@ -86,6 +87,7 @@ import fr.jmmc.jmal.model.targetmodel.Model;
     "spectyp",
     "fluxb",
     "fluxv",
+    "fluxg",
     "fluxr",
     "fluxi",
     "fluxj",
@@ -135,6 +137,8 @@ public class Target
     protected Double fluxb;
     @XmlElement(name = "FLUX_V")
     protected Double fluxv;
+    @XmlElement(name = "FLUX_G")
+    protected Double fluxg;
     @XmlElement(name = "FLUX_R")
     protected Double fluxr;
     @XmlElement(name = "FLUX_I")
@@ -537,6 +541,30 @@ public class Target
      */
     public void setFLUXV(Double value) {
         this.fluxv = value;
+    }
+
+    /**
+     * Gets the value of the fluxg property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXG() {
+        return fluxg;
+    }
+
+    /**
+     * Sets the value of the fluxg property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXG(Double value) {
+        this.fluxg = value;
     }
 
     /**
@@ -1127,6 +1155,8 @@ public class Target
                     return getFLUXB();
                 case V:
                     return getFLUXV();
+                case G:
+                    return getFLUXG();
                 case R:
                     return getFLUXR();
                 case I:
@@ -1256,6 +1286,7 @@ public class Target
                 && areEquals(this.spectyp, other.getSPECTYP())
                 && areEquals(this.fluxb, other.getFLUXB())
                 && areEquals(this.fluxv, other.getFLUXV())
+                && areEquals(this.fluxg, other.getFLUXG())
                 && areEquals(this.fluxr, other.getFLUXR())
                 && areEquals(this.fluxi, other.getFLUXI())
                 && areEquals(this.fluxj, other.getFLUXJ())
@@ -1528,6 +1559,9 @@ public class Target
         if (target.getFLUXV() == null && source.getFLUXV() != null) {
             target.setFLUXV(source.getFLUXV());
         }
+        if (target.getFLUXG() == null && source.getFLUXG() != null) {
+            target.setFLUXG(source.getFLUXG());
+        }
         if (target.getFLUXR() == null && source.getFLUXR() != null) {
             target.setFLUXR(source.getFLUXR());
         }
@@ -1595,6 +1629,9 @@ public class Target
         }
         if (isNaN(fluxr)) {
             fluxr = null;
+        }
+        if (isNaN(fluxg)) {
+            fluxg = null;
         }
         if (isNaN(fluxi)) {
             fluxi = null;

@@ -716,6 +716,14 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <xsd:element name="FLUX_G" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band G (gaia)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="FLUX_R" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -2775,6 +2783,11 @@
             <xsd:enumeration value="V">
                 <xsd:annotation>
                     <xsd:documentation>V band</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="G">
+                <xsd:annotation>
+                    <xsd:documentation>G band (Gaia)</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="R">

@@ -37,6 +37,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="SPECTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_B" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_V" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_G" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_R" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_I" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_J" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
@@ -71,6 +72,7 @@ import fr.jmmc.aspro.model.OIBase;
     "spectyp",
     "fluxb",
     "fluxv",
+    "fluxg",
     "fluxr",
     "fluxi",
     "fluxj",
@@ -115,6 +117,8 @@ public class Target
     protected Double fluxb;
     @XmlElement(name = "FLUX_V")
     protected Double fluxv;
+    @XmlElement(name = "FLUX_G")
+    protected Double fluxg;
     @XmlElement(name = "FLUX_R")
     protected Double fluxr;
     @XmlElement(name = "FLUX_I")
@@ -484,6 +488,30 @@ public class Target
      */
     public void setFLUXV(Double value) {
         this.fluxv = value;
+    }
+
+    /**
+     * Gets the value of the fluxg property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXG() {
+        return fluxg;
+    }
+
+    /**
+     * Sets the value of the fluxg property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXG(Double value) {
+        this.fluxg = value;
     }
 
     /**

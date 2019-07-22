@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
  *     &lt;enumeration value="B"/&gt;
  *     &lt;enumeration value="V"/&gt;
+ *     &lt;enumeration value="G"/&gt;
  *     &lt;enumeration value="R"/&gt;
  *     &lt;enumeration value="I"/&gt;
  *     &lt;enumeration value="J"/&gt;
@@ -44,6 +45,12 @@ public enum SpectralBand {
      * 
      */
     V,
+
+    /**
+     * G band (Gaia)
+     * 
+     */
+    G,
 
     /**
      * R band
