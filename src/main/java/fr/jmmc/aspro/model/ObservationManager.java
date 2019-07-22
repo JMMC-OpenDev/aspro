@@ -72,7 +72,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(ObservationManager.class.getName());
     /** minimum target version to force a simbad update */
-    public final static float TARGET_VERSION_MUST_UPDATE = 2019.04f;
+    public final static float TARGET_VERSION_MUST_UPDATE = 2019.08f;
     /** flag to log a stack trace in method fireEvent() to debug events */
     private final static boolean DEBUG_FIRE_EVENT = false;
     /** configuration manager */

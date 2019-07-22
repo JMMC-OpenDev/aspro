@@ -333,6 +333,7 @@ public class ExportOBXml {
         t.setSPECTYP(target.getSPECTYP());
         t.setFLUXB(target.getFLUXB());
         t.setFLUXV(target.getFLUXV());
+        t.setFLUXG(target.getFLUXG());
         t.setFLUXR(target.getFLUXR());
         t.setFLUXI(target.getFLUXI());
         t.setFLUXJ(target.getFLUXJ());

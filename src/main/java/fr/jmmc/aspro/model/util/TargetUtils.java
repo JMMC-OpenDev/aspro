@@ -175,6 +175,7 @@ public final class TargetUtils {
         newTarget.setFLUXB(star.getPropertyAsDouble(Star.Property.FLUX_B));
         newTarget.setFLUXV(star.getPropertyAsDouble(Star.Property.FLUX_V));
         newTarget.setFLUXR(star.getPropertyAsDouble(Star.Property.FLUX_R));
+        newTarget.setFLUXG(star.getPropertyAsDouble(Star.Property.FLUX_G));
         newTarget.setFLUXI(star.getPropertyAsDouble(Star.Property.FLUX_I));
         newTarget.setFLUXJ(star.getPropertyAsDouble(Star.Property.FLUX_J));
         newTarget.setFLUXH(star.getPropertyAsDouble(Star.Property.FLUX_H));
@@ -228,5 +229,10 @@ public final class TargetUtils {
                     "#5BAFD6"
             ));
         }
+
+        // TODO: add more predefined groups:
+        // backup
+        // priority High, Normal, Low
+        // status In Progress / Done
     }
 }

@@ -33,6 +33,7 @@ public final class SpectralBandUtils {
                 return SpectralBand.B;
             case V:
                 return SpectralBand.V;
+            // note: SpectralBand.G is not available in Band !
             case R:
                 return SpectralBand.R;
             case I:
