@@ -1989,13 +1989,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             // set initial target version (avoid repeats):
             om.updateTargetVersion();
         } else {
-            // check version:
-            if (om.checkTargetVersion()) {
-                // version is OK, skip update
-                return;
-            }
-
             if (onLoad) {
+                // check version:
+                if (om.checkTargetVersion()) {
+                    // version is OK, skip update
+                    return;
+                }
+                
                 // TODO: test last simbad date ?
                 if (!MessagePane.showConfirmMessage(this, "Do you want to update targets with the latest CDS Simbad information (coordinates ...) ?")) {
                     return;
