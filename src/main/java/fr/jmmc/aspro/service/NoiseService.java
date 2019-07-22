@@ -718,8 +718,21 @@ public final class NoiseService implements VisNoiseService {
             }
         }
 
-        flux = aoTarget.getFlux(aoBand);
+        SpectralBand fluxAOBand = aoBand;
+        flux = aoTarget.getFlux(fluxAOBand);
 
+        // handle special case for R band (NAOMI)
+        if ((flux == null) && (fluxAOBand == SpectralBand.R)) {
+            // use G then V (if no mag)
+            fluxAOBand = SpectralBand.G;
+            flux = aoTarget.getFlux(fluxAOBand);
+
+            if (flux == null) {
+                fluxAOBand = SpectralBand.V;
+                flux = aoTarget.getFlux(fluxAOBand);
+            }
+        }
+        
         if (flux == null) {
             if (aoTarget == target) {
                 missingMags.add(aoBand);
@@ -737,15 +750,17 @@ public final class NoiseService implements VisNoiseService {
                 addWarning("Observation can not use AO (magnitude limit = " + adaptiveOpticsLimit + ") in " + aoBand + " band");
             } else {
                 if (this.aoSetup != null) {
-                    addInformation("AO setup: " + aoSetup.getName() + " in " + aoBand + " band");
+                    addInformation("AO setup: " + aoSetup.getName() + " in " + aoBand + " band ("
+                            + fluxAOBand + '=' + df.format(adaptiveOpticsMag) + " mag)");
                 }
                 if (aoTarget != target) {
-                    addInformation("AO associated to target [" + aoTarget.getName() + "]: "
-                            + df.format(adaptiveOpticsMag) + " mag");
+                    addInformation("AO associated to target [" + aoTarget.getName() + "] ("
+                            + fluxAOBand + '=' + df.format(adaptiveOpticsMag) + " mag)");
                 }
             }
         }
         if (logger.isDebugEnabled()) {
+            logger.debug("fluxAOBand                    : {}", fluxAOBand);
             logger.debug("adaptiveOpticsMag             : {}", adaptiveOpticsMag);
         }
 

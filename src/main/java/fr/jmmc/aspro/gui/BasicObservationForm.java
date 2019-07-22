@@ -1996,7 +1996,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                     return;
                 }
                 
-                // TODO: test last simbad date ?
                 if (!MessagePane.showConfirmMessage(this, "Do you want to update targets with the latest CDS Simbad information (coordinates ...) ?")) {
                     return;
                 }
