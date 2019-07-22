@@ -234,10 +234,24 @@
             </xsl:call-template>
         </xsl:variable>
 
+        <xsl:variable name="FLUX_B_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="ucd11">phot.mag;em.opt.B</xsl:with-param>
+                <xsl:with-param name="ucd10">PHOT_JHN_B</xsl:with-param>
+                <xsl:with-param name="unit">mag</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
         <xsl:variable name="FLUX_V_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="ucd11">phot.mag;em.opt.V</xsl:with-param>
                 <xsl:with-param name="ucd10">PHOT_JHN_V</xsl:with-param>
+                <xsl:with-param name="unit">mag</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="FLUX_R_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="ucd11">phot.mag;em.opt.R</xsl:with-param>
+                <xsl:with-param name="ucd10">PHOT_JHN_R</xsl:with-param>
                 <xsl:with-param name="unit">mag</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
@@ -266,6 +280,20 @@
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="ucd11">phot.mag;em.IR.K</xsl:with-param>
                 <xsl:with-param name="ucd10">PHOT_JHN_K</xsl:with-param>
+                <xsl:with-param name="unit">mag</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="FLUX_L_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="ucd11">phot.mag;em.IR.3-4um</xsl:with-param>
+                <xsl:with-param name="ucd10">PHOT_JHN_L</xsl:with-param>
+                <xsl:with-param name="unit">mag</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="FLUX_M_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="ucd11">phot.mag;em.IR.4-8um</xsl:with-param>
+                <xsl:with-param name="ucd10">PHOT_JHN_M</xsl:with-param>
                 <xsl:with-param name="unit">mag</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
@@ -488,11 +516,15 @@
                     <xsl:variable name="e_PLX"    select="./TD[position()=$e_PLX_index]"/>
                     <xsl:variable name="OTYPES"   select="./TD[position()=$OTYPES_index]"/>
                     <xsl:variable name="SP_TYPES" select="./TD[position()=$SP_TYPES_index]"/>
+                    <xsl:variable name="FLUX_B"   select="./TD[position()=$FLUX_B_index]"/>
                     <xsl:variable name="FLUX_V"   select="./TD[position()=$FLUX_V_index]"/>
+                    <xsl:variable name="FLUX_R"   select="./TD[position()=$FLUX_R_index]"/>
                     <xsl:variable name="FLUX_I"   select="./TD[position()=$FLUX_I_index]"/>
                     <xsl:variable name="FLUX_J"   select="./TD[position()=$FLUX_J_index]"/>
                     <xsl:variable name="FLUX_H"   select="./TD[position()=$FLUX_H_index]"/>
                     <xsl:variable name="FLUX_K"   select="./TD[position()=$FLUX_K_index]"/>
+                    <xsl:variable name="FLUX_L"   select="./TD[position()=$FLUX_L_index]"/>
+                    <xsl:variable name="FLUX_M"   select="./TD[position()=$FLUX_M_index]"/>
                     <xsl:variable name="FLUX_N"   select="./TD[position()=$FLUX_N_index]"/>
 
                     <xsl:if test="$NAME/text() and $RA != '' and $DEC != ''">
@@ -579,10 +611,20 @@
                             </xsl:if>
 
                             <!-- magnitudes -->
+                            <xsl:if test="$FLUX_B/text()">
+                                <FLUX_B>
+                                    <xsl:value-of select="$FLUX_B"/>
+                                </FLUX_B>
+                            </xsl:if>
                             <xsl:if test="$FLUX_V/text()">
                                 <FLUX_V>
                                     <xsl:value-of select="$FLUX_V"/>
                                 </FLUX_V>
+                            </xsl:if>
+                            <xsl:if test="$FLUX_R/text()">
+                                <FLUX_R>
+                                    <xsl:value-of select="$FLUX_R"/>
+                                </FLUX_R>
                             </xsl:if>
                             <xsl:if test="$FLUX_I/text()">
                                 <FLUX_I>
@@ -603,6 +645,16 @@
                                 <FLUX_K>
                                     <xsl:value-of select="$FLUX_K"/>
                                 </FLUX_K>
+                            </xsl:if>
+                            <xsl:if test="$FLUX_L/text()">
+                                <FLUX_L>
+                                    <xsl:value-of select="$FLUX_L"/>
+                                </FLUX_L>
+                            </xsl:if>
+                            <xsl:if test="$FLUX_M/text()">
+                                <FLUX_M>
+                                    <xsl:value-of select="$FLUX_M"/>
+                                </FLUX_M>
                             </xsl:if>
                             <xsl:if test="$FLUX_N/text()">
                                 <FLUX_N>
