@@ -19,7 +19,7 @@
     </company>
 
     <program name="Aspro2" version="0.9.9.7 beta 7"/>
-    <compilation date="22/07/2019" compiler="JDK 1.6.0_24"/>
+    <compilation date="02/08/2019" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -222,7 +222,7 @@
 
     <releasenotes>
         <release version="0.9.9.7">
-            <pubDate>Mon, 22 Jul 2019 16:00:00 GMT</pubDate>
+            <pubDate>Fri, 02 Aug 2019 16:00:00 GMT</pubDate>
             <prerelease version="0.9.9.7 beta 7">
                 <change type="FEATURE">Added the G magnitude in Simbad resolver and Target Editor, used by AO if missing R mag (NAOMI)</change>
             </prerelease>
