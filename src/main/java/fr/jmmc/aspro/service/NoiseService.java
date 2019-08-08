@@ -127,6 +127,8 @@ public final class NoiseService implements VisNoiseService {
 
     /** ratio photometry exposures per photometric channel (chopping) */
     private double ratioPhotoPerBeam = Double.NaN;
+    /** frame ratio (overhead) */
+    private double frameRatio = 1.0;
 
     /** (W) Transmission of interferometer+instrument at observed wavelength (no strehl, no QE) */
     private double[] transmission = null;
@@ -383,13 +385,16 @@ public final class NoiseService implements VisNoiseService {
 
         this.ratioPhotoPerBeam = sequence.getRatioPhotoPerBeam();
 
-        final double effectiveFrameTime = insSetup.getFrameRatio() * this.dit;
+        this.frameRatio = insSetup.getFrameRatio();
+
+        final double effectiveFrameTime = frameRatio * this.dit;
         // ratio in time [0..1]
-        final double ratioTimeInterfero = ratioInterfero / insSetup.getFrameRatio();
+        final double ratioTimeInterfero = ratioInterfero / frameRatio;
 
         if (logger.isDebugEnabled()) {
             logger.debug("ratioInterfero                : {}", ratioInterfero);
             logger.debug("ratioPhotoPerBeam             : {}", ratioPhotoPerBeam);
+            logger.debug("frameRatio                    : {}", frameRatio);
             logger.debug("effectiveFrameTime            : {}", effectiveFrameTime);
             logger.debug("efficiency (%)                : {}", (100.0 * ratioTimeInterfero));
             logger.debug("totalObsTime                  : {}", totalObsTime);
@@ -990,12 +995,14 @@ public final class NoiseService implements VisNoiseService {
 
         // total number of frames:
         final double nbFrames = totalObsTime / obsDit;
+        final double nbFramesWithOverheads = nbFrames / frameRatio;
 
         // total frame correction = 1 / SQRT(nFrames):
-        this.totFrameCorrection = 1.0 / Math.sqrt(nbFrames);
+        this.totFrameCorrection = 1.0 / Math.sqrt(nbFramesWithOverheads);
 
         if (logger.isDebugEnabled()) {
             logger.debug("nbFrames                      : {}", nbFrames);
+            logger.debug("nbFramesWithOverheads         : {}", nbFramesWithOverheads);
             logger.debug("totFrameCorrection            : {}", totFrameCorrection);
         }
 
