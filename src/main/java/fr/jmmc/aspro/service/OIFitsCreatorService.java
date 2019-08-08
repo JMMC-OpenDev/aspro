@@ -829,7 +829,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                             if (useVisData) {
                                 // pure correlated fluxes or NaN:
-                                flux = ns.computeCorrelatedFluxWeight(i, l);
+                                flux = ns.getCorrelatedFluxWeight(i, l);
 
                                 // store pure (0..1) or noisy correlated fluxes (NaN if no flux):
                                 visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
@@ -1016,6 +1016,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private void createOIVis2() {
         final long start = System.nanoTime();
 
+        // generate squared correlated fluxes:
+        final boolean useExtraVis2 = AsproConstants.INS_GRAVITY.equals(this.instrumentName)
+                || this.instrumentName.startsWith(AsproConstants.INS_MATISSE);
+
+        // Update the data model before calling new OIVis():
+        DataModel.setOiVis2ExtraSupport(useExtraVis2);
+
         // Get OI_VIS table :
         final OIVis vis = this.oiFitsFile.getOiVis()[0];
         final int nRows = vis.getNbRows();
@@ -1035,6 +1042,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final double[][] vis2Data = vis2.getVis2Data();
         final double[][] vis2Err = vis2.getVis2Err();
 
+        final double[][] vis2CorrSq = (useExtraVis2) ? vis2.getCorrSq() : null;
+        final double[][] vis2CorrSqErr = (useExtraVis2) ? vis2.getCorrSqErr() : null;
+
+        final double[][] vis2Phot = (useExtraVis2) ? vis2.getPhot() : null;
+        final double[][] vis2PhotErr = (useExtraVis2) ? vis2.getPhotErr() : null;
+
         final boolean[][] flags = vis2.getFlag();
 
         final double[][] snrData = (DEBUG_SNR) ? new double[nWaveLengths][nRows] : null;
@@ -1044,6 +1057,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // vars:
         double visRe, visIm, errCVis, bias;
         double v2, v2Err;
+        double phot = Double.NaN, errPhot = Double.NaN;
+        double sqCorr = Double.NaN, errSqCorr = Double.NaN;
 
         // distribution samples:
         double[] distRe = null, distIm = null;
@@ -1067,11 +1082,18 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                 // if target has models, then complex visibility are computed :
                 if (!this.hasModel) {
-
                     // Iterate on wave lengths :
                     for (l = 0; l < nWaveLengths; l++) {
                         vis2Data[k][l] = Double.NaN;
                         vis2Err[k][l] = Double.NaN;
+
+                        if (useExtraVis2) {
+                            vis2CorrSq[k][l] = Double.NaN;
+                            vis2CorrSqErr[k][l] = Double.NaN;
+
+                            vis2Phot[k][l] = Double.NaN;
+                            vis2PhotErr[k][l] = Double.NaN;
+                        }
 
                         // mark this value as invalid :
                         flags[k][l] = true;
@@ -1080,7 +1102,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                             snrData[l][k] = Double.NaN;
                         }
                     }
-
                 } else {
                     if (ns != null) {
                         // Get the complex distribution for this row:
@@ -1103,9 +1124,23 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         doFlag = visSnrFlag[k][l];
 
                         if (ns == null) {
+                            phot = Double.NaN;
+                            errPhot = Double.NaN;
                             v2Err = Double.NaN;
                             snr = Double.NaN;
                         } else {
+
+                            if (useExtraVis2) {
+                                phot = ns.getNbPhotPhoto(i, l);
+                                errPhot = ns.getErrorPhotPhoto(i, l);
+
+                                // TODO: avoid recomputation twice (in cvis + vis2) ?
+                                ns.computeVis2Error(i, l, v2);
+
+                                sqCorr = ns.getSqCorrFlux(i, l);
+                                errSqCorr = ns.getErrorSqCorrFlux(i, l);
+                            }
+
                             if (doFlag) {
                                 // use theoretical value & error if SNR < 3 !
 
@@ -1124,7 +1159,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 errCVis = visError[k][l];
 
                                 if (this.doNoise) {
-                                    bias = ns.computeVis2Bias(i, l);
+                                    bias = ns.getVis2Bias(i, l);
                                     // Remove v2 bias:
                                     v2 -= bias;
                                 } else {
@@ -1195,6 +1230,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         // Set values:
                         vis2Data[k][l] = v2;
                         vis2Err[k][l] = v2Err;
+
+                        if (useExtraVis2) {
+                            vis2CorrSq[k][l] = sqCorr;
+                            vis2CorrSqErr[k][l] = errSqCorr;
+
+                            vis2Phot[k][l] = phot;
+                            vis2PhotErr[k][l] = errPhot;
+                        }
 
                         // mark this value as valid only if observables are not NaN, error is valid and SNR is OK:
                         if (!doFlag && (Double.isNaN(vis2Data[k][l]) || Double.isNaN(vis2Err[k][l]))) {

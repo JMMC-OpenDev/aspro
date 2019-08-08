@@ -677,7 +677,7 @@ public abstract class AbstractOIFitsProducer {
                         cVisErrorRow[l] = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp);
 
                         // check SNR(V2) without any bias:
-                        final double snrV2 = ns.getSNRVis2NoBias();
+                        final double snrV2 = ns.getSNRVis2NoBias(ptIdx[k], l);
 
                         if (snrV2 < SNR_THRESHOLD) {
                             cVisSnrFlagRow[l] = true;

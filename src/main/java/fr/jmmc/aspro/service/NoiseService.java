@@ -194,8 +194,6 @@ public final class NoiseService implements VisNoiseService {
     private final DecimalFormat df = new DecimalFormat("##0.##");
     /** flag to indicate that a parameter is invalid in order the code to return errors as NaN values */
     private boolean invalidParameters = false;
-    /** SNR (V2) estimated in computeVis2Error() for the current point (NOT thread safe) without any bias */
-    private double snrV2 = 0.0;
 
     /** total instrumental visibility (with FT if any) */
     private double[] vinst;
@@ -732,7 +730,7 @@ public final class NoiseService implements VisNoiseService {
                 flux = aoTarget.getFlux(fluxAOBand);
             }
         }
-        
+
         if (flux == null) {
             if (aoTarget == target) {
                 missingMags.add(aoBand);
@@ -1037,7 +1035,6 @@ public final class NoiseService implements VisNoiseService {
             final double[] nbPhotPhoto = param.nbPhotPhoto;
 
             for (int i = 0; i < nWLen; i++) {
-
                 // corrected total number of photons using the final observation dit per telescope:
                 nbTotalPhot[n][i] *= obsDit;
                 nbPhot = nbTotalPhot[n][i];
@@ -1088,7 +1085,7 @@ public final class NoiseService implements VisNoiseService {
         double v2 = visAmp * visAmp;
         double errV2 = computeVis2Error(iMidPoint, iChannel, v2);
         double snr = v2 / errV2;
-        double bias = computeVis2Bias(iMidPoint, iChannel);
+        double bias = getVis2Bias(iMidPoint, iChannel);
 
         logger.info("computeVis2Error({}) :{} SNR= {} bias= {}", NumberUtils.trimTo5Digits(v2), errV2, NumberUtils.trimTo3Digits(snr),
                 bias);
@@ -1152,27 +1149,98 @@ public final class NoiseService implements VisNoiseService {
      * @param iChannel index of the channel
      * @return correlated flux or NaN if the flux can not be computed
      */
-    public double computeCorrelatedFluxWeight(final int iPoint, final int iChannel) {
-        if (DO_CHECKS) {
-            // fast return NaN if invalid configuration :
-            if (this.invalidParameters) {
-                return Double.NaN;
-            }
-            if (check(iPoint, iChannel)) {
-                return Double.NaN;
-            }
+    public double getCorrelatedFluxWeight(final int iPoint, final int iChannel) {
+        if (check(iPoint, iChannel)) {
+            return Double.NaN;
         }
-
-        final NoiseWParams param = this.params[iPoint];
-
         // correlated flux (include instrumental visibility loss) (1T):
-        final double fcorrel = param.nbPhotInterf[iChannel] * vinst[iChannel];
-
-        return fcorrel;
+        return this.params[iPoint].nbPhotInterf[iChannel] * vinst[iChannel];
     }
 
     /**
-     * Prepare numeric constants for square visiblity error
+     * Return the number of photons in each photometric channel (photometric flux)
+     *
+     * @param iPoint index of the observable point
+     * @param iChannel index of the channel
+     * @return number of photons in each photometric channel
+     */
+    public double getNbPhotPhoto(final int iPoint, final int iChannel) {
+        if (check(iPoint, iChannel)) {
+            return Double.NaN;
+        }
+        return this.params[iPoint].nbPhotPhoto[iChannel];
+    }
+
+    /**
+     * Return the error on the number of photons in each photometric channel
+     * @param iPoint index of the observable point
+     * @param iChannel index of the channel
+     * @return error on the number of photons in each photometric channel
+     */
+    public double getErrorPhotPhoto(final int iPoint, final int iChannel) {
+        if (check(iPoint, iChannel)) {
+            return Double.NaN;
+        }
+        return this.params[iPoint].errPhotPhoto[iChannel];
+    }
+
+    /**
+     * Return the squared correlated flux
+     *
+     * @param iPoint index of the observable point
+     * @param iChannel index of the channel
+     * @return squared correlated flux
+     */
+    public double getSqCorrFlux(final int iPoint, final int iChannel) {
+        if (check(iPoint, iChannel)) {
+            return Double.NaN;
+        }
+        return this.params[iPoint].sqCorrFlux[iChannel];
+    }
+
+    /**
+     * Return the error on squared correlated flux
+     * @param iPoint index of the observable point
+     * @param iChannel index of the channel
+     * @return error on squared correlated flux
+     */
+    public double getErrorSqCorrFlux(final int iPoint, final int iChannel) {
+        if (check(iPoint, iChannel)) {
+            return Double.NaN;
+        }
+        return this.params[iPoint].errSqCorrFlux[iChannel];
+    }
+
+    /**
+     * Return the SNR(V2) without any bias
+     * @param iPoint index of the observable point
+     * @param iChannel index of the channel
+     * @return SNR(V2)
+     */
+    public double getSNRVis2NoBias(final int iPoint, final int iChannel) {
+        if (check(iPoint, iChannel)) {
+            return Double.NaN;
+        }
+        return this.params[iPoint].snrV2[iChannel];
+    }
+
+    /**
+     * Return the bias on V2
+     * It returns 0 if the photometry is not available
+     *
+     * @param iPoint index of the observable point
+     * @param iChannel index of the channel
+     * @return bias on V2 or 0 if the photometry is not available
+     */
+    public double getVis2Bias(final int iPoint, final int iChannel) {
+        if (check(iPoint, iChannel)) {
+            return Double.NaN;
+        }
+        return this.params[iPoint].biasV2[iChannel];
+    }
+
+    /**
+     * Prepare numeric constants for square visibility error
      *
      * Note: this method is statefull and NOT thread safe
      *
@@ -1185,6 +1253,7 @@ public final class NoiseService implements VisNoiseService {
 
         final double[] nbPhotInterf = param.nbPhotInterf;
         final double[] nbPhotPhoto = param.nbPhotPhoto;
+        final double[] errPhotPhoto = param.errPhotPhoto;
 
         final double[] sqErrVis2Phot = param.sqErrVis2Phot;
         final double[] sqCorFluxCoef = param.sqCorFluxCoef;
@@ -1196,12 +1265,15 @@ public final class NoiseService implements VisNoiseService {
 
         if (usePhotometry) {
             for (int i = 0; i < nWLen; i++) {
-                // variance of the photometric flux in photometric channel:
-                final double varFluxPhot = nbPhotPhoto[i]
-                        + ratioPhotoPerBeam * (nbPhotThermPhoto[i] + nbPixPhoto[i] * FastMath.pow2(ron));
+                // error on the photometric flux in photometric channel:
+                errPhotPhoto[i] = Math.sqrt(nbPhotPhoto[i]
+                        + ratioPhotoPerBeam * (nbPhotThermPhoto[i] + nbPixPhoto[i] * FastMath.pow2(ron)));
 
                 // square error contribution of 2 photometric channels on the square visiblity FiFj:
-                sqErrVis2Phot[i] = 2.0 * varFluxPhot / FastMath.pow2(nbPhotPhoto[i]);
+                sqErrVis2Phot[i] = 2.0 * FastMath.pow2(errPhotPhoto[i] / nbPhotPhoto[i]);
+
+                // repeat OBS measurements to reach totalObsTime minutes:
+                errPhotPhoto[i] *= totFrameCorrection;
             }
 
             if (logger.isDebugEnabled()) {
@@ -1253,27 +1325,6 @@ public final class NoiseService implements VisNoiseService {
     }
 
     /**
-     * Return the bias on V2
-     * It returns 0 if the photometry is not available
-     *
-     * @param iPoint index of the observable point
-     * @param iChannel index of the channel
-     * @return bias on V2 or 0 if the photometry is not available
-     */
-    public double computeVis2Bias(final int iPoint, final int iChannel) {
-        if (DO_CHECKS) {
-            // fast return NaN if invalid configuration :
-            if (this.invalidParameters) {
-                return Double.NaN;
-            }
-            if (check(iPoint, iChannel)) {
-                return Double.NaN;
-            }
-        }
-        return this.params[iPoint].biasV2[iChannel];
-    }
-
-    /**
      * Compute error on square visibility. It returns NaN if the error can not be computed
      *
      * @param iPoint index of the observable point
@@ -1282,20 +1333,14 @@ public final class NoiseService implements VisNoiseService {
      * @return square visiblity error or NaN if the error can not be computed
      */
     public double computeVis2Error(final int iPoint, final int iChannel, final double vis2) {
-        if (DO_CHECKS) {
-            // fast return NaN if invalid configuration :
-            if (this.invalidParameters) {
-                return Double.NaN;
-            }
-            if (check(iPoint, iChannel)) {
-                return Double.NaN;
-            }
+        if (check(iPoint, iChannel)) {
+            return Double.NaN;
         }
 
         final NoiseWParams param = this.params[iPoint];
 
         // squared correlated flux (include instrumental visibility loss):
-        double sqCorFlux = param.sqCorFluxCoef[iChannel] * vis2;
+        final double sqCorFlux = param.sqCorFluxCoef[iChannel] * vis2;
         /*
          double sqCorFlux = FastMath.pow2(nbPhotonInI * vinst / nbTel) * vis2;
          */
@@ -1310,19 +1355,24 @@ public final class NoiseService implements VisNoiseService {
          + nbPixInterf * (nbPixInterf + 3d) * FastMath.pow(ron, 4d);
          */
 
+        // error of the squared correlated flux:
+        param.sqCorrFlux[iChannel] = sqCorFlux;
+        param.errSqCorrFlux[iChannel] = Math.sqrt(varSqCorFlux);
+
         // Uncertainty on square visibility per frame:
         double errVis2;
         if (usePhotometry) {
             errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)) + param.sqErrVis2Phot[iChannel]);
         } else {
             // no photometry...
-            errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)));
+            errVis2 = vis2 * (param.errSqCorrFlux[iChannel] / param.sqCorrFlux[iChannel]);
         }
         // repeat OBS measurements to reach totalObsTime minutes:
         errVis2 *= totFrameCorrection;
+        param.errSqCorrFlux[iChannel] *= totFrameCorrection;
 
         // estimate SNR(V2):
-        snrV2 = vis2 / errVis2;
+        param.snrV2[iChannel] = vis2 / errVis2;
 
         // Limit excessively large errors (very low transmission or strehl):
         errVis2 = Math.min(errVis2, MAX_ERR_V2);
@@ -1333,16 +1383,8 @@ public final class NoiseService implements VisNoiseService {
     public double computeBiasedVis2Error(final double vis2, final double errVis2) {
         // Note: bias are normally not a gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
 
-        // use min or sqrt(err^2 + bias^2)
+        // TODO: use sqrt(err^2 + bias^2)
         return Math.max(errVis2, instrumentalVis2Bias);
-    }
-
-    /**
-     * Return the SNR (V2) estimated in computeVis2Error() for the current point (NOT thread safe) without any bias
-     * @return SNR (V2)
-     */
-    public double getSNRVis2NoBias() {
-        return snrV2;
     }
 
     /**
@@ -1408,14 +1450,8 @@ public final class NoiseService implements VisNoiseService {
      */
     public double computeT3PhiError(final int iPoint, final int iChannel,
                                     final double visAmp12, final double visAmp23, final double visAmp31) {
-        if (DO_CHECKS) {
-            // fast return NaN if invalid configuration :
-            if (this.invalidParameters) {
-                return Double.NaN;
-            }
-            if (check(iPoint, iChannel)) {
-                return Double.NaN;
-            }
+        if (check(iPoint, iChannel)) {
+            return Double.NaN;
         }
 
         final NoiseWParams param = this.params[iPoint];
@@ -1548,13 +1584,19 @@ public final class NoiseService implements VisNoiseService {
     }
 
     private boolean check(final int iPoint, final int iChannel) {
-        if (iPoint < 0 || iPoint >= nPoints) {
-            logger.warn("invalid point index {}, expect [0 to {}]", iPoint, nPoints);
-            return true;
-        }
-        if (iChannel < 0 || iChannel >= nSpectralChannels) {
-            logger.warn("invalid channel index {}, expect [0 to {}]", iChannel, nSpectralChannels);
-            return true;
+        if (DO_CHECKS) {
+            // fast return NaN if invalid configuration :
+            if (this.invalidParameters) {
+                return true;
+            }
+            if (iPoint < 0 || iPoint >= nPoints) {
+                logger.warn("invalid point index {}, expect [0 to {}]", iPoint, nPoints);
+                return true;
+            }
+            if (iChannel < 0 || iChannel >= nSpectralChannels) {
+                logger.warn("invalid channel index {}, expect [0 to {}]", iChannel, nSpectralChannels);
+                return true;
+            }
         }
         return false;
     }
@@ -1670,6 +1712,8 @@ public final class NoiseService implements VisNoiseService {
         final double[] nbPhotInterf;
         /** (W) number of photons in each photometric channel (photometric flux) */
         final double[] nbPhotPhoto;
+        /** (W) error on the number of photons in each photometric channel (photometric flux) */
+        final double[] errPhotPhoto;
         /** (W) square error contribution of 2 photometric channels on the square visiblity FiFj */
         final double[] sqErrVis2Phot;
         /** (W) coefficient used to the squared correlated flux */
@@ -1679,6 +1723,13 @@ public final class NoiseService implements VisNoiseService {
         /** (W) constant used to compute variance of the squared correlated flux */
         final double[] varSqCorFluxConst;
 
+        /** (W) squared correlated flux */
+        final double[] sqCorrFlux;
+        /** (W) error on squared correlated flux */
+        final double[] errSqCorrFlux;
+        /** (W) SNR on squared visibility */
+        final double[] snrV2;
+        /** (W) bias on squared visibility */
         final double[] biasV2;
 
         /** (W) t3 phi error - coefficient */
@@ -1697,10 +1748,14 @@ public final class NoiseService implements VisNoiseService {
         NoiseWParams(final int nWLen) {
             this.nbPhotInterf = init(nWLen);
             this.nbPhotPhoto = init(nWLen);
+            this.errPhotPhoto = init(nWLen);
             this.sqErrVis2Phot = init(nWLen);
             this.sqCorFluxCoef = init(nWLen);
             this.varSqCorFluxCoef = init(nWLen);
             this.varSqCorFluxConst = init(nWLen);
+            this.sqCorrFlux = init(nWLen);
+            this.errSqCorrFlux = init(nWLen);
+            this.snrV2 = init(nWLen);
             this.biasV2 = init(nWLen);
             this.t3photCoef = init(nWLen);
             this.t3photCoef2 = init(nWLen);
