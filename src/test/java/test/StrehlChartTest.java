@@ -66,7 +66,7 @@ public class StrehlChartTest {
                 Band aoBand;
                 double td;
 
-                if (true) {
+                if (false) {
                     if (false) {
                         // OK
                         // UT MACAO:
@@ -115,7 +115,7 @@ public class StrehlChartTest {
 
                         ZENITH_ANGLE = 0.0;
                     }
-                    if (true) {
+                    if (false) {
                         final Band b = Band.H;
                         // AT:
                         if (true) {

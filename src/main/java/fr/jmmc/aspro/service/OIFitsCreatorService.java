@@ -1447,9 +1447,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                     logger.debug("T3  baseline: {}", Arrays.toString(triplet.getBaselineIndexes()[0]));
                 }
 
+                /*
+                Note: use complex visibility error WITHOUT photometric error (closure phase is not affected by photometry)
+                 */
                 // pure complex visibility data :
                 visData12 = (this.hasModel) ? this.visComplex[vp + pos] : null;
-                visErr12 = (this.hasModel) ? this.visError[vp + pos] : null;
+                visErr12 = (this.hasModel) ? this.visErrorNoPhot[vp + pos] : null;
                 dist12 = this.visRndDist[vp + pos];
                 visSnrFlag12 = this.visSnrFlag[vp + pos];
                 u12 = visUCoords[vp + pos];
@@ -1465,7 +1468,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                 // pure complex visibility data :
                 visData23 = (this.hasModel) ? this.visComplex[vp + pos] : null;
-                visErr23 = (this.hasModel) ? this.visError[vp + pos] : null;
+                visErr23 = (this.hasModel) ? this.visErrorNoPhot[vp + pos] : null;
                 dist23 = this.visRndDist[vp + pos];
                 visSnrFlag23 = this.visSnrFlag[vp + pos];
                 u23 = visUCoords[vp + pos];
@@ -1486,7 +1489,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                 // pure complex visibility data :
                 visData13 = (this.hasModel) ? this.visComplex[vp + pos] : null;
-                visErr13 = (this.hasModel) ? this.visError[vp + pos] : null;
+                visErr13 = (this.hasModel) ? this.visErrorNoPhot[vp + pos] : null;
                 dist13 = this.visRndDist[vp + pos];
                 visSnrFlag13 = this.visSnrFlag[vp + pos];
 

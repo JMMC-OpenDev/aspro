@@ -93,6 +93,8 @@ public abstract class AbstractOIFitsProducer {
     protected Complex[][] visComplex = null;
     /** internal complex visibility error [row][waveLength] */
     protected double[][] visError = null;
+    /** internal complex visibility error [row][waveLength] without photometry */
+    protected double[][] visErrorNoPhot = null;
     /** internal complex distribution [row] */
     protected ComplexDistribution[] visRndDist = null;
     /** internal random index [row][waveLength] */
@@ -646,6 +648,7 @@ public abstract class AbstractOIFitsProducer {
             }
 
             final double[][] cVisError = new double[nRows][nChannels];
+            final double[][] cVisErrorNoPhot = new double[nRows][nChannels];
             final boolean[][] cVisSnrFlag = new boolean[nRows][nChannels];
             final ComplexDistribution[] cVisRndDist = new ComplexDistribution[nRows];
 
@@ -658,10 +661,12 @@ public abstract class AbstractOIFitsProducer {
             // Iterate on rows :
             for (int k = 0, l; k < nRows; k++) {
                 final double[] cVisErrorRow = cVisError[k];
+                final double[] cVisErrorRowNoPhot = cVisErrorNoPhot[k];
                 final boolean[] cVisSnrFlagRow = cVisSnrFlag[k];
 
                 if (ns == null) {
                     Arrays.fill(cVisErrorRow, Double.NaN);
+                    Arrays.fill(cVisErrorRowNoPhot, Double.NaN);
                     Arrays.fill(cVisSnrFlagRow, true);
                 } else {
                     final ImmutableComplex[] cVisRow = cVis[k];
@@ -674,7 +679,9 @@ public abstract class AbstractOIFitsProducer {
                         visAmp = cVisRow[l].abs();
 
                         // complex visibility error or Complex.NaN:
-                        cVisErrorRow[l] = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp);
+                        cVisErrorRow[l] = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp, true);
+                        // complex visibility error without photometric error:
+                        cVisErrorRowNoPhot[l] = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp, false);
 
                         // check SNR(V2) without any bias:
                         final double snrV2 = ns.getSNRVis2NoBias(ptIdx[k], l);
@@ -706,6 +713,7 @@ public abstract class AbstractOIFitsProducer {
             computed = true;
             this.visComplex = cVis;
             this.visError = cVisError;
+            this.visErrorNoPhot = cVisErrorNoPhot;
             this.visRndDist = cVisRndDist;
             this.visRndIdx = cVisRndIdx;
             this.visSnrFlag = cVisSnrFlag;

@@ -1,4 +1,3 @@
-
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -8,7 +7,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
-
 
 /**
  * 
@@ -39,8 +37,7 @@ import fr.jmmc.aspro.model.OIBase;
     "exposures"
 })
 public class ObservationSequence
-    extends OIBase
-{
+        extends OIBase {
 
     @XmlElement(name = "exposure", required = true)
     protected List<Exposure> exposures;
@@ -73,7 +70,7 @@ public class ObservationSequence
         }
         return this.exposures;
     }
-    
+
 //--simple--preserve
     /** ratio interferometry vs total time in time units (read-only) */
     @javax.xml.bind.annotation.XmlTransient
@@ -81,6 +78,9 @@ public class ObservationSequence
     /** ratio between total photometry vs Science photometry per beam (read-only) */
     @javax.xml.bind.annotation.XmlTransient
     protected double ratioPhotoPerBeam = 0.0;
+    /** ratio between photometry vs interferometry in time unit per beam (read-only) */
+    @javax.xml.bind.annotation.XmlTransient
+    protected double ratioPhotoVsInterfero = 0.0;
     /** ratio between dead vs interferometry in time units (read-only) */
     @javax.xml.bind.annotation.XmlTransient
     protected double ratioDeadTime = 0.0;
@@ -91,6 +91,10 @@ public class ObservationSequence
 
     public double getRatioPhotoPerBeam() {
         return ratioPhotoPerBeam;
+    }
+
+    public double getRatioPhotoVsInterfero() {
+        return ratioPhotoVsInterfero;
     }
 
     public double getRatioDeadTime() {
@@ -132,24 +136,29 @@ public class ObservationSequence
 
         this.ratioDeadTime = totalDead / totalInterfero;
 
+        final double totalInterferoPerBeam = getTotalPerBeam(ExposureMode.INTERFEROMETRY);
         final double totalPhotoPerBeam = getTotalPerBeam(ExposureMode.PHOTOMETRY);
         final double totalPhotoSciPerBeam = getTotalPerBeam(ExposureMode.PHOTOMETRY, ExposureType.SCIENCE);
 
         this.ratioPhotoPerBeam = totalPhotoPerBeam / totalPhotoSciPerBeam;
-/*
-        logger.info("--- Setup: "+setupName);
+
+        this.ratioPhotoVsInterfero = totalPhotoPerBeam / totalInterferoPerBeam;
+        /*
+        logger.info("--- Setup: " + setupName);
         logger.info("totalInterfero:       " + totalInterfero);
         logger.info("totalPhoto:           " + totalPhoto);
         logger.info("total:                " + total);
         logger.info("ratioInterfero:       " + ratioInterfero);
         logger.info("totalDead:            " + totalDead);
         logger.info("ratioDeadTime:        " + ratioDeadTime);
-        logger.info("totalPhotoSciPerBeam: " + totalPhotoSciPerBeam);
+        logger.info("totalInterferoPerBeam:" + totalInterferoPerBeam);
         logger.info("totalPhotoPerBeam:    " + totalPhotoPerBeam);
+        logger.info("totalPhotoSciPerBeam: " + totalPhotoSciPerBeam);
         logger.info("ratioPhotoPerBeam:    " + ratioPhotoPerBeam);
-*/
+        logger.info("ratioPhotoVsInterfero:" + ratioPhotoVsInterfero);
+         */
     }
-    
+
     private double getTotalExposures() {
         double total = 0.0;
         for (Exposure exp : getExposures()) {
@@ -175,7 +184,7 @@ public class ObservationSequence
     private double getTotalPerBeam(final ExposureMode mode) {
         return getTotalPerBeam(mode, null);
     }
-    
+
     private double getTotalPerBeam(final ExposureMode mode, final ExposureType type) {
         double total = 0.0;
         for (Exposure exp : getExposures()) {

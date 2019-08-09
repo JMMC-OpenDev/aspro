@@ -127,6 +127,9 @@ public final class NoiseService implements VisNoiseService {
 
     /** ratio photometry exposures per photometric channel (chopping) */
     private double ratioPhotoPerBeam = Double.NaN;
+    /** ratio between photometry vs interferometry in time unit per beam  */
+    private double ratioPhotoVsInterfero = Double.NaN;
+
     /** frame ratio (overhead) */
     private double frameRatio = 1.0;
 
@@ -203,6 +206,8 @@ public final class NoiseService implements VisNoiseService {
     /* cached intermediate constants */
     /** error correction = 1 / SQRT(total frame) */
     private double totFrameCorrection;
+    /** error correction = 1 / SQRT(total frame photometry) */
+    private double totFrameCorrectionPhot;
     /** noise computation parameters per uv point */
     private NoiseWParams[] params = null;
     /* varying values (spectrally dependent) */
@@ -384,6 +389,7 @@ public final class NoiseService implements VisNoiseService {
         final double ratioInterfero = sequence.getRatioInterferometry(); // [0..1]
 
         this.ratioPhotoPerBeam = sequence.getRatioPhotoPerBeam();
+        this.ratioPhotoVsInterfero = sequence.getRatioPhotoVsInterfero();
 
         this.frameRatio = insSetup.getFrameRatio();
 
@@ -835,7 +841,7 @@ public final class NoiseService implements VisNoiseService {
             }
 
             for (int n = 0; n < nObs; n++) {
-                double elevation = targetPointInfos[n].getElevation();
+                final double elevation = targetPointInfos[n].getElevation();
 
                 strehlPerChannel[n] = Band.strehl(band, adaptiveOpticsMag, waveLengths, telDiam, seeing,
                         nbSubPupils, td, t0, qe, ron, elevation);
@@ -844,6 +850,14 @@ public final class NoiseService implements VisNoiseService {
                     logger.debug("elevation                     : {}", elevation);
                     logger.debug("strehlPerChannel[iMidChannel] : {}", strehlPerChannel[n][iMidChannel]);
                     logger.debug("strehlPerChannel              : {}", Arrays.toString(strehlPerChannel[n]));
+                }
+
+                if (false) {
+                    System.out.println("strehl table for elevation=" + elevation + " seeing=" + seeing);
+                    System.out.println("channel\twaveLength\tstrehl");
+                    for (int i = 0; i < waveLengths.length; i++) {
+                        System.out.println(i + "\t" + waveLengths[i] + "\t" + strehlPerChannel[n][i]);
+                    }
                 }
             }
         } else {
@@ -999,11 +1013,13 @@ public final class NoiseService implements VisNoiseService {
 
         // total frame correction = 1 / SQRT(nFrames):
         this.totFrameCorrection = 1.0 / Math.sqrt(nbFramesWithOverheads);
+        this.totFrameCorrectionPhot = 1.0 / Math.sqrt(nbFramesWithOverheads * ratioPhotoVsInterfero);
 
         if (logger.isDebugEnabled()) {
             logger.debug("nbFrames                      : {}", nbFrames);
             logger.debug("nbFramesWithOverheads         : {}", nbFramesWithOverheads);
             logger.debug("totFrameCorrection            : {}", totFrameCorrection);
+            logger.debug("totFrameCorrectionPhot        : {}", totFrameCorrectionPhot);
         }
 
         // 2nd pass: obsDit is known = integration time (setup)
@@ -1279,8 +1295,8 @@ public final class NoiseService implements VisNoiseService {
                 // square error contribution of 2 photometric channels on the square visiblity FiFj:
                 sqErrVis2Phot[i] = 2.0 * FastMath.pow2(errPhotPhoto[i] / nbPhotPhoto[i]);
 
-                // repeat OBS measurements to reach totalObsTime minutes:
-                errPhotPhoto[i] *= totFrameCorrection;
+                // repeat OBS measurements to reach totalObsTime minutes (corrected by photo / interfero ratio):
+                errPhotPhoto[i] *= totFrameCorrectionPhot;
             }
 
             if (logger.isDebugEnabled()) {
@@ -1340,6 +1356,19 @@ public final class NoiseService implements VisNoiseService {
      * @return square visiblity error or NaN if the error can not be computed
      */
     public double computeVis2Error(final int iPoint, final int iChannel, final double vis2) {
+        return computeVis2Error(iPoint, iChannel, vis2, true);
+    }
+
+    /**
+     * Compute error on square visibility. It returns NaN if the error can not be computed
+     *
+     * @param iPoint index of the observable point
+     * @param iChannel index of the channel
+     * @param vis2 squared visibility
+     * @param usePhot do use the photometry
+     * @return square visiblity error or NaN if the error can not be computed
+     */
+    public double computeVis2Error(final int iPoint, final int iChannel, final double vis2, final boolean usePhot) {
         if (check(iPoint, iChannel)) {
             return Double.NaN;
         }
@@ -1368,14 +1397,19 @@ public final class NoiseService implements VisNoiseService {
 
         // Uncertainty on square visibility per frame:
         double errVis2;
-        if (usePhotometry) {
-            errVis2 = vis2 * Math.sqrt((varSqCorFlux / FastMath.pow2(sqCorFlux)) + param.sqErrVis2Phot[iChannel]);
+        if (usePhot && usePhotometry) {
+
+            // repeat OBS measurements to reach totalObsTime minutes (corrected by photo / interfero ratio):
+            errVis2 = vis2 * Math.sqrt(
+                    (varSqCorFlux / FastMath.pow2(sqCorFlux)) * FastMath.pow2(totFrameCorrection)
+                    + param.sqErrVis2Phot[iChannel] * FastMath.pow2(totFrameCorrectionPhot)
+            );
         } else {
             // no photometry...
             errVis2 = vis2 * (param.errSqCorrFlux[iChannel] / param.sqCorrFlux[iChannel]);
+            // repeat OBS measurements to reach totalObsTime minutes:
+            errVis2 *= totFrameCorrection;
         }
-        // repeat OBS measurements to reach totalObsTime minutes:
-        errVis2 *= totFrameCorrection;
         param.errSqCorrFlux[iChannel] *= totFrameCorrection;
 
         // estimate SNR(V2):
@@ -1543,11 +1577,12 @@ public final class NoiseService implements VisNoiseService {
      * @param iPoint index of the observable point
      * @param iChannel index of the channel
      * @param visAmp visibility amplitude
+     * @param usePhot visibility amplitude
      * @return complex visiblity error or NaN if the error can not be computed
      */
-    public double computeVisComplexErrorValue(final int iPoint, final int iChannel, final double visAmp) {
+    public double computeVisComplexErrorValue(final int iPoint, final int iChannel, final double visAmp, final boolean usePhot) {
         // visibility amplitude error (gaussian distribution):
-        double visAmpErr = computeVisError(iPoint, iChannel, visAmp);
+        double visAmpErr = computeVisError(iPoint, iChannel, visAmp, usePhot);
 
         // Limit excessively large errors (very low transmission or strehl):
         visAmpErr = Math.min(visAmpErr, MAX_ERR_V);
@@ -1571,11 +1606,12 @@ public final class NoiseService implements VisNoiseService {
      * @param iPoint index of the observable point
      * @param iChannel index of the channel
      * @param visAmp visibility amplitude
+     * @param usePhot do use the photometry
      * @return visiblity error
      */
-    private double computeVisError(final int iPoint, final int iChannel, final double visAmp) {
+    private double computeVisError(final int iPoint, final int iChannel, final double visAmp, final boolean usePhot) {
         // vis2 error without bias :
-        final double errV2 = computeVis2Error(iPoint, iChannel, visAmp * visAmp);
+        final double errV2 = computeVis2Error(iPoint, iChannel, visAmp * visAmp, usePhot);
 
         // dvis = d(vis2) / (2 * vis) :
         // in log scale: (dv / v) = (1/2) (dv2 / v2)
@@ -1627,7 +1663,7 @@ public final class NoiseService implements VisNoiseService {
      */
     @Override
     public double computeVisComplexErrorValue(final double visAmp) {
-        return computeVisComplexErrorValue(iMidPoint, iMidChannel, visAmp);
+        return computeVisComplexErrorValue(iMidPoint, iMidChannel, visAmp, true);
     }
 
     /* --- utility methods --- */
