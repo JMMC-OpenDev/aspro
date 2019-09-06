@@ -66,6 +66,12 @@ public final class NoiseService implements VisNoiseService {
     /** enable tests on vis2 error */
     private final static boolean DO_DUMP_VIS2 = false;
 
+    /** dump atmospheric transmission */
+    private final static boolean DO_DUMP_ATM_TRANS = false;
+
+    /** dump strehl values */
+    private final static boolean DO_DUMP_STREHL = false;
+
     /** maximum error on Vis to avoid excessively large errors */
     private final static double MAX_ERR_V = 10.0;
     /** maximum error on Vis2 to avoid excessively large errors */
@@ -852,7 +858,7 @@ public final class NoiseService implements VisNoiseService {
                     logger.debug("strehlPerChannel              : {}", Arrays.toString(strehlPerChannel[n]));
                 }
 
-                if (false) {
+                if (DO_DUMP_STREHL) {
                     System.out.println("strehl table for elevation=" + elevation + " seeing=" + seeing);
                     System.out.println("channel\twaveLength\tstrehl");
                     for (int i = 0; i < waveLengths.length; i++) {
@@ -1123,7 +1129,7 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("atmTrans                      : {}", Arrays.toString(atmTrans));
         }
 
-        if (false) {
+        if (DO_DUMP_ATM_TRANS) {
             System.out.println("#AtmTransmission[" + instrumentName + "] [" + this.waveLengths[0] + " - "
                     + this.waveLengths[this.waveLengths.length - 1] + "]:");
 
@@ -1140,9 +1146,10 @@ public final class NoiseService implements VisNoiseService {
         for (int i = 0; i < nWLen; i++) {
             // nb of photons m^-2.s^-1.m^-1 for an object at magnitude 0:
             // note: fzero depends on the spectral band:
-            final double fzero = insBand[i].getNbPhotZero(waveLengths[i]);
+            // consider flat profile:
+            final double fzero = insBand[i].getNbPhotZero();
 
-            // TODO: source flux may be spectrally dependent:
+            // TODO: source flux may be spectrally dependent i.e. use 1 or several black body profiles ?
             // nb of photons m^-2.s^-1.m^-1 for the target object:
             final double fsrc = fzero * FastMath.pow(10d, -0.4d * objectMag[i]);
 
