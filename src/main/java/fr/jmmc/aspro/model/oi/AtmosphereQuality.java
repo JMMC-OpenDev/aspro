@@ -17,6 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="Average"/&gt;
  *     &lt;enumeration value="Good"/&gt;
  *     &lt;enumeration value="Excellent"/&gt;
+ *     &lt;enumeration value="Worse"/&gt;
  *     &lt;enumeration value="Bad"/&gt;
  *     &lt;enumeration value="Awful"/&gt;
  *   &lt;/restriction&gt;
@@ -37,7 +38,7 @@ public enum AtmosphereQuality {
     AVERAGE("Average"),
 
     /**
-     * 'Good' means seeing = 0.6 arcsec
+     * 'Good' means seeing = 0.7 arcsec
      * 
      */
     @XmlEnumValue("Good")
@@ -49,6 +50,13 @@ public enum AtmosphereQuality {
      */
     @XmlEnumValue("Excellent")
     EXCELLENT("Excellent"),
+
+    /**
+     * 'Worse' means seeing = 1.15 arcsec
+     * 
+     */
+    @XmlEnumValue("Worse")
+    WORSE("Worse"),
 
     /**
      * 'Bad' means seeing = 1.4 arcsec

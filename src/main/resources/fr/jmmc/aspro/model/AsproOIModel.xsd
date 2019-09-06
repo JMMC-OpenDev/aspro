@@ -2841,11 +2841,12 @@
         <xsd:annotation>
             <xsd:documentation>
                 Possible values for the AtmosphereQuality :
-                - "Average"   seeing = 1.0 arc sec
-                - "Good"      seeing = 0.6 arc sec
-                - "Excellent" seeing = 0.4 arc sec
-                - "Bad"       seeing = 1.4 arc sec
-                - "Awful"     seeing = 1.8 arc sec
+                - "Excellent" seeing = 0.40 arcsec
+                - "Good"      seeing = 0.70 arcsec
+                - "Average"   seeing = 1.00 arcsec
+                - "Worse"     seeing = 1.15 arcsec
+                - "Bad"       seeing = 1.40 arcsec
+                - "Awful"     seeing = 1.80 arcsec
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
@@ -2856,12 +2857,17 @@
             </xsd:enumeration>
             <xsd:enumeration value="Good">
                 <xsd:annotation>
-                    <xsd:documentation>'Good' means seeing = 0.6 arcsec</xsd:documentation>
+                    <xsd:documentation>'Good' means seeing = 0.7 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Excellent">
                 <xsd:annotation>
                     <xsd:documentation>'Excellent' means seeing = 0.4 arcsec</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="Worse">
+                <xsd:annotation>
+                    <xsd:documentation>'Worse' means seeing = 1.15 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Bad">
