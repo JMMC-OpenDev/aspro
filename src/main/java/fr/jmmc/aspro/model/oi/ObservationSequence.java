@@ -1,3 +1,4 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+
 
 /**
  * 
@@ -37,7 +39,8 @@ import fr.jmmc.aspro.model.OIBase;
     "exposures"
 })
 public class ObservationSequence
-        extends OIBase {
+    extends OIBase
+{
 
     @XmlElement(name = "exposure", required = true)
     protected List<Exposure> exposures;
@@ -70,7 +73,7 @@ public class ObservationSequence
         }
         return this.exposures;
     }
-
+    
 //--simple--preserve
     /** ratio interferometry vs total time in time units (read-only) */
     @javax.xml.bind.annotation.XmlTransient
@@ -142,21 +145,22 @@ public class ObservationSequence
 
         this.ratioPhotoPerBeam = totalPhotoPerBeam / totalPhotoSciPerBeam;
 
-        this.ratioPhotoVsInterfero = totalPhotoPerBeam / totalInterferoPerBeam;
-        /*
-        logger.info("--- Setup: " + setupName);
-        logger.info("totalInterfero:       " + totalInterfero);
-        logger.info("totalPhoto:           " + totalPhoto);
-        logger.info("total:                " + total);
-        logger.info("ratioInterfero:       " + ratioInterfero);
-        logger.info("totalDead:            " + totalDead);
-        logger.info("ratioDeadTime:        " + ratioDeadTime);
-        logger.info("totalInterferoPerBeam:" + totalInterferoPerBeam);
-        logger.info("totalPhotoPerBeam:    " + totalPhotoPerBeam);
-        logger.info("totalPhotoSciPerBeam: " + totalPhotoSciPerBeam);
-        logger.info("ratioPhotoPerBeam:    " + ratioPhotoPerBeam);
-        logger.info("ratioPhotoVsInterfero:" + ratioPhotoVsInterfero);
-         */
+        this.ratioPhotoVsInterfero = totalPhotoSciPerBeam / totalInterferoPerBeam;
+        
+        if (false) {
+            logger.info("--- Setup: " + setupName);
+            logger.info("totalInterfero:       " + totalInterfero);
+            logger.info("totalPhoto:           " + totalPhoto);
+            logger.info("total:                " + total);
+            logger.info("ratioInterfero:       " + ratioInterfero);
+            logger.info("totalDead:            " + totalDead);
+            logger.info("ratioDeadTime:        " + ratioDeadTime);
+            logger.info("totalInterferoPerBeam:" + totalInterferoPerBeam);
+            logger.info("totalPhotoPerBeam:    " + totalPhotoPerBeam);
+            logger.info("totalPhotoSciPerBeam: " + totalPhotoSciPerBeam);
+            logger.info("ratioPhotoPerBeam:    " + ratioPhotoPerBeam);
+            logger.info("ratioPhotoVsInterfero:" + ratioPhotoVsInterfero);
+        }
     }
 
     private double getTotalExposures() {
