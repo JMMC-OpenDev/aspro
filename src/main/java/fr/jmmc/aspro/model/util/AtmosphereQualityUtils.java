@@ -54,16 +54,18 @@ public final class AtmosphereQualityUtils {
     public static double getSeeing(final AtmosphereQuality atmQuality) {
         switch (atmQuality) {
             case EXCELLENT:
-                return 0.4d;
+                return 0.4;
             case GOOD:
-                return 0.7d;
+                return 0.7;
             default:
             case AVERAGE:
-                return 1.0d;
+                return 1.0;
+            case WORSE:
+                return 1.15;
             case BAD:
-                return 1.4d;
+                return 1.4;
             case AWFUL:
-                return 1.8d;
+                return 1.8;
         }
     }
 
@@ -75,14 +77,16 @@ public final class AtmosphereQualityUtils {
     public static double getCoherenceTime(final AtmosphereQuality atmQuality) {
         switch (atmQuality) {
             case EXCELLENT:
-                return 10.0;
+                return 8.0; /* "10%  (Seeing < 0.6  arcsec, t0 > 5.2 ms)", */
             case GOOD:
-                return 6.0;
+                return 5.0; /* "20%  (Seeing < 0.7  arcsec, t0 > 4.4 ms)" */
             default:
             case AVERAGE:
-                return 4.0;
+                return 3.2; /* "50%  (Seeing < 1.0  arcsec, t0 > 3.2 ms)" */
+            case WORSE:
+                return 2.2; /* "70%  (Seeing < 1.15 arcsec, t0 > 2.2 ms)" */
             case BAD:
-                return 1.0;
+                return 1.6; /* "85%  (Seeing < 1.4  arcsec, t0 > 1.6 ms)" */
             case AWFUL:
                 return 0.5;
         }

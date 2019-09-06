@@ -44,7 +44,7 @@ public class StrehlChartTest {
     private final static double[] LAMBDA_K = new double[]{2.2e-6};
 
     // NAOMI plots @ 1.1, MACAO, CIAO @ 0.85
-    private final static double[] SEEING = new double[]{1.1, 1.0, 0.85, 0.7, 0.4};
+    private final static double[] SEEING = new double[]{1.4, 1.1, 1.0, 0.85, 0.7, 0.5};
 
     public static void main(String[] args) {
         // invoke App method to initialize logback now:
@@ -170,8 +170,8 @@ public class StrehlChartTest {
 
                 final double[] lambda = new double[1];
 
-                for (Band b : EnumSet.of(Band.H, Band.K, Band.L, Band.M /*, Band.N */)) {
-                    lambda[0] = b.getLambda() * 1E-6;
+                for (Band b : EnumSet.of(Band.H, Band.K, Band.L, Band.M, Band.N)) {
+                    lambda[0] = b.getLambdaFluxZero()* 1E-6;
 
                     if (true) {
                         // OK
