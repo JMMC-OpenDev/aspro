@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.9.7 beta 7"/>
-    <compilation date="02/08/2019" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="19.09 beta 8"/>
+    <compilation date="09/09/2019" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -221,31 +221,34 @@
     </menubar>
 
     <releasenotes>
-        <release version="0.9.9.7">
-            <pubDate>Fri, 02 Aug 2019 16:00:00 GMT</pubDate>
-            <prerelease version="0.9.9.7 beta 7">
+        <release version="19.9">
+            <pubDate>Mon, 09 Sep 2019 15:00:00 GMT</pubDate>
+            <prerelease version="19.9 beta 8">
+                <change type="FEATURE">Fixed noise modelling for MATISSE LM &amp; N</change>
+            </prerelease>
+            <prerelease version="19.9 beta 7">
                 <change type="FEATURE">Added the G magnitude in Simbad resolver and Target Editor, used by AO if missing R mag (NAOMI)</change>
             </prerelease>
-            <prerelease version="0.9.9.7 beta 6">
+            <prerelease version="19.9 beta 6">
                 <change type="FEATURE">Improved observability plot to support the new 'Hide ancillary stars' filter (any FT, AO, Guide star)</change>
                 <change type="FEATURE">Improved observability plot to use the color of the first target group (if any) as shown in the legend</change>
                 <change type="FEATURE">Improved tooltips on targets to always indicate target groups and show target notes</change>
             </prerelease>
-            <prerelease version="0.9.9.7 beta 5">
+            <prerelease version="19.9 beta 5">
                 <change type="FEATURE">Optimized startup of the command line tool to compute interferometric observables</change>
             </prerelease>
-            <prerelease version="0.9.9.7 beta 4">
+            <prerelease version="19.9 beta 4">
                 <change type="FEATURE">Added user preferences for Fast mode error (1% by default) and Apodization in the Preferences panel</change>
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/1000">Optimized apodization of user model images (performance and concurrency issues)</change>
             </prerelease>
-            <prerelease version="0.9.9.7 beta 3">
+            <prerelease version="19.9 beta 3">
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/1000">Added apodization of user model images according to telescope diameter and min instrument wavelength</change>
             </prerelease>
-            <prerelease version="0.9.9.7 beta 2">
+            <prerelease version="19.9 beta 2">
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/985">Added actions in the 'Edit' menu and in the 'Target Editor' to update target(s) with latest Simbad information;
                 added an auto-update check when loading an asprox file to propose the update of all targets</change>
             </prerelease>
-            <prerelease version="0.9.9.7 beta 1">
+            <prerelease version="19.9 beta 1">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/992">Use proper geocentric positions for stations and array center in OI_ARRAY (FITS)</change>
             </prerelease>
         </release>
