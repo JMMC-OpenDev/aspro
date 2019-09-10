@@ -95,6 +95,7 @@ import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.nom.tam.fits.FitsException;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -124,9 +125,11 @@ import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
+import javax.swing.JList;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import net.jafama.FastMath;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -857,7 +860,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.jComboBoxInstrumentMode.addActionListener(this);
         this.jComboBoxFTMode.addActionListener(this);
         this.jComboBoxAOSetup.addActionListener(this);
+        
         this.jComboBoxAtmQual.addActionListener(this);
+        this.jComboBoxAtmQual.setRenderer(new AtmQualComboBoxRenderer());
 
         this.uvMaxAdapter = new FieldSliderAdapter(jSliderUVMax, jFieldUVMax, 0d, 0d, 0d);
         this.uvMaxAdapter.addChangeListener(this);
@@ -3774,6 +3779,20 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             logger.debug("Stopping timer: {}", this.timerTimeRefresh);
 
             this.timerTimeRefresh.stop();
+        }
+    }
+
+    private final static class AtmQualComboBoxRenderer extends BasicComboBoxRenderer {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Component getListCellRendererComponent(JList list, Object value,
+                                                      int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            
+            setToolTipText(AtmosphereQualityUtils.getTooltip(value.toString()));
+            return this;
         }
     }
 }

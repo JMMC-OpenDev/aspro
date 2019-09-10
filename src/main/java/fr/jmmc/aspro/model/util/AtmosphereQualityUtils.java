@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.model.util;
 
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
+import java.util.EnumMap;
 import java.util.Vector;
 
 /**
@@ -12,8 +13,11 @@ import java.util.Vector;
  */
 public final class AtmosphereQualityUtils {
 
-    /** computed AtmosphereQuality  */
+    /** computed AtmosphereQuality */
     private static Vector<String> atmosphereQualityList = null;
+
+    /** computed AtmosphereQuality tooltip */
+    private static EnumMap<AtmosphereQuality, String> atmosphereQualityTooltip = null;
 
     /**
      * Forbidden constructor
@@ -38,6 +42,20 @@ public final class AtmosphereQualityUtils {
     }
 
     /**
+     * Return the vector of all atmosphere quality items as string
+     * @return vector of all atmosphere quality items as string
+     */
+    public static EnumMap<AtmosphereQuality, String> getAtmosphereQualityTooltips() {
+        if (atmosphereQualityTooltip == null) {
+            atmosphereQualityTooltip = new EnumMap<AtmosphereQuality, String>(AtmosphereQuality.class);
+            for (AtmosphereQuality atmQuality : AtmosphereQuality.values()) {
+                atmosphereQualityTooltip.put(atmQuality, computeTooltip(atmQuality));
+            }
+        }
+        return atmosphereQualityTooltip;
+    }
+
+    /**
      * Return the atmosphere quality for the given string
      * @param value atmosphere quality as string
      * @return atmosphere quality item
@@ -54,13 +72,17 @@ public final class AtmosphereQualityUtils {
     public static double getSeeing(final AtmosphereQuality atmQuality) {
         switch (atmQuality) {
             case EXCELLENT:
-                return 0.4;
+                /* "10%  (Seeing < 0.6  arcsec, t0 > 5.2 ms)" */
+                return 0.6;
             case GOOD:
+                /* "20%  (Seeing < 0.7  arcsec, t0 > 4.4 ms)" */
                 return 0.7;
             default:
             case AVERAGE:
+                /* "50%  (Seeing < 1.0  arcsec, t0 > 3.2 ms)" */
                 return 1.0;
             case WORSE:
+                /* "70%  (Seeing < 1.15 arcsec, t0 > 2.2 ms)" */
                 return 1.15;
             case BAD:
                 return 1.4;
@@ -77,19 +99,38 @@ public final class AtmosphereQualityUtils {
     public static double getCoherenceTime(final AtmosphereQuality atmQuality) {
         switch (atmQuality) {
             case EXCELLENT:
-                return 8.0; /* "10%  (Seeing < 0.6  arcsec, t0 > 5.2 ms)", */
+                /* "10%  (Seeing < 0.6  arcsec, t0 > 5.2 ms)" */
+                return 5.2;
             case GOOD:
-                return 5.0; /* "20%  (Seeing < 0.7  arcsec, t0 > 4.4 ms)" */
+                /* "20%  (Seeing < 0.7  arcsec, t0 > 4.4 ms)" */
+                return 4.4;
             default:
             case AVERAGE:
-                return 3.2; /* "50%  (Seeing < 1.0  arcsec, t0 > 3.2 ms)" */
+                /* "50%  (Seeing < 1.0  arcsec, t0 > 3.2 ms)" */
+                return 3.2;
             case WORSE:
-                return 2.2; /* "70%  (Seeing < 1.15 arcsec, t0 > 2.2 ms)" */
+                /* "70%  (Seeing < 1.15 arcsec, t0 > 2.2 ms)" */
+                return 2.2;
             case BAD:
-                return 1.6; /* "85%  (Seeing < 1.4  arcsec, t0 > 1.6 ms)" */
+                return 1.6;
             case AWFUL:
                 return 0.5;
         }
+    }
+
+    /**
+     * Return the tooltip corresponding to the given atmosphere quality
+     * @param value atmosphere quality as string
+     * @return tooltip 
+     */
+    public static String getTooltip(final String value) {
+        return getAtmosphereQualityTooltips().get(getAtmosphereQuality(value));
+    }
+
+    private static String computeTooltip(final AtmosphereQuality atmQuality) {
+        return atmQuality.value() + " sky conditions: seeing = "
+                + getSeeing(atmQuality) + " arcsec, t0 = "
+                + getCoherenceTime(atmQuality) + " ms";
     }
 
 }
