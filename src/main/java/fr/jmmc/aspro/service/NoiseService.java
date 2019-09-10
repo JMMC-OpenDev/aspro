@@ -1130,13 +1130,12 @@ public final class NoiseService implements VisNoiseService {
         }
 
         if (DO_DUMP_ATM_TRANS) {
-            System.out.println("#AtmTransmission[" + instrumentName + "] [" + this.waveLengths[0] + " - "
+            System.out.println("AtmTransmission[" + instrumentName + "] [" + this.waveLengths[0] + " - "
                     + this.waveLengths[this.waveLengths.length - 1] + "]:");
-
-            for (int i = 0; i < this.waveLengths.length; i++) {
-                System.out.println(this.waveLengths[i] + "\t" + atmTrans[i]);
+            System.out.println("channel\twaveLength\tatm_trans");
+            for (int i = 0; i < waveLengths.length; i++) {
+                System.out.println(i + "\t" + waveLengths[i] + "\t" + atmTrans[i]);
             }
-            System.out.println("#---");
         }
 
         final int nWLen = nSpectralChannels;
