@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="19.09 beta 8"/>
-    <compilation date="09/09/2019" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="19.09 beta 9"/>
+    <compilation date="11/09/2019" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -222,7 +222,10 @@
 
     <releasenotes>
         <release version="19.9">
-            <pubDate>Mon, 09 Sep 2019 15:00:00 GMT</pubDate>
+            <pubDate>Wed, 11 Sep 2019 12:00:00 GMT</pubDate>
+            <prerelease version="19.9 beta 9">
+                <change type="FEATURE">Added tooltip in the UV Coverage panel on the 'atmosphere quality' combo box</change>
+            </prerelease>
             <prerelease version="19.9 beta 8">
                 <change type="FEATURE">Fixed noise modelling for MATISSE LM &amp; N</change>
             </prerelease>
