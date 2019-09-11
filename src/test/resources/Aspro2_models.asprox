@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<a:observationSetting xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <schemaVersion>2011.02</schemaVersion>
+<a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <schemaVersion>2018.04</schemaVersion>
+    <targetVersion>2019.09</targetVersion>
     <name>default</name>
     <when>
         <date>2011-10-15</date>
@@ -24,10 +25,8 @@
         <RA>00:00:00.000</RA>
         <DEC>00:00:00.000</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <VELTYP></VELTYP>
         <IDS>Puncts</IDS>
-        <OBJTYP></OBJTYP>
-        <SPECTYP></SPECTYP>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="punct1" type="punct">
             <desc>Returns the Fourier transform of a punctual object (Dirac function) at coordinates (X,Y) 
 (milliarcsecond). 
@@ -71,6 +70,7 @@ FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
         <configuration>
             <HAMin>-12.0</HAMin>
             <HAMax>12.0</HAMax>
+            <aoSetup>MACAO</aoSetup>
         </configuration>
     </target>
     <target id="DISK">
@@ -78,10 +78,8 @@ FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
         <RA>00:00:00.000</RA>
         <DEC>00:00:00.000</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <VELTYP></VELTYP>
         <IDS>Disk</IDS>
-        <OBJTYP></OBJTYP>
-        <SPECTYP></SPECTYP>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_disk1" type="elong_disk">
             <desc>Returns the Fourier transform of a normalized ellipse centered at coordinates (X,Y) 
 (milliarcsecond) with a ratio ELONG_RATIO between the major diameter and the minor one 
@@ -140,10 +138,8 @@ smaller than 1.</desc>
         <RA>00:00:00.000</RA>
         <DEC>00:00:00.000</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <VELTYP></VELTYP>
         <IDS>Gaussian</IDS>
-        <OBJTYP></OBJTYP>
-        <SPECTYP></SPECTYP>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_gaussian1" type="elong_gaussian">
             <desc>Returns the Fourier transform of a normalized elongated gaussian centered at coordinates 
 (X,Y) (milliarcsecond). The sizes of the function in two orthogonal directions are given by 
@@ -204,10 +200,8 @@ is smaller than 1.</desc>
         <RA>00:00:00.000</RA>
         <DEC>00:00:00.000</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <VELTYP></VELTYP>
         <IDS>Circle</IDS>
-        <OBJTYP></OBJTYP>
-        <SPECTYP></SPECTYP>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="circle1" type="circle">
             <desc>Returns the Fourier transform of a normalized uniform circle of diameter DIAMETER 
 (milliarcsecond) and centered at coordinates (X,Y) (milliarcsecond). 
@@ -243,10 +237,8 @@ The function returns an error if DIAMETER is negative.</desc>
         <RA>00:00:00.000</RA>
         <DEC>00:00:00.000</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <VELTYP></VELTYP>
         <IDS>Ring</IDS>
-        <OBJTYP></OBJTYP>
-        <SPECTYP></SPECTYP>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_ring1" type="elong_ring">
             <desc>Returns the Fourier transform of a normalized uniform elongated ring centered at 
 coordinates (X,Y) (milliarcsecond). The sizes of the function in two orthogonal directions 
@@ -314,10 +306,8 @@ is smaller than 1.</desc>
         <RA>00:00:00.000</RA>
         <DEC>00:00:00.000</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <VELTYP></VELTYP>
         <IDS>LDDisk</IDS>
-        <OBJTYP></OBJTYP>
-        <SPECTYP></SPECTYP>
+        <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="limb_quadratic1" type="limb_quadratic">
             <desc>Returns the Fourier transform of a center-to-limb darkened disk of diameter DIAMETER 
 (milliarcsecond) centered at coordinates (X,Y) (milliarcsecond). 
@@ -369,6 +359,26 @@ outside bounds [-1,1]</desc>
             <HAMax>12.0</HAMax>
         </configuration>
     </target>
+    <targetUserInfos>
+        <group id="JMMC_AO">
+            <name>AO Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the Adaptive Optics system</description>
+            <color>#F781BF</color>
+        </group>
+        <group id="JMMC_FT">
+            <name>FT Star</name>
+            <category>[OB]</category>
+            <description>Group gathering stars used by the Fringe Tracking system</description>
+            <color>#75C147</color>
+        </group>
+        <group id="JMMC_GUIDE">
+            <name>Guide Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the telescope guiding</description>
+            <color>#5BAFD6</color>
+        </group>
+    </targetUserInfos>
     <variant>
         <stations>UT1 UT2 UT3</stations>
     </variant>

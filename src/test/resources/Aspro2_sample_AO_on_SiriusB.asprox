@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<a:observationSetting xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <schemaVersion>2018.04</schemaVersion>
+    <targetVersion>2019.09</targetVersion>
     <name>default</name>
     <when>
         <date>2018-12-08</date>
@@ -33,6 +34,7 @@
         <SPECTYP>DA1.9</SPECTYP>
         <FLUX_B>8.41</FLUX_B>
         <FLUX_V>8.44</FLUX_V>
+        <FLUX_G>8.4745</FLUX_G>
         <FLUX_R>12.0</FLUX_R>
         <FLUX_H>12.0</FLUX_H>
         <FLUX_K>12.0</FLUX_K>
