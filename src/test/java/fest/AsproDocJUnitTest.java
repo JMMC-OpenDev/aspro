@@ -251,7 +251,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
             // move the mouse on the first observability interval (top right corner):
             // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 415, 390);
+            robot().moveMouse(window.component(), 390, 410);
 
             // let tooltip appear:
             pauseMedium();
@@ -311,7 +311,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
             // move the mouse on one uv measurement:
             // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 685, 595);
+            robot().moveMouse(window.component(), 690, 590);
 
             // let tooltip appear:
             pauseMedium();
