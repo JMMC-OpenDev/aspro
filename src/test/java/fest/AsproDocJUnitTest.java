@@ -790,13 +790,47 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             window.moveTo(ref);
         }
     }
+    
+    /**
+     * Capture the moon details
+     */
+    @Test
+    @GUITest
+    public void m18_captureMoon() {
+        openObservation("Aspro2_sample_moon.asprox");
+
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
+
+        // Capture observability plot :
+        getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
+
+        final JPanelFixture panel = window.panel("observabilityPanel");
+
+        // enable detailed plot :
+        panel.checkBox("jCheckBoxDetailedOutput").check();
+
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
+
+        panel.scrollBar("scroller").scrollTo(8); // see ETA TAU (moon) [0 to 14]
+
+        // Capture observability plot of detailed plot :
+        saveScreenshot(getMainTabbedPane(), "Aspro2-moon-obs-det.png");
+
+        // disable detailed plot :
+        panel.checkBox("jCheckBoxDetailedOutput").uncheck();
+
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();        
+    }
 
     /**
      * Test A2P2 integration : Start A2P2 manually before this test
      */
     @Test
     @GUITest
-    public void m18_shouldCallA2P2() {
+    public void m19_shouldCallA2P2() {
         // hack to solve focus trouble in menu items :
         window.menuItemWithPath("Interop").focus();
 
