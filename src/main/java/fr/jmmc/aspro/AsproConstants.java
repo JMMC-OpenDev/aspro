@@ -104,6 +104,8 @@ public interface AsproConstants {
     public static final String INS_MATISSE = "MATISSE_";
     /** CHARA VEGA (2T/3T) */
     public static final String INS_VEGA = "VEGA_";
+    /** CHARA SPICA (6T) */
+    public static final String INS_SPICA = "SPICA_";
     /** JMMC legal notice on plots */
     public static final String JMMC_ANNOTATION = "Made by ASPRO 2/JMMC ";
     /** JMMC legal notice on plots */

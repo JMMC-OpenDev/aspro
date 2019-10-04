@@ -1018,7 +1018,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         // generate squared correlated fluxes:
         final boolean useExtraVis2 = AsproConstants.INS_GRAVITY.equals(this.instrumentName)
-                || this.instrumentName.startsWith(AsproConstants.INS_MATISSE);
+                || this.instrumentName.startsWith(AsproConstants.INS_MATISSE)
+                || this.instrumentName.startsWith(AsproConstants.INS_SPICA);
 
         // Update the data model before calling new OIVis():
         DataModel.setOiVis2ExtraSupport(useExtraVis2);
