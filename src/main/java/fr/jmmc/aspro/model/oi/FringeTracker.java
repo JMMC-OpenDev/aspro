@@ -33,7 +33,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="mode" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="instrumentVisibility" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
- *         &lt;element name="maxIntegration" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *         &lt;element name="maxIntegration" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -67,7 +67,7 @@ public class FringeTracker
     protected List<String> modes;
     protected double instrumentVisibility;
     protected double magLimit;
-    protected int maxIntegration;
+    protected double maxIntegration;
 
     /**
      * Gets the value of the name property.
@@ -182,7 +182,7 @@ public class FringeTracker
      * Gets the value of the maxIntegration property.
      * 
      */
-    public int getMaxIntegration() {
+    public double getMaxIntegration() {
         return maxIntegration;
     }
 
@@ -190,7 +190,7 @@ public class FringeTracker
      * Sets the value of the maxIntegration property.
      * 
      */
-    public void setMaxIntegration(int value) {
+    public void setMaxIntegration(double value) {
         this.maxIntegration = value;
     }
     

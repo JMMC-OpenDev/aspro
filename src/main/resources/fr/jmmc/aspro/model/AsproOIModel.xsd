@@ -2752,7 +2752,7 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="maxIntegration" type="xsd:int">
+            <xsd:element name="maxIntegration" type="xsd:double">
                 <xsd:annotation>
                     <xsd:documentation>
                         The max Integration Time (s) (FINITO = 60)
