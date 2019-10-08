@@ -822,47 +822,65 @@ public final class NoiseService implements VisNoiseService {
 
         if (useStrehlCorrection) {
             strehlPerChannel = new double[nObs][];
+            
+            if (this.instrumentName.startsWith(AsproConstants.INS_SPICA)) {
+                // SPICA case (waiting for CHARA AO):
+                final double strehl;
+                if (seeing <= 0.7) {
+                    strehl = 0.25;
+                } else if (seeing <= 1.0) {
+                    strehl = 0.15;
+                } else {
+                    strehl = 0.1;
+                }
+                addInformation("Strehl (SPICA): " + NumberUtils.format(strehl));
+                
+                for (int n = 0; n < nObs; n++) {
+                    strehlPerChannel[n] = new double[waveLengths.length];
+                    Arrays.fill(strehlPerChannel[n], strehl);
+                }
+            } else {
+                Band band = Band.V;
+                int nbSubPupils = 1;
+                double td = 1.0;
+                double ron = 1.0;
+                double qe = 0.9;
 
-            Band band = Band.V;
-            int nbSubPupils = 1;
-            double td = 1.0;
-            double ron = 1.0;
-            double qe = 0.9;
+                if (aoSetup != null) {
+                    band = Band.valueOf(aoBand.name());
+                    nbSubPupils = aoSetup.getNumberSubPupils();
+                    td = aoSetup.getDit();
+                    ron = aoSetup.getRon();
+                    qe = aoSetup.getQuantumEfficiency();
 
-            if (aoSetup != null) {
-                band = Band.valueOf(aoBand.name());
-                nbSubPupils = aoSetup.getNumberSubPupils();
-                td = aoSetup.getDit();
-                ron = aoSetup.getRon();
-                qe = aoSetup.getQuantumEfficiency();
-
-                // TODO: transmission on target flux (remainder)
-                if (aoSetup.getTransmission() != null) {
-                    qe *= aoSetup.getTransmission();
-                    aoInstrumentalVisibility = 1.0 - aoSetup.getTransmission();
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("aoInstrumentalVisibility      : {}", aoInstrumentalVisibility);
+                    // TODO: transmission on target flux (remainder)
+                    if (aoSetup.getTransmission() != null) {
+                        qe *= aoSetup.getTransmission();
+                        aoInstrumentalVisibility = 1.0 - aoSetup.getTransmission();
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("aoInstrumentalVisibility      : {}", aoInstrumentalVisibility);
+                        }
                     }
                 }
-            }
 
-            for (int n = 0; n < nObs; n++) {
-                final double elevation = targetPointInfos[n].getElevation();
+                for (int n = 0; n < nObs; n++) {
+                    final double elevation = targetPointInfos[n].getElevation();
 
-                strehlPerChannel[n] = Band.strehl(band, adaptiveOpticsMag, waveLengths, telDiam, seeing,
-                        nbSubPupils, td, t0, qe, ron, elevation);
+                    strehlPerChannel[n] = Band.strehl(band, adaptiveOpticsMag, waveLengths, telDiam, seeing,
+                            nbSubPupils, td, t0, qe, ron, elevation);
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug("elevation                     : {}", elevation);
-                    logger.debug("strehlPerChannel[iMidChannel] : {}", strehlPerChannel[n][iMidChannel]);
-                    logger.debug("strehlPerChannel              : {}", Arrays.toString(strehlPerChannel[n]));
-                }
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("elevation                     : {}", elevation);
+                        logger.debug("strehlPerChannel[iMidChannel] : {}", strehlPerChannel[n][iMidChannel]);
+                        logger.debug("strehlPerChannel              : {}", Arrays.toString(strehlPerChannel[n]));
+                    }
 
-                if (DO_DUMP_STREHL) {
-                    System.out.println("strehl table for elevation=" + elevation + " seeing=" + seeing);
-                    System.out.println("channel\twaveLength\tstrehl");
-                    for (int i = 0; i < waveLengths.length; i++) {
-                        System.out.println(i + "\t" + waveLengths[i] + "\t" + strehlPerChannel[n][i]);
+                    if (DO_DUMP_STREHL) {
+                        System.out.println("strehl table for elevation=" + elevation + " seeing=" + seeing);
+                        System.out.println("channel\twaveLength\tstrehl");
+                        for (int i = 0; i < waveLengths.length; i++) {
+                            System.out.println(i + "\t" + waveLengths[i] + "\t" + strehlPerChannel[n][i]);
+                        }
                     }
                 }
             }
@@ -904,7 +922,7 @@ public final class NoiseService implements VisNoiseService {
                 // Per second:
                 nbPhot = (telSurface * quantumEfficiency) * transmission[i] * fluxSrcPerChannel[i];
 
-                if (useStrehlCorrection) {
+                if (strehlPerChannel != null) {
                     nbPhot *= strehlPerChannel[n][i];
                 }
 
