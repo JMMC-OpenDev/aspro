@@ -32,7 +32,7 @@ import static fr.jmmc.aspro.util.StatUtils.SAMPLING_FACTOR_MEAN;
 import static fr.jmmc.aspro.util.StatUtils.SAMPLING_FACTOR_VARIANCE;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.complex.Complex;
-import fr.jmmc.jmal.complex.ImmutableComplex;
+import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmcs.gui.task.InterruptableThread;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
@@ -75,6 +75,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private final static boolean DO_VALIDATE_OIFITS = false;
     /** enable DEBUG mode */
     private final static boolean DEBUG_SNR = false;
+    /** enable Differential visibility in the OI_VIS table */
+    private final static boolean ENABLE_DIFF_VIS = true;
 
     /* members */
 
@@ -116,8 +118,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private String arrNameKeyword = null;
     /** insname keyword value (instrument_LAMBDA1-LAMBDA2-Nch) */
     private String insNameKeyword = null;
-    /** instrument experimental flag */
-    private boolean instrumentExperimental = false;
+    /** instrument differential visibility support */
+    private boolean instrumentVisDiff = false;
     /** Station mapping */
     private Map<Station, Short> stationMapping = null;
     /** beam mapping */
@@ -213,12 +215,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         // use alias or real instrument name:
         this.instrumentName = instrument.getAliasOrName();
-        this.instrumentExperimental = (instrument.isExperimental() != null) ? instrument.isExperimental().booleanValue() : false;
+        this.instrumentVisDiff = (instrument.isVisDiff()!= null) ? instrument.isVisDiff().booleanValue() : false;
 
         if (logger.isDebugEnabled()) {
             logger.debug("arrNameKeyword: {}", this.arrNameKeyword);
             logger.debug("instrumentName: {}", this.instrumentName);
-            logger.debug("instrumentExperimental: {}", this.instrumentExperimental);
+            logger.debug("instrumentVisDiff: {}", this.instrumentVisDiff);
         }
 
         final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
@@ -692,13 +694,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         final int nWaveLengths = this.waveLengths.length;
 
-        // complex visiblity with noise (sigma = visError) used by AMBER:
-        final Complex[][] visComplexNoisy = new Complex[vis.getNbRows()][nWaveLengths];
+        // complex visiblity with noise (sigma = visError):
+        final MutableComplex visComplexNoisy = new MutableComplex();
 
         final NoiseService ns = this.noiseService;
 
-        if (this.hasModel && (ns != null) && !isAmber && this.instrumentExperimental) {
-            logger.info("createOIVis: Experimental instrument: VisAmp/Phi errors computed using {} random complex visiblities", N_SAMPLES);
+        if (this.hasModel && (ns != null) && !isAmber && this.instrumentVisDiff) {
+            logger.info("createOIVis: {} VisAmp/Phi errors computed using {} random complex visiblities",
+                    ENABLE_DIFF_VIS ? "Differential" : "Absolute", N_SAMPLES);
         }
 
         // vars:
@@ -713,15 +716,26 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // try resampling:
         double re, im, sample, diff;
         double vamp_sum, vamp_sum_diff, vamp_sum_diff_square;
+        double re_sum, im_sum, cos_phi, sin_phi;
         double s_vamp_mean, s_vamp_err;
-        double vphi_sum_cos, vphi_sum_sin;
         double vphi_sum_diff, vphi_sum_diff_square;
         double s_vphi_mean, s_vphi_err;
 
+        final double[] re_samples = new double[N_SAMPLES];
+        final double[] im_samples = new double[N_SAMPLES];
         final double[] vamp_samples = new double[N_SAMPLES];
         final double[] vphi_samples = new double[N_SAMPLES];
         int[] visRndIdxRow = null;
         boolean doFlag;
+
+        boolean doNormVisDiff = false;
+
+        // Use mutable complex carefully:
+        final double normFactorWL = 1.0 / (nWaveLengths - 1);
+
+        final MutableComplex cpxVisSum = new MutableComplex();
+        final MutableComplex cpxVisRef = new MutableComplex();
+        final MutableComplex cpxVisDiff = new MutableComplex();
 
         // Iterate on observable UV points :
         for (int i = 0, j, k, l, n; i < nObsPoints; i++) {
@@ -795,10 +809,24 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         visRndIdxRow = this.visRndIdx[k];
                     }
 
+                    if (!isAmber && ENABLE_DIFF_VIS) {
+                        // Compute Vref (complex) as mean(V) along wavelength axis:
+
+                        // reset:
+                        cpxVisSum.updateComplex(0d, 0d);
+
+                        // Iterate on wave lengths :
+                        for (l = 0; l < nWaveLengths; l++) {
+                            /* sum all R and I */
+                            cpxVisSum.add(visComplex[k][l]); // sum of all pure complex visibilities
+                        }
+                        // note: normalization is done below ie substract mean(cpxVis)
+                    }
+
                     // Iterate on wave lengths :
                     for (l = 0; l < nWaveLengths; l++) {
                         // Get pure complex visibility:
-                        visComplexNoisy[k][l] = visComplex[k][l];
+                        visComplexNoisy.updateComplex(visComplex[k][l]);
 
                         doFlag = visSnrFlag[k][l];
 
@@ -821,7 +849,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                             if (doNoise) {
                                 // Use the corresponding sample:
-                                visComplexNoisy[k][l] = new ImmutableComplex(
+                                visComplexNoisy.updateComplex(
                                         visRe + (visErrCplx * distRe[visRndIdxRow[l]]),
                                         visIm + (visErrCplx * distIm[visRndIdxRow[l]])
                                 ); // immutable complex for safety
@@ -832,8 +860,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 flux = ns.getCorrelatedFluxWeight(i, l);
 
                                 // store pure (0..1) or noisy correlated fluxes (NaN if no flux):
-                                visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
-                                visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
+                                visData[k][l][0] = (float) (flux * visComplexNoisy.getReal());
+                                visData[k][l][1] = (float) (flux * visComplexNoisy.getImaginary());
 
                                 // error on correlated fluxes :
                                 visErr[k][l][0] = (float) (flux * visErrCplx);
@@ -842,12 +870,27 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         }
 
                         if (!isAmber) {
-                            if (instrumentExperimental) {
-                                // For experimental instruments: VisAmp/Phi are only amplitude and phase of complex visibility:
+                            if (instrumentVisDiff) {
                                 if (ns == null) {
-                                    vamp = visComplex[k][l].abs();
-                                    vphi = visComplex[k][l].getArgument();
+                                    if (ENABLE_DIFF_VIS) {
+                                        re = visComplex[k][l].getReal();
+                                        im = visComplex[k][l].getImaginary();
 
+                                        /* then construct Cref by substracting current R and I
+                                         * at that Wlen and make the arithmetic mean */
+                                        cpxVisRef.updateComplex(
+                                                normFactorWL * (cpxVisSum.getReal() - re),
+                                                normFactorWL * (cpxVisSum.getImaginary() - im)
+                                        );
+                                        // VisDiff = CNop / CRef
+                                        cpxVisDiff.set(re, im).divide(cpxVisRef);
+
+                                        vamp = cpxVisDiff.abs();
+                                        vphi = cpxVisDiff.getArgument();
+                                    } else {
+                                        vamp = visComplex[k][l].abs();
+                                        vphi = visComplex[k][l].getArgument();
+                                    }
                                     errAmp = errPhi = Double.NaN;
 
                                 } else {
@@ -859,16 +902,34 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     visErrCplx = visError[k][l];
 
                                     // pure visibility amplitude:
-                                    vamp = Math.sqrt(visRe * visRe + visIm * visIm); // TODO: remove bias
+                                    if (ENABLE_DIFF_VIS) {
+                                        re = visRe;
+                                        im = visIm;
+
+                                        /* then construct Cref by substracting current R and I
+                                         * at that Wlen and make the arithmetic mean */
+                                        cpxVisRef.updateComplex(
+                                                normFactorWL * (cpxVisSum.getReal() - re),
+                                                normFactorWL * (cpxVisSum.getImaginary() - im)
+                                        );
+                                        // VisDiff = CNop / CRef
+                                        cpxVisDiff.set(re, im).divide(cpxVisRef);
+
+                                        vamp = cpxVisDiff.abs();
+                                    } else {
+                                        // pure visibility amplitude:
+                                        vamp = Math.sqrt(visRe * visRe + visIm * visIm); // TODO: remove bias
+                                    }
 
                                     // note: if (V2 - bias) is negative then vamp must be NaN (no error)
-                                    // pure visibility phase:
+                                    // pure visibility phase (unused):
                                     vphi = (visIm != 0.0) ? FastMath.atan2(visIm, visRe) : 0.0;
 
                                     // Sampling complex visibilities:
                                     vamp_sum = vamp_sum_diff = vamp_sum_diff_square = 0.0;
-                                    vphi_sum_cos = vphi_sum_sin = 0.0;
+                                    re_sum = im_sum = 0.0;
 
+                                    // 1. compute average(complex visibility):
                                     // bivariate distribution (complex normal):
                                     for (n = 0; n < N_SAMPLES; n++) {
                                         // update nth sample:
@@ -876,7 +937,53 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         im = visIm + (visErrCplx * distIm[n]);
 
                                         // amplitude:
-                                        sample = Math.sqrt(re * re + im * im);
+                                        if (ENABLE_DIFF_VIS) {
+                                            /* then construct Cref by substracting current R and I
+                                             * at that Wlen and make the arithmetic mean */
+                                            cpxVisRef.updateComplex(
+                                                    normFactorWL * (cpxVisSum.getReal() - re),
+                                                    normFactorWL * (cpxVisSum.getImaginary() - im)
+                                            );
+                                            // VisDiff = CNop / CRef
+                                            cpxVisDiff.set(re, im).divide(cpxVisRef);
+
+                                            re = cpxVisDiff.getReal();
+                                            im = cpxVisDiff.getImaginary();
+                                        }
+                                        // average complex value:
+                                        re_samples[n] = re;
+                                        im_samples[n] = im;
+
+                                        re_sum += re;
+                                        im_sum += im;
+
+                                        // phase in [-PI; PI]:
+                                        sample = (im != 0.0) ? FastMath.atan2(im, re) : 0.0;
+                                        vphi_samples[n] = sample;
+                                    }
+
+                                    // mean(vphi):
+                                    s_vamp_mean = Math.sqrt(re_sum * re_sum + im_sum * im_sum);
+                                    s_vphi_mean = (im_sum != 0.0) ? FastMath.atan2(im_sum, re_sum) : 0.0;
+
+                                    // rotate by -phi:
+                                    cos_phi = re_sum / s_vamp_mean;
+                                    sin_phi = im_sum / s_vamp_mean;
+
+                                    vphi_sum_diff = vphi_sum_diff_square = 0.0;
+
+                                    // compute angle variance and amplitude:
+                                    for (n = 0; n < N_SAMPLES; n++) {
+                                        // phase in [-PI; PI]:
+                                        // Compensated-summation variant for better numeric precision:
+                                        // check if diff is [-PI; PI]:
+                                        diff = distanceAngle(vphi_samples[n], s_vphi_mean);
+                                        vphi_sum_diff += diff;
+                                        vphi_sum_diff_square += diff * diff;
+
+                                        // Correct amplitude by estimated phase:
+                                        // Amp = Re { C * phasor(-phi) }
+                                        sample = re_samples[n] * cos_phi + im_samples[n] * sin_phi; // -phi => + imaginary part in complex mult
                                         vamp_samples[n] = sample;
 
                                         // Compensated-summation variant for better numeric precision:
@@ -884,15 +991,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         diff = sample - vamp;
                                         vamp_sum_diff += diff;
                                         vamp_sum_diff_square += diff * diff;
-
-                                        // mean angle: compute sum(cos) and sum(sin):
-                                        // note: do not check div 0 (should never happen as distrib != pure 0.0):
-                                        vphi_sum_cos += re / sample;
-                                        vphi_sum_sin += im / sample;
-
-                                        // phase in [-PI; PI]:
-                                        sample = (im != 0.0) ? FastMath.atan2(im, re) : 0.0;
-                                        vphi_samples[n] = sample;
                                     }
 
                                     // mean(vamp):
@@ -903,22 +1001,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     s_vamp_err = Math.sqrt(
                                             SAMPLING_FACTOR_VARIANCE * (vamp_sum_diff_square - (SAMPLING_FACTOR_MEAN * (vamp_sum_diff * vamp_sum_diff)))
                                     );
-
-                                    // mean(vphi):
-                                    s_vphi_mean = (vphi_sum_sin != 0.0) ? FastMath.atan2(vphi_sum_sin, vphi_sum_cos) : 0.0;
-
-                                    vphi_sum_diff = vphi_sum_diff_square = 0.0;
-
-                                    // compute angle variance:
-                                    for (n = 0; n < N_SAMPLES; n++) {
-                                        sample = vphi_samples[n];
-
-                                        // Compensated-summation variant for better numeric precision:
-                                        // check if diff is [-PI; PI]:
-                                        diff = distanceAngle(sample, s_vphi_mean);
-                                        vphi_sum_diff += diff;
-                                        vphi_sum_diff_square += diff * diff;
-                                    }
 
                                     // error(vphi):
                                     // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
@@ -942,9 +1024,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         final int nSample = visRndIdxRow[l];
                                         vamp = vamp_samples[nSample];
                                         vphi = vphi_samples[nSample];
+                                        doNormVisDiff = ENABLE_DIFF_VIS;
                                     } else if (DO_USE_SAMPLED_MEAN) {
                                         vamp = s_vamp_mean;
                                         vphi = s_vphi_mean;
+                                        doNormVisDiff = ENABLE_DIFF_VIS;
                                     }
                                     errAmp = s_vamp_err;
                                     errPhi = s_vphi_err;
@@ -963,6 +1047,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 visPhi[k][l] = FastMath.toDegrees(vphi);
                                 visPhiErr[k][l] = FastMath.toDegrees(errPhi);
 
+                                // mark this value as valid only if observables are not NaN, error is valid and SNR is OK:
+                                if (!doFlag && (Double.isNaN(visAmp[k][l]) || Double.isNaN(visAmpErr[k][l])
+                                        || Double.isNaN(visPhi[k][l]) || Double.isNaN(visPhiErr[k][l]))) {
+                                    doFlag = true;
+                                }
+
                             } else {
                                 // Waiting for explanations on every instrument processing to compute VisAmp/Phi:
                                 // following values are considered as invalid :
@@ -972,12 +1062,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 visPhi[k][l] = Double.NaN;
                                 visPhiErr[k][l] = Double.NaN;
                             }
-                        }
-
-                        // mark this value as valid only if observables are not NaN, error is valid and SNR is OK:
-                        if (!doFlag && (Double.isNaN(visAmp[k][l]) || Double.isNaN(visAmpErr[k][l])
-                                || Double.isNaN(visPhi[k][l]) || Double.isNaN(visPhiErr[k][l]))) {
-                            doFlag = true;
                         }
                         flags[k][l] = doFlag;
                     }
@@ -999,8 +1083,24 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         /* Compute visAmp / visPhi as amber does */
         if (isAmber && this.hasModel && (ns != null)) {
-            // Should perform that algorithm using sampling ?
-            OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplexNoisy, this.visError, this.waveLengths);
+            OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, this.visError, nWaveLengths, this.visRndDist);
+            // TODO: generate noisy samples if doNoise
+        } else if (doNormVisDiff) {
+
+            /* Normalize differential visibilities to 1 */
+            for (int k = 0, l; k < visAmp.length; k++) {
+                vamp_sum = 0.0;
+
+                for (l = 0; l < nWaveLengths; l++) {
+                    vamp_sum += visAmp[k][l];
+                }
+                vamp_sum /= nWaveLengths; // mean
+
+                for (l = 0; l < nWaveLengths; l++) {
+                    visAmp[k][l] /= vamp_sum;
+                    visAmpErr[k][l] /= vamp_sum;
+                }
+            }
         }
 
         this.oiFitsFile.addOiTable(vis);
@@ -1176,6 +1276,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     re = visRe + (errCVis * distRe[n]);
                                     im = visIm + (errCVis * distIm[n]);
 
+// TODO: use sum(re), sum(im)                                    
                                     // compute debiased V2 = re^2 + im^2 - bias:
                                     sample = re * re + im * im - bias;
                                     v2_samples[n] = sample;
@@ -1387,13 +1488,15 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         int[] relPos;
         int pos;
 
-        // try resampling:
+        // resampling:
+        double re_sum, im_sum, cos_phi, sin_phi;
         double t3amp_sum, t3amp_sum_diff, t3amp_sum_diff_square;
         double s_t3amp_mean, s_t3amp_err;
-        double t3phi_sum_cos, t3phi_sum_sin;
         double t3phi_sum_diff, t3phi_sum_diff_square;
         double s_t3phi_mean, s_t3phi_err;
 
+        final double[] re_samples = new double[N_SAMPLES];
+        final double[] im_samples = new double[N_SAMPLES];
         final double[] t3amp_samples = new double[N_SAMPLES];
         final double[] t3phi_samples = new double[N_SAMPLES];
         int[] visRndIdxRow;
@@ -1592,7 +1695,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 visErrCplx31 = visErr13[l];
 
                                 t3amp_sum = t3amp_sum_diff = t3amp_sum_diff_square = 0.0;
-                                t3phi_sum_cos = t3phi_sum_sin = 0.0;
+                                re_sum = im_sum = 0.0;
 
                                 // bivariate distribution (complex normal):
                                 for (n = 0; n < N_SAMPLES; n++) {
@@ -1612,12 +1715,44 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     sIm31 = visIm31 - (visErrCplx31 * distIm_31[n]);
 
                                     // Compute RE/IM bispectrum with C12*C23*~C13 :
-                                    //                        ComplexUtils.bispectrum(vis12, vis23, vis31, t3Data);
+                                    // see ComplexUtils.bispectrum(vis12, vis23, vis31, t3Data);
                                     t3Re = sRe12 * sRe23 * sRe31 - sRe12 * sIm23 * sIm31 - sIm12 * sRe23 * sIm31 - sIm12 * sIm23 * sRe31;
                                     t3Im = sRe12 * sRe23 * sIm31 + sRe12 * sIm23 * sRe31 + sIm12 * sRe23 * sRe31 - sIm12 * sIm23 * sIm31;
 
-                                    // amplitude :
-                                    sample = Math.sqrt(t3Re * t3Re + t3Im * t3Im);
+                                    // average complex value:
+                                    re_samples[n] = t3Re;
+                                    im_samples[n] = t3Im;
+
+                                    re_sum += t3Re;
+                                    im_sum += t3Im;
+
+                                    // phase in [-PI; PI]:
+                                    sample = (t3Im != 0.0) ? FastMath.atan2(t3Im, t3Re) : 0.0;
+                                    t3phi_samples[n] = sample;
+                                }
+
+                                // mean(T3phi):
+                                s_t3amp_mean = Math.sqrt(re_sum * re_sum + im_sum * im_sum);
+                                s_t3phi_mean = (im_sum != 0.0) ? FastMath.atan2(im_sum, re_sum) : 0.0;
+
+                                // rotate by -phi:
+                                cos_phi = re_sum / s_t3amp_mean;
+                                sin_phi = im_sum / s_t3amp_mean;
+
+                                t3phi_sum_diff = t3phi_sum_diff_square = 0.0;
+
+                                // compute angle variance and amplitude:
+                                for (n = 0; n < N_SAMPLES; n++) {
+                                    // phase in [-PI; PI]:
+                                    // Compensated-summation variant for better numeric precision:
+                                    // check if diff is [-PI; PI]:
+                                    diff = distanceAngle(t3phi_samples[n], s_t3phi_mean);
+                                    t3phi_sum_diff += diff;
+                                    t3phi_sum_diff_square += diff * diff;
+
+                                    // Correct amplitude by estimated phase:
+                                    // Amp = Re { C * phasor(-phi) }
+                                    sample = re_samples[n] * cos_phi + im_samples[n] * sin_phi; // -phi => + imaginary part in complex mult
                                     t3amp_samples[n] = sample;
 
                                     // Compensated-summation variant for better numeric precision:
@@ -1625,15 +1760,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     diff = sample - t3amp;
                                     t3amp_sum_diff += diff;
                                     t3amp_sum_diff_square += diff * diff;
-
-                                    // mean angle: compute sum(cos) and sum(sin):
-                                    // note: do not check div 0 (should never happen as distrib != pure 0.0):
-                                    t3phi_sum_cos += t3Re / sample;
-                                    t3phi_sum_sin += t3Im / sample;
-
-                                    // phase in [-PI; PI]:
-                                    sample = (t3Im != 0.0) ? FastMath.atan2(t3Im, t3Re) : 0.0;
-                                    t3phi_samples[n] = sample;
                                 }
 
                                 // mean(T3amp):
@@ -1644,22 +1770,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 s_t3amp_err = Math.sqrt(
                                         SAMPLING_FACTOR_VARIANCE * (t3amp_sum_diff_square - (SAMPLING_FACTOR_MEAN * (t3amp_sum_diff * t3amp_sum_diff)))
                                 );
-
-                                // mean(T3phi):
-                                s_t3phi_mean = (t3phi_sum_sin != 0.0) ? FastMath.atan2(t3phi_sum_sin, t3phi_sum_cos) : 0.0;
-
-                                t3phi_sum_diff = t3phi_sum_diff_square = 0.0;
-
-                                // compute angle variance:
-                                for (n = 0; n < N_SAMPLES; n++) {
-                                    sample = t3phi_samples[n];
-
-                                    // Compensated-summation variant for better numeric precision:
-                                    // check if diff is [-PI; PI]:
-                                    diff = distanceAngle(sample, s_t3phi_mean);
-                                    t3phi_sum_diff += diff;
-                                    t3phi_sum_diff_square += diff * diff;
-                                }
 
                                 // error(t3phi):
                                 // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !

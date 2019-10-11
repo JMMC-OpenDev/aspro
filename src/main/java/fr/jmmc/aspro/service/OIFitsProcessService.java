@@ -13,7 +13,7 @@ import static fr.jmmc.aspro.util.StatUtils.N_SAMPLES;
 import static fr.jmmc.aspro.util.StatUtils.SAMPLING_FACTOR_MEAN;
 import static fr.jmmc.aspro.util.StatUtils.SAMPLING_FACTOR_VARIANCE;
 import fr.jmmc.jmal.complex.Complex;
-import fr.jmmc.jmal.complex.ImmutableComplex;
+import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oitools.model.DataModel;
@@ -409,8 +409,8 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
         final int nWaveLengths = this.waveLengths.length;
 
-        // complex visiblity with noise (sigma = visError) used by AMBER:
-        final Complex[][] visComplexNoisy = new Complex[nRows][nWaveLengths];
+        // complex visiblity with noise (sigma = visError):
+        final MutableComplex visComplexNoisy = new MutableComplex();
 
         final NoiseService ns = this.noiseService;
 
@@ -481,7 +481,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                 // Iterate on wave lengths :
                 for (l = 0; l < nWaveLengths; l++) {
                     // Get pure complex visibility:
-                    visComplexNoisy[k][l] = visComplex[k][l];
+                    visComplexNoisy.updateComplex(visComplex[k][l]);
 
                     doFlag = visSnrFlag[k][l];
 
@@ -504,7 +504,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
                         if (doNoise) {
                             // Use the corresponding sample:
-                            visComplexNoisy[k][l] = new ImmutableComplex(
+                            visComplexNoisy.updateComplex(
                                     visRe + (visErrCplx * distRe[visRndIdxRow[l]]),
                                     visIm + (visErrCplx * distIm[visRndIdxRow[l]])
                             ); // immutable complex for safety
@@ -665,8 +665,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
         /* Compute visAmp / visPhi as amber does */
         if (isAmber && this.hasModel && (ns != null)) {
-            // Should perform that algorithm using sampling ?
-            OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplexNoisy, this.visError, this.waveLengths);
+            OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, this.visError, nWaveLengths, this.visRndDist);
         }
 
         if (logger.isDebugEnabled()) {

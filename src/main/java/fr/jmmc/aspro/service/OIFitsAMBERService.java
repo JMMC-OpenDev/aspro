@@ -3,6 +3,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.util.StatUtils.ComplexDistribution;
+import static fr.jmmc.aspro.util.StatUtils.N_SAMPLES;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmal.complex.MutableComplex;
@@ -45,50 +47,40 @@ public final class OIFitsAMBERService {
      * @param visComplex complex visibility [row][waveLength]
      * @param visError complex visibility error [row][waveLength]
      * @param waveLengths wavelengths
+     * @param visRndDist complex normal distribution to sample complex visibilities
      */
     public static void amdlibFakeAmberDiffVis(final OIVis vis,
-            final Complex[][] visComplex,
-            final double[][] visError,
-            final double[] waveLengths) {
+                                              final Complex[][] visComplex,
+                                              final double[][] visError,
+                                              final int nbLVis,
+                                              final ComplexDistribution[] visRndDist) {
 
         /*
          * Note on amdlib port :
          * In our case (Aspro 1) : nbBases = 1 and nbFrames = vis.getNbRows().
          * => The double loop (iFrame/iBase) is replaced by a single loop (iRow)
-         *
-         * This simplify both loops and temporary arrays
-         *
-         * variable mapping :
-         * cpxVisTable[(][)][]         =  visComplex[][]
-         * wlen[]                      =  waveLengths[]
          */
-
         // number of rows in OI_VIS table :
         final int nRows = vis.getNbRows();
 
         /* loop on rows */
         int iRow;
 
-        // number of wavelengths :
-        final int nbLVis = waveLengths.length;
-
-        int lVis;
+        int lVis, n;
 
         /* We try to follow the paper's notations */
-        final Complex[][] cpxVisTable = visComplex;
-        final Complex[][] sigma2_cpxVisTable = new Complex[nRows][nbLVis];
+        final Complex[][][] cpxVisTable = new Complex[nRows][nbLVis][N_SAMPLES];
 
-        final Complex[][] cNopTable = new Complex[nRows][nbLVis];
-        final Complex[][] w1 = new Complex[nRows][nbLVis];
-        final Complex[][] sigma2_w1 = new Complex[nRows][nbLVis];
-        final Complex[][] cRefTable = new Complex[nRows][nbLVis];
-        final Complex[][] sigma2_cRefTable = new Complex[nRows][nbLVis];
+        final Complex[][][] cNopTable = cpxVisTable; // use same input / output
+        final Complex[][][] cRefTable = new Complex[nRows][nbLVis][N_SAMPLES];
+        final Complex[][][] w1 = new Complex[nRows][nbLVis][N_SAMPLES];
 
-        final double[] opd = new double[nRows];
-        final double[] cpxVisVectR = new double[nRows];
+        final double[] cpxVisVectR = new double[N_SAMPLES];
+        final double[] cpxVisVectI = new double[N_SAMPLES];
+        final double[] phiVect = new double[N_SAMPLES];
 
-        Complex t, phasor, w1Avg;
-        double x;
+        Complex phasor, w1Avg;
+        double x, squareModulus, cosPhi, sinPhi;
 
         // Output in OI_VIS table :
         final double[][] visAmp = vis.getVisAmp();
@@ -97,78 +89,70 @@ public final class OIFitsAMBERService {
         final double[][] visPhi = vis.getVisPhi();
         final double[][] visPhiErr = vis.getVisPhiErr();
 
-        /*
-         * Immediately copy input cpxVis to 3D structure, flagging as BLANK when Flag is present
-         *
-         * Skipped because :
-         * cpxVisTable[(][)][]         =  visComplex[][]
-         */
+        // distribution samples:
+        double[] distRe = null, distIm = null;
+        double visRe, visIm, visErrCplx;
 
-        // Compute sigma2_cpxVis = visError**2 :
+        // Compute complex visibility samples:
         for (iRow = 0; iRow < nRows; iRow++) {
 
+            // Get the complex distribution for this row:
+            distRe = visRndDist[iRow].getSamples()[0];
+            distIm = visRndDist[iRow].getSamples()[1];
+
             for (lVis = 0; lVis < nbLVis; lVis++) {
-                x = FastMath.pow2(visError[iRow][lVis]);
-                
-                sigma2_cpxVisTable[iRow][lVis] = new ImmutableComplex(x, x); // immutable complex for safety
+                // pure complex visibility data :
+                visRe = visComplex[iRow][lVis].getReal();
+                visIm = visComplex[iRow][lVis].getImaginary();
+
+                // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
+                visErrCplx = visError[iRow][lVis];
+
+                // bivariate distribution (complex normal):
+                for (n = 0; n < N_SAMPLES; n++) {
+                    cpxVisTable[iRow][lVis][n] = new ImmutableComplex(
+                            visRe + (visErrCplx * distRe[n]),
+                            visIm + (visErrCplx * distIm[n])
+                    ); // immutable complex for safety
+                }
             }
         }
 
-        // Aspro 2 : compute fake piston2T now :
-
-        // Port amdlibPiston.c : amdlibComputePiston2T()
-
-
-        /* Initialize opd: local copy where all bad pistons are Blank:
-         * if opd = BLANK, cNopTable[iFrame][iBase] will be BLANK, and the avg
-         * and rms done at the end will avoid these values */
-        for (iRow = 0; iRow < nRows; iRow++) {
-            /* force opd to 0 : was :instantOpdPistonPtr[iRow]; */
-            opd[iRow] = 0d;
-        }
-
-        /* First, correct coherent flux from achromatic piston phase (eq 2.2)*/
-        /* Here the piston is Zero for the moment */
+        /* First, correct coherent flux from achromatic piston phase (eq 2.2)
+         * Here the piston is Zero (perfect piston correction) */
         amdlibCorrect3DVisTableFromAchromaticPiston(cpxVisTable,
                 cNopTable,
                 nRows,
-                nbLVis,
-                waveLengths,
-                opd);
+                nbLVis);
 
         // Use mutable complex carefully:
-        Complex cpxVis = new MutableComplex();
+        final Complex cpxVis = new MutableComplex();
         final Complex sigma2_cpxVis = new MutableComplex();
 
         final double normFactorWL = 1d / (nbLVis - 1);
 
         /* Production of the reference channel: mean of all R and I parts
          * of all channels except the one considered ( eq 2.3) */
-        for (iRow = 0; iRow < nRows; iRow++) {
+        // bivariate distribution (complex normal):
+        for (n = 0; n < N_SAMPLES; n++) { // Frame
 
-            // reset:
-            cpxVis.updateComplex(0d, 0d);
-            sigma2_cpxVis.updateComplex(0d, 0d);
+            for (iRow = 0; iRow < nRows; iRow++) {
+                // reset:
+                cpxVis.updateComplex(0d, 0d);
+                sigma2_cpxVis.updateComplex(0d, 0d);
 
-            /* sum all R and I */
-            for (lVis = 0; lVis < nbLVis; lVis++) {
-                /* skipped flags
-                 if (cpxVisTable[iRow][lVis].re != amdlibBLANKING_VALUE)
-                 */
-                cpxVis.add(cNopTable[iRow][lVis]);
-                sigma2_cpxVis.add(sigma2_cpxVisTable[iRow][lVis]);
-            }
+                /* sum all R and I */
+                for (lVis = 0; lVis < nbLVis; lVis++) {
+                    cpxVis.add(cNopTable[iRow][lVis][n]);
+                }
 
-            /* then construct Cref by substracting current R and I
-             * at that Wlen and make the arithmetic mean */
-            for (lVis = 0; lVis < nbLVis; lVis++) {
-                cRefTable[iRow][lVis] = new ImmutableComplex(
-                        (cpxVis.getReal() - cNopTable[iRow][lVis].getReal()) * normFactorWL,
-                        (cpxVis.getImaginary() - cNopTable[iRow][lVis].getImaginary()) * normFactorWL); // immutable complex for safety
-
-                sigma2_cRefTable[iRow][lVis] = new ImmutableComplex(
-                        (sigma2_cpxVis.getReal() - sigma2_cpxVisTable[iRow][lVis].getReal()) * normFactorWL,
-                        (sigma2_cpxVis.getImaginary() - sigma2_cpxVisTable[iRow][lVis].getImaginary()) * normFactorWL); // immutable complex for safety
+                /* then construct Cref by substracting current R and I
+                 * at that Wlen and make the arithmetic mean */
+                for (lVis = 0; lVis < nbLVis; lVis++) {
+                    cRefTable[iRow][lVis][n] = new ImmutableComplex(
+                            (cpxVis.getReal() - cNopTable[iRow][lVis][n].getReal()) * normFactorWL,
+                            (cpxVis.getImaginary() - cNopTable[iRow][lVis][n].getImaginary()) * normFactorWL); // immutable complex for safety
+                }
             }
         }
 
@@ -178,91 +162,180 @@ public final class OIFitsAMBERService {
         for (iRow = 0; iRow < nRows; iRow++) {
 
             for (lVis = 0; lVis < nbLVis; lVis++) {
-                cpxVis = cNopTable[iRow][lVis];
-                phasor = cRefTable[iRow][lVis].conjugate();
 
-                w1[iRow][lVis] = cpxVis.multiply(phasor);
+                // bivariate distribution (complex normal):
+                for (n = 0; n < N_SAMPLES; n++) { // Frame
+                    phasor = cRefTable[iRow][lVis][n].conjugate();
 
-                /* Please have a look to the F. Millour thesis
-                 (http://tel.archives-ouvertes.fr/tel-00134268),
-                 pp.91-892 (eq. 4.55 to 4.58) */
+                    w1[iRow][lVis][n] = cNopTable[iRow][lVis][n].multiply(phasor);
 
-                sigma2_w1[iRow][lVis] = new ImmutableComplex(
-                        sigma2_cpxVisTable[iRow][lVis].getReal()
-                        * FastMath.pow2(cRefTable[iRow][lVis].getReal())
-                        + sigma2_cRefTable[iRow][lVis].getReal()
-                        * FastMath.pow2(cpxVisTable[iRow][lVis].getReal())
-                        + sigma2_cpxVisTable[iRow][lVis].getImaginary()
-                        * FastMath.pow2(cRefTable[iRow][lVis].getImaginary())
-                        + sigma2_cRefTable[iRow][lVis].getImaginary()
-                        * FastMath.pow2(cpxVisTable[iRow][lVis].getImaginary()),
-                        sigma2_cpxVisTable[iRow][lVis].getImaginary()
-                        * FastMath.pow2(cRefTable[iRow][lVis].getReal())
-                        + sigma2_cRefTable[iRow][lVis].getImaginary()
-                        * FastMath.pow2(cpxVisTable[iRow][lVis].getReal())
-                        + sigma2_cpxVisTable[iRow][lVis].getReal()
-                        * FastMath.pow2(cRefTable[iRow][lVis].getImaginary())
-                        + sigma2_cRefTable[iRow][lVis].getReal()
-                        * FastMath.pow2(cpxVisTable[iRow][lVis].getImaginary())); // immutable complex for safety
+                    /* Compute mean VisPhi as average of selected frames */
+                    // bivariate distribution (complex normal):
+                    /* The W1 vector */
+                    cpxVisVectR[n] = w1[iRow][lVis][n].getReal();
+                    cpxVisVectI[n] = w1[iRow][lVis][n].getImaginary();
+                }
+                /* The Phase Herself :
+                 * average re and im */
+                w1Avg = new ImmutableComplex(
+                        amdlibAvgTable(cpxVisVectR),
+                        amdlibAvgTable(cpxVisVectI)
+                );
 
+                /* store */
+                visPhi[iRow][lVis] = /* ((double) (N_SAMPLES - 1) / (double) N_SAMPLES) */ FastMath.toDegrees(w1Avg.getArgument());
 
-                /*Here there is no over-frame averaging. Compute 'averaged' values frame by frame */
-                w1Avg = w1[iRow][lVis];
+                /* WE USE THE STATISTICAL ERROR FOR BINNING */
+                w1Avg = w1Avg.conjugate();
 
-                visPhi[iRow][lVis] = FastMath.toDegrees(w1Avg.getArgument());
+                // bivariate distribution (complex normal):
+                for (n = 0; n < N_SAMPLES; n++) {
+                    /* add w1*conj(w1Avg) to vector
+                     * use phiVect to store phases */
+                    phiVect[n] = w1[iRow][lVis][n].multiply(w1Avg).getArgument();
+                }
 
-                visPhiErr[iRow][lVis] = FastMath.toDegrees(amdlibAbacusErrPhi(Math.sqrt(sigma2_w1[iRow][lVis].getReal() + sigma2_w1[iRow][lVis].getImaginary())));
+                x = amdlibRmsTable(phiVect);
 
+                /* Err on Phi must be corrected with an abacus*/
+                // do not divide by SQRT(N_SAMPLES) as initial distribution correspond to 1 sigma
+                visPhiErr[iRow][lVis] = FastMath.toDegrees(amdlibAbacusErrPhi(x));
             }
         }
 
-        /* Now for the differential vis, we use cNopTable/cRefTable. Store in w1.
-         * note this is not exactly as complicated as in the computeDiff yorick
-         * implementation by Millour */
+        // Use latest approach (2013) for VisAmp:
+        if (true) {
+            /* Amplitude of Differential Visibility (VisAmp)
+             * substract averaged phase from each complex vis; store in, e.g., w1 */
+            for (iRow = 0; iRow < nRows; iRow++) {
+
+                for (lVis = 0; lVis < nbLVis; lVis++) {
+                    /* Buildup a phasor out of the differential phase */
+                    x = FastMath.toRadians(visPhi[iRow][lVis]);
+                    phasor = new ImmutableComplex(FastMath.cos(x), -FastMath.sin(x)); // immutable complex for safety
+
+                    /* Subtract differential phase phasor from the complex coherent
+                       flux to obtain a clean coherent flux w1 */
+                    // bivariate distribution (complex normal):
+                    for (n = 0; n < N_SAMPLES; n++) {
+                        w1[iRow][lVis][n] = cNopTable[iRow][lVis][n].multiply(phasor);
+                    }
+                }
+            }
+
+            /* recompute differential vis on these values that are now in w1 */
+            // bivariate distribution (complex normal):
+            for (n = 0; n < N_SAMPLES; n++) {
+
+                for (iRow = 0; iRow < nRows; iRow++) {
+                    // reset:
+                    cpxVis.updateComplex(0d, 0d);
+
+                    /* sum all R and I */
+                    for (lVis = 0; lVis < nbLVis; lVis++) {
+                        cpxVis.add(w1[iRow][lVis][n]);
+                    }
+
+                    /* then construct Cref by substracting current R and I 
+                     * at that Wlen and make the arithmetic mean */
+                    for (lVis = 0; lVis < nbLVis; lVis++) {
+                        cRefTable[iRow][lVis][n] = new ImmutableComplex(
+                                (cpxVis.getReal() - w1[iRow][lVis][n].getReal()) * normFactorWL,
+                                (cpxVis.getImaginary() - w1[iRow][lVis][n].getImaginary()) * normFactorWL); // immutable complex for safety
+                    }
+                }
+            }
+
+            /* Now the interspectrum is w1*~cRefTable. Store back in w1. */
+            for (iRow = 0; iRow < nRows; iRow++) {
+
+                for (lVis = 0; lVis < nbLVis; lVis++) {
+                    squareModulus = 0.0;
+
+                    // bivariate distribution (complex normal):
+                    for (n = 0; n < N_SAMPLES; n++) {
+                        phasor = cRefTable[iRow][lVis][n].conjugate();
+
+                        w1[iRow][lVis][n] = w1[iRow][lVis][n].multiply(phasor);
+
+                        /* Hack to get the differential visibility normalized to 1
+                         * compute the squared modulus of cRefTable */
+                        squareModulus += phasor.getReal();
+
+                        /* perform mean of R and I of w1 that is now the depistoned interspectrum and compute visamp
+                         * populate serie of R and I of w in cpxVisVect*/
+                        cpxVisVectR[n] = w1[iRow][lVis][n].getReal();
+                    }
+                    squareModulus /= N_SAMPLES;
+
+                    x = amdlibAvgTable(cpxVisVectR);
+
+                    /* Store differential visibilities */
+                    // suppose pow(p1p2,0.5) = 1 (already normalized in Aspro2)
+                    visAmp[iRow][lVis] = x / squareModulus; // / pow(p1p2,0.5)
+
+                    /* variance will be taken as the statistical variance, i use cpxVisVectR to store temporarily the values */
+                    // bivariate distribution (complex normal):
+                    for (n = 0; n < N_SAMPLES; n++) {
+                        cpxVisVectR[n] /= squareModulus;
+                    }
+
+                    // do not divide by SQRT(N_SAMPLES) as initial distribution correspond to 1 sigma
+                    visAmpErr[iRow][lVis] = amdlibRmsTable(cpxVisVectR);
+                }
+            }
+        } else {
+            /* Now for the differential vis, we use cNopTable/cRefTable. Store in w1.
+             * note this is not exactly as complicated as in the computeDiff yorick
+             * implementation by Millour */
+            for (iRow = 0; iRow < nRows; iRow++) {
+
+                for (lVis = 0; lVis < nbLVis; lVis++) {
+
+                    // bivariate distribution (complex normal):
+                    for (n = 0; n < N_SAMPLES; n++) {
+                        phasor = cRefTable[iRow][lVis][n];
+
+                        w1[iRow][lVis][n] = cNopTable[iRow][lVis][n].divide(phasor);
+                    }
+                }
+            }
+
+            /* Compute mean VisAmp as average of selected frames. */
+            for (iRow = 0; iRow < nRows; iRow++) {
+
+                for (lVis = 0; lVis < nbLVis; lVis++) {
+                    /* see eq 2.8 */
+                    x = FastMath.toRadians(visPhi[iRow][lVis]);
+                    cosPhi = FastMath.cos(x);
+                    sinPhi = FastMath.sin(x); // sinAndCos ?
+
+                    // bivariate distribution (complex normal):
+                    for (n = 0; n < N_SAMPLES; n++) {
+                        /* The W1 vector */
+                        cpxVisVectR[n] = cosPhi * w1[iRow][lVis][n].getReal() + sinPhi * w1[iRow][lVis][n].getImaginary();
+                    }
+
+                    visAmp[iRow][lVis] = amdlibAvgTable(cpxVisVectR);
+                    visAmpErr[iRow][lVis] = amdlibRmsTable(cpxVisVectR);
+                }
+            }
+        }
+
+        /* Normalize differential visibilities to 1 */
         for (iRow = 0; iRow < nRows; iRow++) {
+            x = 0.0;
 
             for (lVis = 0; lVis < nbLVis; lVis++) {
-                cpxVis = cNopTable[iRow][lVis];
-                phasor = cRefTable[iRow][lVis];
-
-                w1[iRow][lVis] = cpxVis.divide(phasor);
+                x += visAmp[iRow][lVis];
             }
-        }
-
-        /* Compute VisAmp */
-        for (iRow = 0; iRow < nRows; iRow++) {
+            x /= nbLVis;
 
             for (lVis = 0; lVis < nbLVis; lVis++) {
-
-                /* The W1 vector */
-
-                /* see eq 2.8 */
-                x = FastMath.toRadians(visPhi[iRow][lVis]);
-
-                cpxVis = w1[iRow][lVis];
-
-                /*Here there is no over-frame averaging. Compute 'averaged' values frame by frame */
-                cpxVisVectR[iRow] = FastMath.cos(x) * cpxVis.getReal() + FastMath.sin(x) * cpxVis.getImaginary();
-
-                visAmp[iRow][lVis] = cpxVisVectR[iRow];
-                visAmpErr[iRow][lVis] = Math.sqrt(sigma2_w1[iRow][lVis].getImaginary() + sigma2_w1[iRow][lVis].getReal());
+                visAmp[iRow][lVis] /= x;
+                visAmpErr[iRow][lVis] /= x;
             }
         }
-    }
-
-    /**
-     * Compute piston, iterative phasor method.
-     */
-    private static void amdlibFakeComputePiston2T(int nbLVis,
-            final double[] wlen,
-            final Complex[] cpxVisTable,
-            final Complex[] s2cpxVisTable,
-            final double[] pistonOPD,
-            final double[] sigma,
-            double wlenAvg,
-            double wlenDifAvg,
-            double R) {
-        // TODO : port amdlibPiston.c
     }
 
     /**
@@ -271,91 +344,60 @@ public final class OIFitsAMBERService {
      * @param cNopTable corrected complex visibility [row][waveLength] (output)
      * @param nRows number of rows in OI_VIS
      * @param nbLVis number of wavelengths
-     * @param waveLengths wave lengths
-     * @param pst piston / opd array
      */
     private static void amdlibCorrect3DVisTableFromAchromaticPiston(
-            final Complex[][] cpxVisTable,
-            final Complex[][] cNopTable,
-            int nRows,
-            int nbLVis,
-            final double[] waveLengths,
-            final double[] pst) {
+            final Complex[][][] cpxVisTable,
+            final Complex[][][] cNopTable,
+            final int nRows,
+            final int nbLVis) {
 
-        int iRow;
-        int lVis;
-        double x;
+        int iRow, lVis, n;
         Complex phasor, cpxVis, cpxVisAvgConj;
 
         final MutableComplex cpxVisAvg = new MutableComplex();
-        final Complex[][] tmpCpxVis = new Complex[nRows][nbLVis];
 
         final double normFactorWL = 1d / nbLVis;
 
-        for (iRow = 0; iRow < nRows; iRow++) {
+        // bivariate distribution (complex normal):
+        for (n = 0; n < N_SAMPLES; n++) { // Frame
 
-            /*
-             * skip test as pst = 0 here :
-             if( !(pst[iRow]==amdlibBLANKING_VALUE))
-             */
-            for (lVis = 0; lVis < nbLVis; lVis++) {
-                /*Flagged Vis not important here*/
+            for (iRow = 0; iRow < nRows; iRow++) {
 
-                /* Note older versions artificially removed -1*pst
-                 * since the pst sign in amdlib was kept wrong because
-                 * the OPD correction at ESO was in the wrong direction.
-                 * To use this new version in the OS at Paranal, one must
-                 * change the sign of the displacements of, e.g., the Delay
-                 * lines that are used in templates.
-                 * x = (2 * M_PI/wlen[lVis]) * -1*pst[iFrame][iBase]; */
-                if (pst[iRow] == 0d) {
-                    phasor = Complex.ONE;
-                } else {
-                    x = ((2d * Math.PI) / waveLengths[lVis]) * pst[iRow];
+                // Piston is 0:
+                for (lVis = 0; lVis < nbLVis; lVis++) {
 
-                    phasor = new ImmutableComplex(FastMath.cos(x), -FastMath.sin(x)); // immutable complex for safety
+                    cpxVis = cpxVisTable[iRow][lVis][n];
+                    phasor = Complex.ONE; // piston = 0
+
+                    /* Store complex Product of the phasor with the coherent flux
+                     in cNopTable*/
+                    cNopTable[iRow][lVis][n] = cpxVis.multiply(phasor);
                 }
 
-                cpxVis = cpxVisTable[iRow][lVis];
+                /* Recenter this by removing the mean, taking account of bad Vis
+                 * Compute the mean over lambda */
+                // reset:
+                cpxVisAvg.updateComplex(0d, 0d);
 
-                /* Store complex Product of the phasor with the coherent flux
-                 in cNopTable*/
-                cNopTable[iRow][lVis] = cpxVis.multiply(phasor);
+                for (lVis = 0; lVis < nbLVis; lVis++) {
+                    cpxVisAvg.add(cNopTable[iRow][lVis][n]);
+                }
+                cpxVisAvg.multiply(normFactorWL);
+
+                // store immutable conjugate complex:
+                cpxVisAvgConj = new ImmutableComplex(cpxVisAvg.conjugate());
+
+                /* Remove constant by multiplying the two */
+                for (lVis = 0; lVis < nbLVis; lVis++) {
+                    /* Store conjugate complex values in tmpCpxVis as (constant) vector */
+                    phasor = cpxVisAvgConj;
+                    cpxVis = cNopTable[iRow][lVis][n];
+
+                    /* Store Complex Product of the phasor with the coherent flux in cNopTable */
+                    cNopTable[iRow][lVis][n] = cpxVis.multiply(phasor);
+                }
+                /* re-Flag cNopTable where cpxVis was Flagged : skipped flags */
             }
-
-            /* Flag cNopTable where cpxVis was Flagged : skipped flags */
-
-            /* Recenter this by removing the mean, taking account of bad Vis */
-            /* Compute the mean over lambda */
-
-            // reset:
-            cpxVisAvg.updateComplex(0d, 0d);
-
-            for (lVis = 0; lVis < nbLVis; lVis++) {
-                /* skipped flags
-                 if (cNopTable[iRow][lVis].re!=amdlibBLANKING_VALUE)
-                 */
-                cpxVisAvg.add(cNopTable[iRow][lVis]);
-            }
-            cpxVisAvg.multiply(normFactorWL);
-
-            // store immutable conjugate complex:
-            cpxVisAvgConj = new ImmutableComplex(cpxVisAvg.conjugate());
-
-            /* Store conjugate complex values in tmpCpxVis as (constant) vector */
-            for (lVis = 0; lVis < nbLVis; lVis++) {
-                tmpCpxVis[iRow][lVis] = cpxVisAvgConj;
-            }
-
-            /* Remove constant by multiplying the two */
-            for (lVis = 0; lVis < nbLVis; lVis++) {
-                phasor = tmpCpxVis[iRow][lVis];
-                cpxVis = cNopTable[iRow][lVis];
-
-                /* Store Complex Product of the phasor with the coherent flux in cNopTable*/
-                cNopTable[iRow][lVis] = cpxVis.multiply(phasor);
-            }
-            /* re-Flag cNopTable where cpxVis was Flagged : skipped flags */
         }
     }
 
@@ -387,6 +429,10 @@ public final class OIFitsAMBERService {
      */
     private static double amdlibAbacusErrPhi(final double x) {
 
+        if (true) {
+            return x;
+        }
+
         if (x > ASYMPTOT) {
             return Double.NaN;
         }
@@ -412,5 +458,30 @@ public final class OIFitsAMBERService {
                 + abacusCoeff[6] * x
                 + abacusCoeff[7];
         return FastMath.pow(10d, z);
+    }
+
+    private static double amdlibAvgTable(final double[] table) {
+        double avg = 0.0;
+
+        for (int iPix = 0; iPix < table.length; iPix++) {
+            avg += table[iPix];
+        }
+        avg /= table.length;
+        return avg;
+    }
+
+    private static double amdlibRmsTable(final double[] table) {
+        double rms = 0.0;
+
+        final double avg = amdlibAvgTable(table);
+
+        for (int iPix = 0; iPix < table.length; iPix++) {
+            rms += FastMath.pow2(table[iPix] - avg);
+        }
+
+        rms /= table.length;
+        rms = Math.sqrt(rms);
+
+        return rms;
     }
 }

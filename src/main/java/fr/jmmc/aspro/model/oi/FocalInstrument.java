@@ -32,7 +32,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
  *         &lt;element name="alias" type="{http://www.w3.org/2001/XMLSchema}NCName" minOccurs="0"/&gt;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
- *         &lt;element name="experimental" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
+ *         &lt;element name="visDiff" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
  *         &lt;element name="fringeTracker" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="fringeTrackerRequired" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
@@ -51,7 +51,7 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "alias",
     "description",
-    "experimental",
+    "visDiff",
     "numberChannels",
     "fringeTracker",
     "fringeTrackerRequired",
@@ -72,7 +72,7 @@ public class FocalInstrument
     protected String alias;
     @XmlElement(required = true)
     protected String description;
-    protected Boolean experimental;
+    protected Boolean visDiff;
     protected int numberChannels;
     @XmlElement(type = Object.class)
     @XmlIDREF
@@ -157,27 +157,27 @@ public class FocalInstrument
     }
 
     /**
-     * Gets the value of the experimental property.
+     * Gets the value of the visDiff property.
      * 
      * @return
      *     possible object is
      *     {@link Boolean }
      *     
      */
-    public Boolean isExperimental() {
-        return experimental;
+    public Boolean isVisDiff() {
+        return visDiff;
     }
 
     /**
-     * Sets the value of the experimental property.
+     * Sets the value of the visDiff property.
      * 
      * @param value
      *     allowed object is
      *     {@link Boolean }
      *     
      */
-    public void setExperimental(Boolean value) {
-        this.experimental = value;
+    public void setVisDiff(Boolean value) {
+        this.visDiff = value;
     }
 
     /**
@@ -427,8 +427,8 @@ public class FocalInstrument
         logger.info("  alias: {}", getAlias());
         logger.info("  description: {}", getDescription());
         
-        logger.info("  experimental: {}", isExperimental());
         logger.info("  numberChannels: {}", getNumberChannels());
+        logger.info("  visDiff: {}", isVisDiff());
         
         logger.info("  fringeTracker: {}", getFringeTracker());
         logger.info("  fringeTrackerRequired: {}", isFringeTrackerRequired());

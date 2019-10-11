@@ -2484,13 +2484,6 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="experimental" type="xsd:boolean" minOccurs="0">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        This flag indicates that this instrument is experimental (not on the sky) (optional)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
             <xsd:element name="numberChannels" type="xsd:int">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -2498,7 +2491,14 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <!-- TODO: add use_strehl (global) -->
+
+            <xsd:element name="visDiff" type="xsd:boolean" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        This flag indicates that this instrument estimates differential visiblities (optional)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
 
             <!-- fringe tracker -->
             <xsd:element name="fringeTracker" type="xsd:IDREF" minOccurs="0">
