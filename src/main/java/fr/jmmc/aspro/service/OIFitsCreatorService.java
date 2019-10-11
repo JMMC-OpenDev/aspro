@@ -892,7 +892,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         vphi = visComplex[k][l].getArgument();
                                     }
                                     errAmp = errPhi = Double.NaN;
-
                                 } else {
                                     // pure complex visibility data :
                                     visRe = visComplex[k][l].getReal();

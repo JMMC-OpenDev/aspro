@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="19.11 beta 1"/>
-    <compilation date="04/10/2019" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="19.11 beta 2"/>
+    <compilation date="11/10/2019" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -224,7 +224,10 @@
 
     <releasenotes>
         <release version="19.11">
-            <pubDate>Fri, 04 Oct 2019 11:00:00 GMT</pubDate>
+            <pubDate>Fri, 11 Oct 2019 16:00:00 GMT</pubDate>
+            <prerelease version="19.11 beta 2">
+                <change type="FEATURE">Updated OIFITS generation to support differential visibilities for GRAVITY, MATISSE, SPICA instruments</change>
+            </prerelease>
             <prerelease version="19.11 beta 1">
                 <change type="FEATURE">Updated embedded OIFits explorer (improved plot editor)</change>
             </prerelease>
