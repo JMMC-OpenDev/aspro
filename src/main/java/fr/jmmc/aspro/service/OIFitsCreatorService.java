@@ -659,6 +659,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // Create OI_VIS table :
         final OIVis vis = new OIVis(this.oiFitsFile, this.insNameKeyword, this.nObsPoints * this.nBaseLines);
         vis.setArrName(this.arrNameKeyword);
+        
+        // OIFITS 2 keywords indicating the Absolute or Differential Visibility:
+        vis.addHeaderCard(OIFitsConstants.KEYWORD_AMPTYP, 
+                this.instrumentVisDiff ? OIFitsConstants.KEYWORD_AMPTYP_DIFF : OIFitsConstants.KEYWORD_AMPTYP_ABSOLUTE, 
+                "VISAMP type");
+        vis.addHeaderCard(OIFitsConstants.KEYWORD_PHITYP, 
+                this.instrumentVisDiff ? OIFitsConstants.KEYWORD_PHITYP_DIFF : OIFitsConstants.KEYWORD_PHITYP_ABSOLUTE, 
+                "VISPHI type");
 
         // Get target information for each UV point:
         final TargetPointInfo[] obsPointInfos = this.targetPointInfos;
@@ -1275,7 +1283,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     re = visRe + (errCVis * distRe[n]);
                                     im = visIm + (errCVis * distIm[n]);
 
-// TODO: use sum(re), sum(im)                                    
                                     // compute debiased V2 = re^2 + im^2 - bias:
                                     sample = re * re + im * im - bias;
                                     v2_samples[n] = sample;
