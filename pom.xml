@@ -3,11 +3,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <!--  please install first parent pom from jMCS/parent-pom directory -->
     <parent>
         <groupId>fr.jmmc</groupId>
         <artifactId>jmmc</artifactId>
         <version>TRUNK</version>
-        <!--  please install first parent pom from jMCS/parent-pom directory -->
+        <relativePath />
     </parent>
 
     <groupId>fr.jmmc.aspro</groupId>
@@ -29,7 +30,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.20</version>
                 <configuration>
                     <argLine>-Xms512m -Xmx1024m -XX:MaxPermSize=128m -Dsun.java2d.uiScale=1.0</argLine>
                 </configuration>
