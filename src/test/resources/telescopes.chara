@@ -2,12 +2,12 @@
 
 
 # Data file for the parameters of the telescopes as used by the
-# astrometric model.  
+# astrometric model.
 #
 # The data for each station begins with a line of the form
 # [South/East/West] [station number]
 # and is terminated by the line
-# END 
+# END
 #
 # Data can be entered in any order between these two lines.
 # Note that angles can be entered as decimal degrees
@@ -48,7 +48,7 @@
 
 # Right now the S1 positions are set to zero all around as an origin
 # in particular it will NEVER have harmonics.
-# Beam positions never measured, but seem to be good on the sky 
+# Beam positions never measured, but seem to be good on the sky
 # to a few 100 microns
 # For pop measurements see Theo's log book 5 page 174
 S1
@@ -57,7 +57,7 @@ LAT       34 13 27.78130
 XOFFSET	0.0
 YOFFSET 0.0
 ZOFFSET 0.0
-EC	0.0	
+EC	0.0
 SAS	0.0
 SAC	0.0
 HSA2	0.0
@@ -156,7 +156,7 @@ POP4    109708072.0
 POP5    143020030.0
 END
 
-# From baseline solution. 
+# From baseline solution.
 E2
 LONG    -118  3 22.58100
 LAT       34 13 36.51405
@@ -260,4 +260,46 @@ POP2    -106455324.0
 POP3     -69911098.0
 POP4     -33306356.0
 POP5             0.0
+END
+
+# S3 at P4 (like S1)
+P4
+XOFFSET 65901016.2
+YOFFSET 173941757.2
+ZOFFSET  2077237.8
+AIRPATH	0.0
+INTERNAL 0
+LIGHT	0.0
+BEAM1	 416200.000
+BEAM2	 208100.000
+BEAM3	      0.000
+BEAM4	-208100.000
+BEAM5	-416200.000
+BEAM6	-624300.000
+POP1            0.000
+POP2     36563466.066
+POP3     73128180.086
+POP4    109724732.920
+POP5    143035830.878
+END
+
+# S3 at P5 (like S1)
+P5
+XOFFSET 48299942.0
+YOFFSET 147734146.1
+ZOFFSET  2868250.1
+AIRPATH	0.0
+INTERNAL 0
+LIGHT	0.0
+BEAM1	 416200.000
+BEAM2	 208100.000
+BEAM3	      0.000
+BEAM4	-208100.000
+BEAM5	-416200.000
+BEAM6	-624300.000
+POP1            0.000
+POP2     36563466.066
+POP3     73128180.086
+POP4    109724732.920
+POP5    143035830.878
 END

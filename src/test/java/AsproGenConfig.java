@@ -1296,6 +1296,32 @@ public final class AsproGenConfig {
         final double[] lonlat = CHARAposition(sb);
 
         final double lat = Math.toRadians(lonlat[1]);
+        
+        if (false) {
+            /*
+            S3lightpath + S3airpath = W2lightpath+W2airpath in these lines in both cases. 
+            We do not plan POPs as for W2 we have never used anything other than POP5. 
+            We will use the line on the north side of the beam sampling table that now holds the metrology system. 
+            This means the S3airpath = S2airpath - (W2airpath-S2airpath)  and S3lightpath = W2airpath+W2lightpath - S3airpath
+            */
+            final Map<String, Double> w2 = stationConfigs.get("W2");
+            final Map<String, Double> s2 = stationConfigs.get("S2");
+            
+            final double s3air = s2.get("AIRPATH") - (w2.get("AIRPATH") - s2.get("AIRPATH"));
+            final double s3light = w2.get("AIRPATH") + w2.get("LIGHT") - s3air;
+            
+            System.out.println("s3air: "+s3air);
+            System.out.println("s3light: "+s3light);
+            
+            final Map<String, Double> p4 = stationConfigs.get("P4");
+            final Map<String, Double> p5 = stationConfigs.get("P5");
+            
+            p4.put("AIRPATH", s3air);
+            p4.put("LIGHT", s3light);
+            
+            p5.put("AIRPATH", s3air);
+            p5.put("LIGHT", s3light);
+        }
 
         String station;
         Map<String, Double> config;
@@ -2337,7 +2363,7 @@ ARRAYZ  =   -2642728.201444249
 
         final String asproTestPath = userHome + "/dev/aspro/src/test/resources/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.VLTI;
+        final INTERFEROMETER selected = INTERFEROMETER.CHARA;
 
         switch (selected) {
             case VLTI:
