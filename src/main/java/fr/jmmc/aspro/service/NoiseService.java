@@ -842,20 +842,20 @@ public final class NoiseService implements VisNoiseService {
             } else {
                 Band band = Band.V;
                 int nbSubPupils = 1;
-                double td = 1.0;
-                double ron = 1.0;
-                double qe = 0.9;
+                double ao_td = 1.0;
+                double ao_ron = 1.0;
+                double ao_qe = 0.9;
 
                 if (aoSetup != null) {
                     band = Band.valueOf(aoBand.name());
                     nbSubPupils = aoSetup.getNumberSubPupils();
-                    td = aoSetup.getDit();
-                    ron = aoSetup.getRon();
-                    qe = aoSetup.getQuantumEfficiency();
+                    ao_td = aoSetup.getDit();
+                    ao_ron = aoSetup.getRon();
+                    ao_qe = aoSetup.getQuantumEfficiency();
 
                     // TODO: transmission on target flux (remainder)
                     if (aoSetup.getTransmission() != null) {
-                        qe *= aoSetup.getTransmission();
+                        ao_qe *= aoSetup.getTransmission();
                         aoInstrumentalVisibility = 1.0 - aoSetup.getTransmission();
                         if (logger.isDebugEnabled()) {
                             logger.debug("aoInstrumentalVisibility      : {}", aoInstrumentalVisibility);
@@ -867,7 +867,7 @@ public final class NoiseService implements VisNoiseService {
                     final double elevation = targetPointInfos[n].getElevation();
 
                     strehlPerChannel[n] = Band.strehl(band, adaptiveOpticsMag, waveLengths, telDiam, seeing,
-                            nbSubPupils, td, t0, qe, ron, elevation);
+                            nbSubPupils, ao_td, t0, ao_qe, ao_ron, elevation);
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("elevation                     : {}", elevation);

@@ -66,6 +66,24 @@ public class StrehlChartTest {
                 Band aoBand;
                 double td;
 
+                if (true) {
+                    aoBand = Band.V;
+
+                    USE_STREHL_OLD = true;
+                    createChartFrame("CHARA - Strehl (OLD) vs mag" + aoBand.getName(),
+                            StrehlChartTest.createCHARAStrehlvsMagChart(aoBand, LAMBDA_K, 2, -1, -1, 0, 0)); // td, t0 not used
+
+                    // >100Hz ie max 10s
+                    td = 2.5;
+                    final double qe = 0.70;
+                    final double ron = 4.0;
+
+                    USE_STREHL_OLD = false;
+                    createChartFrame("CHARA - Strehl (NEW) vs mag" + aoBand.getName(),
+                            StrehlChartTest.createCHARAStrehlvsMagChart(aoBand, LAMBDA_K, 4, td, -1, qe, ron));
+                    return;
+                }
+
                 if (false) {
                     if (false) {
                         // OK
@@ -170,8 +188,8 @@ public class StrehlChartTest {
 
                 final double[] lambda = new double[1];
 
-                for (Band b : EnumSet.of(Band.H, Band.K, Band.L, Band.M, Band.N)) {
-                    lambda[0] = b.getLambdaFluxZero()* 1E-6;
+                for (Band b : EnumSet.of(Band.V, Band.H, Band.K, Band.L, Band.M, Band.N)) {
+                    lambda[0] = b.getLambdaFluxZero() * 1E-6;
 
                     if (true) {
                         // OK
@@ -273,6 +291,13 @@ public class StrehlChartTest {
         return createStrehlvsMagChart((aoBand == Band.V) ? "STRAP" : "NAOMI", aoBand, LAMBDA, 1.8, nbSubPupils, td, t0, qe, ron);
     }
 
+    static JPanel createCHARAStrehlvsMagChart(final Band aoBand, final double[] LAMBDA,
+                                              final int nbSubPupils,
+                                              final double td, final double t0,
+                                              final double qe, final double ron) {
+        return createStrehlvsMagChart("TIP-TILT", aoBand, LAMBDA, 1.0, nbSubPupils, td, t0, qe, ron);
+    }
+
     static JPanel createStrehlvsMagChart(final String aoName, final Band aoBand, final double[] LAMBDA,
                                          final double telDiameter,
                                          final int nbSubPupils,
@@ -280,7 +305,7 @@ public class StrehlChartTest {
                                          final double qe, final double ron) {
 
         final double lambdaObs = LAMBDA[0] * 1e6;
-        System.out.println("Strehl " + aoName + " (@" + lambdaObs + ") UT AO vs mag(" + aoBand + ")");
+        System.out.println("Strehl " + aoName + " (@" + lambdaObs + ") AO vs mag(" + aoBand + ")");
 
         final XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
 
@@ -384,6 +409,15 @@ public class StrehlChartTest {
     static double[] strehl(final Band aoBand, final double magnitude, final double[] waveLengths,
                            final double diameter, final double seeing, final int nbSubPupils,
                            final double td, final double t0, final double quantumEfficiency, final double ron) {
+
+        System.out.println("setup: seeing: " + seeing
+                + " nbSubPupils: " + nbSubPupils
+                + " td: " + td
+                + " t0: " + t0
+                + " quantumEfficiency: " + quantumEfficiency
+                + " ron: " + ron
+        );
+
         return Band.strehl(aoBand, magnitude, waveLengths, diameter, seeing, nbSubPupils, td, t0, quantumEfficiency, ron, 90.0 - ZENITH_ANGLE);
     }
 
