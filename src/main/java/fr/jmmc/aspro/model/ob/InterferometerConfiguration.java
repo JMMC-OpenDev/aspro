@@ -25,6 +25,8 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="version" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="confAltName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="aoSetup" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="pops" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="channels" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
@@ -40,6 +42,8 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "version",
     "stations",
+    "confAltName",
+    "aoSetup",
     "pops",
     "channels"
 })
@@ -52,6 +56,8 @@ public class InterferometerConfiguration
     protected String version;
     @XmlElement(required = true)
     protected String stations;
+    protected String confAltName;
+    protected String aoSetup;
     protected String pops;
     protected String channels;
 
@@ -125,6 +131,54 @@ public class InterferometerConfiguration
      */
     public void setStations(String value) {
         this.stations = value;
+    }
+
+    /**
+     * Gets the value of the confAltName property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getConfAltName() {
+        return confAltName;
+    }
+
+    /**
+     * Sets the value of the confAltName property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setConfAltName(String value) {
+        this.confAltName = value;
+    }
+
+    /**
+     * Gets the value of the aoSetup property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getAoSetup() {
+        return aoSetup;
+    }
+
+    /**
+     * Sets the value of the aoSetup property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setAoSetup(String value) {
+        this.aoSetup = value;
     }
 
     /**

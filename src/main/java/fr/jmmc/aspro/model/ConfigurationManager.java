@@ -1049,6 +1049,26 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
+     * Return the instrument configuration alternative name for the given interferometer configuration and instrument name
+     * @param configurationName name of the interferometer configuration
+     * @param instrumentAlias name or alias of the instrument
+     * @param confName configuration name (stations)
+     * @return instrument configuration alternative name or null
+     */
+    public String getInstrumentConfigurationAltName(final String configurationName, final String instrumentAlias, final String confName) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
+        if (ic != null) {
+            for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
+                // may be null
+                if (confName.equals(c.getName())) {
+                    return c.getAltName();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Return the instrument configuration item for the given interferometer configuration, instrument name and instrument configuration
      * @param insConf instrument configuration
      * @param instrumentConfigurationName name of the instrument configuration

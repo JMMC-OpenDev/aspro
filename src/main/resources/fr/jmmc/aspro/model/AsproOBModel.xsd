@@ -131,6 +131,22 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="confAltName" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The alternative name for this configuration (Small, Large...) known at the interferometer (optional)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- AO mode -->
+            <xsd:element name="aoSetup" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The Adaptive Optics Setup (among possible Adaptive Optics available)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
 
             <xsd:element name="pops" type="xsd:string" minOccurs="0">
                 <xsd:annotation>

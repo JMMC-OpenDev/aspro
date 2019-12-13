@@ -32,8 +32,8 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
  *         &lt;element name="alias" type="{http://www.w3.org/2001/XMLSchema}NCName" minOccurs="0"/&gt;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
- *         &lt;element name="visDiff" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *         &lt;element name="visDiff" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="fringeTracker" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="fringeTrackerRequired" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="setup" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentSetup" maxOccurs="unbounded"/&gt;
@@ -51,8 +51,8 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "alias",
     "description",
-    "visDiff",
     "numberChannels",
+    "visDiff",
     "fringeTracker",
     "fringeTrackerRequired",
     "setups",
@@ -72,8 +72,8 @@ public class FocalInstrument
     protected String alias;
     @XmlElement(required = true)
     protected String description;
-    protected Boolean visDiff;
     protected int numberChannels;
+    protected Boolean visDiff;
     @XmlElement(type = Object.class)
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
@@ -157,6 +157,22 @@ public class FocalInstrument
     }
 
     /**
+     * Gets the value of the numberChannels property.
+     * 
+     */
+    public int getNumberChannels() {
+        return numberChannels;
+    }
+
+    /**
+     * Sets the value of the numberChannels property.
+     * 
+     */
+    public void setNumberChannels(int value) {
+        this.numberChannels = value;
+    }
+
+    /**
      * Gets the value of the visDiff property.
      * 
      * @return
@@ -178,22 +194,6 @@ public class FocalInstrument
      */
     public void setVisDiff(Boolean value) {
         this.visDiff = value;
-    }
-
-    /**
-     * Gets the value of the numberChannels property.
-     * 
-     */
-    public int getNumberChannels() {
-        return numberChannels;
-    }
-
-    /**
-     * Sets the value of the numberChannels property.
-     * 
-     */
-    public void setNumberChannels(int value) {
-        this.numberChannels = value;
     }
 
     /**
