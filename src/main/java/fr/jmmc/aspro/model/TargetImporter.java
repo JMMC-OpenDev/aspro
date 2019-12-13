@@ -6,6 +6,8 @@ package fr.jmmc.aspro.model;
 import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetGroup;
+import fr.jmmc.aspro.model.oi.TargetGroupMembers;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.TargetUtils;
@@ -21,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -256,13 +259,16 @@ public final class TargetImporter {
      * @param origin origin value
      * @param editTargets edited list of targets
      * @param editTargetUserInfos edited target user informations
-     * @param targets list of new targets
-     * @param targetUserInfos new target user informations
+     * @param targets list of imported targets
+     * @param targetUserInfos imported target user informations
      * @return merge operation report
      */
     private static String mergeTargets(final StringBuilder sb, final String origin,
                                        final List<Target> editTargets, final TargetUserInformations editTargetUserInfos,
                                        final List<Target> targets, final TargetUserInformations targetUserInfos) {
+
+        final IdentityHashMap<Target, Target> mapTargetsNewToOld = new IdentityHashMap<Target, Target>(targets.size());
+
         String targetName;
         Target oldTarget;
 
@@ -280,6 +286,8 @@ public final class TargetImporter {
             oldTarget = Target.matchTarget(newTarget, editTargets);
 
             if (oldTarget == null) {
+                mapTargetsNewToOld.put(newTarget, newTarget);
+
                 // append the missing target:
                 editTargets.add(newTarget);
 
@@ -288,6 +296,7 @@ public final class TargetImporter {
 
             } else {
                 // target already exist
+                mapTargetsNewToOld.put(newTarget, oldTarget);
 
                 // copy non empty values into old target:
                 Target.mergeTarget(oldTarget, newTarget);
@@ -303,8 +312,8 @@ public final class TargetImporter {
 
         for (Target newCal : targetUserInfos.getCalibrators()) {
 
-            // Find any target (id + position) within 5 arcsecs:
-            oldCal = Target.matchTarget(newCal, editTargets);
+            // Find corresponding target:
+            oldCal = mapTargetsNewToOld.get(newCal);
 
             // should not be null as it has been added before:
             if (oldCal != null) {
@@ -336,13 +345,46 @@ public final class TargetImporter {
             }
         }
 
-        // Add target notes & calibrators to science targets:
-        Target ref;
-        for (TargetInformation targetInfo : targetUserInfos.getTargetInfos()) {
-            ref = targetInfo.getTargetRef();
+        final IdentityHashMap<TargetGroup, TargetGroup> mapGroupsNewToOld = new IdentityHashMap<TargetGroup, TargetGroup>(4);
 
-            // Find any target (id + position) within 5 arcsecs:
-            oldTarget = Target.matchTarget(ref, editTargets);
+        for (TargetGroup oldGroup : editTargetUserInfos.getGroups()) {
+            // note: ignore user groups:
+            if (oldGroup.isCategoryOB()) {
+                final String gid = oldGroup.getId();
+
+                final TargetGroup newGroup = targetUserInfos.getGroupById(gid);
+                if (newGroup != null) {
+                    mapGroupsNewToOld.put(newGroup, oldGroup);
+
+                    final TargetGroupMembers tgm = targetUserInfos.getGroupMembers(newGroup);
+                    if (tgm != null) {
+                        for (Target newTarget : tgm.getTargets()) {
+
+                            // Find corresponding target:
+                            oldTarget = mapTargetsNewToOld.get(newTarget);
+
+                            // should not be null as it has been added before:
+                            if (oldTarget != null) {
+                                targetName = oldTarget.getName();
+
+                                editTargetUserInfos.addTargetToTargetGroup(oldGroup, oldTarget);
+
+                                // report message:
+                                sb.append(targetName).append(" added to the group ").append(oldGroup.getName()).append('\n');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Add target notes, calibrators and ancillary stars to science targets:
+        Target newRef;
+        for (TargetInformation targetInfo : targetUserInfos.getTargetInfos()) {
+            newRef = targetInfo.getTargetRef();
+
+            // Find corresponding target:
+            oldTarget = mapTargetsNewToOld.get(newRef);
 
             // should not be null as it has been added before:
             if (oldTarget != null) {
@@ -366,10 +408,10 @@ public final class TargetImporter {
 
                 // process calibrator for this science target:
                 if (!editTargetUserInfos.isCalibrator(oldTarget)) {
-                    for (Target newCal : targetUserInfos.getCalibrators(ref)) {
+                    for (Target newCal : targetUserInfos.getCalibrators(newRef)) {
 
-                        // Find any target (id + position) within 5 arcsecs:
-                        oldCal = Target.matchTarget(newCal, editTargets);
+                        // Find corresponding target:
+                        oldCal = mapTargetsNewToOld.get(newCal);
 
                         // should not be null as it has been added before:
                         if ((oldCal != null) && editTargetUserInfos.isCalibrator(oldCal)) {
@@ -380,6 +422,37 @@ public final class TargetImporter {
 
                             // report message:
                             sb.append(calName).append(" added as a calibrator to target ").append(targetName).append('\n');
+                        }
+                    }
+                }
+
+                // Process group members (AO / FT / Guide):
+                for (TargetGroupMembers tgm : targetInfo.getGroupMembers()) {
+                    // note: ignore user groups:
+                    final TargetGroup newGroup = tgm.getGroupRef();
+
+                    if (newGroup.isCategoryOB()) {
+                        for (Target newTargetMember : tgm.getTargets()) {
+
+                            // Find corresponding target:
+                            final Target oldTargetMember = mapTargetsNewToOld.get(newTargetMember);
+
+                            // should not be null as it has been added before:
+                            if (oldTargetMember != null) {
+                                final TargetInformation editTargetInfo = editTargetUserInfos.getOrCreateTargetInformation(oldTarget);
+
+                                // Find corresponding group:
+                                final TargetGroup oldGroup = mapGroupsNewToOld.get(newGroup);
+
+                                // should not be null, predefined:
+                                if (oldGroup != null) {
+                                    editTargetInfo.addTargetInGroupMembers(oldGroup, oldTargetMember);
+
+                                    // report message:
+                                    sb.append(oldTargetMember.getName()).append(" added as [").append(oldGroup.getName()).append("] to target ")
+                                            .append(targetName).append('\n');
+                                }
+                            }
                         }
                     }
                 }
