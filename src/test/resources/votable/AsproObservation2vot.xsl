@@ -122,9 +122,15 @@
                         <DESCRIPTION>MK spectral type(s)</DESCRIPTION>
                     </FIELD>
 
-                    <!-- fluxes (FLUX_V, FLUX_I, FLUX_J, FLUX_H, FLUX_K) -->
+                    <!-- fluxes -->
+                    <FIELD name="FLUX_B" datatype="double" ucd="phot.mag;em.opt.B" unit="mag">
+                        <DESCRIPTION>Magnitude B</DESCRIPTION>
+                    </FIELD>
                     <FIELD name="FLUX_V" datatype="double" ucd="phot.mag;em.opt.V" unit="mag">
                         <DESCRIPTION>Magnitude V</DESCRIPTION>
+                    </FIELD>
+                    <FIELD name="FLUX_R" datatype="double" ucd="phot.mag;em.opt.R" unit="mag">
+                        <DESCRIPTION>Magnitude R</DESCRIPTION>
                     </FIELD>
                     <FIELD name="FLUX_I" datatype="double" ucd="phot.mag;em.opt.I" unit="mag">
                         <DESCRIPTION>Magnitude I</DESCRIPTION>
@@ -137,6 +143,12 @@
                     </FIELD>
                     <FIELD name="FLUX_K" datatype="double" ucd="phot.mag;em.IR.K" unit="mag">
                         <DESCRIPTION>Magnitude K</DESCRIPTION>
+                    </FIELD>
+                    <FIELD name="FLUX_L" datatype="double" ucd="phot.mag;em.IR.3-4um" unit="mag">
+                        <DESCRIPTION>Magnitude L</DESCRIPTION>
+                    </FIELD>
+                    <FIELD name="FLUX_M" datatype="double" ucd="phot.mag;em.IR.4-8um" unit="mag">
+                        <DESCRIPTION>Magnitude M</DESCRIPTION>
                     </FIELD>
                     <FIELD name="FLUX_N" datatype="double" ucd="phot.mag;em.IR.8-15um" unit="mag">
                         <DESCRIPTION>Magnitude N</DESCRIPTION>
@@ -274,9 +286,18 @@
             <TD>
                 <xsl:value-of select="SPECTYP/text()"/>
             </TD>
+
+            <!-- FLUX_B -->
+            <TD>
+                <xsl:value-of select="FLUX_B/text()"/>
+            </TD>
             <!-- FLUX_V -->
             <TD>
                 <xsl:value-of select="FLUX_V/text()"/>
+            </TD>
+            <!-- FLUX_R -->
+            <TD>
+                <xsl:value-of select="FLUX_R/text()"/>
             </TD>
             <!-- FLUX_I -->
             <TD>
@@ -293,6 +314,14 @@
             <!-- FLUX_K -->
             <TD>
                 <xsl:value-of select="FLUX_K/text()"/>
+            </TD>
+            <!-- FLUX_L -->
+            <TD>
+                <xsl:value-of select="FLUX_L/text()"/>
+            </TD>
+            <!-- FLUX_M -->
+            <TD>
+                <xsl:value-of select="FLUX_M/text()"/>
             </TD>
             <!-- FLUX_N -->
             <TD>
