@@ -671,11 +671,15 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // Get target information for each UV point:
         final TargetPointInfo[] obsPointInfos = this.targetPointInfos;
 
-        // Compute UTC start date of the first point :
-        final Calendar calObs = this.sc.toCalendar(obsPointInfos[0].getJd(), false);
+        final Calendar calObs;
+        // TODO: fix synchronization issue on AstroSkyCalc:
+        synchronized(this.sc) {
+            // Compute UTC start date of the first point :
+            calObs = this.sc.toCalendar(obsPointInfos[0].getJd(), false);
 
-        final String dateObs = calendarToString(calObs);
-        vis.setDateObs(dateObs);
+            final String dateObs = calendarToString(calObs);
+            vis.setDateObs(dateObs);
+        }
 
         // Columns :
         final short[] targetIds = vis.getTargetId();
@@ -751,8 +755,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             // jd at the observed uv point:
             jd = obsPointInfos[i].getJd();
 
-            // UTC :
-            time = calendarToTime(sc.toCalendar(jd, false), calObs);
+            // TODO: fix synchronization issue on AstroSkyCalc:
+            synchronized(this.sc) {
+                // UTC :
+                time = calendarToTime(sc.toCalendar(jd, false), calObs);
+            }
 
             // modified julian day :
             mjd = AstroSkyCalc.mjd(jd);

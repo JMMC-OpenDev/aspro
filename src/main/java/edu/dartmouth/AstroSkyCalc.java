@@ -49,7 +49,7 @@ public final class AstroSkyCalc {
     /** minimal precision value in decimal hour */
     private final static double PREC_IN_DEC_HOUR = MSEC_IN_DEC_HOUR / 10d;
     /** cached log trace disabled */
-    private final static boolean isLogTrace = false; /* logger.isTraceEnabled(); */
+    private final static boolean isLogTrace = false;
 
     /* members */
     /** cached log debug enabled */
@@ -309,7 +309,8 @@ public final class AstroSkyCalc {
      * @param timeRef time reference (LST, UTC or Local)
      * @return Date object
      */
-    public Date toDate(final double jd, final TimeRef timeRef) {
+// TODO: remove synchronization when safe !    
+    public synchronized Date toDate(final double jd, final TimeRef timeRef) {
         // use temporary GregorianCalendar instance:
         final Calendar cal = toCalendar(jd, (timeRef == TimeRef.LST), tmpCal);
         final Date date = cal.getTime();
@@ -344,7 +345,8 @@ public final class AstroSkyCalc {
      * @param dateMax upper date/time
      * @return Date object within range [dateMin; dateMax]
      */
-    public Date toDate(final double jd, final TimeRef timeRef, final Date dateMin, final Date dateMax) {
+// TODO: remove synchronization when safe !    
+    public synchronized Date toDate(final double jd, final TimeRef timeRef, final Date dateMin, final Date dateMax) {
         // convert JD to LST/UT date/time:
         final Calendar cal = toCalendar(jd, (timeRef == TimeRef.LST));
 
@@ -394,13 +396,30 @@ public final class AstroSkyCalc {
     }
 
     /**
+     * Convert a julian date to the LST decimal hours (precise up to the second)
+     * @param jd julian date
+     * @return LST decimal hours
+     */
+// TODO: remove synchronization when safe !    
+    public synchronized double toLst(final double jd) {
+        // avoid new instances:
+        if (wwCal == null) {
+            wwCal = new WhenWhere(jd, this.site, false);
+        } else {
+            wwCal.changeWhen(jd);
+        }
+        return wwCal.siderealobj.value;
+    }
+
+    /**
      * Convert a julian date to a gregorian calendar (precise up to the second) in LST or UTC
      * @param jd julian date
      * @param useLst flag to select LST (true) or UTC reference (false)
      * @param cal calendar instance to use
      * @return Calendar object
      */
-    private Calendar toCalendar(final double jd, final boolean useLst, final Calendar cal) {
+// TODO: remove synchronization when safe !    
+    private synchronized Calendar toCalendar(final double jd, final boolean useLst, final Calendar cal) {
         // avoid new instances:
         if (wwCal == null) {
             wwCal = new WhenWhere(jd, this.site, false);
@@ -848,6 +867,16 @@ public final class AstroSkyCalc {
     }
 
     /**
+     * Convert LST decimal hours in Julian day using internal LST0 reference.
+     * @param lst decimal hours
+     * @return JD value
+     */
+    public double convertLstToJD(final double lst) {
+        // apply the sideral / solar ratio :
+        return this.jdLst0 + AstroSkyCalc.lst2jd(lst);
+    }
+
+    /**
      * Convert a decimal hour angle in Julian day using internal LST0 reference.
      * Returned JD value is in range [LST0 - 12; LST0 + 36]
      * @param ha decimal hour angle
@@ -855,10 +884,7 @@ public final class AstroSkyCalc {
      * @return JD value
      */
     public double convertHAToJD(final double ha, final double precRA) {
-        final double lst = precRA + ha;
-
-        // apply the sideral / solar ratio :
-        return this.jdLst0 + AstroSkyCalc.lst2jd(lst);
+        return convertLstToJD(precRA + ha);
     }
 
     /**
@@ -981,13 +1007,6 @@ public final class AstroSkyCalc {
         }
         return cal.getTime();
     }
-    /*
-     static {
-     for (String name : TimeZone.getAvailableIDs()) {
-     System.out.println("TZ [" + name + "]");
-     }
-     }
-     */
 
     private static void convertUTCToLocal(final Date date, final TimeZone localTZ) {
         if (localTZ == null) {
