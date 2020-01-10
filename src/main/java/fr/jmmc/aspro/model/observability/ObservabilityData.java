@@ -8,11 +8,11 @@ import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ObservationVersion;
+import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.aspro.model.oi.Target;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -592,4 +592,81 @@ public final class ObservabilityData {
     public double jdCenter() {
         return 0.5d * (jdMin + jdMax);
     }
+
+    /**
+     * Convert a JD range list to a date interval with respect for the LST range [0;24]
+     * 
+     * @param rangesJD range list to convert
+     * @param intervals interval list where new date intervals will be added
+     */
+    public void convertRangesToDateIntervals(final List<Range> rangesJD, final List<DateTimeInterval> intervals) {
+        if (rangesJD != null) {
+            for (int i = 0, len = rangesJD.size(); i < len; i++) {
+                convertRangeToDateInterval(rangesJD.get(i), intervals);
+            }
+            if (intervals.size() > 1) {
+                // merge contiguous date ranges :
+                DateTimeInterval.merge(intervals);
+            }
+        }
+    }
+
+    /**
+     * Convert a JD range to a date interval with respect for the LST range [0;24]
+     * Note : due to HA limit [+/-12h], the converted JD / Date ranges
+     * can have a discontinuity on the date axis !
+     *
+     * @param rangeJD range to convert
+     * @param intervals interval list where new date intervals will be added
+     */
+    private void convertRangeToDateInterval(final Range rangeJD, final List<DateTimeInterval> intervals) {
+        final double jdStart = rangeJD.getMin();
+        final double jdEnd = rangeJD.getMax();
+
+        if (jdStart >= jdMin) {
+
+            if (jdEnd <= jdMax) {
+
+                // single interval [jdStart;jdEnd]
+                intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart), jdToDateInDateRange(jdEnd)));
+
+            } else {
+                if (jdStart > jdMax) {
+                    // two points over LST 24 :
+
+                    // single interval [jdStart - day;jdEnd - day]
+                    intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart - AstroSkyCalc.LST_DAY_IN_JD),
+                            jdToDateInDateRange(jdEnd - AstroSkyCalc.LST_DAY_IN_JD)));
+
+                } else {
+                    // end occurs after LST 24 :
+
+                    // interval [jdStart;jdLst24]
+                    intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart), getDateMax()));
+
+                    // add the second interval [jdLst0;jdEnd - day]
+                    intervals.add(new DateTimeInterval(getDateMin(), jdToDateInDateRange(jdEnd - AstroSkyCalc.LST_DAY_IN_JD)));
+                }
+            }
+
+        } else {
+            // start occurs before LST 0h :
+
+            if (jdEnd < jdMin) {
+                // two points before LST 0h :
+
+                // single interval [jdStart + day;jdEnd + day]
+                intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart + AstroSkyCalc.LST_DAY_IN_JD),
+                        jdToDateInDateRange(jdEnd + AstroSkyCalc.LST_DAY_IN_JD)));
+
+            } else {
+                // interval [jdLst0;jdEnd]
+                intervals.add(new DateTimeInterval(getDateMin(), jdToDateInDateRange(jdEnd)));
+
+                // add the second interval [jdStart + day;jdLst24]
+                intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart + AstroSkyCalc.LST_DAY_IN_JD), getDateMax()));
+            }
+        }
+    }
+    
 }
