@@ -8,6 +8,7 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xmlns="http://www.jmmc.fr/aspro-oi/0.1"
             targetNamespace="http://www.jmmc.fr/aspro-oi/0.1"
+            xmlns:obs="http://www.jmmc.fr/aspro-raw-obs/0.1"
             xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1"
             xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
             xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
@@ -30,9 +31,13 @@
     </xsd:annotation>
 
 
+    <xsd:import namespace="http://www.jmmc.fr/aspro-raw-obs/0.1" schemaLocation="./AsproRawObsModel.xsd"/>
+
     <xsd:import namespace="http://www.jmmc.fr/jmcs/models/0.1" schemaLocation="./targetModel.xsd"/>
 
 
+
+    
     <!-- Elements -->
     <xsd:element name="configurations" type="InterferometerFileCollection">
         <xsd:annotation>
@@ -277,6 +282,14 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         User information related to targets (calibrator flag, calibrators associated to every target, user description)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="targetObservations" type="TargetRawObservation" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Raw observations per targets
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -1161,6 +1174,40 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         The targets associated to the target groups for this specific target (locally)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <!-- TargetRawObservation -->
+    <xsd:complexType name="TargetRawObservation">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the list of raw observations associated to a target
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="targetRef" type="xsd:IDREF">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The target identifier corresponding to the target which this additional information is related to
+                    </xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:property>
+                            <jaxb:baseType name="Target" />
+                        </jaxb:property>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="observation" type="obs:RawObservation" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The raw observations associated to this specific target
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
