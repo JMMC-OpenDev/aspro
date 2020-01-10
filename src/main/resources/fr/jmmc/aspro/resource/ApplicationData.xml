@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="19.12 beta 3"/>
-    <compilation date="13/12/2019" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="20.01 beta 4"/>
+    <compilation date="10/01/2020" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -195,6 +195,9 @@
             <menu/>
             <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction" action="updateSimbad"
                   description="update all targets with the latest information from the CDS Simbad service"/>
+            <menu/>
+            <menu label="Query raw Observations" classpath="fr.jmmc.aspro.gui.action.QueryRawObservationsAction" action="queryRawObservations"
+                  description="query raw observations (from ESO archive) corresponding to the selected target"/>
         </menu>
 
         <menu label="Interop">
@@ -223,15 +226,18 @@
     </menubar>
 
     <releasenotes>
-        <release version="19.12">
-            <pubDate>Fri, 13 Dec 2019 16:00:00 GMT</pubDate>
-            <prerelease version="19.12 beta 3">
+        <release version="20.01">
+            <pubDate>Fri, 10 Jan 2020 16:00:00 GMT</pubDate>
+            <prerelease version="20.01 beta 4">
+                <change type="FEATURE">Added new action 'Edit/Query raw Observations' to retrieve observation logs from JMMC ObsPortal (ESO archive)</change>
+            </prerelease>
+            <prerelease version="20.01 beta 3">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1030">Improved action 'Import targets from an observation' to preserve ancillary stars (FT, AO, Guide star groups)</change>
             </prerelease>
-            <prerelease version="19.12 beta 2">
+            <prerelease version="20.01 beta 2">
                 <change type="FEATURE">Updated OIFITS generation to support differential visibilities for GRAVITY, MATISSE, SPICA instruments</change>
             </prerelease>
-            <prerelease version="19.12 beta 1">
+            <prerelease version="20.01 beta 1">
                 <change type="FEATURE">Updated embedded OIFits explorer (improved plot editor)</change>
             </prerelease>
         </release>
