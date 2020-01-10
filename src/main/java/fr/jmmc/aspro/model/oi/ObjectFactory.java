@@ -118,6 +118,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link TargetRawObservation }
+     * 
+     */
+    public TargetRawObservation createTargetRawObservation() {
+        return new TargetRawObservation();
+    }
+
+    /**
      * Create an instance of {@link ObservationVariant }
      * 
      */

@@ -34,6 +34,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="instrumentConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentConfigurationChoice"/&gt;
  *         &lt;element name="target" type="{http://www.jmmc.fr/aspro-oi/0.1}Target" maxOccurs="unbounded"/&gt;
  *         &lt;element name="targetUserInfos" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetUserInformations" minOccurs="0"/&gt;
+ *         &lt;element name="targetObservations" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetRawObservation" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="variant" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationVariant" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="context" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationContext" minOccurs="0"/&gt;
  *         &lt;element name="extendedConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}InterferometerConfiguration" minOccurs="0"/&gt;
@@ -56,6 +57,7 @@ import fr.jmmc.aspro.model.OIBase;
     "instrumentConfiguration",
     "targets",
     "targetUserInfos",
+    "targetObservations",
     "variants",
     "context",
     "extendedConfiguration"
@@ -79,6 +81,7 @@ public class ObservationSetting
     @XmlElement(name = "target", required = true)
     protected List<Target> targets;
     protected TargetUserInformations targetUserInfos;
+    protected List<TargetRawObservation> targetObservations;
     @XmlElement(name = "variant")
     protected List<ObservationVariant> variants;
     protected ObservationContext context;
@@ -287,6 +290,35 @@ public class ObservationSetting
      */
     public void setTargetUserInfos(TargetUserInformations value) {
         this.targetUserInfos = value;
+    }
+
+    /**
+     * Gets the value of the targetObservations property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the targetObservations property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getTargetObservations().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link TargetRawObservation }
+     * 
+     * 
+     */
+    public List<TargetRawObservation> getTargetObservations() {
+        if (targetObservations == null) {
+            targetObservations = new ArrayList<TargetRawObservation>();
+        }
+        return this.targetObservations;
     }
 
     /**
@@ -567,6 +599,17 @@ public class ObservationSetting
                 this.targetUserInfos = null;
             }
         }
+        // check target's raw observations:
+        if (this.targetObservations != null) {
+            logger.debug("checkReferences = {}", this.targetObservations);
+
+            TargetRawObservation.updateTargetReferences(this.targetObservations, Target.createTargetIndex(getTargets()));
+            
+            if (this.targetObservations.isEmpty()) {
+                logger.debug("Removing empty target raw observations.");
+                this.targetObservations = null;
+            }
+        }
     }
 
     /** computed displayable list of targets (read only) */
@@ -674,6 +717,15 @@ public class ObservationSetting
         // cache the computed collections :
         this.cachedDisplayTargets = displayTargets;
         this.cachedOrphanCalibrators = orphans;
+    }
+
+    /**
+     * Return the existing target raw observation corresponding to the target
+     * @param target target
+     * @return target raw observation or null
+     */
+    public final TargetRawObservation getTargetRawObservation(final Target target) {
+        return TargetRawObservation.getTargetRawObservation(target, getTargetObservations());
     }
 
 //--simple--preserve

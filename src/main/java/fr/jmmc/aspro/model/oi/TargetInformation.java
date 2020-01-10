@@ -322,9 +322,9 @@ public class TargetInformation
     protected static final TargetInformation getTargetInformation(final Target target,
                                                                   final java.util.List<TargetInformation> targetInfos) {
         for (int i = 0, len = targetInfos.size(); i < len; i++) {
-            TargetInformation gm = targetInfos.get(i);
-            if (gm.getTargetRef().equals(target)) {
-                return gm;
+            TargetInformation targetInfo = targetInfos.get(i);
+            if (targetInfo.getTargetRef().equals(target)) {
+                return targetInfo;
             }
         }
         return null;
