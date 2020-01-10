@@ -14,6 +14,7 @@ import fr.jmmc.aspro.gui.action.ImportTargetsAction;
 import fr.jmmc.aspro.gui.action.ImportVOTableAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.NewObservationAction;
+import fr.jmmc.aspro.gui.action.QueryRawObservationsAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.TargetEditorAction;
 import fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction;
@@ -361,6 +362,8 @@ public final class Aspro2 extends App {
         new TargetEditorAction();
         // update simbad:
         new TargetUpdateSimbadAction();
+        // query observations:
+        new QueryRawObservationsAction();
 
         // Interop menu :
         // send observation (SAMP) :
