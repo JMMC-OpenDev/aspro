@@ -303,6 +303,14 @@ public final class ConfigurationManager extends BaseOIManager {
             for (FocalInstrument instrument : id.getFocalInstruments()) {
                 instrument.init(logger);
             }
+
+            computeInterferometerLocation(id);
+            computeInstrumentWaveLengthRange(id);
+            adjustStationHorizons(name, id.getStations());
+            associateAdaptiveOpticsSetup(id);
+
+            configuration.getInterferometerDescriptions().put(name, id);
+            
         } catch (IllegalStateException ise) {
             dump = true;
             throw ise;
@@ -313,13 +321,6 @@ public final class ConfigurationManager extends BaseOIManager {
                 }
             }
         }
-
-        computeInterferometerLocation(id);
-        computeInstrumentWaveLengthRange(id);
-        adjustStationHorizons(name, id.getStations());
-        associateAdaptiveOpticsSetup(id);
-
-        configuration.getInterferometerDescriptions().put(name, id);
     }
 
     /**
