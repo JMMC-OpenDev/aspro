@@ -431,6 +431,15 @@ public class ObservationSetting
     public final Target getTarget(final String name) {
         return Target.getTarget(name, getTargets());
     }
+    
+    /**
+     * Return the target of the given identifier
+     * @param id target identifier
+     * @return target or null if the target was not found
+     */
+    public final Target getTargetById(final String id) {
+        return Target.getTargetById(id, getTargets());
+    }
 
     /**
      * Return the target user informations (create a new one if needed)

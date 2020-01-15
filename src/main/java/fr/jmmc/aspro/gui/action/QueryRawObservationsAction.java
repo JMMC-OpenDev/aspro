@@ -22,7 +22,10 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
+import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Query raw observations action
  * @author bourgesl
  */
-public final class QueryRawObservationsAction extends RegisteredAction {
+public abstract class QueryRawObservationsAction extends RegisteredAction {
 
     // Use -DRemoteExecutionMode.local=true (dev) to use local obsportal instance (docker)
     private static final boolean USE_LOCAL = Boolean.getBoolean("QueryRawObservations.local");
@@ -43,7 +46,7 @@ public final class QueryRawObservationsAction extends RegisteredAction {
     /** Action name. This name is used to register to the ActionRegistrar */
     public final static String actionName = "queryRawObservations";
     /** Class logger */
-    private static final Logger logger = LoggerFactory.getLogger(className);
+    protected static final Logger logger = LoggerFactory.getLogger(QueryRawObservationsAction.class.getName());
 
     public static final String SERVER_URL = (USE_LOCAL)
             ? "http://localhost:6543/observation/search.votable"
@@ -55,7 +58,7 @@ public final class QueryRawObservationsAction extends RegisteredAction {
     /**
      * Public constructor that automatically register the action in RegisteredAction.
      */
-    public QueryRawObservationsAction() {
+    QueryRawObservationsAction(final String className, final String actionName) {
         super(className, actionName);
     }
 
@@ -64,29 +67,16 @@ public final class QueryRawObservationsAction extends RegisteredAction {
      * @param evt action event
      */
     @Override
-    public void actionPerformed(final ActionEvent evt) {
-        logger.debug("actionPerformed");
-
-        // Use main observation to check instrument :
-        final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
-
-        // retrieve the selected target from its name:
-        final Target target = observation.getTarget(observation.getSelectedTargetName());
-
-        if (target != null) {
-            // launch a new worker
-            new QueryObsPortalWorker(target).executeTask();
-        }
-    }
+    public abstract void actionPerformed(final ActionEvent evt);
 
     /**
      * This worker aims to query the obs portal in background.
      */
-    private static final class QueryObsPortalWorker extends TaskSwingWorker<String> {
+    static final class QueryObsPortalWorker extends TaskSwingWorker<Map<String, Observations>> {
 
         /* members */
         /** selected target */
-        private final Target target;
+        private final List<Target> targets;
 
         /**
          * Hidden constructor
@@ -94,9 +84,9 @@ public final class QueryRawObservationsAction extends RegisteredAction {
          * @param observation observation
          * @param target target
          */
-        private QueryObsPortalWorker(final Target target) {
+        QueryObsPortalWorker(final List<Target> targets) {
             super(AsproTaskRegistry.TASK_QUERY_OBS);
-            this.target = target;
+            this.targets = targets;
         }
 
         /**
@@ -105,100 +95,150 @@ public final class QueryRawObservationsAction extends RegisteredAction {
          * @return String (Raw observations) document or null (if failure)
          */
         @Override
-        public String computeInBackground() {
+        public Map<String, Observations> computeInBackground() {
+            final URI uri = Http.validateURL(SERVER_URL);
+
+            final RawObsManager rom = RawObsManager.getInstance();
+
+            Map<String, Observations> rawObsMap = null;
 
             final long start = System.nanoTime();
 
-            // Query JMMC ObsPortal:
-            String result = null;
+            for (final Target target : targets) {
+                final String targetId = target.getIdentifier();
 
-            try {
-                final URI uri = Http.validateURL(SERVER_URL);
+                final long startHttp = System.nanoTime();
 
-                // use the multi threaded HTTP client
-                result = Http.post(uri, false, new PostQueryProcessor() {
-                    /**
-                     * Process the given post method to define its HTTP input fields
-                     *
-                     * @param method post method to complete
-                     * @throws IOException if any IO error occurs
-                     */
-                    @Override
-                    public void process(final PostMethod method) throws IOException {
-                        method.addParameter("ra", Double.toString(target.getRADeg()));
-                        method.addParameter("dec", Double.toString(target.getDECDeg()));
+                // Query JMMC ObsPortal:
+                String result = null;
 
-                        // add radius ?
-                        // add instrument (name) ?
-                    }
-                });
-
-            } catch (IOException ioe) {
-                _logger.error("Query failed: {}", SERVER_URL, ioe);
-            } finally {
-                logger.info("Query[{}] {}: {} ms.", (result != null) ? "OK" : "FAILED", SERVER_URL,
-                        1e-6d * (System.nanoTime() - start));
-            }
-
-            if (result != null) {
-                logger.debug("Query result:\n{}", result);
                 try {
-                    final String rawObsDocument = processVOTable(result);
+                    // use the multi threaded HTTP client
+                    result = Http.post(uri, false, new PostQueryProcessor() {
+                        /**
+                         * Process the given post method to define its HTTP input fields
+                         *
+                         * @param method post method to complete
+                         * @throws IOException if any IO error occurs
+                         */
+                        @Override
+                        public void process(final PostMethod method) throws IOException {
+                            method.addParameter("ra", Double.toString(target.getRADeg()));
+                            method.addParameter("dec", Double.toString(target.getDECDeg()));
 
-                    logger.debug("Transformed result:\n{}", rawObsDocument);
-
-                    result = rawObsDocument;
-                } catch (IllegalArgumentException iae) {
-                    _logger.error("ProcessVOTable failed:\n{}", result, iae);
+                            // add radius ?
+                            // add instrument (name) ?
+                        }
+                    });
+                } catch (UnknownHostException uhe) {
+                    _logger.error("Query failed: {}", SERVER_URL, uhe);
+                    break;
                 } catch (IOException ioe) {
-                    _logger.error("ProcessVOTable failed: {}", SERVER_URL, ioe);
+                    _logger.error("Query failed: {}", SERVER_URL, ioe);
+                    break;
+                } finally {
+                    logger.info("Query[{}] {}: {} ms.", (result != null) ? "OK" : "FAILED", SERVER_URL,
+                            1e-6d * (System.nanoTime() - startHttp));
+                }
+
+                if (result != null) {
+                    logger.debug("Query result:\n{}", result);
+
+                    String rawObsDocument = null;
+                    try {
+                        rawObsDocument = processVOTable(result);
+
+                    } catch (IllegalArgumentException iae) {
+                        _logger.error("ProcessVOTable failed:\n{}", result, iae);
+                    } catch (IOException ioe) {
+                        _logger.error("ProcessVOTable failed: {}", SERVER_URL, ioe);
+                    }
+
+                    if (rawObsDocument != null) {
+                        // Load RawObservations
+                        Observations rawObservations = null;
+                        try {
+                            logger.debug("Transformed result:\n{}", rawObsDocument);
+
+                            // throws IllegalArgumentException if the document can not be loaded (invalid or unmarshalling exception):
+                            rawObservations = rom.loadRawObservations(new StringReader(rawObsDocument));
+
+                        } catch (IllegalArgumentException iae) {
+                            // Report both Observation and VOTable in a new IllegalArgumentException to get them in the feedback report:
+                            throw new IllegalArgumentException("Invalid generated Aspro2 Raw Observations:\n" + rawObsDocument, iae);
+                        } catch (IOException ioe) {
+                            throw new IllegalArgumentException("Could not load the document:\n" + rawObsDocument, ioe);
+                        }
+                        if (rawObservations != null) {
+                            if (rawObsMap == null) {
+                                rawObsMap = new HashMap<String, Observations>();
+                            }
+                            rawObsMap.put(targetId, rawObservations);
+                        }
+                    }
                 }
             }
+            logger.info("Query[{} targets]: {} ms.", targets.size(), 1e-6d * (System.nanoTime() - start));
 
-            return result;
+            return rawObsMap;
         }
 
         /**
          * Update the target observations with the given response.
          * This code is executed by the Swing Event Dispatcher thread (EDT)
-         * @param rawObsDocument votable
+         * @param rawObsMap map<target id, rawObsDocument>
          */
         @Override
-        public void refreshUI(final String rawObsDocument) {
-            logger.debug("refreshUI: Transformed result:\n{}", rawObsDocument);
+        public void refreshUI(final Map<String, Observations> rawObsMap) {
+            logger.debug("refreshUI: Transformed results:\n{}", rawObsMap);
 
-            Observations rawObservations = null;
-            try {
-                // throws IllegalArgumentException if the document can not be loaded (invalid or unmarshalling exception):
-                rawObservations = RawObsManager.getInstance().loadRawObservations(new StringReader(rawObsDocument));
+            if (rawObsMap == null) {
+                StatusBar.show("Query raw Observations returned no results (check your network).");
+            } else {
+                final long start = System.nanoTime();
 
-            } catch (IllegalArgumentException iae) {
-                // Report both Observation and VOTable in a new IllegalArgumentException to get them in the feedback report:
-                throw new IllegalArgumentException("Invalid generated Aspro2 Raw Observations:\n\n" + rawObsDocument, iae);
-            } catch (IOException ioe) {
-                MessagePane.showErrorMessage("Could not load the file : ", ioe);
-            }
-
-            if (rawObservations != null) {
                 final ObservationManager om = ObservationManager.getInstance();
 
                 // Use main observation to check instrument :
                 final ObservationSetting observation = om.getMainObservation();
 
-                TargetRawObservation rawObs = observation.getTargetRawObservation(target);
-                if (rawObs == null) {
-                    rawObs = new TargetRawObservation();
-                    rawObs.setTargetRef(target);
-                    observation.getTargetObservations().add(rawObs);
+                final StringBuilder report = new StringBuilder(1024);
+                report.append("Raw Observations updated for targets:\n");
+
+                int modCount = 0;
+
+                for (Map.Entry<String, Observations> e : rawObsMap.entrySet()) {
+                    final String targetId = e.getKey();
+                    final Observations rawObservations = e.getValue();
+
+                    final Target target = observation.getTargetById(targetId);
+
+                    if (target != null) {
+                        // Possibly: target was removed meanwhile
+                        modCount++;
+
+                        // TODO: move it in RawObsManager:
+                        TargetRawObservation rawObs = observation.getTargetRawObservation(target);
+                        if (rawObs == null) {
+                            rawObs = new TargetRawObservation();
+                            rawObs.setTargetRef(target);
+                            observation.getTargetObservations().add(rawObs);
+                        }
+                        final List<RawObservation> obsList = rawObs.getObservations();
+                        obsList.clear();
+                        obsList.addAll(rawObservations.getObservations());
+
+                        report.append(target.getName()).append(" : ").append(obsList.size()).append(" records.\n");
+                    }
                 }
-                final List<RawObservation> obsList = rawObs.getObservations();
-                obsList.clear();
-                obsList.addAll(rawObservations.getObservations());
+                logger.info("refreshUI[{} targets updated]: {} ms.", modCount, 1e-6d * (System.nanoTime() - start));
 
-                om.fireTargetChangedEvents();
+                if (modCount != 0) {
+                    om.fireTargetChangedEvents();
 
-                // display report message:
-                MessagePane.showMessage("Raw Observations updated for target '" + target.getName() + "': " + obsList.size() + " records.");
+                    // display report message:
+                    MessagePane.showMessage(report.toString());
+                }
             }
         }
 

@@ -196,8 +196,10 @@
             <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction" action="updateSimbad"
                   description="update all targets with the latest information from the CDS Simbad service"/>
             <menu/>
-            <menu label="Query raw Observations" classpath="fr.jmmc.aspro.gui.action.QueryRawObservationsAction" action="queryRawObservations"
+            <menu label="Get Observations (Selected)" classpath="fr.jmmc.aspro.gui.action.QueryOneRawObservationsAction" action="queryRawObservations"
                   description="query raw observations (from ESO archive) corresponding to the selected target"/>
+            <menu label="Get Observations (All targets)" classpath="fr.jmmc.aspro.gui.action.QueryAllRawObservationsAction" action="queryRawObservations"
+                  description="query raw observations (from ESO archive) for all targets"/>
         </menu>
 
         <menu label="Interop">
