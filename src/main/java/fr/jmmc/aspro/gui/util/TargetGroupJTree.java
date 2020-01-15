@@ -30,7 +30,7 @@ public final class TargetGroupJTree extends AbstractTargetJTree<Object> {
      * @return tooltip of the user object or null
      */
     @Override
-    protected String getTooltipText(final Object userObject, final StringBuffer sbTmp) {
+    protected String getTooltipText(final Object userObject, final StringBuilder sbTmp) {
         if (userObject instanceof TargetGroup) {
             final TargetGroup group = (TargetGroup) userObject;
             return group.getTooltip();

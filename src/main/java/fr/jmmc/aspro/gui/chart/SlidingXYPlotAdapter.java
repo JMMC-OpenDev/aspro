@@ -8,6 +8,7 @@ import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.rawobs.RawObservation;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
@@ -103,7 +104,9 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     /** last used end position for the subset */
     private int lastEnd = -1;
     /** tooltip buffer */
-    private final StringBuffer sbToolTip = new StringBuffer(512);
+    private final StringBuilder sbToolTip = new StringBuilder(512);
+    /** formatter buffer */
+    private final StringBuffer sbf = new StringBuffer(512);
 
     /**
      * Constructor
@@ -622,8 +625,10 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                                   final StarObservabilityData starObs,
                                   final Date startDate, final Date endDate) {
 
-        final StringBuffer sb = this.sbToolTip;
+        final StringBuilder sb = this.sbToolTip;
         sb.setLength(0); // clear
+
+        final StringBuffer sbf = this.sbf;
 
         sb.append("<html><b>").append(legendLabel).append(" Observability");
         if (description != null) {
@@ -637,24 +642,32 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
             Date date = startDate;
             sb.append("<br><b>Start</b>: ");
-            FormatterUtils.format(this.timeFormatter, sb, date);
+            FormatterUtils.format(this.timeFormatter, sbf, date);
+            sb.append(sbf);
+            sbf.setLength(0);
 
             TargetPositionDate pos = starObs.getTargetPosition(date);
             if (pos != null) {
                 sb.append(" - <b>HA</b>: ");
-                FormatterUtils.format(this.df1, sb, pos.getHa());
+                FormatterUtils.format(this.df1, sbf, pos.getHa());
+                sb.append(sbf);
+                sbf.setLength(0);
                 sb.append(" (az ").append(pos.getAzimuth());
                 sb.append(", el ").append(pos.getElevation()).append(')');
             }
 
             date = endDate;
             sb.append("<br><b>End</b>: ");
-            FormatterUtils.format(this.timeFormatter, sb, date);
+            FormatterUtils.format(this.timeFormatter, sbf, date);
+            sb.append(sbf);
+            sbf.setLength(0);
 
             pos = starObs.getTargetPosition(date);
             if (pos != null) {
                 sb.append(" - <b>HA</b>: ");
-                FormatterUtils.format(this.df1, sb, pos.getHa());
+                FormatterUtils.format(this.df1, sbf, pos.getHa());
+                sb.append(sbf);
+                sbf.setLength(0);
                 sb.append(" (az ").append(pos.getAzimuth());
                 sb.append(", el ").append(pos.getElevation()).append(')');
             }
@@ -662,7 +675,9 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             date = starObs.getTransitDate();
             if (date != null) {
                 sb.append("<br><b>Transit</b>: ");
-                FormatterUtils.format(this.timeFormatter, sb, date);
+                FormatterUtils.format(this.timeFormatter, sbf, date);
+                sb.append(sbf);
+                sbf.setLength(0);
 
                 // if target not rise at transit: no az/el:
                 pos = starObs.getTargetPosition(date);
@@ -676,6 +691,27 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
         TargetList.getTooltipPart(sb, false, target, this.targetUserInfos);
 
+        sb.append("</html>");
+
+        return sb.toString();
+    }
+
+    /**
+     * Generates the tooltip text for the given values.
+     *
+     * @param observation to get its tooltip text
+     *
+     * @return The tooltip text (possibly <code>null</code>).
+     */
+    public String generateToolTip(final RawObservation observation) {
+
+        final StringBuilder sb = this.sbToolTip;
+        sb.setLength(0); // clear
+
+        final StringBuffer sbf = this.sbf;
+
+        sb.append("<html>");
+        observation.toHtml(sb);
         sb.append("</html>");
 
         return sb.toString();

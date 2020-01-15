@@ -1387,7 +1387,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final List<String> labelList = new ArrayList<String>(initialSize);
         final List<StarObservabilityData> soTargetList = new ArrayList<StarObservabilityData>(initialSize);
 
-        final StringBuffer sb = new StringBuffer(32);
+        final StringBuilder sb = new StringBuilder(32);
 
         // Update target user infos before any call to generateToolTip():
         this.slidingXYPlotAdapter.setTargetUserInfos(targetUserInfos);
@@ -1696,7 +1696,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                         // ensure lstEnd > lstStart: exposure time is positive:
                                         final double lstEnd = lstStart + (observation.getMjdEnd() - observation.getMjdStart()) * 24.0;
 
-//                                        System.out.println("lst obs: " + lstStart + " - " + lstEnd);
                                         if (lstEnd > lstStart) {
 
                                             final double jdStart = sc.convertLstToJD(lstStart);
@@ -1708,7 +1707,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                             intervals.clear();
                                             obsData.convertRangesToDateIntervals(rangesJD, intervals);
 
-//                                          System.out.println("intervals: " + intervals);
                                             double total = 0.0;
 
                                             for (int d = 0, iLen = intervals.size(); d < iLen; d++) {
@@ -1716,13 +1714,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                                 addAnnotation(annotations, pos,
                                                         new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
                                                                 ChartUtils.DEFAULT_STROKE, null, RAW_OBS_OVERLAY_COLOR, Layer.FOREGROUND,
-                                                                observation.toString() // TODO: tooltip as html
+                                                                this.slidingXYPlotAdapter.generateToolTip(observation)
                                                         ));
                                                 total += (interval.getEndDate().getTime() - interval.getStartDate().getTime()) / 1000.0;
                                             }
 
                                             // Warning: concurrency issue (date conversion are not thread safe ! background threads // awt thread !)
-                                            if (total > 1800.0) {
+                                            if (false && total > 1800.0) {
                                                 System.out.println("Bad conversion ??");
                                                 System.out.println("intervals: " + intervals);
                                                 System.out.println("rangesJD: " + rangesJD);

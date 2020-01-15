@@ -32,7 +32,7 @@ public final class TargetList extends JList {
 
     /* members */
     /** tooltip buffer */
-    private final StringBuffer sbToolTip = new StringBuffer(512);
+    private final StringBuilder sbToolTip = new StringBuilder(512);
     /** last item index at the mouse position */
     private int lastIndex;
     /** last tooltip at item index */
@@ -100,7 +100,7 @@ public final class TargetList extends JList {
         return getToolTipText();
     }
 
-    public static String getTooltip(final StringBuffer sb, final Target target,
+    public static String getTooltip(final StringBuilder sb, final Target target,
                                     final TargetUserInformations targetUserInfos) {
         sb.setLength(0); // clear
 
@@ -113,7 +113,7 @@ public final class TargetList extends JList {
         return sb.toString();
     }
 
-    public static void getTooltipPart(final StringBuffer sb, final boolean full, final Target target,
+    public static void getTooltipPart(final StringBuilder sb, final boolean full, final Target target,
                                       final TargetUserInformations targetUserInfos) {
 
         target.toHtml(sb, full);

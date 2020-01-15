@@ -1073,11 +1073,11 @@ public class Target
      * @param sb string buffer to fill
      * @param full flag to display full information
      */
-    public final void toHtml(final StringBuffer sb, final boolean full) {
-        sb.append("<b>Name: ").append(getName());
+    public final void toHtml(final StringBuilder sb, final boolean full) {
+        sb.append("<b>Name: ").append(getName()).append("</b>");
         if (getRA() != null && getDEC() != null) {
             // note: generated targets for baseline limits do not have RA/DEC as string (useless):
-            sb.append("</b><br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
+            sb.append("<br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
         }
         if (full) {
             if (getPMRA() != null && getPMDEC() != null) {

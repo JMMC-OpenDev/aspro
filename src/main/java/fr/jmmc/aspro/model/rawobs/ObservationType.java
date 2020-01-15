@@ -2,6 +2,7 @@
 package fr.jmmc.aspro.model.rawobs;
 
 import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -13,8 +14,8 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;simpleType name="ObservationType"&gt;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
- *     &lt;enumeration value="CALIBRATION"/&gt;
- *     &lt;enumeration value="SCIENCE"/&gt;
+ *     &lt;enumeration value="calibrator"/&gt;
+ *     &lt;enumeration value="science"/&gt;
  *   &lt;/restriction&gt;
  * &lt;/simpleType&gt;
  * </pre>
@@ -29,20 +30,32 @@ public enum ObservationType {
      * Calibration
      * 
      */
-    CALIBRATION,
+    @XmlEnumValue("calibrator")
+    CALIBRATOR("calibrator"),
 
     /**
      * Science
      * 
      */
-    SCIENCE;
+    @XmlEnumValue("science")
+    SCIENCE("science");
+    private final String value;
+
+    ObservationType(String v) {
+        value = v;
+    }
 
     public String value() {
-        return name();
+        return value;
     }
 
     public static ObservationType fromValue(String v) {
-        return valueOf(v);
+        for (ObservationType c: ObservationType.values()) {
+            if (c.value.equals(v)) {
+                return c;
+            }
+        }
+        throw new IllegalArgumentException(v);
     }
 
 }

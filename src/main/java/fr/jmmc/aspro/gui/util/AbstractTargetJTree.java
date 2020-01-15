@@ -25,7 +25,7 @@ public class AbstractTargetJTree<E> extends GenericJTree<E> {
     /** edited target user informations (clone) */
     protected final TargetUserInformations editTargetUserInfos;
     /** temporary buffer */
-    protected final StringBuffer sbTmp = new StringBuffer(512);
+    protected final StringBuilder sbTmp = new StringBuilder(512);
     /** last item index at the mouse position */
     private int lastIndex;
     /** last tooltip at item index */
@@ -104,7 +104,7 @@ public class AbstractTargetJTree<E> extends GenericJTree<E> {
      * @param sbTmp temporary buffer 
      * @return tooltip of the user object or null
      */
-    protected String getTooltipText(final Object userObject, final StringBuffer sbTmp) {
+    protected String getTooltipText(final Object userObject, final StringBuilder sbTmp) {
         if (userObject instanceof Target) {
             final Target target = (Target) userObject;
             // Return the tool tip text:
@@ -162,7 +162,7 @@ public class AbstractTargetJTree<E> extends GenericJTree<E> {
     protected String convertUserObjectToString(final E userObject) {
         if (userObject instanceof Target) {
             final Target target = (Target) userObject;
-            final StringBuffer sb = sbTmp;
+            final StringBuilder sb = sbTmp;
             sb.setLength(0); // clear
             this.editTargetUserInfos.getTargetDisplayName(target, sb);
             return sb.toString();

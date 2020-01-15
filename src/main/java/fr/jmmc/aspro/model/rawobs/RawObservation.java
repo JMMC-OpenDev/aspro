@@ -503,18 +503,17 @@ public class RawObservation
     }
     
 //--simple--preserve
-    
     /**
-    * Return the exposure time in seconds
-    * @return exposure time in seconds
-    */
-    public double getExpTime() {
-        return (getMjdEnd() - getMjdStart()) * 86400.0;
+     * Return the exposure time in seconds
+     * @return exposure time in seconds
+     */
+    public int getExpTime() {
+        return (int) Math.round((getMjdEnd() - getMjdStart()) * 86400.0);
     }
-    
+
     @Override
     public final String toString() {
-        return "RawObservation [" + getObsId() + "] {" 
+        return "RawObservation [" + getObsId() + "] {"
                 + "type: " + getType()
                 + ", parentId: " + getParentId()
                 + ", programId: " + getProgramId()
@@ -534,6 +533,57 @@ public class RawObservation
                 + ", projectedBaselines: " + getProjectedBaselines()
                 + " | expTime: " + getExpTime()
                 + "}";
+    }
+
+    /**
+     * Return an HTML representation of the RawObservation used by tooltips in the given string buffer
+     * @param sb string buffer to fill
+     */
+    public final void toHtml(final StringBuilder sb) {
+        sb.append("<b>Observation Log<br>ID: ").append(getObsId());
+        sb.append("</b><br>Type: ").append(getType());
+
+        // skip parent id
+        if (getProgramId() != null) {
+            sb.append("<br>Program ID: ").append(getProgramId());
+        }
+
+        // Interferometer:
+        sb.append("<hr><b>Interferometer: ").append(getInterferometerName());
+        if (getInterferometerVersion() != null) {
+            sb.append(" (").append(getInterferometerVersion()).append(")");
+        }
+
+        // Interferometer setup:
+        sb.append("<br>Baseline: ").append(getStations()).append("</b>");
+        if (getPops() != null) {
+            sb.append("<br>PoPs: ").append(getPops());
+        }
+        if (getChannels() != null) {
+            sb.append("<br>Channels: ").append(getInterferometerName());
+        }
+
+        // Instrument:
+        sb.append("<b>Instrument: ").append(getInstrumentName());
+        sb.append("<br>Mode: ").append(getInstrumentMode()).append("</b>");
+        if (getChannels() != null) {
+            sb.append("<br>sub Mode: ").append(getInstrumentSubMode());
+        }
+
+        // Target:
+        sb.append("<hr><b>Target: ");
+        if (getTargetName() != null) {
+            sb.append(getTargetName());
+        }
+        sb.append("</b>");
+        // note: generated targets for baseline limits do not have RA/DEC as string (useless):
+        sb.append("<br><b>Coords</b>: ").append(getTargetRa()).append(' ').append(getTargetDec());
+
+        // Obs time range:
+        sb.append("<hr>MJD: ").append(getMjdStart());
+        if (getExpTime() > 0.0) {
+            sb.append("<br>Exp. time: ").append(getExpTime()).append(" s");
+        }
     }
 
 //--simple--preserve

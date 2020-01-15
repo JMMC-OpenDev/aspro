@@ -213,7 +213,7 @@ public class TargetUserInformations
      * @param sb string buffer to append into
      * @return display name
      */
-    public final StringBuffer getTargetDisplayName(final Target target, final StringBuffer sb) {
+    public final StringBuilder getTargetDisplayName(final Target target, final StringBuilder sb) {
         sb.append(target.getName());
 
         if (isCalibrator(target)) {

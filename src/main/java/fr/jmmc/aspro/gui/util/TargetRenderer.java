@@ -25,7 +25,7 @@ public final class TargetRenderer {
     /** target user informations */
     private final TargetUserInformations targetUserInfos;
     /** temporary buffer */
-    protected final StringBuffer sbTmp = new StringBuffer(32);
+    protected final StringBuilder sbTmp = new StringBuilder(32);
 
     /**
      * Public constructor
@@ -43,7 +43,7 @@ public final class TargetRenderer {
      */
     public String convertTargetToString(final Target target) {
         if (this.targetUserInfos != null) {
-            final StringBuffer sb = sbTmp;
+            final StringBuilder sb = sbTmp;
             sb.setLength(0); // clear
             this.targetUserInfos.getTargetDisplayName(target, sb);
             return sb.toString();
