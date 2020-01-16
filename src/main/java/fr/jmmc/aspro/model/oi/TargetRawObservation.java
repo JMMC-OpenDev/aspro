@@ -146,7 +146,7 @@ public class TargetRawObservation
      * @param targetObservations list to process
      * @param mapIDTargets Map<ID, Target> index
      */
-    protected static final void updateTargetReferences(final List<TargetRawObservation> targetObservations, 
+    protected static final void updateTargetReferences(final List<TargetRawObservation> targetObservations,
                                                        final java.util.Map<String, Target> mapIDTargets) {
 
         Target target, newTarget;
@@ -175,13 +175,14 @@ public class TargetRawObservation
                     }
 
                 } else {
-                    logger.info("Removing missing target reference: {}", target.getIdentifier());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Removing missing target reference: {}", target.getIdentifier());
+                    }
                     it.remove();
                 }
             }
         }
     }
-    
 
     /**
      * Return the existing TargetRawObservation corresponding to the target

@@ -1453,7 +1453,9 @@ public class Target
                         it.set(newTarget);
                     }
                 } else {
-                    logger.info("Removing missing target reference: {}", target.getIdentifier());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Removing missing target reference: {}", target.getIdentifier());
+                    }
                     it.remove();
                 }
             }
