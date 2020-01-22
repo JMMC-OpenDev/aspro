@@ -12,39 +12,41 @@
 
  Transforms:
          <TABLE>
-            <FIELD ID="obs_id" arraysize="*" datatype="unicodeChar" name="obs_id"/>
-            <FIELD ID="obs_type" arraysize="*" datatype="unicodeChar" name="obs_type"/>
-            <FIELD ID="obs_program" arraysize="*" datatype="unicodeChar" name="obs_program"/>
-            <FIELD ID="obs_container" arraysize="*" datatype="unicodeChar" name="obs_container"/>
-            <FIELD ID="obs_mjd_start" datatype="double" name="obs_mjd_start"/>
-            <FIELD ID="obs_mjd_end" datatype="double" name="obs_mjd_end"/>
-            <FIELD ID="target_ra" datatype="double" name="target_ra"/>
-            <FIELD ID="target_dec" datatype="double" name="target_dec"/>
-            <FIELD ID="target_name" arraysize="*" datatype="unicodeChar" name="target_name"/>
-            <FIELD ID="instrument_name" arraysize="*" datatype="unicodeChar" name="instrument_name"/>
-            <FIELD ID="instrument_mode" arraysize="*" datatype="unicodeChar" name="instrument_mode"/>
-            <FIELD ID="instrument_submode" arraysize="*" datatype="unicodeChar" name="instrument_submode"/>
-            <FIELD ID="interferometer_name" arraysize="*" datatype="unicodeChar" name="interferometer_name"/>
+            <FIELD ID="obs_id" arraysize="*" datatype="unicodeChar" name="obs_id" ucd="meta.id"/>
+            <FIELD ID="obs_type" arraysize="*" datatype="unicodeChar" name="obs_type" ucd="meta.id;class"/>
+            <FIELD ID="obs_program" arraysize="*" datatype="unicodeChar" name="obs_program" ucd="meta.id"/>
+            <FIELD ID="obs_container" arraysize="*" datatype="unicodeChar" name="obs_container" ucd="meta.id"/>
+            <FIELD ID="obs_mjd_start" datatype="double" name="obs_mjd_start" ucd="time.start;obs.exposure"/>
+            <FIELD ID="obs_mjd_end" datatype="double" name="obs_mjd_end" ucd="time.end;obs.exposure"/>
+            <FIELD ID="target_ra" datatype="double" name="target_ra" ucd="pos.eq.ra;meta.main"/>
+            <FIELD ID="target_dec" datatype="double" name="target_dec" ucd="pos.eq.dec;meta.main"/>
+            <FIELD ID="target_name" arraysize="*" datatype="unicodeChar" name="target_name" ucd="meta.id;src"/>
+            <FIELD ID="instrument_name" arraysize="*" datatype="unicodeChar" name="instrument_name" ucd="meta.id;instr"/>
+            <FIELD ID="instrument_mode" arraysize="*" datatype="unicodeChar" name="instrument_mode" ucd="meta.id;instr.setup"/>
+            <FIELD ID="instrument_submode" arraysize="*" datatype="unicodeChar" name="instrument_submode" ucd="meta.id;instr.setup"/>
+            <FIELD ID="interferometer_name" arraysize="*" datatype="unicodeChar" name="interferometer_name" ucd="meta.id"/>
             <FIELD ID="interferometer_stations" arraysize="*" datatype="unicodeChar" name="interferometer_stations"/>
+            <FIELD ID="interferometer_version" arraysize="*" datatype="unicodeChar" name="interferometer_version"/>
             <FIELD ID="projected_baselines" arraysize="*" datatype="unicodeChar" name="projected_baselines"/>
             <DATA>
                 <TABLEDATA>
                     <TR>
-                        <TD>GRAVI.2019-12-01T01:28:19.399</TD>
-                        <TD>science</TD>
-                        <TD>0104.C-0161(B)</TD>
-                        <TD>2452867</TD>
-                        <TD>58818.06133564</TD>
-                        <TD>58818.0633263807</TD>
-                        <TD>24.768974</TD>
-                        <TD>-17.94778</TD>
-                        <TD>GJ65</TD>
-                        <TD>GRAVITY</TD>
-                        <TD>MEDIUM-SPLIT</TD>
-                        <TD>OBJECT,DUAL</TD>
-                        <TD>VLTI</TD>
-                        <TD>A0 G1 J2 K0</TD>
-                        <TD>{'A0-G1': {'length': 90.507, 'angle': 114.80000000000001}, 'A0-J2': {'length': 129.07299999999998, 'angle': 91.80000000000001}, 'A0-K0': {'length': 127.45, 'angle': 70.0445}, 'G1-J2': {'length': 57.855000000000004, 'angle': 54.05}, 'G1-K0': {'length': 89.7155, 'angle': 24.7975}, 'J2-K0': {'length': 48.372, 'angle': 349.0185}}</TD>
+                     <TD>PIONI.2019-12-13T03:24:59.281</TD>
+                     <TD>calibrator</TD>
+                     <TD>60.A-9004(A)</TD>
+                     <TD>2656378</TD>
+                     <TD>58830.1423527901</TD>
+                     <TD>58830.1429453827</TD>
+                     <TD>27.342153</TD>
+                     <TD>-27.77426</TD>
+                     <TD>HD_11174</TD>
+                     <TD>PIONIER</TD>
+                     <TD/>
+                     <TD/>
+                     <TD>VLTI</TD>
+                     <TD>A 0   G 1   J 2   J 3</TD>
+                     <TD/>
+                     <TD>{'A0-G1': {'length': '82.8280', 'angle': '136.3000'}, 'A0-J2': {'length': '111.8865', 'angle': '111.2000'}, 'A0-J3': {'length': '118.3970', 'angle': '57.6805'}, 'G1-J2': {'length': '50.9495', 'angle': '67.5500'}, 'G1-J3': {'length': '130.4260', 'angle': '19.1725'}, 'J2-J3': {'length': '103.8475', 'angle': '357.6440'}}</TD>
                     </TR>
                 </TABLEDATA>
             </DATA>
@@ -172,7 +174,7 @@
 
         <xsl:variable name="INTERFEROMETER_VERSION_index">
             <xsl:call-template name="getColumnIndex">
-                <xsl:with-param name="name">interferometer_version</xsl:with-param> <!-- TBD -->
+                <xsl:with-param name="name">interferometer_version</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
 
@@ -185,7 +187,7 @@
 
         <xsl:variable name="POPS_index">
             <xsl:call-template name="getColumnIndex">
-                <xsl:with-param name="name">interferometer_pops</xsl:with-param> <!-- TBD -->
+                <xsl:with-param name="name">interferometer_pops</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
 
