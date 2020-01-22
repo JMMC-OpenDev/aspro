@@ -541,11 +541,11 @@ public class RawObservation
      */
     public final void toHtml(final StringBuilder sb) {
         sb.append("<b>Observation Log<br>ID: ").append(getObsId());
-        sb.append("</b><br>Type: ").append(getType());
+        sb.append("<br>Type:</b> ").append(getType());
 
         // skip parent id
         if (getProgramId() != null) {
-            sb.append("<br>Program ID: ").append(getProgramId());
+            sb.append("<br><b>Program ID:</b> ").append(getProgramId());
         }
 
         // Interferometer:
@@ -555,19 +555,22 @@ public class RawObservation
         }
 
         // Interferometer setup:
-        sb.append("<br>Baseline: ").append(getStations()).append("</b>");
         if (getPops() != null) {
-            sb.append("<br>PoPs: ").append(getPops());
+            sb.append("<br>Baseline: ").append(getStations());
+        }
+        sb.append("</b>");
+        if (getPops() != null) {
+            sb.append("<br><b>PoPs:</b> ").append(getPops());
         }
         if (getChannels() != null) {
-            sb.append("<br>Channels: ").append(getInterferometerName());
+            sb.append("<br><b>Channels:</b> ").append(getInterferometerName());
         }
 
         // Instrument:
-        sb.append("<b>Instrument: ").append(getInstrumentName());
+        sb.append("<br><b>Instrument: ").append(getInstrumentName());
         sb.append("<br>Mode: ").append(getInstrumentMode()).append("</b>");
         if (getChannels() != null) {
-            sb.append("<br>sub Mode: ").append(getInstrumentSubMode());
+            sb.append("<br><b>Sub Mode:</b> ").append(getInstrumentSubMode());
         }
 
         // Target:
@@ -575,14 +578,13 @@ public class RawObservation
         if (getTargetName() != null) {
             sb.append(getTargetName());
         }
-        sb.append("</b>");
         // note: generated targets for baseline limits do not have RA/DEC as string (useless):
-        sb.append("<br><b>Coords</b>: ").append(getTargetRa()).append(' ').append(getTargetDec());
+        sb.append("<br>Coords:</b> ").append(getTargetRa()).append(' ').append(getTargetDec());
 
         // Obs time range:
-        sb.append("<hr>MJD: ").append(getMjdStart());
+        sb.append("<hr><b>MJD:</b> ").append(getMjdStart());
         if (getExpTime() > 0.0) {
-            sb.append("<br>Exp. time: ").append(getExpTime()).append(" s");
+            sb.append("<br><b>Exp. time:</b> ").append(getExpTime()).append(" s");
         }
     }
 
