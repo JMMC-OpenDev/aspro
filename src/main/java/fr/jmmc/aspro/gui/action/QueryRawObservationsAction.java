@@ -123,8 +123,12 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                          */
                         @Override
                         public void process(final PostMethod method) throws IOException {
-                            method.addParameter("ra", Double.toString(target.getRADeg()));
-                            method.addParameter("dec", Double.toString(target.getDECDeg()));
+                            final String ra = Double.toString(target.getRADeg());
+                            final String de = Double.toString(target.getDECDeg());
+                            logger.info("Query[{}]: ra={} dec={}", SERVER_URL, ra, de);
+                            
+                            method.addParameter("ra", ra);
+                            method.addParameter("dec", de);
 
                             // add radius ?
                             // add instrument (name) ?
@@ -170,6 +174,8 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                             throw new IllegalArgumentException("Could not load the document:\n" + rawObsDocument, ioe);
                         }
                         if (rawObservations != null) {
+                            logger.debug("Observations for target [{}]:\n{}", targetId, rawObservations);
+
                             if (rawObsMap == null) {
                                 rawObsMap = new HashMap<String, Observations>();
                             }
@@ -224,6 +230,9 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                             rawObs.setTargetRef(target);
                             observation.getTargetObservations().add(rawObs);
                         }
+                        // TODO: update timestamp in rawObs
+                            
+                        // Replace or Merge subset (use last_mod_date to do incremental updates ?)
                         final List<RawObservation> obsList = rawObs.getObservations();
                         obsList.clear();
                         obsList.addAll(rawObservations.getObservations());

@@ -1682,6 +1682,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                     intervals = new ArrayList<DateTimeInterval>(2); // 2 max sub intervals
                                     final List<Range> rangesJD = new ArrayList<Range>(1); // 1 range per observation
 
+                                    /*
+                                    TODO: encapsulate the computations in observability service (background thread)
+                                    Precompute mjd to LST when loading raw observations (exposure, Date, LST, UV coords)
+                                    */
+                                    
                                     // Get AstroSkyCalc instance :
                                     final AstroSkyCalc sc = obsData.getDateCalc();
 
