@@ -253,14 +253,14 @@ This model describes the raw observations
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="calibrator"> <!-- CALIBRATION -->
+            <xsd:enumeration value="calibrator">
                 <xsd:annotation>
-                    <xsd:documentation>Calibration</xsd:documentation>
+                    <xsd:documentation>Calibrator target</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
-            <xsd:enumeration value="science"> <!-- SCIENCE -->
+            <xsd:enumeration value="science">
                 <xsd:annotation>
-                    <xsd:documentation>Science</xsd:documentation>
+                    <xsd:documentation>Science target</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
         </xsd:restriction>
