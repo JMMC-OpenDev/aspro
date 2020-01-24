@@ -25,6 +25,7 @@ public final class RawObservationTableModel extends AbstractTableModel {
     public enum ColumnDef {
         ID("Id", String.class),
         TYPE("Type", String.class),
+        PARENT_ID("Parent Id", String.class),
         PROGRAM_ID("Program", String.class),
         INTERF_NAME("Array", String.class),
         INTERF_VERSION("Period", String.class),
@@ -205,6 +206,8 @@ public final class RawObservationTableModel extends AbstractTableModel {
                     return obs.getObsId();
                 case TYPE:
                     return obs.getType();
+                case PARENT_ID:
+                    return obs.getParentId();
                 case PROGRAM_ID:
                     return obs.getProgramId();
                 case INTERF_NAME:
