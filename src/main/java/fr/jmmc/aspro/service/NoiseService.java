@@ -397,7 +397,10 @@ public final class NoiseService implements VisNoiseService {
         this.ratioPhotoPerBeam = sequence.getRatioPhotoPerBeam();
         this.ratioPhotoVsInterfero = sequence.getRatioPhotoVsInterfero();
 
-        this.frameRatio = insSetup.getFrameRatio();
+        this.frameRatio = 1.0;
+        if (insMode.getFrameTime() != null) {
+            this.frameRatio = insMode.getFrameTime() / this.dit;
+        }        
 
         final double effectiveFrameTime = frameRatio * this.dit;
         // ratio in time [0..1]

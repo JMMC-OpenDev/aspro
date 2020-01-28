@@ -37,7 +37,7 @@
 
 
 
-    
+
     <!-- Elements -->
     <xsd:element name="configurations" type="InterferometerFileCollection">
         <xsd:annotation>
@@ -2315,13 +2315,6 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="frameRatio" type="xsd:double" minOccurs="0">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The ratio giving the real Frame time vs DIT (typically &gt; 1.0) to include overheads
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
 
             <!-- general detector parameters -->
             <xsd:element name="ron" type="xsd:double" minOccurs="0">
@@ -2672,6 +2665,13 @@
                     <xsd:documentation>
                         The optimal detector individual integration time in seconds (typically less than 0.1s)
                         for this instrument mode
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="frameTime" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The optional Frame time (typically &gt; dit) to include overheads
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>

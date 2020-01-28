@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:observationSetting xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <schemaVersion>2018.04</schemaVersion>
+    <targetVersion>2019.08</targetVersion>
+    <name>default</name>
+    <when>
+        <date>2019-05-09</date>
+        <nightRestriction>true</nightRestriction>
+        <atmosphereQuality>Average</atmosphereQuality>
+    </when>
+    <interferometerConfiguration>
+        <name>VLTI Period 105</name>
+        <minElevation>30.0</minElevation>
+    </interferometerConfiguration>
+    <instrumentConfiguration>
+        <name>MATISSE_LM</name>
+        <stations>D0 G2 J3 K0</stations>
+        <pops></pops>
+        <instrumentMode>SI_PHOT_LM_LOW</instrumentMode>
+        <samplingPeriod>60.0</samplingPeriod>
+        <acquisitionTime>240.0</acquisitionTime>
+    </instrumentConfiguration>
+    <target id="TEST">
+        <name>TEST</name>
+        <RA>11:33:25.4404858122</RA>
+        <DEC>-24:11:41.239343121</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <PMRA>0.0</PMRA>
+        <PMDEC>0.0</PMDEC>
+        <PARALLAX>0.0</PARALLAX>
+        <PARA_ERR>0.0</PARA_ERR>
+        <FLUX_V>5.0</FLUX_V>
+        <FLUX_L>2.46</FLUX_L>
+        <FLUX_M>1.84</FLUX_M>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="punct1" type="punct">
+            <desc>Returns the Fourier transform of a punctual object (Dirac function) at coordinates (X,Y) 
+(milliarcsecond). 
+
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.</desc>
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <userModel>
+            <name>HD100546_model_Tatulli2011_512.fits</name>
+            <file>/home/bourgesl/ASPRO2/fits/cube/PRIVATE/HD100546_model_Tatulli2011_512.fits</file>
+            <checksum>2903521865</checksum>
+        </userModel>
+        <configuration>
+            <HAMin>0.0</HAMin>
+            <HAMax>1.0</HAMax>
+            <aoSetup>NAOMI_BRIGHT</aoSetup>
+        </configuration>
+    </target>
+    <targetUserInfos>
+        <group id="JMMC_AO">
+            <name>AO Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the Adaptive Optics system</description>
+            <color>#F781BF</color>
+        </group>
+        <group id="JMMC_FT">
+            <name>FT Star</name>
+            <category>[OB]</category>
+            <description>Group gathering stars used by the Fringe Tracking system</description>
+            <color>#75C147</color>
+        </group>
+        <group id="JMMC_GUIDE">
+            <name>Guide Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the telescope guiding</description>
+            <color>#5BAFD6</color>
+        </group>
+    </targetUserInfos>
+    <variant>
+        <stations>D0 G2 J3 K0</stations>
+    </variant>
+</a:observationSetting>

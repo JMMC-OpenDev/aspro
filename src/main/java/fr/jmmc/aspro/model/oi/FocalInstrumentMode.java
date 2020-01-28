@@ -36,6 +36,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="waveLengthBandRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="setupRef" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="frameTime" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="table" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralSetup" minOccurs="0"/&gt;
  *         &lt;element name="parameter" type="{http://www.jmmc.fr/aspro-oi/0.1}Parameter" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
@@ -57,6 +58,7 @@ import fr.jmmc.aspro.model.OIBase;
     "waveLengthBandRef",
     "setupRef",
     "dit",
+    "frameTime",
     "table",
     "parameters"
 })
@@ -77,6 +79,7 @@ public class FocalInstrumentMode
     @XmlSchemaType(name = "IDREF")
     protected FocalInstrumentSetup setupRef;
     protected Double dit;
+    protected Double frameTime;
     protected SpectralSetup table;
     @XmlElement(name = "parameter")
     protected List<Parameter> parameters;
@@ -295,6 +298,30 @@ public class FocalInstrumentMode
      */
     public void setDit(Double value) {
         this.dit = value;
+    }
+
+    /**
+     * Gets the value of the frameTime property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFrameTime() {
+        return frameTime;
+    }
+
+    /**
+     * Sets the value of the frameTime property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFrameTime(Double value) {
+        this.frameTime = value;
     }
 
     /**

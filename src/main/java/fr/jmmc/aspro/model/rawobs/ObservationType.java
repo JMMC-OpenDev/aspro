@@ -27,14 +27,14 @@ public enum ObservationType {
 
 
     /**
-     * Calibration
+     * Calibrator target
      * 
      */
     @XmlEnumValue("calibrator")
     CALIBRATOR("calibrator"),
 
     /**
-     * Science
+     * Science target
      * 
      */
     @XmlEnumValue("science")
