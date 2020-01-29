@@ -180,7 +180,9 @@ public final class NoiseService implements VisNoiseService {
     /** Fringe Tracker Usage limit (mag) */
     private double fringeTrackerLimit = Double.NaN;
     /** Fringe Tracker Max Integration Time (s) */
-    private double fringeTrackerMaxIntTime = Double.NaN;
+    private double fringeTrackerMaxDit = Double.NaN;
+    /** Fringe Tracker Max Frame Time (s) */
+    private double fringeTrackerMaxFrameTime = Double.NaN;
     /** FT band */
     private SpectralBand ftBand;
 
@@ -404,6 +406,7 @@ public final class NoiseService implements VisNoiseService {
 
         final double effectiveFrameTime = frameRatio * this.dit;
         // ratio in time [0..1]
+        // note: ratio is not correct if FT is enabled !
         final double ratioTimeInterfero = ratioInterfero / frameRatio;
 
         if (logger.isDebugEnabled()) {
@@ -580,16 +583,28 @@ public final class NoiseService implements VisNoiseService {
 
         if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
             final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
+    
+            final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
 
             final FringeTracker ft = instrument.getFringeTracker();
             if (ft != null) {
+                final String ftMode = targetConf.getFringeTrackerMode();
                 this.fringeTrackerPresent = true;
                 // TODO: handle FT modes properly: GroupTrack is hard coded !
-                this.fringeTrackingMode = !"GroupTrack".equalsIgnoreCase(targetConf.getFringeTrackerMode());
+                this.fringeTrackingMode = (ftMode != null && !ftMode.startsWith("GroupTrack"));
                 this.fringeTrackerInstrumentalVisibility = ft.getInstrumentVisibility();
                 this.fringeTrackerLimit = ft.getMagLimit();
-                this.fringeTrackerMaxIntTime = ft.getMaxIntegration();
+                this.fringeTrackerMaxDit = ft.getMaxIntegration();
+                this.fringeTrackerMaxFrameTime = this.fringeTrackerMaxDit;
                 this.ftBand = ft.getBand();
+                
+                // use specific FT DIT defined for this instrument mode:
+                if (insMode.getFtDit() != null) {
+                    this.fringeTrackerMaxDit = insMode.getFtDit();
+                }
+                if (insMode.getFtFrameTime() != null) {
+                    this.fringeTrackerMaxFrameTime = insMode.getFtFrameTime();
+                }
             }
         }
 
@@ -601,7 +616,8 @@ public final class NoiseService implements VisNoiseService {
                 logger.debug("fringeTrackingMode            : {}", fringeTrackingMode);
                 logger.debug("fringeTrackerInstrumentalVisibility : {}", fringeTrackerInstrumentalVisibility);
                 logger.debug("fringeTrackerLimit            : {}", fringeTrackerLimit);
-                logger.debug("fringeTrackerMaxIntTime       : {}", fringeTrackerMaxIntTime);
+                logger.debug("fringeTrackerMaxDit           : {}", fringeTrackerMaxDit);
+                logger.debug("fringeTrackerMaxFrameTime     : {}", fringeTrackerMaxFrameTime);
                 logger.debug("ftBand                        : {}", ftBand);
             }
         }
@@ -1012,10 +1028,14 @@ public final class NoiseService implements VisNoiseService {
                 if (fringeTrackingMode) {
                     // FT is asked, can work, and is useful (need to integrate longer)
                     obsDit = Math.min(obsDit * nbFrameToSaturation, totalObsTime);
-                    obsDit = Math.min(obsDit, fringeTrackerMaxIntTime);
+                    obsDit = Math.min(obsDit, fringeTrackerMaxDit);
+                    
+                    // Fix frame ratio:
+                    this.frameRatio = fringeTrackerMaxFrameTime / fringeTrackerMaxDit;
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("dit (FT)                      : {}", obsDit);
+                        logger.debug("frameRatio (FT)               : {}", frameRatio);
                     }
 
                     addInformation("Observation can take advantage of FT. Adjusting DIT to: " + formatTime(obsDit));

@@ -2676,6 +2676,22 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <!-- FT restrictions -->
+            <xsd:element name="ft_dit" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The max Integration Time (s) for the Fringe Tracker for this instrument mode
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="ft_frameTime" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The optional Frame time (typically &gt; dit) for the Fringe Tracker for this instrument mode
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <!-- tabular data sampling -->
             <xsd:element name="table" type="SpectralSetup" minOccurs="0">
                 <xsd:annotation>

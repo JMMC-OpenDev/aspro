@@ -37,6 +37,8 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="setupRef" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="frameTime" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="ft_dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="ft_frameTime" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="table" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralSetup" minOccurs="0"/&gt;
  *         &lt;element name="parameter" type="{http://www.jmmc.fr/aspro-oi/0.1}Parameter" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
@@ -59,6 +61,8 @@ import fr.jmmc.aspro.model.OIBase;
     "setupRef",
     "dit",
     "frameTime",
+    "ftDit",
+    "ftFrameTime",
     "table",
     "parameters"
 })
@@ -80,6 +84,10 @@ public class FocalInstrumentMode
     protected FocalInstrumentSetup setupRef;
     protected Double dit;
     protected Double frameTime;
+    @XmlElement(name = "ft_dit")
+    protected Double ftDit;
+    @XmlElement(name = "ft_frameTime")
+    protected Double ftFrameTime;
     protected SpectralSetup table;
     @XmlElement(name = "parameter")
     protected List<Parameter> parameters;
@@ -322,6 +330,54 @@ public class FocalInstrumentMode
      */
     public void setFrameTime(Double value) {
         this.frameTime = value;
+    }
+
+    /**
+     * Gets the value of the ftDit property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFtDit() {
+        return ftDit;
+    }
+
+    /**
+     * Sets the value of the ftDit property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFtDit(Double value) {
+        this.ftDit = value;
+    }
+
+    /**
+     * Gets the value of the ftFrameTime property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFtFrameTime() {
+        return ftFrameTime;
+    }
+
+    /**
+     * Sets the value of the ftFrameTime property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFtFrameTime(Double value) {
+        this.ftFrameTime = value;
     }
 
     /**
