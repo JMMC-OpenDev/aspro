@@ -3,8 +3,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
-import fr.jmmc.aspro.util.StatUtils.ComplexDistribution;
-import static fr.jmmc.aspro.util.StatUtils.N_SAMPLES;
+import fr.jmmc.jmcs.util.StatUtils.ComplexDistribution;
+import static fr.jmmc.jmcs.util.StatUtils.N_SAMPLES;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmal.complex.MutableComplex;

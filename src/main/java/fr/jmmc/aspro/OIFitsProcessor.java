@@ -11,7 +11,7 @@ import fr.jmmc.aspro.service.OIFitsProcessService;
 import fr.jmmc.aspro.service.UserModelData;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
-import fr.jmmc.aspro.util.StatUtils;
+import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.oitools.image.FitsImage;

@@ -174,7 +174,10 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
         final String plotId = OIFitsCollectionManager.CURRENT_VIEW;
 
         this.plotView = new PlotView(plotId);
+        this.plotView.setName("plotView"); // FEST
+
         this.plotChartPanel = this.plotView.getPlotPanel();
+        this.plotChartPanel.setName("plotChartPanel"); // FEST
 
         add(this.plotView, BorderLayout.CENTER);
     }

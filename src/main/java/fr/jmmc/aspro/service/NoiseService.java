@@ -29,7 +29,7 @@ import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
-import fr.jmmc.aspro.util.StatUtils;
+import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmcs.util.NumberUtils;
