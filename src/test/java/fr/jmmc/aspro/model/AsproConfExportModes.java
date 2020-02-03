@@ -44,10 +44,19 @@ public class AsproConfExportModes {
         for (String name : cm.getInterferometerNames()) {
             final InterferometerDescription id = cm.getInterferometerDescription(name);
             
+            if (!"VLTI".equals(id.getName())) {
+                continue;
+            }
+            
             sb.append("  <interferometer>\n");
             sb.append("    <name>").append(id.getName()).append("</name>\n");
 
             for (FocalInstrument ins : id.getFocalInstruments()) {
+                
+                if ("PIONIER_3T".equals(ins.getName())) {
+                    continue;
+                }
+                
                 sb.append("    <instrument>\n");
                 sb.append("      <name>").append(ins.getName()).append("</name>\n");
 
