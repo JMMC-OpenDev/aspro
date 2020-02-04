@@ -27,6 +27,7 @@ import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.PopCombination;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
@@ -964,8 +965,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * Refresh the list of instrument configurations : depends on the chosen instrument (also the interferometer configuration)
      */
     private void updateComboInstrumentConfiguration() {
-        final Vector<String> names = cm.getInstrumentConfigurationNames((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
-                (String) jComboBoxInstrument.getSelectedItem());
+        final String configurationName = (String) jComboBoxInterferometerConfiguration.getSelectedItem();
+        final String instrumentAlias = (String) jComboBoxInstrument.getSelectedItem();
+
+        final Vector<String> names = cm.getInstrumentConfigurationNames(configurationName, instrumentAlias);
 
         final Object[] oldValues = getInstrumentConfigurations();
 
@@ -976,9 +979,30 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
             // define alternative names for tooltips:
             ((ConfigurationJList) jListInstrumentConfigurations).setAltNames(
-                    cm.getInstrumentConfigurationAltNames((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
-                            (String) jComboBoxInstrument.getSelectedItem())
+                    cm.getInstrumentConfigurationAltNames(configurationName, instrumentAlias)
             );
+
+            FocalInstrumentConfiguration insConf = null;
+
+            // Fix alternatives for previous selected item(s):
+            for (int i = 0; i < oldValues.length; i++) {
+                final String oldStations = (String) oldValues[i];
+
+                if (!names.contains(oldStations)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Missing prev conf {}", oldStations);
+                    }
+                    if (insConf == null) {
+                        insConf = cm.getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
+                    }
+                    // insConf can not be null now:
+                    final String stationIds = ConfigurationManager.findInstrumentConfigurationStations(insConf, oldStations);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Fixed conf {}", stationIds);
+                    }
+                    oldValues[i] = (stationIds != null) ? stationIds : "";
+                }
+            }
 
             // restore previous selected item(s) :
             selectInstrumentConfigurations(oldValues);

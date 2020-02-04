@@ -310,7 +310,7 @@ public final class ConfigurationManager extends BaseOIManager {
             associateAdaptiveOpticsSetup(id);
 
             configuration.getInterferometerDescriptions().put(name, id);
-            
+
         } catch (IllegalStateException ise) {
             dump = true;
             throw ise;
@@ -1441,7 +1441,7 @@ public final class ConfigurationManager extends BaseOIManager {
         // number of stations in the string :
         final int nStation = stations.length;
 
-        if (nStation < 2) {
+        if (nStation != insConf.getFocalInstrument().getNumberChannels()) {
             // bad value
             return null;
         }
