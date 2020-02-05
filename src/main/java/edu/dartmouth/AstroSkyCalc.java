@@ -400,8 +400,7 @@ public final class AstroSkyCalc {
      * @param jd julian date
      * @return LST decimal hours
      */
-// TODO: remove synchronization when safe !    
-    public synchronized double toLst(final double jd) {
+    public double toLst(final double jd) {
         // avoid new instances:
         if (wwCal == null) {
             wwCal = new WhenWhere(jd, this.site, false);

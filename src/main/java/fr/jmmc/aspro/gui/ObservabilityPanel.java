@@ -36,6 +36,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetRawObservation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.rawobs.Observations;
 import fr.jmmc.aspro.model.rawobs.RawObservation;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
@@ -1676,28 +1677,30 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                     }
                                 }
 
+                                /*
+                                    TODO: encapsulate the computations in observability service (background thread)
+                                 */
                                 // Raw observations:
                                 final TargetRawObservation targetRawObs = TargetRawObservation.getTargetRawObservation(target, targetObservations);
                                 if (targetRawObs != null) {
-                                    intervals = new ArrayList<DateTimeInterval>(2); // 2 max sub intervals
-                                    final List<Range> rangesJD = new ArrayList<Range>(1); // 1 range per observation
+                                    final List<Observations> obsGroups = targetRawObs.getGroups();
 
-                                    /*
-                                    TODO: encapsulate the computations in observability service (background thread)
-                                    Precompute mjd to LST when loading raw observations (exposure, Date, LST, UV coords)
-                                    */
-                                    
-                                    // Get AstroSkyCalc instance :
-                                    final AstroSkyCalc sc = obsData.getDateCalc();
+                                    // has groups (valid observations) to show
+                                    if (obsGroups != null) {
+                                        intervals = new ArrayList<DateTimeInterval>(2); // 2 max sub intervals
+                                        final List<Range> rangesJD = new ArrayList<Range>(1); // 1 range per observation
 
-                                    // TODO: filter observations to plot ?
-                                    final List<RawObservation> observations = targetRawObs.getObservations();
-                                    for (int k = 0, len = observations.size(); k < len; k++) {
-                                        final RawObservation rawObs = observations.get(k);
-                                        
-                                        if (rawObs.isValid(RawObservation.INVALID_TIMES)) {
-                                            final double lstStart = rawObs.getLstStart();
-                                            final double lstEnd = rawObs.getLstEnd();
+                                        // Get AstroSkyCalc instance :
+                                        final AstroSkyCalc sc = obsData.getDateCalc();
+
+                                        for (int l = 0, lenG = obsGroups.size(); l < lenG; l++) {
+                                            final Observations obsGroup = obsGroups.get(l);
+
+                                            final RawObservation rawObsFirst = obsGroup.first();
+                                            final RawObservation rawObsLast = obsGroup.last();
+
+                                            final double lstStart = rawObsFirst.getLstStart();
+                                            final double lstEnd = rawObsLast.getLstEnd();
 
                                             // Convert to JD range (current night):
                                             final double jdStart = sc.convertLstToJD(lstStart);
@@ -1707,31 +1710,50 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                             rangesJD.add(new Range(jdStart, jdEnd)); // reuse Range ?
 
                                             intervals.clear();
+                                            // Warning: concurrency issue (date conversion are not thread safe ! background threads // awt thread !)
                                             obsData.convertRangesToDateIntervals(rangesJD, intervals);
-
-                                            double total = 0.0;
 
                                             for (int d = 0, iLen = intervals.size(); d < iLen; d++) {
                                                 final DateTimeInterval interval = intervals.get(d);
                                                 addAnnotation(annotations, pos,
                                                         new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
                                                                 ChartUtils.DEFAULT_STROKE, null, RAW_OBS_OVERLAY_COLOR, Layer.FOREGROUND,
-                                                                this.slidingXYPlotAdapter.generateToolTip(rawObs)
+                                                                this.slidingXYPlotAdapter.generateToolTip(obsGroup.getObservations().size(), rawObsFirst, rawObsLast)
                                                         ));
-                                                total += (interval.getEndDate().getTime() - interval.getStartDate().getTime()) / 1000.0;
                                             }
+                                        }
 
-                                            // Warning: concurrency issue (date conversion are not thread safe ! background threads // awt thread !)
-                                            if (false && total > 1800.0) {
-                                                System.out.println("Bad conversion ??");
-                                                System.out.println("intervals: " + intervals);
-                                                System.out.println("rangesJD: " + rangesJD);
-                                                System.out.println("lst obs: " + lstStart + " - " + lstEnd);
+                                        if (false) {
+                                            // TODO: filter observations to plot ?
+                                            final List<RawObservation> observations = targetRawObs.getObservations();
+                                            for (int k = 0, len = observations.size(); k < len; k++) {
+                                                final RawObservation rawObs = observations.get(k);
 
-                                                intervals.clear();
-                                                obsData.convertRangesToDateIntervals(rangesJD, intervals);
+                                                if (rawObs.isValid(RawObservation.INVALID_TIMES)) {
+                                                    final double lstStart = rawObs.getLstStart();
+                                                    final double lstEnd = rawObs.getLstEnd();
 
-                                                System.out.println("intervals (2): " + intervals);
+                                                    // Convert to JD range (current night):
+                                                    final double jdStart = sc.convertLstToJD(lstStart);
+                                                    final double jdEnd = sc.convertLstToJD(lstEnd);
+
+                                                    rangesJD.clear();
+                                                    rangesJD.add(new Range(jdStart, jdEnd)); // reuse Range ?
+
+                                                    intervals.clear();
+
+                                                    // Warning: concurrency issue (date conversion are not thread safe ! background threads // awt thread !)
+                                                    obsData.convertRangesToDateIntervals(rangesJD, intervals);
+
+                                                    for (int d = 0, iLen = intervals.size(); d < iLen; d++) {
+                                                        final DateTimeInterval interval = intervals.get(d);
+                                                        addAnnotation(annotations, pos,
+                                                                new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
+                                                                        ChartUtils.DEFAULT_STROKE, null, RAW_OBS_OVERLAY_COLOR, Layer.FOREGROUND,
+                                                                        this.slidingXYPlotAdapter.generateToolTip(1, rawObs, null)
+                                                                ));
+                                                    }
+                                                }
                                             }
                                         }
                                     }

@@ -665,7 +665,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
             final TargetRawObservation targetRawObs = observation.getTargetRawObservation(selectedTarget);
             if (targetRawObs != null) {
-                final List<RawObservation> rawObsList = targetRawObs.getObservations();
+                // Get all observations (TODO use groups):
+                final List<RawObservation> rawObsList = targetRawObs.getObservations(); 
                 if (!rawObsList.isEmpty()) {
                     RawObservationTablePanel.showFrameData(JFrame.DISPOSE_ON_CLOSE,
                             "Obs. logs for Target '" + selectedTarget.getName() + "'",

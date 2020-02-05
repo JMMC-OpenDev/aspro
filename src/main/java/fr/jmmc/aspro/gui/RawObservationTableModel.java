@@ -23,6 +23,7 @@ public final class RawObservationTableModel extends AbstractTableModel {
 
     /** Column definition enum */
     public enum ColumnDef {
+        GID("Group Id", Integer.class),
         ID("Id", String.class),
         TYPE("Type", String.class),
         PARENT_ID("Parent Id", String.class),
@@ -37,14 +38,14 @@ public final class RawObservationTableModel extends AbstractTableModel {
         TARGET_NAME("Target", String.class),
         TARGET_RA("RA", Double.class),
         TARGET_DEC("DEC", Double.class),
-        MJD_OBS("MJD OBS", Double.class),
+        MJD_START("MJD OBS", Double.class),
         VALID("Valid", Integer.class),
         EXP_TIME("Exp. time", Double.class),
         TARGET_RA_HMS("RA (HMS)", String.class),
         TARGET_DEC_DMS("DEC (DMS)", String.class),
         DATE("Date (UTC)", String.class),
         TIME("Time (UTC)", String.class),
-        LST("LST", Double.class);
+        LST_START("LST Start", Double.class);
 
         /**
          * Custom constructor
@@ -207,6 +208,8 @@ public final class RawObservationTableModel extends AbstractTableModel {
 
         if (obs != null) {
             switch (COLUMNS[columnIndex]) {
+                case GID:
+                    return obs.getGroupId();
                 case ID:
                     return obs.getObsId();
                 case TYPE:
@@ -235,7 +238,7 @@ public final class RawObservationTableModel extends AbstractTableModel {
                     return obs.getTargetRa();
                 case TARGET_DEC:
                     return obs.getTargetDec();
-                case MJD_OBS:
+                case MJD_START:
                     return obs.getMjdStart();
                 case VALID:
                     return obs.getValid();
@@ -246,10 +249,10 @@ public final class RawObservationTableModel extends AbstractTableModel {
                 case TARGET_DEC_DMS:
                     return obs.getDec();
                 case DATE:
-                    return obs.getDate();
+                    return obs.getDateStart();
                 case TIME:
-                    return obs.getTime();
-                case LST:
+                    return obs.getTimeStart();
+                case LST_START:
                     return obs.getLstStart();
                 default:
             }

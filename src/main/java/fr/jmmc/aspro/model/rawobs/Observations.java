@@ -77,9 +77,23 @@ public class Observations
     
 //--simple--preserve
     
+    public RawObservation first() {
+        if (observations.isEmpty()) {
+            return null;
+        }
+        return observations.get(0);
+    }
+
+    public RawObservation last() {
+        if (observations.isEmpty()) {
+            return null;
+        }
+        return observations.get(observations.size() - 1);
+    }
+
     @Override
     public final String toString() {
-        return "Observations [" + getObservations().size() + "] {" 
+        return "Observations [" + getObservations().size() + "] {"
                 + "observations: " + getObservations()
                 + "}";
     }

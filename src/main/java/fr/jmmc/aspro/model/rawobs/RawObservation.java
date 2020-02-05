@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+import java.util.Objects;
 
 
 /**
@@ -600,28 +601,52 @@ public class RawObservation
         return instrumentModeRef;
     }
 
-    /** converted date */
+    /** converted date start time */
     @javax.xml.bind.annotation.XmlTransient
-    private String date = null;
+    private String dateStart = null;
 
     /**
-     * Return the date
+     * Return the date start time
      * @return date
      */
-    public String getDate() {
-        return date;
+    public String getDateStart() {
+        return dateStart;
     }
 
-    /** converted time */
+    /** converted start time */
     @javax.xml.bind.annotation.XmlTransient
-    private String time = null;
+    private String timeStart = null;
 
     /**
-     * Return the time
-     * @return time
+     * Return the start time
+     * @return start time
      */
-    public String getTime() {
-        return time;
+    public String getTimeStart() {
+        return timeStart;
+    }
+
+    /** converted date End time */
+    @javax.xml.bind.annotation.XmlTransient
+    private String dateEnd = null;
+
+    /**
+     * Return the date End time
+     * @return date
+     */
+    public String getDateEnd() {
+        return dateEnd;
+    }
+
+    /** converted End time */
+    @javax.xml.bind.annotation.XmlTransient
+    private String timeEnd = null;
+
+    /**
+     * Return the End time
+     * @return End time
+     */
+    public String getTimeEnd() {
+        return timeEnd;
     }
 
     /** converted LST start time in hours */
@@ -646,6 +671,17 @@ public class RawObservation
      */
     public double getLstEnd() {
         return lstEnd;
+    }
+    
+    @javax.xml.bind.annotation.XmlTransient
+    private Integer gid = null;
+
+    public Integer getGroupId() {
+        return gid;
+    }
+
+    public void setGroupId(final Integer gid) {
+        this.gid = gid;
     }
 
     /**
@@ -707,20 +743,27 @@ public class RawObservation
             }
             java.text.DateFormat tf = (java.text.DateFormat) sharedContext.get("TIME_FMT");
             if (tf == null) {
-                tf = new java.text.SimpleDateFormat("HH:mm:ss.ms");
+                tf = new java.text.SimpleDateFormat("HH:mm:ss");
                 sharedContext.put("TIME_FMT", tf);
             }
 
             final double jd_start = getMjdStart() + edu.dartmouth.AstroSkyCalc.MJD_REF;
+            final double jd_end = jd_start + getExpTime() / 86400.0;
             logger.debug(" jd_start = {}", jd_start);
+            logger.debug(" jd_end   = {}", jd_end);
 
             // Precompute Date Time UTC:
-            final java.util.Date utc = sc.toDate(jd_start, fr.jmmc.aspro.model.TimeRef.UTC);
-            logger.debug("Date UTC: {}", utc);
+            final java.util.Date utc_start = sc.toDate(jd_start, fr.jmmc.aspro.model.TimeRef.UTC);
+            final java.util.Date utc_end = sc.toDate(jd_end, fr.jmmc.aspro.model.TimeRef.UTC);
+            logger.debug("Date UTC Start: {}", utc_start);
+            logger.debug("Date UTC End  : {}", utc_end);
 
-            this.date = df.format(utc);
-            this.time = tf.format(utc);
-            logger.debug("Date/Time: {} {}", date, time);
+            this.dateStart = df.format(utc_start);
+            this.dateEnd = df.format(utc_end);
+
+            this.timeStart = tf.format(utc_start);
+            this.timeEnd = tf.format(utc_end);
+            logger.debug("Date/Time: {} {} to {} {}", dateStart, timeStart, dateEnd, timeEnd);
 
             // Precompute LST:
             this.lstStart = sc.toLst(jd_start);
@@ -779,6 +822,49 @@ public class RawObservation
         this.valid = flag;
     }
 
+    public boolean isCompatible(final RawObservation other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!Objects.equals(this.targetName, other.targetName)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.targetRa) != Double.doubleToLongBits(other.targetRa)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.targetDec) != Double.doubleToLongBits(other.targetDec)) {
+            return false;
+        }
+        if (!Objects.equals(this.programId, other.programId)) {
+            return false;
+        }
+        if (!Objects.equals(this.interferometerName, other.interferometerName)) {
+            return false;
+        }
+        if (!Objects.equals(this.stations, other.stations)) {
+            return false;
+        }
+        if (!Objects.equals(this.pops, other.pops)) {
+            return false;
+        }
+        if (!Objects.equals(this.instrumentName, other.instrumentName)) {
+            return false;
+        }
+        if (!Objects.equals(this.instrumentMode, other.instrumentMode)) {
+            return false;
+        }
+        if (!Objects.equals(this.instrumentSubMode, other.instrumentSubMode)) {
+            return false;
+        }
+        if (this.type != other.type) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public final String toString() {
         return "RawObservation [" + getObsId() + "] {"
@@ -802,8 +888,8 @@ public class RawObservation
                 + " | expTime: " + getExpTime()
                 + ", RA: " + getRa()
                 + ", DEC: " + getDec()
-                + ", date: " + getDate()
-                + ", time: " + getTime()
+                + ", date: " + getDateStart()
+                + ", time: " + getTimeStart()
                 + ", LST start: " + getLstStart()
                 + ", LST end: " + getLstEnd()
                 + "}";
@@ -813,8 +899,8 @@ public class RawObservation
      * Return an HTML representation of the RawObservation used by tooltips in the given string buffer
      * @param sb string buffer to fill
      */
-    public final void toHtml(final StringBuilder sb) {
-        sb.append("<b>Observation Log<br>ID: ").append(getObsId());
+    public final void toHtml(final StringBuilder sb, final int obsCount) {
+        sb.append("<b>Observation Log (").append(obsCount).append("):");
         sb.append("<br>Type:</b> ").append(getType());
 
         // skip parent id
@@ -829,7 +915,7 @@ public class RawObservation
         }
 
         // Interferometer setup:
-        if (getPops() != null) {
+        if (getStations() != null) {
             sb.append("<br>Baseline: ").append(getStations());
         }
         sb.append("</b>");
@@ -853,21 +939,38 @@ public class RawObservation
             sb.append(getTargetName());
         }
         sb.append("<br>Coords:</b> ").append(getRa()).append(' ').append(getDec());
-
-        // Obs time range:
-        sb.append("<hr><b>MJD:</b> ").append(getMjdStart());
-        if (getDate() != null) {
-            sb.append("<br><b>Date:</b> ").append(getDate());
-            sb.append("<br><b>Time:</b> ").append(getTime());
-        }
-        if (getLstStart() > 0.0) {
-            sb.append("<br><b>LST:</b> ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(getLstStart())).append(" h");
-        }
+    }
+    
+    /**
+     * Return an HTML representation of the RawObservation Times used by tooltips in the given string buffer
+     * @param sb string buffer to fill
+     */
+    public final void timeToHtml(final StringBuilder sb, final int showDate) {
+        sb.append("<hr><b>ID:</b> ").append(getObsId());
         if (getExpTime() > 0.0) {
             sb.append("<br><b>Exp. time:</b> ").append(getIntExpTime()).append(" s");
         }
+        if ((showDate & 1) != 0) {
+            if (getDateStart() != null) {
+                sb.append("<br><b>Start time:</b> ").append(getDateStart()).append(' ').append(getTimeStart());
+            } else {
+                sb.append("<br><b>MJD Start:</b> ").append(getMjdStart());
+            }
+            if (getLstStart() > 0.0) {
+                sb.append("<br><b>LST:</b> ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(getLstStart())).append(" h");
+            }
+        }
+        if ((showDate & 2) != 0) {
+            if (getDateEnd() != null) {
+                sb.append("<br><b>End time:</b> ").append(getDateEnd()).append(' ').append(getTimeEnd());
+            } else {
+                sb.append("<br><b>MJD End:</b> ").append(getMjdEnd());
+            }
+            if (getLstEnd() > 0.0) {
+                sb.append("<br><b>LST:</b> ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(getLstEnd())).append(" h");
+            }
+        }
     }
-
 //--simple--preserve
 
 }
