@@ -1693,16 +1693,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                     // TODO: filter observations to plot ?
                                     final List<RawObservation> observations = targetRawObs.getObservations();
                                     for (int k = 0, len = observations.size(); k < len; k++) {
-                                        final RawObservation observation = observations.get(k);
+                                        final RawObservation rawObs = observations.get(k);
+                                        
+                                        if (rawObs.isValid(RawObservation.INVALID_TIMES)) {
+                                            final double lstStart = rawObs.getLstStart();
+                                            final double lstEnd = rawObs.getLstEnd();
 
-                                        // WARNING: AstroSkyCalc converts LST according to observing site (longitude)
-                                        // MJD to LST (0..24):
-                                        final double lstStart = sc.toLst(observation.getMjdStart() + AstroSkyCalc.MJD_REF);
-                                        // ensure lstEnd > lstStart: exposure time is positive:
-                                        final double lstEnd = lstStart + (observation.getMjdEnd() - observation.getMjdStart()) * 24.0;
-
-                                        if (lstEnd > lstStart) {
-
+                                            // Convert to JD range (current night):
                                             final double jdStart = sc.convertLstToJD(lstStart);
                                             final double jdEnd = sc.convertLstToJD(lstEnd);
 
@@ -1719,7 +1716,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                                 addAnnotation(annotations, pos,
                                                         new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
                                                                 ChartUtils.DEFAULT_STROKE, null, RAW_OBS_OVERLAY_COLOR, Layer.FOREGROUND,
-                                                                this.slidingXYPlotAdapter.generateToolTip(observation)
+                                                                this.slidingXYPlotAdapter.generateToolTip(rawObs)
                                                         ));
                                                 total += (interval.getEndDate().getTime() - interval.getStartDate().getTime()) / 1000.0;
                                             }

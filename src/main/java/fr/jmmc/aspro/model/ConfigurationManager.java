@@ -1013,6 +1013,26 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
+     * Return the first instrument for the given instrument name prefix and mode
+     * @param instrumentPrefix prefix for the name or alias of the instrument
+     * @param instrumentMode name or alias of the instrument
+     * @return focal instrument
+     */
+    public FocalInstrument getInterferometerInstrumentByMode(final String instrumentPrefix, final String instrumentMode) {
+        for (InterferometerConfiguration c : getInterferometerConfigurations().values()) {
+            for (FocalInstrumentConfiguration ic : c.getInstruments()) {
+                final FocalInstrument ins = ic.getFocalInstrument();
+                // match alias or name:
+                if (ins.getAliasOrName().startsWith(instrumentPrefix)
+                        && getInstrumentMode(ins, instrumentMode) != null) {
+                    return ins;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Return the list of all instrument configuration names for the given interferometer configuration and instrument name
      * @param configurationName name of the interferometer configuration
      * @param instrumentAlias name or alias of the instrument
@@ -1314,11 +1334,22 @@ public final class ConfigurationManager extends BaseOIManager {
     public FocalInstrumentMode getInstrumentMode(final String configurationName, final String instrumentName, final String instrumentMode) {
         if (instrumentMode != null && instrumentMode.length() > 0) {
             final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
-            if (ins != null) {
-                for (FocalInstrumentMode m : ins.getModes()) {
-                    if (m.getName().equals(instrumentMode)) {
-                        return m;
-                    }
+            return getInstrumentMode(ins, instrumentMode);
+        }
+        return null;
+    }
+
+    /**
+     * Return the instrument mode for the given instrument and mode
+     * @param instrument instrument
+     * @param instrumentMode instrument mode
+     * @return instrument mode or null
+     */
+    public FocalInstrumentMode getInstrumentMode(final FocalInstrument instrument, final String instrumentMode) {
+        if (instrument != null) {
+            for (FocalInstrumentMode m : instrument.getModes()) {
+                if (m.getName().equals(instrumentMode)) {
+                    return m;
                 }
             }
         }

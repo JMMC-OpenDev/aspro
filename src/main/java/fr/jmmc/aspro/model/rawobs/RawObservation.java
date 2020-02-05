@@ -503,12 +503,280 @@ public class RawObservation
     }
     
 //--simple--preserve
+    public final static int VALID_ALL = 0;
+    public final static int INVALID_META = 1;
+    public final static int INVALID_TIMES = 2;
+    public final static int INVALID_UV = 4;
+
+    /** validation flag */
+    @javax.xml.bind.annotation.XmlTransient
+    private int valid = 0;
+
+    public int getValid() {
+        return valid;
+    }
+
+    public boolean isValid(final int flag) {
+        return (valid & flag) == 0;
+    }
+
+    /** converted exposure time in seconds */
+    @javax.xml.bind.annotation.XmlTransient
+    private double expTime = 0.0;
+
     /**
      * Return the exposure time in seconds
      * @return exposure time in seconds
      */
-    public int getExpTime() {
-        return (int) Math.round((getMjdEnd() - getMjdStart()) * 86400.0);
+    public double getExpTime() {
+        return expTime;
+    }
+
+    /**
+     * Return the exposure time in seconds
+     * @return exposure time in seconds
+     */
+    public int getIntExpTime() {
+        return (int) Math.round(expTime);
+    }
+
+    /** converted RA in HMS */
+    @javax.xml.bind.annotation.XmlTransient
+    private String ra = null;
+
+    /**
+     * Return the right ascension (RA) in HMS
+     * @return right ascension (RA) in HMS
+     */
+    public final String getRa() {
+        return this.ra;
+    }
+
+    /** converted DEC in DMS */
+    @javax.xml.bind.annotation.XmlTransient
+    private String dec = null;
+
+    /**
+     * Return the declination (DEC) in DMS
+     * @return declination (DEC) in DMS
+     */
+    public final String getDec() {
+        return this.dec;
+    }
+
+    /** resolved reference to the interferometer (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private fr.jmmc.aspro.model.oi.InterferometerDescription interferometerRef = null;
+
+    /**
+     * Return the reference to the interferometer (read only)
+     * @return interferometer or null
+     */
+    public final fr.jmmc.aspro.model.oi.InterferometerDescription getInterferometerRef() {
+        return interferometerRef;
+    }
+
+    /** resolved reference to the instrument (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private fr.jmmc.aspro.model.oi.FocalInstrument instrumentRef = null;
+
+    /**
+     * Return the reference to the instrument (read only)
+     * @return instrument or null
+     */
+    public final fr.jmmc.aspro.model.oi.FocalInstrument getInstrumentRef() {
+        return instrumentRef;
+    }
+
+    /** resolved reference to the instrument (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private fr.jmmc.aspro.model.oi.FocalInstrumentMode instrumentModeRef = null;
+
+    /**
+     * Return the reference to the instrument (read only)
+     * @return instrument or null
+     */
+    public final fr.jmmc.aspro.model.oi.FocalInstrumentMode getInstrumentModeRef() {
+        return instrumentModeRef;
+    }
+
+    /** converted date */
+    @javax.xml.bind.annotation.XmlTransient
+    private String date = null;
+
+    /**
+     * Return the date
+     * @return date
+     */
+    public String getDate() {
+        return date;
+    }
+
+    /** converted time */
+    @javax.xml.bind.annotation.XmlTransient
+    private String time = null;
+
+    /**
+     * Return the time
+     * @return time
+     */
+    public String getTime() {
+        return time;
+    }
+
+    /** converted LST start time in hours */
+    @javax.xml.bind.annotation.XmlTransient
+    private double lstStart = Double.NaN;
+
+    /**
+     * Return the LST start time in hours
+     * @return LST start time in hours
+     */
+    public double getLstStart() {
+        return lstStart;
+    }
+
+    /** converted LST end time in hours */
+    @javax.xml.bind.annotation.XmlTransient
+    private double lstEnd = Double.NaN;
+
+    /**
+     * Return the LST end time in hours
+     * @return LST end time in hours
+     */
+    public double getLstEnd() {
+        return lstEnd;
+    }
+
+    /**
+     * Prepare this observation ie compute and resolve internal references
+     * @param logger logger to use
+     * @param sharedContext shared context (cache)
+     * @param cm configuration manager
+     */
+    public final void prepare(final org.slf4j.Logger logger,
+                              final java.util.Map sharedContext,
+                              final fr.jmmc.aspro.model.ConfigurationManager cm) {
+
+        // Convert exposure time:
+        this.expTime = Math.max(0.0, (getMjdEnd() - getMjdStart()) * 86400.0);
+        if (Double.isNaN(getExpTime())) {
+            this.expTime = 0.0;
+        }
+
+        // Convert Target coords (deg) to HMS / DMS
+        this.ra = fr.jmmc.jmal.ALX.toHMS(getTargetRa());
+        this.dec = fr.jmmc.jmal.ALX.toDMS(getTargetDec());
+
+        // Parse projected baselines
+        /*
+        * TODO impl
+         */
+        // Resolve references:
+        // interferometer
+        this.interferometerRef = cm.getInterferometerDescription(getInterferometerName());
+
+        // instrument
+        this.instrumentRef = cm.getInterferometerInstrumentByMode(getInstrumentName(), getInstrumentMode());
+
+        // instrument mode
+        this.instrumentModeRef = cm.getInstrumentMode(this.instrumentRef, getInstrumentMode());
+
+        // Validate:
+        this.validate();
+
+        // Prepare computations (observability, uv):
+        if (isValid(INVALID_TIMES)) {
+            // Prepare AstroSkyCalc on site:
+            final String keyInterf = "INTERF_" + getInterferometerName();
+            edu.dartmouth.AstroSkyCalc sc = (edu.dartmouth.AstroSkyCalc) sharedContext.get(keyInterf);
+            if (sc == null) {
+                sc = new edu.dartmouth.AstroSkyCalc();
+                sharedContext.put(keyInterf, sc);
+
+                // define site:
+                sc.defineSite(this.interferometerRef.getName(),
+                        this.interferometerRef.getPosSph(),
+                        this.interferometerRef.getTimezone());
+            }
+            // Prepare ISO date/time formatter:
+            java.text.DateFormat df = (java.text.DateFormat) sharedContext.get("DATE_FMT");
+            if (df == null) {
+                df = new java.text.SimpleDateFormat("yyyy/MM/dd");
+                sharedContext.put("DATE_FMT", df);
+            }
+            java.text.DateFormat tf = (java.text.DateFormat) sharedContext.get("TIME_FMT");
+            if (tf == null) {
+                tf = new java.text.SimpleDateFormat("HH:mm:ss.ms");
+                sharedContext.put("TIME_FMT", tf);
+            }
+
+            final double jd_start = getMjdStart() + edu.dartmouth.AstroSkyCalc.MJD_REF;
+            logger.debug(" jd_start = {}", jd_start);
+
+            // Precompute Date Time UTC:
+            final java.util.Date utc = sc.toDate(jd_start, fr.jmmc.aspro.model.TimeRef.UTC);
+            logger.debug("Date UTC: {}", utc);
+
+            this.date = df.format(utc);
+            this.time = tf.format(utc);
+            logger.debug("Date/Time: {} {}", date, time);
+
+            // Precompute LST:
+            this.lstStart = sc.toLst(jd_start);
+            // ensure lstEnd > lstStart: exposure time is positive:
+            this.lstEnd = lstStart + getExpTime() / 3600.0;
+
+            logger.debug("lst_start = {}", lstStart);
+            logger.debug("lst_end   = {}", lstEnd);
+        }
+
+        logger.debug("prepared: {}", this);
+    }
+
+    private void validate() {
+        int flag = 0;
+        if (this.getType() == null) {
+            logger.warn("Missing type for observation[{}]", getObsId());
+            flag |= INVALID_META;
+        }
+        if (isEmpty(this.getStations())) {
+            logger.warn("Missing stations for observation[{}]", getObsId());
+            flag |= INVALID_META;
+        }
+        if (Double.isNaN(getMjdStart()) || (getMjdStart() == 0.0)
+                || Double.isNaN(getMjdEnd()) || (getMjdEnd() == 0.0)
+                || getMjdEnd() <= getMjdStart()) {
+            logger.warn("Invalid MJD range [{} to {}] for observation[{}]", getMjdStart(), getMjdEnd(), getObsId());
+            flag |= INVALID_META;
+            flag |= INVALID_TIMES;
+        }
+        // check computed values:
+        if (getExpTime() <= 1.0) {
+            // less than 1 second !
+            logger.warn("Invalid Exp. time [{} s] for observation[{}]", getExpTime(), getObsId());
+            flag |= INVALID_META;
+            flag |= INVALID_TIMES;
+        }
+        // check references:
+        if (this.getInterferometerRef() == null) {
+            logger.warn("Missing interferometer reference '{}' for observation[{}]", getInterferometerName(), getObsId());
+            flag |= INVALID_META;
+            flag |= INVALID_TIMES;
+            flag |= INVALID_UV;
+        }
+        if (this.getInstrumentRef() == null) {
+            logger.warn("Missing instrument reference '{}' mode '{}' for observation[{}]", getInstrumentName(), getInstrumentMode(), getObsId());
+            flag |= INVALID_META;
+            flag |= INVALID_UV;
+        } else {
+            if (this.getInstrumentModeRef() == null) {
+                logger.warn("Missing instrument mode reference '{}' for observation[{}]", getInstrumentMode(), getObsId());
+                flag |= INVALID_META;
+                flag |= INVALID_UV;
+            }
+        }
+        this.valid = flag;
     }
 
     @Override
@@ -532,6 +800,12 @@ public class RawObservation
                 + ", mjdEnd: " + getMjdEnd()
                 + ", projectedBaselines: " + getProjectedBaselines()
                 + " | expTime: " + getExpTime()
+                + ", RA: " + getRa()
+                + ", DEC: " + getDec()
+                + ", date: " + getDate()
+                + ", time: " + getTime()
+                + ", LST start: " + getLstStart()
+                + ", LST end: " + getLstEnd()
                 + "}";
     }
 
@@ -578,13 +852,19 @@ public class RawObservation
         if (getTargetName() != null) {
             sb.append(getTargetName());
         }
-        // note: generated targets for baseline limits do not have RA/DEC as string (useless):
-        sb.append("<br>Coords:</b> ").append(getTargetRa()).append(' ').append(getTargetDec());
+        sb.append("<br>Coords:</b> ").append(getRa()).append(' ').append(getDec());
 
         // Obs time range:
         sb.append("<hr><b>MJD:</b> ").append(getMjdStart());
+        if (getDate() != null) {
+            sb.append("<br><b>Date:</b> ").append(getDate());
+            sb.append("<br><b>Time:</b> ").append(getTime());
+        }
+        if (getLstStart() > 0.0) {
+            sb.append("<br><b>LST:</b> ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(getLstStart())).append(" h");
+        }
         if (getExpTime() > 0.0) {
-            sb.append("<br><b>Exp. time:</b> ").append(getExpTime()).append(" s");
+            sb.append("<br><b>Exp. time:</b> ").append(getIntExpTime()).append(" s");
         }
     }
 

@@ -126,7 +126,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                             final String ra = Double.toString(target.getRADeg());
                             final String de = Double.toString(target.getDECDeg());
                             logger.info("Query[{}]: ra={} dec={}", SERVER_URL, ra, de);
-                            
+
                             method.addParameter("ra", ra);
                             method.addParameter("dec", de);
 
@@ -221,29 +221,23 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
 
                     if (target != null) {
                         // Possibly: target was removed meanwhile
+                        final List<RawObservation> newObservations = rawObservations.getObservations();
+
+                        final TargetRawObservation rawObs = observation.getOrCreateTargetRawObservation(target);
+                        // TODO: update timestamp in rawObs
+
+                        // Replace or Merge subset (use last_mod_date to do incremental updates ?)
+                        // note: atomicity OK (no need clone ?)
+                        rawObs.setObservations(newObservations);
                         modCount++;
 
-                        // TODO: move it in RawObsManager:
-                        TargetRawObservation rawObs = observation.getTargetRawObservation(target);
-                        if (rawObs == null) {
-                            rawObs = new TargetRawObservation();
-                            rawObs.setTargetRef(target);
-                            observation.getTargetObservations().add(rawObs);
-                        }
-                        // TODO: update timestamp in rawObs
-                            
-                        // Replace or Merge subset (use last_mod_date to do incremental updates ?)
-                        final List<RawObservation> obsList = rawObs.getObservations();
-                        obsList.clear();
-                        obsList.addAll(rawObservations.getObservations());
-
-                        report.append(target.getName()).append(" : ").append(obsList.size()).append(" records.\n");
+                        report.append(target.getName()).append(" : ").append(newObservations.size()).append(" records.\n");
                     }
                 }
                 logger.info("refreshUI[{} targets updated]: {} ms.", modCount, 1e-6d * (System.nanoTime() - start));
 
                 if (modCount != 0) {
-                    om.fireTargetChangedEvents();
+                    om.fireTargetObservationsChangedEvents();
 
                     // display report message:
                     MessagePane.showMessage(report.toString());

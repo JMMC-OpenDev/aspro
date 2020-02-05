@@ -107,6 +107,41 @@ public class TargetRawObservation
     }
     
 //--simple--preserve
+    
+    public final void setObservations(final List<RawObservation> newObservations) {
+        final List<RawObservation> obsList = getObservations();
+        obsList.clear();
+        obsList.addAll(newObservations);
+        // reset the preparation flag:
+        prepared = false;
+    }
+
+    /** preparation flag (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    boolean prepared = false;
+
+    /** preparation flag (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    List<fr.jmmc.aspro.model.rawobs.Observations> obsGroups = null;
+    
+    /**
+     * Return the observations as Observation Blocks
+     * @return observations as Observation Blocks
+     */
+    public final List<fr.jmmc.aspro.model.rawobs.Observations> getGroups() {
+        return this.obsGroups;
+    }
+    
+    public final void prepare() {
+        if (prepared) {
+            return;
+        }
+        prepared = true;
+        
+        // Perform preparation and analysis:
+        this.obsGroups = fr.jmmc.aspro.model.RawObsManager.getInstance().analyze(getTargetRef().getName(), getObservations());
+    }
+    
     @Override
     public final String toString() {
         return "TargetRawObservation [" + ((this.getTargetRef() != null) ? this.getTargetRef() : "undefined") + "]" + " : " + getObservations();

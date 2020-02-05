@@ -3,11 +3,14 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
-import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.rawobs.Observations;
+import fr.jmmc.aspro.model.rawobs.RawObservation;
 import fr.jmmc.jmcs.util.jaxb.XmlBindException;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +26,10 @@ public final class RawObsManager extends BaseXmlManager {
     private final static String OB_JAXB_PATH = "fr.jmmc.aspro.model.rawobs";
     /** singleton pattern */
     private static final RawObsManager INSTANCE = new RawObsManager();
+
+    /* members */
+    /** shared context */
+    private final Map sharedContext = new HashMap(32);
 
     /**
      * Return the singleton
@@ -68,5 +75,24 @@ public final class RawObsManager extends BaseXmlManager {
             return rawObservations;
         }
         return null;
+    }
+
+    public List<Observations> analyze(final String name, final List<RawObservation> observations) {
+        logger.info("analyze: Target '{}' {} observations", name, observations.size());
+
+        final List<Observations> obsGroups = null;
+
+        if (!observations.isEmpty()) {
+            final ConfigurationManager cm = ConfigurationManager.getInstance();
+
+            // 1. Analyze all individual observations:
+            for (RawObservation rawObs : observations) {
+                rawObs.prepare(logger, sharedContext, cm);
+            }
+
+            // 2. Group observations as Observation Blocks (30mins)
+            // TODO
+        }
+        return obsGroups;
     }
 }

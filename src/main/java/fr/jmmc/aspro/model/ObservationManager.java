@@ -28,6 +28,7 @@ import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.TargetRawObservation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.oi.WhenSetting;
@@ -431,7 +432,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         this.fireObservationLoaded();
 
         // fire change events :
-        this.fireTargetChangedEvents();
+        this.fireTargetObservationsChangedEvents();
 
         // finally: set the initial state of the main observation (after GUI updates => potentially modified) 
         this.defineInitialObservation();
@@ -1388,7 +1389,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         // fire change events :
         this.fireTargetChangedEvents();
     }
-
+    
     /**
      * This fires a target change and an observation change event to all registered listeners.
      */
@@ -1403,6 +1404,20 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         this.fireObservationUpdate(true);
     }
 
+
+    /**
+     * This prepares the TargetRawObservation 
+     * and fires a target change and an observation change event to all registered listeners.
+     */
+    public void fireTargetObservationsChangedEvents() {
+        // analyze raw observations once loaded:
+        for (TargetRawObservation rawObs : getMainObservation().getTargetObservations()) {
+            rawObs.prepare();
+        }
+        
+        this.fireTargetChangedEvents();
+    }   
+    
     // --- TARGET CONFIGURATION --------------------------------------------------
     /**
      * Return the target configuration for the given target (FT mode, HA min/max)

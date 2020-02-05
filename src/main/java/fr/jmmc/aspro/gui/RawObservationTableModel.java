@@ -38,14 +38,19 @@ public final class RawObservationTableModel extends AbstractTableModel {
         TARGET_RA("RA", Double.class),
         TARGET_DEC("DEC", Double.class),
         MJD_OBS("MJD OBS", Double.class),
-        EXP_TIME("Exp. time", Double.class);
+        VALID("Valid", Integer.class),
+        EXP_TIME("Exp. time", Double.class),
+        TARGET_RA_HMS("RA (HMS)", String.class),
+        TARGET_DEC_DMS("DEC (DMS)", String.class),
+        DATE("Date (UTC)", String.class),
+        TIME("Time (UTC)", String.class),
+        LST("LST", Double.class);
 
         /**
          * Custom constructor
          *
          * @param name name of the column
          * @param type class type of the column value
-         * @param editable flag to indicate if column values are editable
          */
         private ColumnDef(final String name, final Class<?> type) {
             this.name = name;
@@ -232,8 +237,20 @@ public final class RawObservationTableModel extends AbstractTableModel {
                     return obs.getTargetDec();
                 case MJD_OBS:
                     return obs.getMjdStart();
+                case VALID:
+                    return obs.getValid();
                 case EXP_TIME:
                     return obs.getExpTime();
+                case TARGET_RA_HMS:
+                    return obs.getRa();
+                case TARGET_DEC_DMS:
+                    return obs.getDec();
+                case DATE:
+                    return obs.getDate();
+                case TIME:
+                    return obs.getTime();
+                case LST:
+                    return obs.getLstStart();
                 default:
             }
         }

@@ -597,11 +597,17 @@ public class ObservationSetting
         for (Target target : getTargets()) {
             target.checkValues();
         }
+        
+        java.util.Map<String, Target> mapIDTargets = null;
+            
         // check target user infos :
         if (this.targetUserInfos != null) {
             logger.debug("checkReferences = {}", this.targetUserInfos);
 
-            this.targetUserInfos.updateTargetReferences(Target.createTargetIndex(getTargets()));
+            // create the Map<ID, Target> index for targets:
+            mapIDTargets = Target.createTargetIndex(getTargets());
+            
+            this.targetUserInfos.updateTargetReferences(mapIDTargets);
 
             if (this.targetUserInfos.isEmpty()) {
                 logger.debug("Removing empty target user informations.");
@@ -612,7 +618,12 @@ public class ObservationSetting
         if (this.targetObservations != null) {
             logger.debug("checkReferences = {}", this.targetObservations);
 
-            TargetRawObservation.updateTargetReferences(this.targetObservations, Target.createTargetIndex(getTargets()));
+            if (mapIDTargets == null) {
+                // create the Map<ID, Target> index for targets:
+                mapIDTargets = Target.createTargetIndex(getTargets());
+            }
+            
+            TargetRawObservation.updateTargetReferences(this.targetObservations, mapIDTargets);
             
             if (this.targetObservations.isEmpty()) {
                 logger.debug("Removing empty target raw observations.");
@@ -728,6 +739,21 @@ public class ObservationSetting
         this.cachedOrphanCalibrators = orphans;
     }
 
+    /**
+     * Return the target raw observation (create a new one if needed)
+     * @param target target
+     * @return target raw observation
+     */
+    public final TargetRawObservation getOrCreateTargetRawObservation(final Target target) {
+        TargetRawObservation rawObs = getTargetRawObservation(target);
+        if (rawObs == null) {
+            rawObs = new TargetRawObservation();
+            rawObs.setTargetRef(target);
+            getTargetObservations().add(rawObs);
+        }
+        return rawObs;
+    }
+    
     /**
      * Return the existing target raw observation corresponding to the target
      * @param target target
