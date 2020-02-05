@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
-import java.util.Objects;
 
 
 /**
@@ -829,7 +828,7 @@ public class RawObservation
         if (other == null) {
             return false;
         }
-        if (!Objects.equals(this.targetName, other.targetName)) {
+        if (!areEquals(this.targetName, other.targetName)) {
             return false;
         }
         if (Double.doubleToLongBits(this.targetRa) != Double.doubleToLongBits(other.targetRa)) {
@@ -838,25 +837,25 @@ public class RawObservation
         if (Double.doubleToLongBits(this.targetDec) != Double.doubleToLongBits(other.targetDec)) {
             return false;
         }
-        if (!Objects.equals(this.programId, other.programId)) {
+        if (!areEquals(this.programId, other.programId)) {
             return false;
         }
-        if (!Objects.equals(this.interferometerName, other.interferometerName)) {
+        if (!areEquals(this.interferometerName, other.interferometerName)) {
             return false;
         }
-        if (!Objects.equals(this.stations, other.stations)) {
+        if (!areEquals(this.stations, other.stations)) {
             return false;
         }
-        if (!Objects.equals(this.pops, other.pops)) {
+        if (!areEquals(this.pops, other.pops)) {
             return false;
         }
-        if (!Objects.equals(this.instrumentName, other.instrumentName)) {
+        if (!areEquals(this.instrumentName, other.instrumentName)) {
             return false;
         }
-        if (!Objects.equals(this.instrumentMode, other.instrumentMode)) {
+        if (!areEquals(this.instrumentMode, other.instrumentMode)) {
             return false;
         }
-        if (!Objects.equals(this.instrumentSubMode, other.instrumentSubMode)) {
+        if (!areEquals(this.instrumentSubMode, other.instrumentSubMode)) {
             return false;
         }
         if (this.type != other.type) {
