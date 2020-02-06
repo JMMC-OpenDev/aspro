@@ -8,6 +8,8 @@ import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
+import fr.jmmc.aspro.gui.chart.ClickableXYAnnotationEntity;
+import fr.jmmc.aspro.gui.chart.ClickableXYBoxAnnotation;
 import fr.jmmc.aspro.gui.chart.EnhancedXYBoxAnnotation;
 import fr.jmmc.aspro.gui.chart.FitXYTextAnnotation;
 import fr.jmmc.aspro.gui.chart.ObservabilityPlotContext;
@@ -374,6 +376,23 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 if (entity instanceof XYItemEntity) {
                     final XYItemEntity itemEntity = (XYItemEntity) entity;
                     seriesIndex = itemEntity.getSeriesIndex();
+                } else if (entity instanceof ClickableXYAnnotationEntity) {
+                    final ClickableXYAnnotationEntity anEntity = (ClickableXYAnnotationEntity) entity;
+                    seriesIndex = anEntity.getRendererIndex();
+                    // get object reference:
+                    final Object ref = anEntity.getReference();
+
+                    if (ref instanceof Observations) {
+                        final Observations obsGroup = (Observations) ref;
+
+                        logger.info("clicked on group [" + obsGroup.getGroupId() + " for " + obsGroup.getTargetId() + "]");
+
+                        StatusBar.show("obs log : " + obsGroup.first().getObsId());
+                        /*
+                    TODO: show group in table ?
+                         */
+                    }
+
                 } else if (entity instanceof XYAnnotationEntity) {
                     final XYAnnotationEntity anEntity = (XYAnnotationEntity) entity;
                     seriesIndex = anEntity.getRendererIndex();
@@ -1716,44 +1735,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                             for (int d = 0, iLen = intervals.size(); d < iLen; d++) {
                                                 final DateTimeInterval interval = intervals.get(d);
                                                 addAnnotation(annotations, pos,
-                                                        new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
+                                                        new ClickableXYBoxAnnotation(obsGroup, n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
                                                                 ChartUtils.DEFAULT_STROKE, null, RAW_OBS_OVERLAY_COLOR, Layer.FOREGROUND,
                                                                 this.slidingXYPlotAdapter.generateToolTip(obsGroup.getObservations().size(), rawObsFirst, rawObsLast)
                                                         ));
-                                            }
-                                        }
-
-                                        if (false) {
-                                            // TODO: filter observations to plot ?
-                                            final List<RawObservation> observations = targetRawObs.getObservations();
-                                            for (int k = 0, len = observations.size(); k < len; k++) {
-                                                final RawObservation rawObs = observations.get(k);
-
-                                                if (rawObs.isValid(RawObservation.INVALID_TIMES)) {
-                                                    final double lstStart = rawObs.getLstStart();
-                                                    final double lstEnd = rawObs.getLstEnd();
-
-                                                    // Convert to JD range (current night):
-                                                    final double jdStart = sc.convertLstToJD(lstStart);
-                                                    final double jdEnd = sc.convertLstToJD(lstEnd);
-
-                                                    rangesJD.clear();
-                                                    rangesJD.add(new Range(jdStart, jdEnd)); // reuse Range ?
-
-                                                    intervals.clear();
-
-                                                    // Warning: concurrency issue (date conversion are not thread safe ! background threads // awt thread !)
-                                                    obsData.convertRangesToDateIntervals(rangesJD, intervals);
-
-                                                    for (int d = 0, iLen = intervals.size(); d < iLen; d++) {
-                                                        final DateTimeInterval interval = intervals.get(d);
-                                                        addAnnotation(annotations, pos,
-                                                                new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
-                                                                        ChartUtils.DEFAULT_STROKE, null, RAW_OBS_OVERLAY_COLOR, Layer.FOREGROUND,
-                                                                        this.slidingXYPlotAdapter.generateToolTip(1, rawObs, null)
-                                                                ));
-                                                    }
-                                                }
                                             }
                                         }
                                     }

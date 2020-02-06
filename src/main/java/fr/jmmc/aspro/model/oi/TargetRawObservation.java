@@ -139,7 +139,7 @@ public class TargetRawObservation
         prepared = true;
         
         // Perform preparation and analysis:
-        this.obsGroups = fr.jmmc.aspro.model.RawObsManager.getInstance().analyze(getTargetRef().getName(), getObservations());
+        this.obsGroups = fr.jmmc.aspro.model.RawObsManager.getInstance().analyze(getTargetRef().getIdentifier(), getObservations());
     }
     
     @Override

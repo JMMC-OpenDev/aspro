@@ -77,6 +77,28 @@ public class Observations
     
 //--simple--preserve
     
+    @javax.xml.bind.annotation.XmlTransient
+    private Integer gid = null;
+
+    public Integer getGroupId() {
+        return gid;
+    }
+
+    public void setGroupId(final Integer gid) {
+        this.gid = gid;
+    }
+    
+    @javax.xml.bind.annotation.XmlTransient
+    private Object targetId = null;
+
+    public Object getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(final Object targetId) {
+        this.targetId = targetId;
+    }
+    
     public RawObservation first() {
         if (observations.isEmpty()) {
             return null;
@@ -93,8 +115,9 @@ public class Observations
 
     @Override
     public final String toString() {
-        return "Observations [" + getObservations().size() + "] {"
-                + "observations: " + getObservations()
+        return "Observations[" + getGroupId() + "] [" + getObservations().size() + "] {"
+                + " target: " + getTargetId()
+                + " observations: " + getObservations()
                 + "}";
     }
 

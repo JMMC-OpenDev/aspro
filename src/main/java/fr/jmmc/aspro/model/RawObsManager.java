@@ -81,9 +81,9 @@ public final class RawObsManager extends BaseXmlManager {
         return null;
     }
 
-    public List<Observations> analyze(final String name, final List<RawObservation> observations) {
+    public List<Observations> analyze(final String targetId, final List<RawObservation> observations) {
         final int len = observations.size();
-        logger.debug("analyze: Target '{}' {} observations", name, len);
+        logger.debug("analyze: {} has {} observations", targetId, len);
 
         List<Observations> obsGroups = null;
 
@@ -113,8 +113,7 @@ public final class RawObsManager extends BaseXmlManager {
 
                 // Create initial group:
                 int gid = 1;
-                Observations group = new Observations();
-                obsGroups.add(group);
+                Observations group = addGroup(obsGroups, gid, targetId);
 
                 // last valid observation:
                 RawObservation lastObs = observations.get(first);
@@ -143,9 +142,7 @@ public final class RawObsManager extends BaseXmlManager {
                             logger.debug("NOT time:\n{}\n{}", lastObs, rawObs);
                         }
                         if (!add) {
-                            gid++;
-                            group = new Observations();
-                            obsGroups.add(group);
+                            group = addGroup(obsGroups, ++gid, targetId);
                         }
                         addObsInGroup(group, gid, rawObs);
                         lastObs = rawObs;
@@ -153,14 +150,12 @@ public final class RawObsManager extends BaseXmlManager {
                 }
 
                 if (DUMP) {
-                    int i = 0;
                     for (Observations g : obsGroups) {
-                        System.out.println("Group [" + i + "] ---");
+                        System.out.println("Group [" + g.getGroupId() + "] ---");
 
                         for (RawObservation o : g.getObservations()) {
                             System.out.println("  " + o);
                         }
-                        i++;
                     }
                 }
             }
@@ -168,8 +163,16 @@ public final class RawObsManager extends BaseXmlManager {
         return obsGroups;
     }
 
+    private Observations addGroup(final List<Observations> obsGroups, final int gid, final String targetId) {
+        final Observations group = new Observations();
+        group.setGroupId(NumberUtils.valueOf(gid));
+        group.setTargetId(targetId);
+        obsGroups.add(group);
+        return group;
+    }
+
     private void addObsInGroup(final Observations group, final int gid, final RawObservation obs) {
-        obs.setGroupId(NumberUtils.valueOf(gid));
+        obs.setGroupId(group.getGroupId());
         group.getObservations().add(obs);
     }
 }
