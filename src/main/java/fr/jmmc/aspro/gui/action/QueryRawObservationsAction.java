@@ -48,9 +48,15 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
     /** Class logger */
     protected static final Logger logger = LoggerFactory.getLogger(QueryRawObservationsAction.class.getName());
 
-    public static final String SERVER_URL = (USE_LOCAL)
-            ? "http://localhost:6543/observation/search.votable"
-            : "http://obs.jmmc.fr/observation/search.votable";
+    public static final String ESO_GET_PROG_URL = "http://archive.eso.org/wdb/wdb/eso/sched_rep_arc/query?progid=";
+
+    public static final String OBS_SERVER = (USE_LOCAL)
+            ? "http://localhost:6543/"
+            : "http://obs.jmmc.fr/";
+
+    public static final String OBS_SERVER_GET_OBS_URL = OBS_SERVER + "header/";
+
+    public static final String OBS_SERVER_SEARCH_URL = OBS_SERVER_GET_OBS_URL + "/search.votable";
 
     /** XSLT file path */
     private final static String XSLT_FILE = "fr/jmmc/aspro/interop/Obsvot2RawObservations.xsl";
@@ -96,7 +102,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
          */
         @Override
         public Map<String, Observations> computeInBackground() {
-            final URI uri = Http.validateURL(SERVER_URL);
+            final URI uri = Http.validateURL(OBS_SERVER_SEARCH_URL);
 
             final RawObsManager rom = RawObsManager.getInstance();
 
@@ -125,7 +131,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                         public void process(final PostMethod method) throws IOException {
                             final String ra = Double.toString(target.getRADeg());
                             final String de = Double.toString(target.getDECDeg());
-                            logger.info("Query[{}]: ra={} dec={}", SERVER_URL, ra, de);
+                            logger.info("Query[{}]: ra={} dec={}", OBS_SERVER_SEARCH_URL, ra, de);
 
                             method.addParameter("ra", ra);
                             method.addParameter("dec", de);
@@ -135,13 +141,13 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                         }
                     });
                 } catch (UnknownHostException uhe) {
-                    _logger.error("Query failed: {}", SERVER_URL, uhe);
+                    _logger.error("Query failed: {}", OBS_SERVER_SEARCH_URL, uhe);
                     break;
                 } catch (IOException ioe) {
-                    _logger.error("Query failed: {}", SERVER_URL, ioe);
+                    _logger.error("Query failed: {}", OBS_SERVER_SEARCH_URL, ioe);
                     break;
                 } finally {
-                    logger.info("Query[{}] {}: {} ms.", (result != null) ? "OK" : "FAILED", SERVER_URL,
+                    logger.info("Query[{}] {}: {} ms.", (result != null) ? "OK" : "FAILED", OBS_SERVER_SEARCH_URL,
                             1e-6d * (System.nanoTime() - startHttp));
                 }
 
@@ -155,7 +161,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                     } catch (IllegalArgumentException iae) {
                         _logger.error("ProcessVOTable failed:\n{}", result, iae);
                     } catch (IOException ioe) {
-                        _logger.error("ProcessVOTable failed: {}", SERVER_URL, ioe);
+                        _logger.error("ProcessVOTable failed: {}", OBS_SERVER_SEARCH_URL, ioe);
                     }
 
                     if (rawObsDocument != null) {

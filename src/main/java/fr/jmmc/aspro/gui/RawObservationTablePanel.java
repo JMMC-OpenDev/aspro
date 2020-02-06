@@ -11,16 +11,27 @@ import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.gui.component.BasicTableSorter;
 import fr.jmmc.jmcs.gui.util.AutofitTableColumns;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.NumberUtils;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.AbstractCellEditor;
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +45,6 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(RawObservationTablePanel.class.getName());
 
-    private static final TableCellRenderer RDR_NUM_INSTANCE = new TableCellNumberRenderer();
-
     private final RawObservationTableModel obsModel;
     private final BasicTableSorter obsTableSorter;
 
@@ -45,6 +54,9 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
 
         initComponents();
 
+        final EnhancedTableCellRenderer rdr = new EnhancedTableCellRenderer();
+        final EnhancedTableCellEditor editor = new EnhancedTableCellEditor();
+
         // Configure table sorting
         obsTableSorter = new BasicTableSorter(obsModel, jTableObs.getTableHeader());
         jTableObs.setModel(obsTableSorter);
@@ -52,8 +64,13 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
         // Fix row height:
         SwingUtils.adjustRowHeight(jTableObs);
 
-        jTableObs.setDefaultRenderer(Boolean.class, RDR_NUM_INSTANCE);
-        jTableObs.setDefaultRenderer(Double.class, RDR_NUM_INSTANCE);
+        // Use the internal cell renderer:
+        final TableColumnModel columnModel = jTableObs.getColumnModel();
+        for (int i = 0, len = columnModel.getColumnCount(); i < len; i++) {
+            final TableColumn tc = columnModel.getColumn(i);
+            tc.setCellRenderer(rdr);
+            tc.setCellEditor(editor);
+        }
     }
 
     // Display Table
@@ -64,6 +81,14 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
             AutofitTableColumns.autoResizeTable(jTableObs);
         }
         return this;
+    }
+
+    private boolean hasURL(final int column) {
+        return obsModel.hasURL(column);
+    }
+
+    private String getURL(final int column, final int row) {
+        return obsModel.getURL(column, row);
     }
 
     /** This method is called from within the constructor to
@@ -114,19 +139,26 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
     }
 
     /**
-     * Used to format numbers in cells.
+     * Used to render cells.
      *
      * @warning: No trace log implemented as this is very often called (performance).
      */
-    private final static class TableCellNumberRenderer extends DefaultTableCellRenderer {
+    private final class EnhancedTableCellRenderer extends DefaultTableCellRenderer {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
+        /* members */
+        /** derived italic font */
+        private Font _derivedItalicFont = null;
+        /** orange border for selected cell */
+        private final Border _orangeBorder = BorderFactory.createLineBorder(Color.ORANGE, 2);
+        /** internal string buffer */
+        final StringBuilder _buffer = new StringBuilder(128);
 
         /**
-         * Constructor
+         * TableCellColors  -  Constructor
          */
-        private TableCellNumberRenderer() {
+        EnhancedTableCellRenderer() {
             super();
         }
 
@@ -144,7 +176,10 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
             String text = "";
             if (value != null) {
                 if (value instanceof Double) {
-                    text = NumberUtils.format(((Double) value).doubleValue());
+                    final double val = ((Double) value).doubleValue();
+                    if (!Double.isNaN(val)) {
+                        text = NumberUtils.format(val);
+                    }
                 } else if (value instanceof Boolean) {
                     text = ((Boolean) value).booleanValue() ? "True" : "False";
                 } else {
@@ -153,6 +188,132 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
             }
             setText(text);
         }
+
+        /**
+         * getTableCellRendererComponent  -  return the component with renderer (Table)
+         * @param table JTable
+         * @param value Object
+         * @param isSelected boolean
+         * @param hasFocus boolean
+         * @param row int
+         * @param column int
+         * @return Component
+         */
+        @Override
+        public Component getTableCellRendererComponent(final JTable table, final Object value,
+                                                       final boolean isSelected, final boolean hasFocus,
+                                                       final int row, final int column) {
+
+            // Set default renderer to the component
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            // always use right alignment:
+            setHorizontalAlignment(JLabel.RIGHT);
+
+            final int colIndex = table.convertColumnIndexToModel(column);
+
+            if (colIndex == -1) {
+                logger.warn("Error searching in the table model while trying to render cell "
+                        + "at column {} table.getColumnCount() = {}", column, table.getColumnCount());
+                return this;
+            }
+
+            // Do not change color if cell is located on a selected row
+            if (table.isRowSelected(row)) {
+                // Except if it is the selected cell itself (to highlight found tokens)
+                if (table.isColumnSelected(column)) {
+                    setBorder(_orangeBorder);
+                    setBackground(Color.YELLOW);
+                    setForeground(Color.BLACK);
+
+                    // Put the corresponding row font in italic:
+                    if (_derivedItalicFont == null) {
+                        // cache derived Font:
+                        final Font cellFont = getFont();
+                        _derivedItalicFont = cellFont.deriveFont(cellFont.getStyle() | Font.ITALIC);
+                    }
+                    setFont(_derivedItalicFont);
+                }
+
+                return this;
+            }
+
+            final StringBuilder sb = _buffer;
+            final int modelColumn = obsTableSorter.columnModelIndex(colIndex);
+
+            // Compose catalog URL
+            if (value != null && hasURL(modelColumn)) {
+                setText(sb.append("<html><a href='#empty'>").append(value).append("</a></html>").toString());
+                sb.setLength(0); // recycle buffer
+            }
+
+            Color foregroundColor = Color.BLACK;
+            Color backgroundColor = Color.WHITE;
+
+            // If cell is not selected and not focused 
+            if (!(isSelected && hasFocus)) {
+                // Apply colors
+                setForeground(foregroundColor);
+                setBackground(backgroundColor);
+                setBorder(noFocusBorder);
+            }
+
+            // Return the component
+            return this;
+        }
+    }
+
+    final class EnhancedTableCellEditor extends AbstractCellEditor implements TableCellEditor {
+
+        /** default serial UID for Serializable interface */
+        private static final long serialVersionUID = 1;
+
+        // This method is called when a cell value is edited by the user.
+        @Override
+        public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected,
+                                                     final int row, final int column) {
+            // If the cell is empty
+            if (value == null) {
+                return null; // Exit
+            }
+
+            // Retrieve clicked cell informations
+            final int colIndex = table.convertColumnIndexToModel(column);
+
+            if (colIndex == -1) {
+                logger.warn("Error searching in the table model while trying to render cell "
+                        + "at column {} table.getColumnCount() = {}", column, table.getColumnCount());
+                return null;
+            }
+
+            final int modelColumn = obsTableSorter.columnModelIndex(colIndex);
+
+            if (hasURL(modelColumn)) {
+                final int modelRow = obsTableSorter.modelIndex(row);
+                final String url = getURL(modelColumn, modelRow);
+
+                if (url != null) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("User clicked, will open '{}' in default browser.", url);
+                    }
+
+                    // Open web browser with the computed URL
+                    BrowserLauncher.openURL(url);
+                }
+            }
+
+            // Return null to "cancel" editing
+            return null;
+        }
+
+        // This method is called when editing is completed.
+        // It must return the new value to be stored in the cell.
+        @Override
+        public Object getCellEditorValue() {
+            // Should not be called
+            logger.error("TableCellColorsEditor.getCellEditorValue() should have not been called.");
+            return null;
+        }
     }
 
     public static void main(String[] args) {
@@ -160,10 +321,10 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
         Bootstrapper.getState();
 
         final File file = new File("/home/bourgesl/ASPRO2/obsportal_targets.asprox");
-        
+
         try {
-            ObservationSetting observation= ObservationManager.getInstance().loadObservation(file, null);
-            
+            ObservationSetting observation = ObservationManager.getInstance().loadObservation(file, null);
+
             // Merge all raw obs:
             final List<RawObservation> obsList = new ArrayList<RawObservation>();
             for (TargetRawObservation targetRawObs : observation.getTargetObservations()) {

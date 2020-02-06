@@ -3,6 +3,7 @@
  ***************************************************************************** */
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.gui.action.QueryRawObservationsAction;
 import fr.jmmc.aspro.model.rawobs.RawObservation;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -22,7 +23,7 @@ public final class RawObservationTableModel extends AbstractTableModel {
     private static final Logger logger = LoggerFactory.getLogger(RawObservationTableModel.class.getName());
 
     /** Column definition enum */
-    public enum ColumnDef {
+    private enum ColumnDef {
         GID("Group Id", Integer.class),
         ID("Id", String.class),
         TYPE("Type", String.class),
@@ -119,6 +120,29 @@ public final class RawObservationTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    public boolean hasURL(final int column) {
+        if (column == ColumnDef.ID.ordinal()) {
+            return true;
+        }
+        if (column == ColumnDef.PROGRAM_ID.ordinal()) {
+            return true;
+        }
+        return false;
+    }
+
+    public String getURL(final int column, final int row) {
+        final String id = (String) getValueAt(row, column);
+        if (id != null) {
+            if (column == ColumnDef.ID.ordinal()) {
+                return QueryRawObservationsAction.OBS_SERVER_GET_OBS_URL + id;
+            }
+            if (column == ColumnDef.PROGRAM_ID.ordinal()) {
+                return QueryRawObservationsAction.ESO_GET_PROG_URL + id;
+            }
+        }
+        return null;
+    }
+
     /* TableModel interface implementation */
     /**
      * Returns the number of columns in the model. A
@@ -176,7 +200,7 @@ public final class RawObservationTableModel extends AbstractTableModel {
      */
     @Override
     public boolean isCellEditable(final int rowIndex, final int columnIndex) {
-        return false;
+        return hasURL(columnIndex);
     }
 
     /**
