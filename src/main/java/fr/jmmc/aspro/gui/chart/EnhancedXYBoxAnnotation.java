@@ -73,7 +73,7 @@ import org.jfree.chart.util.SerialUtils;
  *
  * @author bourgesl
  */
-public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
+public class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
         implements Cloneable, PublicCloneable, Serializable {
 
     /** For serialization. */
@@ -220,9 +220,9 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * @param info  the plot rendering info.
      */
     @Override
-    public void draw(final Graphics2D g2, final XYPlot plot, final Rectangle2D dataArea,
-                     final ValueAxis domainAxis, final ValueAxis rangeAxis,
-                     final int rendererIndex, final PlotRenderingInfo info) {
+    public final void draw(final Graphics2D g2, final XYPlot plot, final Rectangle2D dataArea,
+                           final ValueAxis domainAxis, final ValueAxis rangeAxis,
+                           final int rendererIndex, final PlotRenderingInfo info) {
 
         final PlotOrientation orientation = plot.getOrientation();
 
@@ -387,7 +387,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      *                                    by subclasses.
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public final Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
 
@@ -426,7 +426,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Return the lower x-coordinate.
      * @return lower x-coordinate.
      */
-    public double getX0() {
+    public final double getX0() {
         return x0;
     }
 
@@ -434,7 +434,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Define the lower x-coordinate.
      * @param x0 lower x-coordinate.
      */
-    public void setX0(final double x0) {
+    public final void setX0(final double x0) {
         this.x0 = x0;
     }
 
@@ -442,7 +442,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Return the The lower y-coordinate.
      * @return The lower y-coordinate.
      */
-    public double getY0() {
+    public final double getY0() {
         return y0;
     }
 
@@ -450,7 +450,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Define the The lower y-coordinate.
      * @param y0 The lower y-coordinate.
      */
-    public void setY0(final double y0) {
+    public final void setY0(final double y0) {
         this.y0 = y0;
     }
 
@@ -458,7 +458,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Return the upper x-coordinate.
      * @return upper x-coordinate.
      */
-    public double getX1() {
+    public final double getX1() {
         return x1;
     }
 
@@ -466,7 +466,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Define the upper x-coordinate.
      * @param x1 upper x-coordinate.
      */
-    public void setX1(final double x1) {
+    public final void setX1(final double x1) {
         this.x1 = x1;
     }
 
@@ -474,7 +474,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Return the The upper y-coordinate
      * @return The upper y-coordinate
      */
-    public double getY1() {
+    public final double getY1() {
         return y1;
     }
 
@@ -482,7 +482,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Define the The upper y-coordinate
      * @param y1 The upper y-coordinate
      */
-    public void setY1(final double y1) {
+    public final void setY1(final double y1) {
         this.y1 = y1;
     }
 
@@ -490,7 +490,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Return the stroke used to draw the box outline
      * @return stroke used to draw the box outline
      */
-    public Stroke getStroke() {
+    public final Stroke getStroke() {
         return stroke;
     }
 
@@ -498,7 +498,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Return the paint used to draw the box outline
      * @return paint used to draw the box outline
      */
-    public Paint getOutlinePaint() {
+    public final Paint getOutlinePaint() {
         return outlinePaint;
     }
 
@@ -506,7 +506,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Return the paint used to fill the box.
      * @return 
      */
-    public Paint getFillPaint() {
+    public final Paint getFillPaint() {
         return fillPaint;
     }
 
@@ -514,7 +514,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Return the layer to draw this annotation = foreground or background (default)
      * @return layer to draw this annotation = foreground or background (default)
      */
-    public Layer getLayer() {
+    public final Layer getLayer() {
         return layer;
     }
 
@@ -522,14 +522,14 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Define the layer to draw this annotation = foreground or background (default)
      * @param layer layer to draw this annotation = foreground or background (default)
      */
-    public void setLayer(Layer layer) {
+    public final void setLayer(final Layer layer) {
         this.layer = layer;
     }
 
     /**
      * @return optional series index
      */
-    public int getSeriesIndex() {
+    public final int getSeriesIndex() {
         return seriesIndex;
     }
 
@@ -537,14 +537,14 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Define the optional series index
      @param seriesIndex optional series index
      */
-    public void setSeriesIndex(final int seriesIndex) {
+    public final void setSeriesIndex(final int seriesIndex) {
         this.seriesIndex = seriesIndex;
     }
 
     /**
      * @return highlighted flag
      */
-    public boolean isHighlighted() {
+    public final boolean isHighlighted() {
         return highlighted;
     }
 
@@ -552,14 +552,14 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Define the highlighted flag
      * @param highlighted highlighted flag
      */
-    public void setHighlighted(final boolean highlighted) {
+    public final void setHighlighted(final boolean highlighted) {
         this.highlighted = highlighted;
     }
 
     /**
      * @return paint used to fill the box if highlighted.
      */
-    public Paint getHighlightPaint() {
+    public final Paint getHighlightPaint() {
         return highlightPaint;
     }
 
@@ -567,7 +567,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * Define the paint used to fill the box if highlighted.
      * @param highlightPaint paint used to fill the box if highlighted.
      */
-    public void setHighlightPaint(final Paint highlightPaint) {
+    public final void setHighlightPaint(final Paint highlightPaint) {
         this.highlightPaint = highlightPaint;
     }
 
