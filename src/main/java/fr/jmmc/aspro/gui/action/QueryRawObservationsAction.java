@@ -54,9 +54,9 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
             ? "http://localhost:6543/"
             : "http://obs.jmmc.fr/";
 
-    public static final String OBS_SERVER_GET_OBS_URL = OBS_SERVER + "header/";
+    public static final String OBS_SERVER_GET_OBS_URL = OBS_SERVER + "observation/";
 
-    public static final String OBS_SERVER_SEARCH_URL = OBS_SERVER_GET_OBS_URL + "/search.votable";
+    public static final String OBS_SERVER_SEARCH_URL = OBS_SERVER_GET_OBS_URL + "search.votable";
 
     /** XSLT file path */
     private final static String XSLT_FILE = "fr/jmmc/aspro/interop/Obsvot2RawObservations.xsl";
