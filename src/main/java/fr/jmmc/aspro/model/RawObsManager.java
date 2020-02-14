@@ -82,7 +82,7 @@ public final class RawObsManager extends BaseXmlManager {
     }
 
     public List<Observations> analyze(final String targetId, final List<RawObservation> observations) {
-        final int len = observations.size();
+        int len = observations.size();
         logger.debug("analyze: {} has {} observations", targetId, len);
 
         List<Observations> obsGroups = null;
@@ -96,57 +96,66 @@ public final class RawObsManager extends BaseXmlManager {
             }
 
             // 2. Group observations as Observation Blocks (30mins):
-            int first = -1;
+            // 2.1: get only valid observations:
+            final List<RawObservation> validObservations = new ArrayList<RawObservation>();
+
             for (int i = 0; i < len; i++) {
                 final RawObservation rawObs = observations.get(i);
                 // only valid:
                 if (rawObs.isValid(RawObservation.INVALID_TIMES)) {
-                    first = i;
-                    break;
+                    validObservations.add(rawObs);
                 }
             }
 
-            logger.debug("first = {}", first);
+            logger.debug("valid observations = {}", validObservations);
 
-            if (first != -1) {
+            if (!validObservations.isEmpty()) {
+                len = validObservations.size();
                 obsGroups = new ArrayList<Observations>();
+
+                final Map<Integer, Observations> obsGroupById = new HashMap<Integer, Observations>();
 
                 // Create initial group:
                 int gid = 1;
-                Observations group = addGroup(obsGroups, gid, targetId);
+                Observations group = addGroup(obsGroupById, obsGroups, gid, targetId);
 
-                // last valid observation:
-                RawObservation lastObs = observations.get(first);
-                addObsInGroup(group, gid, lastObs);
+                // first valid observation:
+                addObsInGroup(group, validObservations.get(0));
 
-                for (int i = first + 1; i < len; i++) {
-                    final RawObservation rawObs = observations.get(i);
-
+                for (int i = 1; i < len; i++) {
                     // only valid:
-                    if (rawObs.isValid(RawObservation.INVALID_TIMES)) {
-                        // check if time distance is within 30mins
-                        final double elapsed = (rawObs.getMjdStart() - lastObs.getMjdEnd()) * 86400.0; // in seconds
+                    final RawObservation rawObs = validObservations.get(i);
 
+                    Observations prevGroup = null;
+
+                    for (int j = i - 1; j >= 0; j--) {
+                        final RawObservation prevObs = validObservations.get(j);
+
+                        // check if time distance is within 30mins
+                        final double elapsed = (rawObs.getMjdStart() - prevObs.getMjdEnd()) * 86400.0; // in seconds
                         logger.debug("elapsed [{}] = {}", i, elapsed);
 
-                        boolean add = false;
                         if (elapsed < TIME_RANGE) {
-                            // check if rawObs is compatible with lastObs:
-                            if (rawObs.isCompatible(lastObs)) {
+                            // check if rawObs is compatible with prevObs:
+                            if (rawObs.isCompatible(prevObs)) {
                                 logger.debug("compatible [{}]", i);
-                                add = true;
+                                prevGroup = obsGroupById.get(prevObs.getGroupId());
+                                break;
                             } else {
-                                logger.debug("NOT compatible:\n{}\n{}", lastObs, rawObs);
+                                logger.debug("NOT compatible:\n{}\n{}", prevObs, rawObs);
                             }
                         } else {
-                            logger.debug("NOT time:\n{}\n{}", lastObs, rawObs);
+                            logger.debug("NOT time:\n{}\n{}", prevObs, rawObs);
+                            break;
                         }
-                        if (!add) {
-                            group = addGroup(obsGroups, ++gid, targetId);
-                        }
-                        addObsInGroup(group, gid, rawObs);
-                        lastObs = rawObs;
                     }
+                    group = null;
+                    if (prevGroup == null) {
+                        group = addGroup(obsGroupById, obsGroups, ++gid, targetId);
+                    } else {
+                        group = prevGroup;
+                    }
+                    addObsInGroup(group, rawObs);
                 }
 
                 if (DUMP) {
@@ -163,15 +172,19 @@ public final class RawObsManager extends BaseXmlManager {
         return obsGroups;
     }
 
-    private Observations addGroup(final List<Observations> obsGroups, final int gid, final String targetId) {
+    private static Observations addGroup(final Map<Integer, Observations> obsGroupById,
+                                         final List<Observations> obsGroups,
+                                         final int gid, final String targetId) {
         final Observations group = new Observations();
         group.setGroupId(NumberUtils.valueOf(gid));
         group.setTargetId(targetId);
+
         obsGroups.add(group);
+        obsGroupById.put(group.getGroupId(), group);
         return group;
     }
 
-    private void addObsInGroup(final Observations group, final int gid, final RawObservation obs) {
+    private static void addObsInGroup(final Observations group, final RawObservation obs) {
         obs.setGroupId(group.getGroupId());
         group.getObservations().add(obs);
     }
