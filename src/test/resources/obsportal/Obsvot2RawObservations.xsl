@@ -11,42 +11,44 @@
  This stylesheet transform a specific OBS-PORTAL Votable (any version) into one aspro observation setting.
 
  Transforms:
-         <TABLE>
+        <TABLE>
+            <FIELD ID="exp_id" arraysize="*" datatype="unicodeChar" name="exp_id" ucd="meta.id"/>
+            <FIELD ID="exp_header" arraysize="*" datatype="unicodeChar" name="exp_header" ucd="meta.id"/>
+            <FIELD ID="exp_mjd_start" datatype="double" name="exp_mjd_start" ucd="time.start;obs.exposure"/>
+            <FIELD ID="exp_mjd_end" datatype="double" name="exp_mjd_end" ucd="time.end;obs.exposure"/>
+            <FIELD ID="exp_projected_baselines" arraysize="*" datatype="unicodeChar" name="exp_projected_baselines" ucd="instr.baseline"/>
             <FIELD ID="obs_id" arraysize="*" datatype="unicodeChar" name="obs_id" ucd="meta.id"/>
             <FIELD ID="obs_type" arraysize="*" datatype="unicodeChar" name="obs_type" ucd="meta.id;class"/>
             <FIELD ID="obs_program" arraysize="*" datatype="unicodeChar" name="obs_program" ucd="meta.id"/>
-            <FIELD ID="obs_container" arraysize="*" datatype="unicodeChar" name="obs_container" ucd="meta.id"/>
-            <FIELD ID="obs_mjd_start" datatype="double" name="obs_mjd_start" ucd="time.start;obs.exposure"/>
-            <FIELD ID="obs_mjd_end" datatype="double" name="obs_mjd_end" ucd="time.end;obs.exposure"/>
-            <FIELD ID="target_ra" datatype="double" name="target_ra" ucd="pos.eq.ra;meta.main"/>
-            <FIELD ID="target_dec" datatype="double" name="target_dec" ucd="pos.eq.dec;meta.main"/>
-            <FIELD ID="target_name" arraysize="*" datatype="unicodeChar" name="target_name" ucd="meta.id;src"/>
+            <FIELD ID="interferometer_name" arraysize="*" datatype="unicodeChar" name="interferometer_name" ucd="meta.id"/>
+            <FIELD ID="interferometer_stations" arraysize="*" datatype="unicodeChar" name="interferometer_stations"/>
             <FIELD ID="instrument_name" arraysize="*" datatype="unicodeChar" name="instrument_name" ucd="meta.id;instr"/>
             <FIELD ID="instrument_mode" arraysize="*" datatype="unicodeChar" name="instrument_mode" ucd="meta.id;instr.setup"/>
             <FIELD ID="instrument_submode" arraysize="*" datatype="unicodeChar" name="instrument_submode" ucd="meta.id;instr.setup"/>
-            <FIELD ID="interferometer_name" arraysize="*" datatype="unicodeChar" name="interferometer_name" ucd="meta.id"/>
-            <FIELD ID="interferometer_stations" arraysize="*" datatype="unicodeChar" name="interferometer_stations"/>
-            <FIELD ID="interferometer_version" arraysize="*" datatype="unicodeChar" name="interferometer_version"/>
-            <FIELD ID="projected_baselines" arraysize="*" datatype="unicodeChar" name="projected_baselines"/>
+            <FIELD ID="target_id" arraysize="*" datatype="unicodeChar" name="target_id" ucd="meta.id"/>
+            <FIELD ID="target_name" arraysize="*" datatype="unicodeChar" name="target_name" ucd="meta.id;meta.main"/>
+            <FIELD ID="target_ra" datatype="double" name="target_ra" ucd="pos.eq.ra;meta.main" unit="deg"/>
+            <FIELD ID="target_dec" datatype="double" name="target_dec" ucd="pos.eq.dec;meta.main" unit="deg"/>
             <DATA>
                 <TABLEDATA>
                     <TR>
-                     <TD>PIONI.2019-12-13T03:24:59.281</TD>
-                     <TD>calibrator</TD>
-                     <TD>60.A-9004(A)</TD>
-                     <TD>2656378</TD>
-                     <TD>58830.1423527901</TD>
-                     <TD>58830.1429453827</TD>
-                     <TD>27.342153</TD>
-                     <TD>-27.77426</TD>
-                     <TD>HD_11174</TD>
-                     <TD>PIONIER</TD>
-                     <TD/>
-                     <TD/>
-                     <TD>VLTI</TD>
-                     <TD>A 0   G 1   J 2   J 3</TD>
-                     <TD/>
-                     <TD>{'A0-G1': {'length': '82.8280', 'angle': '136.3000'}, 'A0-J2': {'length': '111.8865', 'angle': '111.2000'}, 'A0-J3': {'length': '118.3970', 'angle': '57.6805'}, 'G1-J2': {'length': '50.9495', 'angle': '67.5500'}, 'G1-J3': {'length': '130.4260', 'angle': '19.1725'}, 'J2-J3': {'length': '103.8475', 'angle': '357.6440'}}</TD>
+                        <TD>GRAVI.2019-02-16T04:26:53.206_1</TD>
+                        <TD>GRAVI.2019-02-16T04:26:53.206</TD>
+                        <TD>58530.18533803</TD>
+                        <TD>58530.1888102522</TD>
+                        <TD>{'U1-U2': {'length': {'start': '50.1590', 'end': '50.0840'}, 'angle': {'start': '14.6000', 'end': '15.4000'}}, 'U1-U3': {'length': {'start': '93.5290', 'end': '93.3650'}, 'angle': {'start': '20.5000', 'end': '21.3000'}}, 'U1-U4': {'length': {'start': '129.2960', 'end': '129.1750'}, 'angle': {'start': '43.4850', 'end': '44.5810'}}, 'U2-U3': {'length': {'start': '43.9410', 'end': '43.8610'}, 'angle': {'start': '27.2000', 'end': '28.2000'}}, 'U2-U4': {'length': {'start': '88.7820', 'end': '88.8800'}, 'angle': {'start': '59.3480', 'end': '60.5360'}}, 'U3-U4': {'length': {'start': '56.6300', 'end': '56.9140'}, 'angle': {'start': '83.7340', 'end': '84.9140'}}}</TD>
+                        <TD>512</TD>
+                        <TD>science</TD>
+                        <TD>0102.C-0519(A)</TD>
+                        <TD>VLTI</TD>
+                        <TD>U1 U2 U3 U4</TD>
+                        <TD>GRAVITY</TD>
+                        <TD>HIGH-COMBINED</TD>
+                        <TD>SINGLE</TD>
+                        <TD>466</TD>
+                        <TD>IRS9A</TD>
+                        <TD>168.790967</TD>
+                        <TD>-61.28026</TD>
                     </TR>
                 </TABLEDATA>
             </DATA>
@@ -56,23 +58,22 @@
      <o:observations xmlns:o="http://www.jmmc.fr/aspro-raw-obs/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                      xsi:schemaLocation="http://www.jmmc.fr/aspro-raw-obs/0.1 AsproRawObsModel.xsd">
         <observation>
-           <obsId>GRAVI.2017-09-28T01:46:39.919.fits</obsId>
-           <type>SCIENCE</type>
-           <parentId>200436844</parentId>
-           <programId>60.A-9295(A)</programId>
-           <interferometerName>VLTI</interferometerName>
-           <interferometerVersion>Period 103</interferometerVersion>
-           <stations>A0 G1 J2 K0</stations>
-           <instrumentName>GRAVITY</instrumentName>
-           <instrumentMode>HIGH-COMBINED</instrumentMode>
-           <instrumentSubMode>SINGLE</instrumentSubMode>
-           <targetName>Fomalhaut</targetName>
-           <targetRa>344.411622</targetRa>
-           <targetDec>-29.6229</targetDec>
-           <mjdStart>58024.07407314</mjdStart>
-           <mjdEnd>58024.07778841778</mjdEnd>
-           <projectedBaselines></projectedBaselines>
-       </observation>
+            <obsId>GRAVI.2019-02-16T04:26:53.206_1</obsId>
+            <type>science</type>
+            <parentId>512</parentId>
+            <programId>0102.C-0519(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>IRS9A</targetName>
+            <targetRa>168.790967</targetRa>
+            <targetDec>-61.28026</targetDec>
+            <mjdStart>58530.18533803</mjdStart>
+            <mjdEnd>58530.1888102522</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '50.1590', 'end': '50.0840'}, 'angle': {'start': '14.6000', 'end': '15.4000'}}, 'U1-U3': {'length': {'start': '93.5290', 'end': '93.3650'}, 'angle': {'start': '20.5000', 'end': '21.3000'}}, 'U1-U4': {'length': {'start': '129.2960', 'end': '129.1750'}, 'angle': {'start': '43.4850', 'end': '44.5810'}}, 'U2-U3': {'length': {'start': '43.9410', 'end': '43.8610'}, 'angle': {'start': '27.2000', 'end': '28.2000'}}, 'U2-U4': {'length': {'start': '88.7820', 'end': '88.8800'}, 'angle': {'start': '59.3480', 'end': '60.5360'}}, 'U3-U4': {'length': {'start': '56.6300', 'end': '56.9140'}, 'angle': {'start': '83.7340', 'end': '84.9140'}}}</projectedBaselines>
+        </observation>
     </o:observations>
 -->
 
@@ -127,6 +128,14 @@
 
         <!-- Locate fields in the votable (generated by mapping2xslt) -->
 
+        <!--
+            <FIELD ID="exp_id" arraysize="*" datatype="unicodeChar" name="exp_id" ucd="meta.id"/>
+            <FIELD ID="exp_header" arraysize="*" datatype="unicodeChar" name="exp_header" ucd="meta.id"/>
+            <FIELD ID="obs_id" arraysize="*" datatype="unicodeChar" name="obs_id" ucd="meta.id"/>
+            <FIELD ID="obs_type" arraysize="*" datatype="unicodeChar" name="obs_type" ucd="meta.id;class"/>
+            <FIELD ID="obs_program" arraysize="*" datatype="unicodeChar" name="obs_program" ucd="meta.id"/>
+        -->
+
         <!-- TODO: fix UCD -->
         <xsl:variable name="OBS_ID_index">
             <xsl:call-template name="getColumnIndex">
@@ -134,7 +143,7 @@
                     <xsl:with-param name="ucd11">meta.id;meta.main</xsl:with-param>
                     <xsl:with-param name="ucd10">META.MAIN</xsl:with-param>
                 -->
-                <xsl:with-param name="name">obs_id</xsl:with-param>
+                <xsl:with-param name="name">exp_id</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
 
@@ -150,7 +159,7 @@
                     <xsl:with-param name="ucd11">meta.id</xsl:with-param>
                     <xsl:with-param name="ucd10">META.ID</xsl:with-param>
                 -->
-                <xsl:with-param name="name">obs_container</xsl:with-param> <!-- obs_parent_id -->
+                <xsl:with-param name="name">obs_id</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
 
@@ -161,11 +170,15 @@
                     <xsl:with-param name="ucd11">meta.id</xsl:with-param>
                     <xsl:with-param name="ucd10">META.ID</xsl:with-param>
                 -->
-                <xsl:with-param name="name">obs_program</xsl:with-param> <!-- obs_prog_id -->
+                <xsl:with-param name="name">obs_program</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
 
         <!-- interferometer (facility) identification -->
+        <!--
+            <FIELD ID="interferometer_name" arraysize="*" datatype="unicodeChar" name="interferometer_name" ucd="meta.id"/>
+            <FIELD ID="interferometer_stations" arraysize="*" datatype="unicodeChar" name="interferometer_stations"/>
+        -->
         <xsl:variable name="INTERFEROMETER_NAME_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="name">interferometer_name</xsl:with-param>
@@ -198,6 +211,11 @@
         </xsl:variable>
 
         <!-- instrument setup -->
+        <!--
+            <FIELD ID="instrument_name" arraysize="*" datatype="unicodeChar" name="instrument_name" ucd="meta.id;instr"/>
+            <FIELD ID="instrument_mode" arraysize="*" datatype="unicodeChar" name="instrument_mode" ucd="meta.id;instr.setup"/>
+            <FIELD ID="instrument_submode" arraysize="*" datatype="unicodeChar" name="instrument_submode" ucd="meta.id;instr.setup"/>
+        -->
         <xsl:variable name="INSTRUMENT_NAME_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="name">instrument_name</xsl:with-param>
@@ -217,6 +235,13 @@
         </xsl:variable>
 
         <!-- target -->
+        <!-- TODO: keep target_id -->
+        <!--
+            <FIELD ID="target_id" arraysize="*" datatype="unicodeChar" name="target_id" ucd="meta.id"/>
+            <FIELD ID="target_name" arraysize="*" datatype="unicodeChar" name="target_name" ucd="meta.id;meta.main"/>
+            <FIELD ID="target_ra" datatype="double" name="target_ra" ucd="pos.eq.ra;meta.main" unit="deg"/>
+            <FIELD ID="target_dec" datatype="double" name="target_dec" ucd="pos.eq.dec;meta.main" unit="deg"/>
+        -->
         <xsl:variable name="TARGET_NAME_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="name">target_name</xsl:with-param>
@@ -245,23 +270,30 @@
             </xsl:call-template>
         </xsl:variable>
 
+        <!-- exposure / acquisition -->
+        <!--
+            <FIELD ID="exp_mjd_start" datatype="double" name="exp_mjd_start" ucd="time.start;obs.exposure"/>
+            <FIELD ID="exp_mjd_end" datatype="double" name="exp_mjd_end" ucd="time.end;obs.exposure"/>
+            <FIELD ID="exp_projected_baselines" arraysize="*" datatype="unicodeChar" name="exp_projected_baselines" ucd="instr.baseline"/>
+        -->
+
         <!-- exposure time -->
         <xsl:variable name="MJD_START_index">
             <xsl:call-template name="getColumnIndex">
-                <xsl:with-param name="name">obs_mjd_start</xsl:with-param>
+                <xsl:with-param name="name">exp_mjd_start</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
 
         <xsl:variable name="MJD_END_index">
             <xsl:call-template name="getColumnIndex">
-                <xsl:with-param name="name">obs_mjd_end</xsl:with-param>
+                <xsl:with-param name="name">exp_mjd_end</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
 
         <!-- projected baselines (uv points) -->
         <xsl:variable name="PROJ_BASELINES_index">
             <xsl:call-template name="getColumnIndex">
-                <xsl:with-param name="name">projected_baselines</xsl:with-param>
+                <xsl:with-param name="name">exp_projected_baselines</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
 
