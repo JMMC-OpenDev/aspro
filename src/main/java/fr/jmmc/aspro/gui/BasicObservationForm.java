@@ -37,9 +37,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.model.oi.TargetRawObservation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.aspro.model.rawobs.RawObservation;
 import fr.jmmc.aspro.model.util.TargetMatch;
 import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.jmal.ALX;
@@ -82,7 +80,6 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JSpinner.DateEditor;
 import javax.swing.ListModel;
@@ -170,7 +167,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jButtonTargetEditor = new javax.swing.JButton();
         jPanelTargetsRight = new javax.swing.JPanel();
         jButtonSkyCalc = new javax.swing.JButton();
-        jButtonShowObsTable = new javax.swing.JButton();
         jPanelMain = new javax.swing.JPanel();
         jPanelObsLeft = new javax.swing.JPanel();
         jLabelInterferometer = new javax.swing.JLabel();
@@ -243,7 +239,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridheight = 3;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.8;
         gridBagConstraints.weighty = 1.0;
@@ -260,8 +256,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         jPanelTargets.add(jButtonDeleteTarget, gridBagConstraints);
 
@@ -300,21 +296,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
-        jPanelTargets.add(jButtonSkyCalc, gridBagConstraints);
-
-        jButtonShowObsTable.setText("Obs.");
-        jButtonShowObsTable.setToolTipText("Show the table of Observation logs");
-        jButtonShowObsTable.setName("jButtonSkyCalc"); // NOI18N
-        jButtonShowObsTable.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonShowObsTableActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
-        jPanelTargets.add(jButtonShowObsTable, gridBagConstraints);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
+        jPanelTargets.add(jButtonSkyCalc, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridheight = 2;
@@ -657,24 +642,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
           JSkyCalc.showJSkyCalc(site, name, ra, dec, selectedTarget.getName(), observation.getWhen().getDate());
       }
   }//GEN-LAST:event_jButtonSkyCalcActionPerformed
-
-    private void jButtonShowObsTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShowObsTableActionPerformed
-        final Target selectedTarget = getSelectedTarget();
-        if (selectedTarget != null) {
-            final ObservationSetting observation = om.getMainObservation();
-
-            final TargetRawObservation targetRawObs = observation.getTargetRawObservation(selectedTarget);
-            if (targetRawObs != null) {
-                // Get all observations (TODO use groups):
-                final List<RawObservation> rawObsList = targetRawObs.getObservations(); 
-                if (!rawObsList.isEmpty()) {
-                    RawObservationTablePanel.showFrameData(JFrame.DISPOSE_ON_CLOSE,
-                            "Obs. logs for Target '" + selectedTarget.getName() + "'",
-                            rawObsList);
-                }
-            }
-        }
-    }//GEN-LAST:event_jButtonShowObsTableActionPerformed
 
     /**
      * Process the remove target action
@@ -2084,7 +2051,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonDeleteTarget;
-    private javax.swing.JButton jButtonShowObsTable;
     private javax.swing.JButton jButtonSkyCalc;
     private javax.swing.JButton jButtonTargetEditor;
     private javax.swing.JCheckBox jCheckBoxNightLimit;

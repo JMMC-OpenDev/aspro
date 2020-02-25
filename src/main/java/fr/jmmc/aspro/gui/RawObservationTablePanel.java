@@ -29,7 +29,6 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import org.slf4j.Logger;
@@ -48,7 +47,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
     private final RawObservationTableModel obsModel;
     private final BasicTableSorter obsTableSorter;
 
-    /** Creates new form FitsTableViewer */
+    /** Creates new form RawObservationTablePanel */
     public RawObservationTablePanel() {
         this.obsModel = new RawObservationTableModel();
 
@@ -73,8 +72,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
         }
     }
 
-    // Display Table
-    private RawObservationTablePanel setData(final List<RawObservation> observations) {
+    public RawObservationTablePanel setData(final List<RawObservation> observations) {
         obsModel.setData(observations);
 
         if (jTableObs.getRowCount() != 0) {
@@ -126,17 +124,6 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPaneTable;
     private javax.swing.JTable jTableObs;
     // End of variables declaration//GEN-END:variables
-
-    public static void showFrameData(final int frameCloseOperation, final String title, final List<RawObservation> observations) {
-        final JFrame frame = new JFrame(title);
-        frame.setDefaultCloseOperation(frameCloseOperation);
-
-        frame.setMinimumSize(new Dimension(800, 800));
-
-        frame.add(new RawObservationTablePanel().setData(observations));
-        frame.pack();
-        frame.setVisible(true);
-    }
 
     /**
      * Used to render cells.
@@ -314,6 +301,18 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
             logger.error("TableCellColorsEditor.getCellEditorValue() should have not been called.");
             return null;
         }
+    }
+
+    // --- TEST ---
+    private static void showFrameData(final int frameCloseOperation, final String title, final List<RawObservation> observations) {
+        final JFrame frame = new JFrame(title);
+        frame.setDefaultCloseOperation(frameCloseOperation);
+
+        frame.setMinimumSize(new Dimension(800, 800));
+
+        frame.add(new RawObservationTablePanel().setData(observations));
+        frame.pack();
+        frame.setVisible(true);
     }
 
     public static void main(String[] args) {

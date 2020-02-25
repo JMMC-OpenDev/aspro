@@ -8,7 +8,11 @@ import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.event.ObservationListener;
+import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetRawObservation;
+import fr.jmmc.aspro.model.rawobs.RawObservation;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
@@ -18,6 +22,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -67,6 +72,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     private UVCoveragePanel uvCoveragePanel = null;
     /** OIFits viewer panel */
     private OIFitsViewPanel oiFitsViewPanel = null;
+    /** raw obs panel */
+    private RawObservationTablePanel rawObsPanel = null;
 
     /** 
      * Creates new form SettingPanel
@@ -142,6 +149,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
             oiFitsViewPanel.dispose();
             oiFitsViewPanel = null;
         }
+        rawObsPanel = null;
 
         // disable timeline refresh timer:
         enableMouseCursorRefreshTimer(false);
@@ -157,6 +165,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     private void initComponents() {
 
         jSplitPane = new javax.swing.JSplitPane();
+        jSplitPaneMain = new javax.swing.JSplitPane();
         jTabbedPane = new javax.swing.JTabbedPane();
 
         setLayout(new java.awt.BorderLayout());
@@ -165,8 +174,13 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         jSplitPane.setResizeWeight(0.05);
         jSplitPane.setContinuousLayout(true);
 
+        jSplitPaneMain.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        jSplitPaneMain.setResizeWeight(0.9);
+
         jTabbedPane.setName("AsproTab"); // NOI18N
-        jSplitPane.setRightComponent(jTabbedPane);
+        jSplitPaneMain.setLeftComponent(jTabbedPane);
+
+        jSplitPane.setRightComponent(jSplitPaneMain);
 
         add(jSplitPane, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
@@ -196,7 +210,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
 
         // Add panels :
         // create the observation description form:
-        final ObservationDescriptionForm  obsDescForm = new ObservationDescriptionForm();
+        final ObservationDescriptionForm obsDescForm = new ObservationDescriptionForm();
         obsDescForm.setName("obsDescForm");
 
         // add the map panel :
@@ -224,9 +238,17 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
 
         // add the observation form :
         this.jSplitPane.setLeftComponent(this.observationForm);
+
+        // add the raw obs panel :
+        rawObsPanel = new RawObservationTablePanel();
+
+        this.jSplitPaneMain.setRightComponent(rawObsPanel);
+        this.jSplitPaneMain.setOneTouchExpandable(true);
+        onTargetSelectionChange(null);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSplitPane jSplitPane;
+    private javax.swing.JSplitPane jSplitPaneMain;
     private javax.swing.JTabbedPane jTabbedPane;
     // End of variables declaration//GEN-END:variables
 
@@ -249,16 +271,18 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
                 || type == ObservationEventType.REFRESH) {
 
             if (type == ObservationEventType.LOADED) {
+                // reset raw obs:
+                onTargetSelectionChange(null);
+
                 // show interferometer map when a file is loaded or the observation is reset :
-                
                 final int idx = this.jTabbedPane.indexOfTab(TAB_INTERFEROMETER_MAP);
                 if (idx != -1) {
                     this.jTabbedPane.setSelectedIndex(idx);
                 }
             }
 
-            final ObservationSetting observation = (type == ObservationEventType.REFRESH) ? 
-                    event.getObservationCollection().getFirstObservation() : event.getObservation();
+            final ObservationSetting observation = (type == ObservationEventType.REFRESH)
+                    ? event.getObservationCollection().getFirstObservation() : event.getObservation();
 
             // Observability panel :
             if (this.observabilityPanel == null) {
@@ -280,7 +304,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
             }
 
             /* disable UV Coverage & OIFits panels for single dishes */
-            if (observation.hasTargets() 
+            if (observation.hasTargets()
                     && observation.getInstrumentConfiguration().getStationList().size() > 1) {
                 if (uvPanelIndex == -1) {
                     // create the uv coverage panel :
@@ -293,10 +317,10 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
                     // register the uv coverage panel as an observation listener :
                     final ObservationManager om = ObservationManager.getInstance();
                     om.register(this.uvCoveragePanel);
-                    
+
                     if (type == ObservationEventType.REFRESH) {
                         // Fire events to initialize the UV Coverage panel properly:
-                    
+
                         // target selection:
                         om.fireTargetSelectionChanged(this.uvCoveragePanel);
 
@@ -324,6 +348,9 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
                     this.oiFitsViewPanel = null;
                 }
             }
+        } else if (type == ObservationEventType.TARGET_SELECTION_CHANGED
+                && event instanceof TargetSelectionEvent) {
+            this.onTargetSelectionChange(((TargetSelectionEvent) event).getTarget());
         } else if (type == ObservationEventType.OIFITS_DONE
                 && event instanceof OIFitsEvent
                 && ((OIFitsEvent) event).getOIFitsData() != null) {
@@ -365,6 +392,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     public Component getTabSelectedComponent() {
         return jTabbedPane.getSelectedComponent();
     }
+
     /**
      * Returns the currently selected component in the tabbedpane as a DocumentExportable
      * @return selected component or null if the tabbedpane is empty
@@ -372,7 +400,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     public DocumentExportable getExportableSelectedComponent() {
         Component com = getTabSelectedComponent();
         if (com instanceof DocumentExportable) {
-            return (DocumentExportable)com;
+            return (DocumentExportable) com;
         }
         return null;
     }
@@ -419,5 +447,56 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
      */
     public UVCoveragePanel getUVCoveragePanel() {
         return uvCoveragePanel;
+    }
+
+    /**
+     * Update the selected target for the given observation
+     * @param target selected target
+     */
+    private void onTargetSelectionChange(final Target target) {
+        logger.debug("onTargetSelectionChange : {}", target);
+
+        List<RawObservation> rawObsList = null;
+
+        // update the current selected target :
+        if (target != null) {
+            final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+
+            final TargetRawObservation targetRawObs = observation.getTargetRawObservation(target);
+            if (targetRawObs != null) {
+                // Get all observations:
+                if (!targetRawObs.getObservations().isEmpty()) {
+                    rawObsList = targetRawObs.getObservations();
+                }
+            }
+        }
+        // update data:
+        rawObsPanel.setData(rawObsList);
+
+        // this.setSelectedTargetName((target != null) ? target.getName() : null);
+        shouldShowRawObsPanel(rawObsList != null);
+    }
+
+    /**
+     * Tell GUI to show or hide raw obs panel
+     */
+    public void shouldShowRawObsPanel(final boolean visible) {
+        if (rawObsPanel.isVisible() == visible) {
+            return;
+        }
+        rawObsPanel.setVisible(visible);
+
+        final int totalHeight = (int) jSplitPaneMain.getBounds().getHeight();
+        final int dividerHeight = jSplitPaneMain.getDividerSize();
+        final int freeHeight = totalHeight - dividerHeight;
+
+        int rawObsPanelHeight = freeHeight;
+
+        if (visible) {
+            // TODO: check rows ?
+            rawObsPanelHeight -= (int) Math.ceil(0.15 * freeHeight); // 15%
+        }
+
+        jSplitPaneMain.setDividerLocation(rawObsPanelHeight);
     }
 }

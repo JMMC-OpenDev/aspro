@@ -5,6 +5,7 @@ package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.action.QueryRawObservationsAction;
 import fr.jmmc.aspro.model.rawobs.RawObservation;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
@@ -93,10 +94,12 @@ public final class RawObservationTableModel extends AbstractTableModel {
     }
     /** LITpro Columns (all) */
     private static final ColumnDef[] COLUMNS = ColumnDef.values();
+    /** empty collection */
+    private static final List<RawObservation> EMPTY = Collections.emptyList();
 
     /* members */
     /** list of parameters (row) present in the table */
-    private List<RawObservation> observations = null;
+    private List<RawObservation> observations = EMPTY;
 
     /**
      * Public constructor
@@ -114,7 +117,7 @@ public final class RawObservationTableModel extends AbstractTableModel {
         if (logger.isDebugEnabled()) {
             logger.debug("setData[{}]: {}", observations);
         }
-        this.observations = observations;
+        this.observations = (observations != null) ? observations : EMPTY;
 
         // fire the table data changed event :
         fireTableDataChanged();

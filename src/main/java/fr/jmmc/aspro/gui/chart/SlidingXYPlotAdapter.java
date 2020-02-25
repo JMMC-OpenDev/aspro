@@ -358,7 +358,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         this.lastStart = start;
         this.lastEnd = end;
 
-        final int newSize = end - start;
+        int newSize = end - start;
 
         if (logger.isDebugEnabled()) {
             logger.debug("updatePlot: pos = {} :: ({} to {})", this.state.position, start, end);
@@ -371,6 +371,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             rangeMin = -(2d / 3d);
             rangeMax = newSize - (1d / 3d);
         } else {
+            newSize = 0;
             rangeMin = 0d;
             rangeMax = 1d;
         }
