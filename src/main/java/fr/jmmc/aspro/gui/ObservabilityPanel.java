@@ -1324,6 +1324,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                         observation.getOrphanCalibrators(),
                         observation.getOrCreateTargetUserInfos(),
                         observation.getTargetObservations(),
+                        observation.getRawObsFilterInsNames(),
                         chartData,
                         obsData.getDateMin(), obsData.getDateMax(),
                         doBaseLineLimits);
@@ -1355,6 +1356,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                              final Set<Target> orphanCalibrators,
                              final TargetUserInformations targetUserInfos,
                              final List<TargetRawObservation> targetObservations,
+                             final List<String> rawObsFilterInsNames,
                              final ObservationCollectionObsData chartData,
                              final Date min, final Date max,
                              final boolean doBaseLineLimits) {
@@ -1702,6 +1704,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 // Raw observations:
                                 final TargetRawObservation targetRawObs = TargetRawObservation.getTargetRawObservation(target, targetObservations);
                                 if (targetRawObs != null) {
+                                    logger.info("filter instruments: {}", rawObsFilterInsNames);
+
                                     final List<Observations> obsGroups = targetRawObs.getGroups();
 
                                     // has groups (valid observations) to show
@@ -1716,6 +1720,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                             final Observations obsGroup = obsGroups.get(l);
 
                                             final RawObservation rawObsFirst = obsGroup.first();
+
+                                            // filter group ?
+                                            if (rawObsFilterInsNames != null
+                                                    && !rawObsFilterInsNames.contains(rawObsFirst.getInstrumentName())) {
+                                                logger.info("skip rawObs instrument: {}", rawObsFirst.getInstrumentName());
+                                                continue;
+                                            }
+
                                             final RawObservation rawObsLast = obsGroup.last();
 
                                             final double lstStart = rawObsFirst.getLstStart();

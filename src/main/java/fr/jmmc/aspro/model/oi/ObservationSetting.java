@@ -763,6 +763,18 @@ public class ObservationSetting
         return TargetRawObservation.getTargetRawObservation(target, getTargetObservations());
     }
 
+    /** TODO: fix temporary storage for instrument filter (in-memory) */
+    @javax.xml.bind.annotation.XmlTransient
+    private List<String> rawObsFilterInsNames = null;
+
+    public List<String> getRawObsFilterInsNames() {
+        return rawObsFilterInsNames;
+    }
+
+    public void setRawObsFilterInsNames(List<String> rawObsFilterInsNames) {
+        this.rawObsFilterInsNames = rawObsFilterInsNames;
+    }
+    
 //--simple--preserve
 
 }

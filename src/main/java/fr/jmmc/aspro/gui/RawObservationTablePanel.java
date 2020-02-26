@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.TargetRawObservation;
@@ -23,10 +24,14 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
@@ -44,6 +49,8 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(RawObservationTablePanel.class.getName());
 
+    /* members */
+    private List<RawObservation> observations = null;
     private final RawObservationTableModel obsModel;
     private final BasicTableSorter obsTableSorter;
 
@@ -70,15 +77,54 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
             tc.setCellRenderer(rdr);
             tc.setCellEditor(editor);
         }
+
+        this.jListIns.setModel(new DefaultComboBoxModel(AsproConstants.INS_OBS_LIST));
     }
 
+    public void resetFilters() {
+        this.jListIns.clearSelection();
+    }
+    
     public RawObservationTablePanel setData(final List<RawObservation> observations) {
-        obsModel.setData(observations);
+        this.observations = observations;
+        filterData();
+        return this;
+    }
 
-        if (jTableObs.getRowCount() != 0) {
+    private void filterData() {
+        List<RawObservation> filtered = null;
+
+        if (observations != null) {
+            // filter observations:
+            final List<String> rawObsFilterInsNames = ObservationManager.getInstance().getMainObservation().getRawObsFilterInsNames();
+
+            logger.info("filter instruments: {}", rawObsFilterInsNames);
+
+            if (rawObsFilterInsNames == null) {
+                // no filter:
+                filtered = observations;
+            } else {
+                final int len = observations.size();
+                filtered = new ArrayList<RawObservation>(len);
+
+                for (int i = 0; i < len; i++) {
+                    final RawObservation rawObs = observations.get(i);
+
+                    if (!rawObsFilterInsNames.contains(rawObs.getInstrumentName())) {
+                        logger.info("skip rawObs instrument: {}", rawObs.getInstrumentName());
+                        continue;
+                    }
+                    // TODO: other filters (chain)
+                    filtered.add(rawObs);
+                }
+            }
+        }
+
+        obsModel.setData(filtered);
+
+        if (filtered != null) {
             AutofitTableColumns.autoResizeTable(jTableObs);
         }
-        return this;
     }
 
     private boolean hasURL(final int column) {
@@ -89,6 +135,55 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
         return obsModel.getURL(column, row);
     }
 
+    /**
+     * Called whenever the instrument selection changes.
+     * @param e the event that characterizes the change.
+     */
+    private void processInstrumentsValueChanged(final ListSelectionEvent e) {
+        // skip events when the user selection is adjusting :
+        if (e.getValueIsAdjusting()) {
+            return;
+        }
+
+        final List<String> selectedInstruments = getSelectedInstruments();
+
+        logger.info("Selected instruments: {}", selectedInstruments);
+
+        final ObservationManager om = ObservationManager.getInstance();
+
+        // Set filters:
+        om.getMainObservation().setRawObsFilterInsNames(selectedInstruments);
+
+        // filter table:
+        filterData();
+
+        om.fireTargetObservationsChangedEvents();
+    }
+
+    /**
+     * Return the currently selected instruments
+     * @return instrument list
+     */
+    public List<String> getSelectedInstruments() {
+        final ListSelectionModel lsm = jListIns.getSelectionModel();
+
+        final int iMin = lsm.getMinSelectionIndex();
+        final int iMax = lsm.getMaxSelectionIndex();
+
+        if ((iMin < 0) || (iMax < 0)) {
+            return null;
+        }
+
+        final ListModel model = jListIns.getModel();
+        final List<String> selectedItems = new ArrayList<String>(iMax - iMin);
+        for (int i = iMin; i <= iMax; i++) {
+            if (lsm.isSelectedIndex(i)) {
+                selectedItems.add((String) model.getElementAt(i));
+            }
+        }
+        return selectedItems;
+    }
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -97,18 +192,65 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
+        jPanelHeader = new javax.swing.JPanel();
+        jLabelFilterBy = new javax.swing.JLabel();
+        jScrollPaneIns = new javax.swing.JScrollPane();
+        jListIns = new javax.swing.JList<>();
+        jPanelHeaderFiller = new javax.swing.JPanel();
         jScrollPaneTable = new javax.swing.JScrollPane();
         jTableObs = new javax.swing.JTable();
 
         setName("Form"); // NOI18N
         setLayout(new java.awt.BorderLayout());
 
+        jPanelHeader.setName("jPanelHeader"); // NOI18N
+        jPanelHeader.setLayout(new java.awt.GridBagLayout());
+
+        jLabelFilterBy.setText("Filter by:");
+        jLabelFilterBy.setName("jLabelFilterBy"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelHeader.add(jLabelFilterBy, gridBagConstraints);
+
+        jScrollPaneIns.setName("jScrollPaneIns"); // NOI18N
+
+        jListIns.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "_MATISSE_" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jListIns.setToolTipText("Select 1 or more instruments to filter raw observations (use Ctrl + click)");
+        jListIns.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
+        jListIns.setName("jListIns"); // NOI18N
+        jListIns.setPrototypeCellValue("_MATISSE_");
+        jListIns.setVisibleRowCount(1);
+        jListIns.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                jListInsValueChanged(evt);
+            }
+        });
+        jScrollPaneIns.setViewportView(jListIns);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanelHeader.add(jScrollPaneIns, gridBagConstraints);
+
+        jPanelHeaderFiller.setName("jPanelHeaderFiller"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.9;
+        jPanelHeader.add(jPanelHeaderFiller, gridBagConstraints);
+
+        add(jPanelHeader, java.awt.BorderLayout.NORTH);
+
         jScrollPaneTable.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         jScrollPaneTable.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         jScrollPaneTable.setAutoscrolls(true);
         jScrollPaneTable.setName("jScrollPaneTable"); // NOI18N
-        jScrollPaneTable.setPreferredSize(new java.awt.Dimension(300, 300));
+        jScrollPaneTable.setPreferredSize(new java.awt.Dimension(200, 200));
+        jScrollPaneTable.setViewportView(null);
 
         jTableObs.setModel(obsModel);
         jTableObs.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
@@ -119,8 +261,17 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
         add(jScrollPaneTable, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jListInsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListInsValueChanged
+        processInstrumentsValueChanged(evt);
+    }//GEN-LAST:event_jListInsValueChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabelFilterBy;
+    private javax.swing.JList<String> jListIns;
+    private javax.swing.JPanel jPanelHeader;
+    private javax.swing.JPanel jPanelHeaderFiller;
+    private javax.swing.JScrollPane jScrollPaneIns;
     private javax.swing.JScrollPane jScrollPaneTable;
     private javax.swing.JTable jTableObs;
     // End of variables declaration//GEN-END:variables

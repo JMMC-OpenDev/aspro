@@ -244,7 +244,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
 
         this.jSplitPaneMain.setRightComponent(rawObsPanel);
         this.jSplitPaneMain.setOneTouchExpandable(true);
-        onTargetSelectionChange(null);
+        resetRawObsPanel();
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSplitPane jSplitPane;
@@ -271,8 +271,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
                 || type == ObservationEventType.REFRESH) {
 
             if (type == ObservationEventType.LOADED) {
-                // reset raw obs:
-                onTargetSelectionChange(null);
+                resetRawObsPanel();
 
                 // show interferometer map when a file is loaded or the observation is reset :
                 final int idx = this.jTabbedPane.indexOfTab(TAB_INTERFEROMETER_MAP);
@@ -283,6 +282,13 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
 
             final ObservationSetting observation = (type == ObservationEventType.REFRESH)
                     ? event.getObservationCollection().getFirstObservation() : event.getObservation();
+
+            if (type == ObservationEventType.TARGET_CHANGED) {
+                // retrieve the selected target from its name:
+                final Target target = observation.getTarget(observation.getSelectedTargetName());
+                // force refresh content:
+                this.onTargetSelectionChange(target);
+            }
 
             // Observability panel :
             if (this.observabilityPanel == null) {
@@ -449,6 +455,12 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         return uvCoveragePanel;
     }
 
+    // --- RawObs panel handling ---
+    private void resetRawObsPanel() {
+        rawObsPanel.resetFilters();
+        onTargetSelectionChange(null);
+    }
+
     /**
      * Update the selected target for the given observation
      * @param target selected target
@@ -473,7 +485,6 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         // update data:
         rawObsPanel.setData(rawObsList);
 
-        // this.setSelectedTargetName((target != null) ? target.getName() : null);
         shouldShowRawObsPanel(rawObsList != null);
     }
 
@@ -493,8 +504,9 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         int rawObsPanelHeight = freeHeight;
 
         if (visible) {
-            // TODO: check rows ?
-            rawObsPanelHeight -= (int) Math.ceil(0.15 * freeHeight); // 15%
+            int prefHeight = rawObsPanel.getPreferredSize().height;
+
+            rawObsPanelHeight -= Math.max(prefHeight, (int) Math.ceil(0.15 * freeHeight)); // 15%
         }
 
         jSplitPaneMain.setDividerLocation(rawObsPanelHeight);
