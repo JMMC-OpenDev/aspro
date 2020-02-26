@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="20.02 beta 7"/>
+    <program name="Aspro2" version="20.03"/>
     <compilation date="26/02/2020" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -228,29 +228,29 @@
     </menubar>
 
     <releasenotes>
-        <release version="20.02">
+        <release version="20.03">
             <pubDate>Wed, 26 Feb 2020 14:00:00 GMT</pubDate>
-            <prerelease version="20.02 beta 7">
+            <prerelease version="20.03 beta 7">
                 <change type="FEATURE">Improved GUI to display and filter observation logs (auto-hide)</change>
             </prerelease>
-            <prerelease version="20.02 beta 6">
+            <prerelease version="20.03 beta 6">
                 <change type="FEATURE">Improved handling of observation logs from JMMC ObsPortal: table view, grouping exposures</change>
             </prerelease>
-            <prerelease version="20.02 beta 5">
+            <prerelease version="20.03 beta 5">
                 <change type="FEATURE">Improved GUI handling of previously selected Configuration(s) when changing the interferometer Period
                     (automatically select the configuration having the same stations even if the order changed)
                 </change>
             </prerelease>
-            <prerelease version="20.02 beta 4">
+            <prerelease version="20.03 beta 4">
                 <change type="FEATURE">Added new action 'Edit/Query raw Observations' to retrieve observation logs from JMMC ObsPortal (ESO archive)</change>
             </prerelease>
-            <prerelease version="20.02 beta 3">
+            <prerelease version="20.03 beta 3">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1030">Improved action 'Import targets from an observation' to preserve ancillary stars (FT, AO, Guide star groups)</change>
             </prerelease>
-            <prerelease version="20.02 beta 2">
+            <prerelease version="20.03 beta 2">
                 <change type="FEATURE">Updated OIFITS generation to support differential visibilities for GRAVITY, MATISSE, SPICA instruments</change>
             </prerelease>
-            <prerelease version="20.02 beta 1">
+            <prerelease version="20.03 beta 1">
                 <change type="FEATURE">Updated embedded OIFits explorer (improved plot editor)</change>
             </prerelease>
         </release>
