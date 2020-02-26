@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+*******************************************************************************
+* JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+*******************************************************************************
+-->
+<!--
+    Document   : MROI.xml
+    Created on : 22 march 2011
+    Author     : bourges laurent
+    Description:
+        MROI interferometer.
+-->
+
+<a:interferometerSetting
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+    xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+    <description>
+        <name>MROI</name>
+
+        <description>MROI interferometer ...</description>
+
+        <!--
+             LONGITUDE '-107:11:05.12'
+             LATITUDE  '33:58:47.6'
+             ALTITUDE  3200
+        -->
+        <position>
+            <posX>-1565073.4350700215</posX>
+            <posY>-5060701.548559521</posY>
+            <posZ>3546390.0025549233</posZ>
+        </position>
+
+        <timezone>US/Mountain</timezone>
+
+        <telescope>
+            <name>T</name>
+            <diameter>1.4</diameter>
+            <maxElevation>85.0</maxElevation>
+
+            <adaptiveOptics>
+                <band>V</band>
+                <!-- tip tilt -->
+                <numberActuators>2</numberActuators>
+            </adaptiveOptics>
+        </telescope>
+
+        <station>
+            <name>W0</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>0.0</posX>
+                <posY>0.0</posY>
+                <posZ>0.0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>0.0</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>W1</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-1.058755762353468</posX>
+                <posY>-7.2772199998144</posY>
+                <posZ>1.570859050973913</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>7.52</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>W2</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-2.1386491936416</posX>
+                <posY>-14.937289999797</posY>
+                <posZ>3.173079724470378</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>15.42</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>W3</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-3.163870843607306</posX>
+                <posY>-22.209509999956</posY>
+                <posZ>4.694184747335298</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>22.92</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>W4</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-4.339453864407444</posX>
+                <posY>-30.548319999827</posY>
+                <posZ>6.438378539764107</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>31.52</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>W5</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-6.553929275099621</posX>
+                <posY>-46.256319999927</posY>
+                <posZ>9.723960414012865</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>47.72</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>W6</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-8.864088686242457</posX>
+                <posY>-62.643049999838</posY>
+                <posZ>13.15150711479272</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>64.62</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>W7</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-13.38872350820761</posX>
+                <posY>-94.73777999985</posY>
+                <posZ>19.86463569001442</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>97.72</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>W8</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-18.14574413965418</posX>
+                <posY>-128.48087999993</posY>
+                <posZ>26.92255138717852</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>132.52</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>W9</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-27.41372885313961</posX>
+                <posY>-194.22173999995</posY>
+                <posZ>40.67331260060934</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>200.32</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>N1</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-4.639785374649303</posX>
+                <posY>2.07488000020385</posY>
+                <posZ>6.883975615058781</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>7.44</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>N2</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-6.047485932201411</posX>
+                <posY>10.445640000049</posY>
+                <posZ>8.972558497456832</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>15.34</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>N3</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-9.054461842173314</posX>
+                <posY>15.6709700000938</posY>
+                <posZ>13.43396073222731</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>22.84</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>N4</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-11.94115648011144</posX>
+                <posY>20.6872800001875</posY>
+                <posZ>17.7169035606311</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>31.44</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>N5</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-17.8749226482563</posX>
+                <posY>30.9985800001305</posY>
+                <posZ>26.52073785653481</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>47.64</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>N6</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-23.68840754436744</posX>
+                <posY>41.1008700001985</posY>
+                <posZ>35.14611274607192</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>64.54</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>N7</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-35.39556857744981</posX>
+                <posY>61.444790000096</posY>
+                <posZ>52.51584099118432</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>97.64</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>N8</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-46.9423527180032</posX>
+                <posY>81.5100300000049</posY>
+                <posZ>69.64762059681426</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>132.44</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>N9</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>-70.15620227140391</posX>
+                <posY>121.849510000087</posY>
+                <posZ>104.0896392148268</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>200.24</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>S1</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>3.999132925184171</posX>
+                <posY>2.04168000002392</posY>
+                <posZ>-5.933449786010279</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>8.56</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>S2</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>8.246870992202004</posX>
+                <posY>4.1975200001616</posY>
+                <posZ>-12.23575105888282</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>15.04</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>S3</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>12.27953802977393</posX>
+                <posY>6.24420000007376</posY>
+                <posZ>-18.21895487300208</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>22.54</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>S4</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>16.90366297390507</posX>
+                <posY>8.59106000000611</posY>
+                <posZ>-25.07969535688488</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>29.74</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>S5</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>25.61422131576938</posX>
+                <posY>13.011890000198</posY>
+                <posZ>-38.00341194657154</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>44.54</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>S6</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>34.70116094568577</posX>
+                <posY>17.6237500000279</posY>
+                <posZ>-51.48555945486741</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>59.04</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>S7</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>52.49865332840515</posX>
+                <posY>26.6564300002065</posY>
+                <posZ>-77.89141526044874</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>88.24</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>S8</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>71.21022413489602</posX>
+                <posY>36.1530300001614</posY>
+                <posZ>-105.6534746555054</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>117.04</delayLineFixedOffset>
+        </station>
+        <station>
+            <name>S9</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>107.6655265528767</posX>
+                <posY>54.6550300000235</posY>
+                <posZ>-159.7416258566675</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>174.94</delayLineFixedOffset>
+        </station>
+
+        <channel>
+            <name>Channel1</name>
+        </channel>
+        <channel>
+            <name>Channel2</name>
+        </channel>
+        <channel>
+            <name>Channel3</name>
+        </channel>
+        <channel>
+            <name>Channel4</name>
+        </channel>
+        <channel>
+            <name>Channel5</name>
+        </channel>
+        <channel>
+            <name>Channel6</name>
+        </channel>
+        <channel>
+            <name>Channel7</name>
+        </channel>
+        <channel>
+            <name>Channel8</name>
+        </channel>
+        <channel>
+            <name>Channel9</name>
+        </channel>
+        <channel>
+            <name>Channel10</name>
+        </channel>
+
+        <delayLine>
+            <name>DL1</name>
+            <maximumThrow>380</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL2</name>
+            <maximumThrow>380</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL3</name>
+            <maximumThrow>380</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL4</name>
+            <maximumThrow>380</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL5</name>
+            <maximumThrow>380</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL6</name>
+            <maximumThrow>380</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL7</name>
+            <maximumThrow>380</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL8</name>
+            <maximumThrow>380</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL9</name>
+            <maximumThrow>380</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL10</name>
+            <maximumThrow>380</maximumThrow>
+        </delayLine>
+
+        <!-- No pop on MROI -->
+
+
+        <!-- instruments (4T) -->
+
+        <focalInstrument>
+            <name>TEST_4T</name>
+            <description>sample for MROI instrument</description>
+            <numberChannels>4</numberChannels>
+
+            <setup>
+                <name>TEST_4T_SETUP</name>
+                <description>sample for MROI instrument</description>
+                <defaultSamplingTime>30</defaultSamplingTime>
+
+                <dit>0.01</dit>
+                <ron>10</ron>
+                <detectorSaturation>50000</detectorSaturation>
+
+                <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
+                <fracFluxInPhotometry>0.2</fracFluxInPhotometry>
+
+                <nbPixInterferometry>4</nbPixInterferometry>
+                <nbPixPhotometry>4</nbPixPhotometry>
+
+                <transmission>0.1</transmission>
+                <instrumentVisibility>0.9</instrumentVisibility>
+
+                <instrumentVisibilityBias>0.1</instrumentVisibilityBias>
+                <instrumentPhaseBias>0.01</instrumentPhaseBias>
+            </setup>
+
+            <mode>
+                <name>default</name>
+                <resolution>100</resolution>
+                <waveLengthMin>0.6</waveLengthMin>
+                <waveLengthMax>2.4</waveLengthMax>
+            </mode>
+        </focalInstrument>
+
+    </description>
+
+    <configuration>
+        <interferometer>MROI</interferometer>
+
+        <!-- instruments (4T) -->
+
+        <instrument>
+            <focalInstrument>TEST_4T</focalInstrument>
+
+            <!--
+            !    MROI
+              ! A10 = N1, N2, N3	W0, W1, W2, W3	S1, S2, S3
+              ! A6 = N1-N2-W1-W2-S1-S2 further splitted in: N1-N2-W1-W2 + N1-N2-S1-S2 + W1-SW2-S1-S2, etc..
+              let oipt%mroi%i4s%Config -
+              "N1 W1 W2 S1" "N2 W1 W2 S2" "N1 N2 S1 S2" -
+              "N2 W2 W4 S2" "N4 W2 W4 S4" "N2 N4 S2 S4" -
+              "N4 W4 W6 S4" "N6 W4 W6 S6" "N4 N6 S4 S6" -
+              "N6 W6 W8 S6" "N8 W6 W8 S8" "N6 N8 S6 S8" ! always a triangle, or...
+            !   let oipt%mroi%i4s%Config -
+            ! "N1 N2 W1 W2"  "N1 N2 S1 S2"  "W1 W2 S1 S2" -
+            ! "N2 N4 W2 W4"  "N2 N4 S2 S4"  "W2 W4 S2 S4" -
+            ! "N4 N6 W4 W6"  "N4 N6 S4 S6"  "W4 W6 S4 S6" -
+            ! "N6 N8 W6 W8"  "N6 N8 S6 S8"  "W6 W8 S6 S8" ! simpler, straighter.
+            -->
+
+            <configuration>
+                <stations>N1 W1 W2 S1</stations>
+            </configuration>
+            <configuration>
+                <stations>N2 W1 W2 S2</stations>
+            </configuration>
+            <configuration>
+                <stations>N1 N2 S1 S2</stations>
+            </configuration>
+
+            <configuration>
+                <stations>N2 W2 W4 S2</stations>
+            </configuration>
+            <configuration>
+                <stations>N4 W2 W4 S4</stations>
+            </configuration>
+            <configuration>
+                <stations>N2 N4 S2 S4</stations>
+            </configuration>
+
+            <configuration>
+                <stations>N4 W4 W6 S4</stations>
+            </configuration>
+            <configuration>
+                <stations>N6 W4 W6 S6</stations>
+            </configuration>
+            <configuration>
+                <stations>N4 N6 S4 S6</stations>
+            </configuration>
+
+            <configuration>
+                <stations>N6 W6 W8 S6</stations>
+            </configuration>
+            <configuration>
+                <stations>N8 W6 W8 S8</stations>
+            </configuration>
+            <configuration>
+                <stations>N6 N8 S6 S8</stations>
+            </configuration>
+
+        </instrument>
+
+    </configuration>
+
+</a:interferometerSetting>

@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ *******************************************************************************
+ -->
+<!--
+    Document   : DEMO.xml
+    Created on : 2 september 2013
+    Author     : bourgesl
+    Description:
+        Demo interferometer.
+-->
+
+<a:interferometerSetting
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+  xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+  <description>
+    <name>DEMO</name>
+
+    <description>Interferometer for demo / school</description>
+
+    <!--
+      Coordinates DEMO:
+        lat = +90
+        lon = 0
+        alt = 0
+    -->
+    <position>
+      <posX>0.0</posX>
+      <posY>0.0</posY>
+      <posZ>6356752.0</posZ>
+    </position>
+
+    <timezone>GMT</timezone>
+
+    <telescope>
+      <name>T</name>
+      <diameter>1.0</diameter>
+      <maxElevation>90.0</maxElevation>
+
+      <adaptiveOptics>
+        <band>V</band>
+        <!-- tip tilt -->
+        <numberActuators>2</numberActuators>
+      </adaptiveOptics>
+
+      <!--
+        Moon Pointing Restrictions on SUSI: 5 deg at least !
+
+            <moonPointingRestriction>
+              <warningThreshold>10</warningThreshold>
+              <restriction>
+                <separation>5.0</separation>
+              </restriction>
+            </moonPointingRestriction>
+            -->
+
+        </telescope>
+
+        <station>
+            <name>S0</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>0.0</posX>
+                <posY>0.0</posY>
+                <posZ>0.0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>0.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S1</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>1</posX>
+                <posY>0.0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>1.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S2</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>2</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>2.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S3</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>8</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>8.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S4</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>14</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>14.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S5</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>20</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>20.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S6</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>31</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>31.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S7</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>42</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>42.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S8</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>53</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>53.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S9</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>64</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>64.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S10</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>75</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>75.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S11</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>86</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>86.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S12</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>91</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>91.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S13</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>96</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>96.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S14</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>99</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>99.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S15</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>100</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>100.0</delayLineFixedOffset>
+        </station>
+
+        <station>
+            <name>S16</name>
+            <telescope>T</telescope>
+            <relativePosition>
+                <posX>101</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>101.0</delayLineFixedOffset>
+        </station>
+
+        <!-- no channel nor switchyard -->
+
+        <!-- DL :
+        = 8 DL with long length -->
+        <delayLine>
+            <name>DL0</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL1</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL2</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL3</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL4</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL5</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL6</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL7</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL8</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL9</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL10</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL11</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL12</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL13</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL14</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL15</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL16</name>
+            <maximumThrow>1000000</maximumThrow>
+        </delayLine>
+
+        <!-- instruments (2T) -->
+
+        <focalInstrument>
+            <name>DEMO_SPATIAL</name>
+            <description>DEMO combiner (16T)</description>
+            <numberChannels>16</numberChannels>
+            <visDiff>true</visDiff>
+
+            <setup>
+                <name>DEMO_SPATIAL_SETUP</name>
+                <description>DEMO combiner (16T)</description>
+                <defaultSamplingTime>40</defaultSamplingTime>
+
+                <dit>0.1</dit>
+                <ron>0</ron>
+                <detectorSaturation>1000000</detectorSaturation>
+
+                <fracFluxInInterferometry>1</fracFluxInInterferometry>
+                <fracFluxInPhotometry>0.0</fracFluxInPhotometry>
+
+                <nbPixInterferometry>1</nbPixInterferometry>
+                <nbPixPhotometry>0</nbPixPhotometry>
+
+                <transmission>0.01</transmission>
+                <instrumentVisibility>1</instrumentVisibility>
+
+                <instrumentVisibilityBias>0</instrumentVisibilityBias>
+                <instrumentPhaseBias>0</instrumentPhaseBias>
+            </setup>
+
+            <mode>
+                <name>B</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>0.46</waveLengthMin>
+                <waveLengthMax>0.460001</waveLengthMax>
+            </mode>
+
+            <mode>
+                <name>V</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>0.55</waveLengthMin>
+                <waveLengthMax>0.550001</waveLengthMax>
+            </mode>
+
+            <mode>
+                <name>R</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>0.66</waveLengthMin>
+                <waveLengthMax>0.660001</waveLengthMax>
+            </mode>
+
+            <mode>
+                <name>I</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>0.87</waveLengthMin>
+                <waveLengthMax>0.870001</waveLengthMax>
+            </mode>
+
+            <mode>
+                <name>J</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>1.23</waveLengthMin>
+                <waveLengthMax>1.230001</waveLengthMax>
+            </mode>
+
+            <mode>
+                <name>H</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>1.67</waveLengthMin>
+                <waveLengthMax>1.670001</waveLengthMax>
+            </mode>
+
+            <mode>
+                <name>K</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>2.36</waveLengthMin>
+                <waveLengthMax>2.360001</waveLengthMax>
+            </mode>
+
+            <mode>
+                <name>L</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>3.46</waveLengthMin>
+                <waveLengthMax>3.460001</waveLengthMax>
+            </mode>
+
+            <mode>
+                <name>M</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>6.40</waveLengthMin>
+                <waveLengthMax>6.400001</waveLengthMax>
+            </mode>
+
+            <mode>
+                <name>N</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>12</waveLengthMin>
+                <waveLengthMax>12.000001</waveLengthMax>
+            </mode>
+
+        </focalInstrument>
+
+        <focalInstrument>
+            <name>DEMO_3T_SPECTRAL</name>
+            <description>DEMO combiner (3T)</description>
+            <numberChannels>3</numberChannels>
+            <visDiff>true</visDiff>
+
+            <setup>
+                <name>DEMO_3T_SPECTRAL_SETUP</name>
+                <description>DEMO combiner (3T)</description>
+                <defaultSamplingTime>40</defaultSamplingTime>
+
+                <dit>0.1</dit>
+                <ron>0</ron>
+                <detectorSaturation>1000000</detectorSaturation>
+
+                <fracFluxInInterferometry>1</fracFluxInInterferometry>
+                <fracFluxInPhotometry>0.0</fracFluxInPhotometry>
+
+                <nbPixInterferometry>1</nbPixInterferometry>
+                <nbPixPhotometry>0</nbPixPhotometry>
+
+                <transmission>0.01</transmission>
+                <instrumentVisibility>1</instrumentVisibility>
+
+                <instrumentVisibilityBias>0</instrumentVisibilityBias>
+                <instrumentPhaseBias>0</instrumentPhaseBias>
+            </setup>
+
+            <mode>
+                <name>Wide</name>
+                <resolution>1000</resolution>
+                <waveLengthMin>0.1</waveLengthMin>
+                <waveLengthMax>10.0</waveLengthMax>
+            </mode>
+
+        </focalInstrument>
+
+    </description>
+
+
+    <configuration>
+        <interferometer>DEMO</interferometer>
+
+        <instrument>
+            <focalInstrument>DEMO_SPATIAL</focalInstrument>
+
+            <!-- The baseline configuration uses all 16 telescopes -->
+            <configuration>
+                <stations>S0 S1 S2 S3 S4 S5 S6 S7 S8 S9 S10 S11 S12 S13 S14 S15 S16</stations>
+            </configuration>
+            <configuration>
+                <stations>S0 S7</stations>
+            </configuration>
+        </instrument>
+
+        <instrument>
+            <focalInstrument>DEMO_3T_SPECTRAL</focalInstrument>
+
+            <!-- The baseline configuration is limited to one telescope from the North and one telescope from the South -->
+            <configuration>
+                <stations>S0 S6 S16</stations>
+            </configuration>
+        </instrument>
+    </configuration>
+
+</a:interferometerSetting>
