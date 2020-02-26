@@ -98,7 +98,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
             // filter observations:
             final List<String> rawObsFilterInsNames = ObservationManager.getInstance().getMainObservation().getRawObsFilterInsNames();
 
-            logger.info("filter instruments: {}", rawObsFilterInsNames);
+            logger.debug("filter instruments: {}", rawObsFilterInsNames);
 
             if (rawObsFilterInsNames == null) {
                 // no filter:
@@ -111,7 +111,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
                     final RawObservation rawObs = observations.get(i);
 
                     if (!rawObsFilterInsNames.contains(rawObs.getInstrumentName())) {
-                        logger.info("skip rawObs instrument: {}", rawObs.getInstrumentName());
+                        logger.debug("skip rawObs instrument: {}", rawObs.getInstrumentName());
                         continue;
                     }
                     // TODO: other filters (chain)

@@ -379,20 +379,23 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 } else if (entity instanceof ClickableXYAnnotationEntity) {
                     final ClickableXYAnnotationEntity anEntity = (ClickableXYAnnotationEntity) entity;
                     seriesIndex = anEntity.getRendererIndex();
-                    // get object reference:
-                    final Object ref = anEntity.getReference();
 
-                    if (ref instanceof Observations) {
-                        final Observations obsGroup = (Observations) ref;
+                    // TODO: finalize interactions
+                    if (false) {
+                        // get object reference:
+                        final Object ref = anEntity.getReference();
 
-                        logger.info("clicked on group [" + obsGroup.getGroupId() + " for " + obsGroup.getTargetId() + "]");
+                        if (ref instanceof Observations) {
+                            final Observations obsGroup = (Observations) ref;
 
-                        StatusBar.show("obs log : " + obsGroup.first().getObsId());
-                        /*
-                    TODO: show group in table ?
-                         */
+                            logger.info("clicked on group [" + obsGroup.getGroupId() + " for " + obsGroup.getTargetId() + "]");
+
+                            StatusBar.show("obs log : " + obsGroup.first().getObsId());
+                            /*
+                                TODO: show group in table ?
+                             */
+                        }
                     }
-
                 } else if (entity instanceof XYAnnotationEntity) {
                     final XYAnnotationEntity anEntity = (XYAnnotationEntity) entity;
                     seriesIndex = anEntity.getRendererIndex();
@@ -1704,7 +1707,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 // Raw observations:
                                 final TargetRawObservation targetRawObs = TargetRawObservation.getTargetRawObservation(target, targetObservations);
                                 if (targetRawObs != null) {
-                                    logger.info("filter instruments: {}", rawObsFilterInsNames);
+                                    logger.debug("filter instruments: {}", rawObsFilterInsNames);
 
                                     final List<Observations> obsGroups = targetRawObs.getGroups();
 
@@ -1724,7 +1727,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                             // filter group ?
                                             if (rawObsFilterInsNames != null
                                                     && !rawObsFilterInsNames.contains(rawObsFirst.getInstrumentName())) {
-                                                logger.info("skip rawObs instrument: {}", rawObsFirst.getInstrumentName());
+                                                logger.debug("skip rawObs instrument: {}", rawObsFirst.getInstrumentName());
                                                 continue;
                                             }
 
