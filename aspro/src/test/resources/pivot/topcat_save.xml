@@ -1,0 +1,463 @@
+<?xml version='1.0'?>
+<VOTABLE version="1.1"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.1 http://www.ivoa.net/xml/VOTable/v1.1"
+ xmlns="http://www.ivoa.net/xml/VOTable/v1.1">
+<!--
+ !  VOTable written by STIL version 3.0-3 (uk.ac.starlink.votable.VOTableWriter)
+ !  at 2012-05-31T13:19:32
+ !-->
+<RESOURCE>
+<TABLE name="II/246/out" nrows="18">
+<DESCRIPTION>
+The Point Source catalogue of 470,992,970 sources. % Additions to 2MASS Intro (last modif: 27-Nov-2007)
+%---------------------------------------===========
+Please {\bf
+\aW{ack}{http://www.ipac.caltech.edu/2mass/releases/allsky/doc/sec1_8b.html}
+ {acknowledge the usage of the 2MASS All-Sky Survey}};
+ see also the \W{ext}{http://www.ipac.caltech.edu/2mass/}{2MASS Pages}.
+\ifnum\Vphase&gt;3{\fg{red3}\quad
+Note that the magnitudes in red correspond to low quality results
+(upper limits or very poor photometry)}\fi
+</DESCRIPTION>
+<PARAM arraysize="22" datatype="char" name="Warning" value="No center provided++++"/>
+<PARAM arraysize="123" datatype="char" name="Warning" value="No alternative matching in '{-c ${-c} -r ${-c.rm}| -la ${,RAJ2000} -ld ${,DEJ2000}} [-lJ ${,Jmag}] [-lH ${,Hmag}] [-lK ${,K"/>
+<PARAM arraysize="52" datatype="char" name="Warning" value="Missing '-c' argument (Target position and geometry)"/>
+<PARAM arraysize="42" datatype="char" name="Warning" value="an error occured on a large catalog(close)"/>
+<PARAM arraysize="41" datatype="char" name="Warning" value="Constraint added: -c=  0.000000+90.000000"/>
+<PARAM arraysize="18" datatype="char" name="votable-version" value="1.88 (30-Jan-2012)"/>
+<PARAM arraysize="15" datatype="char" name="-ref" value="VIZ4fc4bc0668dd"/>
+<PARAM arraysize="2" datatype="char" name="-out.max" value="50"/>
+<PARAM arraysize="2" datatype="char" name="queryParameters" value="28">
+<DESCRIPTION>-oc.form=dec
+-out.max=50
+-out.add=_r
+-out.add=_RAJ,_DEJ
+-sort=_r
+-nav=cat:II/246&amp;tab:{II/246/out}&amp;key:source=II/246&amp;HTTPPRM:&amp;-ref=VIZ4fc4bc0668dd&amp;-out.max=50&amp;-out.form=HTML Table&amp;-out.add=_r&amp;-out.add=_RAJ,_DEJ&amp;-sort=_r&amp;-oc.form=sexa&amp;-meta.foot=1&amp;-meta=1&amp;-meta.ucd=2&amp;-c.eq=J2000&amp;-c.r=  2&amp;-c.u=arcmin&amp;-c.geom=r&amp;-usenav=1&amp;
+-c.eq=J2000
+-c.r=  2
+-c.u=arcmin
+-c.geom=r
+-source=II/246/out
+-order=I
+-out=RAJ2000
+-out=DEJ2000
+-out=2MASS
+-out=Jmag
+-out=e_Jmag
+-out=Hmag
+-out=e_Hmag
+-out=Kmag
+-out=e_Kmag
+-out=Qflg
+-out=Rflg
+-out=Bflg
+-out=Cflg
+-out=Xflg
+-out=Aflg
+Opt=Opt</DESCRIPTION>
+</PARAM>
+<PARAM arraysize="26" datatype="char" name="-c" value="000.000000+90.000000,rm=2."/>
+<FIELD datatype="double" name="_RAJ2000" precision="6" ref="J2000" ucd="pos.eq.ra" unit="deg" width="10">
+<DESCRIPTION>Right ascension (FK5, Equinox=J2000.0) (computed by VizieR, not part of the original data)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="_DEJ2000" precision="6" ref="J2000" ucd="pos.eq.dec" unit="deg" width="10">
+<DESCRIPTION>Declination (FK5, Equinox=J2000.0) (computed by VizieR, not part of the original data)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="RAJ2000" precision="6" ref="J2000" ucd="pos.eq.ra;meta.main" unit="deg" width="10">
+<DESCRIPTION>(ra) Right ascension (J2000)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="DEJ2000" precision="6" ref="J2000" ucd="pos.eq.dec;meta.main" unit="deg" width="10">
+<DESCRIPTION>(dec) Declination (J2000) (dec)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="2MASS" ucd="meta.id;meta.main">
+<DESCRIPTION>(designation) Source designation (1)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="Jmag" precision="3" ucd="phot.mag;em.IR.J" unit="mag" width="6">
+<DESCRIPTION>?(j_m) J selected default magnitude (2)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="e_Jmag" precision="3" ucd="stat.error;phot.mag;em.IR.J" unit="mag" width="6">
+<DESCRIPTION>?(j_msigcom) J total magnitude uncertainty (4)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="Hmag" precision="3" ucd="phot.mag;em.IR.H" unit="mag" width="6">
+<DESCRIPTION>?(h_m) H selected default magnitude (2)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="e_Hmag" precision="3" ucd="stat.error;phot.mag;em.IR.H" unit="mag" width="6">
+<DESCRIPTION>?(h_msigcom) H total magnitude uncertainty (4)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="Kmag" precision="3" ucd="phot.mag;em.IR.K" unit="mag" width="6">
+<DESCRIPTION>?(k_m) K selected default magnitude (2)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="e_Kmag" precision="3" ucd="stat.error;phot.mag;em.IR.K" unit="mag" width="6">
+<DESCRIPTION>?(k_msigcom) K total magnitude uncertainty (4)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="3" datatype="char" name="Qflg" ucd="meta.code.qual;phot">
+<DESCRIPTION>(ph_qual) JHK Photometric quality flag (5)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="3" datatype="char" name="Rflg" ucd="meta.ref">
+<DESCRIPTION>(rd_flg) Source of JHK default mag (6)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="3" datatype="char" name="Bflg" ucd="meta.code">
+<DESCRIPTION>(bl_flg) JHK components fit to source (7)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="3" datatype="char" name="Cflg" ucd="meta.code">
+<DESCRIPTION>(cc_flg) Artifact contamination, confusion (8)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="short" name="Xflg" ucd="meta.code" width="1">
+<DESCRIPTION>[0,2] (gal_contam) Extended source contamination (10)</DESCRIPTION>
+<VALUES null='-32768'/>
+</FIELD>
+<FIELD datatype="short" name="Aflg" ucd="meta.code" width="1">
+<DESCRIPTION>[0,1] (mp_flg) Association with asteroid or comet (11)</DESCRIPTION>
+<VALUES null='-32768'/>
+</FIELD>
+<DATA>
+<TABLEDATA>
+  <TR>
+    <TD>10.439434</TD>
+    <TD>0.977051</TD>
+    <TD>10.439434</TD>
+    <TD>0.977051</TD>
+    <TD>00414546+8958373</TD>
+    <TD>15.36</TD>
+    <TD>0.068</TD>
+    <TD>14.871</TD>
+    <TD>0.101</TD>
+    <TD>14.606</TD>
+    <TD>0.114</TD>
+    <TD>AAB</TD>
+    <TD>222</TD>
+    <TD>111</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>23.510793</TD>
+    <TD>0.977364</TD>
+    <TD>23.510793</TD>
+    <TD>0.977364</TD>
+    <TD>01340259+8958385</TD>
+    <TD>16.475</TD>
+    <TD>0.179</TD>
+    <TD>15.874</TD>
+    <TD>NaN</TD>
+    <TD>16.14</TD>
+    <TD>NaN</TD>
+    <TD>CUU</TD>
+    <TD>200</TD>
+    <TD>100</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>74.304832</TD>
+    <TD>0.979912</TD>
+    <TD>74.304832</TD>
+    <TD>0.979912</TD>
+    <TD>04571315+8958476</TD>
+    <TD>16.703</TD>
+    <TD>0.138</TD>
+    <TD>17.575</TD>
+    <TD>NaN</TD>
+    <TD>16.318</TD>
+    <TD>NaN</TD>
+    <TD>BUU</TD>
+    <TD>200</TD>
+    <TD>100</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>78.158658</TD>
+    <TD>0.989044</TD>
+    <TD>78.158658</TD>
+    <TD>0.989044</TD>
+    <TD>05123807+8959205</TD>
+    <TD>15.715</TD>
+    <TD>0.077</TD>
+    <TD>15.013</TD>
+    <TD>0.099</TD>
+    <TD>14.672</TD>
+    <TD>0.094</TD>
+    <TD>AAA</TD>
+    <TD>222</TD>
+    <TD>111</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>78.403255</TD>
+    <TD>0.985268</TD>
+    <TD>78.403255</TD>
+    <TD>0.985268</TD>
+    <TD>05133678+8959069</TD>
+    <TD>18.6</TD>
+    <TD>NaN</TD>
+    <TD>16.479</TD>
+    <TD>NaN</TD>
+    <TD>15.078</TD>
+    <TD>0.125</TD>
+    <TD>UUB</TD>
+    <TD>002</TD>
+    <TD>001</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>79.221887</TD>
+    <TD>0.972488</TD>
+    <TD>79.221887</TD>
+    <TD>0.972488</TD>
+    <TD>05165325+8958209</TD>
+    <TD>16.056</TD>
+    <TD>0.127</TD>
+    <TD>15.654</TD>
+    <TD>0.216</TD>
+    <TD>15.353</TD>
+    <TD>0.216</TD>
+    <TD>BCC</TD>
+    <TD>222</TD>
+    <TD>111</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>86.793746</TD>
+    <TD>0.969536</TD>
+    <TD>86.793746</TD>
+    <TD>0.969536</TD>
+    <TD>05471049+8958103</TD>
+    <TD>16.78</TD>
+    <TD>0.149</TD>
+    <TD>17.081</TD>
+    <TD>NaN</TD>
+    <TD>15.471</TD>
+    <TD>NaN</TD>
+    <TD>BUU</TD>
+    <TD>200</TD>
+    <TD>100</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>110.92212</TD>
+    <TD>0.983841</TD>
+    <TD>110.92212</TD>
+    <TD>0.983841</TD>
+    <TD>07234130+8959018</TD>
+    <TD>18.471</TD>
+    <TD>NaN</TD>
+    <TD>15.569</TD>
+    <TD>0.144</TD>
+    <TD>17.006</TD>
+    <TD>NaN</TD>
+    <TD>UBU</TD>
+    <TD>020</TD>
+    <TD>010</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>180.216382</TD>
+    <TD>0.967781</TD>
+    <TD>180.216382</TD>
+    <TD>0.967781</TD>
+    <TD>12005193+8958040</TD>
+    <TD>16.804</TD>
+    <TD>0.155</TD>
+    <TD>17.634</TD>
+    <TD>NaN</TD>
+    <TD>17.163</TD>
+    <TD>NaN</TD>
+    <TD>BUU</TD>
+    <TD>200</TD>
+    <TD>100</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>191.63972</TD>
+    <TD>0.974533</TD>
+    <TD>191.63972</TD>
+    <TD>0.974533</TD>
+    <TD>12463353+8958283</TD>
+    <TD>13.776</TD>
+    <TD>0.027</TD>
+    <TD>13.21</TD>
+    <TD>0.032</TD>
+    <TD>13.08</TD>
+    <TD>0.035</TD>
+    <TD>AAA</TD>
+    <TD>222</TD>
+    <TD>111</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>197.450988</TD>
+    <TD>0.977242</TD>
+    <TD>197.450988</TD>
+    <TD>0.977242</TD>
+    <TD>13094823+8958380</TD>
+    <TD>16.366</TD>
+    <TD>0.141</TD>
+    <TD>15.707</TD>
+    <TD>0.198</TD>
+    <TD>15.202</TD>
+    <TD>0.172</TD>
+    <TD>BCC</TD>
+    <TD>222</TD>
+    <TD>111</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>241.847897</TD>
+    <TD>0.990128</TD>
+    <TD>241.847897</TD>
+    <TD>0.990128</TD>
+    <TD>16072349+8959244</TD>
+    <TD>16.676</TD>
+    <TD>0.176</TD>
+    <TD>15.912</TD>
+    <TD>0.187</TD>
+    <TD>15.526</TD>
+    <TD>0.213</TD>
+    <TD>CCC</TD>
+    <TD>222</TD>
+    <TD>111</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>260.073455</TD>
+    <TD>0.968155</TD>
+    <TD>260.073455</TD>
+    <TD>0.968155</TD>
+    <TD>17201762+8958053</TD>
+    <TD>16.277</TD>
+    <TD>0.124</TD>
+    <TD>15.771</TD>
+    <TD>0.176</TD>
+    <TD>15.161</TD>
+    <TD>0.16</TD>
+    <TD>BCC</TD>
+    <TD>222</TD>
+    <TD>111</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>304.956115</TD>
+    <TD>0.967041</TD>
+    <TD>304.956115</TD>
+    <TD>0.967041</TD>
+    <TD>20194946+8958013</TD>
+    <TD>16.568</TD>
+    <TD>0.149</TD>
+    <TD>15.985</TD>
+    <TD>NaN</TD>
+    <TD>16.421</TD>
+    <TD>NaN</TD>
+    <TD>BUU</TD>
+    <TD>200</TD>
+    <TD>100</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>316.795845</TD>
+    <TD>0.982071</TD>
+    <TD>316.795845</TD>
+    <TD>0.982071</TD>
+    <TD>21071100+8958554</TD>
+    <TD>16.445</TD>
+    <TD>0.143</TD>
+    <TD>15.82</TD>
+    <TD>0.177</TD>
+    <TD>15.248</TD>
+    <TD>0.191</TD>
+    <TD>BCC</TD>
+    <TD>222</TD>
+    <TD>111</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>321.653808</TD>
+    <TD>0.967438</TD>
+    <TD>321.653808</TD>
+    <TD>0.967438</TD>
+    <TD>21263691+8958027</TD>
+    <TD>18.516</TD>
+    <TD>NaN</TD>
+    <TD>15.405</TD>
+    <TD>0.142</TD>
+    <TD>17.028</TD>
+    <TD>NaN</TD>
+    <TD>UBU</TD>
+    <TD>020</TD>
+    <TD>010</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>342.747968</TD>
+    <TD>0.973076</TD>
+    <TD>342.747968</TD>
+    <TD>0.973076</TD>
+    <TD>22505951+8958230</TD>
+    <TD>15.306</TD>
+    <TD>0.048</TD>
+    <TD>14.594</TD>
+    <TD>0.089</TD>
+    <TD>14.335</TD>
+    <TD>0.087</TD>
+    <TD>AAA</TD>
+    <TD>222</TD>
+    <TD>111</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+  <TR>
+    <TD>347.869091</TD>
+    <TD>0.977455</TD>
+    <TD>347.869091</TD>
+    <TD>0.977455</TD>
+    <TD>23112858+8958388</TD>
+    <TD>18.393</TD>
+    <TD>NaN</TD>
+    <TD>15.74</TD>
+    <TD>0.154</TD>
+    <TD>17.091</TD>
+    <TD>NaN</TD>
+    <TD>UBU</TD>
+    <TD>020</TD>
+    <TD>010</TD>
+    <TD>000</TD>
+    <TD>0</TD>
+    <TD>0</TD>
+  </TR>
+</TABLEDATA>
+</DATA>
+</TABLE>
+</RESOURCE>
+</VOTABLE>
