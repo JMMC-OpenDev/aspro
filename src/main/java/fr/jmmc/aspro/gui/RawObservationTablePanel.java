@@ -197,7 +197,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
         jPanelHeader = new javax.swing.JPanel();
         jLabelFilterBy = new javax.swing.JLabel();
         jScrollPaneIns = new javax.swing.JScrollPane();
-        jListIns = new javax.swing.JList<>();
+        jListIns = new javax.swing.JList();
         jPanelHeaderFiller = new javax.swing.JPanel();
         jScrollPaneTable = new javax.swing.JScrollPane();
         jTableObs = new javax.swing.JTable();
@@ -216,10 +216,10 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
 
         jScrollPaneIns.setName("jScrollPaneIns"); // NOI18N
 
-        jListIns.setModel(new javax.swing.AbstractListModel<String>() {
+        jListIns.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "_MATISSE_" };
             public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
+            public Object getElementAt(int i) { return strings[i]; }
         });
         jListIns.setToolTipText("Select 1 or more instruments to filter raw observations (use Ctrl + click)");
         jListIns.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
@@ -268,7 +268,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabelFilterBy;
-    private javax.swing.JList<String> jListIns;
+    private javax.swing.JList jListIns;
     private javax.swing.JPanel jPanelHeader;
     private javax.swing.JPanel jPanelHeaderFiller;
     private javax.swing.JScrollPane jScrollPaneIns;
