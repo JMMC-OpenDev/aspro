@@ -142,9 +142,11 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                     });
                 } catch (UnknownHostException uhe) {
                     _logger.error("Query failed: {}", OBS_SERVER_SEARCH_URL, uhe);
+                    StatusBar.show("Query failed: " + OBS_SERVER_SEARCH_URL);
                     break;
                 } catch (IOException ioe) {
                     _logger.error("Query failed: {}", OBS_SERVER_SEARCH_URL, ioe);
+                    StatusBar.show("Query failed: " + OBS_SERVER_SEARCH_URL);
                     break;
                 } finally {
                     logger.info("Query[{}] {}: {} ms.", (result != null) ? "OK" : "FAILED", OBS_SERVER_SEARCH_URL,
