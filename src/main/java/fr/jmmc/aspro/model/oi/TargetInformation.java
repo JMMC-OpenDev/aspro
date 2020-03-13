@@ -254,6 +254,53 @@ public class TargetInformation
                 );
     }
 
+    protected static void updateTargetReferences(final java.util.List<TargetInformation> targetInfos,
+                                                 final java.util.Map<String, Target> mapIDTargets,
+                                                 final java.util.Map<String, TargetGroup> mapIDGroups,
+                                                 final java.util.Map<String, Target> mapIDCalibrators,
+                                                 final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers) {
+
+        TargetInformation targetInfo;
+        Target target, newTarget;
+
+        for (final java.util.ListIterator<TargetInformation> it = targetInfos.listIterator(); it.hasNext();) {
+            targetInfo = it.next();
+
+            target = targetInfo.getTargetRef();
+
+            if (target == null) {
+                logger.debug("Removing invalid target reference.");
+                it.remove();
+            } else {
+                newTarget = mapIDTargets.get(target.getIdentifier());
+                if (newTarget != null) {
+                    if (newTarget != target) {
+                        targetInfo.setTargetRef(newTarget);
+                    }
+
+                    targetInfo.updateTargetReferences(mapIDCalibrators);
+
+                    targetInfo.updateGroupReferences(mapIDTargets, mapIDGroups, mapIDGroupMembers);
+
+                    // remove if empty :
+                    if (targetInfo.isEmpty()) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Removing empty target information: {}", target.getIdentifier());
+                        }
+                        it.remove();
+                    }
+
+                } else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Removing missing target reference: {}", target.getIdentifier());
+                    }
+                    it.remove();
+                }
+            }
+        }
+    }
+    
+    
     /**
      * Check bad references and update target references 
      * and check if referenced calibrators are present in the given mapIDCalibrators
@@ -337,6 +384,9 @@ public class TargetInformation
      * @return TargetGroupMembers
      */
     public final TargetGroupMembers getOrCreateGroupMembers(final TargetGroup group) {
+        if (group == null) {
+            throw new NullPointerException("Group can not be null !");
+        }        
         TargetGroupMembers gm = getGroupMembers(group);
         if (gm == null) {
             // create a new instance if the group is not found :

@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.AnimatorPanel;
 import fr.jmmc.aspro.gui.util.ModelJTree;
@@ -12,14 +11,11 @@ import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
 import fr.jmmc.aspro.gui.util.UserModelAnimator;
 import fr.jmmc.aspro.gui.util.UserModelAnimator.UserModelAnimatorListener;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.service.UserModelData;
-import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel;
@@ -31,7 +27,6 @@ import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.NumericJTable;
-import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.NumberUtils;
@@ -216,7 +211,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         this.generateTree();
         this.selectTarget(Target.getTarget(targetName, this.editTargets));
 
-        if (targetName == null) {
+        if (this.editTargets.isEmpty()) {
             resetForm();
         }
     }
@@ -228,20 +223,26 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         // Use a new target to reset form fields:
         processTargetSelection(Target.EMPTY_TARGET);
 
-        // disable buttons:
-        this.jRadioButtonAnalytical.setEnabled(false);
-        this.jRadioButtonUserModel.setEnabled(false);
-        this.jButtonAdd.setEnabled(false);
-
-        // disable fields:
-        this.jComboBoxModelType.setEnabled(false);
-
-        this.jRadioButtonXY.setEnabled(false);
-        this.jRadioButtonSepPosAngle.setEnabled(false);
-        this.jButtonNormalizeFluxes.setEnabled(false);
-
         // reset current target:
         this.currentTarget = null;
+    }
+
+    private void autoLockForm() {
+        final boolean enable = !this.editTargets.isEmpty();
+
+        if (enable != this.jRadioButtonAnalytical.isEnabled()) {
+            // fix state of buttons:
+            this.jRadioButtonAnalytical.setEnabled(enable);
+            this.jRadioButtonUserModel.setEnabled(enable);
+            this.jButtonAdd.setEnabled(enable);
+
+            // fix state of fields:
+            this.jComboBoxModelType.setEnabled(enable);
+
+            this.jRadioButtonXY.setEnabled(enable);
+            this.jRadioButtonSepPosAngle.setEnabled(enable);
+            this.jButtonNormalizeFluxes.setEnabled(enable);
+        }
     }
 
     /**
@@ -481,6 +482,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         } finally {
             // restore the automatic update observation :
             setAutoUpdateUserModel(prevAutoUpdateUserModel);
+
+            autoLockForm();
         }
 
         // anyway enable or disable animator:

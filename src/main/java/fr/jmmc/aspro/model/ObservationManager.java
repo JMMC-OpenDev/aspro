@@ -1202,7 +1202,11 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      */
     public void removeTarget(final Target target) {
         if (Target.removeTarget(target, getTargets(), getTargetUserInfos())) {
-            logger.trace("removeTarget: {}", target);
+            logger.debug("removeTarget: {}", target);
+
+            // check and update target references :
+            getMainObservation().checkReferences();
+
             // fire change events :
             this.fireTargetChangedEvents();
         }
@@ -1222,6 +1226,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
             if (Target.removeTarget(calibrator, targets, targetUserInfos)) {
                 logger.trace("removeCalibrator: {}", calibrator);
+
+                // check and update target references :
+                getMainObservation().checkReferences();
+
                 // fire change events :
                 this.fireTargetChangedEvents();
             }
@@ -1264,6 +1272,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             }
 
             if (changed) {
+                // check and update target references :
+                getMainObservation().checkReferences();
+
                 // fire change events :
                 this.fireTargetChangedEvents();
             }
@@ -1389,7 +1400,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         // fire change events :
         this.fireTargetChangedEvents();
     }
-    
+
     /**
      * This fires a target change and an observation change event to all registered listeners.
      */
@@ -1404,7 +1415,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         this.fireObservationUpdate(true);
     }
 
-
     /**
      * This prepares the TargetRawObservation 
      * and fires a target change and an observation change event to all registered listeners.
@@ -1414,10 +1424,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         for (TargetRawObservation rawObs : getMainObservation().getTargetObservations()) {
             rawObs.prepare();
         }
-        
+
         this.fireTargetChangedEvents();
-    }   
-    
+    }
+
     // --- TARGET CONFIGURATION --------------------------------------------------
     /**
      * Return the target configuration for the given target (FT mode, HA min/max)

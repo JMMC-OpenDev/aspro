@@ -192,7 +192,7 @@ public class TargetRawObservation
             target = targetRawObs.getTargetRef();
 
             if (target == null) {
-                logger.info("Removing invalid target reference.");
+                logger.debug("Removing invalid target reference.");
                 it.remove();
             } else {
                 newTarget = mapIDTargets.get(target.getIdentifier());

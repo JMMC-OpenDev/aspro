@@ -330,6 +330,10 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
         if (getTreeGroups() != source) {
             getTreeGroups().selectTarget(target, false); // ignore missing
         }
+        if (target == null) {
+            // no target anymore:
+            processTargetSelection(null);
+        }
     }
 
     /**
@@ -400,7 +404,8 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
      * @param target selected target
      */
     private void processTargetSelection(final Target target) {
-        logger.debug("processTargetSelection: {}", target.getName());
+        final String targetName = (target != null) ? target.getName() : null;
+        logger.debug("processTargetSelection: {}", targetName);
 
         // update the current target :
         this.currentTarget = target;
@@ -411,35 +416,38 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
             // note : setText() / setValue() methods fire a property change event :
 
             // name :
-            this.jFieldTargetName.setText(target.getName());
-
+            this.jFieldTargetName.setText(targetName);
             this.jFieldTargetName.setToolTipText(getTreeTargets().getTooltipText(target));
 
             // Update selection in checkboxlist :
             this.checkBoxListGroups.selectNone();
             this.disabledGroupsInCheckBoxList.clear();
 
-            // indicates if the target has associated targets (implicitely OB targets):
-            final boolean hasGM = this.editTargetUserInfos.getOrCreateTargetInformation(target).hasGroupMembers();
+            if (target != null) {
+                // indicates if the target has associated targets (implicitely OB targets):
+                final boolean hasGM = this.editTargetUserInfos.getOrCreateTargetInformation(target).hasGroupMembers();
 
-            // get used groups by the target (associated OB target):
-            final Set<TargetGroup> usedGroups = (hasGM) ? null : this.editTargetUserInfos.getGroupsUsedByTargetGroupMembers(target);
+                // get used groups by the target (associated OB target):
+                final Set<TargetGroup> usedGroups = (hasGM) ? null : this.editTargetUserInfos.getGroupsUsedByTargetGroupMembers(target);
 
-            boolean shouldScroll = true;
+                boolean shouldScroll = true;
 
-            for (TargetGroup group : this.editTargetUserInfos.getGroups()) {
-                TargetGroupMembers gm = this.editTargetUserInfos.getOrCreateGroupMembers(group);
+                for (TargetGroup group : this.editTargetUserInfos.getGroups()) {
+                    TargetGroupMembers gm = this.editTargetUserInfos.getOrCreateGroupMembers(group);
 
-                if (gm.hasTarget(target)) {
-                    this.checkBoxListGroups.addCheckBoxListSelectedValue(group, shouldScroll);
-                    shouldScroll = false;
-                }
-                if (group.isCategoryOB()) {
-                    if (hasGM || usedGroups.contains(group)) {
-                        // disable the checkbox on this group:
-                        this.disabledGroupsInCheckBoxList.add(group);
+                    if (gm.hasTarget(target)) {
+                        this.checkBoxListGroups.addCheckBoxListSelectedValue(group, shouldScroll);
+                        shouldScroll = false;
+                    }
+                    if (group.isCategoryOB()) {
+                        if (hasGM || usedGroups.contains(group)) {
+                            // disable the checkbox on this group:
+                            this.disabledGroupsInCheckBoxList.add(group);
+                        }
                     }
                 }
+            } else {
+                this.disabledGroupsInCheckBoxList.addAll(this.editTargetUserInfos.getGroups());
             }
             // Force repaint:
             this.checkBoxListGroups.repaint();

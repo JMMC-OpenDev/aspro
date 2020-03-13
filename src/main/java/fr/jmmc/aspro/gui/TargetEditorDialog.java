@@ -70,7 +70,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
      */
     public static boolean showEditor(final String targetName, final String selectedTab) {
         logger.debug("showing Editor : {}", targetName);
-        
+
         boolean result = false;
 
         JDialog dialog = null;
@@ -164,7 +164,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
      * @param selectedTab name of the selected tab (see TAB_xxx constants)
      */
     protected TargetEditorDialog(final List<Target> targets, final TargetUserInformations targetUserInfos,
-            final String selectedTab) {
+                                 final String selectedTab) {
         super();
 
         // Define shared data model with tabbed forms :
@@ -197,9 +197,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
                 if (selected != targetModelForm) {
                     targetModelForm.disableForm();
                 }
-                
+
                 final Target target = getCurrentTarget();
-                
+
                 if (selected == targetForm) {
                     // select the target :
                     targetForm.selectTarget(target);
@@ -207,17 +207,14 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
                     // refresh the tree according to the new target / calibrator list
                     // and select the target :
                     targetModelForm.initialize((target != null) ? target.getName() : null);
-                } else  if (selected == targetGroupForm) {
-                     // refresh the tree according to the new target / calibrator list
+                } else if (selected == targetGroupForm) {
+                    // refresh the tree according to the new target / calibrator list
                     // and select the target :
                     targetGroupForm.initialize((target != null) ? target.getName() : null);
-                    // OR
-                    // select the target :
-//                    targetGroupForm.selectTarget(target);
                 }
                 currentComponent = selected;
             }
-            
+
             private Target getCurrentTarget() {
                 if (currentComponent == targetForm) {
                     return targetForm.getCurrentTarget();
@@ -245,7 +242,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         }
 
         this.targetForm.initialize(targetName);
-        
+
         this.targetGroupForm.initialize(targetName);
     }
 

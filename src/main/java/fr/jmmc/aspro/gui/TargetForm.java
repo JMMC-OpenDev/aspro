@@ -10,6 +10,7 @@ import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.TargetTransferHandler;
 import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
+import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
@@ -37,7 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JFormattedTextField;
-import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
@@ -192,12 +192,32 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
      * @param targetName target name to select
      */
     void initialize(final String targetName) {
-        this.calibratorsModel = new GenericListModel<Target>(this.editTargetUserInfos.getCalibrators());
+        final List<Target> calTargets = this.editTargetUserInfos.getCalibrators();
+        this.calibratorsModel = new GenericListModel<Target>(calTargets);
         this.jListCalibrators.setModel(this.calibratorsModel);
-        ((TargetList)this.jListCalibrators).setTargetUserInfos(this.editTargetUserInfos);
+        ((TargetList) this.jListCalibrators).setTargetUserInfos(this.editTargetUserInfos);
 
         this.generateTree();
-        this.selectTarget(Target.getTarget(targetName, this.editTargets));
+
+        // select target:
+        Target target = null;
+        if (targetName != null) {
+            target = Target.getTarget(targetName, this.editTargets);
+        }
+        this.selectTarget(target);
+
+        if ((target == null) && this.getTreeTargets().isRootNodeLeaf()) {
+            // no tree selection then select first calibrator:
+            if (!calTargets.isEmpty()) {
+                // use first target:
+                this.selectTarget(calTargets.get(0));
+            }
+        }
+    }
+
+    private void initializeCurrentTarget() {
+        final String targetName = (getCurrentTarget() != null) ? getCurrentTarget().getName() : null;
+        this.initialize(targetName);
     }
 
     /* Tree related methods */
@@ -439,11 +459,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             this.jScrollPaneCalibratorInfos.setVisible(useTableCalibratorInfos);
 
             // check that the target has no calibrator yet to let the user edit the target name:
-            this.jFieldName.setEditable(!calibrator && !this.editTargetUserInfos.hasCalibrators(this.currentTarget));
+            this.jFieldName.setEditable(!calibrator && !this.editTargetUserInfos.hasCalibrators(target));
 
         } finally {
             // restore the automatic update target :
             this.setAutoUpdateTarget(prevAutoUpdateTarget);
+
+            autoLockForm();
         }
     }
 
@@ -599,7 +621,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                 } finally {
                     if (isTargetChanged) {
                         // Refresh the complete form :
-                        this.initialize(getCurrentTarget().getName());
+                        this.initializeCurrentTarget();
                     }
                     if (sb.length() != 0) {
                         MessagePane.showWarning(sb.toString(), "Simbad resolver");
@@ -1459,12 +1481,10 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
   }//GEN-LAST:event_jButtonSimbadActionPerformed
 
     private void jButtonDeleteTargetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteTargetActionPerformed
-
         // see BasicObservationForm#jButtonDeleteTargetActionPerformed():
         final Target selectedTarget = getCurrentTarget();
 
         if (selectedTarget != null) {
-
             if (isCalibrator(selectedTarget)) {
                 if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
                         "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
@@ -1618,7 +1638,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         }
 
         // Refresh the complete form :
-        this.initialize(getCurrentTarget().getName());
+        this.initializeCurrentTarget();
     }//GEN-LAST:event_jButtonSortRAActionPerformed
 
     private void jButtonAfterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAfterActionPerformed
@@ -1783,8 +1803,11 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     public void deleteTarget(final Target target) {
         if (target != null) {
             if (Target.removeTarget(target, this.editTargets, this.editTargetUserInfos)) {
-                logger.trace("removeTarget: {}", target);
+                logger.debug("removeTarget: {}", target);
             }
+
+            // check and update target references :
+            ObservationSetting.checkReferences(this.editTargets, this.editTargetUserInfos, null);
 
             // remove the cached target information:
             this.mapIDTargetInformations.remove(target.getIdentifier());
@@ -1805,37 +1828,48 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         // Use a new target to reset form fields:
         processTargetSelection(Target.EMPTY_TARGET);
 
-        // disable buttons:
-        this.jButtonSortRA.setEnabled(false);
-        this.jToggleButtonCalibrator.setEnabled(false);
-        this.jButtonDeleteTarget.setEnabled(false);
-        this.jButtonSimbad.setEnabled(false);
-
-        // disable fields:
-        this.jFieldSysVel.setEnabled(false);
-        this.jFieldPMRA.setEnabled(false);
-        this.jFieldPMDEC.setEnabled(false);
-
-        this.jFieldParallax.setEnabled(false);
-        this.jFieldParaErr.setEnabled(false);
-
-        this.jFieldMagB.setEnabled(false);
-        this.jFieldMagV.setEnabled(false);
-        this.jFieldMagG.setEnabled(false);
-        this.jFieldMagR.setEnabled(false);
-        this.jFieldMagI.setEnabled(false);
-        this.jFieldMagJ.setEnabled(false);
-        this.jFieldMagH.setEnabled(false);
-        this.jFieldMagK.setEnabled(false);
-        this.jFieldMagL.setEnabled(false);
-        this.jFieldMagM.setEnabled(false);
-        this.jFieldMagN.setEnabled(false);
-
-        this.jTextAreaIds.setEnabled(false);
-        this.jTextAreaTargetInfos.setEnabled(false);
-
-        // reset current target:
+        // reset current target after processTargetSelection():
         this.currentTarget = null;
+    }
+
+    private void autoLockForm() {
+        final boolean enable = !this.editTargets.isEmpty();
+
+        if (enable != this.jFieldName.isEnabled()) {
+            // fix state of buttons:
+            this.jButtonSortRA.setEnabled(enable);
+            this.jButtonSortDE.setEnabled(enable);
+            this.jToggleButtonCalibrator.setEnabled(enable);
+            this.jButtonDeleteTarget.setEnabled(enable);
+            this.refreshButton.setEnabled(enable);
+            this.jButtonSimbad.setEnabled(enable);
+            this.jButtonSEDViewer.setEnabled(enable);
+            this.jButtonGetStar.setEnabled(enable);
+
+            // fix state of fields:
+            this.jFieldName.setEnabled(enable);
+            this.jFieldSysVel.setEnabled(enable);
+            this.jFieldPMRA.setEnabled(enable);
+            this.jFieldPMDEC.setEnabled(enable);
+
+            this.jFieldParallax.setEnabled(enable);
+            this.jFieldParaErr.setEnabled(enable);
+
+            this.jFieldMagB.setEnabled(enable);
+            this.jFieldMagV.setEnabled(enable);
+            this.jFieldMagG.setEnabled(enable);
+            this.jFieldMagR.setEnabled(enable);
+            this.jFieldMagI.setEnabled(enable);
+            this.jFieldMagJ.setEnabled(enable);
+            this.jFieldMagH.setEnabled(enable);
+            this.jFieldMagK.setEnabled(enable);
+            this.jFieldMagL.setEnabled(enable);
+            this.jFieldMagM.setEnabled(enable);
+            this.jFieldMagN.setEnabled(enable);
+
+            this.jTextAreaIds.setEnabled(enable);
+            this.jTextAreaTargetInfos.setEnabled(enable);
+        }
     }
 
     /**
@@ -1851,7 +1885,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                     after, target, refTarget, parentTarget);
         }
 
-        final String name = target.getName();
+        final String targetName = target.getName();
 
         if (parentTarget != null) {
             // move target in the calibrator list of parent science target:
@@ -1868,7 +1902,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         }
 
         // Refresh the complete form :
-        this.initialize(name);
+        this.initialize(targetName);
     }
 
     /**

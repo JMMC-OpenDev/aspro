@@ -110,7 +110,6 @@ public class TargetGroupMembers
     }
     
 //--simple--preserve
-
     @Override
     public final String toString() {
         return "TargetGroupMembers [" + ((this.getGroupRef() != null) ? this.getGroupRef() : "undefined") + "]" + " : " + getTargets();
@@ -127,7 +126,6 @@ public class TargetGroupMembers
         // note : groups & targets are not cloned as only there (immutable) identifier is useful
         // see  : updateTargetReferences(Map<ID, Target>) to replace target instances to have a clean object graph
         // i.e. (no leaking references)
-        
         // Simple copy of targets (Target instances) :
         if (copy.targets != null) {
             copy.targets = OIBase.copyList(copy.targets);
@@ -158,15 +156,15 @@ public class TargetGroupMembers
             return java.util.Collections.emptyMap();
         }
         final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers
-            = new java.util.HashMap<String, java.util.Map<String, Target>>(groupMembers.size());
-        
+                                                                   = new java.util.HashMap<String, java.util.Map<String, Target>>(groupMembers.size());
+
         for (TargetGroupMembers tgm : groupMembers) {
             // create the Map<ID, Target> index for members:
             mapIDGroupMembers.put(tgm.getGroupRef().getIdentifier(), Target.createTargetIndex(tgm.targets));
         }
         return mapIDGroupMembers;
     }
-    
+
     protected static void updateGroupReferences(final List<TargetGroupMembers> groupMembers,
                                                 final java.util.Map<String, Target> mapIDTargets,
                                                 final java.util.Map<String, TargetGroup> mapIDGroups,
@@ -174,14 +172,14 @@ public class TargetGroupMembers
 
         java.util.Map<String, Target> index;
         TargetGroup group, newGroup;
-        
+
         for (final java.util.ListIterator<TargetGroupMembers> it = groupMembers.listIterator(); it.hasNext();) {
             TargetGroupMembers tgm = it.next();
 
             group = tgm.getGroupRef();
 
             if (group == null) {
-                logger.info("Removing invalid group reference.");
+                logger.debug("Removing invalid group reference.");
                 it.remove();
             } else {
                 newGroup = mapIDGroups.get(group.getIdentifier());
@@ -189,7 +187,7 @@ public class TargetGroupMembers
                     if (newGroup != group) {
                         tgm.setGroupRef(newGroup);
                     }
-                    
+
                     // consider only target references corresponding to the group members or all target references:
                     index = (mapIDGroupMembers != null) ? mapIDGroupMembers.get(group.getIdentifier()) : mapIDTargets;
 
@@ -204,23 +202,25 @@ public class TargetGroupMembers
                     }
 
                 } else {
-                    logger.info("Removing missing group reference: {}", group.getIdentifier());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Removing missing group reference: {}", group.getIdentifier());
+                    }
                     it.remove();
                 }
             }
         }
     }
-    
+
     /**
      * Check bad references and update target references in this instance using the given Map<ID, Target> index
      * @param mapIDTargets Map<ID, Target> index
      */
     private final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
         // note : groupRef is already updated in updateGroupReferences()
-        
+
         if (this.targets != null) {
             Target.updateTargetReferences(this.targets, mapIDTargets);
-            
+
             if (this.targets.isEmpty()) {
                 this.targets = null;
             }
@@ -253,7 +253,7 @@ public class TargetGroupMembers
         }
         return null;
     }
-    
+
     /**
      * Return true if the given target is present in the group members
      * @param target target to test
@@ -262,7 +262,7 @@ public class TargetGroupMembers
     public boolean hasTarget(final Target target) {
         return getTargets().contains(target);
     }
-    
+
     /**
      * Add the given target to the group members if not present (avoid duplicates)
      * @param target target to add

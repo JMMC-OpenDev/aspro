@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="20.03"/>
-    <compilation date="26/02/2020" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="20.04 beta 1"/>
+    <compilation date="13/03/2020" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -228,6 +228,12 @@
     </menubar>
 
     <releasenotes>
+        <release version="20.04">
+            <pubDate>Fri, 13 Mar 2020 16:00:00 GMT</pubDate>
+            <prerelease version="20.04 beta 1">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1035">Fixed exceptions occuring in the Target Editor when the last target is deleted</change>
+            </prerelease>
+        </release>
         <release version="20.03">
             <pubDate>Wed, 26 Feb 2020 14:00:00 GMT</pubDate>
             <prerelease version="20.03 beta 7">

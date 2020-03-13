@@ -399,7 +399,7 @@ public class ObservationSetting
     }
     
 //--simple--preserve
-  /**
+    /**
      * Return the number of variants
      * @return number of variants
      */
@@ -431,7 +431,7 @@ public class ObservationSetting
     public final Target getTarget(final String name) {
         return Target.getTarget(name, getTargets());
     }
-    
+
     /**
      * Return the target of the given identifier
      * @param id target identifier
@@ -597,38 +597,51 @@ public class ObservationSetting
         for (Target target : getTargets()) {
             target.checkValues();
         }
-        
-        java.util.Map<String, Target> mapIDTargets = null;
-            
+
+        checkReferences(getTargets(), this.targetUserInfos, this.targetObservations);
+
         // check target user infos :
-        if (this.targetUserInfos != null) {
-            logger.debug("checkReferences = {}", this.targetUserInfos);
-
-            // create the Map<ID, Target> index for targets:
-            mapIDTargets = Target.createTargetIndex(getTargets());
-            
-            this.targetUserInfos.updateTargetReferences(mapIDTargets);
-
-            if (this.targetUserInfos.isEmpty()) {
-                logger.debug("Removing empty target user informations.");
-                this.targetUserInfos = null;
-            }
+        if (this.targetUserInfos != null && this.targetUserInfos.isEmpty()) {
+            logger.debug("Removing empty target user informations.");
+            this.targetUserInfos = null;
         }
         // check target's raw observations:
-        if (this.targetObservations != null) {
-            logger.debug("checkReferences = {}", this.targetObservations);
+        if (this.targetObservations != null && this.targetObservations.isEmpty()) {
+            logger.debug("Removing empty target raw observations.");
+            this.targetObservations = null;
+        }
+    }
+
+    /**
+     * Check this object for bad reference(s) and removes them if needed.
+     * @param targets list of targets
+     * @param targetUserInfos target user infos
+     * @param targetObservations target raw observations
+    */
+    public static void checkReferences(final List<Target> targets,
+                                       final TargetUserInformations targetUserInfos,
+                                       final List<TargetRawObservation> targetObservations) {
+        java.util.Map<String, Target> mapIDTargets = null;
+
+        // check target user infos :
+        if (targetUserInfos != null) {
+            logger.debug("checkReferences = {}", targetUserInfos);
+
+            // create the Map<ID, Target> index for targets:
+            mapIDTargets = Target.createTargetIndex(targets);
+
+            targetUserInfos.updateTargetReferences(mapIDTargets);
+        }
+        // check target's raw observations:
+        if (targetObservations != null) {
+            logger.debug("checkReferences = {}", targetObservations);
 
             if (mapIDTargets == null) {
                 // create the Map<ID, Target> index for targets:
-                mapIDTargets = Target.createTargetIndex(getTargets());
+                mapIDTargets = Target.createTargetIndex(targets);
             }
-            
-            TargetRawObservation.updateTargetReferences(this.targetObservations, mapIDTargets);
-            
-            if (this.targetObservations.isEmpty()) {
-                logger.debug("Removing empty target raw observations.");
-                this.targetObservations = null;
-            }
+
+            TargetRawObservation.updateTargetReferences(targetObservations, mapIDTargets);
         }
     }
 
@@ -745,6 +758,9 @@ public class ObservationSetting
      * @return target raw observation
      */
     public final TargetRawObservation getOrCreateTargetRawObservation(final Target target) {
+        if (target == null) {
+            throw new NullPointerException("Target can not be null !");
+        }
         TargetRawObservation rawObs = getTargetRawObservation(target);
         if (rawObs == null) {
             rawObs = new TargetRawObservation();
@@ -753,7 +769,7 @@ public class ObservationSetting
         }
         return rawObs;
     }
-    
+
     /**
      * Return the existing target raw observation corresponding to the target
      * @param target target
@@ -774,7 +790,7 @@ public class ObservationSetting
     public void setRawObsFilterInsNames(List<String> rawObsFilterInsNames) {
         this.rawObsFilterInsNames = rawObsFilterInsNames;
     }
-    
+
 //--simple--preserve
 
 }

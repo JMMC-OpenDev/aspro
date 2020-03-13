@@ -253,6 +253,9 @@ public class TargetUserInformations
      * @return target user information
      */
     public final TargetInformation getOrCreateTargetInformation(final Target target) {
+        if (target == null) {
+            throw new NullPointerException("Target can not be null !");
+        }
         TargetInformation targetInfo = getTargetInformation(target);
         if (targetInfo == null) {
             // create a new instance if the target is not found :
@@ -401,7 +404,7 @@ public class TargetUserInformations
         final java.util.Map<String, TargetGroup> mapIDGroups = TargetGroup.createTargetGroupIndex(getGroups());
 
         if (this.groupMembers != null) {
-            // fix group ref & target refs in group members:
+            // Fix group ref & target refs in group members:
             TargetGroupMembers.updateGroupReferences(this.groupMembers, mapIDTargets, mapIDGroups, null);
 
             if (this.groupMembers.isEmpty()) {
@@ -419,51 +422,16 @@ public class TargetUserInformations
         }
 
         if (this.targetInfos != null) {
+            // create the Map<ID, Target> index for calibrators:
+            final java.util.Map<String, Target> mapIDCalibrators = Target.createTargetIndex(this.calibrators);
+
             // create the Map<ID TargetGroup, Map<ID, Target> > index for group members:
             final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers
                                                                        = TargetGroupMembers.createGroupMemberIndex(this.groupMembers);
 
-            // create the Map<ID, Target> index for calibrators:
-            final java.util.Map<String, Target> mapIDCalibrators = Target.createTargetIndex(this.calibrators);
+            // Fix target refs in calibrators & group members:
+            TargetInformation.updateTargetReferences(this.targetInfos, mapIDTargets, mapIDGroups, mapIDCalibrators, mapIDGroupMembers);
 
-            TargetInformation targetInfo;
-            Target target, newTarget;
-
-            for (final java.util.ListIterator<TargetInformation> it = this.targetInfos.listIterator(); it.hasNext();) {
-                targetInfo = it.next();
-
-                target = targetInfo.getTargetRef();
-
-                if (target == null) {
-                    logger.info("Removing invalid target reference.");
-                    it.remove();
-                } else {
-                    newTarget = mapIDTargets.get(target.getIdentifier());
-                    if (newTarget != null) {
-                        if (newTarget != target) {
-                            targetInfo.setTargetRef(newTarget);
-                        }
-
-                        targetInfo.updateTargetReferences(mapIDCalibrators);
-
-                        targetInfo.updateGroupReferences(mapIDTargets, mapIDGroups, mapIDGroupMembers);
-
-                        // remove if empty :
-                        if (targetInfo.isEmpty()) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Removing empty target information: {}", target.getIdentifier());
-                            }
-                            it.remove();
-                        }
-
-                    } else {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Removing missing target reference: {}", target.getIdentifier());
-                        }
-                        it.remove();
-                    }
-                }
-            }
             if (this.targetInfos.isEmpty()) {
                 this.targetInfos = null;
             }
@@ -537,6 +505,9 @@ public class TargetUserInformations
      * @return TargetGroupMembers
      */
     public final TargetGroupMembers getOrCreateGroupMembers(final TargetGroup group) {
+        if (group == null) {
+            throw new NullPointerException("Group can not be null !");
+        }
         TargetGroupMembers gm = getGroupMembers(group);
         if (gm == null) {
             // create a new instance if the group is not found :
