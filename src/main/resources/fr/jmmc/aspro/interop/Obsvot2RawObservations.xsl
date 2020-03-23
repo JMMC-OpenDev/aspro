@@ -17,14 +17,22 @@
             <FIELD ID="exp_mjd_start" datatype="double" name="exp_mjd_start" ucd="time.start;obs.exposure"/>
             <FIELD ID="exp_mjd_end" datatype="double" name="exp_mjd_end" ucd="time.end;obs.exposure"/>
             <FIELD ID="exp_projected_baselines" arraysize="*" datatype="unicodeChar" name="exp_projected_baselines" ucd="instr.baseline"/>
+
+            <FIELD ID="exp_tau0" datatype="double" name="exp_tau0" ucd="time.processing"/>
+            <FIELD ID="exp_temperature" datatype="double" name="exp_temperature" ucd="phys.temperature"/>
+            <FIELD ID="exp_seeing" datatype="double" name="exp_seeing" ucd="instr.obsty.seeing"/>
+
             <FIELD ID="obs_id" arraysize="*" datatype="unicodeChar" name="obs_id" ucd="meta.id"/>
             <FIELD ID="obs_type" arraysize="*" datatype="unicodeChar" name="obs_type" ucd="meta.id;class"/>
             <FIELD ID="obs_program" arraysize="*" datatype="unicodeChar" name="obs_program" ucd="meta.id"/>
+
             <FIELD ID="interferometer_name" arraysize="*" datatype="unicodeChar" name="interferometer_name" ucd="meta.id"/>
             <FIELD ID="interferometer_stations" arraysize="*" datatype="unicodeChar" name="interferometer_stations"/>
+
             <FIELD ID="instrument_name" arraysize="*" datatype="unicodeChar" name="instrument_name" ucd="meta.id;instr"/>
             <FIELD ID="instrument_mode" arraysize="*" datatype="unicodeChar" name="instrument_mode" ucd="meta.id;instr.setup"/>
             <FIELD ID="instrument_submode" arraysize="*" datatype="unicodeChar" name="instrument_submode" ucd="meta.id;instr.setup"/>
+
             <FIELD ID="target_id" arraysize="*" datatype="unicodeChar" name="target_id" ucd="meta.id"/>
             <FIELD ID="target_name" arraysize="*" datatype="unicodeChar" name="target_name" ucd="meta.id;meta.main"/>
             <FIELD ID="target_ra" datatype="double" name="target_ra" ucd="pos.eq.ra;meta.main" unit="deg"/>
@@ -37,14 +45,22 @@
                         <TD>58530.18533803</TD>
                         <TD>58530.1888102522</TD>
                         <TD>{'U1-U2': {'length': {'start': '50.1590', 'end': '50.0840'}, 'angle': {'start': '14.6000', 'end': '15.4000'}}, 'U1-U3': {'length': {'start': '93.5290', 'end': '93.3650'}, 'angle': {'start': '20.5000', 'end': '21.3000'}}, 'U1-U4': {'length': {'start': '129.2960', 'end': '129.1750'}, 'angle': {'start': '43.4850', 'end': '44.5810'}}, 'U2-U3': {'length': {'start': '43.9410', 'end': '43.8610'}, 'angle': {'start': '27.2000', 'end': '28.2000'}}, 'U2-U4': {'length': {'start': '88.7820', 'end': '88.8800'}, 'angle': {'start': '59.3480', 'end': '60.5360'}}, 'U3-U4': {'length': {'start': '56.6300', 'end': '56.9140'}, 'angle': {'start': '83.7340', 'end': '84.9140'}}}</TD>
+
+                        <TD>0.0049675</TD>
+                        <TD>12.3</TD>
+                        <TD>0.71</TD>
+
                         <TD>512</TD>
                         <TD>science</TD>
                         <TD>0102.C-0519(A)</TD>
+
                         <TD>VLTI</TD>
                         <TD>U1 U2 U3 U4</TD>
+
                         <TD>GRAVITY</TD>
                         <TD>HIGH-COMBINED</TD>
                         <TD>SINGLE</TD>
+
                         <TD>466</TD>
                         <TD>IRS9A</TD>
                         <TD>168.790967</TD>
@@ -297,6 +313,23 @@
             </xsl:call-template>
         </xsl:variable>
 
+        <!-- weather conditions -->
+        <xsl:variable name="EXP_TAU0_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="name">exp_tau0</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="EXP_TEMP_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="name">exp_temperature</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="EXP_SEEING_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="name">exp_seeing</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+
 
         <!-- starting output document -->
         <o:observations xmlns:o="http://www.jmmc.fr/aspro-raw-obs/0.1"
@@ -336,6 +369,10 @@
                     <xsl:variable name="MJD_END"                      select="./TD[position()=$MJD_END_index]"/>
 
                     <xsl:variable name="PROJ_BASELINES"               select="./TD[position()=$PROJ_BASELINES_index]"/>
+
+                    <xsl:variable name="EXP_TAU0"                     select="./TD[position()=$EXP_TAU0_index]"/>
+                    <xsl:variable name="EXP_TEMP"                     select="./TD[position()=$EXP_TEMP_index]"/>
+                    <xsl:variable name="EXP_SEEING"                   select="./TD[position()=$EXP_SEEING_index]"/>
 
 
                     <xsl:if test="$OBS_ID/text() and $TARGET_RA/text() and $TARGET_DEC/text()">
@@ -414,16 +451,27 @@
                                 <xsl:value-of select="$PROJ_BASELINES"/>
                             </projectedBaselines>
 
+                            <xsl:if test="$EXP_TAU0/text()">
+                                <expTau0>
+                                    <xsl:value-of select="$EXP_TAU0"/>
+                                </expTau0>
+                            </xsl:if>
+                            <xsl:if test="$EXP_TEMP/text()">
+                                <expTemp>
+                                    <xsl:value-of select="$EXP_TEMP"/>
+                                </expTemp>
+                            </xsl:if>
+                            <xsl:if test="$EXP_SEEING/text()">
+                                <expSeeing>
+                                    <xsl:value-of select="$EXP_SEEING"/>
+                                </expSeeing>
+                            </xsl:if>
+
                         </observation>
-
                     </xsl:if>
-
                 </xsl:for-each>
-
             </xsl:if>
-
         </o:observations>
-
     </xsl:template>
 
 

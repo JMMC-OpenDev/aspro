@@ -41,6 +41,9 @@ public final class RawObservationTableModel extends AbstractTableModel {
         TARGET_RA("RA", Double.class),
         TARGET_DEC("DEC", Double.class),
         MJD_START("MJD OBS", Double.class),
+        TAU0("Tau0 (ms)", Double.class),
+        TEMP("Temp (C)", Double.class),
+        SEEING("Seeing (as)", Double.class),
         VALID("Valid", Integer.class),
         EXP_TIME("Exp. time", Double.class),
         TARGET_RA_HMS("RA (HMS)", String.class),
@@ -267,6 +270,12 @@ public final class RawObservationTableModel extends AbstractTableModel {
                     return obs.getTargetDec();
                 case MJD_START:
                     return obs.getMjdStart();
+                case TAU0:
+                    return (obs.getExpTau0() != null) ? 1000.0 * obs.getExpTau0() : null;
+                case TEMP:
+                    return obs.getExpTemp();
+                case SEEING:
+                    return obs.getExpSeeing();
                 case VALID:
                     return obs.getValid();
                 case EXP_TIME:

@@ -41,6 +41,9 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="mjdStart" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *         &lt;element name="mjdEnd" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *         &lt;element name="projectedBaselines" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="expTau0" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="expTemp" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="expSeeing" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -68,7 +71,10 @@ import fr.jmmc.aspro.model.OIBase;
     "targetDec",
     "mjdStart",
     "mjdEnd",
-    "projectedBaselines"
+    "projectedBaselines",
+    "expTau0",
+    "expTemp",
+    "expSeeing"
 })
 public class RawObservation
     extends OIBase
@@ -101,6 +107,9 @@ public class RawObservation
     protected double mjdEnd;
     @XmlElement(required = true)
     protected String projectedBaselines;
+    protected Double expTau0;
+    protected Double expTemp;
+    protected Double expSeeing;
 
     /**
      * Gets the value of the obsId property.
@@ -501,6 +510,78 @@ public class RawObservation
     public void setProjectedBaselines(String value) {
         this.projectedBaselines = value;
     }
+
+    /**
+     * Gets the value of the expTau0 property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getExpTau0() {
+        return expTau0;
+    }
+
+    /**
+     * Sets the value of the expTau0 property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setExpTau0(Double value) {
+        this.expTau0 = value;
+    }
+
+    /**
+     * Gets the value of the expTemp property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getExpTemp() {
+        return expTemp;
+    }
+
+    /**
+     * Sets the value of the expTemp property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setExpTemp(Double value) {
+        this.expTemp = value;
+    }
+
+    /**
+     * Gets the value of the expSeeing property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getExpSeeing() {
+        return expSeeing;
+    }
+
+    /**
+     * Sets the value of the expSeeing property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setExpSeeing(Double value) {
+        this.expSeeing = value;
+    }
     
 //--simple--preserve
     public final static int VALID_ALL = 0;
@@ -884,6 +965,9 @@ public class RawObservation
                 + ", mjdStart: " + getMjdStart()
                 + ", mjdEnd: " + getMjdEnd()
                 + ", projectedBaselines: " + getProjectedBaselines()
+                + ", tau0: " + getExpTau0()
+                + ", temp: " + getExpTemp()
+                + ", seeing: " + getExpSeeing()
                 + " | expTime: " + getExpTime()
                 + ", RA: " + getRa()
                 + ", DEC: " + getDec()
@@ -968,6 +1052,16 @@ public class RawObservation
             if (getLstEnd() > 0.0) {
                 sb.append("<br><b>LST:</b> ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(getLstEnd())).append(" h");
             }
+        }
+        // show weather conditions:
+        if (getExpTau0() != null) {
+            sb.append("<br><b>Tau0:</b> ").append(Math.round(1000.0 * getExpTau0())).append(" ms");
+        }
+        if (getExpTemp()!= null) {
+            sb.append("<br><b>Temp:</b> ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo1Digits(getExpTemp())).append(" C");
+        }
+        if (getExpSeeing()!= null) {
+            sb.append("<br><b>Seeing:</b> ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo1Digits(getExpSeeing())).append(" as");
         }
     }
 //--simple--preserve
