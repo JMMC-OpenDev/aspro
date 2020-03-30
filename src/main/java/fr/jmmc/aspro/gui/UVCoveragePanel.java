@@ -860,7 +860,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.jComboBoxInstrumentMode.addActionListener(this);
         this.jComboBoxFTMode.addActionListener(this);
         this.jComboBoxAOSetup.addActionListener(this);
-        
+
         this.jComboBoxAtmQual.addActionListener(this);
         this.jComboBoxAtmQual.setRenderer(new AtmQualComboBoxRenderer());
 
@@ -1744,6 +1744,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // Use OIFits preferences:
             final int supersamplingOIFits = this.myPreferences.getPreferenceAsInt(Preferences.OIFITS_SUPER_SAMPLING);
             final MathMode mathModeOIFits = this.myPreferences.getOIFitsMathMode();
+            final double snrThresholdOIFits = this.myPreferences.getPreferenceAsDouble(Preferences.OIFITS_SNR_THRESHOLD);
 
             // update the status bar :
             StatusBar.show(MSG_COMPUTING_COVERAGE);
@@ -1756,7 +1757,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             new UVCoverageSwingWorker(this, obsCollection, this.getObservabilityData(), targetName, uvMax,
                     doUVSupport, doOIFits, useInstrumentBias, doDataNoise,
                     doModelImage, imageMode, imageSize, colorModel, colorScale, doImageNoise,
-                    this.imageIndex, supersamplingOIFits, mathModeOIFits, currentUVMapData).executeTask();
+                    this.imageIndex, supersamplingOIFits, mathModeOIFits, snrThresholdOIFits, currentUVMapData
+            ).executeTask();
 
         } // observability data check
     }
@@ -1803,6 +1805,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         private final int supersamplingOIFits;
         /** OIFits MathMode preference */
         private final UserModelService.MathMode mathModeOIFits;
+        /** OIFits SNR threshold preference */
+        private final double snrThresholdOIFits;
 
         /**
          * Hidden constructor
@@ -1826,6 +1830,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param supersamplingOIFits OIFits supersampling preference
          * @param mathModeOIFits OIFits MathMode preference
          * @param currentUVMapData previously computed UV Map Data
+         * @param snrThresholdOIFits OIFits SNR threshold preference
          */
         private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationCollection obsCollection,
                                       final List<ObservabilityData> obsDataList, final String targetName,
@@ -1834,7 +1839,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                       final boolean doModelImage, final ImageMode imageMode, final int imageSize,
                                       final IndexColorModel colorModel, final ColorScale colorScale, final boolean doImageNoise,
                                       final int imageIndex, final int supersamplingOIFits, final UserModelService.MathMode mathModeOIFits,
-                                      final UVMapData currentUVMapData) {
+                                      final double snrThresholdOIFits, final UVMapData currentUVMapData) {
 
             // get current observation version :
             super(AsproTaskRegistry.TASK_UV_COVERAGE, obsCollection);
@@ -1855,6 +1860,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.imageIndex = imageIndex;
             this.supersamplingOIFits = supersamplingOIFits;
             this.mathModeOIFits = mathModeOIFits;
+            this.snrThresholdOIFits = snrThresholdOIFits;
             this.currentUVMapData = currentUVMapData;
         }
 
@@ -1881,8 +1887,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 final ObservabilityData obsData = this.obsDataList.get(i);
 
                 // compute the uv coverage data :
-                uvDataList.add(new UVCoverageService(observation, obsData, targetName, this.uvMax, this.doUVSupport,
-                        this.useInstrumentBias, this.doDataNoise, this.supersamplingOIFits, this.mathModeOIFits).compute());
+                uvDataList.add(
+                        new UVCoverageService(observation, obsData, targetName, this.uvMax, this.doUVSupport,
+                                this.useInstrumentBias, this.doDataNoise, this.supersamplingOIFits, this.mathModeOIFits,
+                                this.snrThresholdOIFits).compute()
+                );
 
                 // fast interrupt :
                 if (Thread.currentThread().isInterrupted()) {
@@ -3790,7 +3799,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         public Component getListCellRendererComponent(JList list, Object value,
                                                       int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            
+
             setToolTipText(AtmosphereQualityUtils.getTooltip(value.toString()));
             return this;
         }

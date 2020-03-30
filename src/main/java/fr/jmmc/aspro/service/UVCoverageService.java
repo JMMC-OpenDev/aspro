@@ -72,6 +72,8 @@ public final class UVCoverageService {
     private final int supersamplingOIFits;
     /** OIFits MathMode preference */
     private final MathMode mathModeOIFits;
+    /** OIFits SNR threshold preference */
+    private final double snrThresholdOIFits;
     /** cosinus wrapper used by FastMath.sinAndCos() */
     private final DoubleWrapper cw = new DoubleWrapper();
     /* internal */
@@ -113,10 +115,11 @@ public final class UVCoverageService {
      * @param doDataNoise enable data noise
      * @param supersamplingOIFits OIFits supersampling preference
      * @param mathModeOIFits OIFits MathMode preference
+     * @param snrThresholdOIFits OIFits SNR threshold preference
      */
     public UVCoverageService(final ObservationSetting observation, final ObservabilityData obsData, final String targetName,
                              final double uvMax, final boolean doUVSupport, final boolean useInstrumentBias, final boolean doDataNoise,
-                             final int supersamplingOIFits, final MathMode mathModeOIFits) {
+                             final int supersamplingOIFits, final MathMode mathModeOIFits, final double snrThresholdOIFits) {
 
         this.observation = observation;
         this.obsData = obsData;
@@ -127,6 +130,7 @@ public final class UVCoverageService {
         this.doDataNoise = doDataNoise;
         this.supersamplingOIFits = supersamplingOIFits;
         this.mathModeOIFits = mathModeOIFits;
+        this.snrThresholdOIFits = snrThresholdOIFits;
 
         // create the uv coverage data corresponding to the observation version :
         this.data = new UVCoverageData(observation.getVersion());
@@ -577,7 +581,7 @@ public final class UVCoverageService {
                     final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
                             this.beams, this.baseLines,
                             this.useInstrumentBias, this.doDataNoise,
-                            this.supersamplingOIFits, this.mathModeOIFits,
+                            this.supersamplingOIFits, this.mathModeOIFits, this.snrThresholdOIFits,
                             this.data.getTargetPointInfos(), this.data.getTargetUVObservability(),
                             this.sc, this.data.getWarningContainer());
 

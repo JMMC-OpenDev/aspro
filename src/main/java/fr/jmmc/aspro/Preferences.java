@@ -58,6 +58,8 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
     public final static String OIFITS_MATH_MODE = "oifits.math.mode";
     /** Preference : Number of complex visibility samples used to compute the complex visibility of each spectral channel (1, 5, 10 ...) */
     public final static String OIFITS_SUPER_SAMPLING = "oifits.supersampling";
+    /** Preference : SNR Threshold (V2) to flag out low SNR values */
+    public final static String OIFITS_SNR_THRESHOLD = "oifits.snr.threshold";
 
     /**
      * Private constructor that must be empty.
@@ -142,6 +144,7 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
         setDefaultPreference(OIFITS_ADD_NOISE, Boolean.TRUE);
         setDefaultPreference(OIFITS_SUPER_SAMPLING, AsproConstants.DEFAULT_SUPER_SAMPLING);
         setDefaultPreference(OIFITS_MATH_MODE, MathMode.FAST.toString());
+        setDefaultPreference(OIFITS_SNR_THRESHOLD, AsproConstants.DEFAULT_SNR_THRESHOLD);
     }
 
     /**

@@ -139,6 +139,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
      * @param doDataNoise flag to add gaussian noise to OIFits data
      * @param supersampling OIFits supersampling preference
      * @param mathMode OIFits MathMode preference
+     * @param snrThreshold SNR threshold to flag values
      * @param targetPointInfos target information for each uv point couples
      * @param targetUVObservability list of UV coordinates per baseline
      * @param sc sky calc instance
@@ -152,12 +153,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                    final boolean doDataNoise,
                                    final int supersampling,
                                    final MathMode mathMode,
+                                   final double snrThreshold,
                                    final TargetPointInfo[] targetPointInfos,
                                    final List<UVRangeBaseLineData> targetUVObservability,
                                    final AstroSkyCalc sc,
                                    final WarningContainer warningContainer) throws IllegalArgumentException {
 
-        super(target, supersampling, mathMode);
+        super(target, supersampling, mathMode, snrThreshold);
 
         this.beams = beams;
         this.nBeams = this.beams.size();
@@ -1395,7 +1397,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 );
 
                 // check mean(SNR):
-                if (snrWL[0][l] < SNR_THRESHOLD) {
+                if (snrWL[0][l] < snrThreshold) {
                     snrWL[0][l] = Double.NaN;
                 } else {
                     nValid++;
@@ -1405,7 +1407,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 logger.info("SNR: average = " + NumberUtils.trimTo3Digits(StatUtils.mean(snrWL[0]))
                         + " min = " + NumberUtils.trimTo3Digits(StatUtils.min(snrWL[1]))
                         + " max = " + NumberUtils.trimTo3Digits(StatUtils.max(snrWL[2]))
-                        + " - [" + nValid + " / " + nWaveLengths + "] channels with SNR >= " + SNR_THRESHOLD);
+                        + " - [" + nValid + " / " + nWaveLengths + "] channels with SNR >= " + snrThreshold);
             }
 
             // TODO: add information in status log ...

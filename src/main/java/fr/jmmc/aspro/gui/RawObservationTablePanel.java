@@ -77,7 +77,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
             tc.setCellRenderer(rdr);
             tc.setCellEditor(editor);
         }
-
+        // TODO: auto-populate filters from observations
         this.jListIns.setModel(new DefaultComboBoxModel(AsproConstants.INS_OBS_LIST));
     }
 
@@ -152,6 +152,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
         final ObservationManager om = ObservationManager.getInstance();
 
         // Set filters:
+        // TODO: store filters
         om.getMainObservation().setRawObsFilterInsNames(selectedInstruments);
 
         // filter table:

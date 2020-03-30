@@ -75,7 +75,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                                 final UserModelService.MathMode mathMode,
                                 final boolean doApodization, final double diameter) {
 
-        super(target, supersampling, mathMode);
+        super(target, supersampling, mathMode, 3.0); // snrThreshold = 3
 
         this.oiFitsFile = oifitsFile;
 

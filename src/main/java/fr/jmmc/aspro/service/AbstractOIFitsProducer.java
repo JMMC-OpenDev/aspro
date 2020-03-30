@@ -55,10 +55,6 @@ public abstract class AbstractOIFitsProducer {
     protected final static boolean SHOW_COMPUTE_STATS = false;
     /** threshold to use parallel jobs for user models (32 UV points) */
     protected final static int JOB_THRESHOLD_USER_MODELS = 32;
-    /** SNR threshold to flag values with low SNR */
-    protected final static double SNR_THRESHOLD = 3.0;
-    /** minimal V2 error (5%) to check for SNR */
-    protected final static double SNR_THRESHOLD_VIS = 0.05;
     /** Jmcs Parallel Job executor */
     protected static final ParallelJobExecutor JOB_EXECUTOR = ParallelJobExecutor.getInstance();
 
@@ -88,6 +84,8 @@ public abstract class AbstractOIFitsProducer {
     protected NoiseService noiseService = null;
     /** flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid */
     protected boolean doNoise = false;
+    /** SNR threshold to flag values with low SNR */
+    protected final double snrThreshold;
     /* complex visibility fields */
     /** internal computed complex visibility [row][waveLength] */
     protected Complex[][] visComplex = null;
@@ -107,10 +105,12 @@ public abstract class AbstractOIFitsProducer {
      * @param target target to process
      * @param supersampling OIFits supersampling preference
      * @param mathMode OIFits MathMode preference
+     * @param snrThreshold SNR threshold to flag values
      */
     protected AbstractOIFitsProducer(final Target target,
                                      final int supersampling,
-                                     final MathMode mathMode) {
+                                     final MathMode mathMode,
+                                     final double snrThreshold) {
 
         this.target = target;
 
@@ -120,6 +120,10 @@ public abstract class AbstractOIFitsProducer {
         // OIFits preferences:
         this.supersampling = supersampling;
         this.mathMode = mathMode;
+        
+        this.snrThreshold = snrThreshold;
+        
+        logger.debug("snr threshold: {}", snrThreshold);
     }
 
     /**
@@ -686,7 +690,7 @@ public abstract class AbstractOIFitsProducer {
                         // check SNR(V2) without any bias:
                         final double snrV2 = ns.getSNRVis2NoBias(ptIdx[k], l);
 
-                        if (snrV2 < SNR_THRESHOLD) {
+                        if (snrV2 < snrThreshold) {
                             cVisSnrFlagRow[l] = true;
 //                            System.out.println("Low SNR["+this.waveLengths[l]+"]: " + snrV2);
                         }
@@ -747,6 +751,14 @@ public abstract class AbstractOIFitsProducer {
      */
     public boolean isDoNoise() {
         return doNoise;
+    }
+
+    /**
+     * Return the SNR threshold to flag values with low SNR
+     * @return SNR threshold to flag values with low SNR
+     */
+    public double getSnrThreshold() {
+        return snrThreshold;
     }
 
     /**

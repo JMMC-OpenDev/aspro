@@ -107,6 +107,24 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
             }
         });
 
+        this.jFieldSNRTh.addPropertyChangeListener("value", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(final PropertyChangeEvent evt) {
+                final double snrNew = ((Number) jFieldSNRTh.getValue()).doubleValue();
+
+                if (snrNew < 0d) {
+                    // invalid value :
+                    jFieldSNRTh.setValue(myPreferences.getPreferenceAsDouble(Preferences.OIFITS_SNR_THRESHOLD));
+                }
+                try {
+                    // will fire triggerObserversNotification so update() will be called
+                    myPreferences.setPreference(Preferences.OIFITS_SNR_THRESHOLD, Double.valueOf(((Number) jFieldSNRTh.getValue()).doubleValue()));
+                } catch (PreferencesException pe) {
+                    logger.error("property failure : ", pe);
+                }
+            }
+        });
+        
         final Dimension dim = new Dimension(500, 500);
         setMinimumSize(dim);
         addComponentListener(new ComponentResizeAdapter(dim));
@@ -197,6 +215,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jLabelAddNoise = new javax.swing.JLabel();
         jRadioButtonAddNoiseYes = new javax.swing.JRadioButton();
         jRadioButtonAddNoiseNo = new javax.swing.JRadioButton();
+        jFieldSNRTh = new javax.swing.JFormattedTextField();
+        jLabelSNRTh = new javax.swing.JLabel();
         jPanelGui = new javax.swing.JPanel();
         jLabelGuiRestrictions = new javax.swing.JLabel();
         jRadioButtonBypassGuiRestrictionsYes = new javax.swing.JRadioButton();
@@ -334,6 +354,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         jPanelObservability.add(jFieldMinElev, gridBagConstraints);
 
@@ -744,6 +765,25 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelOIFits.add(jRadioButtonAddNoiseNo, gridBagConstraints);
 
+        jFieldSNRTh.setColumns(5);
+        jFieldSNRTh.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.0"))));
+        jFieldSNRTh.setName("jFieldMinElev"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
+        jPanelOIFits.add(jFieldSNRTh, gridBagConstraints);
+
+        jLabelSNRTh.setText("SNR Threshold (V2)");
+        jLabelSNRTh.setToolTipText("All related values below this threshold will be flagged out (V2, T3...)");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelOIFits.add(jLabelSNRTh, gridBagConstraints);
+
         jPanelLayout.add(jPanelOIFits);
 
         jPanelGui.setBorder(javax.swing.BorderFactory.createTitledBorder("Gui settings"));
@@ -1045,6 +1085,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JComboBox jComboBoxSuperSampling;
     private javax.swing.JComboBox jComboBoxTwilight;
     private javax.swing.JFormattedTextField jFieldMinElev;
+    private javax.swing.JFormattedTextField jFieldSNRTh;
     private javax.swing.JLabel jLabelAddNoise;
     private javax.swing.JLabel jLabelApodization;
     private javax.swing.JLabel jLabelBestPopsAlgorithm;
@@ -1062,6 +1103,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JLabel jLabelMinElev;
     private javax.swing.JLabel jLabelNightOnly;
     private javax.swing.JLabel jLabelPositionStyle;
+    private javax.swing.JLabel jLabelSNRTh;
     private javax.swing.JLabel jLabelSuperSampling;
     private javax.swing.JLabel jLabelTimeRef;
     private javax.swing.JLabel jLabelTwilight;
@@ -1169,6 +1211,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         final boolean preferAddNoise = this.myPreferences.getPreferenceAsBoolean(Preferences.OIFITS_ADD_NOISE);
         this.jRadioButtonAddNoiseYes.setSelected(preferAddNoise);
         this.jRadioButtonAddNoiseNo.setSelected(!preferAddNoise);
+        
+        this.jFieldSNRTh.setValue(this.myPreferences.getPreferenceAsDouble(Preferences.OIFITS_SNR_THRESHOLD));
 
         // Gui settings:
         // Inverse logical:

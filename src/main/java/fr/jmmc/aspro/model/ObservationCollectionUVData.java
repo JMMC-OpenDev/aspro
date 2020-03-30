@@ -160,6 +160,9 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
             if (current.isUseInstrumentBias() != other.isUseInstrumentBias()) {
                 return false;
             }
+            if (current.getSnrThreshold() != other.getSnrThreshold()) {
+                return false;
+            }
         }
         return true;
     }

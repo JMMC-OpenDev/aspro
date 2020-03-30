@@ -82,6 +82,8 @@ public interface AsproConstants {
                 Double.valueOf(2.0),
                 Double.valueOf(5.0)
             }));
+    /** default SNR threshold = 3 */
+    public final static Double DEFAULT_SNR_THRESHOLD = Double.valueOf(3.0);
 
     /** no value for combo boxes */
     public static final String NONE = "None";
