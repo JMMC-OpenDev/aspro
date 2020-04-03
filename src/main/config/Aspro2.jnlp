@@ -36,6 +36,9 @@
         <extension href="../oiexplorer-core/OIExplorerCore.jnlp"/>
 
         <!-- Libraries -->
+        <!-- json lib -->
+        <jar href="@SHARED@/json-20190722.jar"/>
+
         <!-- SteelSeries Compass -->
         <jar href="@SHARED@/SteelSeries-3.9.26.jar"/>
         <jar href="@SHARED@/trident-6.3.jar"/>

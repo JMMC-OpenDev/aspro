@@ -9,48 +9,43 @@ package fr.jmmc.aspro.model.uvcoverage;
  */
 public class UVBaseLineData {
 
-  /** baseline name */
-  private final String name;
-  /** number of uv points */
-  private int nPoints = 0;
-  /** u coordinates */
-  private double[] u = null;
-  /** v coordinates */
-  private double[] v = null;
+    /** baseline name */
+    private final String name;
+    /** number of uv points */
+    private final int nPoints;
+    /** u coordinates */
+    private final double[] u;
+    /** v coordinates */
+    private final double[] v;
 
-  /**
-   * Constructor
-   * @param name baseline name
-   */
-  public UVBaseLineData(final String name) {
-    this.name = name;
-  }
+    /**
+     * Constructor
+     * @param name baseline name
+     * @param nPoints number of valid U/V values
+     * @param u U coords (m)
+     * @param v V coords (m)
+     */
+    public UVBaseLineData(final String name, final int nPoints,
+                          final double[] u, final double[] v) {
+        this.name = name;
+        this.nPoints = nPoints;
+        this.u = u;
+        this.v = v;
+    }
 
-  public final String getName() {
-    return name;
-  }
+    public final String getName() {
+        return name;
+    }
 
-  public final int getNPoints() {
-    return nPoints;
-  }
+    public final int getNPoints() {
+        return this.nPoints;
+    }
 
-  public final void setNPoints(final int nPoints) {
-    this.nPoints = nPoints;
-  }
+    public final double[] getU() {
+        return u;
+    }
 
-  public final double[] getU() {
-    return u;
-  }
-
-  public final void setU(final double[] u) {
-    this.u = u;
-  }
-
-  public final double[] getV() {
-    return v;
-  }
-
-  public final void setV(final double[] v) {
-    this.v = v;
-  }
+    public final double[] getV() {
+        return v;
+    }
 }

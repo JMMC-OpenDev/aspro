@@ -39,7 +39,10 @@ import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.TargetRawObservation;
 import fr.jmmc.aspro.model.oi.UserModel;
+import fr.jmmc.aspro.model.rawobs.Observations;
+import fr.jmmc.aspro.model.rawobs.RawObservation;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
@@ -83,6 +86,7 @@ import fr.jmmc.oiexplorer.core.gui.chart.BoundedNumberAxis;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorModelPaintScale;
 import fr.jmmc.oiexplorer.core.gui.chart.FastXYLineAndShapeRenderer;
+import fr.jmmc.oiexplorer.core.gui.chart.FastXYPathAreaRenderer;
 import fr.jmmc.oiexplorer.core.gui.chart.PaintLogScaleLegend;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
@@ -191,6 +195,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private final static int DATASET_UV_TRACKS = 2;
     /** dataset index for UV tracks shadows */
     private final static int DATASET_UV_TRACKS_SHADOW = 3;
+    /** dataset index for UV points from raw observations */
+    private final static int DATASET_UV_RAW_OBS = 4;
     /** observation manager */
     private final static ObservationManager om = ObservationManager.getInstance();
     /** user model animator singleton */
@@ -820,6 +826,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         rendererTracksShadow.setAutoPopulateSeriesStroke(false);
         rendererTracksShadow.setDefaultStroke(ChartUtils.VERY_LARGE_STROKE);
         this.xyPlot.setRenderer(DATASET_UV_TRACKS_SHADOW, rendererTracksShadow);
+
+        // Use FastXYPathAreaRenderer to have tooltip on UV area:
+        final FastXYPathAreaRenderer rendererRawObs = new FastXYPathAreaRenderer(); // DATASET_UV_RAW_OBS
+        // force to use the large stroke :
+        rendererRawObs.setAutoPopulateSeriesStroke(false);
+        rendererRawObs.setDefaultToolTipGenerator(this);
+        this.xyPlot.setRenderer(DATASET_UV_RAW_OBS, rendererRawObs);
 
         // Adjust background settings :
         this.xyPlot.setBackgroundImageAlpha(1.0f);
@@ -2346,6 +2359,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.xyPlot.setDataset(DATASET_UV_POINTS_SHADOW, null);
             this.xyPlot.setDataset(DATASET_UV_TRACKS, null);
             this.xyPlot.setDataset(DATASET_UV_TRACKS_SHADOW, null);
+            this.xyPlot.setDataset(DATASET_UV_RAW_OBS, null);
 
             // update the background image :
             this.resetUVMap();
@@ -2483,8 +2497,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // change the scaling factor ?
                 setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
 
+                // Get Raw Observations if any:
+                TargetRawObservation targetRawObs = null;
+
+                // get target from the first observation for consistency :
+                final Target target = observation.getTarget(chartData.getTargetName());
+                if (target != null) {
+                    targetRawObs = observation.getTargetRawObservation(target);
+                }
+
                 // computed data are valid :
-                updateChart(chartData, uvMapData);
+                updateChart(chartData, uvMapData, targetRawObs, observation.getRawObsFilterInsNames());
 
                 // update the background image and legend:
                 updateUVMapData(uvMapData);
@@ -2975,7 +2998,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @param chartData chart data
      * @param uvMapData optional uvMap data
      */
-    private void updateChart(final ObservationCollectionUVData chartData, final UVMapData uvMapData) {
+    private void updateChart(final ObservationCollectionUVData chartData, final UVMapData uvMapData,
+                             final TargetRawObservation targetRawObs, final List<String> rawObsFilterInsNames) {
 
         // points renderer:
         final AbstractRenderer rendererPoints = (AbstractRenderer) this.xyPlot.getRenderer(); // DATASET_UV_POINTS
@@ -3011,12 +3035,25 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         rendererTracksShadow.setAutoPopulateSeriesPaint(false);
         rendererTracksShadow.setDefaultPaint(SHADOW_COLOR);
 
+        // points shadow renderer:
+        final AbstractRenderer rendererRawObs = (AbstractRenderer) this.xyPlot.getRenderer(DATASET_UV_RAW_OBS);
+        // hide series in legend:
+        rendererRawObs.setDefaultSeriesVisibleInLegend(false);
+        // side effect with chart theme :
+        rendererRawObs.setAutoPopulateSeriesPaint(false);
+        rendererRawObs.setDefaultPaint(ObservabilityPanel.RAW_OBS_OVERLAY_COLOR); // TODO: share elsewhere ?
+
         // Create dataset with UV coverage data :
         final XYSeriesCollection datasetPoints = prepareDataset(chartData, rendererPoints);
         this.updateUVObservableRanges(datasetPoints, chartData);
 
         final XYSeriesCollection datasetTracks = prepareDataset(chartData, rendererTracks);
         this.updateUVTracksRiseSet(datasetTracks, chartData);
+
+        XYSeriesCollection datasetRawObs = null;
+        if (targetRawObs != null) {
+            datasetRawObs = this.updateUVRawObsRanges(targetRawObs, rawObsFilterInsNames);
+        }
 
         // define bounds to the uv maximum value (before setDataset which calls restoreAxisBounds()) :
         final UVCoverageData uvData = chartData.getFirstUVData();
@@ -3043,6 +3080,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.xyPlot.setDataset(DATASET_UV_POINTS_SHADOW, datasetPoints);
         this.xyPlot.setDataset(DATASET_UV_TRACKS, datasetTracks);
         this.xyPlot.setDataset(DATASET_UV_TRACKS_SHADOW, datasetTracks);
+        this.xyPlot.setDataset(DATASET_UV_RAW_OBS, datasetRawObs);
     }
 
     /**
@@ -3086,6 +3124,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             } // BL
         }
 
+        // TODO: only do it for main datasets ?
         // Apply attributes to dataset:
         for (int serie = 0, seriesCount = dataset.getSeriesCount(); serie < seriesCount; serie++) {
             label = (String) dataset.getSeriesKey(serie);
@@ -3282,6 +3321,133 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 } // BL
             }
         }
+    }
+
+    /**
+     * Update the dataset with UV ranges from raw observations
+     */
+    private XYSeriesCollection updateUVRawObsRanges(final TargetRawObservation targetRawObs, final List<String> rawObsFilterInsNames) {
+
+        final XYSeriesCollection dataset = new XYSeriesCollection();
+
+        XYSeries xySeries;
+        String label;
+        String serieKey;
+        Map<Integer, String> tooltipMap = null;
+
+        double[] u;
+        double[] v;
+        double[] uWMin;
+        double[] vWMin;
+        double[] uWMax;
+        double[] vWMax;
+        double x1, y1, x2, y2, x21, y21, x22, y22;
+
+        final List<Observations> obsGroups = targetRawObs.getGroups();
+
+        // has groups (valid observations) to show
+        if (obsGroups != null) {
+            for (int l = 0, lenG = obsGroups.size(); l < lenG; l++) {
+                final Observations obsGroup = obsGroups.get(l);
+
+                final RawObservation rawObsFirst = obsGroup.first();
+
+                // filter group ?
+                if (rawObsFilterInsNames != null
+                        && !rawObsFilterInsNames.contains(rawObsFirst.getInstrumentName())) {
+                    logger.debug("skip rawObs instrument: {}", rawObsFirst.getInstrumentName());
+                    continue;
+                }
+
+                for (RawObservation rawObs : obsGroup.getObservations()) {
+
+                    // show only valid for UV plot:
+                    if (rawObs.isValid(RawObservation.INVALID_UV)) {
+
+                        for (UVRangeBaseLineData uvBL : rawObs.getUVBaselines()) {
+
+                            // TODO: use blName ...
+                            // and other rawObs info in tooltips 
+                            // Just 1 serie now.
+                            // maybe group by obsGroup or any other criteria ?
+                            label = "RawObs";
+                            serieKey = label;
+
+                            if (dataset.getSeriesIndex(serieKey) == -1) {
+                                xySeries = new XYSeries(label, false);
+                                xySeries.setNotify(false);
+
+                                dataset.addSeries(xySeries);
+                            }
+
+                            // 1 color per per XYSeries:
+                            xySeries = dataset.getSeries(serieKey);
+
+                            tooltipMap = this.seriesTooltips.get(serieKey);
+                            if (tooltipMap == null) {
+                                tooltipMap = new HashMap<Integer, String>(10); // TODO ?
+                                this.seriesTooltips.put(serieKey, tooltipMap);
+                            }
+
+                            u = uvBL.getU();
+                            v = uvBL.getV();
+                            uWMin = uvBL.getUWMin();
+                            vWMin = uvBL.getVWMin();
+                            uWMax = uvBL.getUWMax();
+                            vWMax = uvBL.getVWMax();
+
+                            // size = uvBL.getNPoints()
+                            // 0: start, 1:end
+                            // TODO: try to represent the trapezoid ?
+                            // for now: only start
+                            x1 = toUVPlotScale(uWMax[0]);
+                            y1 = toUVPlotScale(vWMax[0]);
+
+                            x2 = toUVPlotScale(uWMin[0]);
+                            y2 = toUVPlotScale(vWMin[0]);
+
+                            x21 = toUVPlotScale(uWMax[1]);
+                            y21 = toUVPlotScale(vWMax[1]);
+
+                            x22 = toUVPlotScale(uWMin[1]);
+                            y22 = toUVPlotScale(vWMin[1]);
+
+                            // first segment :
+                            xySeries.add(x1, y1, false);
+                            xySeries.add(x2, y2, false);
+
+                            xySeries.add(x22, y22, false);
+                            xySeries.add(x21, y21, false);
+
+                            // line tooltip use index of (x2, y2) point:
+                            tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
+                                    generateTooltipRawObs(uvBL.getName(), rawObs, u[0], v[0]));
+
+                            // note: NaN will close shape
+                            // add an invalid point to break the line between the 2 segments :
+                            xySeries.add(NumberUtils.DBL_NAN, NumberUtils.DBL_NAN, false);
+
+                            // second symetric segment :
+                            xySeries.add(-x1, -y1, false);
+                            xySeries.add(-x2, -y2, false);
+
+                            xySeries.add(-x22, -y22, false);
+                            xySeries.add(-x21, -y21, false);
+
+                            // line tooltip use index of (x2, y2) point:
+                            tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
+                                    generateTooltipRawObs(uvBL.getName(), rawObs, -u[0], -v[0]));
+
+                            // note: NaN will close shape
+                            // add an invalid point to break the line between the 2 segments :
+                            xySeries.add(NumberUtils.DBL_NAN, NumberUtils.DBL_NAN, false);
+
+                        } // BL
+                    }
+                }
+            }
+        }
+        return dataset;
     }
 
     /**
@@ -3660,6 +3826,43 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         sb.append("<br><b>Airmass</b>: ");
         FormatterUtils.format(this.df1, sb, targetPointInfo.getAirmass());
+
+        // use U and V to display radius and position angle:
+        sb.append("<br><b>Radius</b>: ");
+        FormatterUtils.format(this.df1, sb, MathUtils.carthesianNorm(u, v));
+        sb.append(" m<br><b>Pos. angle</b>: ");
+        FormatterUtils.format(this.df1, sb, FastMath.toDegrees(FastMath.atan2(u, v)));
+        sb.append(" deg</html>");
+
+        return sb.toString();
+    }
+
+    /**
+     * Generate the tooltip's text for the given UV point
+     * @param baseline corresponding base line
+     * @param confName configuration name
+     * @param targetPointInfo target point information for the given UV point
+     * @param timeRef time reference LST or UTC
+     * @param u u coordinate in meters
+     * @param v v coordinate in meters
+     * @return tooltip's text for an UV point
+     */
+    public String generateTooltipRawObs(final String baseline, final RawObservation rawObs,
+                                        final double u, final double v) {
+
+        final StringBuffer sb = this.sbToolTip;
+        sb.setLength(0); // clear
+
+        sb.append("<html><b>");
+        sb.append("Base line: ").append(baseline);
+
+        sb.append("</b><br>");
+
+        // TODO: fix
+        final StringBuilder sb2 = new StringBuilder(128);
+        rawObs.toHtml(sb2, 1);
+
+        sb.append(sb2);
 
         // use U and V to display radius and position angle:
         sb.append("<br><b>Radius</b>: ");

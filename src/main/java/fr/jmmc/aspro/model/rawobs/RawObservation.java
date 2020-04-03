@@ -753,6 +753,7 @@ public class RawObservation
         return lstEnd;
     }
     
+    /** group id (same observation setup) defined by RawObsManager.analyze() */
     @javax.xml.bind.annotation.XmlTransient
     private Integer gid = null;
 
@@ -762,6 +763,18 @@ public class RawObservation
 
     public void setGroupId(final Integer gid) {
         this.gid = gid;
+    }
+    
+    /** List of UV points per baseline (parsed from JSON) */
+    @javax.xml.bind.annotation.XmlTransient
+    private java.util.List<fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData> uvPoints = null;
+
+    /**
+     * Return the List of UV points per baseline
+     * @return List of UV points per baseline
+     */
+    public java.util.List<fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData> getUVBaselines() {
+        return uvPoints;
     }
 
     /**
@@ -784,10 +797,6 @@ public class RawObservation
         this.ra = fr.jmmc.jmal.ALX.toHMS(getTargetRa());
         this.dec = fr.jmmc.jmal.ALX.toDMS(getTargetDec());
 
-        // Parse projected baselines
-        /*
-        * TODO impl
-         */
         // Resolve references:
         // interferometer
         this.interferometerRef = cm.getInterferometerDescription(getInterferometerName());
@@ -797,6 +806,9 @@ public class RawObservation
 
         // instrument mode
         this.instrumentModeRef = cm.getInstrumentMode(this.instrumentRef, getInstrumentMode());
+
+        // Parse projected baselines
+        this.uvPoints = fr.jmmc.aspro.model.util.ProjectedBaselineUtils.parse(getProjectedBaselines(), instrumentModeRef);
 
         // Validate:
         this.validate();
@@ -853,6 +865,10 @@ public class RawObservation
             logger.debug("lst_start = {}", lstStart);
             logger.debug("lst_end   = {}", lstEnd);
         }
+        if (isValid(INVALID_UV)) {
+            // prepare UV segments using the instrument mode
+            // see UVRangeBaseLineData and UVCoverageService
+        }
 
         logger.debug("prepared: {}", this);
     }
@@ -880,6 +896,11 @@ public class RawObservation
             logger.warn("Invalid Exp. time [{} s] for observation[{}]", getExpTime(), getObsId());
             flag |= INVALID_META;
             flag |= INVALID_TIMES;
+        }
+        if (getUVBaselines() == null) {
+            logger.warn("Invalid Projected baselines for observation[{}]: '{}'", getObsId(), getProjectedBaselines());
+            flag |= INVALID_META;
+            flag |= INVALID_UV;
         }
         // check references:
         if (this.getInterferometerRef() == null) {

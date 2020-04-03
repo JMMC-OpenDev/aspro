@@ -250,7 +250,6 @@ public final class UVCoverageService {
         final int sizeBL = _baseLines.size();
         final List<UVBaseLineData> targetUVRiseSet = new ArrayList<UVBaseLineData>(sizeBL);
 
-        UVBaseLineData uvData;
         BaseLine baseLine;
         /* U,V coordinates corrected with central wavelength */
         double[] u;
@@ -261,8 +260,6 @@ public final class UVCoverageService {
 
         for (int i = 0, j; i < sizeBL; i++) {
             baseLine = _baseLines.get(i);
-
-            uvData = new UVBaseLineData(baseLine.getName());
 
             u = new double[nPoints];
             v = new double[nPoints];
@@ -286,11 +283,9 @@ public final class UVCoverageService {
                 j++;
             }
 
-            uvData.setNPoints(j);
-            uvData.setU(u);
-            uvData.setV(v);
-
-            targetUVRiseSet.add(uvData);
+            targetUVRiseSet.add(
+                    new UVBaseLineData(baseLine.getName(), j, u, v)
+            );
 
             // fast interrupt :
             if (this.currentThread.isInterrupted()) {
@@ -418,7 +413,6 @@ public final class UVCoverageService {
                 final int sizeBL = _baseLines.size();
                 final List<UVRangeBaseLineData> targetUVObservability = new ArrayList<UVRangeBaseLineData>(sizeBL);
 
-                UVRangeBaseLineData uvData;
                 BaseLine baseLine;
 
                 /* pure U,V coordinates (m) */
@@ -436,8 +430,6 @@ public final class UVCoverageService {
 
                 for (int i = 0; i < sizeBL; i++) {
                     baseLine = _baseLines.get(i);
-
-                    uvData = new UVRangeBaseLineData(baseLine);
 
                     u = new double[nPoints];
                     v = new double[nPoints];
@@ -466,15 +458,9 @@ public final class UVCoverageService {
                         vWMax[j] = v[j] * invLambdaMax;
                     }
 
-                    uvData.setNPoints(nPoints);
-                    uvData.setU(u);
-                    uvData.setV(v);
-                    uvData.setUWMin(uWMin);
-                    uvData.setVWMin(vWMin);
-                    uvData.setUWMax(uWMax);
-                    uvData.setVWMax(vWMax);
-
-                    targetUVObservability.add(uvData);
+                    targetUVObservability.add(
+                            new UVRangeBaseLineData(baseLine, nPoints, u, v, uWMin, vWMin, uWMax, vWMax)
+                    );
 
                     // fast interrupt :
                     if (this.currentThread.isInterrupted()) {
@@ -653,6 +639,9 @@ public final class UVCoverageService {
                 logger.debug("lambdaMax: {}", lambdaMax);
             }
 
+            final double invLambdaMin = 1.0 / lambdaMin;
+            final double invLambdaMax = 1.0 / lambdaMax;
+
             // extract UV values for HA point:
             // precessed target declination in rad :
             final double precDEC = FastMath.toRadians(starData.getPrecDEC());
@@ -661,24 +650,10 @@ public final class UVCoverageService {
             final double cosDec = FastMath.cos(precDEC);
             final double sinDec = FastMath.sin(precDEC);
 
-            final double invLambdaMin = 1.0 / lambdaMin;
-            final double invLambdaMax = 1.0 / lambdaMax;
-
             final int sizeBL = baseLines.size();
             targetUVObservability = new ArrayList<UVRangeBaseLineData>(sizeBL);
 
-            UVRangeBaseLineData uvData;
             BaseLine baseLine;
-
-            /* pure U,V coordinates (m) */
-            double[] u;
-            double[] v;
-            /* U,V coordinates corrected with minimal wavelength */
-            double[] uWMin;
-            double[] vWMin;
-            /* U,V coordinates corrected with maximal wavelength */
-            double[] uWMax;
-            double[] vWMax;
 
             // compute once cos/sin HA:
             final double haRad = AngleUtils.hours2rad(ha);
@@ -688,36 +663,24 @@ public final class UVCoverageService {
             for (int i = 0; i < sizeBL; i++) {
                 baseLine = baseLines.get(i);
 
-                uvData = new UVRangeBaseLineData(baseLine);
-
-                u = new double[1];
-                v = new double[1];
-                uWMin = new double[1];
-                vWMin = new double[1];
-                uWMax = new double[1];
-                vWMax = new double[1];
-
                 // Baseline projected vector (m) :
-                u[0] = CalcUVW.computeU(baseLine, cosHa, sinHa);
-                v[0] = CalcUVW.computeV(cosDec, sinDec, baseLine, cosHa, sinHa);
+                /* pure U,V coordinates (m) */
+                final double u = CalcUVW.computeU(baseLine, cosHa, sinHa);
+                final double v = CalcUVW.computeV(cosDec, sinDec, baseLine, cosHa, sinHa);
 
                 // wavelength correction :
                 // Spatial frequency (rad-1) :
-                uWMin[0] = u[0] * invLambdaMin;
-                vWMin[0] = v[0] * invLambdaMin;
+                /* U,V coordinates corrected with minimal wavelength */
+                final double uWMin = u * invLambdaMin;
+                final double vWMin = v * invLambdaMin;
 
-                uWMax[0] = u[0] * invLambdaMax;
-                vWMax[0] = v[0] * invLambdaMax;
+                /* U,V coordinates corrected with maximal wavelength */
+                final double uWMax = u * invLambdaMax;
+                final double vWMax = v * invLambdaMax;
 
-                uvData.setNPoints(1);
-                uvData.setU(u);
-                uvData.setV(v);
-                uvData.setUWMin(uWMin);
-                uvData.setVWMin(vWMin);
-                uvData.setUWMax(uWMax);
-                uvData.setVWMax(vWMax);
-
-                targetUVObservability.add(uvData);
+                targetUVObservability.add(
+                        new UVRangeBaseLineData(baseLine, u, v, uWMin, vWMin, uWMax, vWMax)
+                );
             }
 
         } else {
