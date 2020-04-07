@@ -27,6 +27,9 @@ public final class ProjectedBaselineUtils {
     private final static String KEY_LENGTH = "length";
     private final static String KEY_START = "start";
     private final static String KEY_END = "end";
+    
+    private final static double PREC_ANGLE = 0.01; // no better than 0.01 deg
+    private final static double PREC_LENGTH = 0.001 / 2.0; // half 1 mm
 
     private ProjectedBaselineUtils() {
         super(); // forbidden
@@ -91,7 +94,12 @@ public final class ProjectedBaselineUtils {
                             && !Double.isNaN(length_start) && !Double.isNaN(length_end)) {
                         // Ensure length > 0
                         if (length_start > 0.0 && length_end > 0.0) {
-                            result.add(convert(baseline, angle_start, length_start, angle_end, length_end, insMode));
+                            result.add(convert(baseline, 
+                                    angle_start - PREC_ANGLE, 
+                                    length_start - PREC_LENGTH, 
+                                    angle_end + PREC_ANGLE, 
+                                    length_end + PREC_LENGTH, 
+                                    insMode));
                         } else {
                             if (logger.isDebugEnabled()) {
                                 logger.debug("Bad length values: {} or {} in '{}'", length_start, length_end, blObj.toMap());
