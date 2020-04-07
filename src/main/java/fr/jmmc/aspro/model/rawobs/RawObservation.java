@@ -1003,8 +1003,20 @@ public class RawObservation
      * Return an HTML representation of the RawObservation used by tooltips in the given string buffer
      * @param sb string buffer to fill
      */
-    public final void toHtml(final StringBuilder sb, final int obsCount) {
-        sb.append("<b>Observation Log (").append(obsCount).append("):");
+    public final void toHtml(final StringBuffer sb) {
+        toHtml(sb, 0);
+    }
+
+    /**
+     * Return an HTML representation of the RawObservation used by tooltips in the given string buffer
+     * @param sb string buffer to fill
+     * @param obsCount observation count (optional)
+     */
+    public final void toHtml(final StringBuffer sb, final int obsCount) {
+        sb.append("<b>Observation Log");
+        if (obsCount > 0) {
+            sb.append(" (").append(obsCount).append("):");
+        }
         sb.append("<br>Type:</b> ").append(getType());
 
         // skip parent id
@@ -1044,12 +1056,14 @@ public class RawObservation
         }
         sb.append("<br>Coords:</b> ").append(getRa()).append(' ').append(getDec());
     }
-    
+
     /**
      * Return an HTML representation of the RawObservation Times used by tooltips in the given string buffer
      * @param sb string buffer to fill
+     * @param showDate bits (1 = start, 2 = end) 
+     * @param showId true to indicate the obs id
      */
-    public final void timeToHtml(final StringBuilder sb, final int showDate) {
+    public final void timeToHtml(final StringBuffer sb, final int showDate) {
         sb.append("<hr><b>ID:</b> ").append(getObsId());
         if (getExpTime() > 0.0) {
             sb.append("<br><b>Exp. time:</b> ").append(getIntExpTime()).append(" s");
@@ -1074,6 +1088,13 @@ public class RawObservation
                 sb.append("<br><b>LST:</b> ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(getLstEnd())).append(" h");
             }
         }
+    }
+        
+    /**
+     * Return an HTML representation of the RawObservation Times used by tooltips in the given string buffer
+     * @param sb string buffer to fill
+     */
+    public final void weatherToHtml(final StringBuffer sb) {
         // show weather conditions:
         if (getExpTau0() != null) {
             sb.append("<br><b>Tau0:</b> ").append(Math.round(1000.0 * getExpTau0())).append(" ms");
@@ -1085,6 +1106,7 @@ public class RawObservation
             sb.append("<br><b>Seeing:</b> ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo1Digits(getExpSeeing())).append(" as");
         }
     }
+        
 //--simple--preserve
 
 }

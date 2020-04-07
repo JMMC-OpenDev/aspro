@@ -700,30 +700,32 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     /**
      * Generates the tooltip text for the given values.
      *
+     * @param obsCount number of observations in the observation group
      * @param obsFirst to get its tooltip text
      * @param obsLast to get its tooltip text
      *
      * @return The tooltip text (possibly <code>null</code>).
      */
     public String generateToolTip(final int obsCount, final RawObservation obsFirst, final RawObservation obsLast) {
-
-        final StringBuilder sb = this.sbToolTip;
-        sb.setLength(0); // clear
-
-        final StringBuffer sbf = this.sbf;
+        final StringBuffer sb = this.sbf;
 
         sb.append("<html>");
         obsFirst.toHtml(sb, obsCount);
 
         if ((obsLast != null) && (obsLast != obsFirst)) {
             obsFirst.timeToHtml(sb, 1); // show start
+            obsFirst.weatherToHtml(sb);
             obsLast.timeToHtml(sb, 2); // show end
+            obsLast.weatherToHtml(sb);
         } else {
             obsFirst.timeToHtml(sb, (1 | 2)); // show start / end
+            obsFirst.weatherToHtml(sb);
         }
         sb.append("</html>");
 
-        return sb.toString();
+        final String tooltip = sb.toString();
+        sb.setLength(0);
+        return tooltip;
     }
 
     /**

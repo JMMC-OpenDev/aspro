@@ -221,7 +221,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     /** precomputed tooltips for uv observable ranges */
     private final Map<String, Map<Integer, String>> seriesTooltips = new HashMap<String, Map<Integer, String>>(32);
     /** tooltip buffer */
-    private final StringBuffer sbToolTip = new StringBuffer(200);
+    private final StringBuffer sbToolTip = new StringBuffer(512);
     /** 24h date formatter like in france */
     private final DateFormat timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
     /** double formatter for HA */
@@ -3325,6 +3325,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
     /**
      * Update the dataset with UV ranges from raw observations
+     * @param targetRawObs target observations
+     * @return dataset
      */
     private XYSeriesCollection updateUVRawObsRanges(final TargetRawObservation targetRawObs, final List<String> rawObsFilterInsNames) {
 
@@ -3333,7 +3335,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         XYSeries xySeries;
         String label;
         String serieKey;
-        Map<Integer, String> tooltipMap = null;
+        Map<Integer, String> tooltipMap;
 
         double[] u;
         double[] v;
@@ -3396,9 +3398,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                             uWMax = uvBL.getUWMax();
                             vWMax = uvBL.getVWMax();
 
-                            // size = uvBL.getNPoints()
                             // 0: start, 1:end
-                            // TODO: try to represent the trapezoid ?
                             // for now: only start
                             x1 = toUVPlotScale(uWMax[0]);
                             y1 = toUVPlotScale(vWMax[0]);
@@ -3421,7 +3421,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                             // line tooltip use index of (x2, y2) point:
                             tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
-                                    generateTooltipRawObs(uvBL.getName(), rawObs, u[0], v[0]));
+                                    generateTooltipRawObs(uvBL.getName(), rawObs,
+                                            u[0], v[0], u[1], v[1])); // start
 
                             // note: NaN will close shape
                             // add an invalid point to break the line between the 2 segments :
@@ -3436,7 +3437,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                             // line tooltip use index of (x2, y2) point:
                             tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
-                                    generateTooltipRawObs(uvBL.getName(), rawObs, -u[0], -v[0]));
+                                    generateTooltipRawObs(uvBL.getName(), rawObs, 
+                                            -u[0], -v[0], u[1], v[1])); // start
 
                             // note: NaN will close shape
                             // add an invalid point to break the line between the 2 segments :
@@ -3840,36 +3842,44 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     /**
      * Generate the tooltip's text for the given UV point
      * @param baseline corresponding base line
-     * @param confName configuration name
-     * @param targetPointInfo target point information for the given UV point
-     * @param timeRef time reference LST or UTC
-     * @param u u coordinate in meters
-     * @param v v coordinate in meters
+     * @param rawObs raw observation
+     * @param u_start u coordinate in meters
+     * @param v_start v coordinate in meters
      * @return tooltip's text for an UV point
      */
     public String generateTooltipRawObs(final String baseline, final RawObservation rawObs,
-                                        final double u, final double v) {
+                                        final double u_start, final double v_start,
+                                        final double u_end, final double v_end) {
 
         final StringBuffer sb = this.sbToolTip;
         sb.setLength(0); // clear
 
         sb.append("<html><b>");
         sb.append("Base line: ").append(baseline);
-
         sb.append("</b><br>");
 
-        // TODO: fix
-        final StringBuilder sb2 = new StringBuilder(128);
-        rawObs.toHtml(sb2, 1);
-
-        sb.append(sb2);
+        rawObs.toHtml(sb);
+        rawObs.timeToHtml(sb, 1); // show start
 
         // use U and V to display radius and position angle:
         sb.append("<br><b>Radius</b>: ");
-        FormatterUtils.format(this.df1, sb, MathUtils.carthesianNorm(u, v));
+        FormatterUtils.format(this.df1, sb, MathUtils.carthesianNorm(u_start, v_start));
         sb.append(" m<br><b>Pos. angle</b>: ");
-        FormatterUtils.format(this.df1, sb, FastMath.toDegrees(FastMath.atan2(u, v)));
-        sb.append(" deg</html>");
+        FormatterUtils.format(this.df1, sb, FastMath.toDegrees(FastMath.atan2(u_start, v_start)));
+        sb.append(" deg");
+        
+        rawObs.timeToHtml(sb, 2); // show end
+
+        // use U and V to display radius and position angle:
+        sb.append("<br><b>Radius</b>: ");
+        FormatterUtils.format(this.df1, sb, MathUtils.carthesianNorm(u_end, v_end));
+        sb.append(" m<br><b>Pos. angle</b>: ");
+        FormatterUtils.format(this.df1, sb, FastMath.toDegrees(FastMath.atan2(u_end, v_end)));
+        sb.append(" deg");
+
+        rawObs.weatherToHtml(sb);
+
+        sb.append("</html>");
 
         return sb.toString();
     }
