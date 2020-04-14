@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="20.04 beta 3"/>
-    <compilation date="30/03/2020" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="20.04 beta 4"/>
+    <compilation date="14/04/2020" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,10 @@
 
     <releasenotes>
         <release version="20.04">
-            <pubDate>Mon, 30 Mar 2020 16:00:00 GMT</pubDate>
+            <pubDate>Thu, 14 Apr 2020 15:00:00 GMT</pubDate>
+            <prerelease version="20.04 beta 4">
+                <change type="FEATURE">Improved tooltips for raw observations</change>
+            </prerelease>
             <prerelease version="20.04 beta 3">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1038">Added a new user-defined Preference 'SNR threshold (V2)' to flag out low SNR values (OIFITS)</change>
             </prerelease>
