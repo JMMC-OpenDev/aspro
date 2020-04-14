@@ -1045,6 +1045,18 @@ public class RawObservation
         // Instrument:
         sb.append("<br><b>Instrument: ").append(getInstrumentName());
         sb.append("<br>Mode: ").append(getInstrumentMode()).append("</b>");
+        
+        if (getInstrumentModeRef() != null) {
+            final fr.jmmc.aspro.model.oi.FocalInstrumentMode insMode = getInstrumentModeRef();
+            final int nWaveLengths = insMode.getSpectralChannels();
+            
+            sb.append("<br>").append(nWaveLengths).append(" channels ");
+            sb.append('[').append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(insMode.getWaveLengthMin()));
+            sb.append(" - ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(insMode.getWaveLengthMax()));
+            sb.append(" ").append(fr.jmmc.jmcs.util.SpecialChars.UNIT_MICRO_METER).append("] (");
+            sb.append("res= ").append((int)Math.ceil(insMode.getResolution())).append(')');
+        }
+        
         if (getChannels() != null) {
             sb.append("<br><b>Sub Mode:</b> ").append(getInstrumentSubMode());
         }
