@@ -11,6 +11,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetRawObservation;
 import fr.jmmc.aspro.model.rawobs.Observations;
 import fr.jmmc.aspro.model.rawobs.RawObservation;
+import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
@@ -50,16 +51,24 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
 
     public static final String ESO_GET_PROG_URL = "http://archive.eso.org/wdb/wdb/eso/sched_rep_arc/query?progid=";
 
-    public static final String OBS_SERVER = (USE_LOCAL)
-            ? "http://localhost:6543/"
-            : "http://obs.jmmc.fr/";
+    public static final String OBS_SERVER;
 
-    public static final String OBS_SERVER_GET_OBS_URL = OBS_SERVER + "detail/exposure/";
+    public static final String OBS_SERVER_GET_OBS_URL;
 
-    public static final String OBS_SERVER_SEARCH_URL = OBS_SERVER + "search.votable";
+    public static final String OBS_SERVER_SEARCH_URL;
 
     /** XSLT file path */
     private final static String XSLT_FILE = "fr/jmmc/aspro/interop/Obsvot2RawObservations.xsl";
+
+    static {
+        OBS_SERVER = (USE_LOCAL) ? "http://localhost:6543/"
+                : ((ApplicationDescription.isBetaVersion()) ? "http://obs-preprod.jmmc.fr/" : "http://obs.jmmc.fr/");
+
+        OBS_SERVER_GET_OBS_URL = OBS_SERVER + "detail/exposure/";
+        OBS_SERVER_SEARCH_URL = OBS_SERVER + "search.votable";
+        
+        logger.info("ObsPortal server url: {}", OBS_SERVER_SEARCH_URL);
+    }
 
     /**
      * Public constructor that automatically register the action in RegisteredAction.
