@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="20.04 beta 4"/>
-    <compilation date="14/04/2020" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="20.04 beta 5"/>
+    <compilation date="20/04/2020" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -196,10 +196,10 @@
             <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction" action="updateSimbad"
                   description="update all targets with the latest information from the CDS Simbad service"/>
             <menu/>
-            <menu label="Get Observations (Selected)" classpath="fr.jmmc.aspro.gui.action.QueryOneRawObservationsAction" action="queryRawObservations"
-                  description="query raw observations (from ESO archive) corresponding to the selected target"/>
-            <menu label="Get Observations (All targets)" classpath="fr.jmmc.aspro.gui.action.QueryAllRawObservationsAction" action="queryRawObservations"
-                  description="query raw observations (from ESO archive) for all targets"/>
+            <menu label="Get Observations (Selected)" classpath="fr.jmmc.aspro.gui.action.QueryOneRawObservationsAction" action="query"
+                  description="query raw observations (from JMMC ObsPortal) corresponding to the selected target"/>
+            <menu label="Get Observations (All targets)" classpath="fr.jmmc.aspro.gui.action.QueryAllRawObservationsAction" action="query"
+                  description="query raw observations (from JMMC ObsPortal) for all targets"/>
         </menu>
 
         <menu label="Interop">
@@ -229,7 +229,10 @@
 
     <releasenotes>
         <release version="20.04">
-            <pubDate>Thu, 14 Apr 2020 15:00:00 GMT</pubDate>
+            <pubDate>Mon, 20 Apr 2020 15:00:00 GMT</pubDate>
+            <prerelease version="20.04 beta 5">
+                <change type="FEATURE">Added a progress bar and a cancel button in the status bar when querying the JMMC ObsPortal</change>
+            </prerelease>
             <prerelease version="20.04 beta 4">
                 <change type="FEATURE">Improved tooltips for raw observations</change>
             </prerelease>

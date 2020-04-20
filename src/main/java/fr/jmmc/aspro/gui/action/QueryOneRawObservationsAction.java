@@ -17,16 +17,12 @@ public final class QueryOneRawObservationsAction extends QueryRawObservationsAct
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
-    /** Class name. This name is used to register to the ActionRegistrar */
-    public final static String className = QueryOneRawObservationsAction.class.getName();
-    /** Action name. This name is used to register to the ActionRegistrar */
-    public final static String actionName = "queryRawObservations";
 
     /**
      * Public constructor that automatically register the action in RegisteredAction.
      */
     public QueryOneRawObservationsAction() {
-        super(className, actionName);
+        super(QueryOneRawObservationsAction.class.getName(), "query");
     }
 
     /**
@@ -44,8 +40,12 @@ public final class QueryOneRawObservationsAction extends QueryRawObservationsAct
         final Target target = observation.getTarget(observation.getSelectedTargetName());
 
         if (target != null) {
-            // launch a new worker
-            new QueryObsPortalWorker(Arrays.asList(new Target[]{target})).executeTask();
+            query(target);
         }
+    }
+
+    public static void query(final Target target) {
+        // launch a new worker
+        new QueryObsPortalWorker(Arrays.asList(new Target[]{target})).executeTask(true);
     }
 }

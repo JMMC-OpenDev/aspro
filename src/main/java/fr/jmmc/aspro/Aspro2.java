@@ -50,12 +50,18 @@ import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Toolkit;
+import java.awt.event.ActionListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,7 +126,9 @@ public final class Aspro2 extends App {
 
         // Initialize tasks and the task executor :
         AsproTaskRegistry.getInstance();
-        TaskSwingWorkerExecutor.start();
+
+        // Initialize tasks and the task executor :
+        TaskSwingWorkerExecutor.start(2); // 2 threads (1 computation and 1 image viewer)
 
         // Initialize the parallel job executor:
         ParallelJobExecutor.getInstance();
@@ -457,4 +465,36 @@ public final class Aspro2 extends App {
                     + " " + suffix);
         }
     }
+
+    /**
+     * Create a generic progress panel (typically shown in overlay)
+     *
+     * @param message message displayed as tooltip
+     * @param progressBar progress bar to use
+     * @param cancelListener optional cancel action listener
+     * @return new panel
+     */
+    public static JPanel createProgressPanel(final String message, final JProgressBar progressBar, final ActionListener cancelListener) {
+        final JPanel progressPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 0));
+        progressPanel.setBorder(BorderFactory.createEtchedBorder());
+        progressPanel.setToolTipText(message);
+
+        final Dimension dim = new Dimension(80, 18);
+        progressBar.setMinimumSize(dim);
+        progressBar.setPreferredSize(dim);
+        progressBar.setMaximumSize(dim);
+
+        progressBar.setStringPainted(true);
+        progressPanel.add(progressBar);
+
+        if (cancelListener != null) {
+            final JButton cancelBtn = new JButton("cancel");
+            cancelBtn.setMargin(new Insets(0, 2, 0, 2));
+            cancelBtn.addActionListener(cancelListener);
+            progressPanel.add(cancelBtn);
+        }
+
+        return progressPanel;
+    }
+
 }

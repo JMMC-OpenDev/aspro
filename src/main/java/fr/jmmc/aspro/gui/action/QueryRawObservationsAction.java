@@ -20,6 +20,7 @@ import fr.jmmc.jmcs.network.http.Http;
 import fr.jmmc.jmcs.network.http.PostQueryProcessor;
 import fr.jmmc.jmcs.service.XslTransform;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -66,7 +67,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
 
         OBS_SERVER_GET_OBS_URL = OBS_SERVER + "detail/exposure/";
         OBS_SERVER_SEARCH_URL = OBS_SERVER + "search.votable";
-        
+
         logger.info("ObsPortal server url: {}", OBS_SERVER_SEARCH_URL);
     }
 
@@ -84,6 +85,11 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
     @Override
     public abstract void actionPerformed(final ActionEvent evt);
 
+    public interface QueryObsListener extends PropertyChangeListener {
+
+        public void done(final boolean cancelled);
+    }
+
     /**
      * This worker aims to query the obs portal in background.
      */
@@ -92,16 +98,31 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
         /* members */
         /** selected target */
         private final List<Target> targets;
+        /** optional progress listener */
+        private final QueryObsListener listener;
 
         /**
          * Hidden constructor
          *
-         * @param observation observation
-         * @param target target
+         * @param targets target list
          */
         QueryObsPortalWorker(final List<Target> targets) {
+            this(targets, null);
+        }
+
+        /**
+         * Hidden constructor
+         *
+         * @param targets target list
+         * @param listener optional listener
+         */
+        QueryObsPortalWorker(final List<Target> targets, final QueryObsListener listener) {
             super(AsproTaskRegistry.TASK_QUERY_OBS);
             this.targets = targets;
+            this.listener = listener;
+            if (listener != null) {
+                this.addPropertyChangeListener(listener);
+            }
         }
 
         /**
@@ -113,13 +134,22 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
         public Map<String, Observations> computeInBackground() {
             final URI uri = Http.validateURL(OBS_SERVER_SEARCH_URL);
 
+            final int total = targets.size();
+
+            if (total > 1) {
+                StatusBar.show("Querying observations from " + OBS_SERVER_SEARCH_URL + " ...");
+            }
+
             final RawObsManager rom = RawObsManager.getInstance();
 
             Map<String, Observations> rawObsMap = null;
 
             final long start = System.nanoTime();
 
+            int n = 0;
+
             for (final Target target : targets) {
+                final int nb = ++n;
                 final String targetId = target.getIdentifier();
 
                 final long startHttp = System.nanoTime();
@@ -140,7 +170,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                         public void process(final PostMethod method) throws IOException {
                             final String ra = Double.toString(target.getRADeg());
                             final String de = Double.toString(target.getDECDeg());
-                            logger.info("Query[{}]: ra={} dec={}", OBS_SERVER_SEARCH_URL, ra, de);
+                            logger.info("Query({}/{})[{}]: ra={} dec={}", nb, total, OBS_SERVER_SEARCH_URL, ra, de);
 
                             method.addParameter("ra", ra);
                             method.addParameter("dec", de);
@@ -150,20 +180,26 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                         }
                     });
                 } catch (UnknownHostException uhe) {
-                    _logger.error("Query failed: {}", OBS_SERVER_SEARCH_URL, uhe);
+                    _logger.error("Query({}/{}) failed: {}", nb, total, OBS_SERVER_SEARCH_URL, uhe);
                     StatusBar.show("Query failed: " + OBS_SERVER_SEARCH_URL);
                     break;
                 } catch (IOException ioe) {
-                    _logger.error("Query failed: {}", OBS_SERVER_SEARCH_URL, ioe);
+                    _logger.error("Query({}/{}) failed: {}", nb, total, OBS_SERVER_SEARCH_URL, ioe);
                     StatusBar.show("Query failed: " + OBS_SERVER_SEARCH_URL);
                     break;
                 } finally {
-                    logger.info("Query[{}] {}: {} ms.", (result != null) ? "OK" : "FAILED", OBS_SERVER_SEARCH_URL,
+                    logger.info("Query({}/{})[{}] {}: {} ms.", nb, total, (result != null) ? "OK" : "FAILED", OBS_SERVER_SEARCH_URL,
                             1e-6d * (System.nanoTime() - startHttp));
                 }
 
+                // fast interrupt :
+                if (Thread.currentThread().isInterrupted()) {
+                    StatusBar.show("Query observations: cancelled.");
+                    return null;
+                }
+
                 if (result != null) {
-                    logger.debug("Query result:\n{}", result);
+                    logger.debug("Query({}/{}) result:\n{}", nb, total, result);
 
                     String rawObsDocument = null;
                     try {
@@ -172,7 +208,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                     } catch (IllegalArgumentException iae) {
                         _logger.error("ProcessVOTable failed:\n{}", result, iae);
                     } catch (IOException ioe) {
-                        _logger.error("ProcessVOTable failed: {}", OBS_SERVER_SEARCH_URL, ioe);
+                        _logger.error("ProcessVOTable failed: {}", ioe);
                     }
 
                     if (rawObsDocument != null) {
@@ -197,11 +233,19 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                                 rawObsMap = new HashMap<String, Observations>();
                             }
                             rawObsMap.put(targetId, rawObservations);
+
+                            if (total > 1) {
+                                StatusBar.show("Query[" + nb + " / " + total + "]: "
+                                        + rawObservations.getObservations().size() + " observations"
+                                        + " for target '" + target.getName() + "'");
+                            }
                         }
                     }
                 }
+                // publish progress:
+                setProgress(Math.round((100f * nb) / total));
             }
-            logger.info("Query[{} targets]: {} ms.", targets.size(), 1e-6d * (System.nanoTime() - start));
+            logger.info("Query[{} targets]: {} ms.", total, 1e-6d * (System.nanoTime() - start));
 
             return rawObsMap;
         }
@@ -213,10 +257,14 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
          */
         @Override
         public void refreshUI(final Map<String, Observations> rawObsMap) {
+            if (listener != null) {
+                listener.done(false);
+            }
+
             logger.debug("refreshUI: Transformed results:\n{}", rawObsMap);
 
             if (rawObsMap == null) {
-                StatusBar.show("Query raw Observations returned no results (check your network).");
+                StatusBar.show("Get observations returned no results (check your network).");
             } else {
                 final long start = System.nanoTime();
 
@@ -262,6 +310,13 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
             }
         }
 
+        @Override
+        public void refreshNoData(final boolean cancelled) {
+            if (listener != null) {
+                listener.done(cancelled);
+            }
+        }
+
         /**
          * Process the given votable
          *
@@ -271,7 +326,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
          * @throws IOException if an I/O exception occured
          * @throws IllegalArgumentException if the file is not an Observation
          */
-        public static String processVOTable(final String votable) throws IOException {
+        private static String processVOTable(final String votable) throws IOException {
             // use an XSLT to transform the votable document to an Aspro 2 Raw Observation list:
             final long start = System.nanoTime();
 
