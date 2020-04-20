@@ -876,29 +876,29 @@ public class RawObservation
     private void validate() {
         int flag = 0;
         if (this.getType() == null) {
-            logger.warn("Missing type for observation[{}]", getObsId());
+            logger.debug("Missing type for observation[{}]", getObsId());
             flag |= INVALID_META;
         }
         if (isEmpty(this.getStations())) {
-            logger.warn("Missing stations for observation[{}]", getObsId());
+            logger.debug("Missing stations for observation[{}]", getObsId());
             flag |= INVALID_META;
         }
         if (Double.isNaN(getMjdStart()) || (getMjdStart() == 0.0)
                 || Double.isNaN(getMjdEnd()) || (getMjdEnd() == 0.0)
                 || getMjdEnd() <= getMjdStart()) {
-            logger.warn("Invalid MJD range [{} to {}] for observation[{}]", getMjdStart(), getMjdEnd(), getObsId());
+            logger.debug("Invalid MJD range [{} to {}] for observation[{}]", getMjdStart(), getMjdEnd(), getObsId());
             flag |= INVALID_META;
             flag |= INVALID_TIMES;
         }
         // check computed values:
         if (getExpTime() <= 1.0) {
             // less than 1 second !
-            logger.warn("Invalid Exp. time [{} s] for observation[{}]", getExpTime(), getObsId());
+            logger.debug("Invalid Exp. time [{} s] for observation[{}]", getExpTime(), getObsId());
             flag |= INVALID_META;
             flag |= INVALID_TIMES;
         }
         if (getUVBaselines() == null) {
-            logger.warn("Invalid Projected baselines for observation[{}]: '{}'", getObsId(), getProjectedBaselines());
+            logger.debug("Invalid Projected baselines for observation[{}]: '{}'", getObsId(), getProjectedBaselines());
             flag |= INVALID_META;
             flag |= INVALID_UV;
         }
