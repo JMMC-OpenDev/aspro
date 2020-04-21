@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -230,7 +230,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                             logger.debug("Observations for target [{}]:\n{}", targetId, rawObservations);
 
                             if (rawObsMap == null) {
-                                rawObsMap = new HashMap<String, Observations>();
+                                rawObsMap = new LinkedHashMap<String, Observations>();
                             }
                             rawObsMap.put(targetId, rawObservations);
 
