@@ -38,8 +38,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class QueryRawObservationsAction extends RegisteredAction {
 
-    // Use -DRemoteExecutionMode.local=true (dev) to use local obsportal instance (docker)
+    /** flag -QueryRawObservations.local=true (dev) to use obsportal instance on localhost:6543 */
     private static final boolean USE_LOCAL = Boolean.getBoolean("QueryRawObservations.local");
+    /** flag -QueryRawObservations.trace=true (dev) to log all http queries */
+    private static final boolean DO_TRACE = Boolean.getBoolean("QueryRawObservations.trace");
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -177,6 +179,10 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
 
                             // add radius ?
                             // add instrument (name) ?
+                            
+                            if (DO_TRACE) {
+                                logger.info("Query({}/{}):\nOBSPORTAL_SEARCH: {}?ra={}&dec={}&", nb, total, OBS_SERVER_SEARCH_URL, ra, de);
+                            }
                         }
                     });
                 } catch (UnknownHostException uhe) {
