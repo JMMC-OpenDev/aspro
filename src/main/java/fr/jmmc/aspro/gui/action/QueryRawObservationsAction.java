@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
+import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.RawObsManager;
@@ -16,11 +17,16 @@ import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.network.http.Http;
 import fr.jmmc.jmcs.network.http.PostQueryProcessor;
 import fr.jmmc.jmcs.service.XslTransform;
+import fr.jmmc.jmcs.util.FileUtils;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -28,6 +34,8 @@ import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,12 +88,54 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
         super(className, actionName);
     }
 
+    public static void cancelAnyTask() {
+        TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_QUERY_OBS);
+    }
+
     /**
      * Handle the action event
      * @param evt action event
      */
     @Override
     public abstract void actionPerformed(final ActionEvent evt);
+
+    /**
+     * Process the given target list (asynchronously)
+     * @param targets list of targets
+     */
+    public void process(final List<Target> targets) {
+        logger.debug("actionPerformed");
+
+        // Create progress panel:
+        final JProgressBar progressBar = new JProgressBar();
+        final JPanel progressPanel = Aspro2.createProgressPanel("querying observations ...",
+                progressBar, new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                cancelAnyTask();
+            }
+        });
+
+        StatusBar.addCustomPanel(progressPanel);
+
+        // launch a new worker
+        new QueryObsPortalWorker(targets, new QueryObsListener() {
+
+            @Override
+            public void propertyChange(final PropertyChangeEvent pce) {
+                if ("progress".equals(pce.getPropertyName())) {
+                    progressBar.setValue((Integer) pce.getNewValue());
+                }
+            }
+
+            @Override
+            public void done(final boolean cancelled) {
+                StatusBar.removeCustomPanel(progressPanel);
+            }
+        }).executeTask(true);
+
+    }
 
     public interface QueryObsListener extends PropertyChangeListener {
 
@@ -179,7 +229,6 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
 
                             // add radius ?
                             // add instrument (name) ?
-                            
                             if (DO_TRACE) {
                                 logger.info("Query({}/{}):\nOBSPORTAL_SEARCH: {}?ra={}&dec={}&", nb, total, OBS_SERVER_SEARCH_URL, ra, de);
                             }
@@ -332,16 +381,30 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
          * @throws IOException if an I/O exception occured
          * @throws IllegalArgumentException if the file is not an Observation
          */
-        private static String processVOTable(final String votable) throws IOException {
+        public static String processVOTable(final String votable) throws IOException {
             // use an XSLT to transform the votable document to an Aspro 2 Raw Observation list:
             final long start = System.nanoTime();
 
+            // May be long (async // parallel task ?)
             final String document = XslTransform.transform(votable, XSLT_FILE);
 
             logger.info("VOTable transformation (XSLT): {} ms.", 1e-6d * (System.nanoTime() - start));
 
             return document;
         }
+    }
 
+    public static void main(String[] args) throws IOException {
+        final String result = FileUtils.readFile(new File("/home/bourgesl/dev/aspro/src/test/resources/obsportal/big.vot"));
+
+        final int N = 100;
+
+        for (int i = 0; i < N; i++) {
+            final String doc = QueryObsPortalWorker.processVOTable(result);
+
+            if (false) {
+                logger.info("doc: {}", doc);
+            }
+        }
     }
 }

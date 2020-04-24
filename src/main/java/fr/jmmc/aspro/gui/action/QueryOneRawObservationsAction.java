@@ -40,12 +40,8 @@ public final class QueryOneRawObservationsAction extends QueryRawObservationsAct
         final Target target = observation.getTarget(observation.getSelectedTargetName());
 
         if (target != null) {
-            query(target);
+            this.process(Arrays.asList(new Target[]{target}));
         }
     }
 
-    public static void query(final Target target) {
-        // launch a new worker
-        new QueryObsPortalWorker(Arrays.asList(new Target[]{target})).executeTask(true);
-    }
 }
