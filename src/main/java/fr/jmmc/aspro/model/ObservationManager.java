@@ -5,6 +5,7 @@ package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
+import fr.jmmc.aspro.gui.action.QueryRawObservationsAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
@@ -156,6 +157,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     private static void cancelAnyBackgroundTask() {
         // Must cancel any pending task using the user model data:
         TaskSwingWorkerExecutor.cancelTaskAndRelated(AsproTaskRegistry.TASK_OBSERVABILITY);
+        QueryRawObservationsAction.cancelAnyTask();
     }
 
     /**
