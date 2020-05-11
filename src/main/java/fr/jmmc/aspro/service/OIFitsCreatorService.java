@@ -181,20 +181,20 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // note: may adjust wavelengths:
         prepare(observation, warningContainer);
 
-        // Prepare the noise service with exact wavelengths:
-        // note: NoiseService parameter dependencies:
-        // observation {target}
-        // parameter: warningContainer
-        final NoiseService ns = new NoiseService(observation, target, targetPointInfos, useInstrumentBias, warningContainer,
-                this.waveLengths, this.waveBands);
-
         // do not generate errors for the DEMO interferometer
-        if (!ns.isValid() || "DEMO".equalsIgnoreCase(this.arrNameKeyword)) {
-            this.noiseService = null;
-        } else {
-            this.noiseService = ns;
-        }
+        if (!"DEMO".equalsIgnoreCase(this.arrNameKeyword)) {
+            // Prepare the noise service with exact wavelengths:
+            // note: NoiseService parameter dependencies:
+            // observation {target}
+            // parameter: warningContainer
+            final NoiseService ns = new NoiseService(observation, target, targetPointInfos, useInstrumentBias, warningContainer,
+                    this.waveLengths, this.waveBands);
 
+            // do not generate errors for the DEMO interferometer
+            if (ns.isValid()) {
+                this.noiseService = ns;
+            }
+        }
         // do noise :
         this.doNoise = (doDataNoise && (this.noiseService != null));
     }
