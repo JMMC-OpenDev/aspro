@@ -1373,12 +1373,16 @@ public final class NoiseService implements VisNoiseService {
             // Vcal^2=1 => k = 1 / |Fc_cal|^2 ie scaling factor car mesures photo identiques (FiFj_cal / FiFj_src = 1)
             // correlated flux (include instrumental visibility loss) for vis2 = 1.0:
             // use the total number photons for nbFrames or not ?
-            biasV2[i] = (nbTotPhot + nbPixInterf[i] * FastMath.pow2(ron)) / sqCorFluxCoef[i];
-            // repeat OBS measurements to reach totalObsTime minutes:
-            biasV2[i] *= totFrameCorrection; // bias divided by SQRT(nbFrames) like error
+            if (sqCorFluxCoef[i] != 0.0) { 
+                biasV2[i] = (nbTotPhot + nbPixInterf[i] * FastMath.pow2(ron)) / sqCorFluxCoef[i];
+                // repeat OBS measurements to reach totalObsTime minutes:
+                biasV2[i] *= totFrameCorrection; // bias divided by SQRT(nbFrames) like error
 
-            // Limit excessively large bias:
-            biasV2[i] = Math.min(biasV2[i], MAX_ERR_V2);
+                // Limit excessively large bias:
+                biasV2[i] = Math.min(biasV2[i], MAX_ERR_V2);
+            } else {
+                biasV2[i] = 0.0;
+            }
         }
 
         if (logger.isDebugEnabled()) {

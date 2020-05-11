@@ -75,8 +75,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private final static boolean DO_VALIDATE_OIFITS = false;
     /** enable DEBUG mode */
     private final static boolean DEBUG_SNR = false;
-    /** enable Differential visibility in the OI_VIS table */
-    private final static boolean ENABLE_DIFF_VIS = true;
 
     /* members */
 
@@ -118,6 +116,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private String arrNameKeyword = null;
     /** insname keyword value (instrument_LAMBDA1-LAMBDA2-Nch) */
     private String insNameKeyword = null;
+    /** instrument visibility support */
+    private boolean instrumentVis = false;
     /** instrument differential visibility support */
     private boolean instrumentVisDiff = false;
     /** Station mapping */
@@ -217,12 +217,23 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         // use alias or real instrument name:
         this.instrumentName = instrument.getAliasOrName();
-        this.instrumentVisDiff = (instrument.isVisDiff()!= null) ? instrument.isVisDiff().booleanValue() : false;
+
+        final Boolean doVis = instrument.isVisDiff();
+        this.instrumentVis = (doVis != null);
+        this.instrumentVisDiff = (doVis != null) ? doVis.booleanValue() : false;
 
         if (logger.isDebugEnabled()) {
             logger.debug("arrNameKeyword: {}", this.arrNameKeyword);
             logger.debug("instrumentName: {}", this.instrumentName);
+            logger.debug("instrumentVis: {}", this.instrumentVis);
             logger.debug("instrumentVisDiff: {}", this.instrumentVisDiff);
+        }
+
+        final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
+
+        if (isAmber || this.instrumentVis) {
+            addInformation(warningContainer, "OI_VIS: "
+                    + ((isAmber || this.instrumentVisDiff) ? "Differential" : "Absolute") + " VisAmp/Phi");
         }
 
         final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
@@ -661,13 +672,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // Create OI_VIS table :
         final OIVis vis = new OIVis(this.oiFitsFile, this.insNameKeyword, this.nObsPoints * this.nBaseLines);
         vis.setArrName(this.arrNameKeyword);
-        
+
         // OIFITS 2 keywords indicating the Absolute or Differential Visibility:
-        vis.addHeaderCard(OIFitsConstants.KEYWORD_AMPTYP, 
-                this.instrumentVisDiff ? OIFitsConstants.KEYWORD_AMPTYP_DIFF : OIFitsConstants.KEYWORD_AMPTYP_ABSOLUTE, 
+        vis.addHeaderCard(OIFitsConstants.KEYWORD_AMPTYP,
+                (isAmber || this.instrumentVisDiff) ? OIFitsConstants.KEYWORD_AMPTYP_DIFF : OIFitsConstants.KEYWORD_AMPTYP_ABSOLUTE,
                 "VISAMP type");
-        vis.addHeaderCard(OIFitsConstants.KEYWORD_PHITYP, 
-                this.instrumentVisDiff ? OIFitsConstants.KEYWORD_PHITYP_DIFF : OIFitsConstants.KEYWORD_PHITYP_ABSOLUTE, 
+        vis.addHeaderCard(OIFitsConstants.KEYWORD_PHITYP,
+                (isAmber || this.instrumentVisDiff) ? OIFitsConstants.KEYWORD_PHITYP_DIFF : OIFitsConstants.KEYWORD_PHITYP_ABSOLUTE,
                 "VISPHI type");
 
         // Get target information for each UV point:
@@ -675,7 +686,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         final Calendar calObs;
         // TODO: fix synchronization issue on AstroSkyCalc:
-        synchronized(this.sc) {
+        synchronized (this.sc) {
             // Compute UTC start date of the first point :
             calObs = this.sc.toCalendar(obsPointInfos[0].getJd(), false);
 
@@ -712,10 +723,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final MutableComplex visComplexNoisy = new MutableComplex();
 
         final NoiseService ns = this.noiseService;
-
-        if (this.hasModel && (ns != null) && !isAmber && this.instrumentVisDiff) {
+        if (this.hasModel && (ns != null) && !isAmber) {
             logger.info("createOIVis: {} VisAmp/Phi errors computed using {} random complex visiblities",
-                    ENABLE_DIFF_VIS ? "Differential" : "Absolute", N_SAMPLES);
+                    this.instrumentVisDiff ? "Differential" : "Absolute", N_SAMPLES);
         }
 
         // vars:
@@ -742,7 +752,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         int[] visRndIdxRow = null;
         boolean doFlag;
 
-        boolean doNormVisDiff = false;
+        final boolean doNormVisDiff = (!isAmber && instrumentVisDiff);
 
         // Use mutable complex carefully:
         final double normFactorWL = 1.0 / (nWaveLengths - 1);
@@ -758,7 +768,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             jd = obsPointInfos[i].getJd();
 
             // TODO: fix synchronization issue on AstroSkyCalc:
-            synchronized(this.sc) {
+            synchronized (this.sc) {
                 // UTC :
                 time = calendarToTime(sc.toCalendar(jd, false), calObs);
             }
@@ -826,7 +836,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         visRndIdxRow = this.visRndIdx[k];
                     }
 
-                    if (!isAmber && ENABLE_DIFF_VIS) {
+                    if (!isAmber && instrumentVisDiff) {
                         // Compute Vref (complex) as mean(V) along wavelength axis:
 
                         // reset:
@@ -887,9 +897,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         }
 
                         if (!isAmber) {
-                            if (instrumentVisDiff) {
+                            if (instrumentVis) {
                                 if (ns == null) {
-                                    if (ENABLE_DIFF_VIS) {
+                                    if (instrumentVisDiff) {
                                         re = visComplex[k][l].getReal();
                                         im = visComplex[k][l].getImaginary();
 
@@ -917,8 +927,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
                                     visErrCplx = visError[k][l];
 
-                                    // pure visibility amplitude:
-                                    if (ENABLE_DIFF_VIS) {
+                                    if (instrumentVisDiff) {
                                         re = visRe;
                                         im = visIm;
 
@@ -953,7 +962,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         im = visIm + (visErrCplx * distIm[n]);
 
                                         // amplitude:
-                                        if (ENABLE_DIFF_VIS) {
+                                        if (instrumentVisDiff) {
                                             /* then construct Cref by substracting current R and I
                                              * at that Wlen and make the arithmetic mean */
                                             cpxVisRef.updateComplex(
@@ -1040,11 +1049,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         final int nSample = visRndIdxRow[l];
                                         vamp = vamp_samples[nSample];
                                         vphi = vphi_samples[nSample];
-                                        doNormVisDiff = ENABLE_DIFF_VIS;
                                     } else if (DO_USE_SAMPLED_MEAN) {
                                         vamp = s_vamp_mean;
                                         vphi = s_vphi_mean;
-                                        doNormVisDiff = ENABLE_DIFF_VIS;
                                     }
                                     errAmp = s_vamp_err;
                                     errPhi = s_vphi_err;
