@@ -723,7 +723,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final MutableComplex visComplexNoisy = new MutableComplex();
 
         final NoiseService ns = this.noiseService;
-        if (this.hasModel && (ns != null) && !isAmber) {
+        if (this.hasModel && !isAmber && (ns != null)) {
             logger.info("createOIVis: {} VisAmp/Phi errors computed using {} random complex visiblities",
                     this.instrumentVisDiff ? "Differential" : "Absolute", N_SAMPLES);
         }
@@ -751,8 +751,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final double[] vphi_samples = new double[N_SAMPLES];
         int[] visRndIdxRow = null;
         boolean doFlag;
-
-        final boolean doNormVisDiff = (!isAmber && instrumentVisDiff);
 
         // Use mutable complex carefully:
         final double normFactorWL = 1.0 / (nWaveLengths - 1);
@@ -1104,28 +1102,29 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             } // baselines
         } // HA
 
-        /* Compute visAmp / visPhi as amber does */
-        if (isAmber && this.hasModel && (ns != null)) {
-            OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, this.visError, nWaveLengths, this.visRndDist);
-            // TODO: generate noisy samples if doNoise
-        } else if (doNormVisDiff) {
+        if (hasModel) {
+            /* Compute visAmp / visPhi as amber does */
+            if (isAmber && (ns != null)) {
+                OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, this.visError, nWaveLengths, this.visRndDist);
+                // TODO: generate noisy samples if doNoise
+            } else if (!isAmber && instrumentVisDiff) {
 
-            /* Normalize differential visibilities to 1 */
-            for (int k = 0, l; k < visAmp.length; k++) {
-                vamp_sum = 0.0;
+                /* Normalize differential visibilities to 1 */
+                for (int k = 0, l; k < visAmp.length; k++) {
+                    vamp_sum = 0.0;
 
-                for (l = 0; l < nWaveLengths; l++) {
-                    vamp_sum += visAmp[k][l];
-                }
-                vamp_sum /= nWaveLengths; // mean
+                    for (l = 0; l < nWaveLengths; l++) {
+                        vamp_sum += visAmp[k][l];
+                    }
+                    vamp_sum /= nWaveLengths; // mean
 
-                for (l = 0; l < nWaveLengths; l++) {
-                    visAmp[k][l] /= vamp_sum;
-                    visAmpErr[k][l] /= vamp_sum;
+                    for (l = 0; l < nWaveLengths; l++) {
+                        visAmp[k][l] /= vamp_sum;
+                        visAmpErr[k][l] /= vamp_sum;
+                    }
                 }
             }
         }
-
         this.oiFitsFile.addOiTable(vis);
 
         if (logger.isDebugEnabled()) {
