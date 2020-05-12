@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="20.04 beta 5"/>
-    <compilation date="20/04/2020" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="20.05 beta 6"/>
+    <compilation date="12/05/2020" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -228,21 +228,24 @@
     </menubar>
 
     <releasenotes>
-        <release version="20.04">
-            <pubDate>Mon, 20 Apr 2020 15:00:00 GMT</pubDate>
-            <prerelease version="20.04 beta 5">
+        <release version="20.05">
+            <pubDate>Tue, 12 May 2020 15:00:00 GMT</pubDate>
+            <prerelease version="20.05 beta 6">
+                <change type="FEATURE">Fixed OIFITS OI_VIS computation for the DEMO instruments (pure theoretical visibilities)</change>
+            </prerelease>
+            <prerelease version="20.05 beta 5">
                 <change type="FEATURE">Added a progress bar and a cancel button in the status bar when querying the JMMC ObsPortal</change>
             </prerelease>
-            <prerelease version="20.04 beta 4">
+            <prerelease version="20.05 beta 4">
                 <change type="FEATURE">Improved tooltips for raw observations</change>
             </prerelease>
-            <prerelease version="20.04 beta 3">
+            <prerelease version="20.05 beta 3">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1038">Added a new user-defined Preference 'SNR threshold (V2)' to flag out low SNR values (OIFITS)</change>
             </prerelease>
-            <prerelease version="20.04 beta 2">
+            <prerelease version="20.05 beta 2">
                 <change type="FEATURE">Get weather conditions (tau0, temp, seeing) from JMMC ObsPortal, displayed in the table view and tooltips</change>
             </prerelease>
-            <prerelease version="20.04 beta 1">
+            <prerelease version="20.05 beta 1">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1035">Fixed exceptions occuring in the Target Editor when the last target is deleted</change>
             </prerelease>
         </release>
@@ -300,7 +303,7 @@
             </prerelease>
             <prerelease version="19.09 beta 2">
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/985">Added actions in the 'Edit' menu and in the 'Target Editor' to update target(s) with latest Simbad information;
-                added an auto-update check when loading an asprox file to propose the update of all targets</change>
+                    added an auto-update check when loading an asprox file to propose the update of all targets</change>
             </prerelease>
             <prerelease version="19.09 beta 1">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/992">Use proper geocentric positions for stations and array center in OI_ARRAY (FITS)</change>
