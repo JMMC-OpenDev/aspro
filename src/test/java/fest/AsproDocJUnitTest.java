@@ -6,6 +6,7 @@ package fest;
 import com.mortennobel.imagescaling.AdvancedResizeOp;
 import com.mortennobel.imagescaling.ResampleOp;
 import fest.common.JmcsFestSwingJUnitTestCase;
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.SettingPanel;
 import fr.jmmc.aspro.gui.TargetEditorDialog;
@@ -19,6 +20,7 @@ import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.DisplayMode;
 import java.awt.Frame;
 import java.awt.Point;
@@ -136,7 +138,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m01_shouldStart() {
+    public void m001_shouldStart() {
         window.textBox("starSearchField").setText("Simbad");
 
         // waits for computation to finish :
@@ -151,7 +153,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m02_captureMain() {
+    public void m002_captureMain() {
         captureMainForm("Aspro2-main.png");
     }
 
@@ -160,7 +162,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m03_captureWindCompass() {
+    public void m003_captureWindCompass() {
         // enable wind restriction:
         window.checkBox("jCheckBoxWind").check();
 
@@ -219,7 +221,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m04_captureJSkyCalc() {
+    public void m004_captureJSkyCalc() {
         window.button("jButtonSkyCalc").click();
 
         final FrameFixture skyCalcWin = getFrame("JSkyCalc");
@@ -241,7 +243,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m05_shouldShowObservability() {
+    public void m005_shouldShowObservability() {
 
         // Capture observability plot :
         getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
@@ -256,7 +258,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             // let tooltip appear:
             pauseMedium();
 
-            saveScreenshot(window, "Aspro2-obs.png");
+            saveScreenshotWithMousePointer(window, "Aspro2-obs.png");
         } finally {
             enableTooltips(false);
         }
@@ -299,33 +301,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m06_shouldShowUVCoverage() {
+    public void m006_shouldShowUVCoverage() {
 
         // Capture UV Coverage plot :
         getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
 
-        BufferedImage image = takeScreenshotOf(window);
-
-        try {
-            enableTooltips(true);
-
-            // move the mouse on one uv measurement:
-            // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 690, 590);
-
-            // let tooltip appear:
-            pauseMedium();
-
-            saveImage(takeScreenshotOf(window), "Aspro2-uv.png");
-
-        } finally {
-            enableTooltips(false);
-        }
-
+        final BufferedImage image = takeScreenshotOf(window);
         saveImage(image, "Aspro2-screen.png");
-
-        // export PDF :
-        exportPDF();
 
         // TODO : refactor that code :
         // miniature for aspro web page : 350px width :
@@ -337,8 +319,26 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         resampleOp.setUnsharpenMask(AdvancedResizeOp.UnsharpenMask.Soft);
 
         final BufferedImage rescaledImage = resampleOp.filter(image, null);
-
         saveImage(rescaledImage, "Aspro2-screen-small.png");
+
+        // export PDF :
+        exportPDF();
+
+        try {
+            enableTooltips(true);
+
+            // move the mouse on one uv measurement:
+            // note: check window margin issue (gnome3):
+            robot().moveMouse(window.component(), 690, 590);
+
+            // let tooltip appear:
+            pauseMedium();
+
+            saveScreenshotWithMousePointer(window, "Aspro2-uv.png");
+
+        } finally {
+            enableTooltips(false);
+        }
 
         // Export OIFits / OB :
         exportOIFits();
@@ -350,7 +350,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m07_shouldShowVis2Plot() {
+    public void m007_shouldShowVis2Plot() {
 
         // Capture OIFits viewer plot :
         showPlotTab(SettingPanel.TAB_OIFITS_VIEWER, "Aspro2-vis2-noErr.png");
@@ -380,7 +380,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m08_shouldOpenTargetEditor() {
+    public void m008_shouldOpenTargetEditor() {
 
         window.button("jButtonTargetEditor").click();
 
@@ -410,7 +410,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m09_shouldOpenPreferences() {
+    public void m009_shouldOpenPreferences() {
         window.menuItemWithPath("Edit", "Preferences...").click();
 
         final Dialog prefDialog = robot().finder().find(DialogMatcher.withTitle("Preferences"));
@@ -428,95 +428,37 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     }
 
     /**
-     * Test Interop menu : Start AppLauncher & A2P2 manually before this test
+     * Test Feedback report
      */
     @Test
     @GUITest
-    public void m10_showInteropMenu() {
-        window.menuItemWithPath("Interop").click();
-        captureMainForm("Aspro2-interop-menu.png");
-
-        window.menuItemWithPath("Interop", "Show Hub Status").click();
-
-        final Frame hubFrame = robot().finder().find(FrameMatcher.withTitle("SAMP Status"));
-
-        if (hubFrame != null) {
-            final FrameFixture frame = new FrameFixture(robot(), hubFrame);
-
-            frame.requireVisible();
-            frame.moveToFront();
-
-            frame.list(new GenericTypeMatcher<JList>(JList.class) {
-                @Override
-                protected boolean isMatching(JList component) {
-                    return "org.astrogrid.samp.gui.ClientListCellRenderer".equals(component.getCellRenderer().getClass().getName());
-                }
-            }).selectItem("Aspro2");
-
-            saveScreenshot(frame, "Aspro2-interop-hubStatus.png");
-
-            // close frame :
-            frame.close();
-        }
-    }
-
-    /**
-     * Test SearchCal integration : Start AppLauncher manually before this test
-     */
-    @Test
-    @GUITest
-    public void m11_shouldCallSearchCall() {
-        // hack to solve focus trouble in menu items :
-        window.menuItemWithPath("Interop").focus();
-
-        try {
-            enableTooltips(true);
-
-            window.menuItemWithPath("Interop", "Search calibrators").click();
-            window.menuItemWithPath("Interop", "Search calibrators", "SearchCal").focus();
-
-            captureMainForm("Aspro2-calibrators-StartSearchQuery.png");
-
-        } finally {
-            enableTooltips(false);
-        }
-    }
-
-    /**
-     * Test LITpro integration : Start AppLauncher manually before this test
-     */
-    @Test
-    @GUITest
-    public void m12_shouldCallLITpro() {
-        // select tab to let menu lost focus:
-        getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
-
-        window.list("jListTargets").selectItem("HD 1234");
-
-        // waits for computation to finish :
-        AsproTestUtils.checkRunningTasks();
-
-        // Export UV Coverage plot as PDF :
-        selectTab(SettingPanel.TAB_UV_COVERAGE);
-
-        // Export OIFits / OB :
-        exportOIFits();
-        exportOB();
+    public void m010_shouldOpenFeedbackReport() {
 
         // hack to solve focus trouble in menu items :
-        window.menuItemWithPath("Interop").focus();
+        window.menuItemWithPath("Help").focus();
 
-        try {
-            enableTooltips(true);
+        window.menuItemWithPath("Help", "Report Feedback to JMMC...").click();
 
-            window.menuItemWithPath("Interop", "Perform model fitting").click();
-            window.menuItemWithPath("Interop", "Perform model fitting", "LITpro").focus();
+        final DialogFixture dialog = window.dialog(withTitle("Feedback Report ").andShowing());
 
-            captureMainForm("Aspro2-LITpro-send.png");
+        dialog.requireVisible();
+        dialog.moveToFront();
 
-        } finally {
-            enableTooltips(false);
-        }
+        final JTextComponentFixture emailField = dialog.textBox(JTextComponentMatcher.withText(FAKE_EMAIL));
+
+        // hide my email address :
+        emailField.setText("type your email address here");
+
+        saveScreenshot(dialog, "Aspro2-FeebackReport.png");
+
+        // restore my preferences :
+        emailField.setText(FAKE_EMAIL);
+
+        // close dialog :
+        dialog.close();
+
+        // reset email preference:
+        defineEmailPref(CURRENT_EMAIL);
     }
 
     /**
@@ -524,7 +466,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m13_shouldShowCharaPoPs() {
+    public void m020_shouldShowCharaPoPs() {
 
         // show observability plot :
         getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
@@ -569,22 +511,12 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         saveCroppedScreenshotOf("popsUser.png", left, 0, width, height);
     }
 
-    private void openObservation(final String obsFileName) {
-        // hack to solve focus trouble in menu items :
-        window.menuItemWithPath("File").focus();
-        window.menuItemWithPath("File", "Open observation").click();
-
-        confirmDialogDontSave();
-
-        window.fileChooser().selectFile(new File(TEST_FOLDER + obsFileName)).approve();
-    }
-
     /**
      * Test Open file "Aspro2_sample_with_calibrators.asprox"
      */
     @Test
     @GUITest
-    public void m14_shouldOpenSampleWithCalibrators() {
+    public void m021_shouldOpenSampleWithCalibrators() {
 
         openObservation("Aspro2_sample_with_calibrators.asprox");
 
@@ -632,7 +564,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m15_shouldOpenSampleMultiConf() {
+    public void m022_shouldOpenSampleMultiConf() {
 
         openObservation("Aspro2_sample_multi.asprox");
 
@@ -657,7 +589,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m16_shouldOpenSampleWithUserModel() {
+    public void m023_shouldOpenSampleWithUserModel() {
         try {
             Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, ColorModels.COLOR_MODEL_HEAT);
 
@@ -721,13 +653,10 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m17_shouldOpenSampleWithAOTargetGroup() {
+    public void m024_shouldOpenSampleWithAOTargetGroup() {
         final Frame frame = window.target;
         final Point ref = frame.getLocation();
         final DisplayMode mode = frame.getGraphicsConfiguration().getDevice().getDisplayMode();
-
-        System.out.println("display mode: " + mode);
-
         try {
             window.moveTo(new Point(mode.getWidth() - frame.getWidth(), ref.y));
 
@@ -775,7 +704,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             // let tooltip appear:
             pauseMedium();
 
-            saveImage(takeScreenshotOf(window), "Aspro2-GroupAO-status.png");
+            saveScreenshotWithMousePointer(window, "Aspro2-GroupAO-status.png");
 
         } catch (PreferencesException pe) {
             logger.error("setPreference failed", pe);
@@ -790,13 +719,75 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             window.moveTo(ref);
         }
     }
-    
+
+    /**
+     * Test Open file "Aspro2_sample_rawobs.asprox" (Target Group Form)
+     */
+    @Test
+    @GUITest
+    public void m025_shouldOpenSampleWithRawObs() {
+        final Dimension oldSize = window.target.getSize();
+        try {
+            Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, ColorModels.COLOR_MODEL_GRAY);
+
+            openObservation("Aspro2_sample_rawobs.asprox");
+
+            window.resizeTo(new Dimension(1100, 1000));
+            
+            // waits for computation to finish :
+            AsproTestUtils.checkRunningTasks();
+            
+            // Filter raw obs by selecting only the GRAVITY instrument:
+            final int insIdx = AsproConstants.INS_OBS_LIST.indexOf("GRAVITY");
+            window.list("jListInstruments").selectItem(insIdx);
+            
+            enableTooltips(true);
+
+            // Capture observability plot :
+            getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
+
+            // move the mouse on plot:
+            // note: check window margin issue (gnome3):
+            robot().moveMouse(window.component(), 760, 490);
+
+            // let tooltip appear:
+            pauseMedium();
+
+            saveScreenshotWithMousePointer(window, "Aspro2-rawobs-obs.png");
+
+            // Capture UV Coverage plot :
+            getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+
+            // move the mouse on plot:
+            // note: check window margin issue (gnome3):
+            robot().moveMouse(window.component(), 768, 452);
+
+            // let tooltip appear:
+            pauseMedium();
+
+            saveScreenshotWithMousePointer(window, "Aspro2-rawobs-uv.png");
+
+        } catch (PreferencesException pe) {
+            logger.error("setPreference failed", pe);
+        } finally {
+            enableTooltips(false);
+            try {
+                Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, Preferences.DEFAULT_IMAGE_LUT);
+            } catch (PreferencesException pe) {
+                logger.error("setPreference failed", pe);
+            }
+            // Restore size:
+            window.resizeTo(oldSize);
+        }
+    }
+
     /**
      * Capture the moon details
      */
     @Test
     @GUITest
-    public void m18_captureMoon() {
+
+    public void m099_captureMoon() {
         openObservation("Aspro2_sample_moon.asprox");
 
         // waits for computation to finish :
@@ -822,7 +813,100 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         panel.checkBox("jCheckBoxDetailedOutput").uncheck();
 
         // waits for computation to finish :
-        AsproTestUtils.checkRunningTasks();        
+        AsproTestUtils.checkRunningTasks();
+    }
+
+    // --- InterOp ---
+    /**
+     * Test Interop menu : Start AppLauncher & A2P2 manually before this test
+     */
+    @Test
+    @GUITest
+    public void m100_showInteropMenu() {
+        window.menuItemWithPath("Interop").click();
+        captureMainForm("Aspro2-interop-menu.png");
+
+        window.menuItemWithPath("Interop", "Show Hub Status").click();
+
+        final Frame hubFrame = robot().finder().find(FrameMatcher.withTitle("SAMP Status"));
+
+        if (hubFrame != null) {
+            final FrameFixture frame = new FrameFixture(robot(), hubFrame);
+
+            frame.requireVisible();
+            frame.moveToFront();
+
+            frame.list(new GenericTypeMatcher<JList>(JList.class) {
+                @Override
+                protected boolean isMatching(JList component) {
+                    return "org.astrogrid.samp.gui.ClientListCellRenderer".equals(component.getCellRenderer().getClass().getName());
+                }
+            }).selectItem("Aspro2");
+
+            saveScreenshot(frame, "Aspro2-interop-hubStatus.png");
+
+            // close frame :
+            frame.close();
+        }
+    }
+
+    /**
+     * Test SearchCal integration : Start AppLauncher manually before this test
+     */
+    @Test
+    @GUITest
+    public void m101_shouldCallSearchCall() {
+        // hack to solve focus trouble in menu items :
+        window.menuItemWithPath("Interop").focus();
+
+        try {
+            enableTooltips(true);
+
+            window.menuItemWithPath("Interop", "Search calibrators").click();
+            window.menuItemWithPath("Interop", "Search calibrators", "SearchCal").focus();
+
+            captureMainForm("Aspro2-calibrators-StartSearchQuery.png");
+
+        } finally {
+            enableTooltips(false);
+        }
+    }
+
+    /**
+     * Test LITpro integration : Start AppLauncher manually before this test
+     */
+    @Test
+    @GUITest
+    public void m102_shouldCallLITpro() {
+        // select tab to let menu lost focus:
+        getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+
+        window.list("jListTargets").selectItem("HD 1234");
+
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
+
+        // Export UV Coverage plot as PDF :
+        getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+
+        // Export OIFits / OB :
+        exportOIFits();
+        exportOB();
+
+        // hack to solve focus trouble in menu items :
+        window.menuItemWithPath("Interop").focus();
+
+        try {
+            enableTooltips(true);
+
+            window.menuItemWithPath("Interop", "Perform model fitting").click();
+            window.menuItemWithPath("Interop", "Perform model fitting", "LITpro").focus();
+
+            captureMainForm("Aspro2-LITpro-send.png");
+
+        } finally {
+            enableTooltips(false);
+        }
     }
 
     /**
@@ -830,7 +914,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m19_shouldCallA2P2() {
+    public void m103_shouldCallA2P2() {
         // hack to solve focus trouble in menu items :
         window.menuItemWithPath("Interop").focus();
 
@@ -847,43 +931,19 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         }
     }
 
-    /**
-     * Test Feedback report
-     */
-    @Test
-    @GUITest
-    public void m20_shouldOpenFeedbackReport() {
-
-        // hack to solve focus trouble in menu items :
-        window.menuItemWithPath("Help").focus();
-
-        window.menuItemWithPath("Help", "Report Feedback to JMMC...").click();
-
-        final DialogFixture dialog = window.dialog(withTitle("Feedback Report ").andShowing());
-
-        dialog.requireVisible();
-        dialog.moveToFront();
-
-        final JTextComponentFixture emailField = dialog.textBox(JTextComponentMatcher.withText(FAKE_EMAIL));
-
-        // hide my email address :
-        emailField.setText("type your email address here");
-
-        saveScreenshot(dialog, "Aspro2-FeebackReport.png");
-
-        // restore my preferences :
-        emailField.setText(FAKE_EMAIL);
-
-        // close dialog :
-        dialog.close();
-
-        // reset email preference:
-        defineEmailPref(CURRENT_EMAIL);
-    }
-
     /* 
      --- Utility methods  ---------------------------------------------------------
      */
+    private void openObservation(final String obsFileName) {
+        // hack to solve focus trouble in menu items :
+        window.menuItemWithPath("File").focus();
+        window.menuItemWithPath("File", "Open observation").click();
+
+        confirmDialogDontSave();
+
+        window.fileChooser().selectFile(new File(TEST_FOLDER + obsFileName)).approve();
+    }
+
     /**
      * Export Observing block file using default file name
      */
@@ -893,7 +953,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         // close deprecation message:
         closeMessage();
-        
+
         // close warning on OIFITS message:
         closeOIFitsMessage();
 
@@ -976,17 +1036,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         // Capture window screenshot :
         saveScreenshot(window, fileName);
-
-        // export PDF :
-        exportPDF();
-    }
-
-    /**
-     * Show the plot tab of the given name and export PDF using default file name
-     * @param tabName tab name
-     */
-    private void selectTab(final String tabName) {
-        getMainTabbedPane().selectTab(tabName);
 
         // export PDF :
         exportPDF();

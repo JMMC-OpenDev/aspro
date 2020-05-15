@@ -1,248 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <schemaVersion>2018.04</schemaVersion>
-    <targetVersion>2019.12</targetVersion>
+    <targetVersion>2020.04</targetVersion>
     <name>default</name>
     <when>
-        <date>2011-10-17</date>
+        <date>2020-04-14</date>
         <nightRestriction>true</nightRestriction>
         <atmosphereQuality>Average</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 88</name>
-        <minElevation>30.0</minElevation>
+        <name>VLTI Period 106</name>
+        <minElevation>45.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
-        <name>AMBER</name>
-        <stations>UT1 UT2 UT4</stations>
+        <name>GRAVITY</name>
+        <stations>UT1 UT2 UT3 UT4</stations>
         <pops></pops>
-        <instrumentMode>Low_JHK</instrumentMode>
+        <instrumentMode>LOW-COMBINED</instrumentMode>
         <samplingPeriod>60.0</samplingPeriod>
-        <acquisitionTime>300.0</acquisitionTime>
+        <acquisitionTime>600.0</acquisitionTime>
     </instrumentConfiguration>
-    <target id="HIP1234">
-        <name>HIP1234</name>
-        <RA>00:15:21.5509030652</RA>
-        <DEC>+28:35:13.846943724</DEC>
+    <target id="DoAr_44">
+        <name>DoAr 44</name>
+        <RA>16:31:33.4638378966</RA>
+        <DEC>-24:27:37.158295501</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>16.2</SYSVEL>
-        <PMRA>54.045</PMRA>
-        <PMDEC>-86.431</PMDEC>
-        <PARALLAX>14.0538</PARALLAX>
-        <PARA_ERR>0.2289</PARA_ERR>
-        <IDS>AG+28 25,AGKR 186,BD+27 25,GSC 01736-00683,HD 1094,HIC 1234,HIP 1234,PPM 89559,SAO 73846,TD1 103,TYC 1736-683-1,YZ 28 84,uvby98 100001094,2MASS J00152153+2835139,Gaia DR1 2859970275176107648,GEN# +1.00001094,Gaia DR2 2859970279471313664</IDS>
-        <OBJTYP>*,PM*,IR,UV</OBJTYP>
-        <SPECTYP>F5</SPECTYP>
-        <FLUX_B>7.77</FLUX_B>
-        <FLUX_V>7.347</FLUX_V>
-        <FLUX_G>7.2025</FLUX_G>
-        <FLUX_J>6.416</FLUX_J>
-        <FLUX_H>6.22</FLUX_H>
-        <FLUX_K>6.163</FLUX_K>
-        <useAnalyticalModel>true</useAnalyticalModel>
-        <tm:model name="elong_disk1" type="elong_disk">
-            <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter,
-elong_ratio, major_axis_pos_angle)
-
-Returns the Fourier transform, at spatial frequencies (UFREQ,VFREQ)
-given in 1/rad, of a normalized ellipse centered at coordinates (X,Y) (milliarcsecond)
-with a ratio ELONG_RATIO between the major diameter and the minor one MINOR_AXIS_DIAMETER,
-turned from the positive vertical semi-axis (i.e. North direction) with angle
-MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis
-(i.e. East direction). (the elongation is along the major_axis)
-
-|North
-|               For avoiding degenerescence, the domain of variation
-|---&gt;East       of MAJOR_AXIS_POS_ANGLE is 180 degrees,
-|               for ex. from 0 to 180 degrees.
-
-ELONG_RATIO = major_axis / minor_axis
-
-FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
-The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO
-is smaller than 1.
-
-UFREQ and VFREQ must be conformable. The returned array is always
-complex and with dimensions dimsof(UFREQ,VFREQ).
-</desc>
-            <tm:parameter name="flux_weight1" type="flux_weight">
-                <value>1.0</value>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="x1" type="x">
-                <units>mas</units>
-                <value>0.0</value>
-                <hasFixedValue>true</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="y1" type="y">
-                <units>mas</units>
-                <value>0.0</value>
-                <hasFixedValue>true</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="minor_axis_diameter1" type="minor_axis_diameter">
-                <units>mas</units>
-                <value>6.0</value>
-                <minValue>0.0</minValue>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="elong_ratio1" type="elong_ratio">
-                <value>1.3</value>
-                <minValue>1.0</minValue>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="major_axis_pos_angle1" type="major_axis_pos_angle">
-                <units>degrees</units>
-                <value>20.0</value>
-                <minValue>0.0</minValue>
-                <maxValue>180.0</maxValue>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-        </tm:model>
+        <PMRA>-6.101</PMRA>
+        <PMDEC>-24.212</PMDEC>
+        <PARALLAX>6.8535</PARALLAX>
+        <PARA_ERR>0.0465</PARA_ERR>
+        <IDS>JCMTLSG J163133.4-242735,GSC 06799-00047,V* V2062 Oph,DoAr 44,GWAYL 3,HBC 268,Haro 1-16,IRAS 16285-2421,ROX 44,ROXs 44,SV* SVS 2114,WSB 72,2MASS J16313346-2427372,SSTc2d J163133.4-242737,[EDJ2009] 985,WRAY 15-1502,[HL2013] 247.88935-24.46031,Gaia DR2 6047590243721186688</IDS>
+        <OBJTYP>Y*?,Y*?,Y*?,*,Y*O,Y*O,Em*,TT*,V*,Or*,smm,IR,X</OBJTYP>
+        <SPECTYP>K3e</SPECTYP>
+        <FLUX_B>14.02</FLUX_B>
+        <FLUX_V>12.8</FLUX_V>
+        <FLUX_G>11.8751</FLUX_G>
+        <FLUX_J>9.233</FLUX_J>
+        <FLUX_H>8.246</FLUX_H>
+        <FLUX_K>7.61</FLUX_K>
         <configuration>
             <HAMin>-12.0</HAMin>
             <HAMax>12.0</HAMax>
             <aoSetup>MACAO</aoSetup>
-        </configuration>
-    </target>
-    <target id="ETA_TAU">
-        <name>ETA TAU</name>
-        <RA>03:47:29.0765529</RA>
-        <DEC>+24:06:18.488347</DEC>
-        <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>5.4</SYSVEL>
-        <PMRA>19.34</PMRA>
-        <PMDEC>-43.67</PMDEC>
-        <PARALLAX>8.09</PARALLAX>
-        <PARA_ERR>0.42</PARA_ERR>
-        <IDS>2MASS J03472908+2406184,PLX 821,Cl* Melotte 22 K 60,Cl* Melotte 22 VM 32,Cl* Melotte 22 MSH 194,Cl* Melotte 22 MSK 141,Cl* Melotte 22 TRU 414,Cl* Melotte 22 WCZ 236,[JE82] 124,* eta Tau,* 25 Tau,AG+23 323,BD+23 541,BDS 1875 A,CCDM J03474+2407A,CEL 344,EM* MWC 74,FK5 139,GC 4541,GCRV 2135,GEN# +5.20221432,GSC 01800-02202,HD 23630,HGAM 274,HIC 17702,HIP 17702,HR 1165,IDS 03415+2348 A,IRAS 03445+2357,IRC +20063,JP11 4669,JP11 4680,N30 776,NAME Alcyone,PMC 90-93 100,PPM 92898,ROT 3785,SAO 76199,SKY# 5771,SRS 30139,TYC 1800-2202-1,UBV 3639,VDB 23,XZ 4911,[B10] 869,EPIC 200007767,[KSP2003] G166.6680-23.4550,[SCG94] O 165,[SCG94] X 180,uvby98 520221432,Cl Melotte 22 1432,ALS 15094,1E 0344.5+2357,[KSP2003] J034729.04+240619.4,WDS J03475+2406A,Cl* Melotte 22 HII 1432,** STF 4008A,** STFA 8A,WEB 3382,Gaia DR2 66714384141781760</IDS>
-        <OBJTYP>**,*,*iC,*iN,Em*,Be*,PM*,IR,UV,X</OBJTYP>
-        <SPECTYP>B7III</SPECTYP>
-        <FLUX_B>2.78</FLUX_B>
-        <FLUX_V>2.873</FLUX_V>
-        <FLUX_G>2.773</FLUX_G>
-        <FLUX_R>2.84</FLUX_R>
-        <FLUX_I>2.88</FLUX_I>
-        <FLUX_J>2.735</FLUX_J>
-        <FLUX_H>2.735</FLUX_H>
-        <FLUX_K>2.636</FLUX_K>
-        <useAnalyticalModel>true</useAnalyticalModel>
-        <tm:model name="punct1" type="punct">
-            <desc>Returns the Fourier transform of a punctual object (Dirac function) at coordinates (X,Y)
-(milliarcsecond).
-
-FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.</desc>
-            <tm:parameter name="flux_weight1" type="flux_weight">
-                <value>1.0</value>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="x1" type="x">
-                <units>mas</units>
-                <value>0.0</value>
-                <hasFixedValue>true</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="y1" type="y">
-                <units>mas</units>
-                <value>0.0</value>
-                <hasFixedValue>true</hasFixedValue>
-            </tm:parameter>
-        </tm:model>
-        <tm:model name="punct2" type="punct">
-            <desc>Returns the Fourier transform of a punctual object (Dirac function) at coordinates (X,Y)
-(milliarcsecond).
-
-FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.</desc>
-            <tm:parameter name="flux_weight2" type="flux_weight">
-                <value>1.0</value>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="x2" type="x">
-                <units>mas</units>
-                <value>47.81523779815177</value>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="y2" type="y">
-                <units>mas</units>
-                <value>14.618585236136836</value>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-        </tm:model>
-        <configuration>
-            <HAMin>-12.0</HAMin>
-            <HAMax>12.0</HAMax>
-        </configuration>
-    </target>
-    <target id="HD_1234">
-        <name>HD 1234</name>
-        <RA>00:16:27.6598684930</RA>
-        <DEC>-36:47:46.635648661</DEC>
-        <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>-10.44</SYSVEL>
-        <VELTYP>Opt</VELTYP>
-        <PMRA>-15.397</PMRA>
-        <PMDEC>-16.553</PMDEC>
-        <PARALLAX>4.8283</PARALLAX>
-        <PARA_ERR>0.0361</PARA_ERR>
-        <IDS>2MASS J00162766-3647467,CD-37 56,CPC 18 68,CPD-37 14,GSC 06996-00075,HD 1234,HIC 1311,HIP 1311,PPM 275860,SAO 192435,SRS 3031,TYC 6996-75-1,uvby98 100001234,Gaia DR1 2308678821500431360,GEN# +1.00001234,Gaia DR2 2308678825796092800</IDS>
-        <OBJTYP>*,IR</OBJTYP>
-        <SPECTYP>F3V</SPECTYP>
-        <FLUX_B>9.65</FLUX_B>
-        <FLUX_V>9.19</FLUX_V>
-        <FLUX_G>9.0923</FLUX_G>
-        <FLUX_J>8.318</FLUX_J>
-        <FLUX_H>8.131</FLUX_H>
-        <FLUX_K>8.112</FLUX_K>
-        <useAnalyticalModel>true</useAnalyticalModel>
-        <tm:model name="elong_disk1" type="elong_disk">
-            <desc>Returns the Fourier transform of a normalized ellipse centered at coordinates (X,Y)
-(milliarcsecond) with a ratio ELONG_RATIO between the major diameter and the minor one
-MINOR_AXIS_DIAMETER, turned from the positive vertical semi-axis (i.e. North direction)
-with angle MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis
-(i.e. East direction). (the elongation is along the major_axis)
-
-For avoiding degenerescence, the domain of variation of MAJOR_AXIS_POS_ANGLE is 180
-degrees, for ex. from 0 to 180 degrees.
-
-ELONG_RATIO = major_axis / minor_axis
-FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
-
-The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO is
-smaller than 1.</desc>
-            <tm:parameter name="flux_weight1" type="flux_weight">
-                <value>1.0</value>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="x1" type="x">
-                <units>mas</units>
-                <value>0.0</value>
-                <hasFixedValue>true</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="y1" type="y">
-                <units>mas</units>
-                <value>0.0</value>
-                <hasFixedValue>true</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="minor_axis_diameter1" type="minor_axis_diameter">
-                <units>mas</units>
-                <value>3.0</value>
-                <minValue>0.0</minValue>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="elong_ratio1" type="elong_ratio">
-                <value>1.3</value>
-                <minValue>1.0</minValue>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="major_axis_pos_angle1" type="major_axis_pos_angle">
-                <units>degrees</units>
-                <value>120.0</value>
-                <minValue>0.0</minValue>
-                <maxValue>180.0</maxValue>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-        </tm:model>
-        <configuration>
-            <HAMin>-4.0</HAMin>
-            <HAMax>4.0</HAMax>
+            <fringeTrackerMode>FringeTrack GRAVITY</fringeTrackerMode>
         </configuration>
     </target>
     <targetUserInfos>
@@ -265,912 +65,1739 @@ smaller than 1.</desc>
             <color>#5BAFD6</color>
         </group>
     </targetUserInfos>
-
     <targetObservations>
-        <targetRef>HD_1234</targetRef>
-          <observation>
-            <obsId>GRAVI.2017-09-28T01:46:39.919.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436844</parentId>
-            <programId>60.A-9295(A)</programId>
+        <targetRef>DoAr_44</targetRef>
+        <observation>
+            <obsId>MIDI.2007-06-26T04:09:29.000_1</obsId>
+            <type>calibrator</type>
+            <parentId>17834</parentId>
+            <programId>079.C-0101(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>Haro1-16</targetName>
+            <targetRa>247.889339</targetRa>
+            <targetDec>-24.4602</targetDec>
+            <mjdStart>54277.17325231</mjdStart>
+            <mjdEnd>54277.1739731433</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '60.4040', 'end': '60.3180'}, 'angle': {'start': '119.2000', 'end': '119.4000'}}}</projectedBaselines>
+            <expTau0>0.0012255</expTau0>
+            <expTemp>6.96</expTemp>
+            <expSeeing>1.2</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2007-06-26T04:11:53.000_1</obsId>
+            <type>science</type>
+            <parentId>17835</parentId>
+            <programId>079.C-0101(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>Haro1-16</targetName>
+            <targetRa>247.889339</targetRa>
+            <targetDec>-24.4602</targetDec>
+            <mjdStart>54277.17491898</mjdStart>
+            <mjdEnd>54277.1756606467</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '60.2690', 'end': '60.1810'}, 'angle': {'start': '119.5000', 'end': '119.7000'}}}</projectedBaselines>
+            <expTau0>0.0012545</expTau0>
+            <expTemp>6.93</expTemp>
+            <expSeeing>1.17</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2007-06-26T04:13:07.506_1</obsId>
+            <type>science</type>
+            <parentId>17835</parentId>
+            <programId>079.C-0101(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>Haro1-16</targetName>
+            <targetRa>247.889339</targetRa>
+            <targetDec>-24.4602</targetDec>
+            <mjdStart>54277.17578132</mjdStart>
+            <mjdEnd>54277.1765229867</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '60.2690', 'end': '60.1050'}, 'angle': {'start': '119.5000', 'end': '119.9000'}}}</projectedBaselines>
+            <expTau0>0.0013195</expTau0>
+            <expTemp>6.93</expTemp>
+            <expSeeing>1.11</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2007-06-26T04:14:22.012_1</obsId>
+            <type>science</type>
+            <parentId>17835</parentId>
+            <programId>079.C-0101(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>Haro1-16</targetName>
+            <targetRa>247.889339</targetRa>
+            <targetDec>-24.4602</targetDec>
+            <mjdStart>54277.17664366</mjdStart>
+            <mjdEnd>54277.1768269933</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '60.2690', 'end': '60.0850'}, 'angle': {'start': '119.5000', 'end': '119.9000'}}}</projectedBaselines>
+            <expTau0>0.0013195</expTau0>
+            <expTemp>6.93</expTemp>
+            <expSeeing>1.11</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2008-05-17T04:17:36.000_1</obsId>
+            <type>calibrator</type>
+            <parentId>19707</parentId>
+            <programId>081.C-0020(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>Haro-1-16</targetName>
+            <targetRa>247.889465</targetRa>
+            <targetDec>-24.45997</targetDec>
+            <mjdStart>54603.17888889</mjdStart>
+            <mjdEnd>54603.1796305567</mjdEnd>
+            <projectedBaselines>{'U1-U3': {'length': {'start': '101.3950', 'end': '101.4350'}, 'angle': {'start': '23.4000', 'end': '23.6000'}}}</projectedBaselines>
+            <expTau0>0.0035445</expTau0>
+            <expTemp>11.3</expTemp>
+            <expSeeing>0.555</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2008-05-17T04:18:50.506_1</obsId>
+            <type>calibrator</type>
+            <parentId>19707</parentId>
+            <programId>081.C-0020(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>Haro-1-16</targetName>
+            <targetRa>247.889465</targetRa>
+            <targetDec>-24.45997</targetDec>
+            <mjdStart>54603.17975123</mjdStart>
+            <mjdEnd>54603.1801303967</mjdEnd>
+            <projectedBaselines>{'U1-U3': {'length': {'start': '101.3950', 'end': '101.4450'}, 'angle': {'start': '23.4000', 'end': '23.7000'}}}</projectedBaselines>
+            <expTau0>0.003653</expTau0>
+            <expTemp>11.3</expTemp>
+            <expSeeing>0.535</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2008-05-17T04:20:31.000_1</obsId>
+            <type>science</type>
+            <parentId>19708</parentId>
+            <programId>081.C-0020(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>Haro-1-16</targetName>
+            <targetRa>247.889465</targetRa>
+            <targetDec>-24.45997</targetDec>
+            <mjdStart>54603.18091435</mjdStart>
+            <mjdEnd>54603.1816560167</mjdEnd>
+            <projectedBaselines>{'U1-U3': {'length': {'start': '101.4620', 'end': '101.4990'}, 'angle': {'start': '23.8000', 'end': '24.0000'}}}</projectedBaselines>
+            <expTau0>0.0033975</expTau0>
+            <expTemp>11.26</expTemp>
+            <expSeeing>0.58</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2008-05-17T04:21:45.507_1</obsId>
+            <type>science</type>
+            <parentId>19708</parentId>
+            <programId>081.C-0020(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>Haro-1-16</targetName>
+            <targetRa>247.889465</targetRa>
+            <targetDec>-24.45997</targetDec>
+            <mjdStart>54603.1817767</mjdStart>
+            <mjdEnd>54603.1825183667</mjdEnd>
+            <projectedBaselines>{'U1-U3': {'length': {'start': '101.4620', 'end': '101.5270'}, 'angle': {'start': '23.8000', 'end': '24.2000'}}}</projectedBaselines>
+            <expTau0>0.00345</expTau0>
+            <expTemp>11.26</expTemp>
+            <expSeeing>0.57</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2008-05-17T04:23:00.013_1</obsId>
+            <type>science</type>
+            <parentId>19708</parentId>
+            <programId>081.C-0020(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>Haro-1-16</targetName>
+            <targetRa>247.889465</targetRa>
+            <targetDec>-24.45997</targetDec>
+            <mjdStart>54603.18263904</mjdStart>
+            <mjdEnd>54603.1828223733</mjdEnd>
+            <projectedBaselines>{'U1-U3': {'length': {'start': '101.4620', 'end': '101.5290'}, 'angle': {'start': '23.8000', 'end': '24.2000'}}}</projectedBaselines>
+            <expTau0>0.00345</expTau0>
+            <expTemp>11.26</expTemp>
+            <expSeeing>0.57</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-03-20T07:27:23.000_1</obsId>
+            <type>calibrator</type>
+            <parentId>24944</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889711</targetRa>
+            <targetDec>-24.45969</targetDec>
+            <mjdStart>55640.31068287</mjdStart>
+            <mjdEnd>55640.3114245367</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '45.1550', 'end': '45.1880'}, 'angle': {'start': '24.8000', 'end': '25.1000'}}}</projectedBaselines>
+            <expTau0>0.001381</expTau0>
+            <expTemp>11.77</expTemp>
+            <expSeeing>1.98</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-03-20T07:28:37.469_1</obsId>
+            <type>calibrator</type>
+            <parentId>24944</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889711</targetRa>
+            <targetDec>-24.45969</targetDec>
+            <mjdStart>55640.31154478</mjdStart>
+            <mjdEnd>55640.3119239467</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '45.1550', 'end': '45.1970'}, 'angle': {'start': '24.8000', 'end': '25.2000'}}}</projectedBaselines>
+            <expTau0>0.0016635</expTau0>
+            <expTemp>11.77</expTemp>
+            <expSeeing>1.61</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-03-20T07:31:10.000_1</obsId>
+            <type>science</type>
+            <parentId>24941</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889711</targetRa>
+            <targetDec>-24.45969</targetDec>
+            <mjdStart>55640.31331019</mjdStart>
+            <mjdEnd>55640.3140518567</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '45.2280', 'end': '45.2610'}, 'angle': {'start': '25.4000', 'end': '25.7000'}}}</projectedBaselines>
+            <expTau0>0.001472</expTau0>
+            <expTemp>11.71</expTemp>
+            <expSeeing>1.82</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-03-20T07:32:20.160_1</obsId>
+            <type>science</type>
+            <parentId>24941</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889711</targetRa>
+            <targetDec>-24.45969</targetDec>
+            <mjdStart>55640.31412222</mjdStart>
+            <mjdEnd>55640.3148638867</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '45.2280', 'end': '45.2830'}, 'angle': {'start': '25.4000', 'end': '25.9000'}}}</projectedBaselines>
+            <expTau0>0.0015025</expTau0>
+            <expTemp>11.71</expTemp>
+            <expSeeing>1.78</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-03-20T07:33:34.628_1</obsId>
+            <type>science</type>
+            <parentId>24941</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889711</targetRa>
+            <targetDec>-24.45969</targetDec>
+            <mjdStart>55640.31498412</mjdStart>
+            <mjdEnd>55640.3151674533</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '45.2280', 'end': '45.2880'}, 'angle': {'start': '25.4000', 'end': '25.9000'}}}</projectedBaselines>
+            <expTau0>0.0015025</expTau0>
+            <expTemp>11.71</expTemp>
+            <expSeeing>1.78</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T04:52:32.000_1</obsId>
+            <type>calibrator</type>
+            <parentId>25055</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889509</targetRa>
+            <targetDec>-24.46018</targetDec>
+            <mjdStart>55664.20314815</mjdStart>
+            <mjdEnd>55664.2038898167</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '44.0530', 'end': '44.0760'}, 'angle': {'start': '14.6000', 'end': '14.8000'}}}</projectedBaselines>
+            <expTau0>8.26E-4</expTau0>
+            <expTemp>10.63</expTemp>
+            <expSeeing>-1.0</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T04:53:46.468_1</obsId>
+            <type>calibrator</type>
+            <parentId>25055</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889509</targetRa>
+            <targetDec>-24.46018</targetDec>
+            <mjdStart>55664.20401005</mjdStart>
+            <mjdEnd>55664.2045892167</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '44.0530', 'end': '44.0930'}, 'angle': {'start': '14.6000', 'end': '15.0000'}}}</projectedBaselines>
+            <expTau0>8.26E-4</expTau0>
+            <expTemp>10.63</expTemp>
+            <expSeeing>-1.0</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T04:56:38.000_1</obsId>
+            <type>science</type>
+            <parentId>25060</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889509</targetRa>
+            <targetDec>-24.46018</targetDec>
+            <mjdStart>55664.20599537</mjdStart>
+            <mjdEnd>55664.2067370367</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '44.1170', 'end': '44.1430'}, 'angle': {'start': '15.3000', 'end': '15.6000'}}}</projectedBaselines>
+            <expTau0>8.26E-4</expTau0>
+            <expTemp>10.52</expTemp>
+            <expSeeing>-1.0</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T04:57:52.469_1</obsId>
+            <type>science</type>
+            <parentId>25060</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889509</targetRa>
+            <targetDec>-24.46018</targetDec>
+            <mjdStart>55664.20685728</mjdStart>
+            <mjdEnd>55664.2075989467</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '44.1170', 'end': '44.1640'}, 'angle': {'start': '15.3000', 'end': '15.8000'}}}</projectedBaselines>
+            <expTau0>8.26E-4</expTau0>
+            <expTemp>10.52</expTemp>
+            <expSeeing>-1.0</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T04:59:06.937_1</obsId>
+            <type>science</type>
+            <parentId>25060</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889509</targetRa>
+            <targetDec>-24.46018</targetDec>
+            <mjdStart>55664.20771918</mjdStart>
+            <mjdEnd>55664.2079025133</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '44.1170', 'end': '44.1650'}, 'angle': {'start': '15.3000', 'end': '15.8000'}}}</projectedBaselines>
+            <expTau0>8.26E-4</expTau0>
+            <expTemp>10.52</expTemp>
+            <expSeeing>-1.0</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T08:27:08.000_1</obsId>
+            <type>calibrator</type>
+            <parentId>25052</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889549</targetRa>
+            <targetDec>-24.45944</targetDec>
+            <mjdStart>55664.35217593</mjdStart>
+            <mjdEnd>55664.3529175967</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '46.4150', 'end': '46.3930'}, 'angle': {'start': '43.7000', 'end': '43.8000'}}}</projectedBaselines>
+            <expTau0>9.36E-4</expTau0>
+            <expTemp>9.55</expTemp>
+            <expSeeing>2.0</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T08:28:22.469_1</obsId>
+            <type>calibrator</type>
+            <parentId>25052</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889549</targetRa>
+            <targetDec>-24.45944</targetDec>
+            <mjdStart>55664.35303783</mjdStart>
+            <mjdEnd>55664.3536169967</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '46.4150', 'end': '46.3810'}, 'angle': {'start': '43.7000', 'end': '43.9000'}}}</projectedBaselines>
+            <expTau0>9.565E-4</expTau0>
+            <expTemp>9.55</expTemp>
+            <expSeeing>2.03</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T08:33:06.000_1</obsId>
+            <type>calibrator</type>
+            <parentId>25052</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889549</targetRa>
+            <targetDec>-24.45944</targetDec>
+            <mjdStart>55664.35631944</mjdStart>
+            <mjdEnd>55664.3570611067</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '46.3330', 'end': '46.3070'}, 'angle': {'start': '44.2000', 'end': '44.3000'}}}</projectedBaselines>
+            <expTau0>8.38E-4</expTau0>
+            <expTemp>9.32</expTemp>
+            <expSeeing>2.47</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T08:34:20.469_1</obsId>
+            <type>calibrator</type>
+            <parentId>25052</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889549</targetRa>
+            <targetDec>-24.45944</targetDec>
+            <mjdStart>55664.35718135</mjdStart>
+            <mjdEnd>55664.3577605167</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '46.3330', 'end': '46.2930'}, 'angle': {'start': '44.2000', 'end': '44.4000'}}}</projectedBaselines>
+            <expTau0>8.805E-4</expTau0>
+            <expTemp>9.32</expTemp>
+            <expSeeing>2.26</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T08:38:00.000_1</obsId>
+            <type>science</type>
+            <parentId>25054</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889549</targetRa>
+            <targetDec>-24.45944</targetDec>
+            <mjdStart>55664.35972222</mjdStart>
+            <mjdEnd>55664.3604638867</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '46.2550', 'end': '46.2290'}, 'angle': {'start': '44.6000', 'end': '44.7000'}}}</projectedBaselines>
+            <expTau0>9.935E-4</expTau0>
+            <expTemp>9.27</expTemp>
+            <expSeeing>1.96</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T08:39:14.469_1</obsId>
+            <type>science</type>
+            <parentId>25054</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889549</targetRa>
+            <targetDec>-24.45944</targetDec>
+            <mjdStart>55664.36058413</mjdStart>
+            <mjdEnd>55664.3613257967</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '46.2550', 'end': '46.2060'}, 'angle': {'start': '44.6000', 'end': '44.8000'}}}</projectedBaselines>
+            <expTau0>0.0010135</expTau0>
+            <expTemp>9.27</expTemp>
+            <expSeeing>1.935</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-13T08:40:28.937_1</obsId>
+            <type>science</type>
+            <parentId>25054</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889549</targetRa>
+            <targetDec>-24.45944</targetDec>
+            <mjdStart>55664.36144603</mjdStart>
+            <mjdEnd>55664.3616293633</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '46.2550', 'end': '46.2010'}, 'angle': {'start': '44.6000', 'end': '44.9000'}}}</projectedBaselines>
+            <expTau0>0.0010135</expTau0>
+            <expTemp>9.27</expTemp>
+            <expSeeing>1.935</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-14T09:32:32.000_1</obsId>
+            <type>calibrator</type>
+            <parentId>25092</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889578</targetRa>
+            <targetDec>-24.45984</targetDec>
+            <mjdStart>55665.39759259</mjdStart>
+            <mjdEnd>55665.3983342567</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '44.5810', 'end': '44.5150'}, 'angle': {'start': '48.7000', 'end': '48.8000'}}}</projectedBaselines>
+            <expTau0>0.002581</expTau0>
+            <expTemp>9.66</expTemp>
+            <expSeeing>1.26</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-14T09:33:46.469_1</obsId>
+            <type>calibrator</type>
+            <parentId>25092</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889578</targetRa>
+            <targetDec>-24.45984</targetDec>
+            <mjdStart>55665.3984545</mjdStart>
+            <mjdEnd>55665.3988336667</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '44.5810', 'end': '44.4880'}, 'angle': {'start': '48.7000', 'end': '48.8000'}}}</projectedBaselines>
+            <expTau0>0.002581</expTau0>
+            <expTemp>9.66</expTemp>
+            <expSeeing>1.26</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-14T09:35:15.000_1</obsId>
+            <type>science</type>
+            <parentId>25096</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889578</targetRa>
+            <targetDec>-24.45984</targetDec>
+            <mjdStart>55665.39947917</mjdStart>
+            <mjdEnd>55665.4002208367</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '44.4690', 'end': '44.4020'}, 'angle': {'start': '48.9000', 'end': '49.0000'}}}</projectedBaselines>
+            <expTau0>0.0023355</expTau0>
+            <expTemp>9.7</expTemp>
+            <expSeeing>1.355</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-14T09:36:29.468_1</obsId>
+            <type>science</type>
+            <parentId>25096</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889578</targetRa>
+            <targetDec>-24.45984</targetDec>
+            <mjdStart>55665.40034107</mjdStart>
+            <mjdEnd>55665.4010827367</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '44.4690', 'end': '44.3460'}, 'angle': {'start': '48.9000', 'end': '49.0000'}}}</projectedBaselines>
+            <expTau0>0.0023725</expTau0>
+            <expTemp>9.7</expTemp>
+            <expSeeing>1.315</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-14T09:37:43.937_1</obsId>
+            <type>science</type>
+            <parentId>25096</parentId>
+            <programId>087.C-0702(G)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U2 U3</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889578</targetRa>
+            <targetDec>-24.45984</targetDec>
+            <mjdStart>55665.40120298</mjdStart>
+            <mjdEnd>55665.4013863133</mjdEnd>
+            <projectedBaselines>{'U2-U3': {'length': {'start': '44.4690', 'end': '44.3340'}, 'angle': {'start': '48.9000', 'end': '49.0000'}}}</projectedBaselines>
+            <expTau0>0.0023725</expTau0>
+            <expTemp>9.7</expTemp>
+            <expSeeing>1.315</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-16T07:54:15.000_1</obsId>
+            <type>calibrator</type>
+            <parentId>25167</parentId>
+            <programId>087.C-0702(H)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889271</targetRa>
+            <targetDec>-24.45977</targetDec>
+            <mjdStart>55667.32934028</mjdStart>
+            <mjdEnd>55667.3300819467</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '62.3490', 'end': '62.3250'}, 'angle': {'start': '112.6000', 'end': '112.8000'}}}</projectedBaselines>
+            <expTau0>0.002009</expTau0>
+            <expTemp>14.94</expTemp>
+            <expSeeing>1.23</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-16T07:55:29.468_1</obsId>
+            <type>calibrator</type>
+            <parentId>25167</parentId>
+            <programId>087.C-0702(H)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889271</targetRa>
+            <targetDec>-24.45977</targetDec>
+            <mjdStart>55667.33020218</mjdStart>
+            <mjdEnd>55667.3303813467</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '62.3490', 'end': '62.3210'}, 'angle': {'start': '112.6000', 'end': '112.8000'}}}</projectedBaselines>
+            <expTau0>0.001909</expTau0>
+            <expTemp>14.94</expTemp>
+            <expSeeing>1.31</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-16T07:56:32.000_1</obsId>
+            <type>science</type>
+            <parentId>25138</parentId>
+            <programId>087.C-0702(H)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889271</targetRa>
+            <targetDec>-24.45977</targetDec>
+            <mjdStart>55667.33092593</mjdStart>
+            <mjdEnd>55667.3316675967</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '62.3130', 'end': '62.2870'}, 'angle': {'start': '112.9000', 'end': '113.0000'}}}</projectedBaselines>
+            <expTau0>0.0019025</expTau0>
+            <expTemp>14.77</expTemp>
+            <expSeeing>1.315</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-16T07:57:46.469_1</obsId>
+            <type>science</type>
+            <parentId>25138</parentId>
+            <programId>087.C-0702(H)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889271</targetRa>
+            <targetDec>-24.45977</targetDec>
+            <mjdStart>55667.33178783</mjdStart>
+            <mjdEnd>55667.3325294967</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '62.3130', 'end': '62.2630'}, 'angle': {'start': '112.9000', 'end': '113.2000'}}}</projectedBaselines>
+            <expTau0>0.0017245</expTau0>
+            <expTemp>14.77</expTemp>
+            <expSeeing>1.435</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-16T07:59:00.938_1</obsId>
+            <type>science</type>
+            <parentId>25138</parentId>
+            <programId>087.C-0702(H)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889271</targetRa>
+            <targetDec>-24.45977</targetDec>
+            <mjdStart>55667.33264974</mjdStart>
+            <mjdEnd>55667.3328330733</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '62.3130', 'end': '62.2580'}, 'angle': {'start': '112.9000', 'end': '113.2000'}}}</projectedBaselines>
+            <expTau0>0.0017245</expTau0>
+            <expTemp>14.77</expTemp>
+            <expSeeing>1.435</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-17T05:10:29.000_1</obsId>
+            <type>calibrator</type>
+            <parentId>25202</parentId>
+            <programId>087.C-0702(H)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889604</targetRa>
+            <targetDec>-24.45969</targetDec>
+            <mjdStart>55668.21561343</mjdStart>
+            <mjdEnd>55668.2163550967</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '53.2400', 'end': '53.4500'}, 'angle': {'start': '97.9000', 'end': '98.0000'}}}</projectedBaselines>
+            <expTau0>0.0011605</expTau0>
+            <expTemp>16.18</expTemp>
+            <expSeeing>1.775</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-17T05:11:43.467_1</obsId>
+            <type>calibrator</type>
+            <parentId>25202</parentId>
+            <programId>087.C-0702(H)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889604</targetRa>
+            <targetDec>-24.45969</targetDec>
+            <mjdStart>55668.21647531</mjdStart>
+            <mjdEnd>55668.2168544767</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '53.2400', 'end': '53.5090'}, 'angle': {'start': '97.9000', 'end': '98.1000'}}}</projectedBaselines>
+            <expTau0>0.0012415</expTau0>
+            <expTemp>16.18</expTemp>
+            <expSeeing>1.665</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-17T05:13:06.000_1</obsId>
+            <type>science</type>
+            <parentId>25182</parentId>
+            <programId>087.C-0702(H)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889604</targetRa>
+            <targetDec>-24.45969</targetDec>
+            <mjdStart>55668.21743056</mjdStart>
+            <mjdEnd>55668.2181722267</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '53.5770', 'end': '53.7910'}, 'angle': {'start': '98.1000', 'end': '98.3000'}}}</projectedBaselines>
+            <expTau0>0.0015005</expTau0>
+            <expTemp>16.05</expTemp>
+            <expSeeing>1.385</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-17T05:14:20.469_1</obsId>
+            <type>science</type>
+            <parentId>25182</parentId>
+            <programId>087.C-0702(H)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889604</targetRa>
+            <targetDec>-24.45969</targetDec>
+            <mjdStart>55668.21829246</mjdStart>
+            <mjdEnd>55668.2190341267</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '53.5770', 'end': '53.9280'}, 'angle': {'start': '98.1000', 'end': '98.3000'}}}</projectedBaselines>
+            <expTau0>0.001718</expTau0>
+            <expTemp>16.05</expTemp>
+            <expSeeing>1.26</expSeeing>
+        </observation>
+        <observation>
+            <obsId>MIDI.2011-04-17T05:15:34.938_1</obsId>
+            <type>science</type>
+            <parentId>25182</parentId>
+            <programId>087.C-0702(H)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U3 U4</stations>
+            <instrumentName>MIDI</instrumentName>
+            <instrumentMode>HIGH_SENS+PRISM</instrumentMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.889604</targetRa>
+            <targetDec>-24.45969</targetDec>
+            <mjdStart>55668.21915437</mjdStart>
+            <mjdEnd>55668.2193377033</mjdEnd>
+            <projectedBaselines>{'U3-U4': {'length': {'start': '53.5770', 'end': '53.9610'}, 'angle': {'start': '98.1000', 'end': '98.4000'}}}</projectedBaselines>
+            <expTau0>0.001753</expTau0>
+            <expTemp>16.05</expTemp>
+            <expSeeing>1.24</expSeeing>
+        </observation>
+        <observation>
+            <obsId>PIONI.2014-03-01T08:19:50.285_1</obsId>
+            <type>science</type>
+            <parentId>32328</parentId>
+            <programId>092.C-0243(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>D0 G1 H0 I1</stations>
+            <instrumentName>PIONIER</instrumentName>
+            <instrumentMode>FREE-H</instrumentMode>
+            <targetName>V2062_OPH</targetName>
+            <targetRa>247.889415</targetRa>
+            <targetDec>-24.46036</targetDec>
+            <mjdStart>56717.3471097811</mjdStart>
+            <mjdEnd>56717.3484123586</mjdEnd>
+            <projectedBaselines>{'D0-G1': {'length': {'start': '65.1700', 'end': '65.3550'}, 'angle': {'start': '124.2000', 'end': '124.3000'}}, 'D0-H0': {'length': {'start': '56.6150', 'end': '56.7950'}, 'angle': {'start': '52.6000', 'end': '52.9000'}}, 'D0-I1': {'length': {'start': '70.4120', 'end': '70.7340'}, 'angle': {'start': '85.8820', 'end': '86.0990'}}, 'G1-H0': {'length': {'start': '71.5400', 'end': '71.5390'}, 'angle': {'start': '352.8000', 'end': '353.0000'}}, 'G1-I1': {'length': {'start': '44.7340', 'end': '44.7710'}, 'angle': {'start': '21.3780', 'end': '21.6950'}}, 'H0-I1': {'length': {'start': '38.6950', 'end': '38.7590'}, 'angle': {'start': '139.2730', 'end': '139.3630'}}}</projectedBaselines>
+            <expTau0>0.0035505</expTau0>
+            <expTemp>13.12</expTemp>
+            <expSeeing>0.725</expSeeing>
+        </observation>
+        <observation>
+            <obsId>PIONI.2014-03-01T08:21:49.660_1</obsId>
+            <type>science</type>
+            <parentId>32328</parentId>
+            <programId>092.C-0243(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>D0 G1 H0 I1</stations>
+            <instrumentName>PIONIER</instrumentName>
+            <instrumentMode>FREE-H</instrumentMode>
+            <targetName>V2062_OPH</targetName>
+            <targetRa>247.889415</targetRa>
+            <targetDec>-24.46036</targetDec>
+            <mjdStart>56717.3484914387</mjdStart>
+            <mjdEnd>56717.3497940162</mjdEnd>
+            <projectedBaselines>{'D0-G1': {'length': {'start': '65.3610', 'end': '65.5430'}, 'angle': {'start': '124.3000', 'end': '124.4000'}}, 'D0-H0': {'length': {'start': '56.8010', 'end': '56.9800'}, 'angle': {'start': '53.0000', 'end': '53.3000'}}, 'D0-I1': {'length': {'start': '70.7460', 'end': '71.0640'}, 'angle': {'start': '86.1070', 'end': '86.3240'}}, 'G1-H0': {'length': {'start': '71.5390', 'end': '71.5390'}, 'angle': {'start': '353.0000', 'end': '353.2000'}}, 'G1-I1': {'length': {'start': '44.7720', 'end': '44.8090'}, 'angle': {'start': '21.7060', 'end': '22.0240'}}, 'H0-I1': {'length': {'start': '38.7610', 'end': '38.8230'}, 'angle': {'start': '139.3660', 'end': '139.4580'}}}</projectedBaselines>
+            <expTau0>0.003635</expTau0>
+            <expTemp>13.12</expTemp>
+            <expSeeing>0.71</expSeeing>
+        </observation>
+        <observation>
+            <obsId>PIONI.2014-03-01T08:23:49.072_1</obsId>
+            <type>science</type>
+            <parentId>32328</parentId>
+            <programId>092.C-0243(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>D0 G1 H0 I1</stations>
+            <instrumentName>PIONIER</instrumentName>
+            <instrumentMode>FREE-H</instrumentMode>
+            <targetName>V2062_OPH</targetName>
+            <targetRa>247.889415</targetRa>
+            <targetDec>-24.46036</targetDec>
+            <mjdStart>56717.3498735218</mjdStart>
+            <mjdEnd>56717.3511760993</mjdEnd>
+            <projectedBaselines>{'D0-G1': {'length': {'start': '65.5510', 'end': '65.7300'}, 'angle': {'start': '124.4000', 'end': '124.4000'}}, 'D0-H0': {'length': {'start': '56.9880', 'end': '57.1650'}, 'angle': {'start': '53.3000', 'end': '53.6000'}}, 'D0-I1': {'length': {'start': '71.0780', 'end': '71.3920'}, 'angle': {'start': '86.3330', 'end': '86.5480'}}, 'G1-H0': {'length': {'start': '71.5390', 'end': '71.5390'}, 'angle': {'start': '353.2000', 'end': '353.4000'}}, 'G1-I1': {'length': {'start': '44.8110', 'end': '44.8480'}, 'angle': {'start': '22.0370', 'end': '22.3520'}}, 'H0-I1': {'length': {'start': '38.8260', 'end': '38.8870'}, 'angle': {'start': '139.4620', 'end': '139.5560'}}}</projectedBaselines>
+            <expTau0>0.0039015</expTau0>
+            <expTemp>13.13</expTemp>
+            <expSeeing>0.66</expSeeing>
+        </observation>
+        <observation>
+            <obsId>PIONI.2014-03-01T08:25:48.643_1</obsId>
+            <type>science</type>
+            <parentId>32328</parentId>
+            <programId>092.C-0243(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>D0 G1 H0 I1</stations>
+            <instrumentName>PIONIER</instrumentName>
+            <instrumentMode>FREE-H</instrumentMode>
+            <targetName>V2062_OPH</targetName>
+            <targetRa>247.889415</targetRa>
+            <targetDec>-24.46036</targetDec>
+            <mjdStart>56717.351257442</mjdStart>
+            <mjdEnd>56717.3525600195</mjdEnd>
+            <projectedBaselines>{'D0-G1': {'length': {'start': '65.7360', 'end': '65.9130'}, 'angle': {'start': '124.5000', 'end': '124.5000'}}, 'D0-H0': {'length': {'start': '57.1710', 'end': '57.3470'}, 'angle': {'start': '53.6000', 'end': '54.0000'}}, 'D0-I1': {'length': {'start': '71.4030', 'end': '71.7130'}, 'angle': {'start': '86.5550', 'end': '86.7680'}}, 'G1-H0': {'length': {'start': '71.5390', 'end': '71.5380'}, 'angle': {'start': '353.4000', 'end': '353.7000'}}, 'G1-I1': {'length': {'start': '44.8490', 'end': '44.8860'}, 'angle': {'start': '22.3630', 'end': '22.6760'}}, 'H0-I1': {'length': {'start': '38.8890', 'end': '38.9490'}, 'angle': {'start': '139.5590', 'end': '139.6540'}}}</projectedBaselines>
+            <expTau0>0.003944</expTau0>
+            <expTemp>13.21</expTemp>
+            <expSeeing>0.655</expSeeing>
+        </observation>
+        <observation>
+            <obsId>PIONI.2014-03-01T08:27:47.879_1</obsId>
+            <type>science</type>
+            <parentId>32328</parentId>
+            <programId>092.C-0243(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>D0 G1 H0 I1</stations>
+            <instrumentName>PIONIER</instrumentName>
+            <instrumentMode>FREE-H</instrumentMode>
+            <targetName>V2062_OPH</targetName>
+            <targetRa>247.889415</targetRa>
+            <targetDec>-24.46036</targetDec>
+            <mjdStart>56717.352637487</mjdStart>
+            <mjdEnd>56717.3539400645</mjdEnd>
+            <projectedBaselines>{'D0-G1': {'length': {'start': '65.9190', 'end': '66.0920'}, 'angle': {'start': '124.5000', 'end': '124.6000'}}, 'D0-H0': {'length': {'start': '57.3530', 'end': '57.5280'}, 'angle': {'start': '54.0000', 'end': '54.3000'}}, 'D0-I1': {'length': {'start': '71.7240', 'end': '72.0300'}, 'angle': {'start': '86.7760', 'end': '86.9890'}}, 'G1-H0': {'length': {'start': '71.5380', 'end': '71.5380'}, 'angle': {'start': '353.7000', 'end': '353.9000'}}, 'G1-I1': {'length': {'start': '44.8880', 'end': '44.9250'}, 'angle': {'start': '22.6870', 'end': '22.9990'}}, 'H0-I1': {'length': {'start': '38.9510', 'end': '39.0100'}, 'angle': {'start': '139.6570', 'end': '139.7540'}}}</projectedBaselines>
+            <expTau0>0.0041635</expTau0>
+            <expTemp>13.22</expTemp>
+            <expSeeing>0.62</expSeeing>
+        </observation>
+        <observation>
+            <obsId>PIONI.2014-03-25T08:20:34.996_1</obsId>
+            <type>science</type>
+            <parentId>32552</parentId>
+            <programId>092.C-0243(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>K0 A1 G1 J3</stations>
+            <instrumentName>PIONIER</instrumentName>
+            <instrumentMode>FREE-H</instrumentMode>
+            <targetName>V2062_OPH</targetName>
+            <targetRa>247.889417</targetRa>
+            <targetDec>-24.46036</targetDec>
+            <mjdStart>56741.3476272705</mjdStart>
+            <mjdEnd>56741.3487527369</mjdEnd>
+            <projectedBaselines>{'K0-A1': {'length': {'start': '127.5350', 'end': '127.6420'}, 'angle': {'start': '239.1000', 'end': '239.3000'}}, 'K0-G1': {'length': {'start': '90.2610', 'end': '90.2770'}, 'angle': {'start': '201.3000', 'end': '201.5000'}}, 'K0-J3': {'length': {'start': '56.3810', 'end': '56.3960'}, 'angle': {'start': '328.8170', 'end': '328.9640'}}, 'A1-G1': {'length': {'start': '78.9480', 'end': '79.0300'}, 'angle': {'start': '103.7000', 'end': '103.8000'}}, 'A1-J3': {'length': {'start': '139.1690', 'end': '139.2240'}, 'angle': {'start': '35.2200', 'end': '35.4250'}}, 'G1-J3': {'length': {'start': '132.3950', 'end': '132.3960'}, 'angle': {'start': '1.5360', 'end': '1.7150'}}}</projectedBaselines>
+            <expTau0>0.0041845</expTau0>
+            <expTemp>14.46</expTemp>
+            <expSeeing>0.535</expSeeing>
+        </observation>
+        <observation>
+            <obsId>PIONI.2014-03-25T08:22:18.991_1</obsId>
+            <type>science</type>
+            <parentId>32552</parentId>
+            <programId>092.C-0243(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>K0 A1 G1 J3</stations>
+            <instrumentName>PIONIER</instrumentName>
+            <instrumentMode>FREE-H</instrumentMode>
+            <targetName>V2062_OPH</targetName>
+            <targetRa>247.889417</targetRa>
+            <targetDec>-24.46036</targetDec>
+            <mjdStart>56741.3488309244</mjdStart>
+            <mjdEnd>56741.3499563908</mjdEnd>
+            <projectedBaselines>{'K0-A1': {'length': {'start': '127.6470', 'end': '127.7490'}, 'angle': {'start': '239.3000', 'end': '239.5000'}}, 'K0-G1': {'length': {'start': '90.2770', 'end': '90.2920'}, 'angle': {'start': '201.5000', 'end': '201.7000'}}, 'K0-J3': {'length': {'start': '56.3960', 'end': '56.4110'}, 'angle': {'start': '328.9700', 'end': '329.1180'}}, 'A1-G1': {'length': {'start': '79.0330', 'end': '79.1100'}, 'angle': {'start': '103.8000', 'end': '104.0000'}}, 'A1-J3': {'length': {'start': '139.2260', 'end': '139.2790'}, 'angle': {'start': '35.4330', 'end': '35.6350'}}, 'G1-J3': {'length': {'start': '132.3960', 'end': '132.3960'}, 'angle': {'start': '1.7220', 'end': '1.8980'}}}</projectedBaselines>
+            <expTau0>0.0040775</expTau0>
+            <expTemp>14.41</expTemp>
+            <expSeeing>0.55</expSeeing>
+        </observation>
+        <observation>
+            <obsId>PIONI.2014-03-25T08:24:02.125_1</obsId>
+            <type>science</type>
+            <parentId>32552</parentId>
+            <programId>092.C-0243(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>K0 A1 G1 J3</stations>
+            <instrumentName>PIONIER</instrumentName>
+            <instrumentMode>FREE-H</instrumentMode>
+            <targetName>V2062_OPH</targetName>
+            <targetRa>247.889417</targetRa>
+            <targetDec>-24.46036</targetDec>
+            <mjdStart>56741.3500245963</mjdStart>
+            <mjdEnd>56741.3511500627</mjdEnd>
+            <projectedBaselines>{'K0-A1': {'length': {'start': '127.7530', 'end': '127.8530'}, 'angle': {'start': '239.5000', 'end': '239.7000'}}, 'K0-G1': {'length': {'start': '90.2920', 'end': '90.3060'}, 'angle': {'start': '201.7000', 'end': '201.9000'}}, 'K0-J3': {'length': {'start': '56.4110', 'end': '56.4250'}, 'angle': {'start': '329.1240', 'end': '329.2730'}}, 'A1-G1': {'length': {'start': '79.1130', 'end': '79.1880'}, 'angle': {'start': '104.0000', 'end': '104.2000'}}, 'A1-J3': {'length': {'start': '139.2810', 'end': '139.3330'}, 'angle': {'start': '35.6430', 'end': '35.8460'}}, 'G1-J3': {'length': {'start': '132.3960', 'end': '132.3960'}, 'angle': {'start': '1.9070', 'end': '2.0830'}}}</projectedBaselines>
+            <expTau0>0.0036645</expTau0>
+            <expTemp>14.35</expTemp>
+            <expSeeing>0.61</expSeeing>
+        </observation>
+        <observation>
+            <obsId>PIONI.2014-03-25T08:25:46.143_1</obsId>
+            <type>science</type>
+            <parentId>32552</parentId>
+            <programId>092.C-0243(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>K0 A1 G1 J3</stations>
+            <instrumentName>PIONIER</instrumentName>
+            <instrumentMode>FREE-H</instrumentMode>
+            <targetName>V2062_OPH</targetName>
+            <targetRa>247.889417</targetRa>
+            <targetDec>-24.46036</targetDec>
+            <mjdStart>56741.3512285142</mjdStart>
+            <mjdEnd>56741.3523539806</mjdEnd>
+            <projectedBaselines>{'K0-A1': {'length': {'start': '127.8580', 'end': '127.9510'}, 'angle': {'start': '239.7000', 'end': '239.9000'}}, 'K0-G1': {'length': {'start': '90.3070', 'end': '90.3210'}, 'angle': {'start': '201.9000', 'end': '202.1000'}}, 'K0-J3': {'length': {'start': '56.4260', 'end': '56.4380'}, 'angle': {'start': '329.2810', 'end': '329.4280'}}, 'A1-G1': {'length': {'start': '79.1910', 'end': '79.2610'}, 'angle': {'start': '104.2000', 'end': '104.3000'}}, 'A1-J3': {'length': {'start': '139.3360', 'end': '139.3840'}, 'angle': {'start': '35.8560', 'end': '36.0530'}}, 'G1-J3': {'length': {'start': '132.3960', 'end': '132.3970'}, 'angle': {'start': '2.0920', 'end': '2.2670'}}}</projectedBaselines>
+            <expTau0>0.0035055</expTau0>
+            <expTemp>14.28</expTemp>
+            <expSeeing>0.64</expSeeing>
+        </observation>
+        <observation>
+            <obsId>PIONI.2014-03-25T08:27:29.302_1</obsId>
+            <type>science</type>
+            <parentId>32552</parentId>
+            <programId>092.C-0243(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>K0 A1 G1 J3</stations>
+            <instrumentName>PIONIER</instrumentName>
+            <instrumentMode>FREE-H</instrumentMode>
+            <targetName>V2062_OPH</targetName>
+            <targetRa>247.889417</targetRa>
+            <targetDec>-24.46036</targetDec>
+            <mjdStart>56741.3524224791</mjdStart>
+            <mjdEnd>56741.3535479455</mjdEnd>
+            <projectedBaselines>{'K0-A1': {'length': {'start': '127.9560', 'end': '128.0460'}, 'angle': {'start': '239.9000', 'end': '240.1000'}}, 'K0-G1': {'length': {'start': '90.3210', 'end': '90.3340'}, 'angle': {'start': '202.1000', 'end': '202.3000'}}, 'K0-J3': {'length': {'start': '56.4390', 'end': '56.4510'}, 'angle': {'start': '329.4360', 'end': '329.5860'}}, 'A1-G1': {'length': {'start': '79.2640', 'end': '79.3310'}, 'angle': {'start': '104.3000', 'end': '104.5000'}}, 'A1-J3': {'length': {'start': '139.3870', 'end': '139.4340'}, 'angle': {'start': '36.0630', 'end': '36.2610'}}, 'G1-J3': {'length': {'start': '132.3970', 'end': '132.3970'}, 'angle': {'start': '2.2760', 'end': '2.4510'}}}</projectedBaselines>
+            <expTau0>0.0034315</expTau0>
+            <expTemp>14.27</expTemp>
+            <expSeeing>0.655</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T02:04:59.138_1</obsId>
+            <type>science</type>
+            <parentId>42971</parentId>
+            <programId>0103.C-0097(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>Fomalhaut</targetName>
-            <targetRa>344.411622</targetRa>
-            <targetDec>-29.6229</targetDec>
-            <mjdStart>58024.07407314</mjdStart>
-            <mjdEnd>58024.07778841778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T01:58:03.947.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436844</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891928</targetRa>
+            <targetDec>-24.46038</targetDec>
+            <mjdStart>58656.08679558</mjdStart>
+            <mjdEnd>58656.0902678022</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.2430', 'end': '56.2800'}, 'angle': {'start': '18.0000', 'end': '18.6000'}}, 'U1-U3': {'length': {'start': '101.5270', 'end': '101.6410'}, 'angle': {'start': '24.2000', 'end': '24.8000'}}, 'U1-U4': {'length': {'start': '126.7530', 'end': '127.2280'}, 'angle': {'start': '52.1220', 'end': '52.8300'}}, 'U2-U3': {'length': {'start': '46.0140', 'end': '46.0960'}, 'angle': {'start': '31.7000', 'end': '32.4000'}}, 'U2-U4': {'length': {'start': '86.1980', 'end': '86.6570'}, 'angle': {'start': '73.6080', 'end': '74.2400'}}, 'U3-U4': {'length': {'start': '60.3340', 'end': '60.6480'}, 'angle': {'start': '104.2090', 'end': '104.6760'}}}</projectedBaselines>
+            <expTau0>0.0064275</expTau0>
+            <expTemp>18.74</expTemp>
+            <expSeeing>0.69</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T02:16:14.167_1</obsId>
+            <type>science</type>
+            <parentId>42971</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>Fomalhaut</targetName>
-            <targetRa>344.411622</targetRa>
-            <targetDec>-29.6229</targetDec>
-            <mjdStart>58024.08199013</mjdStart>
-            <mjdEnd>58024.08570540778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T02:22:01.007.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436862</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891928</targetRa>
+            <targetDec>-24.46038</targetDec>
+            <mjdStart>58656.09460841</mjdStart>
+            <mjdEnd>58656.0980806322</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.3220', 'end': '56.3570'}, 'angle': {'start': '19.4000', 'end': '20.0000'}}, 'U1-U3': {'length': {'start': '101.7660', 'end': '101.8680'}, 'angle': {'start': '25.6000', 'end': '26.3000'}}, 'U1-U4': {'length': {'start': '127.7360', 'end': '128.1430'}, 'angle': {'start': '53.6250', 'end': '54.3020'}}, 'U2-U3': {'length': {'start': '46.1840', 'end': '46.2560'}, 'angle': {'start': '33.2000', 'end': '33.9000'}}, 'U2-U4': {'length': {'start': '87.1430', 'end': '87.5300'}, 'angle': {'start': '74.9530', 'end': '75.5630'}}, 'U3-U4': {'length': {'start': '60.9780', 'end': '61.2390'}, 'angle': {'start': '105.2170', 'end': '105.6940'}}}</projectedBaselines>
+            <expTau0>0.0069675</expTau0>
+            <expTemp>18.8</expTemp>
+            <expSeeing>0.665</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T02:21:53.180_1</obsId>
+            <type>science</type>
+            <parentId>42971</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>88Aqr</targetName>
-            <targetRa>347.35949</targetRa>
-            <targetDec>-21.1723</targetDec>
-            <mjdStart>58024.09862277</mjdStart>
-            <mjdEnd>58024.10233804778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T02:33:28.036.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436862</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891928</targetRa>
+            <targetDec>-24.46038</targetDec>
+            <mjdStart>58656.09853218</mjdStart>
+            <mjdEnd>58656.1020044022</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.3600', 'end': '56.3930'}, 'angle': {'start': '20.1000', 'end': '20.7000'}}, 'U1-U3': {'length': {'start': '101.8760', 'end': '101.9710'}, 'angle': {'start': '26.3000', 'end': '27.0000'}}, 'U1-U4': {'length': {'start': '128.1770', 'end': '128.5470'}, 'angle': {'start': '54.3610', 'end': '55.0190'}}, 'U2-U3': {'length': {'start': '46.2620', 'end': '46.3280'}, 'angle': {'start': '34.0000', 'end': '34.6000'}}, 'U2-U4': {'length': {'start': '87.5630', 'end': '87.9100'}, 'angle': {'start': '75.6160', 'end': '76.2150'}}, 'U3-U4': {'length': {'start': '61.2600', 'end': '61.4920'}, 'angle': {'start': '105.7360', 'end': '106.2150'}}}</projectedBaselines>
+            <expTau0>0.00846</expTau0>
+            <expTemp>18.88</expTemp>
+            <expSeeing>0.665</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T02:27:26.194_1</obsId>
+            <type>science</type>
+            <parentId>42971</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>88Aqr</targetName>
-            <targetRa>347.35949</targetRa>
-            <targetDec>-21.1723</targetDec>
-            <mjdStart>58024.10657449</mjdStart>
-            <mjdEnd>58024.11028976778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T02:40:22.054.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436865</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891928</targetRa>
+            <targetDec>-24.46038</targetDec>
+            <mjdStart>58656.10238651</mjdStart>
+            <mjdEnd>58656.1058587322</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.3950', 'end': '56.4260'}, 'angle': {'start': '20.7000', 'end': '21.4000'}}, 'U1-U3': {'length': {'start': '101.9770', 'end': '102.0650'}, 'angle': {'start': '27.0000', 'end': '27.7000'}}, 'U1-U4': {'length': {'start': '128.5670', 'end': '128.9010'}, 'angle': {'start': '55.0560', 'end': '55.7030'}}, 'U2-U3': {'length': {'start': '46.3320', 'end': '46.3930'}, 'angle': {'start': '34.7000', 'end': '35.3000'}}, 'U2-U4': {'length': {'start': '87.9290', 'end': '88.2420'}, 'angle': {'start': '76.2490', 'end': '76.8420'}}, 'U3-U4': {'length': {'start': '61.5050', 'end': '61.7110'}, 'angle': {'start': '106.2430', 'end': '106.7300'}}}</projectedBaselines>
+            <expTau0>0.0083585</expTau0>
+            <expTemp>18.88</expTemp>
+            <expSeeing>0.71</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T02:32:56.209_1</obsId>
+            <type>science</type>
+            <parentId>42971</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>88Aqr</targetName>
-            <targetRa>347.35949</targetRa>
-            <targetDec>-21.1723</targetDec>
-            <mjdStart>58024.11136636</mjdStart>
-            <mjdEnd>58024.11508163778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T02:52:10.083.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436865</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891928</targetRa>
+            <targetDec>-24.46038</targetDec>
+            <mjdStart>58656.10620612</mjdStart>
+            <mjdEnd>58656.1096783422</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.4280', 'end': '56.4560'}, 'angle': {'start': '21.4000', 'end': '22.0000'}}, 'U1-U3': {'length': {'start': '102.0700', 'end': '102.1490'}, 'angle': {'start': '27.7000', 'end': '28.3000'}}, 'U1-U4': {'length': {'start': '128.9210', 'end': '129.2160'}, 'angle': {'start': '55.7430', 'end': '56.3730'}}, 'U2-U3': {'length': {'start': '46.3960', 'end': '46.4510'}, 'angle': {'start': '35.4000', 'end': '36.0000'}}, 'U2-U4': {'length': {'start': '88.2600', 'end': '88.5330'}, 'angle': {'start': '76.8780', 'end': '77.4600'}}, 'U3-U4': {'length': {'start': '61.7230', 'end': '61.9020'}, 'angle': {'start': '106.7600', 'end': '107.2510'}}}</projectedBaselines>
+            <expTau0>0.008006</expTau0>
+            <expTemp>18.8</expTemp>
+            <expSeeing>0.745</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T02:38:35.222_1</obsId>
+            <type>science</type>
+            <parentId>42971</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>88Aqr</targetName>
-            <targetRa>347.35949</targetRa>
-            <targetDec>-21.1723</targetDec>
-            <mjdStart>58024.11956115</mjdStart>
-            <mjdEnd>58024.12327642778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T03:08:01.705.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436847</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891928</targetRa>
+            <targetDec>-24.46038</targetDec>
+            <mjdStart>58656.11012989</mjdStart>
+            <mjdEnd>58656.1136021122</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.4580', 'end': '56.4830'}, 'angle': {'start': '22.1000', 'end': '22.7000'}}, 'U1-U3': {'length': {'start': '102.1550', 'end': '102.2260'}, 'angle': {'start': '28.4000', 'end': '29.0000'}}, 'U1-U4': {'length': {'start': '129.2390', 'end': '129.4950'}, 'angle': {'start': '56.4230', 'end': '57.0420'}}, 'U2-U3': {'length': {'start': '46.4550', 'end': '46.5030'}, 'angle': {'start': '36.1000', 'end': '36.7000'}}, 'U2-U4': {'length': {'start': '88.5540', 'end': '88.7900'}, 'angle': {'start': '77.5070', 'end': '78.0840'}}, 'U3-U4': {'length': {'start': '61.9150', 'end': '62.0680'}, 'angle': {'start': '107.2910', 'end': '107.7900'}}}</projectedBaselines>
+            <expTau0>0.007419</expTau0>
+            <expTemp>18.81</expTemp>
+            <expSeeing>0.705</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T02:51:26.255_1</obsId>
+            <type>science</type>
+            <parentId>42971</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>Fomalhaut</targetName>
-            <targetRa>344.411622</targetRa>
-            <targetDec>-29.6229</targetDec>
-            <mjdStart>58024.13057529</mjdStart>
-            <mjdEnd>58024.134232697405</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T03:19:22.733.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436847</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>Fomalhaut</targetName>
-            <targetRa>344.411622</targetRa>
-            <targetDec>-29.6229</targetDec>
-            <mjdStart>58024.13845756</mjdStart>
-            <mjdEnd>58024.142114967406</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T03:57:52.830.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436865</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>88Aqr</targetName>
-            <targetRa>347.35949</targetRa>
-            <targetDec>-21.1723</targetDec>
-            <mjdStart>58024.16519479</mjdStart>
-            <mjdEnd>58024.16891006778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T04:09:19.858.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436865</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>88Aqr</targetName>
-            <targetRa>347.35949</targetRa>
-            <targetDec>-21.1723</targetDec>
-            <mjdStart>58024.17314651</mjdStart>
-            <mjdEnd>58024.17686178778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T04:30:40.912.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436868</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD2475</targetName>
-            <targetRa>7.085026</targetRa>
-            <targetDec>-20.33549</targetDec>
-            <mjdStart>58024.18797352</mjdStart>
-            <mjdEnd>58024.1916309274</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T04:41:58.940.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436868</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD2475</targetName>
-            <targetRa>7.085026</targetRa>
-            <targetDec>-20.33549</targetDec>
-            <mjdStart>58024.19582107</mjdStart>
-            <mjdEnd>58024.19947847741</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T04:59:01.983.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436877</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD2066</targetName>
-            <targetRa>6.20445</targetRa>
-            <targetDec>-18.47213</targetDec>
-            <mjdStart>58024.20766184</mjdStart>
-            <mjdEnd>58024.211319247406</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T05:10:23.012.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436877</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD2066</targetName>
-            <targetRa>6.20445</targetRa>
-            <targetDec>-18.47213</targetDec>
-            <mjdStart>58024.21554412</mjdStart>
-            <mjdEnd>58024.219201527405</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T05:27:14.054.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436871</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>LOW-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD2475</targetName>
-            <targetRa>7.085026</targetRa>
-            <targetDec>-20.33549</targetDec>
-            <mjdStart>58024.22724599</mjdStart>
-            <mjdEnd>58024.23178302703</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T05:41:11.089.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436871</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>LOW-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD2475</targetName>
-            <targetRa>7.085026</targetRa>
-            <targetDec>-20.33549</targetDec>
-            <mjdStart>58024.2369339</mjdStart>
-            <mjdEnd>58024.241470937035</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T05:56:05.126.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436886</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>LOW-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD2066</targetName>
-            <targetRa>6.20445</targetRa>
-            <targetDec>-18.47213</targetDec>
-            <mjdStart>58024.24728155</mjdStart>
-            <mjdEnd>58024.251818587036</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T06:09:56.161.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436886</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>LOW-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD2066</targetName>
-            <targetRa>6.20445</targetRa>
-            <targetDec>-18.47213</targetDec>
-            <mjdStart>58024.25690001</mjdStart>
-            <mjdEnd>58024.26143704703</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T06:28:05.206.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436874</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD2475</targetName>
-            <targetRa>7.085026</targetRa>
-            <targetDec>-20.33549</targetDec>
-            <mjdStart>58024.2695047</mjdStart>
-            <mjdEnd>58024.273162107405</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T06:39:29.235.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436874</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD2475</targetName>
-            <targetRa>7.085026</targetRa>
-            <targetDec>-20.33549</targetDec>
-            <mjdStart>58024.2774217</mjdStart>
-            <mjdEnd>58024.2810791074</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T07:11:57.784.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436943</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-COMBINED</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD16234</targetName>
-            <targetRa>39.156144</targetRa>
-            <targetDec>12.4475</targetDec>
-            <mjdStart>58024.29997435</mjdStart>
-            <mjdEnd>58024.3036317574</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T07:42:51.860.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436904</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 B2 C1 D0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-COMBINED</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HIP017503</targetName>
-            <targetRa>56.218471</targetRa>
-            <targetDec>19.83055</targetDec>
-            <mjdStart>58024.32143357</mjdStart>
-            <mjdEnd>58024.32171134778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T08:01:03.906.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436904</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 B2 C1 D0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HIP017503</targetName>
-            <targetRa>56.218471</targetRa>
-            <targetDec>19.83055</targetDec>
-            <mjdStart>58024.33407299</mjdStart>
-            <mjdEnd>58024.33439706408</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T08:03:21.912.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436904</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891928</targetRa>
+            <targetDec>-24.46038</targetDec>
+            <mjdStart>58656.11905388</mjdStart>
+            <mjdEnd>58656.1225261022</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.5140', 'end': '56.5310'}, 'angle': {'start': '23.5000', 'end': '24.1000'}}, 'U1-U3': {'length': {'start': '102.3110', 'end': '102.3580'}, 'angle': {'start': '29.9000', 'end': '30.5000'}}, 'U1-U4': {'length': {'start': '129.8000', 'end': '129.9620'}, 'angle': {'start': '57.9150', 'end': '58.5030'}}, 'U2-U3': {'length': {'start': '46.5600', 'end': '46.5910'}, 'angle': {'start': '37.6000', 'end': '38.1000'}}, 'U2-U4': {'length': {'start': '89.0660', 'end': '89.2120'}, 'angle': {'start': '78.9070', 'end': '79.4690'}}, 'U3-U4': {'length': {'start': '62.2460', 'end': '62.3380'}, 'angle': {'start': '108.5230', 'end': '109.0380'}}}</projectedBaselines>
+            <expTau0>0.0102405</expTau0>
+            <expTemp>18.87</expTemp>
+            <expSeeing>0.615</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T02:57:05.269_1</obsId>
+            <type>science</type>
+            <parentId>42971</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 B2 C1 D0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HIP017503</targetName>
-            <targetRa>56.218471</targetRa>
-            <targetDec>19.83055</targetDec>
-            <mjdStart>58024.33567028</mjdStart>
-            <mjdEnd>58024.33599435408</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T08:14:15.939.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436943</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891928</targetRa>
+            <targetDec>-24.46038</targetDec>
+            <mjdStart>58656.12297765</mjdStart>
+            <mjdEnd>58656.1264498722</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.5320', 'end': '56.5450'}, 'angle': {'start': '24.2000', 'end': '24.7000'}}, 'U1-U3': {'length': {'start': '102.3620', 'end': '102.3970'}, 'angle': {'start': '30.5000', 'end': '31.1000'}}, 'U1-U4': {'length': {'start': '129.9750', 'end': '130.0940'}, 'angle': {'start': '58.5550', 'end': '59.1290'}}, 'U2-U3': {'length': {'start': '46.5940', 'end': '46.6170'}, 'angle': {'start': '38.2000', 'end': '38.8000'}}, 'U2-U4': {'length': {'start': '89.2230', 'end': '89.3290'}, 'angle': {'start': '79.5180', 'end': '80.0730'}}, 'U3-U4': {'length': {'start': '62.3450', 'end': '62.4110'}, 'angle': {'start': '109.0840', 'end': '109.6050'}}}</projectedBaselines>
+            <expTau0>0.0085205</expTau0>
+            <expTemp>18.79</expTemp>
+            <expSeeing>0.62</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T03:33:20.360_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD16234</targetName>
-            <targetRa>39.156144</targetRa>
-            <targetDec>12.4475</targetDec>
-            <mjdStart>58024.34324004</mjdStart>
-            <mjdEnd>58024.3468974474</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T08:37:18.997.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436904</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.14815232</mjdStart>
+            <mjdEnd>58656.1516245422</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.5300', 'end': '56.5090'}, 'angle': {'start': '27.9000', 'end': '28.5000'}}, 'U1-U3': {'length': {'start': '102.3530', 'end': '102.2980'}, 'angle': {'start': '34.3000', 'end': '34.8000'}}, 'U1-U4': {'length': {'start': '129.9310', 'end': '129.7510'}, 'angle': {'start': '62.3180', 'end': '62.8220'}}, 'U2-U3': {'length': {'start': '46.5870', 'end': '46.5510'}, 'angle': {'start': '42.0000', 'end': '42.5000'}}, 'U2-U4': {'length': {'start': '89.1790', 'end': '89.0210'}, 'angle': {'start': '83.2880', 'end': '83.8210'}}, 'U3-U4': {'length': {'start': '62.3130', 'end': '62.2170'}, 'angle': {'start': '112.8690', 'end': '113.4510'}}}</projectedBaselines>
+            <expTau0>0.0086025</expTau0>
+            <expTemp>19.3</expTemp>
+            <expSeeing>0.7</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T03:45:08.390_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 B2 C1 D0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HIP017503</targetName>
-            <targetRa>56.218471</targetRa>
-            <targetDec>19.83055</targetDec>
-            <mjdStart>58024.35924765</mjdStart>
-            <mjdEnd>58024.3629050574</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-28T09:21:04.107.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436904</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.15634711</mjdStart>
+            <mjdEnd>58656.1598193322</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.4750', 'end': '56.4400'}, 'angle': {'start': '29.1000', 'end': '29.6000'}}, 'U1-U3': {'length': {'start': '102.2070', 'end': '102.1170'}, 'angle': {'start': '35.4000', 'end': '35.9000'}}, 'U1-U4': {'length': {'start': '129.4620', 'end': '129.1790'}, 'angle': {'start': '63.4400', 'end': '63.9220'}}, 'U2-U3': {'length': {'start': '46.4930', 'end': '46.4350'}, 'angle': {'start': '43.1000', 'end': '43.5000'}}, 'U2-U4': {'length': {'start': '88.7690', 'end': '88.5250'}, 'angle': {'start': '84.4880', 'end': '85.0170'}}, 'U3-U4': {'length': {'start': '62.0640', 'end': '61.9180'}, 'angle': {'start': '114.1960', 'end': '114.8010'}}}</projectedBaselines>
+            <expTau0>0.010897</expTau0>
+            <expTemp>19.71</expTemp>
+            <expSeeing>0.43</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T03:50:47.404_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 B2 C1 D0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-COMBINED</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HIP017503</targetName>
-            <targetRa>56.218471</targetRa>
-            <targetDec>19.83055</targetDec>
-            <mjdStart>58024.38963087</mjdStart>
-            <mjdEnd>58024.3932882774</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T01:15:36.213.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436856</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>Altair</targetName>
-            <targetRa>297.695668</targetRa>
-            <targetDec>8.86984</targetDec>
-            <mjdStart>58025.05250247</mjdStart>
-            <mjdEnd>58025.05631034037</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T01:29:18.248.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436856</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>Altair</targetName>
-            <targetRa>297.695668</targetRa>
-            <targetDec>8.86984</targetDec>
-            <mjdStart>58025.06201676</mjdStart>
-            <mjdEnd>58025.06582463037</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T01:45:28.778.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436850</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>Altair</targetName>
-            <targetRa>297.695668</targetRa>
-            <targetDec>8.86984</targetDec>
-            <mjdStart>58025.07324974</mjdStart>
-            <mjdEnd>58025.077057610375</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T01:57:07.806.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436850</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.16027088</mjdStart>
+            <mjdEnd>58656.1637431022</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.4370', 'end': '56.3950'}, 'angle': {'start': '29.6000', 'end': '30.1000'}}, 'U1-U3': {'length': {'start': '102.1090', 'end': '102.0010'}, 'angle': {'start': '35.9000', 'end': '36.4000'}}, 'U1-U4': {'length': {'start': '129.1530', 'end': '128.8200'}, 'angle': {'start': '63.9610', 'end': '64.4340'}}, 'U2-U3': {'length': {'start': '46.4290', 'end': '46.3610'}, 'angle': {'start': '43.6000', 'end': '44.0000'}}, 'U2-U4': {'length': {'start': '88.5040', 'end': '88.2180'}, 'angle': {'start': '85.0610', 'end': '85.5900'}}, 'U3-U4': {'length': {'start': '61.9050', 'end': '61.7360'}, 'angle': {'start': '114.8520', 'end': '115.4700'}}}</projectedBaselines>
+            <expTau0>0.013222</expTau0>
+            <expTemp>19.24</expTemp>
+            <expSeeing>0.46</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T03:56:20.418_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>Altair</targetName>
-            <targetRa>297.695668</targetRa>
-            <targetDec>8.86984</targetDec>
-            <mjdStart>58025.08134035</mjdStart>
-            <mjdEnd>58025.08514822037</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T02:10:07.838.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436853</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.16412521</mjdStart>
+            <mjdEnd>58656.1675974322</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.3930', 'end': '56.3440'}, 'angle': {'start': '30.1000', 'end': '30.5000'}}, 'U1-U3': {'length': {'start': '101.9940', 'end': '101.8690'}, 'angle': {'start': '36.4000', 'end': '36.8000'}}, 'U1-U4': {'length': {'start': '128.8000', 'end': '128.4190'}, 'angle': {'start': '64.4600', 'end': '64.9210'}}, 'U2-U3': {'length': {'start': '46.3560', 'end': '46.2770'}, 'angle': {'start': '44.1000', 'end': '44.5000'}}, 'U2-U4': {'length': {'start': '88.2010', 'end': '87.8770'}, 'angle': {'start': '85.6190', 'end': '86.1460'}}, 'U3-U4': {'length': {'start': '61.7250', 'end': '61.5350'}, 'angle': {'start': '115.5040', 'end': '116.1310'}}}</projectedBaselines>
+            <expTau0>0.0123415</expTau0>
+            <expTemp>19.63</expTemp>
+            <expSeeing>0.62</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T04:01:50.432_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>24Cap</targetName>
-            <targetRa>316.779366</targetRa>
-            <targetDec>-25.00603</targetDec>
-            <mjdStart>58025.0903685</mjdStart>
-            <mjdEnd>58025.09408377778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T02:21:31.867.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436853</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.16794482</mjdStart>
+            <mjdEnd>58656.1714170422</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.3410', 'end': '56.2850'}, 'angle': {'start': '30.6000', 'end': '31.0000'}}, 'U1-U3': {'length': {'start': '101.8620', 'end': '101.7180'}, 'angle': {'start': '36.9000', 'end': '37.3000'}}, 'U1-U4': {'length': {'start': '128.3960', 'end': '127.9640'}, 'angle': {'start': '64.9480', 'end': '65.4020'}}, 'U2-U3': {'length': {'start': '46.2720', 'end': '46.1820'}, 'angle': {'start': '44.5000', 'end': '45.0000'}}, 'U2-U4': {'length': {'start': '87.8570', 'end': '87.4920'}, 'angle': {'start': '86.1760', 'end': '86.7040'}}, 'U3-U4': {'length': {'start': '61.5230', 'end': '61.3110'}, 'angle': {'start': '116.1680', 'end': '116.8090'}}}</projectedBaselines>
+            <expTau0>0.0120565</expTau0>
+            <expTemp>19.51</expTemp>
+            <expSeeing>0.6</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T04:07:29.446_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>24Cap</targetName>
-            <targetRa>316.779366</targetRa>
-            <targetDec>-25.00603</targetDec>
-            <mjdStart>58025.0982855</mjdStart>
-            <mjdEnd>58025.10200077778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T02:40:51.480.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436859</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.17186859</mjdStart>
+            <mjdEnd>58656.1753408122</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.2800', 'end': '56.2160'}, 'angle': {'start': '31.1000', 'end': '31.5000'}}, 'U1-U3': {'length': {'start': '101.7050', 'end': '101.5420'}, 'angle': {'start': '37.3000', 'end': '37.8000'}}, 'U1-U4': {'length': {'start': '127.9270', 'end': '127.4430'}, 'angle': {'start': '65.4390', 'end': '65.8850'}}, 'U2-U3': {'length': {'start': '46.1740', 'end': '46.0710'}, 'angle': {'start': '45.0000', 'end': '45.4000'}}, 'U2-U4': {'length': {'start': '87.4600', 'end': '87.0520'}, 'angle': {'start': '86.7480', 'end': '87.2780'}}, 'U3-U4': {'length': {'start': '61.2930', 'end': '61.0580'}, 'angle': {'start': '116.8630', 'end': '117.5200'}}}</projectedBaselines>
+            <expTau0>0.0135815</expTau0>
+            <expTemp>19.56</expTemp>
+            <expSeeing>0.475</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T04:18:41.475_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>24Cap</targetName>
-            <targetRa>316.779366</targetRa>
-            <targetDec>-25.00603</targetDec>
-            <mjdStart>58025.11170694</mjdStart>
-            <mjdEnd>58025.11542221778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T02:52:15.508.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436859</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>24Cap</targetName>
-            <targetRa>316.779366</targetRa>
-            <targetDec>-25.00603</targetDec>
-            <mjdStart>58025.11962393</mjdStart>
-            <mjdEnd>58025.12333920778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T03:06:35.033.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436853</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>24Cap</targetName>
-            <targetRa>316.779366</targetRa>
-            <targetDec>-25.00603</targetDec>
-            <mjdStart>58025.12957214</mjdStart>
-            <mjdEnd>58025.13328741778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T03:17:53.061.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436853</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.1796467</mjdStart>
+            <mjdEnd>58656.1831189222</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.1350', 'end': '56.0540'}, 'angle': {'start': '32.0000', 'end': '32.4000'}}, 'U1-U3': {'length': {'start': '101.3350', 'end': '101.1330'}, 'angle': {'start': '38.2000', 'end': '38.6000'}}, 'U1-U4': {'length': {'start': '126.8350', 'end': '126.2490'}, 'angle': {'start': '66.3810', 'end': '66.8110'}}, 'U2-U3': {'length': {'start': '45.9420', 'end': '45.8160'}, 'angle': {'start': '45.9000', 'end': '46.3000'}}, 'U2-U4': {'length': {'start': '86.5440', 'end': '86.0560'}, 'angle': {'start': '87.8820', 'end': '88.4150'}}, 'U3-U4': {'length': {'start': '60.7690', 'end': '60.4940'}, 'angle': {'start': '118.2850', 'end': '118.9670'}}}</projectedBaselines>
+            <expTau0>0.010497</expTau0>
+            <expTemp>19.12</expTemp>
+            <expSeeing>0.575</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T04:24:23.489_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>24Cap</targetName>
-            <targetRa>316.779366</targetRa>
-            <targetDec>-25.00603</targetDec>
-            <mjdStart>58025.13741969</mjdStart>
-            <mjdEnd>58025.14113496778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T03:30:27.664.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436859</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.1836052</mjdStart>
+            <mjdEnd>58656.1870774222</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.0470', 'end': '55.9580'}, 'angle': {'start': '32.4000', 'end': '32.8000'}}, 'U1-U3': {'length': {'start': '101.1140', 'end': '100.8910'}, 'angle': {'start': '38.7000', 'end': '39.0000'}}, 'U1-U4': {'length': {'start': '126.1950', 'end': '125.5560'}, 'angle': {'start': '66.8490', 'end': '67.2690'}}, 'U2-U3': {'length': {'start': '45.8040', 'end': '45.6660'}, 'angle': {'start': '46.3000', 'end': '46.7000'}}, 'U2-U4': {'length': {'start': '86.0110', 'end': '85.4820'}, 'angle': {'start': '88.4630', 'end': '88.9990'}}, 'U3-U4': {'length': {'start': '60.4680', 'end': '60.1740'}, 'angle': {'start': '119.0290', 'end': '119.7310'}}}</projectedBaselines>
+            <expTau0>0.0064825</expTau0>
+            <expTemp>18.94</expTemp>
+            <expSeeing>0.76</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T04:29:56.503_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>24Cap</targetName>
-            <targetRa>316.779366</targetRa>
-            <targetDec>-25.00603</targetDec>
-            <mjdStart>58025.14615352</mjdStart>
-            <mjdEnd>58025.14986879778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T03:41:57.693.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436859</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>HIGH-SPLIT</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>24Cap</targetName>
-            <targetRa>316.779366</targetRa>
-            <targetDec>-25.00603</targetDec>
-            <mjdStart>58025.15413996</mjdStart>
-            <mjdEnd>58025.15785523778</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T04:02:34.236.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436976</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-COMBINED</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD216494</targetName>
-            <targetRa>343.367358</targetRa>
-            <targetDec>-11.61652</targetDec>
-            <mjdStart>58025.16845181</mjdStart>
-            <mjdEnd>58025.172109217405</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T04:22:25.285.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436922</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 B2 C1 D0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-COMBINED</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HIP112799</targetName>
-            <targetRa>342.639994</targetRa>
-            <targetDec>-12.69165</targetDec>
-            <mjdStart>58025.1822371</mjdStart>
-            <mjdEnd>58025.185894507405</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T04:42:43.336.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436922</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 B2 C1 D0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HIP112799</targetName>
-            <targetRa>342.639994</targetRa>
-            <targetDec>-12.69165</targetDec>
-            <mjdStart>58025.19633491</mjdStart>
-            <mjdEnd>58025.1999923174</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T05:06:34.396.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436976</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.18745952</mjdStart>
+            <mjdEnd>58656.1909317422</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '55.9520', 'end': '55.8550'}, 'angle': {'start': '32.9000', 'end': '33.2000'}}, 'U1-U3': {'length': {'start': '100.8760', 'end': '100.6330'}, 'angle': {'start': '39.1000', 'end': '39.4000'}}, 'U1-U4': {'length': {'start': '125.5140', 'end': '124.8250'}, 'angle': {'start': '67.2960', 'end': '67.7090'}}, 'U2-U3': {'length': {'start': '45.6570', 'end': '45.5070'}, 'angle': {'start': '46.7000', 'end': '47.1000'}}, 'U2-U4': {'length': {'start': '85.4480', 'end': '84.8800'}, 'angle': {'start': '89.0330', 'end': '89.5720'}}, 'U3-U4': {'length': {'start': '60.1540', 'end': '59.8410'}, 'angle': {'start': '119.7760', 'end': '120.4920'}}}</projectedBaselines>
+            <expTau0>0.0070655</expTau0>
+            <expTemp>18.87</expTemp>
+            <expSeeing>0.83</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T04:35:26.517_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD216494</targetName>
-            <targetRa>343.367358</targetRa>
-            <targetDec>-11.61652</targetDec>
-            <mjdStart>58025.2128981</mjdStart>
-            <mjdEnd>58025.2165555074</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T05:19:25.429.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436976</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.19127913</mjdStart>
+            <mjdEnd>58656.1947513522</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '55.8490', 'end': '55.7430'}, 'angle': {'start': '33.3000', 'end': '33.6000'}}, 'U1-U3': {'length': {'start': '100.6200', 'end': '100.3570'}, 'angle': {'start': '39.5000', 'end': '39.8000'}}, 'U1-U4': {'length': {'start': '124.7870', 'end': '124.0470'}, 'angle': {'start': '67.7300', 'end': '68.1350'}}, 'U2-U3': {'length': {'start': '45.4990', 'end': '45.3370'}, 'angle': {'start': '47.1000', 'end': '47.4000'}}, 'U2-U4': {'length': {'start': '84.8490', 'end': '84.2430'}, 'angle': {'start': '89.6000', 'end': '90.1420'}}, 'U3-U4': {'length': {'start': '59.8240', 'end': '59.4940'}, 'angle': {'start': '120.5300', 'end': '121.2630'}}}</projectedBaselines>
+            <expTau0>0.009376</expTau0>
+            <expTemp>18.76</expTemp>
+            <expSeeing>0.855</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T04:44:14.539_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD216494</targetName>
-            <targetRa>343.367358</targetRa>
-            <targetDec>-11.61652</targetDec>
-            <mjdStart>58025.22182209</mjdStart>
-            <mjdEnd>58025.22547949741</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T05:34:28.466.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436988</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.1973905</mjdStart>
+            <mjdEnd>58656.2008627222</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '55.6650', 'end': '55.5450'}, 'angle': {'start': '33.9000', 'end': '34.3000'}}, 'U1-U3': {'length': {'start': '100.1640', 'end': '99.8660'}, 'angle': {'start': '40.1000', 'end': '40.4000'}}, 'U1-U4': {'length': {'start': '123.5090', 'end': '122.6860'}, 'angle': {'start': '68.4100', 'end': '68.8040'}}, 'U2-U3': {'length': {'start': '45.2190', 'end': '45.0370'}, 'angle': {'start': '47.7000', 'end': '48.0000'}}, 'U2-U4': {'length': {'start': '83.8050', 'end': '83.1370'}, 'angle': {'start': '90.5180', 'end': '91.0680'}}, 'U3-U4': {'length': {'start': '59.2560', 'end': '58.8980'}, 'angle': {'start': '121.7780', 'end': '122.5400'}}}</projectedBaselines>
+            <expTau0>0.008229</expTau0>
+            <expTemp>18.77</expTemp>
+            <expSeeing>0.76</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T04:55:32.568_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 B2 C1 D0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>LOW-COMBINED</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HIP112799</targetName>
-            <targetRa>342.639994</targetRa>
-            <targetDec>-12.69165</targetDec>
-            <mjdStart>58025.23227391</mjdStart>
-            <mjdEnd>58025.23637113222</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T06:33:28.614.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436943</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-COMBINED</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD16234</targetName>
-            <targetRa>39.156144</targetRa>
-            <targetDec>12.4475</targetDec>
-            <mjdStart>58025.27324785</mjdStart>
-            <mjdEnd>58025.2769052574</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T06:56:01.670.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436901</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 B2 C1 D0</stations>
-            <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>MEDIUM-COMBINED</instrumentMode>
-            <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HIP012153</targetName>
-            <targetRa>39.155773</targetRa>
-            <targetDec>12.44729</targetDec>
-            <mjdStart>58025.28890822</mjdStart>
-            <mjdEnd>58025.2925656274</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T07:16:43.722.fits</obsId>
-            <type>CALIBRATION</type>
-            <parentId>200436901</parentId>
-            <programId>60.A-9295(A)</programId>
-            <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 B2 C1 D0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HIP012153</targetName>
-            <targetRa>39.155773</targetRa>
-            <targetDec>12.44729</targetDec>
-            <mjdStart>58025.30328382</mjdStart>
-            <mjdEnd>58025.306941227405</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T07:42:04.786.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200436943</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.20523805</mjdStart>
+            <mjdEnd>58656.2087102722</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '55.3950', 'end': '55.2550'}, 'angle': {'start': '34.7000', 'end': '35.0000'}}, 'U1-U3': {'length': {'start': '99.4970', 'end': '99.1560'}, 'angle': {'start': '40.8000', 'end': '41.1000'}}, 'U1-U4': {'length': {'start': '121.6780', 'end': '120.7500'}, 'angle': {'start': '69.2500', 'end': '69.6300'}}, 'U2-U3': {'length': {'start': '44.8120', 'end': '44.6050'}, 'angle': {'start': '48.4000', 'end': '48.7000'}}, 'U2-U4': {'length': {'start': '82.3220', 'end': '81.5760'}, 'angle': {'start': '91.7090', 'end': '92.2710'}}, 'U3-U4': {'length': {'start': '58.4670', 'end': '58.0780'}, 'angle': {'start': '123.4400', 'end': '124.2410'}}}</projectedBaselines>
+            <expTau0>0.0123445</expTau0>
+            <expTemp>18.63</expTemp>
+            <expSeeing>0.625</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T05:01:14.582_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
             <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD16234</targetName>
-            <targetRa>39.156144</targetRa>
-            <targetDec>12.4475</targetDec>
-            <mjdStart>58025.32088873</mjdStart>
-            <mjdEnd>58025.3245461374</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
-          <observation>
-            <obsId>GRAVI.2017-09-29T07:59:34.830.fits</obsId>
-            <type>SCIENCE</type>
-            <parentId>200437004</parentId>
-            <programId>60.A-9295(A)</programId>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.20919655</mjdStart>
+            <mjdEnd>58656.2126687722</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '55.2430', 'end': '55.0930'}, 'angle': {'start': '35.0000', 'end': '35.3000'}}, 'U1-U3': {'length': {'start': '99.1260', 'end': '98.7620'}, 'angle': {'start': '41.1000', 'end': '41.4000'}}, 'U1-U4': {'length': {'start': '120.6700', 'end': '119.6900'}, 'angle': {'start': '69.6610', 'end': '70.0340'}}, 'U2-U3': {'length': {'start': '44.5870', 'end': '44.3670'}, 'angle': {'start': '48.7000', 'end': '49.0000'}}, 'U2-U4': {'length': {'start': '81.5120', 'end': '80.7290'}, 'angle': {'start': '92.3190', 'end': '92.8880'}}, 'U3-U4': {'length': {'start': '58.0440', 'end': '57.6400'}, 'angle': {'start': '124.3090', 'end': '125.1300'}}}</projectedBaselines>
+            <expTau0>0.0130995</expTau0>
+            <expTemp>18.62</expTemp>
+            <expSeeing>0.835</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T05:06:47.596_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
-            <interferometerVersion>Period 103</interferometerVersion>
-            <stations>A0 G1 J2 K0</stations>
+            <stations>U1 U2 U3 U4</stations>
             <instrumentName>GRAVITY</instrumentName>
-            <instrumentMode>LOW-COMBINED</instrumentMode>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
             <instrumentSubMode>SINGLE</instrumentSubMode>
-            <targetName>HD16234</targetName>
-            <targetRa>39.156144</targetRa>
-            <targetDec>12.4475</targetDec>
-            <mjdStart>58025.33304201</mjdStart>
-            <mjdEnd>58025.33713923222</mjdEnd>
-            <projectedBaselines></projectedBaselines>
-          </observation>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.21305088</mjdStart>
+            <mjdEnd>58656.2165231022</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '55.0830', 'end': '54.9240'}, 'angle': {'start': '35.4000', 'end': '35.7000'}}, 'U1-U3': {'length': {'start': '98.7380', 'end': '98.3520'}, 'angle': {'start': '41.5000', 'end': '41.7000'}}, 'U1-U4': {'length': {'start': '119.6260', 'end': '118.5970'}, 'angle': {'start': '70.0570', 'end': '70.4230'}}, 'U2-U3': {'length': {'start': '44.3520', 'end': '44.1200'}, 'angle': {'start': '49.0000', 'end': '49.3000'}}, 'U2-U4': {'length': {'start': '80.6780', 'end': '79.8590'}, 'angle': {'start': '92.9240', 'end': '93.5000'}}, 'U3-U4': {'length': {'start': '57.6140', 'end': '57.1970'}, 'angle': {'start': '125.1830', 'end': '126.0240'}}}</projectedBaselines>
+            <expTau0>0.0131605</expTau0>
+            <expTemp>18.61</expTemp>
+            <expSeeing>0.815</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T05:12:17.609_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.21687048</mjdStart>
+            <mjdEnd>58656.2203427022</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '54.9150', 'end': '54.7460'}, 'angle': {'start': '35.7000', 'end': '36.0000'}}, 'U1-U3': {'length': {'start': '98.3290', 'end': '97.9220'}, 'angle': {'start': '41.8000', 'end': '42.0000'}}, 'U1-U4': {'length': {'start': '118.5360', 'end': '117.4600'}, 'angle': {'start': '70.4440', 'end': '70.8010'}}, 'U2-U3': {'length': {'start': '44.1060', 'end': '43.8620'}, 'angle': {'start': '49.3000', 'end': '49.6000'}}, 'U2-U4': {'length': {'start': '79.8110', 'end': '78.9600'}, 'angle': {'start': '93.5340', 'end': '94.1160'}}, 'U3-U4': {'length': {'start': '57.1730', 'end': '56.7460'}, 'angle': {'start': '126.0730', 'end': '126.9320'}}}</projectedBaselines>
+            <expTau0>0.0112545</expTau0>
+            <expTemp>18.67</expTemp>
+            <expSeeing>0.97</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T05:17:56.624_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.22079426</mjdStart>
+            <mjdEnd>58656.2242664822</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '54.7320', 'end': '54.5530'}, 'angle': {'start': '36.0000', 'end': '36.3000'}}, 'U1-U3': {'length': {'start': '97.8880', 'end': '97.4560'}, 'angle': {'start': '42.1000', 'end': '42.3000'}}, 'U1-U4': {'length': {'start': '117.3700', 'end': '116.2370'}, 'angle': {'start': '70.8300', 'end': '71.1830'}}, 'U2-U3': {'length': {'start': '43.8410', 'end': '43.5830'}, 'angle': {'start': '49.6000', 'end': '49.9000'}}, 'U2-U4': {'length': {'start': '78.8890', 'end': '77.9970'}, 'angle': {'start': '94.1640', 'end': '94.7590'}}, 'U3-U4': {'length': {'start': '56.7100', 'end': '56.2690'}, 'angle': {'start': '127.0030', 'end': '127.8900'}}}</projectedBaselines>
+            <expTau0>0.010649</expTau0>
+            <expTemp>18.5</expTemp>
+            <expSeeing>0.85</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T05:29:08.652_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.22857236</mjdStart>
+            <mjdEnd>58656.2320445822</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '54.3350', 'end': '54.1360'}, 'angle': {'start': '36.6000', 'end': '36.9000'}}, 'U1-U3': {'length': {'start': '96.9350', 'end': '96.4600'}, 'angle': {'start': '42.6000', 'end': '42.8000'}}, 'U1-U4': {'length': {'start': '114.8790', 'end': '113.6500'}, 'angle': {'start': '71.5800', 'end': '71.9180'}}, 'U2-U3': {'length': {'start': '43.2710', 'end': '42.9880'}, 'angle': {'start': '50.2000', 'end': '50.4000'}}, 'U2-U4': {'length': {'start': '76.9350', 'end': '75.9780'}, 'angle': {'start': '95.4530', 'end': '96.0660'}}, 'U3-U4': {'length': {'start': '55.7520', 'end': '55.2930'}, 'angle': {'start': '128.9330', 'end': '129.8630'}}}</projectedBaselines>
+            <expTau0>0.0099905</expTau0>
+            <expTemp>18.62</expTemp>
+            <expSeeing>0.725</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T05:34:47.666_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.23249614</mjdStart>
+            <mjdEnd>58656.2359683622</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '54.1200', 'end': '53.9090'}, 'angle': {'start': '36.9000', 'end': '37.1000'}}, 'U1-U3': {'length': {'start': '96.4200', 'end': '95.9190'}, 'angle': {'start': '42.9000', 'end': '43.1000'}}, 'U1-U4': {'length': {'start': '113.5480', 'end': '112.2630'}, 'angle': {'start': '71.9450', 'end': '72.2790'}}, 'U2-U3': {'length': {'start': '42.9650', 'end': '42.6680'}, 'angle': {'start': '50.4000', 'end': '50.6000'}}, 'U2-U4': {'length': {'start': '75.8990', 'end': '74.9040'}, 'angle': {'start': '96.1170', 'end': '96.7460'}}, 'U3-U4': {'length': {'start': '55.2550', 'end': '54.7860'}, 'angle': {'start': '129.9400', 'end': '130.8990'}}}</projectedBaselines>
+            <expTau0>0.009052</expTau0>
+            <expTemp>18.56</expTemp>
+            <expSeeing>0.84</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T05:40:17.680_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.23631574</mjdStart>
+            <mjdEnd>58656.2397879622</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '53.8980', 'end': '53.6780'}, 'angle': {'start': '37.2000', 'end': '37.4000'}}, 'U1-U3': {'length': {'start': '95.8920', 'end': '95.3700'}, 'angle': {'start': '43.1000', 'end': '43.3000'}}, 'U1-U4': {'length': {'start': '112.1940', 'end': '110.8610'}, 'angle': {'start': '72.2960', 'end': '72.6230'}}, 'U2-U3': {'length': {'start': '42.6520', 'end': '42.3420'}, 'angle': {'start': '50.6000', 'end': '50.8000'}}, 'U2-U4': {'length': {'start': '74.8510', 'end': '73.8250'}, 'angle': {'start': '96.7790', 'end': '97.4210'}}, 'U3-U4': {'length': {'start': '54.7610', 'end': '54.2860'}, 'angle': {'start': '130.9500', 'end': '131.9340'}}}</projectedBaselines>
+            <expTau0>0.0070995</expTau0>
+            <expTemp>18.62</expTemp>
+            <expSeeing>0.875</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-22T05:46:47.696_1</obsId>
+            <type>science</type>
+            <parentId>42973</parentId>
+            <programId>0103.C-0097(A)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.891818</targetRa>
+            <targetDec>-24.46031</targetDec>
+            <mjdStart>58656.24082982</mjdStart>
+            <mjdEnd>58656.2443020422</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '53.6230', 'end': '53.3900'}, 'angle': {'start': '37.4000', 'end': '37.7000'}}, 'U1-U3': {'length': {'start': '95.2400', 'end': '94.6900'}, 'angle': {'start': '43.4000', 'end': '43.6000'}}, 'U1-U4': {'length': {'start': '110.5320', 'end': '109.1390'}, 'angle': {'start': '72.7010', 'end': '73.0210'}}, 'U2-U3': {'length': {'start': '42.2660', 'end': '41.9410'}, 'angle': {'start': '50.9000', 'end': '51.1000'}}, 'U2-U4': {'length': {'start': '73.5720', 'end': '72.5070'}, 'angle': {'start': '97.5780', 'end': '98.2380'}}, 'U3-U4': {'length': {'start': '54.1700', 'end': '53.6870'}, 'angle': {'start': '132.1770', 'end': '133.1940'}}}</projectedBaselines>
+            <expTau0>0.0076195</expTau0>
+            <expTemp>18.55</expTemp>
+            <expSeeing>0.95</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-23T01:48:25.340_1</obsId>
+            <type>science</type>
+            <parentId>42982</parentId>
+            <programId>0103.C-0097(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.89187</targetRa>
+            <targetDec>-24.46043</targetDec>
+            <mjdStart>58657.07529329</mjdStart>
+            <mjdEnd>58657.0787655122</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.1480', 'end': '56.1880'}, 'angle': {'start': '16.4000', 'end': '17.0000'}}, 'U1-U3': {'length': {'start': '101.2380', 'end': '101.3610'}, 'angle': {'start': '22.5000', 'end': '23.2000'}}, 'U1-U4': {'length': {'start': '125.4940', 'end': '126.0380'}, 'angle': {'start': '50.3550', 'end': '51.1020'}}, 'U2-U3': {'length': {'start': '45.8030', 'end': '45.8940'}, 'angle': {'start': '30.0000', 'end': '30.7000'}}, 'U2-U4': {'length': {'start': '84.9610', 'end': '85.4980'}, 'angle': {'start': '72.0450', 'end': '72.7040'}}, 'U3-U4': {'length': {'start': '59.4750', 'end': '59.8510'}, 'angle': {'start': '103.1010', 'end': '103.5600'}}}</projectedBaselines>
+            <expTau0>0.002607</expTau0>
+            <expTemp>16.95</expTemp>
+            <expSeeing>0.98</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-23T01:59:40.369_1</obsId>
+            <type>science</type>
+            <parentId>42982</parentId>
+            <programId>0103.C-0097(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.89187</targetRa>
+            <targetDec>-24.46043</targetDec>
+            <mjdStart>58657.08310612</mjdStart>
+            <mjdEnd>58657.0865783422</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.2320', 'end': '56.2710'}, 'angle': {'start': '17.8000', 'end': '18.5000'}}, 'U1-U3': {'length': {'start': '101.4970', 'end': '101.6120'}, 'angle': {'start': '24.0000', 'end': '24.7000'}}, 'U1-U4': {'length': {'start': '126.6240', 'end': '127.1070'}, 'angle': {'start': '51.9330', 'end': '52.6460'}}, 'U2-U3': {'length': {'start': '45.9920', 'end': '46.0750'}, 'angle': {'start': '31.6000', 'end': '32.3000'}}, 'U2-U4': {'length': {'start': '86.0720', 'end': '86.5400'}, 'angle': {'start': '73.4410', 'end': '74.0750'}}, 'U3-U4': {'length': {'start': '60.2480', 'end': '60.5690'}, 'angle': {'start': '104.0870', 'end': '104.5530'}}}</projectedBaselines>
+            <expTau0>0.0031405</expTau0>
+            <expTemp>17.03</expTemp>
+            <expSeeing>0.9</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-23T02:05:19.382_1</obsId>
+            <type>science</type>
+            <parentId>42982</parentId>
+            <programId>0103.C-0097(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.89187</targetRa>
+            <targetDec>-24.46043</targetDec>
+            <mjdStart>58657.08702989</mjdStart>
+            <mjdEnd>58657.0905021122</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.2740', 'end': '56.3110'}, 'angle': {'start': '18.5000', 'end': '19.2000'}}, 'U1-U3': {'length': {'start': '101.6210', 'end': '101.7310'}, 'angle': {'start': '24.7000', 'end': '25.4000'}}, 'U1-U4': {'length': {'start': '127.1460', 'end': '127.5950'}, 'angle': {'start': '52.7040', 'end': '53.4010'}}, 'U2-U3': {'length': {'start': '46.0810', 'end': '46.1590'}, 'angle': {'start': '32.3000', 'end': '33.0000'}}, 'U2-U4': {'length': {'start': '86.5770', 'end': '87.0100'}, 'angle': {'start': '74.1270', 'end': '74.7510'}}, 'U3-U4': {'length': {'start': '60.5940', 'end': '60.8880'}, 'angle': {'start': '104.5920', 'end': '105.0620'}}}</projectedBaselines>
+            <expTau0>0.002898</expTau0>
+            <expTemp>16.95</expTemp>
+            <expSeeing>0.85</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-23T02:10:52.397_1</obsId>
+            <type>science</type>
+            <parentId>42982</parentId>
+            <programId>0103.C-0097(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.89187</targetRa>
+            <targetDec>-24.46043</targetDec>
+            <mjdStart>58657.09088422</mjdStart>
+            <mjdEnd>58657.0943564422</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.3130', 'end': '56.3480'}, 'angle': {'start': '19.2000', 'end': '19.9000'}}, 'U1-U3': {'length': {'start': '101.7380', 'end': '101.8410'}, 'angle': {'start': '25.4000', 'end': '26.1000'}}, 'U1-U4': {'length': {'start': '127.6230', 'end': '128.0390'}, 'angle': {'start': '53.4450', 'end': '54.1250'}}, 'U2-U3': {'length': {'start': '46.1640', 'end': '46.2380'}, 'angle': {'start': '33.1000', 'end': '33.7000'}}, 'U2-U4': {'length': {'start': '87.0360', 'end': '87.4320'}, 'angle': {'start': '74.7900', 'end': '75.4030'}}, 'U3-U4': {'length': {'start': '60.9060', 'end': '61.1730'}, 'angle': {'start': '105.0920', 'end': '105.5670'}}}</projectedBaselines>
+            <expTau0>0.003606</expTau0>
+            <expTemp>16.85</expTemp>
+            <expSeeing>0.905</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-23T02:16:22.411_1</obsId>
+            <type>science</type>
+            <parentId>42982</parentId>
+            <programId>0103.C-0097(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.89187</targetRa>
+            <targetDec>-24.46043</targetDec>
+            <mjdStart>58657.09470383</mjdStart>
+            <mjdEnd>58657.0981760522</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.3500', 'end': '56.3840'}, 'angle': {'start': '19.9000', 'end': '20.5000'}}, 'U1-U3': {'length': {'start': '101.8470', 'end': '101.9440'}, 'angle': {'start': '26.1000', 'end': '26.8000'}}, 'U1-U4': {'length': {'start': '128.0590', 'end': '128.4400'}, 'angle': {'start': '54.1590', 'end': '54.8250'}}, 'U2-U3': {'length': {'start': '46.2410', 'end': '46.3090'}, 'angle': {'start': '33.8000', 'end': '34.4000'}}, 'U2-U4': {'length': {'start': '87.4510', 'end': '87.8110'}, 'angle': {'start': '75.4340', 'end': '76.0380'}}, 'U3-U4': {'length': {'start': '61.1860', 'end': '61.4260'}, 'angle': {'start': '105.5920', 'end': '106.0720'}}}</projectedBaselines>
+            <expTau0>0.0037475</expTau0>
+            <expTemp>16.75</expTemp>
+            <expSeeing>0.935</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-23T02:22:01.425_1</obsId>
+            <type>science</type>
+            <parentId>42982</parentId>
+            <programId>0103.C-0097(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.89187</targetRa>
+            <targetDec>-24.46043</targetDec>
+            <mjdStart>58657.0986276</mjdStart>
+            <mjdEnd>58657.1020998222</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.3860', 'end': '56.4170'}, 'angle': {'start': '20.6000', 'end': '21.2000'}}, 'U1-U3': {'length': {'start': '101.9510', 'end': '102.0410'}, 'angle': {'start': '26.8000', 'end': '27.5000'}}, 'U1-U4': {'length': {'start': '128.4680', 'end': '128.8120'}, 'angle': {'start': '54.8750', 'end': '55.5260'}}, 'U2-U3': {'length': {'start': '46.3140', 'end': '46.3760'}, 'angle': {'start': '34.5000', 'end': '35.1000'}}, 'U2-U4': {'length': {'start': '87.8370', 'end': '88.1590'}, 'angle': {'start': '76.0840', 'end': '76.6790'}}, 'U3-U4': {'length': {'start': '61.4430', 'end': '61.6570'}, 'angle': {'start': '106.1090', 'end': '106.5940'}}}</projectedBaselines>
+            <expTau0>0.0023075</expTau0>
+            <expTemp>16.73</expTemp>
+            <expSeeing>0.96</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-23T02:33:16.453_1</obsId>
+            <type>science</type>
+            <parentId>42982</parentId>
+            <programId>0103.C-0097(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.89187</targetRa>
+            <targetDec>-24.46043</targetDec>
+            <mjdStart>58657.10644043</mjdStart>
+            <mjdEnd>58657.1099126522</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.4500', 'end': '56.4760'}, 'angle': {'start': '21.9000', 'end': '22.5000'}}, 'U1-U3': {'length': {'start': '102.1350', 'end': '102.2080'}, 'angle': {'start': '28.2000', 'end': '28.8000'}}, 'U1-U4': {'length': {'start': '129.1640', 'end': '129.4300'}, 'angle': {'start': '56.2550', 'end': '56.8770'}}, 'U2-U3': {'length': {'start': '46.4410', 'end': '46.4900'}, 'angle': {'start': '35.9000', 'end': '36.5000'}}, 'U2-U4': {'length': {'start': '88.4850', 'end': '88.7300'}, 'angle': {'start': '77.3510', 'end': '77.9300'}}, 'U3-U4': {'length': {'start': '61.8700', 'end': '62.0300'}, 'angle': {'start': '107.1580', 'end': '107.6550'}}}</projectedBaselines>
+            <expTau0>0.001855</expTau0>
+            <expTemp>16.64</expTemp>
+            <expSeeing>1.045</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-23T02:38:55.467_1</obsId>
+            <type>science</type>
+            <parentId>42982</parentId>
+            <programId>0103.C-0097(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.89187</targetRa>
+            <targetDec>-24.46043</targetDec>
+            <mjdStart>58657.1103642</mjdStart>
+            <mjdEnd>58657.1138364222</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.4790', 'end': '56.5010'}, 'angle': {'start': '22.6000', 'end': '23.2000'}}, 'U1-U3': {'length': {'start': '102.2140', 'end': '102.2760'}, 'angle': {'start': '28.9000', 'end': '29.5000'}}, 'U1-U4': {'length': {'start': '129.4520', 'end': '129.6770'}, 'angle': {'start': '56.9320', 'end': '57.5370'}}, 'U2-U3': {'length': {'start': '46.4940', 'end': '46.5370'}, 'angle': {'start': '36.6000', 'end': '37.2000'}}, 'U2-U4': {'length': {'start': '88.7500', 'end': '88.9550'}, 'angle': {'start': '77.9810', 'end': '78.5490'}}, 'U3-U4': {'length': {'start': '62.0430', 'end': '62.1750'}, 'angle': {'start': '107.7000', 'end': '108.2010'}}}</projectedBaselines>
+            <expTau0>0.001634</expTau0>
+            <expTemp>16.66</expTemp>
+            <expSeeing>1.14</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-23T02:44:28.481_1</obsId>
+            <type>science</type>
+            <parentId>42982</parentId>
+            <programId>0103.C-0097(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.89187</targetRa>
+            <targetDec>-24.46043</targetDec>
+            <mjdStart>58657.11421853</mjdStart>
+            <mjdEnd>58657.1176907522</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.5020', 'end': '56.5210'}, 'angle': {'start': '23.2000', 'end': '23.8000'}}, 'U1-U3': {'length': {'start': '102.2800', 'end': '102.3320'}, 'angle': {'start': '29.5000', 'end': '30.1000'}}, 'U1-U4': {'length': {'start': '129.6890', 'end': '129.8740'}, 'angle': {'start': '57.5710', 'end': '58.1670'}}, 'U2-U3': {'length': {'start': '46.5390', 'end': '46.5740'}, 'angle': {'start': '37.2000', 'end': '37.8000'}}, 'U2-U4': {'length': {'start': '88.9660', 'end': '89.1330'}, 'angle': {'start': '78.5820', 'end': '79.1470'}}, 'U3-U4': {'length': {'start': '62.1820', 'end': '62.2880'}, 'angle': {'start': '108.2300', 'end': '108.7410'}}}</projectedBaselines>
+            <expTau0>0.0019015</expTau0>
+            <expTemp>16.65</expTemp>
+            <expSeeing>1.17</expSeeing>
+        </observation>
+        <observation>
+            <obsId>GRAVI.2019-06-23T02:49:58.495_1</obsId>
+            <type>science</type>
+            <parentId>42982</parentId>
+            <programId>0103.C-0097(B)</programId>
+            <interferometerName>VLTI</interferometerName>
+            <stations>U1 U2 U3 U4</stations>
+            <instrumentName>GRAVITY</instrumentName>
+            <instrumentMode>HIGH-COMBINED</instrumentMode>
+            <instrumentSubMode>SINGLE</instrumentSubMode>
+            <targetName>V2062Oph</targetName>
+            <targetRa>247.89187</targetRa>
+            <targetDec>-24.46043</targetDec>
+            <mjdStart>58657.11803814</mjdStart>
+            <mjdEnd>58657.1215103622</mjdEnd>
+            <projectedBaselines>{'U1-U2': {'length': {'start': '56.5220', 'end': '56.5380'}, 'angle': {'start': '23.8000', 'end': '24.4000'}}, 'U1-U3': {'length': {'start': '102.3350', 'end': '102.3770'}, 'angle': {'start': '30.2000', 'end': '30.7000'}}, 'U1-U4': {'length': {'start': '129.8820', 'end': '130.0260'}, 'angle': {'start': '58.1970', 'end': '58.7800'}}, 'U2-U3': {'length': {'start': '46.5760', 'end': '46.6040'}, 'angle': {'start': '37.8000', 'end': '38.4000'}}, 'U2-U4': {'length': {'start': '89.1400', 'end': '89.2690'}, 'angle': {'start': '79.1760', 'end': '79.7350'}}, 'U3-U4': {'length': {'start': '62.2930', 'end': '62.3740'}, 'angle': {'start': '108.7680', 'end': '109.2860'}}}</projectedBaselines>
+            <expTau0>0.00225</expTau0>
+            <expTemp>16.77</expTemp>
+            <expSeeing>1.385</expSeeing>
+        </observation>
     </targetObservations>
-
     <variant>
-        <stations>UT1 UT2 UT4</stations>
+        <stations>UT1 UT2 UT3 UT4</stations>
     </variant>
 </a:observationSetting>
