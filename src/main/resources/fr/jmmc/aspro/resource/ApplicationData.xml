@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="20.05 beta 6"/>
-    <compilation date="12/05/2020" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="20.05"/>
+    <compilation date="18/05/2020" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,7 @@
 
     <releasenotes>
         <release version="20.05">
-            <pubDate>Tue, 12 May 2020 15:00:00 GMT</pubDate>
+            <pubDate>Mon, 18 May 2020 09:00:00 GMT</pubDate>
             <prerelease version="20.05 beta 6">
                 <change type="FEATURE">Fixed OIFITS OI_VIS computation for the DEMO instruments (pure theoretical visibilities)</change>
             </prerelease>
