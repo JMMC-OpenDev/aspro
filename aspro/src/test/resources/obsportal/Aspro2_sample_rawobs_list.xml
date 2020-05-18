@@ -1,0 +1,904 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<o:observations xmlns:o="http://www.jmmc.fr/aspro-raw-obs/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.jmmc.fr/aspro-raw-obs/0.1 AsproRawObsModel.xsd">
+    <observation>
+        <obsId>GRAVI.2017-09-28T01:46:39.919.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436844</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>Fomalhaut</targetName>
+        <targetRa>344.411622</targetRa>
+        <targetDec>-29.6229</targetDec>
+        <mjdStart>58024.07407314</mjdStart>
+        <mjdEnd>58024.07778841778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T01:58:03.947.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436844</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>Fomalhaut</targetName>
+        <targetRa>344.411622</targetRa>
+        <targetDec>-29.6229</targetDec>
+        <mjdStart>58024.08199013</mjdStart>
+        <mjdEnd>58024.08570540778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T02:22:01.007.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436862</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>88Aqr</targetName>
+        <targetRa>347.35949</targetRa>
+        <targetDec>-21.1723</targetDec>
+        <mjdStart>58024.09862277</mjdStart>
+        <mjdEnd>58024.10233804778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T02:33:28.036.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436862</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>88Aqr</targetName>
+        <targetRa>347.35949</targetRa>
+        <targetDec>-21.1723</targetDec>
+        <mjdStart>58024.10657449</mjdStart>
+        <mjdEnd>58024.11028976778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T02:40:22.054.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436865</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>88Aqr</targetName>
+        <targetRa>347.35949</targetRa>
+        <targetDec>-21.1723</targetDec>
+        <mjdStart>58024.11136636</mjdStart>
+        <mjdEnd>58024.11508163778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T02:52:10.083.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436865</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>88Aqr</targetName>
+        <targetRa>347.35949</targetRa>
+        <targetDec>-21.1723</targetDec>
+        <mjdStart>58024.11956115</mjdStart>
+        <mjdEnd>58024.12327642778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T03:08:01.705.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436847</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>Fomalhaut</targetName>
+        <targetRa>344.411622</targetRa>
+        <targetDec>-29.6229</targetDec>
+        <mjdStart>58024.13057529</mjdStart>
+        <mjdEnd>58024.134232697405</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T03:19:22.733.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436847</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>Fomalhaut</targetName>
+        <targetRa>344.411622</targetRa>
+        <targetDec>-29.6229</targetDec>
+        <mjdStart>58024.13845756</mjdStart>
+        <mjdEnd>58024.142114967406</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T03:57:52.830.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436865</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>88Aqr</targetName>
+        <targetRa>347.35949</targetRa>
+        <targetDec>-21.1723</targetDec>
+        <mjdStart>58024.16519479</mjdStart>
+        <mjdEnd>58024.16891006778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T04:09:19.858.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436865</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>88Aqr</targetName>
+        <targetRa>347.35949</targetRa>
+        <targetDec>-21.1723</targetDec>
+        <mjdStart>58024.17314651</mjdStart>
+        <mjdEnd>58024.17686178778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T04:30:40.912.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436868</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD2475</targetName>
+        <targetRa>7.085026</targetRa>
+        <targetDec>-20.33549</targetDec>
+        <mjdStart>58024.18797352</mjdStart>
+        <mjdEnd>58024.1916309274</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T04:41:58.940.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436868</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD2475</targetName>
+        <targetRa>7.085026</targetRa>
+        <targetDec>-20.33549</targetDec>
+        <mjdStart>58024.19582107</mjdStart>
+        <mjdEnd>58024.19947847741</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T04:59:01.983.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436877</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD2066</targetName>
+        <targetRa>6.20445</targetRa>
+        <targetDec>-18.47213</targetDec>
+        <mjdStart>58024.20766184</mjdStart>
+        <mjdEnd>58024.211319247406</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T05:10:23.012.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436877</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD2066</targetName>
+        <targetRa>6.20445</targetRa>
+        <targetDec>-18.47213</targetDec>
+        <mjdStart>58024.21554412</mjdStart>
+        <mjdEnd>58024.219201527405</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T05:27:14.054.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436871</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>LOW-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD2475</targetName>
+        <targetRa>7.085026</targetRa>
+        <targetDec>-20.33549</targetDec>
+        <mjdStart>58024.22724599</mjdStart>
+        <mjdEnd>58024.23178302703</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T05:41:11.089.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436871</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>LOW-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD2475</targetName>
+        <targetRa>7.085026</targetRa>
+        <targetDec>-20.33549</targetDec>
+        <mjdStart>58024.2369339</mjdStart>
+        <mjdEnd>58024.241470937035</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T05:56:05.126.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436886</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>LOW-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD2066</targetName>
+        <targetRa>6.20445</targetRa>
+        <targetDec>-18.47213</targetDec>
+        <mjdStart>58024.24728155</mjdStart>
+        <mjdEnd>58024.251818587036</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T06:09:56.161.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436886</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>LOW-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD2066</targetName>
+        <targetRa>6.20445</targetRa>
+        <targetDec>-18.47213</targetDec>
+        <mjdStart>58024.25690001</mjdStart>
+        <mjdEnd>58024.26143704703</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T06:28:05.206.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436874</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD2475</targetName>
+        <targetRa>7.085026</targetRa>
+        <targetDec>-20.33549</targetDec>
+        <mjdStart>58024.2695047</mjdStart>
+        <mjdEnd>58024.273162107405</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T06:39:29.235.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436874</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD2475</targetName>
+        <targetRa>7.085026</targetRa>
+        <targetDec>-20.33549</targetDec>
+        <mjdStart>58024.2774217</mjdStart>
+        <mjdEnd>58024.2810791074</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T07:11:57.784.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436943</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD16234</targetName>
+        <targetRa>39.156144</targetRa>
+        <targetDec>12.4475</targetDec>
+        <mjdStart>58024.29997435</mjdStart>
+        <mjdEnd>58024.3036317574</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T07:42:51.860.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436904</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 B2 C1 D0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HIP017503</targetName>
+        <targetRa>56.218471</targetRa>
+        <targetDec>19.83055</targetDec>
+        <mjdStart>58024.32143357</mjdStart>
+        <mjdEnd>58024.32171134778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T08:01:03.906.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436904</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 B2 C1 D0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HIP017503</targetName>
+        <targetRa>56.218471</targetRa>
+        <targetDec>19.83055</targetDec>
+        <mjdStart>58024.33407299</mjdStart>
+        <mjdEnd>58024.33439706408</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T08:03:21.912.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436904</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 B2 C1 D0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HIP017503</targetName>
+        <targetRa>56.218471</targetRa>
+        <targetDec>19.83055</targetDec>
+        <mjdStart>58024.33567028</mjdStart>
+        <mjdEnd>58024.33599435408</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T08:14:15.939.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436943</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD16234</targetName>
+        <targetRa>39.156144</targetRa>
+        <targetDec>12.4475</targetDec>
+        <mjdStart>58024.34324004</mjdStart>
+        <mjdEnd>58024.3468974474</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T08:37:18.997.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436904</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 B2 C1 D0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HIP017503</targetName>
+        <targetRa>56.218471</targetRa>
+        <targetDec>19.83055</targetDec>
+        <mjdStart>58024.35924765</mjdStart>
+        <mjdEnd>58024.3629050574</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-28T09:21:04.107.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436904</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 B2 C1 D0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HIP017503</targetName>
+        <targetRa>56.218471</targetRa>
+        <targetDec>19.83055</targetDec>
+        <mjdStart>58024.38963087</mjdStart>
+        <mjdEnd>58024.3932882774</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T01:15:36.213.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436856</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>Altair</targetName>
+        <targetRa>297.695668</targetRa>
+        <targetDec>8.86984</targetDec>
+        <mjdStart>58025.05250247</mjdStart>
+        <mjdEnd>58025.05631034037</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T01:29:18.248.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436856</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>Altair</targetName>
+        <targetRa>297.695668</targetRa>
+        <targetDec>8.86984</targetDec>
+        <mjdStart>58025.06201676</mjdStart>
+        <mjdEnd>58025.06582463037</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T01:45:28.778.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436850</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>Altair</targetName>
+        <targetRa>297.695668</targetRa>
+        <targetDec>8.86984</targetDec>
+        <mjdStart>58025.07324974</mjdStart>
+        <mjdEnd>58025.077057610375</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T01:57:07.806.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436850</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>Altair</targetName>
+        <targetRa>297.695668</targetRa>
+        <targetDec>8.86984</targetDec>
+        <mjdStart>58025.08134035</mjdStart>
+        <mjdEnd>58025.08514822037</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T02:10:07.838.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436853</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>24Cap</targetName>
+        <targetRa>316.779366</targetRa>
+        <targetDec>-25.00603</targetDec>
+        <mjdStart>58025.0903685</mjdStart>
+        <mjdEnd>58025.09408377778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T02:21:31.867.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436853</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>24Cap</targetName>
+        <targetRa>316.779366</targetRa>
+        <targetDec>-25.00603</targetDec>
+        <mjdStart>58025.0982855</mjdStart>
+        <mjdEnd>58025.10200077778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T02:40:51.480.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436859</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>24Cap</targetName>
+        <targetRa>316.779366</targetRa>
+        <targetDec>-25.00603</targetDec>
+        <mjdStart>58025.11170694</mjdStart>
+        <mjdEnd>58025.11542221778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T02:52:15.508.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436859</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>24Cap</targetName>
+        <targetRa>316.779366</targetRa>
+        <targetDec>-25.00603</targetDec>
+        <mjdStart>58025.11962393</mjdStart>
+        <mjdEnd>58025.12333920778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T03:06:35.033.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436853</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>24Cap</targetName>
+        <targetRa>316.779366</targetRa>
+        <targetDec>-25.00603</targetDec>
+        <mjdStart>58025.12957214</mjdStart>
+        <mjdEnd>58025.13328741778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T03:17:53.061.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436853</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>24Cap</targetName>
+        <targetRa>316.779366</targetRa>
+        <targetDec>-25.00603</targetDec>
+        <mjdStart>58025.13741969</mjdStart>
+        <mjdEnd>58025.14113496778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T03:30:27.664.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436859</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>24Cap</targetName>
+        <targetRa>316.779366</targetRa>
+        <targetDec>-25.00603</targetDec>
+        <mjdStart>58025.14615352</mjdStart>
+        <mjdEnd>58025.14986879778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T03:41:57.693.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436859</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-SPLIT</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>24Cap</targetName>
+        <targetRa>316.779366</targetRa>
+        <targetDec>-25.00603</targetDec>
+        <mjdStart>58025.15413996</mjdStart>
+        <mjdEnd>58025.15785523778</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T04:02:34.236.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436976</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD216494</targetName>
+        <targetRa>343.367358</targetRa>
+        <targetDec>-11.61652</targetDec>
+        <mjdStart>58025.16845181</mjdStart>
+        <mjdEnd>58025.172109217405</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T04:22:25.285.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436922</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 B2 C1 D0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HIP112799</targetName>
+        <targetRa>342.639994</targetRa>
+        <targetDec>-12.69165</targetDec>
+        <mjdStart>58025.1822371</mjdStart>
+        <mjdEnd>58025.185894507405</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T04:42:43.336.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436922</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 B2 C1 D0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HIP112799</targetName>
+        <targetRa>342.639994</targetRa>
+        <targetDec>-12.69165</targetDec>
+        <mjdStart>58025.19633491</mjdStart>
+        <mjdEnd>58025.1999923174</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T05:06:34.396.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436976</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD216494</targetName>
+        <targetRa>343.367358</targetRa>
+        <targetDec>-11.61652</targetDec>
+        <mjdStart>58025.2128981</mjdStart>
+        <mjdEnd>58025.2165555074</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T05:19:25.429.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436976</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD216494</targetName>
+        <targetRa>343.367358</targetRa>
+        <targetDec>-11.61652</targetDec>
+        <mjdStart>58025.22182209</mjdStart>
+        <mjdEnd>58025.22547949741</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T05:34:28.466.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436988</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 B2 C1 D0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>LOW-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HIP112799</targetName>
+        <targetRa>342.639994</targetRa>
+        <targetDec>-12.69165</targetDec>
+        <mjdStart>58025.23227391</mjdStart>
+        <mjdEnd>58025.23637113222</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T06:33:28.614.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436943</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD16234</targetName>
+        <targetRa>39.156144</targetRa>
+        <targetDec>12.4475</targetDec>
+        <mjdStart>58025.27324785</mjdStart>
+        <mjdEnd>58025.2769052574</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T06:56:01.670.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436901</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 B2 C1 D0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>MEDIUM-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HIP012153</targetName>
+        <targetRa>39.155773</targetRa>
+        <targetDec>12.44729</targetDec>
+        <mjdStart>58025.28890822</mjdStart>
+        <mjdEnd>58025.2925656274</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T07:16:43.722.fits</obsId>
+        <type>CALIBRATION</type>
+        <parentId>200436901</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 B2 C1 D0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HIP012153</targetName>
+        <targetRa>39.155773</targetRa>
+        <targetDec>12.44729</targetDec>
+        <mjdStart>58025.30328382</mjdStart>
+        <mjdEnd>58025.306941227405</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T07:42:04.786.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200436943</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>HIGH-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD16234</targetName>
+        <targetRa>39.156144</targetRa>
+        <targetDec>12.4475</targetDec>
+        <mjdStart>58025.32088873</mjdStart>
+        <mjdEnd>58025.3245461374</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+    <observation>
+        <obsId>GRAVI.2017-09-29T07:59:34.830.fits</obsId>
+        <type>SCIENCE</type>
+        <parentId>200437004</parentId>
+        <programId>60.A-9295(A)</programId>
+        <interferometerName>VLTI</interferometerName>
+        <interferometerVersion>Period 103</interferometerVersion>
+        <stations>A0 G1 J2 K0</stations>
+        <instrumentName>GRAVITY</instrumentName>
+        <instrumentMode>LOW-COMBINED</instrumentMode>
+        <instrumentSubMode>SINGLE</instrumentSubMode>
+        <targetName>HD16234</targetName>
+        <targetRa>39.156144</targetRa>
+        <targetDec>12.4475</targetDec>
+        <mjdStart>58025.33304201</mjdStart>
+        <mjdEnd>58025.33713923222</mjdEnd>
+        <projectedBaselines></projectedBaselines>
+    </observation>
+</o:observations>

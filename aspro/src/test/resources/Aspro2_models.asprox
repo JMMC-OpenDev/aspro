@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <schemaVersion>2018.04</schemaVersion>
+    <targetVersion>2019.09</targetVersion>
+    <name>default</name>
+    <when>
+        <date>2011-10-15</date>
+        <nightRestriction>true</nightRestriction>
+        <atmosphereQuality>Average</atmosphereQuality>
+    </when>
+    <interferometerConfiguration>
+        <name>VLTI Period 88</name>
+        <minElevation>30.0</minElevation>
+    </interferometerConfiguration>
+    <instrumentConfiguration>
+        <name>AMBER</name>
+        <stations>UT1 UT2 UT3</stations>
+        <pops></pops>
+        <instrumentMode>Low_JHK</instrumentMode>
+        <samplingPeriod>60.0</samplingPeriod>
+        <acquisitionTime>300.0</acquisitionTime>
+    </instrumentConfiguration>
+    <target id="PUNCTS">
+        <name>PUNCTS</name>
+        <RA>00:00:00.000</RA>
+        <DEC>00:00:00.000</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <IDS>Puncts</IDS>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="punct1" type="punct">
+            <desc>Returns the Fourier transform of a punctual object (Dirac function) at coordinates (X,Y) 
+(milliarcsecond). 
+
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.</desc>
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <tm:model name="punct2" type="punct">
+            <desc>Returns the Fourier transform of a punctual object (Dirac function) at coordinates (X,Y) 
+(milliarcsecond). 
+
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.</desc>
+            <tm:parameter name="flux_weight2" type="flux_weight">
+                <value>1.0</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x2" type="x">
+                <units>mas</units>
+                <value>0.8660254037844387</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y2" type="y">
+                <units>mas</units>
+                <value>0.49999999999999994</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <configuration>
+            <HAMin>-12.0</HAMin>
+            <HAMax>12.0</HAMax>
+            <aoSetup>MACAO</aoSetup>
+        </configuration>
+    </target>
+    <target id="DISK">
+        <name>DISK</name>
+        <RA>00:00:00.000</RA>
+        <DEC>00:00:00.000</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <IDS>Disk</IDS>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="elong_disk1" type="elong_disk">
+            <desc>Returns the Fourier transform of a normalized ellipse centered at coordinates (X,Y) 
+(milliarcsecond) with a ratio ELONG_RATIO between the major diameter and the minor one 
+MINOR_AXIS_DIAMETER, turned from the positive vertical semi-axis (i.e. North direction) 
+with angle MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis 
+(i.e. East direction). (the elongation is along the major_axis) 
+
+For avoiding degenerescence, the domain of variation of MAJOR_AXIS_POS_ANGLE is 180 
+degrees, for ex. from 0 to 180 degrees. 
+
+ELONG_RATIO = major_axis / minor_axis 
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
+
+The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO is 
+smaller than 1.</desc>
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="minor_axis_diameter1" type="minor_axis_diameter">
+                <units>mas</units>
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="elong_ratio1" type="elong_ratio">
+                <value>1.5</value>
+                <minValue>1.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="major_axis_pos_angle1" type="major_axis_pos_angle">
+                <units>degrees</units>
+                <value>30.0</value>
+                <minValue>0.0</minValue>
+                <maxValue>180.0</maxValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <configuration>
+            <HAMin>-12.0</HAMin>
+            <HAMax>12.0</HAMax>
+        </configuration>
+    </target>
+    <target id="GAUSSIAN">
+        <name>GAUSSIAN</name>
+        <RA>00:00:00.000</RA>
+        <DEC>00:00:00.000</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <IDS>Gaussian</IDS>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="elong_gaussian1" type="elong_gaussian">
+            <desc>Returns the Fourier transform of a normalized elongated gaussian centered at coordinates 
+(X,Y) (milliarcsecond). The sizes of the function in two orthogonal directions are given by 
+the narrowest FWHM (MINOR_AXIS_FWHM) and by the ratio ELONG_RATIO between the largest 
+FWHM (MAJOR_AXIS_FWHM) and the MINOR_AXIS_FWHM, in the same way as for an ellipse 
+(the elongation is along the major_axis) : 
+
+ELONG_RATIO = MAJOR_AXIS_FWHM / MINOR_AXIS_FWHM. 
+MAJOR_AXIS_POS_ANGLE is measured in degrees, from the positive vertical semi-axis 
+(i.e. North direction) towards to the positive horizontal semi-axis (i.e. East direction). 
+For avoiding degenerescence, the domain of variation of MAJOR_AXIS_POS_ANGLE is 180 
+degrees, for ex. from 0 to 180 degrees. 
+
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
+
+The function returns an error if MINOR_AXIS_FWHM is negative or if ELONG_RATIO 
+is smaller than 1.</desc>
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="minor_axis_fwhm1" type="minor_axis_fwhm">
+                <units>mas</units>
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="elong_ratio1" type="elong_ratio">
+                <value>1.5</value>
+                <minValue>1.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="major_axis_pos_angle1" type="major_axis_pos_angle">
+                <units>degrees</units>
+                <value>30.0</value>
+                <minValue>0.0</minValue>
+                <maxValue>180.0</maxValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <configuration>
+            <HAMin>-12.0</HAMin>
+            <HAMax>12.0</HAMax>
+        </configuration>
+    </target>
+    <target id="CIRCLE">
+        <name>CIRCLE</name>
+        <RA>00:00:00.000</RA>
+        <DEC>00:00:00.000</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <IDS>Circle</IDS>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="circle1" type="circle">
+            <desc>Returns the Fourier transform of a normalized uniform circle of diameter DIAMETER 
+(milliarcsecond) and centered at coordinates (X,Y) (milliarcsecond). 
+
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
+
+The function returns an error if DIAMETER is negative.</desc>
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="diameter1" type="diameter">
+                <units>mas</units>
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <configuration/>
+    </target>
+    <target id="RING">
+        <name>RING</name>
+        <RA>00:00:00.000</RA>
+        <DEC>00:00:00.000</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <IDS>Ring</IDS>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="elong_ring1" type="elong_ring">
+            <desc>Returns the Fourier transform of a normalized uniform elongated ring centered at 
+coordinates (X,Y) (milliarcsecond). The sizes of the function in two orthogonal directions 
+are given by the narrowest internal diameter (MINOR_INTERNAL_DIAMETER) and by the ratio 
+ELONG_RATIO between the widest internal diameter and MINOR_INTERNAL_DIAMETER, 
+in the same way as for an ellipse (the elongation is along the major_axis) : 
+
+ELONG_RATIO = MAJOR_INTERNAL_DIAMETER / MINOR_INTERNAL_DIAMETER. 
+In the direction of MINOR_INTERNAL_DIAMETER, the external diameter is 
+MINOR_INTERNAL_DIAMETER + WIDTH. In the direction of the widest internal diameter, 
+the width is magnified by the ratio ELONG_RATIO, so that the external diameter is 
+the elongated MAJOR_INTERNAL_DIAMETER + WIDTH * ELONG_RATIO. 
+MAJOR_AXIS_POS_ANGLE is measured in degrees, from the positive vertical semi-axis 
+(i.e. North direction) towards to the positive horizontal semi-axis (i.e. East direction). 
+For avoiding degenerescence, the domain of variation of MAJOR_AXIS_POS_ANGLE is 180 
+degrees, for ex. from 0 to 180 degrees. 
+
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
+
+The function returns an error if MINOR_INTERNAL_DIAMETER is negative or if ELONG_RATIO 
+is smaller than 1.</desc>
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="minor_internal_diameter1" type="minor_internal_diameter">
+                <units>mas</units>
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="elong_ratio1" type="elong_ratio">
+                <value>1.5</value>
+                <minValue>1.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="width1" type="width">
+                <units>mas</units>
+                <value>0.5</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="major_axis_pos_angle1" type="major_axis_pos_angle">
+                <units>degrees</units>
+                <value>30.0</value>
+                <minValue>0.0</minValue>
+                <maxValue>180.0</maxValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <configuration/>
+    </target>
+    <target id="LDDISK">
+        <name>LDDISK</name>
+        <RA>00:00:00.000</RA>
+        <DEC>00:00:00.000</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <IDS>LDDisk</IDS>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="limb_quadratic1" type="limb_quadratic">
+            <desc>Returns the Fourier transform of a center-to-limb darkened disk of diameter DIAMETER 
+(milliarcsecond) centered at coordinates (X,Y) (milliarcsecond). 
+
+The brightness distribution o, if expressed versus mu, the cosine of the azimuth of 
+a surface element of the star, follows a quadratic law of coefficients 
+A1_COEFF, A2_COEFF ([-1,1]), and is normalized for mu = 1 (center of the star). 
+o(mu) = 1 -A1_COEFF(1-mu) - A2_COEFF(1-mu)^2. 
+
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
+
+The function returns an error if DIAMETER is negative or if A1_COEFF or A2_coeff is 
+outside bounds [-1,1]</desc>
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="diameter1" type="diameter">
+                <units>mas</units>
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="a1_coeff1" type="a1_coeff">
+                <value>0.3</value>
+                <minValue>-1.0</minValue>
+                <maxValue>1.0</maxValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="a2_coeff1" type="a2_coeff">
+                <value>0.5</value>
+                <minValue>-1.0</minValue>
+                <maxValue>1.0</maxValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <configuration>
+            <HAMin>-12.0</HAMin>
+            <HAMax>12.0</HAMax>
+        </configuration>
+    </target>
+    <targetUserInfos>
+        <group id="JMMC_AO">
+            <name>AO Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the Adaptive Optics system</description>
+            <color>#F781BF</color>
+        </group>
+        <group id="JMMC_FT">
+            <name>FT Star</name>
+            <category>[OB]</category>
+            <description>Group gathering stars used by the Fringe Tracking system</description>
+            <color>#75C147</color>
+        </group>
+        <group id="JMMC_GUIDE">
+            <name>Guide Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the telescope guiding</description>
+            <color>#5BAFD6</color>
+        </group>
+    </targetUserInfos>
+    <variant>
+        <stations>UT1 UT2 UT3</stations>
+    </variant>
+</a:observationSetting>
