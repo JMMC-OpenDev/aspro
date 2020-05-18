@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+*******************************************************************************
+* JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+*******************************************************************************
+-->
+
+<ApplicationData link="http://www.jmmc.fr/aspro2"
+                 faqlink="http://www.jmmc.fr/aspro2/faq/"
+                 rsslink="http://www.jmmc.fr/aspro2/aspro2.rss"
+                 releaselink="http://www.jmmc.fr/aspro2/releasenotes.htm">
+
+    <company>
+        <short_name>JMMC</short_name>
+        <legal_name>Jean-Marie Mariotti Center</legal_name>
+        <logo_resource>fr/jmmc/jmcs/resource/image/jmmc_logo.png</logo_resource>
+        <homepage_url>http://www.jmmc.fr/</homepage_url>
+        <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
+    </company>
+
+    <program name="AsproConf" version="2020.0512"/> <!-- 'YYYY.MMdd' -->
+    <compilation date="12/05/2020" compiler="JDK 1.6.0_24"/>
+
+    <text>ASPRO 2 Configuration Module to describe supported interferometers and their instruments.</text>
+    <authors>the JMMC Technical Group</authors>
+
+    <releasenotes>
+        <release version="2020.0512">
+            <pubDate>Thu, 12 May 2020 15:00:00 GMT</pubDate>
+            <prerelease version="2020.0512 beta 1">
+                <change type="FEATURE">DEMO: compute pure theoretical VisAmp/Phi (not differential)</change>
+            </prerelease>
+        </release>
+        <release version="2020.0414">
+            <pubDate>Thu, 14 Apr 2020 15:00:00 GMT</pubDate>
+            <prerelease version="2020.0414 beta 1">
+                <change type="FEATURE">VLTI: fixed AMBER Low_JHK (K only)</change>
+            </prerelease>
+        </release>
+        <release version="2020.0220">
+            <pubDate>Thu, 20 Feb 2020 16:00:00 GMT</pubDate>
+            <prerelease version="2020.0220 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 106 (= 105)</change>
+            </prerelease>
+        </release>
+        <release version="2020.0204">
+            <pubDate>Tue, 04 Feb 2020 11:00:00 GMT</pubDate>
+            <prerelease version="2020.0204 beta 1">
+                <change type="FEATURE">VLTI: discarded STRAP, the former tip tilt correction on ATs</change>
+                <change type="FEATURE">VLTI Future: added all relocation baselines for all instruments (Period 105)</change>
+            </prerelease>
+        </release>
+        <release version="2020.0129">
+            <pubDate>Wed, 29 Jan 2020 14:00:00 GMT</pubDate>
+            <prerelease version="2020.0129 beta 1">
+                <change type="FEATURE">VLTI: updated MATISSE LM / N noise parameters</change>
+                <change type="FEATURE">VLTI: fixed GRAV4MAT dit for MATISSE LM modes</change>
+            </prerelease>
+        </release>
+        <release version="2020.0124">
+            <pubDate>Fri, 24 Jan 2020 10:00:00 GMT</pubDate>
+            <prerelease version="2020.0124 beta 1">
+                <change type="FEATURE">VLTI: added GRAV4MAT (optional FT in K band) for MATISSE</change>
+                <change type="FEATURE">VLTI Future: added relocation baselines for PIONIER</change>
+            </prerelease>
+        </release>
+        <release version="2019.1129">
+            <pubDate>Fri, 29 Nov 2019 16:00:00 GMT</pubDate>
+            <prerelease version="2019.1129 beta 1">
+                <change type="FEATURE">CHARA Future: added potential new S3 telescope at P4 / P5 positions (SPICA_7T / MIRC_7T) for preliminary studies</change>
+            </prerelease>
+        </release>
+        <release version="2019.1004">
+            <pubDate>Fri, 04 Oct 2019 14:00:00 GMT</pubDate>
+            <prerelease version="2019.1004 beta 1">
+                <change type="FEATURE">CHARA: fixed noise modeling parameters for the future SPICA instrument (visible 6T)</change>
+            </prerelease>
+        </release>
+        <release version="2019.0909">
+            <pubDate>Mon, 09 Sep 2019 14:00:00 GMT</pubDate>
+            <prerelease version="2019.0909 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 105 (= 104)</change>
+            </prerelease>
+        </release>
+        <release version="2019.0808">
+            <pubDate>Thu, 08 Aug 2019 16:00:00 GMT</pubDate>
+            <prerelease version="2019.0808 beta 1">
+                <change type="FEATURE">VLTI: updated MATISSE setup P104 (LMN wavelength tables, new instrument modes + noise parameters LM / N)</change>
+            </prerelease>
+        </release>
+        <release version="2019.0528">
+            <pubDate>Tue, 28 May 2019 14:00:00 GMT</pubDate>
+            <prerelease version="2019.0528 beta 1">
+                <change type="FEATURE">VLTI: updated telescope shadowing profiles according to the ESO VLTI horizon file (UT dome provisioning)</change>
+            </prerelease>
+        </release>
+        <release version="2019.0329">
+            <pubDate>Fri, 29 Mar 2019 10:00:00 GMT</pubDate>
+            <prerelease version="2019.0329 beta 2">
+                <change type="FEATURE">VLTI: updated MATISSE setup (L / N wavelength tables, transmission, pixel counts)</change>
+            </prerelease>
+            <prerelease version="2019.0329 beta 1">
+                <change type="FEATURE">VLTI: updated station positions to fix telescope elevation above ground</change>
+                <change type="FEATURE">Fixed array center coordinates to geocentric coordinates (WGS84)</change>
+            </prerelease>
+        </release>
+        <release version="2019.0307">
+            <pubDate>Tue, 07 Mar 2019 17:00:00 GMT</pubDate>
+            <prerelease version="2019.0307 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 104 (= 103) including generic names for AT quadruplets ("small", "medium", "large" and "astrometric")</change>
+                <change type="FEATURE">VLTI Future period: added relocation baselines for GRAVITY / MATISSE (Period 104)</change>
+                <change type="FEATURE">VLTI: fixed moon constraints for NAOMI / ATs</change>
+            </prerelease>
+        </release>
+        <release version="2019.0108">
+            <pubDate>Tue, 08 Jan 2019 15:00:00 GMT</pubDate>
+            <prerelease version="2019.0108 beta 1">
+                <change type="FEATURE">VLTI: change order for AdaptiveOptics items (NAOMI first)</change>
+            </prerelease>
+        </release>
+        <release version="2018.1212">
+            <pubDate>Wed, 12 Dec 2018 16:00:00 GMT</pubDate>
+            <prerelease version="2018.1212 beta 1">
+                <change type="FEATURE">VLTI Future period: added relocation baselines for MATISSE (A0 B2 J2 C1, K0 B2 D0 J3, A0 G1 D0 J3)</change>
+            </prerelease>
+        </release>
+        <release version="2018.1207">
+            <pubDate>Fri, 07 Dec 2018 13:00:00 GMT</pubDate>
+            <prerelease version="2018.1207 beta 1">
+                <change type="FEATURE">VLTI: refined AdaptiveOptics setups (STRAP)</change>
+            </prerelease>
+        </release>
+        <release version="2018.1130">
+            <pubDate>Fri, 30 Nov 2018 16:00:00 GMT</pubDate>
+            <prerelease version="2018.1130 beta 1">
+                <change type="FEATURE">VLTI: refined AdaptiveOptics definition (MACAO / STRAP) + added CIAO / NAOMI</change>
+            </prerelease>
+        </release>
+        <release version="2018.1017">
+            <pubDate>Wed, 17 Oct 2018 12:00:00 GMT</pubDate>
+            <prerelease version="2018.1017 beta 1">
+                <change type="FEATURE">CHARA: added Period 2018B (MIRC beams reordered)</change>
+            </prerelease>
+        </release>
+        <release version="2018.0911">
+            <pubDate>Tue, 11 Sep 2018 14:00:00 GMT</pubDate>
+            <prerelease version="2018.0911 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 103 (added MATISSE and GRAVITY_FT instruments)</change>
+                <change type="FEATURE">VLTI: updated MATISSE setup (L / N modes, DIT, overheads)</change>
+                <change type="FEATURE">VLTI: updated GRAVITY setup (fixed default integration time)</change>
+            </prerelease>
+        </release>
+        <release version="2018.0720">
+            <pubDate>Fri, 20 Jul 2018 09:00:00 GMT</pubDate>
+            <prerelease version="2018.0720 beta 1">
+                <change type="FEATURE">VLTI: added GRAVITY_FT instrument in the 'Future' period to check FT performance on faint or over-resolved objects</change>
+                <change type="FEATURE">VLTI: added magnitude limits for adaptive optics systems (STRAP / MACAO)</change>
+            </prerelease>
+        </release>
+        <release version="2018.0713">
+            <pubDate>Fri, 13 Jul 2018 15:00:00 GMT</pubDate>
+            <prerelease version="2018.0713 beta 1">
+                <change type="FEATURE">VLTI: updated MATISSE_LM instrument: ron adjusted (10.1 e-)</change>
+            </prerelease>
+        </release>
+        <release version="2018.0406">
+            <pubDate>Fri, 06 Apr 2018 15:00:00 GMT</pubDate>
+            <prerelease version="2018.0406 beta 1">
+                <change type="FEATURE">VLTI: updated MATISSE_LM instrument: DIT increased to 50ms</change>
+            </prerelease>
+        </release>
+        <release version="2018.0302">
+            <pubDate>Fri, 02 Mar 2018 15:00:00 GMT</pubDate>
+            <prerelease version="2018.0302 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 102 (AMBER removed)</change>
+            </prerelease>
+        </release>
+        <release version="2018.0213">
+            <pubDate>Tue, 13 Feb 2018 14:00:00 GMT</pubDate>
+            <prerelease version="2018.0213 beta 1">
+                <change type="FEATURE">CHARA: added MIRC_5T and MIRC_6T configuration for period 2018A (W2 S2 S1 E1 E2 W2)</change>
+            </prerelease>
+        </release>
+        <release version="2018.0125">
+            <pubDate>Thu, 25 Jan 2018 17:00:00 GMT</pubDate>
+            <prerelease version="2018.0125 beta 1">
+                <change type="FEATURE">VLTI: added configurations 'A0 D0 G2 J3', 'D0 G1 J3 K0' and 'A0 B2 J2 J3' for MATISSE_LM and MATISSE_N instruments</change>
+            </prerelease>
+        </release>
+        <release version="2018.0115">
+            <pubDate>Mon, 15 Jan 2018 11:00:00 GMT</pubDate>
+            <prerelease version="2018.0115 beta 1">
+                <change type="FEATURE">CHARA: added VEGA configuration for period 2018A</change>
+            </prerelease>
+        </release>
+        <release version="2017.1220">
+            <pubDate>Wed, 20 Dec 2017 16:00:00 GMT</pubDate>
+            <prerelease version="2017.1220 beta 1">
+                <change type="FEATURE">VLTI: added configuration 'G1 G2 J2 K0' for MATISSE_LM and MATISSE_N instruments</change>
+            </prerelease>
+        </release>
+        <release version="2017.1117">
+            <pubDate>Fri, 17 Nov 2017 16:00:00 GMT</pubDate>
+            <prerelease version="2017.1117 beta 1">
+                <change type="FEATURE">VLTI: updated MATISSE_LM and MATISSE_N instruments (noise parameter tables, new M HIGH mode, new quadruplets)</change>
+            </prerelease>
+        </release>
+        <release version="2017.1019">
+            <pubDate>Thu, 19 Oct 2017 16:00:00 GMT</pubDate>
+            <prerelease version="2017.1019 beta 1">
+                <change type="FEATURE">VLTI: updated MATISSE_LM and MATISSE_N instruments (noise parameter tables)</change>
+            </prerelease>
+        </release>
+        <release version="2017.0907">
+            <pubDate>Thu, 07 Sep 2017 16:00:00 GMT</pubDate>
+            <prerelease version="2017.0907 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 101 (= 100)</change>
+            </prerelease>
+        </release>
+        <release version="2017.0711">
+            <pubDate>Tue, 11 Jul 2017 14:00:00 GMT</pubDate>
+            <prerelease version="2017.0711 beta 1">
+                <change type="FEATURE">VLTI: always use the Fringe tracker with GRAVITY (mag limit set to 18)</change>
+            </prerelease>
+        </release>
+        <release version="2017.0519">
+            <pubDate>Fri, 19 May 2017 16:00:00 GMT</pubDate>
+            <prerelease version="2017.0519 beta 1">
+                <change type="FEATURE">VLTI: Updated the optical path lengths of the switchyard following the STS installation in 2016</change>
+            </prerelease>
+        </release>
+        <release version="2017.0504">
+            <pubDate>Thu, 04 May 2017 16:00:00 GMT</pubDate>
+            <prerelease version="2017.0504 beta 1">
+                <change type="FEATURE">CHARA: Fixed the setup for low resolution for the new FRIEND (prototype) instrument</change>
+            </prerelease>
+        </release>
+        <release version="2017.0306">
+            <pubDate>Mon, 06 Mar 2017 16:00:00 GMT</pubDate>
+            <prerelease version="2017.0306 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 100 with the quadruplet "all south" Large (A0-G1-J2-K0) for GRAVITY</change>
+            </prerelease>
+        </release>
+        <release version="2016.0926">
+            <pubDate>Mon, 26 Sep 2016 14:00:00 GMT</pubDate>
+            <prerelease version="2016.0926 beta 1">
+                <change type="FEATURE">CHARA: added the Future period providing the SPICA instrument in study (visible 6T)</change>
+            </prerelease>
+        </release>
+        <release version="2016.0905">
+            <pubDate>Mon, 05 Sep 2016 16:00:00 GMT</pubDate>
+            <prerelease version="2016.0905 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 99 (= 98)</change>
+            </prerelease>
+        </release>
+        <release version="2016.0610">
+            <pubDate>Fri, 10 Jun 2016 10:00:00 GMT</pubDate>
+            <prerelease version="2016.0610 beta 1">
+                <change type="FEATURE">VLTI: updated MATISSE_LM modes to have proper values of thermal background photons in the M band</change>
+            </prerelease>
+        </release>
+        <release version="2016.0509">
+            <pubDate>Mon, 09 May 2016 14:00:00 GMT</pubDate>
+            <prerelease version="2016.0419 beta 1">
+                <change type="FEATURE">VLTI: added GRAVITY quadruplet A0-G1-C1-D0 (Science verification) in the 'Future' period</change>
+            </prerelease>
+        </release>
+        <release version="2016.0419">
+            <pubDate>Tue, 19 Apr 2016 14:00:00 GMT</pubDate>
+            <prerelease version="2016.0419 beta 1">
+                <change type="FEATURE">VLTI: fixed max elevation to 88 degrees for both UT/AT telescopes (instead of 86 deg)</change>
+                <change type="FEATURE">CHARA: added JOUFLU instrument (equivalent to the CLASSIC instrument but lower transmission)</change>
+            </prerelease>
+        </release>
+        <release version="2016.0310">
+            <pubDate>Thu, 10 Mar 2016 10:00:00 GMT</pubDate>
+            <prerelease version="2016.0310 beta 1">
+                <change type="FEATURE">VLTI: fixed input channels (IP) for Period 98</change>
+            </prerelease>
+        </release>
+        <release version="2016.0304">
+            <pubDate>Fri, 04 Mar 2016 14:00:00 GMT</pubDate>
+            <prerelease version="2016.0304 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 98 including GRAVITY</change>
+            </prerelease>
+        </release>
+        <release version="2016.0205">
+            <pubDate>Fri, 05 Feb 2016 15:00:00 GMT</pubDate>
+            <prerelease version="2016.0205 beta 1">
+                <change type="FEATURE">VLTI: added GRAVITY quadruplet A0-G2-J2-J3 (relocation)</change>
+            </prerelease>
+        </release>
+        <release version="2015.1218">
+            <pubDate>Fri, 18 Dec 2015 17:00:00 GMT</pubDate>
+            <prerelease version="2015.1218 beta 1">
+                <change type="FEATURE">VLTI: added GRAVITY quadruplets A0-G1-J2-K0 and C1-G1-J2-K0</change>
+                <change type="FEATURE">VLTI: modified maximum delay line throw to 99 meters</change>
+            </prerelease>
+        </release>
+        <release version="2015.1216">
+            <pubDate>Wed, 16 Dec 2015 12:00:00 GMT</pubDate>
+            <prerelease version="2015.1216 beta 1">
+                <change type="FEATURE">VLTI: updated GRAVITY Fringe Tracker and instrument modes (COMBINED, SPLIT)</change>
+                <change type="FEATURE">VLTI: updated telescope shadowing profiles according to ESO new "theoretical" master tables for VLTI horizons
+                    (2015/12/09)</change>
+                <change type="FEATURE">VLTI: added atmospheric transmission (average)</change>
+            </prerelease>
+        </release>
+        <release version="2015.1113">
+            <pubDate>Fri, 13 Nov 2015 17:00:00 GMT</pubDate>
+            <prerelease version="2015.1113 beta 1">
+                <change type="FEATURE">VLTI: updated MATISSE configuration: detailled modes with wavelengths and thermal background noise ...</change>
+            </prerelease>
+        </release>
+        <release version="2015.1006">
+            <pubDate>Tue, 06 Oct 2015 13:00:00 GMT</pubDate>
+            <prerelease version="2015.1006 beta 1">
+                <change type="FEATURE">VLTI: updated MATISSE configuration (dit, fringe tracker)</change>
+            </prerelease>
+        </release>
+        <release version="2015.0923">
+            <pubDate>Wed, 23 Sep 2015 14:00:00 GMT</pubDate>
+            <prerelease version="2015.0923 beta 1">
+                <change type="FEATURE">CHARA: added telescope horizon for S1</change>
+            </prerelease>
+        </release>
+        <release version="2015.0903">
+            <pubDate>Thu, 03 Sep 2015 14:00:00 GMT</pubDate>
+            <prerelease version="2015.0903 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 97 = 96</change>
+                <change type="FEATURE">Added timezone identifier to every interferometer</change>
+            </prerelease>
+        </release>
+        <release version="2015.0227">
+            <pubDate>Fri, 27 Feb 2015 17:00:00 GMT</pubDate>
+            <prerelease version="2015.0226 beta 1">
+                <change type="FEATURE">VLTI: fixed quadruplets and delay lines for Period 96 (PIONIER) and Future (MATISSE, GRAVITY)</change>
+            </prerelease>
+            <prerelease version="2015.0213 beta 2">
+                <change type="FEATURE">VLTI: modified the PIONIER instrument in Period 96 to define its new setup (instrumental modes = GRISM-H, FREE-H)</change>
+                <change type="FEATURE">VLTI: use 2 switchyards (VCM and STS) to respectively have the DL restrictions due to VCM pressure limits (before Period 96) and
+                    no DL restrictions with STS (Period 96 and Future)</change>
+            </prerelease>
+            <prerelease version="2015.0213 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 96 (AMBER + PIONIER only)</change>
+                <change type="FEATURE">VLTI: disable the DL restrictions due to VCM pressure limits as
+                    the STS (star separator / dual feed) should correct properly the pupill</change>
+            </prerelease>
+        </release>
+        <release version="2014.2711">
+            <pubDate>Thu, 27 Nov 2014 17:00:00 GMT</pubDate>
+            <prerelease version="2014.2711 beta 1">
+                <change type="FEATURE">CHARA: Added a preliminary setup for the new FRIEND instrument</change>
+            </prerelease>
+        </release>
+        <release version="2014.0708">
+            <pubDate>Tue, 08 Jul 2014 15:00:00 GMT</pubDate>
+            <prerelease version="2014.0708 beta 1">
+                <change type="FEATURE">Added Paranal and sutherland sites: observability only for single-telescope observations</change>
+            </prerelease>
+        </release>
+        <release version="2014.0602">
+            <pubDate>Mon, 02 Jun 2014 20:40:00 GMT</pubDate>
+            <prerelease version="2014.0602 beta 1">
+                <change type="FEATURE">VLTI: refined DL maximum throw corresponding to VCM pressure limits</change>
+            </prerelease>
+        </release>
+        <release version="2014.0531">
+            <pubDate>Sat, 31 May 2014 02:00:00 GMT</pubDate>
+            <prerelease version="2014.0531 beta 1">
+                <change type="FEATURE">VLTI: added 'AT Relocation' period to gather intermediate configurations available
+                    due to ATs relocation between two standard configurations (and PIONIER_3T for PIONIER with only 3 ATs)</change>
+            </prerelease>
+        </release>
+        <release version="2014.0506">
+            <pubDate>Tue, 06 May 2014 11:00:00 GMT</pubDate>
+            <prerelease version="2014.0506 beta 1">
+                <change type="FEATURE">CHARA: upgraded baseline solution (S2) due to LABAO changes</change>
+            </prerelease>
+        </release>
+        <release version="2014.0429">
+            <pubDate>Thu, 29 Apr 2014 16:00:00 GMT</pubDate>
+            <prerelease version="2014.0429 beta 1">
+                <change type="FEATURE">CHARA: added telescope horizons (except S1)</change>
+            </prerelease>
+        </release>
+        <release version="2014.0403">
+            <pubDate>Thu, 03 Apr 2014 12:00:00 GMT</pubDate>
+            <prerelease version="2014.0403 beta 1">
+                <change type="FEATURE">VLTI: refined noise parameters for AMBER P94</change>
+            </prerelease>
+        </release>
+        <release version="2014.0325">
+            <pubDate>Tue, 25 Mar 2014 18:00:00 GMT</pubDate>
+            <prerelease version="2014.0325 beta 1">
+                <change type="FEATURE">VLTI: added DL maximum throw per [station DL IP] corresponding to VCM pressure limits sampled at 2.5, 2.75 and 3.0 bar</change>
+            </prerelease>
+            <prerelease version="2014.0307 beta 1">
+                <change type="FEATURE">VLTI: updated fixed optical path lengths, configurations to use exact ESO setup [station DL IP] and aspro switchyard</change>
+            </prerelease>
+        </release>
+        <release version="2014.0219">
+            <pubDate>Wed, 19 Feb 2014 18:00:00 GMT</pubDate>
+            <prerelease version="2014.0219 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 94 = 93</change>
+            </prerelease>
+        </release>
+        <release version="2014.0117">
+            <pubDate>Fri, 17 Jan 2014 11:00:00 GMT</pubDate>
+            <prerelease version="2014.0117 beta 1">
+                <change type="FEATURE">CHARA: increased maximum elevation to 88.5 deg (above 85 deg) (tip tilt improvements) but it is dependant on seeing.</change>
+            </prerelease>
+        </release>
+        <release version="2013.1119">
+            <pubDate>Tue, 19 Nov 2013 10:00:00 GMT</pubDate>
+            <prerelease version="2013.1119 beta 1">
+                <change type="FEATURE">VLTI: increased optical path lengths for all delay line (100m)</change>
+            </prerelease>
+        </release>
+        <release version="2013.1015">
+            <pubDate>Tue, 15 Oct 2013 12:00:00 GMT</pubDate>
+            <prerelease version="2013.1015 beta 1">
+                <change type="FEATURE">CHARA: modified interferometer setup: fixed array center coordinates and station positions</change>
+                <change type="FEATURE">NPOI: added all station positions and their fixed optical path lengths</change>
+            </prerelease>
+        </release>
+        <release version="2013.911">
+            <pubDate>Wed, 11 Sep 2013 18:00:00 GMT</pubDate>
+            <prerelease version="2013.911 beta 1">
+                <change type="FEATURE">CHARA: modified interferometer setup: fixed array center coordinates, station positions,
+                    fixed optical path lengths (removed internal, corrected air paths by air refractive index)</change>
+            </prerelease>
+        </release>
+        <release version="2013.902">
+            <pubDate>Mon, 02 Sep 2013 16:00:00 GMT</pubDate>
+            <prerelease version="2013.902 beta 2">
+                <change type="FEATURE">CHARA VEGA: modified parameters TRACKING (R), BLUE FILTER (OPEN) and RECORD (RB)</change>
+            </prerelease>
+            <prerelease version="2013.902 beta 1">
+                <change type="FEATURE">VLTI: fixed ESO Period 93 = 92 but added A1-G1-K0-I1 if J3 is unavailable</change>
+                <change type="FEATURE">DEMO: added demo interferometer (north pole)</change>
+            </prerelease>
+        </release>
+        <release version="2013.809">
+            <pubDate>Fri, 09 Aug 2013 14:00:00 GMT</pubDate>
+            <prerelease version="2013.809 beta 1">
+                <change type="FEATURE">VLTI: added ESO Period 93 = 92</change>
+                <change type="FEATURE">Updated preliminary NPOI description: no zenithal restriction + tip tilt for telescopes;
+                    use 3 characters for station names; fixed AE0 / AC0 offset estimation</change>
+            </prerelease>
+        </release>
+        <release version="2013.613">
+            <pubDate>Thu, 13 Jun 2013 15:00:00 GMT</pubDate>
+            <prerelease version="2013.613 beta 1">
+                <change type="FEATURE">Added preliminary NPOI description (tests only - missing switchyard and pops setup)</change>
+            </prerelease>
+        </release>
+        <release version="2013.405">
+            <pubDate>Fri, 05 Apr 2013 17:00:00 GMT</pubDate>
+            <prerelease version="2013.405 beta 1">
+                <change type="FEATURE">CHARA CLASSIC / CLIMB: added J band capability (filter centered at 1.2862 um with a width of 0.2780 um)</change>
+            </prerelease>
+        </release>
+        <release version="2013.314">
+            <pubDate>Fri, 29 Mar 2013 09:40:00 GMT</pubDate>
+            <prerelease version="2013.314 beta 1">
+                <change type="FEATURE">CHARA VEGA: modified resolution of R2656, R2668 and R2720 modes to have only 2 spectral channels as given by data reduction software</change>
+                <change type="FEATURE">CHARA VEGA: modified parameters BLUE FILTER (CLOSE) and RECORD (B)</change>
+            </prerelease>
+        </release>
+        <release version="2013.3">
+            <pubDate>Wed, 20 Feb 2013 17:15:00 GMT</pubDate>
+            <prerelease version="2013.3 beta 3">
+                <change type="FEATURE">Updated Moon avoidance rules for VLTI (ATs and UTs use same rule): separation > 1 deg
+                    or FLI > 85% and (separation > 10 deg [bright star] or separation > 20 deg [faint star]);
+                    if magV less than 9.0 then [bright star] else [faint star]
+                </change>
+                <change type="FEATURE">Added checksum to each configuration file to test the configuration integrity</change>
+            </prerelease>
+            <prerelease version="2013.3 beta 2">
+                <change type="FEATURE">VLTI: added ESO Period 92 = 91</change>
+            </prerelease>
+            <prerelease version="2013.3 beta 1">
+                <change type="FEATURE">CHARA MIRC: fixed MIRC LOW_H mode (8 spectral channels instead of 7)</change>
+                <change type="FEATURE">CHARA MIRC: fixed transmission for MIRC (0.25%)</change>
+                <change type="CHANGE">Initial configuration extracted from Aspro2 package</change>
+            </prerelease>
+        </release>
+    </releasenotes>
+
+    <acknowledgment><![CDATA[This research has made use of the Jean-Marie Mariotti Center \texttt{Aspro2}
+service \footnote{Available at http://www.jmmc.fr/aspro}.]]>
+    </acknowledgment>
+
+</ApplicationData>

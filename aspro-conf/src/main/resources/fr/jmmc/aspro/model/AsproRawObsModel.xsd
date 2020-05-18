@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ *******************************************************************************
+ -->
+<!--
+Document   : AsproRawObs.xsd
+Created on : dec 2019
+Author     : bourgesl
+Description:
+
+This model describes the raw observations
+
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://www.jmmc.fr/aspro-raw-obs/0.1"
+            targetNamespace="http://www.jmmc.fr/aspro-raw-obs/0.1"
+            xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+            xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+            jaxb:version="2.1" jaxb:extensionBindingPrefixes="xjc">
+
+    <xsd:annotation>
+        <xsd:documentation>
+            Aspro2 raw observation model Xml Schema.
+        </xsd:documentation>
+        <xsd:appinfo>
+            <!--
+             Comment the jaxb:globalBindings element in embedded xml schema used with XJC
+             [ERROR] only one globalBindings customization is allowed in a whole compilation
+            -->
+            <!--
+            <jaxb:globalBindings>
+                <xjc:superClass name="fr.jmmc.jmal.model.CloneableObject"/>
+                <xjc:simple />
+            </jaxb:globalBindings>
+            -->
+
+            <jaxb:schemaBindings>
+                <jaxb:package name="fr.jmmc.aspro.model.rawobs"/>
+            </jaxb:schemaBindings>
+        </xsd:appinfo>
+    </xsd:annotation>
+
+
+
+
+    <!-- Elements -->
+    <xsd:element name="observations" type="RawObservationList">
+        <xsd:annotation>
+            <xsd:documentation>
+                this element contains a list of raw observations
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+
+
+
+    <!-- Class Types -->
+
+
+ <!-- TargetRawObservation -->
+    <xsd:complexType name="RawObservationList">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes a list of raw observations
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="observation" type="RawObservation" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The raw observations
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <xsd:complexType name="RawObservation">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the raw observation
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="obsId" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Identifier for this observation
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="type" type="ObservationType">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The observation type (CALIBRATION or SCIENCE)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- container / group (TODO: decide ?) -->
+            <xsd:element name="parentId" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Corresponding group Id (container or parent OB ?)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- program -->
+            <xsd:element name="programId" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Corresponding program Id (ESO or CHARA identifier)
+                        See http://archive.eso.org/wdb/wdb/eso/sched_rep_arc/query?progid=...
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- interferometer (facility) identification -->
+            <xsd:element name="interferometerName" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Selected interferometer
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="interferometerVersion" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The optional version (period)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- interferometer (array) setup -->
+            <xsd:element name="stations" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The list of stations (U1 U2 U4)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="pops" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The list of PoPs (124 means PoP1, PoP2, PoP4 respectively for U1, U2, U4 i.e. same ordering).
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="channels" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The list of channels for this configuration (V1 V2) used by CHARA and VLTI (optional)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- instrument setup -->
+            <xsd:element name="instrumentName" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Selected instrument identifier
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="instrumentMode" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Selected instrument mode
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="instrumentSubMode" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Optional instrument sub mode (extra description)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- target -->
+            <xsd:element name="targetName" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Target name
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="targetRa" type="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        R.A. at mean equinox (decimal hours)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="targetDec" type="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Decl. at mean equinox (deg)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- exposure time -->
+            <xsd:element name="mjdStart" type="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        MJD at the observation start (days)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="mjdEnd" type="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        MJD at the observation end (days)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- projected baselines (uv points) -->
+            <xsd:element name="projectedBaselines" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Projected baselines encoded in json format:
+                        {'A0-G1': {'length': 90.507, 'angle': 114.80000000000001}, 'A0-J2': {'length': 129.07299999999998, 'angle': 91.80000000000001}, 'A0-K0': {'length': 127.45, 'angle': 70.0445}, 'G1-J2': {'length': 57.855000000000004, 'angle': 54.05}, 'G1-K0': {'length': 89.7155, 'angle': 24.7975}, 'J2-K0': {'length': 48.372, 'angle': 349.0185}}
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- weather conditions -->
+            <xsd:element name="expTau0" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Average Tau0 (s)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="expTemp" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Average Temperature (C)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="expSeeing" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Average Seeing (arcsec)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+    <!-- ObservationType -->
+    <xsd:simpleType name="ObservationType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Possible values for the Observation type
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="calibrator">
+                <xsd:annotation>
+                    <xsd:documentation>Calibrator target</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="science">
+                <xsd:annotation>
+                    <xsd:documentation>Science target</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>
+

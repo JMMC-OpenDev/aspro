@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--  please install first parent pom from jMCS/parent-pom directory -->
+    <parent>
+        <groupId>fr.jmmc</groupId>
+        <artifactId>jmmc</artifactId>
+        <version>TRUNK</version>
+        <relativePath />
+    </parent>
+
+    <groupId>fr.jmmc.aspro</groupId>
+    <artifactId>aspro-conf</artifactId>
+
+    <version>TRUNK</version>
+
+    <packaging>jar</packaging>
+    <name>AsproConfig</name>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>fr/jmmc/aspro/model/*.fits</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>atm</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>atm</classifier>
+                            <includes>
+                                <include>fr/jmmc/aspro/model/*.fits</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>fr.jmmc.jmcs</groupId>
+            <artifactId>jmcs</artifactId>
+            <version>TRUNK</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>
