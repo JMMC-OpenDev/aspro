@@ -228,7 +228,12 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                             method.addParameter("dec", de);
 
                             // add radius ?
+                            // method.addParameter("radius", 10.0);
                             // add instrument (name) ?
+                            
+                            // filter fields:
+                            method.addParameter("all_fields", "false");
+                            
                             if (DO_TRACE) {
                                 logger.info("Query({}/{}):\nOBSPORTAL_SEARCH: {}?ra={}&dec={}&", nb, total, OBS_SERVER_SEARCH_URL, ra, de);
                             }
