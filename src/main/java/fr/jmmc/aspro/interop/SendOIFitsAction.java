@@ -4,8 +4,6 @@
 package fr.jmmc.aspro.interop;
 
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
-import fr.jmmc.aspro.model.OIFitsData;
-import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.network.interop.SampCapability;
@@ -18,7 +16,6 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,24 +66,15 @@ public final class SendOIFitsAction extends SampCapabilityAction {
         }
 
         // Get the oifits data
-        final List<OIFitsFile> oiFitsFiles = ObservationManager.getInstance().checkAndGetOIFitsList();
-
-        if (oiFitsFiles == null) {
-            MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
-            return;
-        } else if (oiFitsFiles == OIFitsData.IGNORE_OIFITS_LIST) {
-            return;
+        final OIFitsFile oiFitsFile = ExportOIFitsAction.checkAndGetMergedOIFits();
+        if (oiFitsFile == null) {
+            return; // no data
         }
 
+        final String command = e.getActionCommand();
         try {
-            final String command = e.getActionCommand();
-
-            for (OIFitsFile oiFitsFile : oiFitsFiles) {
-                if (oiFitsFile != null) {
-                    this.currentOIFitsFile = oiFitsFile;
-                    composeAndSendMessage(command);
-                }
-            }
+            this.currentOIFitsFile = oiFitsFile;
+            composeAndSendMessage(command);
         } finally {
             // cleanup:
             currentOIFitsFile = null;

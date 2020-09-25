@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="20.06 beta 1"/>
-    <compilation date="08/06/2020" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="20.09 beta 2"/>
+    <compilation date="25/09/2020" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -163,8 +163,8 @@
             <menu label="Export targets to VOTable" classpath="fr.jmmc.aspro.gui.action.ExportVOTableAction" action="exportVOTable"
                   description="Export targets (and calibrators) to a VOTable file"/>
             <menu/> <!-- menu separator -->
-            <menu label="Export to OIFits file(s)" classpath="fr.jmmc.aspro.gui.action.ExportOIFitsAction" action="exportOIFits" accelerator="F"
-                  description="Export your target observables to OIFits file(s)"/>
+            <menu label="Export to OIFits file" classpath="fr.jmmc.aspro.gui.action.ExportOIFitsAction" action="exportOIFits" accelerator="F"
+                  description="Export your simulated data to one OIFits file"/>
             <menu/> <!-- menu separator -->
             <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="B"
                   description="Export your observation of the selected target to an Observing block"/>
@@ -174,8 +174,8 @@
             <menu label="Export to an Observing Block (XML)" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOBXML"
                   description="Export your observation of the selected target to an Observing block XML file"/>
             <!--
-                        <menu label="Export targets to Observing Blocks (XML)" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOBXML"
-                              description="Export your complete observation to Observing block XML files"/>
+                <menu label="Export targets to Observing Blocks (XML)" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOBXML"
+                      description="Export your complete observation to Observing block XML files"/>
             -->
             <menu/> <!-- menu separator -->
             <menu label="Export plot to PDF" classpath="fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction" action="exportPDF" accelerator="P"
@@ -213,7 +213,7 @@
             <menu label="Perform model fitting" classpath="fr.jmmc.aspro.interop.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"
                   description="use LITpro to prepare your model fitting and inspect your OIFits files (SAMP)"/>
             <menu label="Send OIFits data" classpath="fr.jmmc.aspro.interop.SendOIFitsAction" action="sendOIFitsAction"
-                  description="send simulated OIFits data file(s) to OIFitsExplorer or other VO Tools (SAMP)"/>
+                  description="send the OIFits file to OIFitsExplorer, OImaging or other VO Tools (SAMP)"/>
             <menu/>
             <menu label="Send StarList to PIVOT" classpath="fr.jmmc.aspro.interop.StarListSendAction" action="starListSendAction"
                   description="send back the star list to PIVOT (SAMP)"/>
@@ -228,9 +228,12 @@
     </menubar>
 
     <releasenotes>
-        <release version="20.06">
+        <release version="20.09">
             <pubDate>Mon, 08 Jun 2020 10:00:00 GMT</pubDate>
-            <prerelease version="20.06 beta 1">
+            <prerelease version="20.09 beta 2">
+                <change type="BUGFIX">Enhanced OIFits export actions (file or SAMP) to merge OIFits files when multiple configurations are selected (better OImaging integration)</change>
+            </prerelease>
+            <prerelease version="20.09 beta 1">
                 <change type="BUGFIX">Fixed retrieved fields from JMMC ObsPortal (smaller band width)</change>
             </prerelease>
         </release>

@@ -11,13 +11,17 @@ import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.data.MimeType;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.action.WaitingTaskAction;
+import fr.jmmc.oiexplorer.core.util.OIDataListHelper;
+import fr.jmmc.oitools.model.OIData;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
-import fr.jmmc.oitools.model.OIVis2;
+import fr.jmmc.oitools.processing.Merger;
 import fr.nom.tam.fits.FitsException;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +43,7 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
     /** OIFits MimeType */
     private final static MimeType mimeType = MimeType.OIFITS;
     /** fits extension including '.' (dot) character ie '.fits' */
-    public final static String OIFITS_EXTENSION = "."  + mimeType.getExtension();
+    public final static String OIFITS_EXTENSION = "." + mimeType.getExtension();
 
     /**
      * Public constructor that automatically register the action in RegisteredAction.
@@ -55,61 +59,57 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
     public void actionPerformed() {
         logger.debug("actionPerformed");
 
-        final List<OIFitsFile> oiFitsFiles = ObservationManager.getInstance().checkAndGetOIFitsList();
-
-        if (oiFitsFiles == null) {
-            MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
-            return;
-        } else if (oiFitsFiles == OIFitsData.IGNORE_OIFITS_LIST) {
-            return;
+        final OIFitsFile oiFitsFile = checkAndGetMergedOIFits();
+        if (oiFitsFile == null) {
+            return; // no data
         }
 
-        final boolean exportAll = oiFitsFiles.size() > 1;
-        File file;
-
-        if (exportAll) {
-            file = FileChooser.showDirectoryChooser("Export observations as OIFits files", null, mimeType);
-        } else {
-            final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
-
-            file = FileChooser.showSaveFileChooser("Export this observation as an OIFits file", null, mimeType, getDefaultFileName(oiFitsFile));
-        }
+        final File file = FileChooser.showSaveFileChooser("Export this observation as an OIFits file", null, mimeType,
+                getDefaultFileName(oiFitsFile));
 
         logger.debug("Selected file: {}", file);
 
         // If a file was defined (No cancel in the dialog)
         if (file != null) {
-            final String directory = (exportAll) ? file.getPath() : file.getParent();
-
             try {
+                OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
 
-                if (exportAll) {
-
-                    for (OIFitsFile oiFitsFile : oiFitsFiles) {
-
-                        file = new File(directory, getDefaultFileName(oiFitsFile));
-
-                        OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
-
-                        StatusBar.show(file.getName() + " created.");
-                    }
-
-                    StatusBar.show("OIFits files saved in " + directory + ".");
-
-                } else {
-                    final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
-
-                    OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
-
-                    StatusBar.show(file.getName() + " created.");
-                }
-
+                StatusBar.show(file.getName() + " created.");
             } catch (FitsException fe) {
                 MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), fe);
             } catch (IOException ioe) {
                 MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
             }
         }
+    }
+
+    /**
+     * Return 1 OIFits file (merged if needed)
+     * @return merged OIFits if multiple or original one
+     */
+    public static OIFitsFile checkAndGetMergedOIFits() {
+        List<OIFitsFile> oiFitsFiles = ObservationManager.getInstance().checkAndGetOIFitsList();
+
+        if (oiFitsFiles == null) {
+            MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
+            return null;
+        } else if (oiFitsFiles == OIFitsData.IGNORE_OIFITS_LIST) {
+            return null;
+        }
+
+        final OIFitsFile oiFitsFile;
+
+        // Merge OIFITS files:
+        if (oiFitsFiles.size() > 1) {
+            // Use Merger to obtain 1 OIFits:
+            oiFitsFile = Merger.process(oiFitsFiles.toArray(new OIFitsFile[oiFitsFiles.size()]));
+            oiFitsFile.analyze();
+
+            logger.debug("Merged OIFits: {}", oiFitsFile);
+        } else {
+            oiFitsFile = oiFitsFiles.get(0);
+        }
+        return oiFitsFile;
     }
 
     /**
@@ -129,29 +129,48 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
      */
     public static String getDefaultFileName(final OIFitsFile oiFitsFile, final boolean addExtension) {
 
+        // TODO: merge with PlotChartPanel.getDefaultFileName() and OIXP ExportOIFitsAction ...
+        final Set<String> distinct = new LinkedHashSet<String>();
+
         final StringBuilder sb = new StringBuilder(128).append("Aspro2_");
 
+        // Add target name:
         final String altName = StringUtils.replaceNonAlphaNumericCharsByUnderscore(oiFitsFile.getOiTarget().getTarget()[0]);
-
         sb.append(altName).append('_');
 
-        final OIVis2 vis2 = oiFitsFile.getOiVis2()[0];
+        final List<OIData> oidataList = oiFitsFile.getOiDataList();
 
-        final String insName = StringUtils.replaceNonAlphaNumericCharsByUnderscore(vis2.getInsName());
-
-        sb.append(insName).append('_');
-
-        // requires analysis:
-        final short[] staConf = vis2.getDistinctStaConf().iterator().next();
-        final String staConfName = vis2.getStaNames(staConf);
-
-        sb.append(StringUtils.replaceWhiteSpaces(staConfName, "-"));
-
+        // Add distinct arrNames:
+        distinct.clear();
+        OIDataListHelper.getDistinct(oidataList, distinct, OIDataListHelper.GET_ARR_NAME);
+        if (!distinct.isEmpty()) {
+            OIDataListHelper.toString(distinct, sb, "_", "_", 3, "MULTI_ARRNAME");
+        }
         sb.append('_');
 
-        final String dateObs = vis2.getDateObs();
+        // Add unique insNames:
+        distinct.clear();
+        // fix values to strip suffix '_nn':
+        OIDataListHelper.getDistinctNoSuffix(oidataList, distinct, OIDataListHelper.GET_INS_NAME);
+        if (!distinct.isEmpty()) {
+            OIDataListHelper.toString(distinct, sb, "_", "_", 3, "MULTI_INSNAME");
+        }
+        sb.append('_');
 
-        sb.append(dateObs);
+        // Add unique configurations:
+        distinct.clear();
+        distinct.addAll(OIDataListHelper.getDistinctStaConfs(oidataList)); // requires analysis
+        if (!distinct.isEmpty()) {
+            OIDataListHelper.toString(distinct, sb, "-", "_", 3, "MULTI_CONF");
+        }
+        sb.append('_');
+
+        // Add unique dateObs:
+        distinct.clear();
+        OIDataListHelper.getDistinct(oidataList, distinct, OIDataListHelper.GET_DATE_OBS);
+        if (!distinct.isEmpty()) {
+            OIDataListHelper.toString(distinct, sb, "_", "_", 3, "MULTI_DATE");
+        }
 
         if (addExtension) {
             sb.append(OIFITS_EXTENSION);
