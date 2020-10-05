@@ -97,6 +97,7 @@
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="ucd11">meta.id;meta.main</xsl:with-param>
                 <xsl:with-param name="ucd10">META.MAIN</xsl:with-param>
+                <xsl:with-param name="utype">obscore:Target.Name</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
 
@@ -1048,6 +1049,7 @@
         <xsl:param name="name"/>
         <xsl:param name="unit"/>
         <xsl:param name="unit_other"/>
+        <xsl:param name="utype"/>
 
         <xsl:variable name="selNodeId">
             <xsl:choose>
@@ -1061,7 +1063,7 @@
                     <xsl:value-of select="generate-id($TABLES/FIELD[@name = $name and (@ucd = $ucd11 or @ucd = $ucd10)])" />
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:value-of select="generate-id($TABLES/FIELD[@ucd = $ucd11 or @ucd = $ucd10])" />
+                    <xsl:value-of select="generate-id($TABLES/FIELD[@ucd = $ucd11 or @ucd = $ucd10 or @name = $name or @utype = $utype ])" />
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
