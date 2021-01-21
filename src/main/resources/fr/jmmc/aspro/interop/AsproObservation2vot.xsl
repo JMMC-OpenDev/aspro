@@ -111,15 +111,20 @@
                         <LINK value="${ID_2MASS}" href="http://simbad.u-strasbg.fr/simbad/sim-id?Ident=2MASS+J${ID_2MASS}"/>
                     </FIELD>
 
+                    <FIELD ID="ID_GAIA" name="GAIA" datatype="char" ucd="meta.id" arraysize="*">
+                        <DESCRIPTION>GAIA DR2 identifier (2Micron All-Sky Survey: II/246)</DESCRIPTION>
+                        <LINK value="${ID_GAIA}" href="http://simbad.u-strasbg.fr/simbad/sim-id?Ident=Gaia+DR2+${ID_GAIA}"/>
+                    </FIELD>
+
                     <!-- Object types: comma separated values -->
                     <FIELD name="OTYPES" datatype="char" ucd="src.class" arraysize="*">
                         <DESCRIPTION>Object type(s)</DESCRIPTION>
                         <LINK href="http://simbad.u-strasbg.fr/simbad/sim-display?data=otypes"/>
                     </FIELD>
 
-                    <!-- SP_TYPES field: Spectral types: comma separated values -->
-                    <FIELD name="SP_TYPES" datatype="char" ucd="src.spType" arraysize="*">
-                        <DESCRIPTION>MK spectral type(s)</DESCRIPTION>
+                    <!-- SP_TYPE field: Spectral types: comma separated values -->
+                    <FIELD name="SP_TYPE" datatype="char" ucd="src.spType" arraysize="*">
+                        <DESCRIPTION>MK spectral type</DESCRIPTION>
                     </FIELD>
 
                     <!-- fluxes -->
@@ -128,6 +133,9 @@
                     </FIELD>
                     <FIELD name="FLUX_V" datatype="double" ucd="phot.mag;em.opt.V" unit="mag">
                         <DESCRIPTION>Magnitude V</DESCRIPTION>
+                    </FIELD>
+                    <FIELD name="FLUX_G" datatype="double" ucd="phot.mag;em.opt.G" unit="mag">
+                        <DESCRIPTION>Magnitude G</DESCRIPTION>
                     </FIELD>
                     <FIELD name="FLUX_R" datatype="double" ucd="phot.mag;em.opt.R" unit="mag">
                         <DESCRIPTION>Magnitude R</DESCRIPTION>
@@ -236,6 +244,13 @@
                 </xsl:if>
             </xsl:for-each>
         </xsl:variable>
+        <xsl:variable name="ID_GAIA">
+            <xsl:for-each select="$tokenIDS">
+                <xsl:if test="starts-with(text(), 'Gaia DR2 ')">
+                    <xsl:value-of select="substring(text(), 10)"/>
+                </xsl:if>
+            </xsl:for-each>
+        </xsl:variable>
 
         <TR>
             <TD>
@@ -278,11 +293,15 @@
             <TD>
                 <xsl:value-of select="$ID_2MASS"/>
             </TD>
+            <!-- ID_GAIA -->
+            <TD>
+                <xsl:value-of select="$ID_GAIA"/>
+            </TD>
             <!-- OTYPES -->
             <TD>
                 <xsl:value-of select="OBJTYP/text()"/>
             </TD>
-            <!-- SP_TYPES -->
+            <!-- SP_TYPE -->
             <TD>
                 <xsl:value-of select="SPECTYP/text()"/>
             </TD>
@@ -294,6 +313,10 @@
             <!-- FLUX_V -->
             <TD>
                 <xsl:value-of select="FLUX_V/text()"/>
+            </TD>
+            <!-- FLUX_G -->
+            <TD>
+                <xsl:value-of select="FLUX_G/text()"/>
             </TD>
             <!-- FLUX_R -->
             <TD>
