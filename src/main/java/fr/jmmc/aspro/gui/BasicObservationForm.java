@@ -114,6 +114,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private final static String POPS_MANUAL = "[Manual]";
     /** blanking value to indicate that PoPs are determined using best PoPs algorithm */
     private final static String POPS_AUTO = "[Auto]";
+    /** maximum of warnings shown in tooltips */
+    private final static int MAX_TOOLTIP_WARNINGS = 100;
     /** configuration manager */
     private final static ConfigurationManager cm = ConfigurationManager.getInstance();
     /** observation manager */
@@ -1966,23 +1968,31 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             jLabelStatus.setIcon((level == Level.Warning) ? ResourceImage.WARNING_ICON.icon() : ResourceImage.INFO_ICON.icon());
             jLabelStatus.setText(level.toString());
 
-            final StringBuilder sb = new StringBuilder(100 * warningContainer.getWarnings().size());
+            final int maxLen = Math.min(MAX_TOOLTIP_WARNINGS, warningContainer.getWarnings().size());
+            final StringBuilder sb = new StringBuilder(100 * maxLen);
             sb.append("<html>");
+
+            int n = 0;
 
             // Add initial setup:
             if (this.loadedObsSetup != null) {
+                n++;
                 sb.append("(loaded obs. setup: ").append(loadedObsSetup).append(")<br>");
             }
 
-            String msg;
-
             for (WarningMessage message : warningContainer.getWarnings()) {
-                msg = message.getMessage();
-
-                sb.append(StringUtils.encodeTagContent(msg)).append("<br>");
-
                 // avoid redudant logs of the same message:
                 if (!message.isLogged()) {
+                    String msg = message.getMessage();
+
+                    if (n < MAX_TOOLTIP_WARNINGS) {
+                        n++;
+                        sb.append(StringUtils.encodeTagContent(msg)).append("<br>");
+                        if (n == MAX_TOOLTIP_WARNINGS) {
+                            sb.append("...");
+                        }
+                    }
+                    
                     msg = StringUtils.removeTags(msg);
 
                     // add message to the warning log:
