@@ -109,6 +109,8 @@ public final class ObservabilityService {
     private final static boolean DEBUG_SLOW_SERVICE = false;
     /** number of best Pops displayed in warnings */
     private final static int MAX_POPS_IN_WARNING = 15;
+    /** threshold to disable warnings 'Not observable' in terms of target list size */
+    private final static int MAX_TARGETS_WARNING_NOT_OBSERVABLE = 100;
     /** jd step = half a minute */
     private final double JD_STEP = (0.5) / (24 * 60);
     /** Moon separation margin = 0.5 arcmin for uncertainty */
@@ -125,6 +127,8 @@ public final class ObservabilityService {
     private final boolean isLogDebug = logger.isDebugEnabled();
     /** reused string buffer instance */
     private final StringBuffer shared_sb = new StringBuffer(128);
+    /** flag to enable / disable warnings about not observable targets */
+    private boolean doWarnNotObservable = true;
     /** temporary list of ranges to merge */
     private ArrayList<Range> tmpRanges = null;
     /** main observability context (RangeFactory) */
@@ -320,6 +324,7 @@ public final class ObservabilityService {
 
         // define the targets anyway :
         this.data.setTargets(targets);
+        this.doWarnNotObservable = (targets.size() <= MAX_TARGETS_WARNING_NOT_OBSERVABLE);
 
         // define site :
         this.sc.defineSite(this.interferometer.getName(),
@@ -1641,9 +1646,11 @@ public final class ObservabilityService {
                 if (isLogDebug) {
                     logger.debug("Target not observable: {}", target);
                 }
-                final StringBuffer sb = getBuffer();
-                sb.append("Target [").append(targetName).append("] is not observable");
-                addInformation(sb.toString());
+                if (doWarnNotObservable) {
+                    final StringBuffer sb = getBuffer();
+                    sb.append("Target [").append(targetName).append("] is not observable");
+                    addInformation(sb.toString());
+                }
             }
 
             // recycle ranges:
@@ -1666,9 +1673,11 @@ public final class ObservabilityService {
             if (isLogDebug) {
                 logger.debug("Target never rise: {}", target);
             }
-            final StringBuffer sb = getBuffer();
-            sb.append("Target [").append(targetName).append("] is not observable (never rise)");
-            addInformation(sb.toString());
+            if (doWarnNotObservable) {
+                final StringBuffer sb = getBuffer();
+                sb.append("Target [").append(targetName).append("] is not observable (never rise)");
+                addInformation(sb.toString());
+            }
         }
 
         // reset current target :
@@ -1961,7 +1970,7 @@ public final class ObservabilityService {
         // Interferometer:
         final String name = this.interferometer.getName();
         final boolean isSouth = this.interferometer.getPosSph().getLatitude() < 0d;
-        
+
         // Prepare profiles :
         final HorizonService hs = HorizonService.getInstance();
 
@@ -1998,7 +2007,7 @@ public final class ObservabilityService {
 
             // AZ [0; 360] where 0 is North, positive toward East:
             this.sco.getTargetPosition(cosDec, sinDec, jdIn, azEl);
-            
+
             // Quick fix AZ for VLTI (ie south):
             if (false && isSouth) {
                 // adjust azimuth to be compatible with vlti profiles :
@@ -2006,7 +2015,7 @@ public final class ObservabilityService {
 
                 // 0 = meridian (north-south) positive toward east :
                 final double adjAz = (az < 180d) ? az + 180d : az - 180d;
-                
+
                 azEl.setAzimuth(adjAz);
             }
 
