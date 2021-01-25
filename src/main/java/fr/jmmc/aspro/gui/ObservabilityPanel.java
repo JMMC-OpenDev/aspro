@@ -949,7 +949,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             this.jCheckBoxBaseLineLimits.setSelected(DEFAULT_DO_BASELINE_LIMITS);
             this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
 
-            this.jCheckBoxListFilters.selectNone();
+            // by default, hide unobservable targets:
+            this.jCheckBoxListFilters.setCheckBoxListSelectedValue(UNOBSERVABLE_FILTER, false);
 
             this.jCheckBoxShowRelated.setSelected(DEFAULT_DO_SHOW_RELATED);
             this.jCheckBoxScrollView.setSelected(DEFAULT_DO_SCROLL_VIEW);
