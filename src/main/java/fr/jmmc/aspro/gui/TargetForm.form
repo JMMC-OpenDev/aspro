@@ -1065,7 +1065,8 @@
             </Container>
             <Component class="javax.swing.JLabel" name="jLabelCalibratorInfos">
               <Properties>
-                <Property name="text" type="java.lang.String" value="&lt;html&gt;Calibrator&lt;br&gt;Information&lt;/html&gt;"/>
+                <Property name="text" type="java.lang.String" value="&lt;html&gt;Extra&lt;br&gt;Information&lt;/html&gt;"/>
+                <Property name="toolTipText" type="java.lang.String" value="user or calibrator additional information"/>
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -1117,7 +1118,7 @@
                       </TableColumnModel>
                     </Property>
                     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                      <Dimension value="[50, 50]"/>
+                      <Dimension value="[50, 150]"/>
                     </Property>
                     <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
                       <TableHeader reorderingAllowed="false" resizingAllowed="true"/>

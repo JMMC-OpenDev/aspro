@@ -450,7 +450,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             final boolean calibrator = isCalibrator(target);
             this.jToggleButtonCalibrator.setSelected(calibrator);
 
-            final boolean useTableCalibratorInfos = calibrator && target.getCalibratorInfos() != null;
+            final boolean useTableCalibratorInfos = (target.getCalibratorInfos() != null);
             if (useTableCalibratorInfos) {
                 getCalibratorInfoTableModel().setData(target.getCalibratorInfos());
             }
@@ -1397,7 +1397,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jScrollPaneIds, gridBagConstraints);
 
-        jLabelCalibratorInfos.setText("<html>Calibrator<br>Information</html>");
+        jLabelCalibratorInfos.setText("<html>Extra<br>Information</html>");
+        jLabelCalibratorInfos.setToolTipText("user or calibrator additional information");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 18;
@@ -1410,7 +1411,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jTableCalibratorInfos.setModel(new CalibratorInfoTableModel());
         jTableCalibratorInfos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jTableCalibratorInfos.setCellSelectionEnabled(true);
-        jTableCalibratorInfos.setMinimumSize(new java.awt.Dimension(50, 50));
+        jTableCalibratorInfos.setMinimumSize(new java.awt.Dimension(50, 150));
         jTableCalibratorInfos.getTableHeader().setReorderingAllowed(false);
         jScrollPaneCalibratorInfos.setViewportView(jTableCalibratorInfos);
 
