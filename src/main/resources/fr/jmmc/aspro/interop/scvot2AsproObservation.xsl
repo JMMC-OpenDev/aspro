@@ -106,6 +106,11 @@
                 <xsl:with-param name="colName">V</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
+        <xsl:variable name="G_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">G</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
         <xsl:variable name="R_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="colName">R</xsl:with-param>
@@ -365,6 +370,7 @@
                             <xsl:variable name="PMDEC"    select="VOT:TD[number($PMDEC_index)]"/>
                             <xsl:variable name="FLUX_B"   select="VOT:TD[number($B_index)]"/>
                             <xsl:variable name="FLUX_V"   select="VOT:TD[number($V_index)]"/>
+                            <xsl:variable name="FLUX_G"   select="VOT:TD[number($G_index)]"/>
                             <xsl:variable name="FLUX_R"   select="VOT:TD[number($R_index)]"/>
                             <xsl:variable name="FLUX_I"   select="VOT:TD[number($I_index)]"/>
                             <xsl:variable name="FLUX_J"   select="VOT:TD[number($J_index)]"/>
@@ -471,6 +477,11 @@
                                 <xsl:if test="$FLUX_V/text()">
                                     <FLUX_V>
                                         <xsl:value-of select="$FLUX_V"/>
+                                    </FLUX_V>
+                                </xsl:if>
+                                <xsl:if test="$FLUX_G/text()">
+                                    <FLUX_V>
+                                        <xsl:value-of select="$FLUX_G"/>
                                     </FLUX_V>
                                 </xsl:if>
                                 <xsl:if test="$FLUX_R/text()">
@@ -610,19 +621,14 @@
                                     </xsl:for-each>
 
                                 </calibratorInfos>
-
                             </target>
 
                         </xsl:if> <!-- deletedFlag -->
-
                     </xsl:for-each>
 
                 </a:observationSetting>
-
             </xsl:if>
-
         </xsl:if>
-
     </xsl:template>
 
 
