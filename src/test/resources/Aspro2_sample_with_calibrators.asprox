@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <schemaVersion>2018.04</schemaVersion>
-    <targetVersion>2019.09</targetVersion>
+    <targetVersion>2021.01</targetVersion>
     <name>default</name>
     <when>
         <date>2015-10-28</date>
@@ -9,16 +9,16 @@
         <atmosphereQuality>Average</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 96</name>
+        <name>VLTI Period 106</name>
         <minElevation>30.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
-        <name>PIONIER</name>
-        <stations>D0 G2 J3 K0</stations>
+        <name>GRAVITY</name>
+        <stations>K0 G2 D0 J3</stations>
         <pops></pops>
-        <instrumentMode>GRISM-H</instrumentMode>
-        <samplingPeriod>30.0</samplingPeriod>
-        <acquisitionTime>300.0</acquisitionTime>
+        <instrumentMode>LOW-COMBINED</instrumentMode>
+        <samplingPeriod>60.0</samplingPeriod>
+        <acquisitionTime>600.0</acquisitionTime>
     </instrumentConfiguration>
     <target id="HIP1234">
         <name>HIP1234</name>
@@ -101,32 +101,9 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <configuration>
             <HAMin>-12.0</HAMin>
             <HAMax>12.0</HAMax>
-            <aoSetup>STRAP</aoSetup>
+            <aoSetup>NAOMI_BRIGHT</aoSetup>
+            <fringeTrackerMode>FringeTrack GRAVITY</fringeTrackerMode>
         </configuration>
-    </target>
-    <target id="ETA_TAU">
-        <name>ETA TAU</name>
-        <RA>03:47:29.0765529</RA>
-        <DEC>+24:06:18.488347</DEC>
-        <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>5.4</SYSVEL>
-        <PMRA>19.34</PMRA>
-        <PMDEC>-43.67</PMDEC>
-        <PARALLAX>8.09</PARALLAX>
-        <PARA_ERR>0.42</PARA_ERR>
-        <IDS>2MASS J03472908+2406184,PLX 821,Cl* Melotte 22 K 60,Cl* Melotte 22 VM 32,Cl* Melotte 22 MSH 194,Cl* Melotte 22 MSK 141,Cl* Melotte 22 TRU 414,Cl* Melotte 22 WCZ 236,[JE82] 124,* eta Tau,* 25 Tau,AG+23 323,BD+23 541,BDS 1875 A,CCDM J03474+2407A,CEL 344,EM* MWC 74,FK5 139,GC 4541,GCRV 2135,GEN# +5.20221432,GSC 01800-02202,HD 23630,HGAM 274,HIC 17702,HIP 17702,HR 1165,IDS 03415+2348 A,IRAS 03445+2357,IRC +20063,JP11 4669,JP11 4680,N30 776,NAME Alcyone,PMC 90-93 100,PPM 92898,ROT 3785,SAO 76199,SKY# 5771,SRS 30139,TYC 1800-2202-1,UBV 3639,VDB 23,XZ 4911,[B10] 869,EPIC 200007767,[KSP2003] G166.6680-23.4550,[SCG94] O 165,[SCG94] X 180,uvby98 520221432,Cl Melotte 22 1432,ALS 15094,1E 0344.5+2357,[KSP2003] J034729.04+240619.4,WDS J03475+2406A,Cl* Melotte 22 HII 1432,** STF 4008A,** STFA 8A,WEB 3382,Gaia DR2 66714384141781760</IDS>
-        <OBJTYP>**,*,*iC,*iN,Em*,Be*,PM*,IR,UV,X</OBJTYP>
-        <SPECTYP>B7III</SPECTYP>
-        <FLUX_B>2.78</FLUX_B>
-        <FLUX_V>2.873</FLUX_V>
-        <FLUX_G>2.773</FLUX_G>
-        <FLUX_R>2.84</FLUX_R>
-        <FLUX_I>2.88</FLUX_I>
-        <FLUX_J>2.735</FLUX_J>
-        <FLUX_H>2.735</FLUX_H>
-        <FLUX_K>2.636</FLUX_K>
-        <useAnalyticalModel>true</useAnalyticalModel>
-        <configuration/>
     </target>
     <target id="HD_1234">
         <name>HD 1234</name>
@@ -202,244 +179,54 @@ smaller than 1.</desc>
             <HAMax>4.0</HAMax>
         </configuration>
     </target>
-    <target id="HD_3546">
-        <name>HD 3546</name>
-        <origin>SearchCal</origin>
-        <RA>00:38:33.34610</RA>
-        <DEC>+29:18:42.3135</DEC>
+    <target id="ETA_TAU">
+        <name>ETA TAU</name>
+        <RA>03:47:29.0765529</RA>
+        <DEC>+24:06:18.488347</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>-84.43</SYSVEL>
-        <VELTYP>Opt</VELTYP>
-        <PMRA>-229.04</PMRA>
-        <PMDEC>-253.11</PMDEC>
-        <PARALLAX>19.91</PARALLAX>
-        <PARA_ERR>0.19</PARA_ERR>
-        <IDS>PLX 106,LSPM J0038+2918,TYC 1744-2936-1,ASCC 648948,2MASS J00383338+2918431,USNO-B1.0 1193-00008685,* eps And,* 30 And,AG+29 89,BD+28 103,FK5 19,GC 759,GCRV 350,GEN# +1.00003546,HD 3546,HIC 3031,HIP 3031,HR 163,IRAS 00358+2902,IRC +30013,JP11 398,LTT 10215,N30 126,NLTT 2065,PMC 90-93 13,PPM 90002,ROT 118,SAO 74164,SKY# 1017,SRS 30019,TD1 348,UBV 493,UBV M 7529,YZ 29 370,uvby98 100003546,PLX 106.00,WEB 544</IDS>
-        <OBJTYP>*,PM*,IR,UV</OBJTYP>
-        <SPECTYP>G7IIIFe-3CH1</SPECTYP>
-        <FLUX_B>5.25</FLUX_B>
-        <FLUX_V>4.347</FLUX_V>
-        <FLUX_R>3.7</FLUX_R>
-        <FLUX_I>3.19</FLUX_I>
-        <FLUX_J>2.578</FLUX_J>
-        <FLUX_H>2.154</FLUX_H>
-        <FLUX_K>2.074</FLUX_K>
+        <SYSVEL>5.4</SYSVEL>
+        <PMRA>19.34</PMRA>
+        <PMDEC>-43.67</PMDEC>
+        <PARALLAX>8.09</PARALLAX>
+        <PARA_ERR>0.42</PARA_ERR>
+        <IDS>2MASS J03472908+2406184,PLX 821,Cl* Melotte 22 K 60,Cl* Melotte 22 VM 32,Cl* Melotte 22 MSH 194,Cl* Melotte 22 MSK 141,Cl* Melotte 22 TRU 414,Cl* Melotte 22 WCZ 236,[JE82] 124,* eta Tau,* 25 Tau,AG+23 323,BD+23 541,BDS 1875 A,CCDM J03474+2407A,CEL 344,EM* MWC 74,FK5 139,GC 4541,GCRV 2135,GEN# +5.20221432,GSC 01800-02202,HD 23630,HGAM 274,HIC 17702,HIP 17702,HR 1165,IDS 03415+2348 A,IRAS 03445+2357,IRC +20063,JP11 4669,JP11 4680,N30 776,NAME Alcyone,PMC 90-93 100,PPM 92898,ROT 3785,SAO 76199,SKY# 5771,SRS 30139,TYC 1800-2202-1,UBV 3639,VDB 23,XZ 4911,[B10] 869,EPIC 200007767,[KSP2003] G166.6680-23.4550,[SCG94] O 165,[SCG94] X 180,uvby98 520221432,Cl Melotte 22 1432,ALS 15094,1E 0344.5+2357,[KSP2003] J034729.04+240619.4,WDS J03475+2406A,Cl* Melotte 22 HII 1432,** STF 4008A,** STFA 8A,WEB 3382,Gaia DR2 66714384141781760</IDS>
+        <OBJTYP>**,*,Em*,Be*,PM*,IR,UV,X</OBJTYP>
+        <SPECTYP>B7III</SPECTYP>
+        <FLUX_B>2.78</FLUX_B>
+        <FLUX_V>2.873</FLUX_V>
+        <FLUX_G>2.773</FLUX_G>
+        <FLUX_R>2.84</FLUX_R>
+        <FLUX_I>2.88</FLUX_I>
+        <FLUX_J>2.735</FLUX_J>
+        <FLUX_H>2.735</FLUX_H>
+        <FLUX_K>2.636</FLUX_K>
         <useAnalyticalModel>true</useAnalyticalModel>
-        <tm:model name="disk1" type="disk">
-            <tm:parameter name="flux_weight1" type="flux_weight">
-                <value>1.0</value>
-                <minValue>0.0</minValue>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="x1" type="x">
-                <units>mas</units>
-                <value>0.0</value>
-                <hasFixedValue>true</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="y1" type="y">
-                <units>mas</units>
-                <value>0.0</value>
-                <hasFixedValue>true</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="diameter1" type="diameter">
-                <units>mas</units>
-                <value>1.85</value>
-                <minValue>0.0</minValue>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-        </tm:model>
-        <configuration>
-            <HAMin>-12.0</HAMin>
-            <aoSetup>STRAP</aoSetup>
-        </configuration>
-        <calibratorInfos>
-            <parameter xsi:type="a:StringValue" value="SearchCal v3.7.5" name="SearchCalServerVersion"/>
-            <parameter xsi:type="a:StringValue" value="K" name="band"/>
-            <parameter xsi:type="a:NumberValue" value="106.72986732869107" name="baseMax" unit="m"/>
-            <parameter xsi:type="a:NumberValue" value="2.0045" name="wlen" unit="um"/>
-            <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
-            <parameter xsi:type="a:StringValue" value="4.3b5" name="SearchCalGuiVersion"/>
-            <field xsi:type="a:StringValue" value="3546" name="HD"/>
-            <field xsi:type="a:StringValue" value="3031" name="HIP"/>
-            <field xsi:type="a:StringValue" value="2800103" name="DM"/>
-            <field xsi:type="a:StringValue" value="1744" name="TYC1"/>
-            <field xsi:type="a:StringValue" value="2936" name="TYC2"/>
-            <field xsi:type="a:StringValue" value="1" name="TYC3"/>
-            <field xsi:type="a:StringValue" value="T" name="opt"/>
-            <field xsi:type="a:StringValue" value="00383338+2918431" name="2MASS"/>
-            <field xsi:type="a:StringValue" value="00 38 33.346" name="RAJ2000" unit="h:m:s"/>
-            <field xsi:type="a:StringValue" value="+29 18 42.31" name="DEJ2000" unit="d:m:s"/>
-            <field xsi:type="a:NumberValue" value="-229.5" name="pmRa" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="-253.58" name="pmDec" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="19.19" name="plx" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.75" name="e_Plx"/>
-            <field xsi:type="a:StringValue" value="G5III..." name="SpType"/>
-            <field xsi:type="a:StringValue" value="W" name="VarFlag2"/>
-            <field xsi:type="a:StringValue" value="C" name="VarFlag3"/>
-            <field xsi:type="a:StringValue" value="DCD" name="Qflag"/>
-            <field xsi:type="a:NumberValue" value="-33.475" name="GLAT" unit="deg"/>
-            <field xsi:type="a:NumberValue" value="119.565" name="GLON" unit="deg"/>
-            <field xsi:type="a:StringValue" value="-83.6" name="RadVel" unit="km/s"/>
-            <field xsi:type="a:StringValue" value="9" name="RotVel" unit="km/s"/>
-            <field xsi:type="a:NumberValue" value="5.211" name="B" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.19" name="Bphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.347" name="V" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.7" name="R" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.35" name="Rphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.19" name="I" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.578" name="J" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.154" name="H" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.074" name="K" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.014" name="L" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="1.605" name="diam_bv" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.128" name="e_diam_bv" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.625" name="diam_vr" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.158" name="e_diam_vr" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.893" name="diam_vk" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.131" name="e_diam_vk" unit="mas"/>
-            <field xsi:type="a:StringValue" value="OK" name="diamFlag"/>
-            <field xsi:type="a:NumberValue" value="5050.0" name="Teff_SpType"/>
-            <field xsi:type="a:NumberValue" value="2.478" name="logg_SpType"/>
-            <field xsi:type="a:NumberValue" value="1.73" name="UD_B" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.804" name="UD_I" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.828" name="UD_J" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.842" name="UD_H" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.85" name="UD_K" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.868" name="UD_L" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.881" name="UD_N" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.784" name="UD_R" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.713" name="UD_U" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.759" name="UD_V" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.034" name="Av"/>
-            <field xsi:type="a:NumberValue" value="2.012" name="Lo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.092" name="Ko" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.148" name="Ho" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.569" name="Jo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.173" name="Io" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.675" name="Ro" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.313" name="Vo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.166" name="Bo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="0.537" name="vis2"/>
-            <field xsi:type="a:NumberValue" value="0.049" name="vis2Err"/>
-            <field xsi:type="a:NumberValue" value="5.125" name="dist" unit="deg"/>
-            <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
-        </calibratorInfos>
-    </target>
-    <target id="HD_3590">
-        <name>HD 3590</name>
-        <origin>SearchCal</origin>
-        <RA>00:38:57.5085857382</RA>
-        <DEC>+26:19:25.525045915</DEC>
-        <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>-3.1</SYSVEL>
-        <VELTYP>Opt</VELTYP>
-        <PMRA>-0.007</PMRA>
-        <PMDEC>-19.484</PMDEC>
-        <PARALLAX>4.2037</PARALLAX>
-        <PARA_ERR>0.0518</PARA_ERR>
-        <IDS>2MASS J00385749+2619256,AG+26 70,AGKR 529,BD+25 92,GC 767,GCRV 354,GPM 9.739616+26.323808,GPM1 9,GSC 01741-00313,HD 3590,HIC 3070,HIP 3070,IRAS 00363+2602,PPM 90008,SAO 74168,SKY# 1029,TYC 1741-313-1,YZ 26 375,Gaia DR1 2809142017287021952,WEB 548,Gaia DR2 2809142021582525312</IDS>
-        <OBJTYP>*,IR</OBJTYP>
-        <SPECTYP>K3III</SPECTYP>
-        <FLUX_B>8.3</FLUX_B>
-        <FLUX_V>6.914</FLUX_V>
-        <FLUX_G>6.4337</FLUX_G>
-        <FLUX_J>4.29</FLUX_J>
-        <FLUX_H>3.7</FLUX_H>
-        <FLUX_K>3.55</FLUX_K>
-        <useAnalyticalModel>true</useAnalyticalModel>
-        <tm:model name="disk1" type="disk">
-            <tm:parameter name="flux_weight1" type="flux_weight">
-                <value>1.0</value>
-                <minValue>0.0</minValue>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="x1" type="x">
-                <units>mas</units>
-                <value>0.0</value>
-                <hasFixedValue>true</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="y1" type="y">
-                <units>mas</units>
-                <value>0.0</value>
-                <hasFixedValue>true</hasFixedValue>
-            </tm:parameter>
-            <tm:parameter name="diameter1" type="diameter">
-                <units>mas</units>
-                <value>0.943</value>
-                <minValue>0.0</minValue>
-                <hasFixedValue>false</hasFixedValue>
-            </tm:parameter>
-        </tm:model>
         <configuration/>
-        <calibratorInfos>
-            <parameter xsi:type="a:StringValue" value="SearchCal v3.7.5" name="SearchCalServerVersion"/>
-            <parameter xsi:type="a:StringValue" value="K" name="band"/>
-            <parameter xsi:type="a:NumberValue" value="106.72986732869107" name="baseMax" unit="m"/>
-            <parameter xsi:type="a:NumberValue" value="2.0045" name="wlen" unit="um"/>
-            <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
-            <parameter xsi:type="a:StringValue" value="4.3b5" name="SearchCalGuiVersion"/>
-            <field xsi:type="a:StringValue" value="3590" name="HD"/>
-            <field xsi:type="a:StringValue" value="3070" name="HIP"/>
-            <field xsi:type="a:StringValue" value="2500092" name="DM"/>
-            <field xsi:type="a:StringValue" value="1741" name="TYC1"/>
-            <field xsi:type="a:StringValue" value="313" name="TYC2"/>
-            <field xsi:type="a:StringValue" value="1" name="TYC3"/>
-            <field xsi:type="a:StringValue" value="T" name="opt"/>
-            <field xsi:type="a:StringValue" value="00385749+2619256" name="2MASS"/>
-            <field xsi:type="a:StringValue" value="00 38 57.508" name="RAJ2000" unit="h:m:s"/>
-            <field xsi:type="a:StringValue" value="+26 19 25.53" name="DEJ2000" unit="d:m:s"/>
-            <field xsi:type="a:NumberValue" value="-0.81" name="pmRa" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="-20.1" name="pmDec" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="4.09" name="plx" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.8" name="e_Plx"/>
-            <field xsi:type="a:StringValue" value="K3III" name="SpType"/>
-            <field xsi:type="a:StringValue" value="DCD" name="Qflag"/>
-            <field xsi:type="a:NumberValue" value="-36.464" name="GLAT" unit="deg"/>
-            <field xsi:type="a:NumberValue" value="119.454" name="GLON" unit="deg"/>
-            <field xsi:type="a:StringValue" value="-0.2" name="RadVel" unit="km/s"/>
-            <field xsi:type="a:NumberValue" value="0.943" name="UDDK" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.013" name="e_UDDK" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="8.343" name="B" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="8.32" name="Bphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.914" name="V" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.93" name="Rphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.29" name="J" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.7" name="H" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.55" name="K" unit="mag"/>
-            <field xsi:type="a:StringValue" value="OK" name="diamFlag"/>
-            <field xsi:type="a:NumberValue" value="0.088" name="Av"/>
-            <field xsi:type="a:NumberValue" value="3.573" name="Ko" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.685" name="Ho" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.266" name="Jo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.826" name="Vo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="8.226" name="Bo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="0.862" name="vis2"/>
-            <field xsi:type="a:NumberValue" value="0.004" name="vis2Err"/>
-            <field xsi:type="a:NumberValue" value="5.703" name="dist" unit="deg"/>
-            <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
-        </calibratorInfos>
     </target>
-    <target id="HD_2767">
-        <name>HD 2767</name>
+    <target id="HD_1583">
+        <name>HD 1583</name>
         <origin>SearchCal</origin>
-        <RA>00:31:25.6379111980</RA>
-        <DEC>+33:34:53.893422503</DEC>
+        <RA>00:20:14.4625007427</RA>
+        <DEC>+24:39:57.210842446</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>3.4</SYSVEL>
-        <PMRA>50.761</PMRA>
-        <PMDEC>-10.813</PMDEC>
-        <PARALLAX>8.6835</PARALLAX>
-        <PARA_ERR>0.1026</PARA_ERR>
-        <IDS>AG+33 51,BD+32 80,BDS 258 A,CCDM J00315+3335A,GC 611,GCRV 279,GEN# +1.00002767,GSC 02266-01661,HD 2767,HIC 2475,HIP 2475,HR 122,IDS 00261+3302 A,PPM 65391,SAO 53956,SKY# 845,TYC 2266-1661-1,UBV M 7434,WDS J00314+3335A,2MASS J00312565+3334538,WEB 451,IRAS 00287+3318,AKARI-IRC-V1 J0031256+333453,Gaia DR2 364887296048209024</IDS>
-        <OBJTYP>**,*,PM*,IR</OBJTYP>
+        <SYSVEL>-36.27</SYSVEL>
+        <PMRA>-13.145</PMRA>
+        <PMDEC>-3.838</PMDEC>
+        <PARALLAX>5.7568</PARALLAX>
+        <PARA_ERR>0.0492</PARA_ERR>
+        <IDS>HD 1583,HIP 1619,2MASS J00201446+2439573,DM 2300038,</IDS>
+        <OBJTYP>,Star,IR,*,</OBJTYP>
         <SPECTYP>K1III</SPECTYP>
-        <FLUX_B>7.015</FLUX_B>
-        <FLUX_V>5.869</FLUX_V>
-        <FLUX_G>5.5174</FLUX_G>
-        <FLUX_I>4.433</FLUX_I>
-        <FLUX_J>4.2</FLUX_J>
-        <FLUX_H>3.522</FLUX_H>
-        <FLUX_K>3.271</FLUX_K>
+        <FLUX_B>8.706</FLUX_B>
+        <FLUX_V>7.2359</FLUX_V>
+        <FLUX_R>6.705023</FLUX_R>
+        <FLUX_I>6.135138</FLUX_I>
+        <FLUX_J>5.593</FLUX_J>
+        <FLUX_H>5.082</FLUX_H>
+        <FLUX_K>4.906</FLUX_K>
+        <FLUX_L>4.874</FLUX_L>
+        <FLUX_M>4.743</FLUX_M>
+        <FLUX_N>4.884</FLUX_N>
         <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
@@ -459,107 +246,135 @@ smaller than 1.</desc>
             </tm:parameter>
             <tm:parameter name="diameter1" type="diameter">
                 <units>mas</units>
-                <value>1.086</value>
+                <value>0.5022699</value>
                 <minValue>0.0</minValue>
                 <hasFixedValue>false</hasFixedValue>
             </tm:parameter>
         </tm:model>
         <configuration/>
         <calibratorInfos>
-            <parameter xsi:type="a:StringValue" value="SearchCal v3.7.5" name="SearchCalServerVersion"/>
-            <parameter xsi:type="a:StringValue" value="K" name="band"/>
-            <parameter xsi:type="a:NumberValue" value="106.72986732869107" name="baseMax" unit="m"/>
-            <parameter xsi:type="a:NumberValue" value="2.0045" name="wlen" unit="um"/>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
             <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
-            <parameter xsi:type="a:StringValue" value="4.3b5" name="SearchCalGuiVersion"/>
-            <field xsi:type="a:StringValue" value="2767" name="HD"/>
-            <field xsi:type="a:StringValue" value="2475" name="HIP"/>
-            <field xsi:type="a:StringValue" value="3200080" name="DM"/>
-            <field xsi:type="a:StringValue" value="2266" name="TYC1"/>
-            <field xsi:type="a:StringValue" value="1661" name="TYC2"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="1583" name="HD"/>
+            <field xsi:type="a:StringValue" value="1619" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2300038" name="DM"/>
+            <field xsi:type="a:StringValue" value="1730" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="35" name="TYC2"/>
             <field xsi:type="a:StringValue" value="1" name="TYC3"/>
-            <field xsi:type="a:StringValue" value="T" name="opt"/>
-            <field xsi:type="a:StringValue" value="00312565+3334538" name="2MASS"/>
-            <field xsi:type="a:StringValue" value="00 31 25.640" name="RAJ2000" unit="h:m:s"/>
-            <field xsi:type="a:StringValue" value="+33 34 53.92" name="DEJ2000" unit="d:m:s"/>
-            <field xsi:type="a:NumberValue" value="49.97" name="pmRa" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="-15.35" name="pmDec" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="7.13" name="plx" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.79" name="e_Plx"/>
-            <field xsi:type="a:StringValue" value="K1III..." name="SpType"/>
+            <field xsi:type="a:StringValue" value="00201446+2439573" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J002014.45+243957.4" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2849290173274885504" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD   1583" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.05739453" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 20 14.4625007427" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.486" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+24 39 57.210842446" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.041" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="-13.145" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.096" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="-3.838" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.067" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="5.7568" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0492" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K1III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",Star,IR,*," name="ObjTypes"/>
             <field xsi:type="a:StringValue" value="C" name="VarFlag3"/>
-            <field xsi:type="a:StringValue" value="00314+3335" name="WDS"/>
-            <field xsi:type="a:NumberValue" value="60.0" name="sep1" unit="arcsec"/>
-            <field xsi:type="a:NumberValue" value="55.3" name="sep2" unit="arcsec"/>
-            <field xsi:type="a:StringValue" value="DDD" name="Qflag"/>
-            <field xsi:type="a:NumberValue" value="-29.105" name="GLAT" unit="deg"/>
-            <field xsi:type="a:NumberValue" value="118.163" name="GLON" unit="deg"/>
-            <field xsi:type="a:StringValue" value="6.7" name="RadVel" unit="km/s"/>
-            <field xsi:type="a:NumberValue" value="7.012" name="B" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="7.02" name="Bphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.869" name="V" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.015" name="R" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.88" name="Rphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.433" name="I" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.2" name="J" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.522" name="H" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.271" name="K" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.187" name="L" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="1.205" name="diam_bv" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.096" name="e_diam_bv" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.199" name="diam_vr" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.116" name="e_diam_vr" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.115" name="diam_vk" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.077" name="e_diam_vk" unit="mas"/>
-            <field xsi:type="a:StringValue" value="OK" name="diamFlag"/>
-            <field xsi:type="a:NumberValue" value="4500.0" name="Teff_SpType"/>
-            <field xsi:type="a:NumberValue" value="2.078" name="logg_SpType"/>
-            <field xsi:type="a:NumberValue" value="1.011" name="UD_B" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.057" name="UD_I" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.072" name="UD_J" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.08" name="UD_H" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.086" name="UD_K" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.098" name="UD_L" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.107" name="UD_N" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.043" name="UD_R" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.002" name="UD_U" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.026" name="UD_V" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.093" name="Av"/>
-            <field xsi:type="a:NumberValue" value="3.181" name="Lo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.291" name="Ko" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.506" name="Ho" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.174" name="Jo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.386" name="Io" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.946" name="Ro" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.776" name="Vo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.888" name="Bo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="0.812" name="vis2"/>
-            <field xsi:type="a:NumberValue" value="0.024" name="vis2Err"/>
-            <field xsi:type="a:NumberValue" value="6.063" name="dist" unit="deg"/>
+            <field xsi:type="a:NumberValue" value="-36.27" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.15" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4763.65" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4662.92" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4927.95" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="172.8555" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="171.3855" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="174.3504" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="8.706" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.017" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.8323" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0012" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.572" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.01" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.2359" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="2.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.705023" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.5449" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0019" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.135138" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.593" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.019" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.082" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.029" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.906" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.023" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.874" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.217" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.743" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.089" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.884" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.014" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="2" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="3.319221" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.4047327" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="2.03958" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.672293" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.493" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1747985" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.5239338" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.01188191" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="2.267827" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.6808" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4500.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.12" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.4678525" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4678525" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4781449" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.485473" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4929331" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5022699" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5022699" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5057751" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5161713" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5181415" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5202793" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.94306168" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.002628626" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="4.070137744" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K1.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1730-35-1" name="Name"/>
             <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
         </calibratorInfos>
     </target>
-    <target id="HD_3421">
-        <name>HD 3421</name>
+    <target id="HD_112">
+        <name>HD 112</name>
         <origin>SearchCal</origin>
-        <RA>00:37:21.2192289481</RA>
-        <DEC>+35:23:58.210879363</DEC>
+        <RA>00:06:03.2620640003</RA>
+        <DEC>+24:54:59.757139623</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>-0.2</SYSVEL>
-        <PMRA>-8.728</PMRA>
-        <PMDEC>-2.998</PMDEC>
-        <PARALLAX>3.5023</PARALLAX>
-        <PARA_ERR>0.1105</PARA_ERR>
-        <IDS>2MASS J00372121+3523581,AG+35 56,BD+34 86,GC 738,GCRV 343,GEN# +1.00003421,GSC 02283-00542,HD 3421,HIC 2942,HIP 2942,HR 157,IRAS 00346+3507,PPM 65488,SAO 54038,SKY# 988,TD1 339,TYC 2283-542-1,UBV 479,UBV M 7514,uvby98 100003421,WEB 534,Gaia DR2 365652216839649280</IDS>
-        <OBJTYP>*,IR,UV</OBJTYP>
-        <SPECTYP>G2Ib-II</SPECTYP>
-        <FLUX_B>6.323</FLUX_B>
-        <FLUX_V>5.427</FLUX_V>
-        <FLUX_G>5.1667</FLUX_G>
-        <FLUX_I>4.166</FLUX_I>
-        <FLUX_J>3.708</FLUX_J>
-        <FLUX_H>3.32</FLUX_H>
-        <FLUX_K>3.212</FLUX_K>
+        <SYSVEL>-10.03</SYSVEL>
+        <PMRA>84.878</PMRA>
+        <PMDEC>-17.41</PMDEC>
+        <PARALLAX>4.571</PARALLAX>
+        <PARA_ERR>0.0568</PARA_ERR>
+        <IDS>HD 112,HIP 504,2MASS J00060327+2454599,DM 2404885,</IDS>
+        <OBJTYP>,PM*,IR,*,PM*,</OBJTYP>
+        <SPECTYP>K1III-IV</SPECTYP>
+        <FLUX_B>8.598</FLUX_B>
+        <FLUX_V>7.2023</FLUX_V>
+        <FLUX_R>6.652748</FLUX_R>
+        <FLUX_I>6.137169</FLUX_I>
+        <FLUX_J>5.621</FLUX_J>
+        <FLUX_H>5.094</FLUX_H>
+        <FLUX_K>4.995</FLUX_K>
+        <FLUX_L>4.883</FLUX_L>
+        <FLUX_M>4.802</FLUX_M>
+        <FLUX_N>4.966</FLUX_N>
         <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
@@ -579,104 +394,134 @@ smaller than 1.</desc>
             </tm:parameter>
             <tm:parameter name="diameter1" type="diameter">
                 <units>mas</units>
-                <value>1.08</value>
+                <value>0.4853585</value>
                 <minValue>0.0</minValue>
                 <hasFixedValue>false</hasFixedValue>
             </tm:parameter>
         </tm:model>
+        <configuration/>
         <calibratorInfos>
-            <parameter xsi:type="a:StringValue" value="SearchCal v3.7.5" name="SearchCalServerVersion"/>
-            <parameter xsi:type="a:StringValue" value="K" name="band"/>
-            <parameter xsi:type="a:NumberValue" value="106.72986732869107" name="baseMax" unit="m"/>
-            <parameter xsi:type="a:NumberValue" value="2.0045" name="wlen" unit="um"/>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
             <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
-            <parameter xsi:type="a:StringValue" value="4.3b5" name="SearchCalGuiVersion"/>
-            <field xsi:type="a:StringValue" value="3421" name="HD"/>
-            <field xsi:type="a:StringValue" value="2942" name="HIP"/>
-            <field xsi:type="a:StringValue" value="3400086" name="DM"/>
-            <field xsi:type="a:StringValue" value="2283" name="TYC1"/>
-            <field xsi:type="a:StringValue" value="542" name="TYC2"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="112" name="HD"/>
+            <field xsi:type="a:StringValue" value="504" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2404885" name="DM"/>
+            <field xsi:type="a:StringValue" value="1729" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="743" name="TYC2"/>
             <field xsi:type="a:StringValue" value="1" name="TYC3"/>
-            <field xsi:type="a:StringValue" value="T" name="opt"/>
-            <field xsi:type="a:StringValue" value="00372121+3523581" name="2MASS"/>
-            <field xsi:type="a:StringValue" value="00 37 21.219" name="RAJ2000" unit="h:m:s"/>
-            <field xsi:type="a:StringValue" value="+35 23 58.21" name="DEJ2000" unit="d:m:s"/>
-            <field xsi:type="a:NumberValue" value="-9.82" name="pmRa" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="-3.42" name="pmDec" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="3.4" name="plx" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.75" name="e_Plx"/>
-            <field xsi:type="a:StringValue" value="G5III" name="SpType"/>
-            <field xsi:type="a:StringValue" value="C" name="VarFlag3"/>
-            <field xsi:type="a:StringValue" value="CCD" name="Qflag"/>
-            <field xsi:type="a:NumberValue" value="-27.384" name="GLAT" unit="deg"/>
-            <field xsi:type="a:NumberValue" value="119.7" name="GLON" unit="deg"/>
-            <field xsi:type="a:StringValue" value="-0.2" name="RadVel" unit="km/s"/>
-            <field xsi:type="a:NumberValue" value="6.315" name="B" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.3" name="Bphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.427" name="V" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.716" name="R" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.44" name="Rphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.166" name="I" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.708" name="J" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.32" name="H" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.212" name="K" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.154" name="L" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="1.01" name="diam_bv" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.081" name="e_diam_bv" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.118" name="diam_vr" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.108" name="e_diam_vr" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.106" name="diam_vk" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.076" name="e_diam_vk" unit="mas"/>
-            <field xsi:type="a:StringValue" value="OK" name="diamFlag"/>
-            <field xsi:type="a:NumberValue" value="5050.0" name="Teff_SpType"/>
-            <field xsi:type="a:NumberValue" value="2.478" name="logg_SpType"/>
-            <field xsi:type="a:NumberValue" value="1.011" name="UD_B" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.054" name="UD_I" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.068" name="UD_J" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.076" name="UD_H" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.08" name="UD_K" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.091" name="UD_L" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.099" name="UD_N" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.042" name="UD_R" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.0" name="UD_U" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.027" name="UD_V" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.163" name="Av"/>
-            <field xsi:type="a:NumberValue" value="3.144" name="Lo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.224" name="Ko" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.292" name="Ho" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.663" name="Jo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.084" name="Io" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.594" name="Ro" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.264" name="Vo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.099" name="Bo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="0.815" name="vis2"/>
-            <field xsi:type="a:NumberValue" value="0.023" name="vis2Err"/>
-            <field xsi:type="a:NumberValue" value="8.252" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="00060327+2454599" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J000603.33+245459.7" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2850088311341732992" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD    112" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.004619274" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 06 03.2620640003" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.2565" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+24 54 59.757139623" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.0873" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="84.878" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.081" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="-17.41" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.07" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="4.571" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0568" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K1III-IV" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",PM*,IR,*,PM*," name="ObjTypes"/>
+            <field xsi:type="a:NumberValue" value="-10.03" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.16" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4788.7" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4726.0" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4864.7" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="217.4414" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="214.7691" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="220.1799" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="8.598" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.014" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.772" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.0E-4" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.484" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.008" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.2023" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="2.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.652748" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.5328" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="9.0E-4" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.137169" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.621" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.024" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.094" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.036" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.995" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.017" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.883" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.228" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.802" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.112" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.966" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.014" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="0" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="3.203468" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.230038" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="1.924683" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.4742287" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.4420537" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1704541" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.506293" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.01201077" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="2.372297" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.2831" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4500.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.12" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.4520999" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4520999" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4620458" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4691271" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4763361" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4853585" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4853585" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4887457" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4987919" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5006957" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5027615" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.946745964" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.002576009" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="4.21725843" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K1.00III-IV" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1729-743-1" name="Name"/>
             <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
         </calibratorInfos>
     </target>
-    <target id="HD_3651">
-        <name>HD 3651</name>
+    <target id="HD_2315">
+        <name>HD 2315</name>
         <origin>SearchCal</origin>
-        <RA>00:39:21.8055114029</RA>
-        <DEC>+21:15:01.716052732</DEC>
+        <RA>00:27:12.5549852068</RA>
+        <DEC>+25:34:42.648808710</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>-33.28</SYSVEL>
-        <PMRA>-462.056</PMRA>
-        <PMDEC>-369.814</PMDEC>
-        <PARALLAX>89.7891</PARALLAX>
-        <PARA_ERR>0.0581</PARA_ERR>
-        <IDS>LSPM J0039+2115,ASCC 741016,2MASS J00392187+2115024,USNO-B1.0 1112-00008299,PLX 110,* 54 Psc,2E 109,AG+20 54,BD+20 85,CCDM J00394+2115A,CSI+20 85 1,Ci 20 42,GC 778,GCRV 358,GEN# +1.00003651,GJ 27,HD 3651,HIC 3093,HIP 3093,HR 166,IDS 00341+2043 A,IRAS 00367+2058,JP11 400,LFT 59,LHS 1116,LTT 10224,N30 130,NLTT 2118,NSV 245,PM 00368+2059,PPM 90012,SAO 74175,SKY# 1037,SPOCS 26,TYC 1193-2072-1,UBV 512,UBV M 7543,YZ 20 193,Zkh 13,[B10] 133,uvby98 100003651,PLX 110.00,2E 0036.8+2057,WDS J00394+2115A,** STT 550A,** LUH 3A,WISEA J003921.43+211457.4,Gaia DR2 2802397960855105920,WEB 552</IDS>
-        <OBJTYP>*,*,PM*,PM*,V*,Ro*,IR,X</OBJTYP>
-        <SPECTYP>K0.5V</SPECTYP>
-        <FLUX_B>6.71</FLUX_B>
-        <FLUX_V>5.875</FLUX_V>
-        <FLUX_G>5.635</FLUX_G>
-        <FLUX_R>5.21</FLUX_R>
-        <FLUX_I>4.82</FLUX_I>
-        <FLUX_J>4.549</FLUX_J>
-        <FLUX_H>4.064</FLUX_H>
-        <FLUX_K>3.999</FLUX_K>
+        <SYSVEL>-38.15</SYSVEL>
+        <PMRA>-28.058</PMRA>
+        <PMDEC>-27.495</PMDEC>
+        <PARALLAX>5.814</PARALLAX>
+        <PARA_ERR>0.0546</PARA_ERR>
+        <IDS>HD 2315,HIP 2152,2MASS J00271255+2534426,DM 2400053,</IDS>
+        <OBJTYP>,Star,IR,*,</OBJTYP>
+        <SPECTYP>K3III</SPECTYP>
+        <FLUX_B>8.68</FLUX_B>
+        <FLUX_V>7.1574</FLUX_V>
+        <FLUX_R>6.491</FLUX_R>
+        <FLUX_I>6.021067</FLUX_I>
+        <FLUX_J>5.487</FLUX_J>
+        <FLUX_H>4.967</FLUX_H>
+        <FLUX_K>4.796</FLUX_K>
+        <FLUX_L>4.675</FLUX_L>
+        <FLUX_M>4.547</FLUX_M>
+        <FLUX_N>4.787</FLUX_N>
         <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
@@ -696,105 +541,1307 @@ smaller than 1.</desc>
             </tm:parameter>
             <tm:parameter name="diameter1" type="diameter">
                 <units>mas</units>
-                <value>0.728</value>
+                <value>0.5403892</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <configuration/>
+        <calibratorInfos>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
+            <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="2315" name="HD"/>
+            <field xsi:type="a:StringValue" value="2152" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2400053" name="DM"/>
+            <field xsi:type="a:StringValue" value="1734" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="4" name="TYC2"/>
+            <field xsi:type="a:StringValue" value="1" name="TYC3"/>
+            <field xsi:type="a:StringValue" value="00271255+2534426" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J002712.53+253442.3" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2807418399666934912" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD   2315" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.01043624" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 27 12.5549852068" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.299" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+25 34 42.648808710" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.2162" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="-28.058" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.084" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="-27.495" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.078" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="5.814" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0546" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K3III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",Star,IR,*," name="ObjTypes"/>
+            <field xsi:type="a:NumberValue" value="-38.15" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.13" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4617.8" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4558.99" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4735.95" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="171.168" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="169.5725" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="172.7934" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="8.68" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.013" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.7691" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0011" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.471" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.01" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.1574" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="2.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.491" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.4546" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0015" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.021067" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.487" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.02" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.967" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.033" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.796" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.023" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.675" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.286" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.547" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.111" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.787" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.016" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="4" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="3.815375" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1991177" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="2.285348" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.5107351" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.5228325" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.2033" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.5653791" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.01317435" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="2.33018" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.6295" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4250.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.01" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.501853" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.501853" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.513168" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5214784" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5302038" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5403892" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5403892" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5445593" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5565359" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5592744" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5612229" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.934342275" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.003111621" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="4.000777713" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K3.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1734-4-1" name="Name"/>
+            <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
+        </calibratorInfos>
+    </target>
+    <target id="HD_1996">
+        <name>HD 1996</name>
+        <origin>SearchCal</origin>
+        <RA>00:24:22.4688457391</RA>
+        <DEC>+26:23:43.824171652</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>-25.54</SYSVEL>
+        <PMRA>-29.04</PMRA>
+        <PMDEC>-21.695</PMDEC>
+        <PARALLAX>5.867</PARALLAX>
+        <PARA_ERR>0.0531</PARA_ERR>
+        <IDS>HD 1996,HIP 1934,2MASS J00242247+2623439,DM 2500046,</IDS>
+        <OBJTYP>,Star,*,IR,</OBJTYP>
+        <SPECTYP>K1III</SPECTYP>
+        <FLUX_B>9.045</FLUX_B>
+        <FLUX_V>7.8489</FLUX_V>
+        <FLUX_R>7.259547</FLUX_R>
+        <FLUX_I>6.901769</FLUX_I>
+        <FLUX_J>6.39</FLUX_J>
+        <FLUX_H>5.873</FLUX_H>
+        <FLUX_K>5.796</FLUX_K>
+        <FLUX_L>5.822</FLUX_L>
+        <FLUX_M>5.724</FLUX_M>
+        <FLUX_N>5.78</FLUX_N>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="disk1" type="disk">
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="diameter1" type="diameter">
+                <units>mas</units>
+                <value>0.3328631</value>
                 <minValue>0.0</minValue>
                 <hasFixedValue>false</hasFixedValue>
             </tm:parameter>
         </tm:model>
         <calibratorInfos>
-            <parameter xsi:type="a:StringValue" value="SearchCal v3.7.5" name="SearchCalServerVersion"/>
-            <parameter xsi:type="a:StringValue" value="K" name="band"/>
-            <parameter xsi:type="a:NumberValue" value="106.72986732869107" name="baseMax" unit="m"/>
-            <parameter xsi:type="a:NumberValue" value="2.0045" name="wlen" unit="um"/>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
             <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
-            <parameter xsi:type="a:StringValue" value="4.3b5" name="SearchCalGuiVersion"/>
-            <field xsi:type="a:StringValue" value="3651" name="HD"/>
-            <field xsi:type="a:StringValue" value="3093" name="HIP"/>
-            <field xsi:type="a:StringValue" value="2000085" name="DM"/>
-            <field xsi:type="a:StringValue" value="1193" name="TYC1"/>
-            <field xsi:type="a:StringValue" value="2072" name="TYC2"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="1996" name="HD"/>
+            <field xsi:type="a:StringValue" value="1934" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2500046" name="DM"/>
+            <field xsi:type="a:StringValue" value="1734" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="1305" name="TYC2"/>
             <field xsi:type="a:StringValue" value="1" name="TYC3"/>
-            <field xsi:type="a:StringValue" value="T" name="opt"/>
-            <field xsi:type="a:StringValue" value="00392187+2115024" name="2MASS"/>
-            <field xsi:type="a:StringValue" value="00 39 21.807" name="RAJ2000" unit="h:m:s"/>
-            <field xsi:type="a:StringValue" value="+21 15 01.71" name="DEJ2000" unit="d:m:s"/>
-            <field xsi:type="a:NumberValue" value="-460.22" name="pmRa" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="-370.22" name="pmDec" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="90.01" name="plx" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.72" name="e_Plx"/>
-            <field xsi:type="a:StringValue" value="K0V" name="SpType"/>
-            <field xsi:type="a:StringValue" value="00394+2115" name="WDS"/>
-            <field xsi:type="a:NumberValue" value="42.9" name="sep1" unit="arcsec"/>
-            <field xsi:type="a:NumberValue" value="42.9" name="sep2" unit="arcsec"/>
-            <field xsi:type="a:StringValue" value="CDE" name="Qflag"/>
-            <field xsi:type="a:NumberValue" value="-41.533" name="GLAT" unit="deg"/>
-            <field xsi:type="a:NumberValue" value="119.173" name="GLON" unit="deg"/>
-            <field xsi:type="a:StringValue" value="-33.3" name="RadVel" unit="km/s"/>
-            <field xsi:type="a:NumberValue" value="6.734" name="B" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.72" name="Bphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.875" name="V" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.21" name="R" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.88" name="Rphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.82" name="I" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.549" name="J" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.064" name="H" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.999" name="K" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.946" name="L" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="0.788" name="diam_bv" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.063" name="e_diam_bv" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.835" name="diam_vr" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.081" name="e_diam_vr" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.746" name="diam_vk" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.051" name="e_diam_vk" unit="mas"/>
-            <field xsi:type="a:StringValue" value="OK" name="diamFlag"/>
-            <field xsi:type="a:NumberValue" value="5150.0" name="Teff_SpType"/>
-            <field xsi:type="a:NumberValue" value="4.428" name="logg_SpType"/>
-            <field xsi:type="a:NumberValue" value="0.683" name="UD_B" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.71" name="UD_I" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.72" name="UD_J" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.725" name="UD_H" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.728" name="UD_K" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.736" name="UD_L" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.741" name="UD_N" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.702" name="UD_R" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.679" name="UD_U" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.692" name="UD_V" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.005" name="Av"/>
-            <field xsi:type="a:NumberValue" value="3.945" name="Lo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.035" name="Ko" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.063" name="Ho" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.548" name="Jo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.818" name="Io" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.207" name="Ro" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.87" name="Vo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.728" name="Bo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="0.912" name="vis2"/>
-            <field xsi:type="a:NumberValue" value="0.012" name="vis2Err"/>
-            <field xsi:type="a:NumberValue" value="9.131" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="00242247+2623439" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J002422.46+262343.6" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2855741935707787904" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD   1996" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.008831356" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 24 22.4688457391" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.1615" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+26 23 43.824171652" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.0977" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="-29.04" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.075" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="-21.695" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.071" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="5.867" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0531" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K1III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",Star,*,IR," name="ObjTypes"/>
+            <field xsi:type="a:NumberValue" value="-25.54" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.13" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="5024.94" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4945.0" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="5075.9" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="169.6286" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="168.1041" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="171.1805" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="9.045" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.013" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.3601" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0013" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.112" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.01" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.8489" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="2.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.259547" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.2253" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0019" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.901769" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.39" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.021" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.873" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.021" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.796" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.016" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.822" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.133" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.724" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.05" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.78" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.015" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="0" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="1.422" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1283286" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.8033873" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1035481" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1998282" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.06713461" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.3472202" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.007541056" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="2.171837" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.7888" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4500.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.12" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.3100541" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3100541" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3168751" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3217315" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3266755" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3328631" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3328631" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3351861" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3420759" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3433815" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3447983" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.974650511" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.001136345" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="2.966434405" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K1.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1734-1305-1" name="Name"/>
             <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
         </calibratorInfos>
     </target>
-    <target id="HD_2910">
-        <name>HD 2910</name>
+    <target id="HIP_1079">
+        <name>HIP 1079</name>
         <origin>SearchCal</origin>
-        <RA>00:32:35.4856249580</RA>
-        <DEC>+20:17:39.544849822</DEC>
+        <RA>00:13:26.6645306143</RA>
+        <DEC>+27:02:38.454816647</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>-12.07</SYSVEL>
-        <PMRA>134.911</PMRA>
-        <PMDEC>-47.505</PMDEC>
-        <PARALLAX>12.0124</PARALLAX>
-        <PARA_ERR>0.1103</PARA_ERR>
-        <IDS>2MASS J00323546+2017394,PLX 90.1,IRAS 00299+2001,AKARI-IRC-V1 J0032355+201739,* 52 Psc,ADS 452 A,AG+20 44,BD+19 79,CCDM J00326+2018A,CSI+19 79 1,FK5 2033,GC 641,GCRV 298,GEN# +1.00002910,GSC 01193-02069,HD 2910,HIC 2568,HIP 2568,HR 131,IDS 00274+1945,PPM 89892,SAO 74084,SKY# 875,TD1 283,TYC 1193-2069-1,UBV 405,UBV M 7455,YZ 20 145,PLX 90.10,WDS J00326+2018A,WEB 470,Gaia DR2 2796273303131206016</IDS>
-        <OBJTYP>PM*,UV,**,*,IR</OBJTYP>
+        <SYSVEL>-18.07</SYSVEL>
+        <PMRA>34.759</PMRA>
+        <PMDEC>-19.15</PMDEC>
+        <PARALLAX>4.4056</PARALLAX>
+        <PARA_ERR>0.0438</PARA_ERR>
+        <IDS>HIP 1079,2MASS J00132666+2702385,DM 2600014,</IDS>
+        <OBJTYP>,Star,IR,*,</OBJTYP>
+        <SPECTYP>K2III</SPECTYP>
+        <FLUX_B>9.736</FLUX_B>
+        <FLUX_V>8.4402</FLUX_V>
+        <FLUX_R>7.792908</FLUX_R>
+        <FLUX_I>7.452136</FLUX_I>
+        <FLUX_J>6.996</FLUX_J>
+        <FLUX_H>6.468</FLUX_H>
+        <FLUX_K>6.362</FLUX_K>
+        <FLUX_L>6.33</FLUX_L>
+        <FLUX_M>6.282</FLUX_M>
+        <FLUX_N>6.281</FLUX_N>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="disk1" type="disk">
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="diameter1" type="diameter">
+                <units>mas</units>
+                <value>0.2567059</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <calibratorInfos>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
+            <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="1079" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2600014" name="DM"/>
+            <field xsi:type="a:StringValue" value="1733" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="728" name="TYC2"/>
+            <field xsi:type="a:StringValue" value="1" name="TYC3"/>
+            <field xsi:type="a:StringValue" value="00132666+2702385" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J001326.69+270238.2" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2856714655605197568" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="BD+26    14" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.003746886" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 13 26.6645306143" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="0.9129" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+27 02 38.454816647" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.0054" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="34.759" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.059" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="-19.15" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.065" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="4.4056" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0438" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K2III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",Star,IR,*," name="ObjTypes"/>
+            <field xsi:type="a:StringValue" value="C" name="VarFlag3"/>
+            <field xsi:type="a:NumberValue" value="-18.07" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.22" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4888.48" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4848.4" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4932.0" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="225.532" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="223.3071" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="227.8008" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="9.736" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.028" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.9746" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="9.0E-4" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.699" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.016" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.4402" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.792908" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.7983" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.001" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.452136" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.996" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.02" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.468" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.018" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.362" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.027" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.33" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.088" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.282" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.025" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.281" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.016" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="1" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="0.8822866" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.05332155" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.4862087" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.01935282" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1378284" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.05990589" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.2681062" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.006022855" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="2.246444" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.0292" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4390.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.07" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.2388219" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2388219" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.244107" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2479549" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.251915" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2567059" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2567059" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2585701" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2640394" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2651699" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2661918" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.984857886" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="7.06023E-4" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="1.600184136" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K2.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1733-728-1" name="Name"/>
+            <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
+        </calibratorInfos>
+    </target>
+    <target id="HD_224895">
+        <name>HD 224895</name>
+        <origin>SearchCal</origin>
+        <RA>00:01:35.1417044442</RA>
+        <DEC>+28:25:25.286936335</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>-15.21</SYSVEL>
+        <PMRA>-19.263</PMRA>
+        <PMDEC>-33.923</PMDEC>
+        <PARALLAX>4.2197</PARALLAX>
+        <PARA_ERR>0.0403</PARA_ERR>
+        <IDS>HD 224895,HIP 121,2MASS J00013516+2825255,DM 2704664,</IDS>
+        <OBJTYP>,Star,IR,*,</OBJTYP>
+        <SPECTYP>K2III</SPECTYP>
+        <FLUX_B>8.048</FLUX_B>
+        <FLUX_V>6.4684</FLUX_V>
+        <FLUX_R>5.958</FLUX_R>
+        <FLUX_I>5.49854</FLUX_I>
+        <FLUX_J>5.179</FLUX_J>
+        <FLUX_H>4.346</FLUX_H>
+        <FLUX_K>4.129</FLUX_K>
+        <FLUX_L>3.958</FLUX_L>
+        <FLUX_M>3.832</FLUX_M>
+        <FLUX_N>3.988</FLUX_N>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="disk1" type="disk">
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="diameter1" type="diameter">
+                <units>mas</units>
+                <value>0.6804325</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <calibratorInfos>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
+            <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="224895" name="HD"/>
+            <field xsi:type="a:StringValue" value="121" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2704664" name="DM"/>
+            <field xsi:type="a:StringValue" value="1735" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="1414" name="TYC2"/>
+            <field xsi:type="a:StringValue" value="1" name="TYC3"/>
+            <field xsi:type="a:StringValue" value="00013516+2825255" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J000135.09+282524.8" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2854933622863316224" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD 224895" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.0124571" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 01 35.1417044442" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="0.7979" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+28 25 25.286936335" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="0.4063" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="-19.263" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.051" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="-33.923" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.026" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="4.2197" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0403" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K2III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",Star,IR,*," name="ObjTypes"/>
+            <field xsi:type="a:StringValue" value="C" name="VarFlag3"/>
+            <field xsi:type="a:NumberValue" value="-15.21" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.12" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4682.16" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4565.54" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4803.58" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="235.3979" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="233.1668" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="237.6713" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="8.048" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.01" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.1036" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0013" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.828" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.008" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.4684" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="2.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.958" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.7548" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0018" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.49854" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.179" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.26" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.346" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.186" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.129" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.036" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.958" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.356" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.832" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.107" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.988" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.014" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="1" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="7.537673" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.9581343" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="4.895538" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="2.120787" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="1.13" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.4816707" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.7106505" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.06206386" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="8.733387" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.54" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4390.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.07" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.6330288" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.6330288" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.6470375" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.6572368" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.6677336" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.6804325" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.6804325" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.6853738" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.699871" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.7028674" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.7055761" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.89759518" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.017852395" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="3.030246258" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K2.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1735-1414-1" name="Name"/>
+            <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
+        </calibratorInfos>
+    </target>
+    <target id="HD_2839">
+        <name>HD 2839</name>
+        <origin>SearchCal</origin>
+        <RA>00:31:57.2868587162</RA>
+        <DEC>+28:31:15.793556909</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>-26.44</SYSVEL>
+        <PMRA>-6.953</PMRA>
+        <PMDEC>-16.375</PMDEC>
+        <PARALLAX>2.4935</PARALLAX>
+        <PARA_ERR>0.0655</PARA_ERR>
+        <IDS>HD 2839,HIP 2520,2MASS J00315728+2831157,DM 2700080,</IDS>
+        <OBJTYP>,Star,IR,**,*,</OBJTYP>
+        <SPECTYP>K1III</SPECTYP>
+        <FLUX_B>9.885</FLUX_B>
+        <FLUX_V>8.5368</FLUX_V>
+        <FLUX_R>8.006</FLUX_R>
+        <FLUX_I>7.511699</FLUX_I>
+        <FLUX_J>6.986</FLUX_J>
+        <FLUX_H>6.497</FLUX_H>
+        <FLUX_K>6.403</FLUX_K>
+        <FLUX_L>6.315</FLUX_L>
+        <FLUX_M>6.326</FLUX_M>
+        <FLUX_N>6.355</FLUX_N>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="disk1" type="disk">
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="diameter1" type="diameter">
+                <units>mas</units>
+                <value>0.2543441</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <calibratorInfos>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
+            <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="2839" name="HD"/>
+            <field xsi:type="a:StringValue" value="2520" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2700080" name="DM"/>
+            <field xsi:type="a:StringValue" value="1737" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="2557" name="TYC2"/>
+            <field xsi:type="a:StringValue" value="1" name="TYC3"/>
+            <field xsi:type="a:StringValue" value="00315728+2831157" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J003157.27+283115.6" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2857857155561621376" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD   2839" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.02441729" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 31 57.2868587162" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.3547" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+28 31 15.793556909" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="0.8749" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="-6.953" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.087" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="-16.375" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.056" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="2.4935" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0655" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K1III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",Star,IR,**,*," name="ObjTypes"/>
+            <field xsi:type="a:StringValue" value="C" name="VarFlag3"/>
+            <field xsi:type="a:NumberValue" value="-26.44" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.27" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4850.0" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4791.43" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4928.0" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="396.7006" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="386.5709" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="407.3652" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="9.885" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.013" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="9.0875" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.0E-4" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.836" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.013" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.5368" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.006" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.8809" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.0E-4" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.511699" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.986" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.018" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.497" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.016" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.403" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.024" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.315" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.086" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.326" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.024" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.355" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.016" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="0" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="0.8867905" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.07835534" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.4643662" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.0197252" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.167" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.05257285" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.2653144" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.005853749" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="2.206344" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="1.9055" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4500.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.12" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.2369155" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2369155" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2421274" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2458383" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.249616" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2543441" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2543441" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.256119" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2613836" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2623813" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.2634638" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.985133504" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="6.80044E-4" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="3.644669889" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K1.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1737-2557-1" name="Name"/>
+            <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
+        </calibratorInfos>
+    </target>
+    <target id="HD_5164">
+        <name>HD 5164</name>
+        <origin>SearchCal</origin>
+        <RA>00:53:49.6540255312</RA>
+        <DEC>+28:33:29.565563910</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>10.88</SYSVEL>
+        <PMRA>27.422</PMRA>
+        <PMDEC>-20.93</PMDEC>
+        <PARALLAX>4.7982</PARALLAX>
+        <PARA_ERR>0.0397</PARA_ERR>
+        <IDS>HD 5164,HIP 4220,2MASS J00534964+2833295,DM 2700144,</IDS>
+        <OBJTYP>,Star,IR,*,</OBJTYP>
+        <SPECTYP>K1III</SPECTYP>
+        <FLUX_B>8.361</FLUX_B>
+        <FLUX_V>7.0314</FLUX_V>
+        <FLUX_R>6.5</FLUX_R>
+        <FLUX_I>6.007686</FLUX_I>
+        <FLUX_J>5.479</FLUX_J>
+        <FLUX_H>4.974</FLUX_H>
+        <FLUX_K>4.852</FLUX_K>
+        <FLUX_L>4.766</FLUX_L>
+        <FLUX_M>4.695</FLUX_M>
+        <FLUX_N>4.808</FLUX_N>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="disk1" type="disk">
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="diameter1" type="diameter">
+                <units>mas</units>
+                <value>0.5154199</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <calibratorInfos>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
+            <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="5164" name="HD"/>
+            <field xsi:type="a:StringValue" value="4220" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2700144" name="DM"/>
+            <field xsi:type="a:StringValue" value="1745" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="1154" name="TYC2"/>
+            <field xsi:type="a:StringValue" value="1" name="TYC3"/>
+            <field xsi:type="a:StringValue" value="00534964+2833295" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J005349.66+283329.2" name="WISE"/>
+            <field xsi:type="a:StringValue" value="311087062525330688" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD   5164" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.004247673" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 53 49.6540255312" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.0494" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+28 33 29.565563910" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.0652" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="27.422" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.068" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="-20.93" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.069" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="4.7982" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0397" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K1III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",Star,IR,*," name="ObjTypes"/>
+            <field xsi:type="a:StringValue" value="C" name="VarFlag3"/>
+            <field xsi:type="a:NumberValue" value="10.88" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.12" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4800.75" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4735.75" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4950.0" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="207.1806" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="205.478" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="208.9111" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="8.361" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.014" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.5937" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0027" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.33" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.008" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.0314" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.5" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.3789" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0034" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.007686" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.479" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.021" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.974" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.016" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.852" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.02" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.766" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.269" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.695" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.123" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.808" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.015" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="0" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="3.608848" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.2263305" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="2.176868" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.4687488" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.502409" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1839745" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.5376509" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0116769" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="2.171837" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.6615" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4500.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.12" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.4801014" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4801014" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4906632" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4981832" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5058386" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5154199" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5154199" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5190168" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5296853" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.531707" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.5339007" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.94011826" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.002644022" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="3.425078008" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K1.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1745-1154-1" name="Name"/>
+            <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
+        </calibratorInfos>
+    </target>
+    <target id="HD_2552">
+        <name>HD 2552</name>
+        <origin>SearchCal</origin>
+        <RA>00:29:20.8760160995</RA>
+        <DEC>+28:49:40.043966208</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>32.19</SYSVEL>
+        <PMRA>50.087</PMRA>
+        <PMDEC>4.038</PMDEC>
+        <PARALLAX>2.4836</PARALLAX>
+        <PARA_ERR>0.0664</PARA_ERR>
+        <IDS>HD 2552,HIP 2300,2MASS J00292087+2849401,DM 2800072,</IDS>
+        <OBJTYP>,PM*,IR,*,PM*,</OBJTYP>
+        <SPECTYP>K3III</SPECTYP>
+        <FLUX_B>8.869</FLUX_B>
+        <FLUX_V>6.7861</FLUX_V>
+        <FLUX_R>6.209051</FLUX_R>
+        <FLUX_I>5.445076</FLUX_I>
+        <FLUX_J>4.808</FLUX_J>
+        <FLUX_H>4.042</FLUX_H>
+        <FLUX_K>3.91</FLUX_K>
+        <FLUX_L>3.658</FLUX_L>
+        <FLUX_M>3.576</FLUX_M>
+        <FLUX_N>3.727</FLUX_N>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="disk1" type="disk">
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="diameter1" type="diameter">
+                <units>mas</units>
+                <value>0.8538691</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <calibratorInfos>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
+            <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="2552" name="HD"/>
+            <field xsi:type="a:StringValue" value="2300" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2800072" name="DM"/>
+            <field xsi:type="a:StringValue" value="1737" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="2547" name="TYC2"/>
+            <field xsi:type="a:StringValue" value="1" name="TYC3"/>
+            <field xsi:type="a:StringValue" value="00292087+2849401" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J002920.92+284940.1" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2857917663060777088" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD   2552" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.01161806" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 29 20.8760160995" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.1152" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+28 49 40.043966208" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.1362" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="50.087" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.072" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="4.038" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.073" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="2.4836" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0664" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K3III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",PM*,IR,*,PM*," name="ObjTypes"/>
+            <field xsi:type="a:NumberValue" value="32.19" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.17" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4119.77" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4009.7" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4295.77" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="398.2837" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="387.9389" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="409.1847" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="8.869" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.013" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.6111" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0012" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.329" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.009" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.7861" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.209051" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.9384" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0012" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.445076" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.808" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.22" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.042" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.224" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.91" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.22" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.658" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.39" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.576" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.23" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.727" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.014" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="3" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="9.586782" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.7003493" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="6.732018" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="3.013396" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="1.353872" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.4892099" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.8933557" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.06787459" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="7.597712" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.0486" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4250.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.01" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.7929781" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.7929781" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.8108569" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.8239882" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.8377751" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.8538691" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.8538691" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.8604583" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.8793826" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.8837096" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.8867885" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.842791032" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.023252973" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="3.076634042" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K3.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1737-2547-1" name="Name"/>
+            <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
+        </calibratorInfos>
+    </target>
+    <target id="HD_3252">
+        <name>HD 3252</name>
+        <origin>SearchCal</origin>
+        <RA>00:35:52.3667872823</RA>
+        <DEC>+29:05:59.300295853</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>-38.66</SYSVEL>
+        <PMRA>-18.19</PMRA>
+        <PMDEC>-30.486</PMDEC>
+        <PARALLAX>3.3287</PARALLAX>
+        <PARA_ERR>0.0455</PARA_ERR>
+        <IDS>HD 3252,HIP 2825,2MASS J00355236+2905593,DM 2800096,</IDS>
+        <OBJTYP>,Star,IR,*,</OBJTYP>
+        <SPECTYP>K1III</SPECTYP>
+        <FLUX_B>9.187</FLUX_B>
+        <FLUX_V>7.7068</FLUX_V>
+        <FLUX_R>7.167795</FLUX_R>
+        <FLUX_I>6.608712</FLUX_I>
+        <FLUX_J>6.022</FLUX_J>
+        <FLUX_H>5.37</FLUX_H>
+        <FLUX_K>5.265</FLUX_K>
+        <FLUX_L>5.295</FLUX_L>
+        <FLUX_M>5.15</FLUX_M>
+        <FLUX_N>5.214</FLUX_N>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="disk1" type="disk">
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="diameter1" type="diameter">
+                <units>mas</units>
+                <value>0.4325004</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <calibratorInfos>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
+            <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="3252" name="HD"/>
+            <field xsi:type="a:StringValue" value="2825" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2800096" name="DM"/>
+            <field xsi:type="a:StringValue" value="1744" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="1359" name="TYC2"/>
+            <field xsi:type="a:StringValue" value="1" name="TYC3"/>
+            <field xsi:type="a:StringValue" value="00355236+2905593" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J003552.29+290559.2" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2857806303148748544" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD   3252" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.006692287" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 35 52.3667872823" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.3412" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+29 05 59.300295853" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.0679" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="-18.19" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.086" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="-30.486" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.069" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="3.3287" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0455" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K1III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",Star,IR,*," name="ObjTypes"/>
+            <field xsi:type="a:StringValue" value="R" name="VarFlag3"/>
+            <field xsi:type="a:NumberValue" value="-38.66" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.14" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4604.57" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4574.64" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4687.24" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="297.8912" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="293.8793" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="302.0121" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="9.187" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.024" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.3291" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0021" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.065" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.014" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.7068" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.167795" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.9935" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0018" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.608712" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.022" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.034" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.37" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.046" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.265" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.017" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.295" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.152" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.15" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.066" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.214" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.014" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="2" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="2.317999" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.2377288" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="1.401608" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.310625" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.333" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1077984" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.451155" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.01151244" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="2.55177" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.591" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4500.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.12" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.4028638" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4028638" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4117265" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4180367" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4244605" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4325004" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4325004" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4355187" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4444708" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4461673" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.4480081" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.957515998" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.002221032" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="4.520952927" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K1.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1744-1359-1" name="Name"/>
+            <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
+        </calibratorInfos>
+    </target>
+    <target id="HD_2732">
+        <name>HD 2732</name>
+        <origin>SearchCal</origin>
+        <RA>00:30:53.3405780005</RA>
+        <DEC>+29:31:42.353534468</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>-16.91</SYSVEL>
+        <PMRA>-5.266</PMRA>
+        <PMDEC>1.894</PMDEC>
+        <PARALLAX>5.0144</PARALLAX>
+        <PARA_ERR>0.0812</PARA_ERR>
+        <IDS>HD 2732,HIP 2421,2MASS J00305335+2931423,DM 2800080,</IDS>
+        <OBJTYP>,Star,*,IR,</OBJTYP>
+        <SPECTYP>K1III</SPECTYP>
+        <FLUX_B>9.18</FLUX_B>
+        <FLUX_V>7.9169</FLUX_V>
+        <FLUX_R>7.367</FLUX_R>
+        <FLUX_I>6.934661</FLUX_I>
+        <FLUX_J>6.414</FLUX_J>
+        <FLUX_H>5.918</FLUX_H>
+        <FLUX_K>5.81</FLUX_K>
+        <FLUX_L>5.805</FLUX_L>
+        <FLUX_M>5.752</FLUX_M>
+        <FLUX_N>5.793</FLUX_N>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="disk1" type="disk">
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="diameter1" type="diameter">
+                <units>mas</units>
+                <value>0.3305953</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <calibratorInfos>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
+            <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="2732" name="HD"/>
+            <field xsi:type="a:StringValue" value="2421" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2800080" name="DM"/>
+            <field xsi:type="a:StringValue" value="1737" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="1367" name="TYC2"/>
+            <field xsi:type="a:StringValue" value="1" name="TYC3"/>
+            <field xsi:type="a:StringValue" value="00305335+2931423" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J003053.34+293142.3" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2858807511564977664" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD   2732" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.0138638" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 30 53.3405780005" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.9495" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+29 31 42.353534468" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.2837" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="-5.266" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.126" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="1.894" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.083" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="5.0144" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0812" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K1III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",Star,*,IR," name="ObjTypes"/>
+            <field xsi:type="a:StringValue" value="C" name="VarFlag3"/>
+            <field xsi:type="a:NumberValue" value="-16.91" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.15" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4967.8" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4890.5" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="5041.4" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="198.3573" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="195.187" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="201.6304" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="9.18" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.014" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.442" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.0E-4" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.197" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.016" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.9169" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.367" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.2777" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.0E-4" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.934661" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.414" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.026" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.918" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.018" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.81" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.017" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.805" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.136" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.752" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.046" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.793" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.015" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="0" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="1.450715" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1739703" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.7906161" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1070736" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.2018872" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.07291443" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.3448545" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.007698534" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="2.2324" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.5867" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4500.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.12" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.3079417" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3079417" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3147162" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3195395" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3244498" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3305953" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3305953" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3329024" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3397453" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3410421" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3424491" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.974991127" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.001152507" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="3.521662462" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K1.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1737-1367-1" name="Name"/>
+            <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
+        </calibratorInfos>
+    </target>
+    <target id="HD_3333">
+        <name>HD 3333</name>
+        <origin>SearchCal</origin>
+        <RA>00:36:31.1919146896</RA>
+        <DEC>+29:50:33.084608568</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>6.37</SYSVEL>
+        <PMRA>-11.66</PMRA>
+        <PMDEC>10.06</PMDEC>
+        <PARALLAX>3.2374</PARALLAX>
+        <PARA_ERR>0.0481</PARA_ERR>
+        <IDS>HD 3333,2MASS J00363118+2950331,DM 2900107,</IDS>
+        <OBJTYP>,Star,*,IR,</OBJTYP>
         <SPECTYP>K0III</SPECTYP>
-        <FLUX_B>6.443</FLUX_B>
-        <FLUX_V>5.363</FLUX_V>
-        <FLUX_G>5.0435</FLUX_G>
-        <FLUX_I>4.061</FLUX_I>
-        <FLUX_J>3.741</FLUX_J>
-        <FLUX_H>3.159</FLUX_H>
-        <FLUX_K>2.95</FLUX_K>
+        <FLUX_B>9.001</FLUX_B>
+        <FLUX_V>7.7359</FLUX_V>
+        <FLUX_R>7.22425</FLUX_R>
+        <FLUX_I>6.730424</FLUX_I>
+        <FLUX_J>6.248</FLUX_J>
+        <FLUX_H>5.74</FLUX_H>
+        <FLUX_K>5.647</FLUX_K>
+        <FLUX_L>5.561</FLUX_L>
+        <FLUX_M>5.511</FLUX_M>
+        <FLUX_N>5.546</FLUX_N>
         <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
@@ -814,106 +1861,132 @@ smaller than 1.</desc>
             </tm:parameter>
             <tm:parameter name="diameter1" type="diameter">
                 <units>mas</units>
-                <value>1.243</value>
+                <value>0.3532352</value>
                 <minValue>0.0</minValue>
                 <hasFixedValue>false</hasFixedValue>
             </tm:parameter>
         </tm:model>
         <calibratorInfos>
-            <parameter xsi:type="a:StringValue" value="SearchCal v3.7.5" name="SearchCalServerVersion"/>
-            <parameter xsi:type="a:StringValue" value="K" name="band"/>
-            <parameter xsi:type="a:NumberValue" value="106.72986732869107" name="baseMax" unit="m"/>
-            <parameter xsi:type="a:NumberValue" value="2.0045" name="wlen" unit="um"/>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
             <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
-            <parameter xsi:type="a:StringValue" value="4.3b5" name="SearchCalGuiVersion"/>
-            <field xsi:type="a:StringValue" value="2910" name="HD"/>
-            <field xsi:type="a:StringValue" value="2568" name="HIP"/>
-            <field xsi:type="a:StringValue" value="1900079" name="DM"/>
-            <field xsi:type="a:StringValue" value="1193" name="TYC1"/>
-            <field xsi:type="a:StringValue" value="2069" name="TYC2"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="3333" name="HD"/>
+            <field xsi:type="a:StringValue" value="2900107" name="DM"/>
+            <field xsi:type="a:StringValue" value="1744" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="35" name="TYC2"/>
             <field xsi:type="a:StringValue" value="1" name="TYC3"/>
-            <field xsi:type="a:StringValue" value="T" name="opt"/>
-            <field xsi:type="a:StringValue" value="00323546+2017394" name="2MASS"/>
-            <field xsi:type="a:StringValue" value="00 32 35.486" name="RAJ2000" unit="h:m:s"/>
-            <field xsi:type="a:StringValue" value="+20 17 39.54" name="DEJ2000" unit="d:m:s"/>
-            <field xsi:type="a:NumberValue" value="136.8" name="pmRa" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="-47.49" name="pmDec" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="12.88" name="plx" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.72" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="00363118+2950331" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J003631.16+295033.2" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2858411446860814848" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD   3333" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.01395696" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 36 31.1919146896" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.4924" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+29 50 33.084608568" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.1621" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="-11.66" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.096" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="10.06" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.075" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="3.2374" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0481" name="e_Plx"/>
             <field xsi:type="a:StringValue" value="K0III" name="SpType"/>
-            <field xsi:type="a:StringValue" value="W" name="VarFlag2"/>
-            <field xsi:type="a:StringValue" value="00326+2018" name="WDS"/>
-            <field xsi:type="a:NumberValue" value="25.0" name="sep1" unit="arcsec"/>
-            <field xsi:type="a:NumberValue" value="54.4" name="sep2" unit="arcsec"/>
-            <field xsi:type="a:StringValue" value="DCD" name="Qflag"/>
-            <field xsi:type="a:NumberValue" value="-42.358" name="GLAT" unit="deg"/>
-            <field xsi:type="a:NumberValue" value="116.947" name="GLON" unit="deg"/>
-            <field xsi:type="a:StringValue" value="-12.5" name="RadVel" unit="km/s"/>
-            <field xsi:type="a:NumberValue" value="6.441" name="B" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.44" name="Bphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.363" name="V" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.567" name="R" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.38" name="Rphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.061" name="I" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.741" name="J" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.159" name="H" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.95" name="K" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.877" name="L" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="1.38" name="diam_bv" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.11" name="e_diam_bv" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.361" name="diam_vr" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.132" name="e_diam_vr" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.276" name="diam_vk" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.088" name="e_diam_vk" unit="mas"/>
-            <field xsi:type="a:StringValue" value="OK" name="diamFlag"/>
-            <field xsi:type="a:NumberValue" value="4660.0" name="Teff_SpType"/>
-            <field xsi:type="a:NumberValue" value="2.078" name="logg_SpType"/>
-            <field xsi:type="a:NumberValue" value="1.157" name="UD_B" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.209" name="UD_I" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.226" name="UD_J" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.236" name="UD_H" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.243" name="UD_K" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.257" name="UD_L" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.267" name="UD_N" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.194" name="UD_R" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.146" name="UD_U" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="1.174" name="UD_V" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.024" name="Av"/>
-            <field xsi:type="a:NumberValue" value="2.876" name="Lo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.976" name="Ko" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.155" name="Ho" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.734" name="Jo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.049" name="Io" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="4.549" name="Ro" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="5.339" name="Vo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.409" name="Bo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="0.761" name="vis2"/>
-            <field xsi:type="a:NumberValue" value="0.029" name="vis2Err"/>
-            <field xsi:type="a:NumberValue" value="9.171" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value=",Star,*,IR," name="ObjTypes"/>
+            <field xsi:type="a:NumberValue" value="6.37" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.21" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4872.85" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4831.74" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4902.58" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="306.2358" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="301.756" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="310.8481" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="9.001" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.02" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.2657" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0015" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="8.022" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.014" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.7359" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="3.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.22425" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.0958" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0024" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.730424" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.248" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.029" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.74" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.053" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.647" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.016" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.561" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.167" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.511" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.052" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.546" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.021" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="0" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="1.689818" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.2437447" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="1.003534" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.1211468" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.258" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.09827205" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.3681539" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.009916248" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="2.693506" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.1068" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4660.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.12" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.3295434" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3295434" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3368543" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3417683" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3467707" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3532352" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3532352" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3555765" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3628846" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3640996" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.3656857" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.971491014" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.00158143" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="4.784297905" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K0.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 1744-35-1" name="Name"/>
             <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
         </calibratorInfos>
     </target>
-    <target id="HD_2841">
-        <name>HD 2841</name>
+    <target id="HD_1406">
+        <name>HD 1406</name>
         <origin>SearchCal</origin>
-        <RA>00:31:54.8822976270</RA>
-        <DEC>+19:38:34.679356667</DEC>
+        <RA>00:18:20.7630289574</RA>
+        <DEC>+30:23:45.393259288</DEC>
         <EQUINOX>2000.0</EQUINOX>
-        <SYSVEL>-1.26</SYSVEL>
-        <VELTYP>Opt</VELTYP>
-        <PMRA>4.321</PMRA>
-        <PMDEC>4.632</PMDEC>
-        <PARALLAX>2.138</PARALLAX>
-        <PARA_ERR>0.0421</PARA_ERR>
-        <IDS>2MASS J00315489+1938344,AG+19 43,AGKR 418,BD+18 67,DO 8404,GC 627,GCRV 289,GSC 01183-01803,HD 2841,HIC 2517,HIP 2517,IRAS 00292+1921,IRC +20009,PPM 116548,SAO 91949,SKY# 862,TYC 1183-1803-1,YZ 19 141,WEB 460,Gaia DR2 2795817516906484736</IDS>
-        <OBJTYP>*,IR</OBJTYP>
-        <SPECTYP>K5III</SPECTYP>
-        <FLUX_B>8.51</FLUX_B>
-        <FLUX_V>6.876</FLUX_V>
-        <FLUX_G>6.1396</FLUX_G>
-        <FLUX_J>3.95</FLUX_J>
-        <FLUX_H>3.07</FLUX_H>
-        <FLUX_K>2.76</FLUX_K>
+        <SYSVEL>-37.7</SYSVEL>
+        <PMRA>35.678</PMRA>
+        <PMDEC>-50.395</PMDEC>
+        <PARALLAX>7.447</PARALLAX>
+        <PARA_ERR>0.0452</PARA_ERR>
+        <IDS>HD 1406,HIP 1477,2MASS J00182075+3023452,DM 2900039,</IDS>
+        <OBJTYP>,PM*,IR,*,PM*,</OBJTYP>
+        <SPECTYP>K3III</SPECTYP>
+        <FLUX_B>8.317</FLUX_B>
+        <FLUX_V>6.7092</FLUX_V>
+        <FLUX_R>6.097</FLUX_R>
+        <FLUX_I>5.568239</FLUX_I>
+        <FLUX_J>4.98</FLUX_J>
+        <FLUX_H>4.21</FLUX_H>
+        <FLUX_K>4.24</FLUX_K>
+        <FLUX_L>4.126</FLUX_L>
+        <FLUX_M>4.071</FLUX_M>
+        <FLUX_N>4.254</FLUX_N>
         <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="disk1" type="disk">
             <tm:parameter name="flux_weight1" type="flux_weight">
@@ -933,62 +2006,112 @@ smaller than 1.</desc>
             </tm:parameter>
             <tm:parameter name="diameter1" type="diameter">
                 <units>mas</units>
-                <value>1.51</value>
+                <value>0.7317176</value>
                 <minValue>0.0</minValue>
                 <hasFixedValue>false</hasFixedValue>
             </tm:parameter>
         </tm:model>
         <calibratorInfos>
-            <parameter xsi:type="a:StringValue" value="SearchCal v3.7.5" name="SearchCalServerVersion"/>
-            <parameter xsi:type="a:StringValue" value="K" name="band"/>
-            <parameter xsi:type="a:NumberValue" value="106.72986732869107" name="baseMax" unit="m"/>
-            <parameter xsi:type="a:NumberValue" value="2.0045" name="wlen" unit="um"/>
+            <parameter xsi:type="a:StringValue" value="SearchCal Server v6.0.0" name="SearchCalServerVersion"/>
+            <parameter xsi:type="a:StringValue" value="H" name="band"/>
+            <parameter xsi:type="a:NumberValue" value="104.316" name="baseMax" unit="m"/>
+            <parameter xsi:type="a:NumberValue" value="1.652" name="wlen" unit="um"/>
             <parameter xsi:type="a:BooleanValue" value="true" name="bright"/>
-            <parameter xsi:type="a:StringValue" value="4.3b5" name="SearchCalGuiVersion"/>
-            <field xsi:type="a:StringValue" value="2841" name="HD"/>
-            <field xsi:type="a:StringValue" value="2517" name="HIP"/>
-            <field xsi:type="a:StringValue" value="1800067" name="DM"/>
-            <field xsi:type="a:StringValue" value="1183" name="TYC1"/>
-            <field xsi:type="a:StringValue" value="1803" name="TYC2"/>
+            <parameter xsi:type="a:StringValue" value="6.0.0 alpha 2" name="SearchCalGuiVersion"/>
+            <field xsi:type="a:StringValue" value="1406" name="HD"/>
+            <field xsi:type="a:StringValue" value="1477" name="HIP"/>
+            <field xsi:type="a:StringValue" value="2900039" name="DM"/>
+            <field xsi:type="a:StringValue" value="2261" name="TYC1"/>
+            <field xsi:type="a:StringValue" value="1582" name="TYC2"/>
             <field xsi:type="a:StringValue" value="1" name="TYC3"/>
-            <field xsi:type="a:StringValue" value="T" name="opt"/>
-            <field xsi:type="a:StringValue" value="00315489+1938344" name="2MASS"/>
-            <field xsi:type="a:StringValue" value="00 31 54.884" name="RAJ2000" unit="h:m:s"/>
-            <field xsi:type="a:StringValue" value="+19 38 34.69" name="DEJ2000" unit="d:m:s"/>
-            <field xsi:type="a:NumberValue" value="4.59" name="pmRa" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="4.23" name="pmDec" unit="mas/yr"/>
-            <field xsi:type="a:NumberValue" value="3.64" name="plx" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.81" name="e_Plx"/>
-            <field xsi:type="a:StringValue" value="K5III" name="SpType"/>
-            <field xsi:type="a:StringValue" value="M" name="VarFlag3"/>
-            <field xsi:type="a:StringValue" value="DDD" name="Qflag"/>
-            <field xsi:type="a:NumberValue" value="-42.99" name="GLAT" unit="deg"/>
-            <field xsi:type="a:NumberValue" value="116.643" name="GLON" unit="deg"/>
-            <field xsi:type="a:StringValue" value="3.7" name="RadVel" unit="km/s"/>
-            <field xsi:type="a:NumberValue" value="1.51" name="UDDK" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="0.02" name="e_UDDK" unit="mas"/>
-            <field xsi:type="a:NumberValue" value="8.522" name="B" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="8.57" name="Bphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.876" name="V" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.89" name="Rphg" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.95" name="J" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.07" name="H" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="2.76" name="K" unit="mag"/>
-            <field xsi:type="a:StringValue" value="OK" name="diamFlag"/>
-            <field xsi:type="a:NumberValue" value="0.05" name="Av"/>
-            <field xsi:type="a:NumberValue" value="2.781" name="Ko" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.062" name="Ho" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="3.936" name="Jo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="6.826" name="Vo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="8.456" name="Bo" unit="mag"/>
-            <field xsi:type="a:NumberValue" value="0.679" name="vis2"/>
-            <field xsi:type="a:NumberValue" value="0.007" name="vis2Err"/>
-            <field xsi:type="a:NumberValue" value="9.707" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="00182075+3023452" name="2MASS"/>
+            <field xsi:type="a:StringValue" value="J001820.80+302345.0" name="WISE"/>
+            <field xsi:type="a:StringValue" value="2860806354984855808" name="GAIA"/>
+            <field xsi:type="a:StringValue" value="HD   1406" name="SIMBAD"/>
+            <field xsi:type="a:StringValue" value="0" name="XMATCH_MAIN_FLAG"/>
+            <field xsi:type="a:NumberValue" value="0.004113947" name="XM_SIMBAD_sep" unit="as"/>
+            <field xsi:type="a:StringValue" value="0" name="GroupSize"/>
+            <field xsi:type="a:StringValue" value="00 18 20.7630289574" name="RAJ2000" unit="h:m:s"/>
+            <field xsi:type="a:NumberValue" value="1.1699" name="e_RAJ2000" unit="mas"/>
+            <field xsi:type="a:StringValue" value="+30 23 45.393259288" name="DEJ2000" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" value="0.7886" name="e_DEJ2000" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="35.678" name="pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.075" name="e_pmRa" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="-50.395" name="pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="0.051" name="e_pmDec" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" value="7.447" name="plx" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.0452" name="e_Plx"/>
+            <field xsi:type="a:StringValue" value="K3III" name="SpType"/>
+            <field xsi:type="a:StringValue" value=",PM*,IR,*,PM*," name="ObjTypes"/>
+            <field xsi:type="a:StringValue" value="C" name="VarFlag3"/>
+            <field xsi:type="a:NumberValue" value="-37.7" name="RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="0.14" name="e_RadVel" unit="km/s"/>
+            <field xsi:type="a:NumberValue" value="4580.38" name="gaia_Teff" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4536.53" name="gaia_Teff_lo" unit="K"/>
+            <field xsi:type="a:NumberValue" value="4714.51" name="gaia_Teff_hi" unit="K"/>
+            <field xsi:type="a:NumberValue" value="133.7695" name="gaia_dist" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="132.9586" name="gaia_dist_lo" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="134.5902" name="gaia_dist_hi" unit="pc"/>
+            <field xsi:type="a:NumberValue" value="8.317" name="B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.008" name="e_B" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.3519" name="Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0016" name="e_Bp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="7.077" name="V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.004" name="e_V" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.7092" name="G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="2.0E-4" name="e_G" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="6.097" name="R" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.989" name="Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.0021" name="e_Rp" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="5.568239" name="I" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.98" name="J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.03" name="e_J" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.21" name="H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.21" name="e_H" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.24" name="K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.024" name="e_K" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.126" name="L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.341" name="e_L" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.071" name="M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.176" name="e_M" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="4.254" name="N" unit="mag"/>
+            <field xsi:type="a:NumberValue" value="0.016" name="e_N" unit="mag"/>
+            <field xsi:type="a:StringValue" value="2" name="IRFlag"/>
+            <field xsi:type="a:NumberValue" value="6.109541" name="Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.2484783" name="e_Lflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="4.085885" name="Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="1.572757" name="e_Mflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.8448135" name="Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.3182273" name="e_Nflux_med" unit="Jy"/>
+            <field xsi:type="a:NumberValue" value="0.7655553" name="LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.05480653" name="e_LDD" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="7.159056" name="e_LDD_rel" unit="%"/>
+            <field xsi:type="a:NumberValue" value="0.2221" name="diam_chi2"/>
+            <field xsi:type="a:StringValue" value="0" name="CalFlag"/>
+            <field xsi:type="a:BooleanValue" value="true" name="diamFlag"/>
+            <field xsi:type="a:NumberValue" value="4250.0" name="Teff_SpType" unit="K"/>
+            <field xsi:type="a:NumberValue" value="2.01" name="logg_SpType" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" value="0.6795375" name="UD_U" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.6795375" name="UD_B" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.6948585" name="UD_V" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.7061114" name="UD_R" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.717926" name="UD_I" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.7317176" name="UD_J" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.7317176" name="UD_H" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.7373641" name="UD_K" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.7535812" name="UD_L" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.7572892" name="UD_M" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.7599277" name="UD_N" unit="mas"/>
+            <field xsi:type="a:NumberValue" value="0.882395265" name="vis2"/>
+            <field xsi:type="a:NumberValue" value="0.016714435" name="vis2Err"/>
+            <field xsi:type="a:NumberValue" value="1.921979502" name="dist" unit="deg"/>
+            <field xsi:type="a:StringValue" value="K3.00III" name="SpType_JMMC"/>
+            <field xsi:type="a:StringValue" value="TYC 2261-1582-1" name="Name"/>
             <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
         </calibratorInfos>
     </target>
     <targetUserInfos>
-        <calibrators>HD_3546 HD_3590 HD_2767 HD_3421 HD_3651 HD_2910 HD_2841</calibrators>
+        <calibrators>HD_1583 HD_112 HD_2315 HD_1996 HIP_1079 HD_224895 HD_2839 HD_5164 HD_2552 HD_3252 HD_2732 HD_3333 HD_1406</calibrators>
         <group id="JMMC_AO">
             <name>AO Star</name>
             <category>[OB]</category>
@@ -1009,10 +2132,10 @@ smaller than 1.</desc>
         </group>
         <targetInfo>
             <targetRef>HIP1234</targetRef>
-            <calibrators>HD_3546 HD_3590 HD_2767 HD_3421 HD_3651 HD_2910 HD_2841</calibrators>
+            <calibrators>HD_1583 HD_112 HD_2315 HD_1996 HIP_1079 HD_224895 HD_2839 HD_2552 HD_3252 HD_2732 HD_3333 HD_1406</calibrators>
         </targetInfo>
     </targetUserInfos>
     <variant>
-        <stations>D0 G2 J3 K0</stations>
+        <stations>K0 G2 D0 J3</stations>
     </variant>
 </a:observationSetting>

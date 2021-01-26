@@ -70,7 +70,6 @@
         <observation>
             <obsId>MIDI.2007-06-26T04:09:29.000_1</obsId>
             <type>calibrator</type>
-            <parentId>17834</parentId>
             <programId>079.C-0101(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -89,7 +88,6 @@
         <observation>
             <obsId>MIDI.2007-06-26T04:11:53.000_1</obsId>
             <type>science</type>
-            <parentId>17835</parentId>
             <programId>079.C-0101(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -108,7 +106,6 @@
         <observation>
             <obsId>MIDI.2007-06-26T04:13:07.506_1</obsId>
             <type>science</type>
-            <parentId>17835</parentId>
             <programId>079.C-0101(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -127,7 +124,6 @@
         <observation>
             <obsId>MIDI.2007-06-26T04:14:22.012_1</obsId>
             <type>science</type>
-            <parentId>17835</parentId>
             <programId>079.C-0101(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -146,7 +142,6 @@
         <observation>
             <obsId>MIDI.2008-05-17T04:17:36.000_1</obsId>
             <type>calibrator</type>
-            <parentId>19707</parentId>
             <programId>081.C-0020(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U3</stations>
@@ -165,7 +160,6 @@
         <observation>
             <obsId>MIDI.2008-05-17T04:18:50.506_1</obsId>
             <type>calibrator</type>
-            <parentId>19707</parentId>
             <programId>081.C-0020(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U3</stations>
@@ -184,7 +178,6 @@
         <observation>
             <obsId>MIDI.2008-05-17T04:20:31.000_1</obsId>
             <type>science</type>
-            <parentId>19708</parentId>
             <programId>081.C-0020(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U3</stations>
@@ -203,7 +196,6 @@
         <observation>
             <obsId>MIDI.2008-05-17T04:21:45.507_1</obsId>
             <type>science</type>
-            <parentId>19708</parentId>
             <programId>081.C-0020(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U3</stations>
@@ -222,7 +214,6 @@
         <observation>
             <obsId>MIDI.2008-05-17T04:23:00.013_1</obsId>
             <type>science</type>
-            <parentId>19708</parentId>
             <programId>081.C-0020(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U3</stations>
@@ -241,7 +232,6 @@
         <observation>
             <obsId>MIDI.2011-03-20T07:27:23.000_1</obsId>
             <type>calibrator</type>
-            <parentId>24944</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -260,7 +250,6 @@
         <observation>
             <obsId>MIDI.2011-03-20T07:28:37.469_1</obsId>
             <type>calibrator</type>
-            <parentId>24944</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -279,7 +268,6 @@
         <observation>
             <obsId>MIDI.2011-03-20T07:31:10.000_1</obsId>
             <type>science</type>
-            <parentId>24941</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -298,7 +286,6 @@
         <observation>
             <obsId>MIDI.2011-03-20T07:32:20.160_1</obsId>
             <type>science</type>
-            <parentId>24941</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -317,7 +304,6 @@
         <observation>
             <obsId>MIDI.2011-03-20T07:33:34.628_1</obsId>
             <type>science</type>
-            <parentId>24941</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -336,7 +322,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T04:52:32.000_1</obsId>
             <type>calibrator</type>
-            <parentId>25055</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -355,7 +340,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T04:53:46.468_1</obsId>
             <type>calibrator</type>
-            <parentId>25055</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -374,7 +358,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T04:56:38.000_1</obsId>
             <type>science</type>
-            <parentId>25060</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -393,7 +376,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T04:57:52.469_1</obsId>
             <type>science</type>
-            <parentId>25060</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -412,7 +394,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T04:59:06.937_1</obsId>
             <type>science</type>
-            <parentId>25060</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -431,7 +412,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T08:27:08.000_1</obsId>
             <type>calibrator</type>
-            <parentId>25052</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -450,7 +430,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T08:28:22.469_1</obsId>
             <type>calibrator</type>
-            <parentId>25052</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -469,7 +448,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T08:33:06.000_1</obsId>
             <type>calibrator</type>
-            <parentId>25052</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -488,7 +466,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T08:34:20.469_1</obsId>
             <type>calibrator</type>
-            <parentId>25052</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -507,7 +484,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T08:38:00.000_1</obsId>
             <type>science</type>
-            <parentId>25054</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -526,7 +502,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T08:39:14.469_1</obsId>
             <type>science</type>
-            <parentId>25054</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -545,7 +520,6 @@
         <observation>
             <obsId>MIDI.2011-04-13T08:40:28.937_1</obsId>
             <type>science</type>
-            <parentId>25054</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -564,7 +538,6 @@
         <observation>
             <obsId>MIDI.2011-04-14T09:32:32.000_1</obsId>
             <type>calibrator</type>
-            <parentId>25092</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -583,7 +556,6 @@
         <observation>
             <obsId>MIDI.2011-04-14T09:33:46.469_1</obsId>
             <type>calibrator</type>
-            <parentId>25092</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -602,7 +574,6 @@
         <observation>
             <obsId>MIDI.2011-04-14T09:35:15.000_1</obsId>
             <type>science</type>
-            <parentId>25096</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -621,7 +592,6 @@
         <observation>
             <obsId>MIDI.2011-04-14T09:36:29.468_1</obsId>
             <type>science</type>
-            <parentId>25096</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -640,7 +610,6 @@
         <observation>
             <obsId>MIDI.2011-04-14T09:37:43.937_1</obsId>
             <type>science</type>
-            <parentId>25096</parentId>
             <programId>087.C-0702(G)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U2 U3</stations>
@@ -659,7 +628,6 @@
         <observation>
             <obsId>MIDI.2011-04-16T07:54:15.000_1</obsId>
             <type>calibrator</type>
-            <parentId>25167</parentId>
             <programId>087.C-0702(H)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -678,7 +646,6 @@
         <observation>
             <obsId>MIDI.2011-04-16T07:55:29.468_1</obsId>
             <type>calibrator</type>
-            <parentId>25167</parentId>
             <programId>087.C-0702(H)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -697,7 +664,6 @@
         <observation>
             <obsId>MIDI.2011-04-16T07:56:32.000_1</obsId>
             <type>science</type>
-            <parentId>25138</parentId>
             <programId>087.C-0702(H)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -716,7 +682,6 @@
         <observation>
             <obsId>MIDI.2011-04-16T07:57:46.469_1</obsId>
             <type>science</type>
-            <parentId>25138</parentId>
             <programId>087.C-0702(H)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -735,7 +700,6 @@
         <observation>
             <obsId>MIDI.2011-04-16T07:59:00.938_1</obsId>
             <type>science</type>
-            <parentId>25138</parentId>
             <programId>087.C-0702(H)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -754,7 +718,6 @@
         <observation>
             <obsId>MIDI.2011-04-17T05:10:29.000_1</obsId>
             <type>calibrator</type>
-            <parentId>25202</parentId>
             <programId>087.C-0702(H)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -773,7 +736,6 @@
         <observation>
             <obsId>MIDI.2011-04-17T05:11:43.467_1</obsId>
             <type>calibrator</type>
-            <parentId>25202</parentId>
             <programId>087.C-0702(H)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -792,7 +754,6 @@
         <observation>
             <obsId>MIDI.2011-04-17T05:13:06.000_1</obsId>
             <type>science</type>
-            <parentId>25182</parentId>
             <programId>087.C-0702(H)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -811,7 +772,6 @@
         <observation>
             <obsId>MIDI.2011-04-17T05:14:20.469_1</obsId>
             <type>science</type>
-            <parentId>25182</parentId>
             <programId>087.C-0702(H)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -830,7 +790,6 @@
         <observation>
             <obsId>MIDI.2011-04-17T05:15:34.938_1</obsId>
             <type>science</type>
-            <parentId>25182</parentId>
             <programId>087.C-0702(H)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U3 U4</stations>
@@ -849,7 +808,6 @@
         <observation>
             <obsId>PIONI.2014-03-01T08:19:50.285_1</obsId>
             <type>science</type>
-            <parentId>32328</parentId>
             <programId>092.C-0243(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>D0 G1 H0 I1</stations>
@@ -868,7 +826,6 @@
         <observation>
             <obsId>PIONI.2014-03-01T08:21:49.660_1</obsId>
             <type>science</type>
-            <parentId>32328</parentId>
             <programId>092.C-0243(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>D0 G1 H0 I1</stations>
@@ -887,7 +844,6 @@
         <observation>
             <obsId>PIONI.2014-03-01T08:23:49.072_1</obsId>
             <type>science</type>
-            <parentId>32328</parentId>
             <programId>092.C-0243(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>D0 G1 H0 I1</stations>
@@ -906,7 +862,6 @@
         <observation>
             <obsId>PIONI.2014-03-01T08:25:48.643_1</obsId>
             <type>science</type>
-            <parentId>32328</parentId>
             <programId>092.C-0243(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>D0 G1 H0 I1</stations>
@@ -925,7 +880,6 @@
         <observation>
             <obsId>PIONI.2014-03-01T08:27:47.879_1</obsId>
             <type>science</type>
-            <parentId>32328</parentId>
             <programId>092.C-0243(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>D0 G1 H0 I1</stations>
@@ -944,7 +898,6 @@
         <observation>
             <obsId>PIONI.2014-03-25T08:20:34.996_1</obsId>
             <type>science</type>
-            <parentId>32552</parentId>
             <programId>092.C-0243(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>K0 A1 G1 J3</stations>
@@ -963,7 +916,6 @@
         <observation>
             <obsId>PIONI.2014-03-25T08:22:18.991_1</obsId>
             <type>science</type>
-            <parentId>32552</parentId>
             <programId>092.C-0243(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>K0 A1 G1 J3</stations>
@@ -982,7 +934,6 @@
         <observation>
             <obsId>PIONI.2014-03-25T08:24:02.125_1</obsId>
             <type>science</type>
-            <parentId>32552</parentId>
             <programId>092.C-0243(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>K0 A1 G1 J3</stations>
@@ -1001,7 +952,6 @@
         <observation>
             <obsId>PIONI.2014-03-25T08:25:46.143_1</obsId>
             <type>science</type>
-            <parentId>32552</parentId>
             <programId>092.C-0243(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>K0 A1 G1 J3</stations>
@@ -1020,7 +970,6 @@
         <observation>
             <obsId>PIONI.2014-03-25T08:27:29.302_1</obsId>
             <type>science</type>
-            <parentId>32552</parentId>
             <programId>092.C-0243(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>K0 A1 G1 J3</stations>
@@ -1039,7 +988,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T02:04:59.138_1</obsId>
             <type>science</type>
-            <parentId>42971</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1059,7 +1007,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T02:16:14.167_1</obsId>
             <type>science</type>
-            <parentId>42971</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1079,7 +1026,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T02:21:53.180_1</obsId>
             <type>science</type>
-            <parentId>42971</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1099,7 +1045,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T02:27:26.194_1</obsId>
             <type>science</type>
-            <parentId>42971</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1119,7 +1064,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T02:32:56.209_1</obsId>
             <type>science</type>
-            <parentId>42971</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1139,7 +1083,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T02:38:35.222_1</obsId>
             <type>science</type>
-            <parentId>42971</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1159,7 +1102,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T02:51:26.255_1</obsId>
             <type>science</type>
-            <parentId>42971</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1179,7 +1121,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T02:57:05.269_1</obsId>
             <type>science</type>
-            <parentId>42971</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1199,7 +1140,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T03:33:20.360_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1219,7 +1159,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T03:45:08.390_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1239,7 +1178,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T03:50:47.404_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1259,7 +1197,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T03:56:20.418_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1279,7 +1216,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T04:01:50.432_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1299,7 +1235,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T04:07:29.446_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1319,7 +1254,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T04:18:41.475_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1339,7 +1273,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T04:24:23.489_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1359,7 +1292,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T04:29:56.503_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1379,7 +1311,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T04:35:26.517_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1399,7 +1330,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T04:44:14.539_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1419,7 +1349,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T04:55:32.568_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1439,7 +1368,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T05:01:14.582_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1459,7 +1387,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T05:06:47.596_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1479,7 +1406,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T05:12:17.609_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1499,7 +1425,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T05:17:56.624_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1519,7 +1444,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T05:29:08.652_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1539,7 +1463,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T05:34:47.666_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1559,7 +1482,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T05:40:17.680_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1579,7 +1501,6 @@
         <observation>
             <obsId>GRAVI.2019-06-22T05:46:47.696_1</obsId>
             <type>science</type>
-            <parentId>42973</parentId>
             <programId>0103.C-0097(A)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1599,7 +1520,6 @@
         <observation>
             <obsId>GRAVI.2019-06-23T01:48:25.340_1</obsId>
             <type>science</type>
-            <parentId>42982</parentId>
             <programId>0103.C-0097(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1619,7 +1539,6 @@
         <observation>
             <obsId>GRAVI.2019-06-23T01:59:40.369_1</obsId>
             <type>science</type>
-            <parentId>42982</parentId>
             <programId>0103.C-0097(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1639,7 +1558,6 @@
         <observation>
             <obsId>GRAVI.2019-06-23T02:05:19.382_1</obsId>
             <type>science</type>
-            <parentId>42982</parentId>
             <programId>0103.C-0097(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1659,7 +1577,6 @@
         <observation>
             <obsId>GRAVI.2019-06-23T02:10:52.397_1</obsId>
             <type>science</type>
-            <parentId>42982</parentId>
             <programId>0103.C-0097(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1679,7 +1596,6 @@
         <observation>
             <obsId>GRAVI.2019-06-23T02:16:22.411_1</obsId>
             <type>science</type>
-            <parentId>42982</parentId>
             <programId>0103.C-0097(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1699,7 +1615,6 @@
         <observation>
             <obsId>GRAVI.2019-06-23T02:22:01.425_1</obsId>
             <type>science</type>
-            <parentId>42982</parentId>
             <programId>0103.C-0097(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1719,7 +1634,6 @@
         <observation>
             <obsId>GRAVI.2019-06-23T02:33:16.453_1</obsId>
             <type>science</type>
-            <parentId>42982</parentId>
             <programId>0103.C-0097(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1739,7 +1653,6 @@
         <observation>
             <obsId>GRAVI.2019-06-23T02:38:55.467_1</obsId>
             <type>science</type>
-            <parentId>42982</parentId>
             <programId>0103.C-0097(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1759,7 +1672,6 @@
         <observation>
             <obsId>GRAVI.2019-06-23T02:44:28.481_1</obsId>
             <type>science</type>
-            <parentId>42982</parentId>
             <programId>0103.C-0097(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>
@@ -1779,7 +1691,6 @@
         <observation>
             <obsId>GRAVI.2019-06-23T02:49:58.495_1</obsId>
             <type>science</type>
-            <parentId>42982</parentId>
             <programId>0103.C-0097(B)</programId>
             <interferometerName>VLTI</interferometerName>
             <stations>U1 U2 U3 U4</stations>

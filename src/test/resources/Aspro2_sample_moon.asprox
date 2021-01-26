@@ -14,7 +14,7 @@
     </interferometerConfiguration>
     <instrumentConfiguration>
         <name>PIONIER</name>
-        <stations>D0 G2 J3 K0</stations>
+        <stations>K0 G2 D0 J3</stations>
         <pops></pops>
         <instrumentMode>GRISM-H</instrumentMode>
         <samplingPeriod>30.0</samplingPeriod>
@@ -267,6 +267,6 @@ smaller than 1.</desc>
         </group>
     </targetUserInfos>
     <variant>
-        <stations>D0 G2 J3 K0</stations>
+        <stations>K0 G2 D0 J3</stations>
     </variant>
 </a:observationSetting>
