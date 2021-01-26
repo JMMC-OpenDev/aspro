@@ -70,6 +70,8 @@
     <logger name="fr.jmmc.jmal.model.ModelUVMapService" level="ALL"/>
 
     <logger name="fr.jmmc.aspro.service.NoiseService" level="DEBUG"/>
+
+    <logger name="fr.jmmc.aspro.gui.action.QueryRawObservationsAction" level="INFO"/>
     -->
 
 </included>
