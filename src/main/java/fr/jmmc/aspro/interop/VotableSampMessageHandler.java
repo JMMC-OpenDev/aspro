@@ -123,7 +123,9 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
             if (senderMetadata != null) {
                 logger.debug("senderMetadata: {}", senderMetadata);
 
-                if ("searchcal".equalsIgnoreCase(senderMetadata.getName())) {
+                final String senderName = senderMetadata.getName();
+
+                if ("searchcal".equalsIgnoreCase(senderName) || "getstar".equalsIgnoreCase(senderName)) {
                     // SearchCal release > 4.4.1:
                     searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
 
