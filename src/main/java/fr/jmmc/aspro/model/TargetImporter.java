@@ -10,7 +10,9 @@ import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetGroupMembers;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.util.TargetMatch;
 import fr.jmmc.aspro.model.util.TargetUtils;
+import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmal.star.StarResolverResult;
@@ -18,6 +20,7 @@ import fr.jmmc.jmal.star.StarResolverWidget;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
@@ -42,11 +45,66 @@ public final class TargetImporter {
     /** maximum targets accepted at once */
     public final static int MAX_TARGETS = 1000;
 
+    /** distance in degrees to consider exact targets match = 0.01 arcsecs ie less than 10 mas */
+    public final static double EXACT_TARGET_DISTANCE = 0.01 * fr.jmmc.jmal.ALX.ARCSEC_IN_DEGREES;
+
     /**
      * Private constructor
      */
     private TargetImporter() {
         super();
+    }
+
+    public static boolean addTarget(final Star star, final List<Target> editTargets, final boolean doConfirm, final StringBuilder sb) {
+        boolean changed = false;
+        if (star != null) {
+            final Target newTarget = TargetUtils.convert(star);
+
+            // TODO: if update ? then use queryName instead
+            // update the data model or throw exception ?
+            if (newTarget != null) {
+                boolean add = true;
+
+                // Find any target (id + position) within 5 arcsecs:
+                final TargetMatch match = Target.doMatchTarget(newTarget, editTargets);
+
+                if (match != null) {
+                    final Target t = match.getMatch();
+                    String msg;
+                    add = false;
+
+                    // exact match:
+                    if (match.getDistance() <= EXACT_TARGET_DISTANCE) {
+                        logger.info("Merge [{}] with [{}]", t, newTarget);
+                        msg = "Target[" + t.getName() + "] updated.";
+
+                        Target.mergeSimbadTarget(t, newTarget);
+                        changed = true;
+                    } else {
+                        msg = "Target[" + newTarget.getName() + "](" + newTarget.getRA() + " , " + newTarget.getDEC()
+                                + ") too close to Target[" + t.getName() + "](" + t.getRA() + " , " + t.getDEC()
+                                + "): " + NumberUtils.trimTo3Digits(match.getDistance() * ALX.DEG_IN_ARCSEC) + " arcsec.";
+
+                        if (doConfirm) {
+                            // Ask user confirmation:
+                            add = MessagePane.showConfirmMessage(msg + "\n\nDo you really want to add this target anyway ?");
+                        }
+
+                        msg += "\nTarget[" + newTarget.getName() + "] " + ((add) ? "added" : "skipped") + " (user)";
+                    }
+                    if (msg != null) {
+                        logger.info("addTarget: {}", msg);
+                        // Append warnings:
+                        sb.append(msg).append('\n');
+                    }
+                }
+                if (add) {
+                    editTargets.add(newTarget);
+                    changed = true;
+                }
+            }
+        }
+        return changed;
     }
 
     /**

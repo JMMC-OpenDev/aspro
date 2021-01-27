@@ -16,6 +16,7 @@ import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.WindWidget;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.TargetImporter;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.WarningMessage;
 import fr.jmmc.aspro.model.WarningMessage.Level;
@@ -38,11 +39,7 @@ import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.aspro.model.util.TargetMatch;
-import fr.jmmc.aspro.model.util.TargetUtils;
-import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.star.EditableStarResolverWidget;
-import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmal.star.StarResolverListener;
 import fr.jmmc.jmal.star.StarResolverResult;
@@ -1534,13 +1531,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             }
 
             if (!validNames.isEmpty()) {
-                final List<Target> editTargets = om.getTargets();
+                final boolean doConfirm = (validNames.size() < 100);
 
+                final List<Target> editTargets = om.getTargets();
                 final StringBuilder sb = new StringBuilder(64);
                 boolean isTargetChanged = false;
                 try {
                     for (String name : validNames) {
-                        isTargetChanged |= addTarget(result.getSingleStar(name), editTargets, sb);
+                        isTargetChanged |= TargetImporter.addTarget(result.getSingleStar(name), editTargets, doConfirm, sb);
                     }
                 } finally {
                     if (isTargetChanged) {
@@ -1553,57 +1551,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 }
             }
         }
-    }
-
-    public static boolean addTarget(final Star star, final List<Target> editTargets, final StringBuilder sb) {
-        boolean changed = false;
-        if (star != null) {
-            final Target newTarget = TargetUtils.convert(star);
-
-            // TODO: if update ? then use queryName instead
-            // update the data model or throw exception ?
-            if (newTarget != null) {
-                boolean add = true;
-
-                // Find any target (id + position) within 5 arcsecs:
-                final TargetMatch match = Target.doMatchTarget(newTarget, editTargets);
-
-                if (match != null) {
-                    final Target t = match.getMatch();
-                    String msg;
-
-                    // exact match:
-                    if (match.getDistance() == 0.0) {
-                        logger.info("Merge [{}] with [{}]", t, newTarget);
-                        msg = "Target[" + t.getName() + "] updated.";
-
-                        Target.mergeSimbadTarget(t, newTarget);
-
-                        add = false;
-                        changed = true;
-                    } else {
-                        msg = "Target[" + newTarget.getName() + "](" + newTarget.getRA() + " , " + newTarget.getDEC()
-                                + ") too close to Target[" + t.getName() + "](" + t.getRA() + " , " + t.getDEC()
-                                + "): " + NumberUtils.trimTo3Digits(match.getDistance() * ALX.DEG_IN_ARCSEC) + " arcsec.";
-
-                        // Ask user confirmation:
-                        add = MessagePane.showConfirmMessage(msg + "\n\nDo you really want to add this target anyway ?");
-
-                        msg += "\nTarget[" + newTarget.getName() + "] " + ((add) ? "added" : "skipped") + " (user)";
-                    }
-                    if (msg != null) {
-                        logger.info("addTarget: {}", msg);
-                        // Append warnings:
-                        sb.append(msg).append('\n');
-                    }
-                }
-                if (add) {
-                    editTargets.add(newTarget);
-                    changed = true;
-                }
-            }
-        }
-        return changed;
     }
 
     /**
