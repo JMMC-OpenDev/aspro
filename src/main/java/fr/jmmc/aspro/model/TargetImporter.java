@@ -41,9 +41,9 @@ public final class TargetImporter {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(TargetImporter.class.getName());
     /** threshold to ask user confirmation */
-    public final static int THRESHOLD_TARGETS = 50;
+    public final static int THRESHOLD_TARGETS = 100;
     /** maximum targets accepted at once */
-    public final static int MAX_TARGETS = 1000;
+    public final static int MAX_TARGETS = 10000;
 
     /** distance in degrees to consider exact targets match = 0.01 arcsecs ie less than 10 mas */
     public final static double EXACT_TARGET_DISTANCE = 0.01 * fr.jmmc.jmal.ALX.ARCSEC_IN_DEGREES;
@@ -402,34 +402,63 @@ public final class TargetImporter {
                 }
             }
         }
-
+        
         final IdentityHashMap<TargetGroup, TargetGroup> mapGroupsNewToOld = new IdentityHashMap<TargetGroup, TargetGroup>(4);
 
         for (TargetGroup oldGroup : editTargetUserInfos.getGroups()) {
-            // note: ignore user groups:
-            if (oldGroup.isCategoryOB()) {
-                final String gid = oldGroup.getId();
+            final String gid = oldGroup.getId();
 
-                final TargetGroup newGroup = targetUserInfos.getGroupById(gid);
-                if (newGroup != null) {
-                    mapGroupsNewToOld.put(newGroup, oldGroup);
+            final TargetGroup newGroup = targetUserInfos.getGroupById(gid);
+            if (newGroup != null) {
+                mapGroupsNewToOld.put(newGroup, oldGroup);
 
-                    final TargetGroupMembers tgm = targetUserInfos.getGroupMembers(newGroup);
-                    if (tgm != null) {
-                        for (Target newTarget : tgm.getTargets()) {
+                final TargetGroupMembers tgm = targetUserInfos.getGroupMembers(newGroup);
+                if (tgm != null) {
+                    for (Target newTarget : tgm.getTargets()) {
 
-                            // Find corresponding target:
-                            oldTarget = mapTargetsNewToOld.get(newTarget);
+                        // Find corresponding target:
+                        oldTarget = mapTargetsNewToOld.get(newTarget);
 
-                            // should not be null as it has been added before:
-                            if (oldTarget != null) {
-                                targetName = oldTarget.getName();
+                        // should not be null as it has been added before:
+                        if (oldTarget != null) {
+                            targetName = oldTarget.getName();
 
-                                editTargetUserInfos.addTargetToTargetGroup(oldGroup, oldTarget);
+                            editTargetUserInfos.addTargetToTargetGroup(oldGroup, oldTarget);
 
-                                // report message:
-                                sb.append(targetName).append(" added to the group ").append(oldGroup.getName()).append('\n');
-                            }
+                            // report message:
+                            sb.append(targetName).append(" added to the group ").append(oldGroup.getName()).append('\n');
+                        }
+                    }
+                }
+            }
+        }
+
+        // Process new groups:
+        for (TargetGroup newGroup : targetUserInfos.getGroups()) {
+            final String gid = newGroup.getId();
+
+            TargetGroup oldGroup = editTargetUserInfos.getGroupById(gid);
+            if (oldGroup == null) {
+                oldGroup = newGroup;
+                mapGroupsNewToOld.put(newGroup, oldGroup);
+                
+                editTargetUserInfos.addGroup(newGroup);
+
+                final TargetGroupMembers tgm = targetUserInfos.getGroupMembers(newGroup);
+                if (tgm != null) {
+                    for (Target newTarget : tgm.getTargets()) {
+
+                        // Find corresponding target:
+                        oldTarget = mapTargetsNewToOld.get(newTarget);
+
+                        // should not be null as it has been added before:
+                        if (oldTarget != null) {
+                            targetName = oldTarget.getName();
+
+                            editTargetUserInfos.addTargetToTargetGroup(oldGroup, oldTarget);
+
+                            // report message:
+                            sb.append(targetName).append(" added to the group ").append(oldGroup.getName()).append('\n');
                         }
                     }
                 }
@@ -489,27 +518,25 @@ public final class TargetImporter {
                     // note: ignore user groups:
                     final TargetGroup newGroup = tgm.getGroupRef();
 
-                    if (newGroup.isCategoryOB()) {
-                        for (Target newTargetMember : tgm.getTargets()) {
+                    for (Target newTargetMember : tgm.getTargets()) {
 
-                            // Find corresponding target:
-                            final Target oldTargetMember = mapTargetsNewToOld.get(newTargetMember);
+                        // Find corresponding target:
+                        final Target oldTargetMember = mapTargetsNewToOld.get(newTargetMember);
 
-                            // should not be null as it has been added before:
-                            if (oldTargetMember != null) {
-                                final TargetInformation editTargetInfo = editTargetUserInfos.getOrCreateTargetInformation(oldTarget);
+                        // should not be null as it has been added before:
+                        if (oldTargetMember != null) {
+                            final TargetInformation editTargetInfo = editTargetUserInfos.getOrCreateTargetInformation(oldTarget);
 
-                                // Find corresponding group:
-                                final TargetGroup oldGroup = mapGroupsNewToOld.get(newGroup);
+                            // Find corresponding group:
+                            final TargetGroup oldGroup = mapGroupsNewToOld.get(newGroup);
 
-                                // should not be null, predefined:
-                                if (oldGroup != null) {
-                                    editTargetInfo.addTargetInGroupMembers(oldGroup, oldTargetMember);
+                            // should not be null, predefined:
+                            if (oldGroup != null) {
+                                editTargetInfo.addTargetInGroupMembers(oldGroup, oldTargetMember);
 
-                                    // report message:
-                                    sb.append(oldTargetMember.getName()).append(" added as [").append(oldGroup.getName()).append("] to target ")
-                                            .append(targetName).append('\n');
-                                }
+                                // report message:
+                                sb.append(oldTargetMember.getName()).append(" added as [").append(oldGroup.getName()).append("] to target ")
+                                        .append(targetName).append('\n');
                             }
                         }
                     }
