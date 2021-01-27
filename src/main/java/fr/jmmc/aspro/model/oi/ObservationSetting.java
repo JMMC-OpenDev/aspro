@@ -659,6 +659,9 @@ public class ObservationSetting
     public void clearCacheTargets() {
         this.cachedDisplayTargets = null;
         this.cachedOrphanCalibrators = null;
+        if (getTargetUserInfos() != null) {
+            getTargetUserInfos().clearCacheGroups();
+        }
     }
 
     /**
@@ -696,7 +699,6 @@ public class ObservationSetting
      * And the set of orphan calibrators
      */
     private void computeDisplayTargets() {
-
         final List<Target> innerTargets = getTargets();
 
         final List<Target> displayTargets;

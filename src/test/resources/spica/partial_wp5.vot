@@ -1,0 +1,4102 @@
+<?xml version='1.0'?>
+<VOTABLE version="1.4"
+ xmlns="http://www.ivoa.net/xml/VOTable/v1.3">
+<!--
+ !  VOTable written by STIL version 4.0 (uk.ac.starlink.votable.VOTableWriter)
+ !  at 2021-01-27T16:23:52
+ !-->
+<RESOURCE>
+<TABLE name="db-2021-01-19/output/OUTPUT_SPICA-DB_Proto_1.csv" nrows="42">
+<PARAM arraysize="5" datatype="char" name="INTERFEROMETER" value="CHARA"/>
+<PARAM arraysize="12" datatype="char" name="PERIOD" value="CHARA Future"/>
+<PARAM arraysize="8" datatype="char" name="INSTRUMENT" value="SPICA_6T"/>
+<FIELD arraysize="15" datatype="char" name="TARGET_ID"/>
+<FIELD arraysize="13" datatype="char" name="TARGET_RA" ucd="pos.eq.ra;meta.main" unit="hms"/>
+<FIELD arraysize="13" datatype="char" name="TARGET_DEC" ucd="pos.eq.dec;meta.main" unit="dms"/>
+<FIELD arraysize="28" datatype="char" name="TARGET_Gaia_ID"/>
+<FIELD arraysize="10" datatype="char" name="TARGET_HD"/>
+<FIELD arraysize="*" datatype="char" name="TARGET_MAIN_ID" ucd="meta.id;meta.main"/>
+<FIELD arraysize="16" datatype="char" name="TARGET_CHARA_ID"/>
+<FIELD arraysize="*" datatype="char" name="TARGET_PINAME"/>
+<FIELD arraysize="*" datatype="char" name="TARGET_PROGNAME" ucd="meta.code.class"/>
+<FIELD arraysize="3" datatype="char" name="TARGET_Flag_Type"/>
+<FIELD datatype="short" name="TARGET_Flag_Priority_PI"/>
+<FIELD arraysize="9" datatype="char" name="TARGET_SPICA_SETUP"/>
+<FIELD arraysize="9" datatype="char" name="TARGET_CHARA_SETUP"/>
+<FIELD arraysize="9" datatype="char" name="TARGET_CAL_IDS"/>
+<FIELD arraysize="9" datatype="char" name="TARGET_QualityRequired"/>
+<FIELD arraysize="9" datatype="char" name="TARGET_Nobs"/>
+<FIELD arraysize="16" datatype="char" name="TARGET_OB"/>
+<FIELD arraysize="16" datatype="char" name="TARGET_Completion_Rate"/>
+<FIELD arraysize="22" datatype="char" name="TARGET_Flag_Priority_Final"/>
+<FIELD datatype="double" name="TARGET_Vmag"/>
+<FIELD datatype="float" name="TARGET_eVmag"/>
+<FIELD datatype="double" name="TARGET_Rmag"/>
+<FIELD datatype="float" name="TARGET_eRmag"/>
+<FIELD datatype="float" name="TARGET_Jmag"/>
+<FIELD datatype="float" name="TARGET_eJmag"/>
+<FIELD datatype="double" name="TARGET_Hmag"/>
+<FIELD datatype="float" name="TARGET_eHmag"/>
+<FIELD datatype="double" name="TARGET_Kmag"/>
+<FIELD datatype="float" name="TARGET_eKmag"/>
+<FIELD datatype="double" name="TARGET_LD_JSDC2"/>
+<FIELD datatype="double" name="TARGET_eLD_JSDC2"/>
+<FIELD arraysize="4" datatype="char" name="TARGET_LD_JSDC"/>
+<FIELD arraysize="4" datatype="char" name="TARGET_eLD_JSDC"/>
+<FIELD datatype="double" name="TARGET_UD_R_JSDC2"/>
+<FIELD datatype="double" name="TARGET_UD_H_JSDC2"/>
+<FIELD arraysize="30" datatype="char" name="TARGET_Flag_Activity_ROT"/>
+<FIELD arraysize="30" datatype="char" name="TARGET_Flag_Activity_BIN"/>
+<FIELD arraysize="30" datatype="char" name="TARGET_Flag_Activity_WIND"/>
+<FIELD arraysize="30" datatype="char" name="TARGET_Flag_Activity_DISK"/>
+<FIELD arraysize="*" datatype="char" name="TARGET_SpT"/>
+<FIELD datatype="float" name="TARGET_Plx"/>
+<FIELD datatype="double" name="TARGET_ePlx"/>
+<FIELD datatype="double" name="TARGET_Ksmag"/>
+<FIELD datatype="double" name="TARGET_eKsmag"/>
+<FIELD datatype="double" name="TARGET_Gmag"/>
+<FIELD datatype="double" name="TARGET_eGmag"/>
+<FIELD datatype="double" name="TARGET_BPmag"/>
+<FIELD datatype="double" name="TARGET_eBPmag"/>
+<FIELD datatype="double" name="TARGET_RPmag"/>
+<FIELD datatype="double" name="TARGET_eRPmag"/>
+<FIELD datatype="float" name="TARGET_E(B-V)"/>
+<FIELD datatype="float" name="TARGET_eE(B-V)_min"/>
+<FIELD datatype="float" name="TARGET_eE(B-V)_max"/>
+<FIELD datatype="double" name="TARGET_Av"/>
+<FIELD datatype="double" name="TARGET_eAv"/>
+<FIELD datatype="double" name="TARGET_Ag"/>
+<FIELD datatype="double" name="TARGET_eAg"/>
+<FIELD datatype="double" name="TARGET_Teff_Gaia"/>
+<FIELD datatype="double" name="TARGET_eTeff_Gaia"/>
+<FIELD datatype="float" name="TARGET_logg"/>
+<FIELD arraysize="3" datatype="char" name="TARGET_elogg"/>
+<FIELD datatype="float" name="TARGET_FeH"/>
+<FIELD arraysize="3" datatype="char" name="TARGET_eFeH"/>
+<FIELD arraysize="18" datatype="char" name="TARGET_Flag_Type_VERIF"/>
+<FIELD arraysize="18" datatype="char" name="TARGET_Flag_Priority_LD"/>
+<FIELD datatype="short" name="TARGET_SBCR_Box"/>
+<FIELD datatype="double" name="TARGET_LD_SBCR_VK"/>
+<FIELD datatype="double" name="TARGET_eLD_SBCR_VK_RMS"/>
+<FIELD datatype="double" name="TARGET_eLD_SBCR_VK_COEFFS"/>
+<FIELD datatype="double" name="TARGET_eLD_SBCR_VK_PHOTO"/>
+<FIELD datatype="double" name="TARGET_LD_SBCR_GK"/>
+<FIELD datatype="double" name="TARGET_eLD_SBCR_GK_RMS"/>
+<FIELD datatype="double" name="TARGET_eLD_SBCR_GK_COEFFS"/>
+<FIELD datatype="double" name="TARGET_eLD_SBCR_GK_PHOTO"/>
+<FIELD arraysize="18" datatype="char" name="TARGET_Flag_Priority_SBCR"/>
+<FIELD arraysize="16" datatype="char" name="TARGET_LD"/>
+<FIELD arraysize="16" datatype="char" name="TARGET_eLD"/>
+<FIELD arraysize="16" datatype="char" name="TARGET_Coeffs"/>
+<FIELD arraysize="16" datatype="char" name="TARGET_eCoeffs"/>
+<FIELD arraysize="16" datatype="char" name="TARGET_ACTIVITY_FLAG"/>
+<FIELD arraysize="16" datatype="char" name="TARGET_NEW_OBSERVATION"/>
+<FIELD datatype="double" name="TARGET_R"/>
+<FIELD datatype="double" name="TARGET_eR"/>
+<FIELD arraysize="20" datatype="char" name="TARGET_Fbol"/>
+<FIELD arraysize="20" datatype="char" name="TARGET_eFbol"/>
+<FIELD arraysize="20" datatype="char" name="TARGET_Teff"/>
+<FIELD arraysize="20" datatype="char" name="TARGET_eTeff"/>
+<FIELD arraysize="20" datatype="char" name="TARGET_M"/>
+<FIELD arraysize="20" datatype="char" name="TARGET_eM"/>
+<FIELD arraysize="20" datatype="char" name="TARGET_AGE"/>
+<FIELD arraysize="20" datatype="char" name="TARGET_eAGE"/>
+<FIELD arraysize="20" datatype="char" name="TARGET_Flag_SBCR_ACTIVITY"/>
+<FIELD arraysize="20" datatype="char" name="PUBLICATION"/>
+<DATA>
+<TABLEDATA>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>08 59 12.5000</TD>
+    <TD>+48 02 34.000</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD>NAME * iot UMa BC</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.899999618530273</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M1V</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>0</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>09 14 22.77</TD>
+    <TD>+52 41 11.8</TD>
+    <TD></TD>
+    <TD>HD 79210J</TD>
+    <TD>MCC 541</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>6.920000076293945</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>K7V+M0V</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>-0.06</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>08 55 24.7933</TD>
+    <TD>+70 47 39.528</TD>
+    <TD>Gaia DR2 1118916393099060992</TD>
+    <TD>HD 75632A</TD>
+    <TD>HD  75632A</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.819999694824219</TD>
+    <TD>0.01</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M1V</TD>
+    <TD>86.379</TD>
+    <TD>0.040699999779462814</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>8.269499778747559</TD>
+    <TD>5.000000237487257E-4</TD>
+    <TD>9.155699729919434</TD>
+    <TD>0.002300000051036477</TD>
+    <TD>7.3531999588012695</TD>
+    <TD>0.002199999988079071</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4306.93994140625</TD>
+    <TD>273.4600830078125</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>0</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>124.353</TD>
+    <TD>215.386</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>09 55 06.3038</TD>
+    <TD>-26 32 19.469</TD>
+    <TD></TD>
+    <TD>HD 85994</TD>
+    <TD>HD  85994</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.569999694824219</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>K1V+M1V</TD>
+    <TD>16.0</TD>
+    <TD>5.199999809265137</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>08 55 24.9208</TD>
+    <TD>+70 47 38.180</TD>
+    <TD>Gaia DR1 1118916393099266048</TD>
+    <TD>HD 75632B</TD>
+    <TD>HD  75632B</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.9399995803833</TD>
+    <TD>0.01</TD>
+    <TD>8.100000381469727</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M1V</TD>
+    <TD>86.321</TD>
+    <TD>0.04320000112056732</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>0</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>124.436</TD>
+    <TD>215.53</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>00 05 41.0198</TD>
+    <TD>+45 48 43.507</TD>
+    <TD>Gaia DR1 386653743629274880</TD>
+    <TD>HD 38</TD>
+    <TD>HD     38</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.217000007629395</TD>
+    <TD>NaN</TD>
+    <TD>8.300000190734863</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>K6V+M0.5V</TD>
+    <TD>88.44</TD>
+    <TD>1.559999942779541</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>00 05 41.0028</TD>
+    <TD>+45 48 37.353</TD>
+    <TD>Gaia DR2 386653747924807424</TD>
+    <TD>HD 38B</TD>
+    <TD>HD     38B</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.994999885559082</TD>
+    <TD>0.016</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.710000038146973</TD>
+    <TD>10.0</TD>
+    <TD>5.283999919891357</TD>
+    <TD>0.023</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M0.5V</TD>
+    <TD>86.94</TD>
+    <TD>0.058800000697374344</TD>
+    <TD>5.283999919891357</TD>
+    <TD>0.023000000044703484</TD>
+    <TD>8.300999641418457</TD>
+    <TD>6.000000284984708E-4</TD>
+    <TD>9.245200157165527</TD>
+    <TD>0.0015999999595806003</TD>
+    <TD>7.364699840545654</TD>
+    <TD>0.00139999995008111</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>4138.52001953125</TD>
+    <TD>104.5299072265625</TD>
+    <TD>4.72</TD>
+    <TD>TBD</TD>
+    <TD>0.17</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>0.538180570062782</TD>
+    <TD>0.00934361744706062</TD>
+    <TD>0.01503715160645591</TD>
+    <TD>NaN</TD>
+    <TD>0.546914193619087</TD>
+    <TD>0.009621177826018651</TD>
+    <TD>0.031643887398140565</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>0.676</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>00 08 33.4972</TD>
+    <TD>-17 34 41.364</TD>
+    <TD>Gaia DR2 2366594638716759168</TD>
+    <TD>HD 402</TD>
+    <TD>V* CF Cet</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>6.130000114440918</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>3.052</TD>
+    <TD>0.272</TD>
+    <TD>2.2009999752044678</TD>
+    <TD>0.246</TD>
+    <TD>1.9279999732971191</TD>
+    <TD>0.258</TD>
+    <TD>2.434937</TD>
+    <TD>0.222504</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>2.301867</TD>
+    <TD>2.38363</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M0/1IIICNVp</TD>
+    <TD>2.7</TD>
+    <TD>0.147599995136261</TD>
+    <TD>1.9279999732971191</TD>
+    <TD>0.257999986410141</TD>
+    <TD>5.271299839019775</TD>
+    <TD>0.0026000000070780516</TD>
+    <TD>6.362500190734863</TD>
+    <TD>0.007899999618530273</TD>
+    <TD>4.3414998054504395</TD>
+    <TD>0.005400000140070915</TD>
+    <TD>0.012</TD>
+    <TD>0.015</TD>
+    <TD>0.015</TD>
+    <TD>0.037200000000000004</TD>
+    <TD>0.14415</TD>
+    <TD>0.02579080627996115</TD>
+    <TD>0.14415</TD>
+    <TD>4012.0</TD>
+    <TD>376.5</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DLD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>2.659080532558212</TD>
+    <TD>0.04616560433285763</TD>
+    <TD>0.07785535849225499</TD>
+    <TD>NaN</TD>
+    <TD>2.7124252990707767</TD>
+    <TD>0.0477163080545822</TD>
+    <TD>0.16426529563022055</TD>
+    <TD>0.44911171845655073</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>108.029</TD>
+    <TD>20.031</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>00 49 06.2907</TD>
+    <TD>+57 48 54.675</TD>
+    <TD>Gaia DR2 425040000951479424</TD>
+    <TD>HD 4614</TD>
+    <TD>* eta Cas</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>3.440000057220459</TD>
+    <TD>NaN</TD>
+    <TD>2.940000057220459</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>2.0199999809265137</TD>
+    <TD>NaN</TD>
+    <TD>1.9900000095367432</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>F9V+M0-V</TD>
+    <TD>167.98</TD>
+    <TD>0.47999998927116394</TD>
+    <TD>1.9880000352859497</TD>
+    <TD>9.996000289916992</TD>
+    <TD>3.187299966812134</TD>
+    <TD>0.006000000052154064</TD>
+    <TD>3.776099920272827</TD>
+    <TD>0.023600000888109207</TD>
+    <TD>2.8691000938415527</TD>
+    <TD>0.005400000140070915</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>5405.0</TD>
+    <TD>729.1650390625</TD>
+    <TD>4.37</TD>
+    <TD>TBD</TD>
+    <TD>-0.25</TD>
+    <TD>TBD</TD>
+    <TD>DLD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>1.711827510842874</TD>
+    <TD>0.03460749830238149</TD>
+    <TD>0.020177208140987137</TD>
+    <TD>NaN</TD>
+    <TD>1.6906122611137915</TD>
+    <TD>0.03869421918930732</TD>
+    <TD>0.026966303989507633</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>1.082</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>01 52 49.1730</TD>
+    <TD>-22 26 05.489</TD>
+    <TD>Gaia DR2 5134635708766250752</TD>
+    <TD>HD 11507</TD>
+    <TD>HD  11507</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.883000373840332</TD>
+    <TD>NaN</TD>
+    <TD>7.974999904632568</TD>
+    <TD>NaN</TD>
+    <TD>6.064</TD>
+    <TD>0.021</TD>
+    <TD>5.40500020980835</TD>
+    <TD>0.026</TD>
+    <TD>5.177999973297119</TD>
+    <TD>0.02</TD>
+    <TD>0.543274</TD>
+    <TD>0.012246</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.515606</TD>
+    <TD>0.531359</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M0V</TD>
+    <TD>90.425</TD>
+    <TD>0.04800000041723251</TD>
+    <TD>5.177999973297119</TD>
+    <TD>0.019999999552965164</TD>
+    <TD>8.185500144958496</TD>
+    <TD>6.000000284984708E-4</TD>
+    <TD>9.140800476074219</TD>
+    <TD>0.0027000000700354576</TD>
+    <TD>7.2357001304626465</TD>
+    <TD>0.003700000001117587</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>4121.580078125</TD>
+    <TD>90.4700927734375</TD>
+    <TD>4.72</TD>
+    <TD>TBD</TD>
+    <TD>0.41</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>0.5647289146184827</TD>
+    <TD>0.009804536308089522</TD>
+    <TD>0.015769392818280298</TD>
+    <TD>NaN</TD>
+    <TD>0.5733001014961548</TD>
+    <TD>0.01008535212383003</TD>
+    <TD>0.033123372558980645</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>0.682</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>02 27 45.8615</TD>
+    <TD>+04 25 55.748</TD>
+    <TD>Gaia DR2 2515752565074318720</TD>
+    <TD>HD 15285</TD>
+    <TD>HD  15285</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.67300033569336</TD>
+    <TD>NaN</TD>
+    <TD>7.796999931335449</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>5.331999778747559</TD>
+    <TD>0.029</TD>
+    <TD>5.11299991607666</TD>
+    <TD>0.018</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M2V</TD>
+    <TD>58.33</TD>
+    <TD>1.0800000429153442</TD>
+    <TD>5.11299991607666</TD>
+    <TD>0.017999999225139618</TD>
+    <TD>8.054499626159668</TD>
+    <TD>0.0010000000474974513</TD>
+    <TD>8.941100120544434</TD>
+    <TD>0.0032999999821186066</TD>
+    <TD>7.141200065612793</TD>
+    <TD>0.002400000113993883</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>4209.0</TD>
+    <TD>132.610107421875</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>0</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>184.15</TD>
+    <TD>318.975</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>03 45 24.1325</TD>
+    <TD>-27 51 44.930</TD>
+    <TD></TD>
+    <TD>HD 23588</TD>
+    <TD>HD  23588</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.184000015258789</TD>
+    <TD>NaN</TD>
+    <TD>7.5980000495910645</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>5.771999835968018</TD>
+    <TD>0.036</TD>
+    <TD>5.603000164031982</TD>
+    <TD>0.016</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>K5V+M3V</TD>
+    <TD>46.37</TD>
+    <TD>0.8700000047683716</TD>
+    <TD>5.603000164031982</TD>
+    <TD>0.01600000075995922</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.5</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>0.393966011834295</TD>
+    <TD>0.00796469153544456</TD>
+    <TD>0.006300672101543608</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>03 48 47.5271</TD>
+    <TD>-07 00 53.910</TD>
+    <TD>Gaia DR2 3243503471660664320</TD>
+    <TD>HD 23937</TD>
+    <TD>V* BR Eri</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>7.150000095367432</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>1.1959999799728394</TD>
+    <TD>0.232</TD>
+    <TD>0.9240000247955322</TD>
+    <TD>0.248</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M5V</TD>
+    <TD>4.0</TD>
+    <TD>0.1996999979019165</TD>
+    <TD>0.9240000247955322</TD>
+    <TD>0.24799999594688416</TD>
+    <TD>5.378600120544434</TD>
+    <TD>0.011099999770522118</TD>
+    <TD>8.335700035095215</TD>
+    <TD>0.21960000693798065</TD>
+    <TD>4.02810001373291</TD>
+    <TD>0.022199999541044235</TD>
+    <TD>0.02</TD>
+    <TD>0.021</TD>
+    <TD>0.021</TD>
+    <TD>0.062000000000000006</TD>
+    <TD>0.20181000000000004</TD>
+    <TD>0.03605000329417436</TD>
+    <TD>0.20181000000000004</TD>
+    <TD>3293.0</TD>
+    <TD>14.25</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>5.272789847600676</TD>
+    <TD>0.09154349665388051</TD>
+    <TD>0.18984483915394848</TD>
+    <TD>NaN</TD>
+    <TD>5.250628348482233</TD>
+    <TD>0.09236774182947292</TD>
+    <TD>0.3744802301013701</TD>
+    <TD>0.8394719359063035</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>141.129</TD>
+    <TD>25.812</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>04 29 00.1237</TD>
+    <TD>+21 55 21.719</TD>
+    <TD>Gaia DR1 145421304810445312</TD>
+    <TD>HD 28343</TD>
+    <TD>HD  28343</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.300000190734863</TD>
+    <TD>NaN</TD>
+    <TD>7.446000099182129</TD>
+    <TD>NaN</TD>
+    <TD>5.674</TD>
+    <TD>0.026</TD>
+    <TD>5.050000190734863</TD>
+    <TD>0.016</TD>
+    <TD>4.875</TD>
+    <TD>0.016</TD>
+    <TD>0.623275</TD>
+    <TD>0.014026</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.589213</TD>
+    <TD>0.610142</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M0.5V</TD>
+    <TD>88.962</TD>
+    <TD>0.049400001764297485</TD>
+    <TD>4.875</TD>
+    <TD>0.01600000075995922</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.59</TD>
+    <TD>TBD</TD>
+    <TD>0.23</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>0</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>120.742</TD>
+    <TD>209.131</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>04 37 40.9307</TD>
+    <TD>+52 53 37.011</TD>
+    <TD>Gaia DR1 272855561463141248</TD>
+    <TD>HD 232979</TD>
+    <TD>HD 232979</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.64799976348877</TD>
+    <TD>0.013</TD>
+    <TD>8.75</TD>
+    <TD>0.04</TD>
+    <TD>5.866</TD>
+    <TD>0.041</TD>
+    <TD>5.26800012588501</TD>
+    <TD>0.031</TD>
+    <TD>5.046999931335449</TD>
+    <TD>0.018</TD>
+    <TD>0.575743</TD>
+    <TD>0.01427</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.546422</TD>
+    <TD>0.563116</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M0.5V</TD>
+    <TD>100.78</TD>
+    <TD>0.06400000303983688</TD>
+    <TD>5.046999931335449</TD>
+    <TD>0.017999999225139618</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.68</TD>
+    <TD>TBD</TD>
+    <TD>-0.09</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>0</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>106.584</TD>
+    <TD>184.608</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>05 20 35.4587</TD>
+    <TD>-13 06 44.433</TD>
+    <TD>Gaia DR2 2988703437315020800</TD>
+    <TD>HD 34949</TD>
+    <TD>HD  34949</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.449999809265137</TD>
+    <TD>0.01</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>5.052</TD>
+    <TD>0.278</TD>
+    <TD>4.067999839782715</TD>
+    <TD>0.226</TD>
+    <TD>3.7960000038146973</TD>
+    <TD>0.232</TD>
+    <TD>1.067199</TD>
+    <TD>0.099584</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>1.009378</TD>
+    <TD>1.029322</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M2III/IV</TD>
+    <TD>2.169</TD>
+    <TD>0.03539999946951866</TD>
+    <TD>3.7960000038146973</TD>
+    <TD>0.23199999332427979</TD>
+    <TD>7.46120023727417</TD>
+    <TD>6.99999975040555E-4</TD>
+    <TD>8.734399795532227</TD>
+    <TD>0.0026000000070780516</TD>
+    <TD>6.36959981918335</TD>
+    <TD>0.0020000000949949026</TD>
+    <TD>0.037</TD>
+    <TD>0.048</TD>
+    <TD>0.048</TD>
+    <TD>0.1147</TD>
+    <TD>0.4612800000000001</TD>
+    <TD>0.07611064342279729</TD>
+    <TD>0.4612800000000001</TD>
+    <TD>3705.27001953125</TD>
+    <TD>224.8599853515625</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>1.1771127079121029</TD>
+    <TD>0.02043643239205246</TD>
+    <TD>0.03586317696273206</TD>
+    <TD>0.1576548185399252</TD>
+    <TD>1.2098935890440705</TD>
+    <TD>0.02128414567872843</TD>
+    <TD>0.07639454178762049</TD>
+    <TD>0.18833834194146734</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>59.98</TD>
+    <TD>10.178</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>05 31 27.3958</TD>
+    <TD>-03 40 38.021</TD>
+    <TD>Gaia DR1 3209938366665770752</TD>
+    <TD>HD 36395</TD>
+    <TD>HD  36395</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>7.9679999351501465</TD>
+    <TD>NaN</TD>
+    <TD>6.995999813079834</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.050000190734863</TD>
+    <TD>NaN</TD>
+    <TD>3.9000000953674316</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M1.5Ve</TD>
+    <TD>175.429</TD>
+    <TD>0.06719999760389328</TD>
+    <TD>4.039000034332275</TD>
+    <TD>0.25999999046325684</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.86</TD>
+    <TD>TBD</TD>
+    <TD>-0.11</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>1.0589220048819399</TD>
+    <TD>0.018384465494057305</TD>
+    <TD>0.030248962690986297</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>06 04 00.6955</TD>
+    <TD>-05 57 53.705</TD>
+    <TD>Gaia DR2 3019297348357526656</TD>
+    <TD>HD 41289</TD>
+    <TD>HD  41289</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.65999984741211</TD>
+    <TD>0.02</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.754</TD>
+    <TD>0.037</TD>
+    <TD>3.734999895095825</TD>
+    <TD>0.246</TD>
+    <TD>3.5490000247955322</TD>
+    <TD>0.246</TD>
+    <TD>1.291077</TD>
+    <TD>0.107376</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>1.221527</TD>
+    <TD>1.243143</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M2/3V</TD>
+    <TD>2.122</TD>
+    <TD>0.048700001090765</TD>
+    <TD>3.5490000247955322</TD>
+    <TD>0.2460000067949295</TD>
+    <TD>7.592400074005127</TD>
+    <TD>0.0013000000035390258</TD>
+    <TD>9.012999534606934</TD>
+    <TD>0.006800000090152025</TD>
+    <TD>6.448299884796143</TD>
+    <TD>0.0038999998942017555</TD>
+    <TD>0.084</TD>
+    <TD>0.06</TD>
+    <TD>0.06</TD>
+    <TD>0.2604</TD>
+    <TD>0.5765999999999999</TD>
+    <TD>0.16244189959930364</TD>
+    <TD>0.5765999999999999</TD>
+    <TD>3744.330078125</TD>
+    <TD>268.885009765625</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>1.3752331590288318</TD>
+    <TD>0.023876098940136575</TD>
+    <TD>0.04335797836362409</TD>
+    <TD>0.19613799788733574</TD>
+    <TD>1.4401107557426738</TD>
+    <TD>0.025334068546431714</TD>
+    <TD>0.09512962112115889</TD>
+    <TD>0.24194803188271427</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>72.971</TD>
+    <TD>13.341</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>06 10 34.6152</TD>
+    <TD>-21 51 52.658</TD>
+    <TD>Gaia DR2 2940856402123426176</TD>
+    <TD>HD 42581</TD>
+    <TD>HD  42581</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.125</TD>
+    <TD>NaN</TD>
+    <TD>7.164000034332275</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.389999866485596</TD>
+    <TD>0.25</TD>
+    <TD>4.170000076293945</TD>
+    <TD>0.23</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M1V</TD>
+    <TD>173.696</TD>
+    <TD>0.04569999873638153</TD>
+    <TD>4.165999889373779</TD>
+    <TD>0.23199999332427979</TD>
+    <TD>7.307199954986572</TD>
+    <TD>6.000000284984708E-4</TD>
+    <TD>8.386199951171875</TD>
+    <TD>0.0012000000569969416</TD>
+    <TD>6.304100036621094</TD>
+    <TD>0.00139999995008111</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>3912.5400390625</TD>
+    <TD>139.7900390625</TD>
+    <TD>4.7</TD>
+    <TD>TBD</TD>
+    <TD>0.07</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>0.923506552220639</TD>
+    <TD>0.016033451250008803</TD>
+    <TD>0.026461709898894806</TD>
+    <TD>NaN</TD>
+    <TD>0.9333546496619729</TD>
+    <TD>0.01641934176130291</TD>
+    <TD>0.05501909343084832</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>0.578</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>06 11 51.7165</TD>
+    <TD>+12 28 14.271</TD>
+    <TD>Gaia DR2 3343951997820088320</TD>
+    <TD>HD 42547</TD>
+    <TD>HD  42547</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.699999809265137</TD>
+    <TD>0.02</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.455</TD>
+    <TD>0.302</TD>
+    <TD>3.5510001182556152</TD>
+    <TD>0.232</TD>
+    <TD>3.118000030517578</TD>
+    <TD>0.318</TD>
+    <TD>1.540393</TD>
+    <TD>0.163514</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>1.457554</TD>
+    <TD>1.483337</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M5V</TD>
+    <TD>1.414</TD>
+    <TD>0.07750000059604645</TD>
+    <TD>3.118000030517578</TD>
+    <TD>0.3179999887943268</TD>
+    <TD>7.295599937438965</TD>
+    <TD>0.002300000051036477</TD>
+    <TD>8.951199531555176</TD>
+    <TD>0.013399999588727951</TD>
+    <TD>6.0858001708984375</TD>
+    <TD>0.0034000000450760126</TD>
+    <TD>0.171</TD>
+    <TD>0.08</TD>
+    <TD>0.08</TD>
+    <TD>0.5301</TD>
+    <TD>0.7687999999999999</TD>
+    <TD>0.3205230460186511</TD>
+    <TD>0.7687999999999999</TD>
+    <TD>3490.110107421875</TD>
+    <TD>257.655029296875</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>1.7385674744488422</TD>
+    <TD>0.03018412460571979</TD>
+    <TD>0.05616078793764388</TD>
+    <TD>0.3208178544221047</TD>
+    <TD>1.7758489422714303</TD>
+    <TD>0.031240290826389478</TD>
+    <TD>0.11721917666546303</TD>
+    <TD>0.3872026416861092</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>135.047</TD>
+    <TD>31.732</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>07 02 06.7312</TD>
+    <TD>-03 45 17.395</TD>
+    <TD>Gaia DR2 3101848784453850240</TD>
+    <TD>HD 52690</TD>
+    <TD>V* V926 Mon</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>6.619999885559082</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>3.139</TD>
+    <TD>0.224</TD>
+    <TD>2.259000062942505</TD>
+    <TD>0.188</TD>
+    <TD>2.005000114440918</TD>
+    <TD>0.228</TD>
+    <TD>2.330569</TD>
+    <TD>0.180452</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>2.179466</TD>
+    <TD>2.260395</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M2Ib+B7/9?IV:</TD>
+    <TD>0.982</TD>
+    <TD>0.11969999969005585</TD>
+    <TD>2.005000114440918</TD>
+    <TD>0.2280000001192093</TD>
+    <TD>5.72160005569458</TD>
+    <TD>0.0019000000320374966</TD>
+    <TD>6.865300178527832</TD>
+    <TD>0.004699999932199717</TD>
+    <TD>4.7230000495910645</TD>
+    <TD>0.0032999999821186066</TD>
+    <TD>0.084</TD>
+    <TD>0.067</TD>
+    <TD>0.067</TD>
+    <TD>0.2604</TD>
+    <TD>0.64387</TD>
+    <TD>0.1708039818956245</TD>
+    <TD>0.64387</TD>
+    <TD>3987.0</TD>
+    <TD>239.449951171875</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DLD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>2.6507472219350463</TD>
+    <TD>0.04602092563046355</TD>
+    <TD>0.0793683713385495</TD>
+    <TD>NaN</TD>
+    <TD>2.7617686161188826</TD>
+    <TD>0.04858434335771439</TD>
+    <TD>0.17354603141778135</TD>
+    <TD>0.44192472895991597</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>302.549</TD>
+    <TD>63.992</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>08 26 50.3923</TD>
+    <TD>-23 48 30.147</TD>
+    <TD>Gaia DR1 5696599086724030336</TD>
+    <TD>HD 71466</TD>
+    <TD>HD  71466</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.220000267028809</TD>
+    <TD>0.01</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.375999927520752</TD>
+    <TD>0.204</TD>
+    <TD>4.109000205993652</TD>
+    <TD>0.036</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>A0V+K5/M0III</TD>
+    <TD>1.138</TD>
+    <TD>0.041200000792741776</TD>
+    <TD>4.109000205993652</TD>
+    <TD>0.035999998450279236</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.055</TD>
+    <TD>0.034</TD>
+    <TD>0.034</TD>
+    <TD>0.1705</TD>
+    <TD>0.3267400000000001</TD>
+    <TD>NaN</TD>
+    <TD>0.3267400000000001</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>0.9565490346017962</TD>
+    <TD>0.01660711803035124</TD>
+    <TD>0.02741350950988077</TD>
+    <TD>0.02376600856393763</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>09 15 55.7216</TD>
+    <TD>-12 14 08.103</TD>
+    <TD>Gaia DR2 5738843152392900864</TD>
+    <TD>HD 79826</TD>
+    <TD>HD  79826</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.789999961853027</TD>
+    <TD>0.02</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>7.437</TD>
+    <TD>0.021</TD>
+    <TD>7.064000129699707</TD>
+    <TD>0.033</TD>
+    <TD>6.946000099182129</TD>
+    <TD>0.021</TD>
+    <TD>0.185413</TD>
+    <TD>0.004377</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.175662</TD>
+    <TD>0.180833</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>G6V+M1/3V</TD>
+    <TD>18.056</TD>
+    <TD>0.04529999941587448</TD>
+    <TD>6.946000099182129</TD>
+    <TD>0.020999999716877937</TD>
+    <TD>8.685400009155273</TD>
+    <TD>0.0031999999191612005</TD>
+    <TD>9.081500053405762</TD>
+    <TD>0.012799999676644802</TD>
+    <TD>8.145999908447266</TD>
+    <TD>0.010300000198185444</TD>
+    <TD>0.001</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0031000000000000003</TD>
+    <TD>0.13454</TD>
+    <TD>0.0025026812376170294</TD>
+    <TD>0.13454</TD>
+    <TD>5436.25</TD>
+    <TD>262.6298828125</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>0.18688528501148277</TD>
+    <TD>0.00377820320260563</TD>
+    <TD>0.002449757004711185</TD>
+    <TD>0.0035385939614687415</TD>
+    <TD>0.19234641295588195</TD>
+    <TD>0.0044023661926411205</TD>
+    <TD>0.0036047953739902884</TD>
+    <TD>0.0041484138331280215</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>1.145</TD>
+    <TD>0.042</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>09 52 08.3867</TD>
+    <TD>+26 54 22.598</TD>
+    <TD>Gaia DR1 646899487268663680</TD>
+    <TD></TD>
+    <TD>V* Z Leo</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.829999923706055</TD>
+    <TD>0.02</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>5.166</TD>
+    <TD>0.019</TD>
+    <TD>4.547999858856201</TD>
+    <TD>0.192</TD>
+    <TD>4.116000175476074</TD>
+    <TD>0.018</TD>
+    <TD>0.930568</TD>
+    <TD>0.061662</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.880524</TD>
+    <TD>0.8961</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M3III-IV</TD>
+    <TD>1.019</TD>
+    <TD>0.06729999929666519</TD>
+    <TD>4.116000175476074</TD>
+    <TD>0.017999999225139618</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.02</TD>
+    <TD>0.012</TD>
+    <TD>0.0</TD>
+    <TD>0.062000000000000006</TD>
+    <TD>0.05766000000000001</TD>
+    <TD>NaN</TD>
+    <TD>0.05766000000000001</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>1.0258040675707145</TD>
+    <TD>0.01780948870358022</TD>
+    <TD>0.03160135141385123</TD>
+    <TD>0.01107506268146579</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>10 36 47.8398</TD>
+    <TD>+47 43 12.472</TD>
+    <TD>Gaia DR2 833845674063974144</TD>
+    <TD>HD 91782</TD>
+    <TD>HD  91782</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.069999694824219</TD>
+    <TD>0.01</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>7.06</TD>
+    <TD>0.023</TD>
+    <TD>6.821000099182129</TD>
+    <TD>0.027</TD>
+    <TD>6.757999897003174</TD>
+    <TD>0.017</TD>
+    <TD>0.190293</TD>
+    <TD>0.004448</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.180975</TD>
+    <TD>0.185891</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>G0+M9V</TD>
+    <TD>17.415</TD>
+    <TD>0.0494999997317791</TD>
+    <TD>6.757999897003174</TD>
+    <TD>0.017000000923871994</TD>
+    <TD>7.943999767303467</TD>
+    <TD>5.000000237487257E-4</TD>
+    <TD>8.242400169372559</TD>
+    <TD>0.0024999999441206455</TD>
+    <TD>7.533400058746338</TD>
+    <TD>0.0024999999441206455</TD>
+    <TD>0.002</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.006200000000000001</TD>
+    <TD>0.13454</TD>
+    <TD>0.005230592399669586</TD>
+    <TD>0.13454</TD>
+    <TD>6115.669921875</TD>
+    <TD>63.7900390625</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>0.1858769253734662</TD>
+    <TD>0.0037578175012193574</TD>
+    <TD>0.0021081676664848514</TD>
+    <TD>0.0031586076913567743</TD>
+    <TD>0.18756760921044205</TD>
+    <TD>0.004292990386111175</TD>
+    <TD>0.00297641525186145</TD>
+    <TD>0.00374282307697448</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>1.158</TD>
+    <TD>0.04</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>11 03 20.1940</TD>
+    <TD>+35 58 11.568</TD>
+    <TD></TD>
+    <TD>HD 95735</TD>
+    <TD>HD  95735</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>7.519999980926514</TD>
+    <TD>0.009</TD>
+    <TD>5.989999771118164</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>3.640000104904175</TD>
+    <TD>0.202</TD>
+    <TD>3.3399999141693115</TD>
+    <TD>0.05</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M2+V</TD>
+    <TD>392.64</TD>
+    <TD>0.6700000166893005</TD>
+    <TD>3.500999927520752</TD>
+    <TD>0.35199999809265137</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.87</TD>
+    <TD>TBD</TD>
+    <TD>-0.09</TD>
+    <TD>TBD</TD>
+    <TD>DLD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>1.3875224553343426</TD>
+    <TD>0.024089459454729047</TD>
+    <TD>0.0400024342893249</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>12 50 43.5668</TD>
+    <TD>-00 46 05.267</TD>
+    <TD>Gaia DR2 3689602277083844480</TD>
+    <TD>HD 111631</TD>
+    <TD>HD 111631</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.470000267028809</TD>
+    <TD>NaN</TD>
+    <TD>7.590000152587891</TD>
+    <TD>NaN</TD>
+    <TD>5.753</TD>
+    <TD>0.02</TD>
+    <TD>5.215000152587891</TD>
+    <TD>0.084</TD>
+    <TD>4.881999969482422</TD>
+    <TD>0.02</TD>
+    <TD>0.604874</TD>
+    <TD>0.02087</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.574069</TD>
+    <TD>0.591608</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M0V</TD>
+    <TD>93.882</TD>
+    <TD>0.05079999938607216</TD>
+    <TD>4.881999969482422</TD>
+    <TD>0.019999999552965164</TD>
+    <TD>7.820000171661377</TD>
+    <TD>5.000000237487257E-4</TD>
+    <TD>8.722200393676758</TD>
+    <TD>0.0010999999940395355</TD>
+    <TD>6.910600185394287</TD>
+    <TD>0.00139999995008111</TD>
+    <TD>0.0</TD>
+    <TD>0.015</TD>
+    <TD>0.015</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>4067.239990234375</TD>
+    <TD>252.4049072265625</TD>
+    <TD>4.56</TD>
+    <TD>TBD</TD>
+    <TD>0.05</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>0.6531041273916545</TD>
+    <TD>0.013203608329005091</TD>
+    <TD>0.013307723402326017</TD>
+    <TD>NaN</TD>
+    <TD>0.6335504792475634</TD>
+    <TD>0.014500510658396248</TD>
+    <TD>0.016705956309660035</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>0.726</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>12 54 40.0155</TD>
+    <TD>+22 06 28.557</TD>
+    <TD>Gaia DR2 3954927249048246272</TD>
+    <TD>HD 112196</TD>
+    <TD>HD 112196</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>7.0</TD>
+    <TD>0.01</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>5.88</TD>
+    <TD>0.03</TD>
+    <TD>5.627999782562256</TD>
+    <TD>0.024</TD>
+    <TD>5.552999973297119</TD>
+    <TD>0.016</TD>
+    <TD>0.328622</TD>
+    <TD>0.007863</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.313243</TD>
+    <TD>0.321407</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>F8V+M2V-M3V</TD>
+    <TD>28.396</TD>
+    <TD>0.03880000114440918</TD>
+    <TD>5.552999973297119</TD>
+    <TD>0.01600000075995922</TD>
+    <TD>6.8566999435424805</TD>
+    <TD>3.9999998989515007E-4</TD>
+    <TD>7.148499965667725</TD>
+    <TD>0.0019000000320374966</TD>
+    <TD>6.425600051879883</TD>
+    <TD>0.0031999999191612005</TD>
+    <TD>0.001</TD>
+    <TD>0.015</TD>
+    <TD>0.015</TD>
+    <TD>0.0031000000000000003</TD>
+    <TD>0.14414999999999997</TD>
+    <TD>0.002591042480985814</TD>
+    <TD>0.14414999999999997</TD>
+    <TD>6163.9501953125</TD>
+    <TD>128.284912109375</TD>
+    <TD>4.36</TD>
+    <TD>TBD</TD>
+    <TD>-0.04</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>0.3314969558825945</TD>
+    <TD>0.006701773552116105</TD>
+    <TD>0.0038992464699254526</TD>
+    <TD>0.005748543538204108</TD>
+    <TD>0.3346541533043905</TD>
+    <TD>0.007659462467189903</TD>
+    <TD>0.005499677237787954</TD>
+    <TD>0.006890261717104774</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>1.267</TD>
+    <TD>0.044</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>13 19 45.5462</TD>
+    <TD>+47 46 40.905</TD>
+    <TD>Gaia DR2 1552921051659352960</TD>
+    <TD>HD 115953</TD>
+    <TD>HD 115953</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.539999961853027</TD>
+    <TD>NaN</TD>
+    <TD>8.699999809265137</TD>
+    <TD>0.08</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.7210001945495605</TD>
+    <TD>0.018</TD>
+    <TD>4.49399995803833</TD>
+    <TD>0.018</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M2V</TD>
+    <TD>109.984</TD>
+    <TD>0.829200029373169</TD>
+    <TD>4.49399995803833</TD>
+    <TD>0.017999999225139618</TD>
+    <TD>7.94890022277832</TD>
+    <TD>0.006399999838322401</TD>
+    <TD>8.774900436401367</TD>
+    <TD>0.00570000009611249</TD>
+    <TD>6.67080020904541</TD>
+    <TD>0.004600000102072954</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>4051.510009765625</TD>
+    <TD>417.014892578125</TD>
+    <TD>4.36</TD>
+    <TD>TBD</TD>
+    <TD>0.22</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>0.8035409396865709</TD>
+    <TD>0.013950669275568754</TD>
+    <TD>0.0232304460973646</TD>
+    <TD>NaN</TD>
+    <TD>0.850942605932668</TD>
+    <TD>0.014969569681923482</TD>
+    <TD>0.05258570349484661</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>0.832</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>13 25 13.5378</TD>
+    <TD>+54 59 16.654</TD>
+    <TD>Gaia DR2 1565090003969283968</TD>
+    <TD>HD 116842</TD>
+    <TD>* g UMa</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>4.010000228881836</TD>
+    <TD>0.009</TD>
+    <TD>3.8499999046325684</TD>
+    <TD>NaN</TD>
+    <TD>3.291</TD>
+    <TD>0.226</TD>
+    <TD>3.6700000762939453</TD>
+    <TD>NaN</TD>
+    <TD>3.609999895095825</TD>
+    <TD>NaN</TD>
+    <TD>0.859983</TD>
+    <TD>0.071992</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.826556</TD>
+    <TD>0.846303</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>A5V+M3-4V</TD>
+    <TD>39.91</TD>
+    <TD>0.12999999523162842</TD>
+    <TD>3.1449999809265137</TD>
+    <TD>0.24400000274181366</TD>
+    <TD>3.885499954223633</TD>
+    <TD>0.00419999985024333</TD>
+    <TD>4.0630998611450195</TD>
+    <TD>0.00279999990016222</TD>
+    <TD>3.815999984741211</TD>
+    <TD>0.002300000051036477</TD>
+    <TD>0.001</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0031000000000000003</TD>
+    <TD>0.13454</TD>
+    <TD>0.0028256830331818044</TD>
+    <TD>0.13454</TD>
+    <TD>7648.25</TD>
+    <TD>281.4599609375</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>5</TD>
+    <TD>0.7108530122165421</TD>
+    <TD>0.3273599098479449</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>99.9</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>269.142</TD>
+    <TD>466.169</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>13 45 43.7754</TD>
+    <TD>+14 53 29.473</TD>
+    <TD>Gaia DR2 3741297293732404352</TD>
+    <TD>HD 119850</TD>
+    <TD>HD 119850</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.5</TD>
+    <TD>0.05</TD>
+    <TD>7.465000152587891</TD>
+    <TD>NaN</TD>
+    <TD>5.181</TD>
+    <TD>0.037</TD>
+    <TD>4.775000095367432</TD>
+    <TD>0.206</TD>
+    <TD>4.414999961853027</TD>
+    <TD>0.017</TD>
+    <TD>0.804995</TD>
+    <TD>0.05685</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.761704</TD>
+    <TD>0.775178</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M2V</TD>
+    <TD>183.984</TD>
+    <TD>0.05090000107884407</TD>
+    <TD>4.414999961853027</TD>
+    <TD>0.017000000923871994</TD>
+    <TD>7.606800079345703</TD>
+    <TD>6.000000284984708E-4</TD>
+    <TD>8.699299812316895</TD>
+    <TD>0.00279999990016222</TD>
+    <TD>6.586299896240234</TD>
+    <TD>0.0024999999441206455</TD>
+    <TD>0.0</TD>
+    <TD>0.015</TD>
+    <TD>0.015</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>4000.27001953125</TD>
+    <TD>78.205078125</TD>
+    <TD>4.79</TD>
+    <TD>TBD</TD>
+    <TD>-0.25</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>0.8369124132744739</TD>
+    <TD>0.014530047833983966</TD>
+    <TD>0.02429236570788187</TD>
+    <TD>NaN</TD>
+    <TD>0.8419449507159105</TD>
+    <TD>0.014811285179770074</TD>
+    <TD>0.05000975620565152</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>0.492</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>14 35 32.0675</TD>
+    <TD>+34 41 11.586</TD>
+    <TD>Gaia DR2 1287869828021042816</TD>
+    <TD>HD 128368</TD>
+    <TD>HD 128368</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.670000076293945</TD>
+    <TD>0.009</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>6.53</TD>
+    <TD>0.024</TD>
+    <TD>5.941999912261963</TD>
+    <TD>0.046</TD>
+    <TD>5.802999973297119</TD>
+    <TD>0.017</TD>
+    <TD>0.349947</TD>
+    <TD>0.008936</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.33026</TD>
+    <TD>0.340735</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M0.5V</TD>
+    <TD>1.853</TD>
+    <TD>0.03840000182390213</TD>
+    <TD>5.802999973297119</TD>
+    <TD>0.017000000923871994</TD>
+    <TD>8.30090045928955</TD>
+    <TD>1.9999999494757503E-4</TD>
+    <TD>8.943699836730957</TD>
+    <TD>0.0010000000474974513</TD>
+    <TD>7.569900035858154</TD>
+    <TD>0.0010999999940395355</TD>
+    <TD>0.019</TD>
+    <TD>0.018</TD>
+    <TD>0.0</TD>
+    <TD>0.0589</TD>
+    <TD>0.08649</TD>
+    <TD>0.04453531948574282</TD>
+    <TD>0.08649</TD>
+    <TD>4653.43017578125</TD>
+    <TD>137.635009765625</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>0.3748749511069424</TD>
+    <TD>0.007578733343087199</TD>
+    <TD>0.0063639499242164384</TD>
+    <TD>0.005145520261165029</TD>
+    <TD>0.3773381365843154</TD>
+    <TD>0.008636400493072927</TD>
+    <TD>0.00874225968963022</TD>
+    <TD>0.0058311984647016445</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>21.897</TD>
+    <TD>0.91</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>14 45 32.9256</TD>
+    <TD>+18 40 20.251</TD>
+    <TD>Gaia DR2 1236656431823497216</TD>
+    <TD></TD>
+    <TD>BD+19  2857</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.699999809265137</TD>
+    <TD>0.02</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>6.466</TD>
+    <TD>0.02</TD>
+    <TD>5.815000057220459</TD>
+    <TD>0.021</TD>
+    <TD>5.679999828338623</TD>
+    <TD>0.018</TD>
+    <TD>0.381535</TD>
+    <TD>0.008315</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.358661</TD>
+    <TD>0.370899</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M0V</TD>
+    <TD>1.541</TD>
+    <TD>0.04569999873638153</TD>
+    <TD>5.679999828338623</TD>
+    <TD>0.017999999225139618</TD>
+    <TD>8.299599647521973</TD>
+    <TD>5.000000237487257E-4</TD>
+    <TD>8.978099822998047</TD>
+    <TD>0.002300000051036477</TD>
+    <TD>7.545199871063232</TD>
+    <TD>0.001500000013038516</TD>
+    <TD>0.029</TD>
+    <TD>0.027</TD>
+    <TD>0.012</TD>
+    <TD>0.08990000000000001</TD>
+    <TD>0.18739500000000003</TD>
+    <TD>0.06715647003057579</TD>
+    <TD>0.18739500000000003</TD>
+    <TD>4534.10009765625</TD>
+    <TD>50.10009765625</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>0.40585435937547193</TD>
+    <TD>0.008205034656900076</TD>
+    <TD>0.007108314525091438</TD>
+    <TD>0.008813358688027408</TD>
+    <TD>0.4081155092454759</TD>
+    <TD>0.009340823636814566</TD>
+    <TD>0.009727146968574102</TD>
+    <TD>0.010554652247890272</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>28.469</TD>
+    <TD>1.463</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>14 57 26.5333</TD>
+    <TD>-21 24 41.577</TD>
+    <TD>Gaia DR2 6232511675556408320</TD>
+    <TD>HD 131976</TD>
+    <TD>HD 131976</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.0649995803833</TD>
+    <TD>NaN</TD>
+    <TD>7.074999809265137</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>3.9100000858306885</TD>
+    <TD>0.2</TD>
+    <TD>3.799999952316284</TD>
+    <TD>0.23</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M1.5V</TD>
+    <TD>168.77</TD>
+    <TD>21.540000915527344</TD>
+    <TD>3.802000045776367</TD>
+    <TD>0.23000000417232513</TD>
+    <TD>7.18179988861084</TD>
+    <TD>8.999999845400453E-4</TD>
+    <TD>8.328900337219238</TD>
+    <TD>0.002899999963119626</TD>
+    <TD>6.141600131988525</TD>
+    <TD>0.0031999999191612005</TD>
+    <TD>0.0</TD>
+    <TD>0.015</TD>
+    <TD>0.015</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>3840.02001953125</TD>
+    <TD>129.68994140625</TD>
+    <TD>5.0</TD>
+    <TD>TBD</TD>
+    <TD>-0.05</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>1.1332350324322757</TD>
+    <TD>0.019674650497730352</TD>
+    <TD>0.03350299712926235</TD>
+    <TD>NaN</TD>
+    <TD>1.1561859422242662</TD>
+    <TD>0.02033933417685281</TD>
+    <TD>0.07064595475517507</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>0.737</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>16 29 24.4597</TD>
+    <TD>-26 25 55.209</TD>
+    <TD></TD>
+    <TD>HD 148478</TD>
+    <TD>* alf Sco</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>0.9100000262260437</TD>
+    <TD>NaN</TD>
+    <TD>-0.6399999856948853</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>-3.490000009536743</TD>
+    <TD>NaN</TD>
+    <TD>-3.7899999618530273</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M0.5Iab+B3V:</TD>
+    <TD>5.89</TD>
+    <TD>1.0</TD>
+    <TD>-4.099999904632568</TD>
+    <TD>0.1599999964237213</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>39.19223150535701</TD>
+    <TD>0.6804355981115661</TD>
+    <TD>1.2522734095950747</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>17 14 38.8581</TD>
+    <TD>+14 23 25.226</TD>
+    <TD></TD>
+    <TD>HD 156014J</TD>
+    <TD>* alf Her</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>3.059999942779541</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>-3.2200000286102295</TD>
+    <TD>0.17</TD>
+    <TD>-3.509999990463257</TD>
+    <TD>0.15</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M5Ib-II+G5III+F2V:</TD>
+    <TD>9.07</TD>
+    <TD>1.3200000524520874</TD>
+    <TD>-3.510999917984009</TD>
+    <TD>0.15000000596046448</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>42.360394390137444</TD>
+    <TD>0.7354396314268363</TD>
+    <TD>1.587427310432395</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>18 07 35.5178</TD>
+    <TD>+63 54 12.333</TD>
+    <TD>Gaia DR2 2161051213466149632</TD>
+    <TD>HD 166779</TD>
+    <TD>HD 166779</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.0600004196167</TD>
+    <TD>0.01</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>5.706</TD>
+    <TD>0.026</TD>
+    <TD>5.078000068664551</TD>
+    <TD>0.02</TD>
+    <TD>4.888999938964844</TD>
+    <TD>0.021</TD>
+    <TD>0.569911</TD>
+    <TD>0.012812</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.532961</TD>
+    <TD>0.552751</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M0.5V</TD>
+    <TD>2.852</TD>
+    <TD>0.026799999177455902</TD>
+    <TD>4.888999938964844</TD>
+    <TD>0.020999999716877937</TD>
+    <TD>7.613999843597412</TD>
+    <TD>3.000000142492354E-4</TD>
+    <TD>8.353500366210938</TD>
+    <TD>0.003700000001117587</TD>
+    <TD>6.832699775695801</TD>
+    <TD>0.0024999999441206455</TD>
+    <TD>0.026</TD>
+    <TD>0.058</TD>
+    <TD>0.058</TD>
+    <TD>0.0806</TD>
+    <TD>0.5573800000000001</TD>
+    <TD>0.05962831336082959</TD>
+    <TD>0.5573800000000001</TD>
+    <TD>4313.25</TD>
+    <TD>162.8349609375</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>1</TD>
+    <TD>0.6002514508902608</TD>
+    <TD>0.012135101776380707</TD>
+    <TD>0.010927759973849569</TD>
+    <TD>0.03341409728377167</TD>
+    <TD>0.6006412080773492</TD>
+    <TD>0.01374729327005098</TD>
+    <TD>0.014761670289516938</TD>
+    <TD>0.041850799072341904</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>22.648</TD>
+    <TD>1.765</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>19 05 20.7732</TD>
+    <TD>+25 55 14.370</TD>
+    <TD>Gaia DR2 2035963417721248128</TD>
+    <TD>HD 177830</TD>
+    <TD>HD 177830</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>7.177000045776367</TD>
+    <TD>0.01</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.949999809265137</TD>
+    <TD>0.04</TD>
+    <TD>4.809000015258789</TD>
+    <TD>0.027</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>K0+M4V</TD>
+    <TD>15.903</TD>
+    <TD>0.031300000846385956</TD>
+    <TD>4.809000015258789</TD>
+    <TD>0.027000000700354576</TD>
+    <TD>6.886600017547607</TD>
+    <TD>1.9999999494757503E-4</TD>
+    <TD>7.4380998611450195</TD>
+    <TD>0.0010999999940395355</TD>
+    <TD>6.23859977722168</TD>
+    <TD>0.0013000000035390258</TD>
+    <TD>0.008</TD>
+    <TD>0.015</TD>
+    <TD>0.015</TD>
+    <TD>0.024800000000000003</TD>
+    <TD>0.14414999999999997</TD>
+    <TD>0.019464858824999723</TD>
+    <TD>0.14414999999999997</TD>
+    <TD>4847.5</TD>
+    <TD>53.360107421875</TD>
+    <TD>3.49</TD>
+    <TD>TBD</TD>
+    <TD>0.37</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>2</TD>
+    <TD>0.531421786553254</TD>
+    <TD>0.005457451721791648</TD>
+    <TD>0.005215418409391137</TD>
+    <TD>0.008499548506302855</TD>
+    <TD>0.535462701064685</TD>
+    <TD>0.060167883546302495</TD>
+    <TD>0.007432730299778659</TD>
+    <TD>0.009843154770684944</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>3.62</TD>
+    <TD>0.415</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>19 47 23.2665</TD>
+    <TD>+18 32 03.520</TD>
+    <TD>Gaia DR2 1824534959598087168</TD>
+    <TD>HD 187076J</TD>
+    <TD>* del Sge</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>3.819999933242798</TD>
+    <TD>NaN</TD>
+    <TD>2.369999885559082</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>-0.4359999895095825</TD>
+    <TD>0.182</TD>
+    <TD>-0.5609999895095825</TD>
+    <TD>0.164</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M2II+B0V</TD>
+    <TD>7.53</TD>
+    <TD>0.5044000148773193</TD>
+    <TD>-0.5609999895095825</TD>
+    <TD>0.164000004529953</TD>
+    <TD>2.691999912261963</TD>
+    <TD>0.0013000000035390258</TD>
+    <TD>4.152900218963623</TD>
+    <TD>0.01549999974668026</TD>
+    <TD>2.29259991645813</TD>
+    <TD>0.019999999552965164</TD>
+    <TD>0.013</TD>
+    <TD>0.018</TD>
+    <TD>0.018</TD>
+    <TD>0.0403</TD>
+    <TD>0.17298</TD>
+    <TD>0.028236779062428777</TD>
+    <TD>0.17298</TD>
+    <TD>4707.25</TD>
+    <TD>1080.5</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DLD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>8.531847728205934</TD>
+    <TD>0.14812560267575223</TD>
+    <TD>0.25439975152134786</TD>
+    <TD>NaN</TD>
+    <TD>8.395320571810613</TD>
+    <TD>0.14768838159661826</TD>
+    <TD>0.5013969014910966</TD>
+    <TD>0.8925979466495627</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>119.88</TD>
+    <TD>16.812</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>19 49 37.0456</TD>
+    <TD>-10 58 44.994</TD>
+    <TD>Gaia DR2 4190346501177672960</TD>
+    <TD>HD 187289</TD>
+    <TD>HD 187289</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.3100004196167</TD>
+    <TD>0.01</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.139</TD>
+    <TD>0.246</TD>
+    <TD>3.1480000019073486</TD>
+    <TD>0.194</TD>
+    <TD>2.8949999809265137</TD>
+    <TD>0.214</TD>
+    <TD>1.762601</TD>
+    <TD>0.146587</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>1.667651</TD>
+    <TD>1.69716</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M2/3V</TD>
+    <TD>1.748</TD>
+    <TD>0.07339999824762344</TD>
+    <TD>2.8949999809265137</TD>
+    <TD>0.21400000154972076</TD>
+    <TD>7.11359977722168</TD>
+    <TD>0.0010000000474974513</TD>
+    <TD>8.575200080871582</TD>
+    <TD>0.004000000189989805</TD>
+    <TD>5.949900150299072</TD>
+    <TD>0.0027000000700354576</TD>
+    <TD>0.149</TD>
+    <TD>0.039</TD>
+    <TD>0.033</TD>
+    <TD>0.4619</TD>
+    <TD>0.34596000000000005</TD>
+    <TD>0.2777923421236943</TD>
+    <TD>0.34596000000000005</TD>
+    <TD>3799.89990234375</TD>
+    <TD>157.945068359375</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>NaN</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>1.8990827181626253</TD>
+    <TD>0.03297090866131721</TD>
+    <TD>0.06066744032438052</TD>
+    <TD>0.23376193935230158</TD>
+    <TD>1.9898417940493045</TD>
+    <TD>0.03500479960029365</TD>
+    <TD>0.13288620398757325</TD>
+    <TD>0.2812048064307649</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>122.433</TD>
+    <TD>19.933</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>21 56 39.1438</TD>
+    <TD>+63 37 32.017</TD>
+    <TD>Gaia DR2 2216536246703152256</TD>
+    <TD>HD 208816</TD>
+    <TD>V* VV Cep</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>4.900000095367432</TD>
+    <TD>NaN</TD>
+    <TD>3.190000057220459</TD>
+    <TD>NaN</TD>
+    <TD>1.226</TD>
+    <TD>0.29</TD>
+    <TD>0.17000000178813934</TD>
+    <TD>NaN</TD>
+    <TD>-0.10999999940395355</TD>
+    <TD>NaN</TD>
+    <TD>6.332892</TD>
+    <TD>0.615141</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>5.989771</TD>
+    <TD>6.108126</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M2epIa-Iab+B8:eV</TD>
+    <TD>1.33</TD>
+    <TD>0.20000000298023224</TD>
+    <TD>-0.0010000000474974513</TD>
+    <TD>0.18000000715255737</TD>
+    <TD>3.876499891281128</TD>
+    <TD>0.00419999985024333</TD>
+    <TD>5.386000156402588</TD>
+    <TD>0.009999999776482582</TD>
+    <TD>2.8866000175476074</TD>
+    <TD>0.006200000178068876</TD>
+    <TD>0.193</TD>
+    <TD>0.084</TD>
+    <TD>0.084</TD>
+    <TD>0.5983</TD>
+    <TD>0.8072400000000002</TD>
+    <TD>0.3729508606688252</TD>
+    <TD>0.8072400000000002</TD>
+    <TD>3494.5</TD>
+    <TD>156.3349609375</TD>
+    <TD>0.0</TD>
+    <TD>TBD</TD>
+    <TD>0.16</TD>
+    <TD>TBD</TD>
+    <TD>DLD</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>4</TD>
+    <TD>6.441589571391048</TD>
+    <TD>0.136753880887338</TD>
+    <TD>0.22552642886493535</TD>
+    <TD>NaN</TD>
+    <TD>6.662812681639215</TD>
+    <TD>0.15433743317103063</TD>
+    <TD>0.37913313393874765</TD>
+    <TD>0.8468782760821039</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>538.647</TD>
+    <TD>111.101</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+  <TR>
+    <TD>TBD by SPICA-DB</TD>
+    <TD>22 56 34.8047</TD>
+    <TD>+16 33 12.353</TD>
+    <TD>Gaia DR1 2828928003907155072</TD>
+    <TD>HD 216899</TD>
+    <TD>HD 216899</TD>
+    <TD>TBD by SPICA-NSS</TD>
+    <TD>nna</TD>
+    <TD>WP5</TD>
+    <TD>DIA</TD>
+    <TD>0</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by PI</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by SPICA-DRS</TD>
+    <TD>TBD by Priority Module</TD>
+    <TD>8.637999534606934</TD>
+    <TD>NaN</TD>
+    <TD>7.6570000648498535</TD>
+    <TD>NaN</TD>
+    <TD>5.36</TD>
+    <TD>0.02</TD>
+    <TD>4.800000190734863</TD>
+    <TD>0.036</TD>
+    <TD>4.5229997634887695</TD>
+    <TD>0.016</TD>
+    <TD>0.774602</TD>
+    <TD>0.01856</TD>
+    <TD>None</TD>
+    <TD>None</TD>
+    <TD>0.730895</TD>
+    <TD>0.752437</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>TBD by Stellar Activity Module</TD>
+    <TD>M1.5Ve</TD>
+    <TD>145.611</TD>
+    <TD>0.03880000114440918</TD>
+    <TD>4.5229997634887695</TD>
+    <TD>0.01600000075995922</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>0.0</TD>
+    <TD>0.014</TD>
+    <TD>0.014</TD>
+    <TD>0.0</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>4.69</TD>
+    <TD>TBD</TD>
+    <TD>0.12</TD>
+    <TD>TBD</TD>
+    <TD>DIA</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>3</TD>
+    <TD>0.7989508006698773</TD>
+    <TD>0.013870977615582201</TD>
+    <TD>0.02326217424642517</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SBCR Module</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>TBD by SPICA-SAS</TD>
+    <TD>NaN</TD>
+    <TD>NaN</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+    <TD>TBD by SURVEY Module</TD>
+  </TR>
+</TABLEDATA>
+</DATA>
+</TABLE>
+</RESOURCE>
+</VOTABLE>

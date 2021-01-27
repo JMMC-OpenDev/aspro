@@ -456,6 +456,52 @@ public class TargetUserInformations
         return isEmpty(this.targetInfos);
     }
 
+    /** computed displayable list of target groups (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private List<TargetGroup> cachedDisplayTargetGroups = null;
+
+    /**
+     * Clear any cached value related to target groups
+     */
+    public void clearCacheGroups() {
+        cachedDisplayTargetGroups = null;
+    }
+
+    /**
+     * Return the displayable list of targets containing
+     * - science targets followed by their calibrators
+     * - calibrator orphans
+     * @return displayable list of targets
+     */
+    public List<TargetGroup> getDisplayGroups() {
+        if (this.cachedDisplayTargetGroups != null) {
+            return this.cachedDisplayTargetGroups;
+        }
+        computeDisplayTargetGroups();
+
+        return this.cachedDisplayTargetGroups;
+    }
+
+    /**
+     * Compute the displayable list of target groups
+     */
+    private void computeDisplayTargetGroups() {
+        final List<TargetGroup> innerGroups = getGroups();
+
+        final List<TargetGroup> displayGroups;
+
+        if (innerGroups.isEmpty()) {
+            displayGroups = java.util.Collections.emptyList();
+        } else {
+            displayGroups = new ArrayList<TargetGroup>(innerGroups);
+            
+            java.util.Collections.sort(displayGroups, fr.jmmc.aspro.model.util.TargetGroupComparator.getInstance());
+        }
+
+        // cache the computed collections :
+        this.cachedDisplayTargetGroups = displayGroups;
+    }
+    
     /**
      * Return the group of the given identifier in the given list of groups
      * @param id group identifier
@@ -528,7 +574,17 @@ public class TargetUserInformations
         return usedGroups;
     }
 
-    public final TargetGroup getFirstTargetGroup(final Target target) {
+    public final TargetGroup getFirstTargetGroup(final Target target,
+                                                 final List<TargetGroup> preferedGroupList) {
+        if (preferedGroupList != null) {
+            for (TargetGroup group : preferedGroupList) {
+                final TargetGroupMembers gm = getGroupMembers(group);
+
+                if (gm != null && gm.hasTarget(target)) {
+                    return group;
+                }
+            }
+        }
         for (TargetGroup group : getGroups()) {
             final TargetGroupMembers gm = getGroupMembers(group);
 

@@ -185,17 +185,16 @@ public class TargetGroup
     }
     
 //--simple--preserve
-
     public final static String CATEGORY_OB = "[OB]";
     public final static String CATEGORY_USER = "[USER]";
-    
+
     public final static String GROUP_AO = "JMMC_AO";
     public final static String GROUP_FT = "JMMC_FT";
     public final static String GROUP_GUIDE = "JMMC_GUIDE";
-    
+
     /** empty TargetGroup instance */
     public static final TargetGroup EMPTY_GROUP = new TargetGroup();
-       
+
     /**
      * Empty constructor for JAXB
      */
@@ -248,11 +247,11 @@ public class TargetGroup
         }
         return this.id;
     }
-    
+
     public static String generateIdentifier(final String name) {
         return fr.jmmc.aspro.model.util.XmlIdUtils.convert(Target.formatName(name));
     }
-    
+
     private final void setIdentifier() {
         setId(fr.jmmc.aspro.model.util.XmlIdUtils.convert(getName()));
     }
@@ -266,7 +265,7 @@ public class TargetGroup
         // recompute identifier:
         setIdentifier();
     }
-    
+
     public final boolean isCategoryOB() {
         return CATEGORY_OB.equals(getCategory());
     }
@@ -287,15 +286,15 @@ public class TargetGroup
         decColor = null;
         overDecColor = null;
     }
-    
+
     public final java.awt.Color getDecodedColor() {
         if (decColor != null) {
             return decColor;
         }
         decColor = java.awt.Color.MAGENTA; // default
-        
+
         final String col = getColor();
-        
+
         if (col != null) {
             try {
                 decColor = java.awt.Color.decode(col);
@@ -305,23 +304,23 @@ public class TargetGroup
         }
         return decColor;
     }
-    
+
     public final java.awt.Color getOverDecodedColor() {
         if (overDecColor != null) {
             return overDecColor;
         }
-        
+
         final java.awt.Color color = getDecodedColor();
-        
-        overDecColor = (fr.jmmc.oiexplorer.core.util.ColorUtils.lum(color.getRGB()) > 0.5f) ? java.awt.Color.BLACK : java.awt.Color.WHITE;
+
+        overDecColor = (fr.jmmc.oiexplorer.core.util.ColorUtils.luminance(color.getRGB()) > 128) ? java.awt.Color.BLACK : java.awt.Color.WHITE;
 
         return overDecColor;
     }
-    
+
     /**
-    * Return the tooltip describing this group
-    * @return tooltip text
-    */
+     * Return the tooltip describing this group
+     * @return tooltip text
+     */
     public final String getTooltip() {
         String desc = getDescription();
         if (desc == null || desc.length() == 0) {
@@ -378,7 +377,6 @@ public class TargetGroup
         final TargetGroup copy = (TargetGroup) super.clone();
 
         // no specific field to deep copy
-
         return copy;
     }
 
@@ -391,10 +389,8 @@ public class TargetGroup
         return (areEquals(this.id, other.getId())
                 && areEquals(this.name, other.getName())
                 && areEquals(this.description, other.getDescription())
-                && areEquals(this.color, other.getColor())
-                );
+                && areEquals(this.color, other.getColor()));
     }
-    
 
     /**
      * Return the group of the given name in the given list of groups
@@ -443,7 +439,17 @@ public class TargetGroup
         }
         return mapIDGroups;
     }
-    
+
+    public static void filterGroups(final java.util.List<TargetGroup> groups, final String category) {
+        if (category != null) {
+            for (final java.util.Iterator<TargetGroup> it = groups.iterator(); it.hasNext();) {
+                if (category.equals(it.next().getCategory())) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
 //--simple--preserve
 
 }

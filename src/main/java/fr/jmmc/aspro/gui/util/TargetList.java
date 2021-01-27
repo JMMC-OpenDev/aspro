@@ -124,7 +124,7 @@ public final class TargetList extends JList {
             boolean startGroups = true;
             int n = 0;
 
-            for (TargetGroup group : targetUserInfos.getGroups()) {
+            for (TargetGroup group : targetUserInfos.getDisplayGroups()) {
                 TargetGroupMembers gm = targetUserInfos.getGroupMembers(group);
 
                 if (gm != null && gm.hasTarget(target)) {

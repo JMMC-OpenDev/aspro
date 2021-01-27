@@ -469,7 +469,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
 
             // add target in group:
             for (Object o : selectedGroups) {
-                TargetGroup g = (TargetGroup) o;
+                final TargetGroup g = (TargetGroup) o;
                 this.editTargetUserInfos.getOrCreateGroupMembers(g).addTarget(currentTarget); // avoid duplicates
             }
 

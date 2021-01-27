@@ -1,3 +1,4 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+
 
 /**
  * 
@@ -38,7 +40,8 @@ import fr.jmmc.aspro.model.OIBase;
     "fields"
 })
 public class CalibratorInformations
-        extends OIBase {
+    extends OIBase
+{
 
     @XmlElement(name = "parameter")
     protected List<BaseValue> parameters;
@@ -102,7 +105,7 @@ public class CalibratorInformations
         }
         return this.fields;
     }
-
+    
 //--simple--preserve
     @Override
     protected boolean areEquals(final OIBase o) {

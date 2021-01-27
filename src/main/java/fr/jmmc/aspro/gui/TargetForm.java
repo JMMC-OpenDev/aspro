@@ -10,6 +10,7 @@ import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.TargetTransferHandler;
 import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
+import fr.jmmc.aspro.model.TargetImporter;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
@@ -612,11 +613,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             }
 
             if (!validNames.isEmpty()) {
+                final boolean doConfirm = (validNames.size() < 100);
+
                 final StringBuilder sb = new StringBuilder(64);
                 boolean isTargetChanged = false;
                 try {
                     for (String name : validNames) {
-                        isTargetChanged |= BasicObservationForm.addTarget(result.getSingleStar(name), editTargets, sb);
+                        isTargetChanged |= TargetImporter.addTarget(result.getSingleStar(name), editTargets, doConfirm, sb);
                     }
                 } finally {
                     if (isTargetChanged) {

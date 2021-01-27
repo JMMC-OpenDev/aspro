@@ -19,6 +19,8 @@ import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
 import fr.jmmc.aspro.gui.chart.XYTickAnnotation;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
+import fr.jmmc.aspro.gui.util.ObservabilityFilter;
+import fr.jmmc.aspro.gui.util.TargetGroupRenderer;
 import fr.jmmc.aspro.model.ObservationCollectionObsData;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
@@ -44,6 +46,7 @@ import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.jmcs.gui.component.Disposable;
+import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
@@ -191,19 +194,19 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private static final Map<Color, Color> SOFT_LIMITS_PAINTS = new HashMap<Color, Color>(8);
     /* Filters */
     /** calibrator filter */
-    private static final Filter CALIBRATOR_FILTER = new Filter("CalibratorFilter", "Hide calibrators",
+    private static final ObservabilityFilter CALIBRATOR_FILTER = new ObservabilityFilter("CalibratorFilter", "Hide calibrators",
             "hide all targets flagged as calibrator and orphaned calibrators") {
         @Override
-        protected boolean apply(final TargetUserInformations targetUserInfos, final Target target, final boolean calibrator, final StarObservabilityData so) {
+        public boolean apply(final TargetUserInformations targetUserInfos, final Target target, final boolean calibrator, final StarObservabilityData so) {
             // if calibrator, filter item:
             return calibrator;
         }
     };
     /** acillary star filter */
-    private static final Filter ANCILLARY_STAR_FILTER = new Filter("AncillaryStarFilter", "Hide ancillary stars",
+    private static final ObservabilityFilter ANCILLARY_STAR_FILTER = new ObservabilityFilter("AncillaryStarFilter", "Hide ancillary stars",
             "hide all ancillary stars (FT, AO, Guide stars)") {
         @Override
-        protected boolean apply(final TargetUserInformations targetUserInfos, final Target target, final boolean calibrator, final StarObservabilityData so) {
+        public boolean apply(final TargetUserInformations targetUserInfos, final Target target, final boolean calibrator, final StarObservabilityData so) {
 
             if (targetUserInfos.hasTargetInTargetGroup(TargetGroup.GROUP_AO, target)) {
                 // if AO, filter item:
@@ -221,12 +224,57 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
     };
     /** unobservable filter */
-    private static final Filter UNOBSERVABLE_FILTER = new Filter("UnobservableFilter", "Hide unobservable",
+    private static final ObservabilityFilter UNOBSERVABLE_FILTER = new ObservabilityFilter("UnobservableFilter", "Hide unobservable",
             "hide all targets that are not observable or never rise") {
         @Override
-        protected boolean apply(final TargetUserInformations targetUserInfos, final Target target, final boolean calibrator, final StarObservabilityData so) {
+        public boolean apply(final TargetUserInformations targetUserInfos, final Target target, final boolean calibrator, final StarObservabilityData so) {
             return (so != null) && so.getVisible().isEmpty();
         }
+    };
+    /** show groups filter */
+    private static final ObservabilityFilter GROUPS_FILTER = new ObservabilityFilter("GroupsFilter", "Show groups",
+            "show only targets that belong to selected groups") {
+
+        // note: not thread-safe
+        private List<?> selectedGroups = null;
+
+        public void prepare(final Object context) {
+            this.selectedGroups = null;
+            if (context instanceof ObservabilityPanel) {
+                final ObservabilityPanel obsPanel = (ObservabilityPanel) context;
+
+                this.selectedGroups = Arrays.asList(obsPanel.checkBoxListGroups.getCheckBoxListSelectedValues());
+
+                if (this.selectedGroups.isEmpty()) {
+                    // disable filter:
+                    this.selectedGroups = null;
+                }
+                logger.debug("selected groups: {}", selectedGroups);
+            }
+        }
+
+        @Override
+        public boolean apply(final TargetUserInformations targetUserInfos, final Target target, final boolean calibrator, final StarObservabilityData so) {
+            if (selectedGroups == null) {
+                // disabled, skip filter:
+                return false;
+            }
+            boolean match = false;
+
+            for (Object o : selectedGroups) {
+                final TargetGroup g = (TargetGroup) o;
+                if (targetUserInfos.hasTargetInTargetGroup(g, target)) {
+                    match = true;
+                    break;
+                }
+
+            }
+            return !match;
+        }
+    };
+
+    private static final ObservabilityFilter[] FILTERS = new ObservabilityFilter[]{
+        GROUPS_FILTER, CALIBRATOR_FILTER, ANCILLARY_STAR_FILTER, UNOBSERVABLE_FILTER
     };
 
     /* default plot options */
@@ -288,6 +336,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private String selectedTargetName = null;
     /** offset of the selected target (-1 means invalid) */
     private int selectedTargetOffset = -1;
+    /** cached list of user groups */
+    private List<TargetGroup> userGroupList = null;
 
     /* plot data */
     /** chart data */
@@ -318,6 +368,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private CheckBoxList jCheckBoxListFilters;
     /** checkbox Related output */
     private JCheckBox jCheckBoxShowRelated;
+    /** label 'Groups' */
+    private JLabel jLabelGroups;
+    /** scroll pane for groups */
+    private JScrollPane jScrollPaneGroups;
+    /** group checkbox list */
+    protected com.jidesoft.swing.CheckBoxList checkBoxListGroups;
 
     /**
      * Constructor
@@ -545,7 +601,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         panelOptions.add(this.jCheckBoxDetailedOutput);
 
-        this.jCheckBoxListFilters = new CheckBoxList(new Object[]{CALIBRATOR_FILTER, ANCILLARY_STAR_FILTER, UNOBSERVABLE_FILTER}) {
+        this.jCheckBoxListFilters = new CheckBoxList(FILTERS) {
             /** default serial UID for Serializable interface */
             private static final long serialVersionUID = 1;
 
@@ -556,7 +612,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 final int index = locationToIndex(evt.getPoint());
                 if (index != -1) {
                     // Get filter:
-                    final Filter filter = (Filter) getModel().getElementAt(index);
+                    final ObservabilityFilter filter = (ObservabilityFilter) getModel().getElementAt(index);
                     if (filter != null) {
                         // Return the tool tip text :
                         return filter.getTooltip();
@@ -581,6 +637,27 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         panelOptions.add(createSeparator());
         panelOptions.add(new JLabel("Filters:"));
         panelOptions.add(new JScrollPane(this.jCheckBoxListFilters));
+
+        this.jLabelGroups = new JLabel("Groups:");
+        panelOptions.add(this.jLabelGroups);
+        this.checkBoxListGroups = createCheckBoxList();
+        this.checkBoxListGroups.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        this.checkBoxListGroups.setToolTipText("groups whose target belongs to");
+        this.checkBoxListGroups.setVisibleRowCount(2); // note: only 1 is ugly on macOS X
+
+        this.checkBoxListGroups.setCellRenderer(TargetGroupRenderer.INSTANCE);
+
+        this.checkBoxListGroups.getCheckBoxListSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(final ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting() && getChartData() != null) {
+                    updatePlot(getChartData());
+                }
+            }
+        });
+
+        this.jScrollPaneGroups = new JScrollPane(this.checkBoxListGroups);
+        panelOptions.add(jScrollPaneGroups);
 
         this.jCheckBoxShowRelated = new JCheckBox("<html>Show<br>related</html>");
         this.jCheckBoxShowRelated.setName("jCheckBoxShowRelated");
@@ -933,7 +1010,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     /**
      * Update the UI widgets from the given loaded observation
      *
-     * @param observation observation (unused)
+     * @param observation observation
      */
     private void onLoadObservation(final ObservationSetting observation) {
         if (logger.isDebugEnabled()) {
@@ -949,8 +1026,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             this.jCheckBoxBaseLineLimits.setSelected(DEFAULT_DO_BASELINE_LIMITS);
             this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
 
-            // by default, hide unobservable targets:
-            this.jCheckBoxListFilters.setCheckBoxListSelectedValue(UNOBSERVABLE_FILTER, false);
+            // set filters by default:
+            this.jCheckBoxListFilters.selectNone();
+            this.jCheckBoxListFilters.addCheckBoxListSelectedValue(GROUPS_FILTER, true);
+            this.jCheckBoxListFilters.addCheckBoxListSelectedValue(UNOBSERVABLE_FILTER, false);
 
             this.jCheckBoxShowRelated.setSelected(DEFAULT_DO_SHOW_RELATED);
             this.jCheckBoxScrollView.setSelected(DEFAULT_DO_SCROLL_VIEW);
@@ -959,6 +1038,35 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             setCurrentTargetName(null);
             selectedTargetName = null;
             selectedTargetOffset = -1;
+            userGroupList = null;
+
+        } finally {
+            // restore the automatic refresh :
+            this.setAutoRefresh(prevAutoRefresh);
+        }
+    }
+
+    /**
+     * Update the UI widgets from the given observation
+     *
+     * @param observation observation (unused)
+     */
+    private void onTargetChanged(final ObservationSetting observation) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("onTargetChanged:\n{}", ObservationManager.toString(observation));
+        }
+        // disable the automatic refresh :
+        final boolean prevAutoRefresh = this.setAutoRefresh(false);
+        try {
+            // show all groups except OB:
+            this.userGroupList = new ArrayList<TargetGroup>(observation.getOrCreateTargetUserInfos().getDisplayGroups());
+            TargetGroup.filterGroups(this.userGroupList, TargetGroup.CATEGORY_OB);
+            this.checkBoxListGroups.setModel(new GenericListModel<TargetGroup>(this.userGroupList));
+            // none selected means disabled filter
+
+            final boolean visible = !this.userGroupList.isEmpty();
+            this.jLabelGroups.setVisible(visible);
+            this.jScrollPaneGroups.setVisible(visible);
 
         } finally {
             // restore the automatic refresh :
@@ -979,6 +1087,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         switch (event.getType()) {
             case LOADED:
                 this.onLoadObservation(event.getObservation());
+                break;
+            case TARGET_CHANGED:
+                this.onTargetChanged(event.getObservation());
                 break;
             case TARGET_SELECTION_CHANGED:
                 if (event instanceof TargetSelectionEvent) {
@@ -1387,14 +1498,34 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         // Get filters:
         final boolean hasFilters = !(doBaseLineLimits) && isSelectedFilter(); // disable filters for baseline limits
-        Filter[] selectedFilters = null;
+        ObservabilityFilter[] selectedFilters = null;
 
         if (hasFilters) {
             selectedFilters = getSelectedFilters();
 
-            if (hasFilters) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("selectedFilters: {}", Arrays.toString(selectedFilters));
+            if (logger.isDebugEnabled()) {
+                logger.debug("selectedFilters: {}", Arrays.toString(selectedFilters));
+            }
+
+            // Prepare filters:
+            for (int k = 0, len = selectedFilters.length; k < len; k++) {
+                selectedFilters[k].prepare(this);
+            }
+        }
+
+        List<TargetGroup> orderedGroupList = null;
+
+        if (colorByGroup) {
+            orderedGroupList = new ArrayList((this.userGroupList != null) ? this.userGroupList.size() : 1);
+
+            for (Object o : this.checkBoxListGroups.getCheckBoxListSelectedValues()) {
+                orderedGroupList.add((TargetGroup) o);
+            }
+            if (this.userGroupList != null) {
+                for (TargetGroup g : this.userGroupList) {
+                    if (!orderedGroupList.contains(g)) {
+                        orderedGroupList.add(g);
+                    }
                 }
             }
         }
@@ -1464,8 +1595,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
             TargetGroup group = null;
             if (colorByGroup) {
-                // get first group (user group only ?)
-                group = targetUserInfos.getFirstTargetGroup(target);
+                // get first group (using first sorted user groups)
+                group = targetUserInfos.getFirstTargetGroup(target, orderedGroupList);
             }
 
             // Iterate over Observability data (multi conf) :
@@ -2547,78 +2678,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     /**
-     * Abstract Filter observability results
-     */
-    private static class Filter {
-
-        /** filter name */
-        private final String name;
-        /** filter label (JList) */
-        private final String label;
-        /** filter tooltip (JList tooltip) */
-        private final String tooltip;
-
-        /**
-         * Filter constructor
-         * @param name filter name
-         * @param label filter label
-         * @param tooltip filter tooltip
-         */
-        Filter(final String name, final String label, final String tooltip) {
-            this.name = name;
-            this.label = label;
-            this.tooltip = tooltip;
-        }
-
-        /**
-         * Return the filter name
-         * @return filter name
-         */
-        public final String getName() {
-            return name;
-        }
-
-        /**
-         * Return the filter label
-         * @return filter label
-         */
-        public final String getLabel() {
-            return label;
-        }
-
-        /**
-         * Return the filter tooltip
-         * @return filter tooltip
-         */
-        private String getTooltip() {
-            return this.tooltip;
-        }
-
-        /**
-         * Return the filter label (JList)
-         * @return filter label
-         */
-        @Override
-        public final String toString() {
-            return label;
-        }
-
-        /**
-         * Apply the filter on the given target, its calibrator flag and star observability data
-         * @param targetUserInfos TargetUserInformations instance
-         * @param target target instance
-         * @param calibrator calibrator flag
-         * @param so star observability data
-         * @return true if that item should be filtered; false otherwise
-         */
-        protected boolean apply(final TargetUserInformations targetUserInfos,
-                                final Target target, final boolean calibrator, final StarObservabilityData so) {
-            // default; do not filter
-            return false;
-        }
-    }
-
-    /**
      * Is any filter selected ?
      * @return true if any filter is selected
      */
@@ -2628,19 +2687,34 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     /**
      * Get selected filters (ie enabled)
-     * @return Filter array
+     * @return ObservabilityFilter array
      */
-    private Filter[] getSelectedFilters() {
+    private ObservabilityFilter[] getSelectedFilters() {
         final Object[] selectedValues = jCheckBoxListFilters.getCheckBoxListSelectedValues();
 
         final int len = selectedValues.length;
 
-        final Filter[] filters = new Filter[len];
+        final ObservabilityFilter[] filters = new ObservabilityFilter[len];
 
         for (int i = 0; i < len; i++) {
-            filters[i] = (Filter) selectedValues[i];
+            filters[i] = (ObservabilityFilter) selectedValues[i];
         }
 
         return filters;
     }
+
+    private static CheckBoxList createCheckBoxList() {
+        final CheckBoxList list = new CheckBoxList() {
+            /** default serial UID for Serializable interface */
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCheckBoxEnabled(final int index) {
+                return true;
+            }
+        };
+        list.setClickInCheckBoxOnly(false);
+        return list;
+    }
+
 }
