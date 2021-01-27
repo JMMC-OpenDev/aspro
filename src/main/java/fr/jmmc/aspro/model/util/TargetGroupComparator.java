@@ -3,30 +3,30 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model.util;
 
-import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetGroup;
 import java.util.Comparator;
 
 /**
- * Target Comparator implementation based on DE field
+ * TargetGroup Comparator implementation based on category and name fields
  * @author bourgesl
  */
-public final class TargetDEComparator implements Comparator<Target> {
+public final class TargetGroupComparator implements Comparator<TargetGroup> {
 
     /** singleton instance */
-    private final static TargetDEComparator instance = new TargetDEComparator();
+    private final static TargetGroupComparator instance = new TargetGroupComparator();
 
     /**
      * Return the comparator singleton
      * @return comparator singleton
      */
-    public static Comparator<Target> getInstance() {
+    public static Comparator<TargetGroup> getInstance() {
         return instance;
     }
 
     /**
      * Private constructor
      */
-    private TargetDEComparator() {
+    private TargetGroupComparator() {
         super();
     }
 
@@ -35,14 +35,18 @@ public final class TargetDEComparator implements Comparator<Target> {
      * zero, or a positive integer as the first argument is less than, equal
      * to, or greater than the second.<p>
      *
-     * @param t1 the first target to be compared.
-     * @param t2 the second target to be compared.
+     * @param g1 the first target group to be compared.
+     * @param g2 the second target group to be compared.
      * @return a negative integer, zero, or a positive integer as the
      * 	       first argument is less than, equal to, or greater than the
      *	       second.
      */
     @Override
-    public int compare(final Target t1, final Target t2) {
-        return Double.compare(t1.getDECDeg(), t2.getDECDeg());
+    public int compare(final TargetGroup g1, final TargetGroup g2) {
+        int cmp = g1.getCategory().compareTo(g2.getCategory());
+        if (cmp == 0) {
+            cmp = g1.getName().compareToIgnoreCase(g2.getName());
+        }
+        return cmp;
     }
 }
