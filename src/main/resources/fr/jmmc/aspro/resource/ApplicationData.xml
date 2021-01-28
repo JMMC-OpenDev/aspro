@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="20.09 beta 2"/>
-    <compilation date="25/09/2020" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.02 beta 3"/>
+    <compilation date="28/01/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -228,8 +228,15 @@
     </menubar>
 
     <releasenotes>
-        <release version="20.09">
-            <pubDate>Mon, 08 Jun 2020 10:00:00 GMT</pubDate>
+        <release version="21.02">
+            <pubDate>Thu, 28 Jan 2021 09:00:00 GMT</pubDate>
+            <prerelease version="21.02 beta 3">
+                <change type="FEATURE">Added a new observability filter 'Show groups' to only show targets belonging to the selected target user groups</change>
+                <change type="FEATURE">Enable observability filters 'Show groups' and 'Hide unobservable' by default</change>
+                <change type="FEATURE">Increased maximum number of imported targets to 10,000 (large survey)</change>
+                <change type="FEATURE">Updated SearchCal / GetStar integration to get more target information</change>
+                <change type="FEATURE">Enhanced VOTable handling (import / export) to exchange more target information (groups, extra columns)</change>
+            </prerelease>
             <prerelease version="20.09 beta 2">
                 <change type="BUGFIX">Enhanced OIFits export actions (file or SAMP) to merge OIFits files when multiple configurations are selected (better OImaging integration)</change>
             </prerelease>
