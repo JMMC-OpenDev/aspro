@@ -333,13 +333,13 @@
 
         <!-- group information (same table) -->
         <!-- TODO add support for multiple fields -->
-        <xsl:variable name="WIPGROUP_index">
+        <xsl:variable name="GROUP_index">
             <xsl:call-template name="getColumnIndex">
-                <xsl:with-param name="ucd11">meta.code.class</xsl:with-param>
+                <xsl:with-param name="ucd11">meta.code.class;meta.id</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
 
-        <xsl:variable name="TARGET_INFOS_indexes">
+        <xsl:variable name="TARGET_EXTRA_INFOS_indexes">
             <xsl:call-template name="getGroupIndexes">
                 <xsl:with-param name="ucd11">meta.code.class</xsl:with-param>
             </xsl:call-template>
@@ -697,13 +697,13 @@
                             <useAnalyticalModel>true</useAnalyticalModel>
 
                             <calibratorInfos>
-                                <xsl:for-each select="exslt:node-set($TARGET_INFOS_indexes)/*">
-                                    <xsl:variable name="TARGET_INFOS_POS" select="."/>
-                                    <xsl:variable name="FIELD_VALUE" select="$TARGET/TD[position()=$TARGET_INFOS_POS]"/>
+                                <xsl:for-each select="exslt:node-set($TARGET_EXTRA_INFOS_indexes)/*">
+                                    <xsl:variable name="TARGET_EXTRA_INFOS_POS" select="."/>
+                                    <xsl:variable name="FIELD_VALUE" select="$TARGET/TD[position()=$TARGET_EXTRA_INFOS_POS]"/>
                                     <!-- TODO map Aspro field/param types from input VOTABLE field -->
                                     <!-- TODO add unit if any -->
                                     <xsl:if test="$FIELD_VALUE!=''">
-                                        <parameter xsi:type="a:StringValue" name="{$TABLES/FIELD[position()=$TARGET_INFOS_POS]/@name}" value="{$FIELD_VALUE}"/>
+                                        <parameter xsi:type="a:StringValue" name="{$TABLES/FIELD[position()=$TARGET_EXTRA_INFOS_POS]/@name}" value="{$FIELD_VALUE}"/>
                                     </xsl:if>
                                 </xsl:for-each>
                             </calibratorInfos>
@@ -716,7 +716,7 @@
             </xsl:if>
 
             <!-- add calibrator info if present and create groups if any-->
-            <xsl:if test="($SCI_TARGET_NAME_index != '' and $CAL_TARGET_NAME_index != '') or ($WIPGROUP_index != '' and $NAME_index)">
+            <xsl:if test="($SCI_TARGET_NAME_index != '' and $CAL_TARGET_NAME_index != '') or ($GROUP_index != '' and $NAME_index)">
                 <xsl:choose>
                     <!-- target defined -->
                     <xsl:when test="$NAME_index != ''">
@@ -730,11 +730,11 @@
                         <targetUserInfos>
 
                             <!-- groups -->
-                            <xsl:for-each select="set:distinct(./TABLE/DATA/TABLEDATA/TR/TD[position()=$WIPGROUP_index])">
+                            <xsl:for-each select="set:distinct(./TABLE/DATA/TABLEDATA/TR/TD[position()=$GROUP_index])">
                                 <xsl:variable name="GROUPREF" select="."/>
                                 <xsl:variable name="GROUPPOS" select="position()"/>
                                 <group id="{$GROUPREF}">
-                                    <name> <xsl:value-of select="$TABLES/FIELD[position()=$WIPGROUP_index]/@name"/> = <xsl:value-of select="$GROUPREF"/></name>
+                                    <name> <xsl:value-of select="$TABLES/FIELD[position()=$GROUP_index]/@name"/> = <xsl:value-of select="$GROUPREF"/></name>
                                     <!-- TODO use other values than USER for futur behaviour mapping -->
                                     <category>[USER]</category>
                                     <color>
@@ -746,10 +746,10 @@
                             </xsl:for-each>
 
                             <!-- groupMembers -->
-                            <xsl:for-each select="set:distinct(./TABLE/DATA/TABLEDATA/TR/TD[position()=$WIPGROUP_index])">
+                            <xsl:for-each select="set:distinct(./TABLE/DATA/TABLEDATA/TR/TD[position()=$GROUP_index])">
                                 <xsl:variable name="GROUPREF" select="."/>
                                 <xsl:variable name="TARGET_IDS">
-                                    <xsl:for-each select="$RESOURCE//DATA/TABLEDATA/TR[TD[position()=$WIPGROUP_index and .=$GROUPREF]]">
+                                    <xsl:for-each select="$RESOURCE//DATA/TABLEDATA/TR[TD[position()=$GROUP_index and .=$GROUPREF]]">
                                         <xsl:variable name="TARGET_ID">
                                             <xsl:call-template name="getTargetId">
                                                 <xsl:with-param name="name" select="./TD[position()=$NAME_index]" />
