@@ -1969,7 +1969,6 @@ public final class ObservabilityService {
 
         // Interferometer:
         final String name = this.interferometer.getName();
-        final boolean isSouth = this.interferometer.getPosSph().getLatitude() < 0d;
 
         // Prepare profiles :
         final HorizonService hs = HorizonService.getInstance();
@@ -2007,17 +2006,6 @@ public final class ObservabilityService {
 
             // AZ [0; 360] where 0 is North, positive toward East:
             this.sco.getTargetPosition(cosDec, sinDec, jdIn, azEl);
-
-            // Quick fix AZ for VLTI (ie south):
-            if (false && isSouth) {
-                // adjust azimuth to be compatible with vlti profiles :
-                final double az = azEl.getAzimuth();
-
-                // 0 = meridian (north-south) positive toward east :
-                final double adjAz = (az < 180d) ? az + 180d : az - 180d;
-
-                azEl.setAzimuth(adjAz);
-            }
 
             if (isDebug) {
                 logger.debug("Target position [{} {}]",
