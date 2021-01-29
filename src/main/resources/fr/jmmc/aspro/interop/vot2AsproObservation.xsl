@@ -486,35 +486,15 @@
             <!-- skip data if no columns matching NAME/RA/DEC -->
             <xsl:if test="$NAME_index != '' and ($RA_index != '' or $RADeg_index != '') and ($DEC_index != '' or $DECDeg_index != '') and $EQUINOX != ''">
 
+                <xsl:variable name="TARGET_EXTRA_INFOS_INDEX_NODES" select="exslt:node-set($TARGET_EXTRA_INFOS_indexes)/*"/>
+
                 <!-- Build one target element per votable row -->
                 <xsl:for-each select="./TABLE/DATA/TABLEDATA/TR">
-                    <xsl:variable name="TARGET" select="."/>
-
-                    <xsl:variable name="ID_HD">
-                        <xsl:if test="./TD[position()=$ID_HD_index]/text()">
-                            <xsl:value-of select="concat('HD ',./TD[position()=$ID_HD_index])"/>
-                        </xsl:if>
-                    </xsl:variable>
-                    <xsl:variable name="ID_HIP">
-                        <xsl:if test="./TD[position()=$ID_HIP_index]/text()">
-                            <xsl:value-of select="concat('HIP ',./TD[position()=$ID_HIP_index])"/>
-                        </xsl:if>
-                    </xsl:variable>
-                    <xsl:variable name="ID_2MASS">
-                        <xsl:if test="./TD[position()=$ID_2MASS_index]/text()">
-                            <xsl:value-of select="concat('2MASS J',./TD[position()=$ID_2MASS_index])"/>
-                        </xsl:if>
-                    </xsl:variable>
-                    <xsl:variable name="ID_PIVOT">
-                        <xsl:if test="./TD[position()=$ID_PIVOT_index]/text()">
-                            <xsl:value-of select="concat('PIVOT ',./TD[position()=$ID_PIVOT_index])"/>
-                        </xsl:if>
-                    </xsl:variable>
 
                     <xsl:variable name="RA">
                         <xsl:choose>
                             <xsl:when test="$RA_index != '' and ./TD[position()=$RA_index]/text()">
-                                <xsl:value-of select="translate(./TD[position()=$RA_index], ' ', ':')"/>
+                                <xsl:value-of select="translate(./TD[position()=$RA_index]/text(), ' ', ':')"/>
                             </xsl:when>
                             <xsl:when test="$RADeg_index != '' and ./TD[position()=$RADeg_index]/text()">
                                 <!-- convert degrees to decimal hours -->
@@ -526,7 +506,7 @@
                     <xsl:variable name="DEC">
                         <xsl:choose>
                             <xsl:when test="$DEC_index != '' and ./TD[position()=$DEC_index]/text()">
-                                <xsl:value-of select="translate(./TD[position()=$DEC_index], ' ', ':')"/>
+                                <xsl:value-of select="translate(./TD[position()=$DEC_index]/text(), ' ', ':')"/>
                             </xsl:when>
                             <xsl:when test="$DECDeg_index != '' and ./TD[position()=$DECDeg_index]/text()">
                                 <xsl:value-of select="format-number(./TD[position()=$DECDeg_index]/text(), '#0.000###')"/>
@@ -535,33 +515,55 @@
                         </xsl:choose>
                     </xsl:variable>
 
-                    <xsl:variable name="NAME"     select="./TD[position()=$NAME_index]"/>
-                    <xsl:variable name="RV"       select="./TD[position()=$RV_index]"/>
-                    <xsl:variable name="PMRA"     select="./TD[position()=$PMRA_index]"/>
-                    <xsl:variable name="PMDEC"    select="./TD[position()=$PMDEC_index]"/>
-                    <xsl:variable name="PLX"      select="./TD[position()=$PLX_index]"/>
-                    <xsl:variable name="e_PLX"    select="./TD[position()=$e_PLX_index]"/>
-                    <xsl:variable name="OTYPES"   select="./TD[position()=$OTYPES_index]"/>
-                    <xsl:variable name="SP_TYPES" select="./TD[position()=$SP_TYPES_index]"/>
-                    <xsl:variable name="FLUX_B"   select="./TD[position()=$FLUX_B_index]"/>
-                    <xsl:variable name="FLUX_V"   select="./TD[position()=$FLUX_V_index]"/>
-                    <xsl:variable name="FLUX_G"   select="./TD[position()=$FLUX_G_index]"/>
-                    <xsl:variable name="FLUX_R"   select="./TD[position()=$FLUX_R_index]"/>
-                    <xsl:variable name="FLUX_I"   select="./TD[position()=$FLUX_I_index]"/>
-                    <xsl:variable name="FLUX_J"   select="./TD[position()=$FLUX_J_index]"/>
-                    <xsl:variable name="FLUX_H"   select="./TD[position()=$FLUX_H_index]"/>
-                    <xsl:variable name="FLUX_K"   select="./TD[position()=$FLUX_K_index]"/>
-                    <xsl:variable name="FLUX_L"   select="./TD[position()=$FLUX_L_index]"/>
-                    <xsl:variable name="FLUX_M"   select="./TD[position()=$FLUX_M_index]"/>
-                    <xsl:variable name="FLUX_N"   select="./TD[position()=$FLUX_N_index]"/>
+                    <xsl:variable name="NAME" select="./TD[$NAME_index != '' and position()=$NAME_index]/text()"/>
 
-                    <xsl:if test="$NAME/text() and $RA != '' and $DEC != ''">
+                    <xsl:if test="$NAME != '' and $RA != '' and $DEC != ''">
 
                         <xsl:variable name="TARGET_ID">
                             <xsl:call-template name="getTargetId">
                                 <xsl:with-param name="name" select="$NAME" />
                             </xsl:call-template>
                         </xsl:variable>
+
+                        <xsl:variable name="ID_HD">
+                            <xsl:if test="$ID_HD_index != '' and ./TD[position()=$ID_HD_index]/text()">
+                                <xsl:value-of select="concat('HD ',./TD[position()=$ID_HD_index]/text())"/>
+                            </xsl:if>
+                        </xsl:variable>
+                        <xsl:variable name="ID_HIP">
+                            <xsl:if test="$ID_HIP_index != '' and ./TD[position()=$ID_HIP_index]/text()">
+                                <xsl:value-of select="concat('HIP ',./TD[position()=$ID_HIP_index]/text())"/>
+                            </xsl:if>
+                        </xsl:variable>
+                        <xsl:variable name="ID_2MASS">
+                            <xsl:if test="$ID_2MASS_index != '' and ./TD[position()=$ID_2MASS_index]/text()">
+                                <xsl:value-of select="concat('2MASS J',./TD[position()=$ID_2MASS_index]/text())"/>
+                            </xsl:if>
+                        </xsl:variable>
+                        <xsl:variable name="ID_PIVOT">
+                            <xsl:if test="$ID_PIVOT_index != '' and ./TD[position()=$ID_PIVOT_index]/text()">
+                                <xsl:value-of select="concat('PIVOT ',./TD[position()=$ID_PIVOT_index]/text())"/>
+                            </xsl:if>
+                        </xsl:variable>
+
+                        <xsl:variable name="RV"       select="./TD[$RV_index != '' and position()=$RV_index]/text()"/>
+                        <xsl:variable name="PMRA"     select="./TD[$PMRA_index != '' and position()=$PMRA_index]/text()"/>
+                        <xsl:variable name="PMDEC"    select="./TD[$PMDEC_index != '' and position()=$PMDEC_index]/text()"/>
+                        <xsl:variable name="PLX"      select="./TD[$PLX_index != '' and position()=$PLX_index]/text()"/>
+                        <xsl:variable name="e_PLX"    select="./TD[$e_PLX_index != '' and position()=$e_PLX_index]/text()"/>
+                        <xsl:variable name="OTYPES"   select="./TD[$OTYPES_index != '' and position()=$OTYPES_index]/text()"/>
+                        <xsl:variable name="SP_TYPES" select="./TD[$SP_TYPES_index != '' and position()=$SP_TYPES_index]/text()"/>
+                        <xsl:variable name="FLUX_B"   select="./TD[$FLUX_B_index != '' and position()=$FLUX_B_index]/text()"/>
+                        <xsl:variable name="FLUX_V"   select="./TD[$FLUX_V_index != '' and position()=$FLUX_V_index]/text()"/>
+                        <xsl:variable name="FLUX_G"   select="./TD[$FLUX_G_index != '' and position()=$FLUX_G_index]/text()"/>
+                        <xsl:variable name="FLUX_R"   select="./TD[$FLUX_R_index != '' and position()=$FLUX_R_index]/text()"/>
+                        <xsl:variable name="FLUX_I"   select="./TD[$FLUX_I_index != '' and position()=$FLUX_I_index]/text()"/>
+                        <xsl:variable name="FLUX_J"   select="./TD[$FLUX_J_index != '' and position()=$FLUX_J_index]/text()"/>
+                        <xsl:variable name="FLUX_H"   select="./TD[$FLUX_H_index != '' and position()=$FLUX_H_index]/text()"/>
+                        <xsl:variable name="FLUX_K"   select="./TD[$FLUX_K_index != '' and position()=$FLUX_K_index]/text()"/>
+                        <xsl:variable name="FLUX_L"   select="./TD[$FLUX_L_index != '' and position()=$FLUX_L_index]/text()"/>
+                        <xsl:variable name="FLUX_M"   select="./TD[$FLUX_M_index != '' and position()=$FLUX_M_index]/text()"/>
+                        <xsl:variable name="FLUX_N"   select="./TD[$FLUX_N_index != '' and position()=$FLUX_N_index]/text()"/>
 
                         <target id="{$TARGET_ID}">
 
@@ -582,31 +584,31 @@
                             </EQUINOX>
 
                             <!-- radial velocity -->
-                            <xsl:if test="$RV/text()">
+                            <xsl:if test="$RV != ''">
                                 <SYSVEL>
                                     <xsl:value-of select="$RV"/>
                                 </SYSVEL>
                             </xsl:if>
 
                             <!-- proper motion -->
-                            <xsl:if test="$PMRA/text()">
+                            <xsl:if test="$PMRA != ''">
                                 <PMRA>
                                     <xsl:value-of select="$PMRA"/>
                                 </PMRA>
                             </xsl:if>
-                            <xsl:if test="$PMDEC/text()">
+                            <xsl:if test="$PMDEC != ''">
                                 <PMDEC>
                                     <xsl:value-of select="$PMDEC"/>
                                 </PMDEC>
                             </xsl:if>
 
                             <!-- parallax -->
-                            <xsl:if test="$PLX/text()">
+                            <xsl:if test="$PLX != ''">
                                 <PARALLAX>
                                     <xsl:value-of select="$PLX"/>
                                 </PARALLAX>
                             </xsl:if>
-                            <xsl:if test="$e_PLX/text()">
+                            <xsl:if test="$e_PLX != ''">
                                 <PARA_ERR>
                                     <xsl:value-of select="$e_PLX"/>
                                 </PARA_ERR>
@@ -625,94 +627,117 @@
                             </IDS>
 
                             <!-- object types -->
-                            <xsl:if test="$OTYPES/text()">
+                            <xsl:if test="$OTYPES != ''">
                                 <OBJTYP>
                                     <xsl:value-of select="$OTYPES"/>
                                 </OBJTYP>
                             </xsl:if>
 
                             <!-- spectral types -->
-                            <xsl:if test="$SP_TYPES/text()">
+                            <xsl:if test="$SP_TYPES != ''">
                                 <SPECTYP>
                                     <xsl:value-of select="$SP_TYPES"/>
                                 </SPECTYP>
                             </xsl:if>
 
                             <!-- magnitudes -->
-                            <xsl:if test="$FLUX_B/text()">
+                            <xsl:if test="$FLUX_B != ''">
                                 <FLUX_B>
                                     <xsl:value-of select="$FLUX_B"/>
                                 </FLUX_B>
                             </xsl:if>
-                            <xsl:if test="$FLUX_V/text()">
+                            <xsl:if test="$FLUX_V != ''">
                                 <FLUX_V>
                                     <xsl:value-of select="$FLUX_V"/>
                                 </FLUX_V>
                             </xsl:if>
-                            <xsl:if test="$FLUX_G/text()">
+                            <xsl:if test="$FLUX_G != ''">
                                 <FLUX_G>
                                     <xsl:value-of select="$FLUX_G"/>
                                 </FLUX_G>
                             </xsl:if>
-                            <xsl:if test="$FLUX_R/text()">
+                            <xsl:if test="$FLUX_R != ''">
                                 <FLUX_R>
                                     <xsl:value-of select="$FLUX_R"/>
                                 </FLUX_R>
                             </xsl:if>
-                            <xsl:if test="$FLUX_I/text()">
+                            <xsl:if test="$FLUX_I != ''">
                                 <FLUX_I>
                                     <xsl:value-of select="$FLUX_I"/>
                                 </FLUX_I>
                             </xsl:if>
-                            <xsl:if test="$FLUX_J/text()">
+                            <xsl:if test="$FLUX_J != ''">
                                 <FLUX_J>
                                     <xsl:value-of select="$FLUX_J"/>
                                 </FLUX_J>
                             </xsl:if>
-                            <xsl:if test="$FLUX_H/text()">
+                            <xsl:if test="$FLUX_H != ''">
                                 <FLUX_H>
                                     <xsl:value-of select="$FLUX_H"/>
                                 </FLUX_H>
                             </xsl:if>
-                            <xsl:if test="$FLUX_K/text()">
+                            <xsl:if test="$FLUX_K != ''">
                                 <FLUX_K>
                                     <xsl:value-of select="$FLUX_K"/>
                                 </FLUX_K>
                             </xsl:if>
-                            <xsl:if test="$FLUX_L/text()">
+                            <xsl:if test="$FLUX_L != ''">
                                 <FLUX_L>
                                     <xsl:value-of select="$FLUX_L"/>
                                 </FLUX_L>
                             </xsl:if>
-                            <xsl:if test="$FLUX_M/text()">
+                            <xsl:if test="$FLUX_M != ''">
                                 <FLUX_M>
                                     <xsl:value-of select="$FLUX_M"/>
                                 </FLUX_M>
                             </xsl:if>
-                            <xsl:if test="$FLUX_N/text()">
+                            <xsl:if test="$FLUX_N != ''">
                                 <FLUX_N>
                                     <xsl:value-of select="$FLUX_N"/>
                                 </FLUX_N>
                             </xsl:if>
+
+                            <!-- no model -->
                             <useAnalyticalModel>true</useAnalyticalModel>
 
                             <calibratorInfos>
-                                <xsl:for-each select="exslt:node-set($TARGET_EXTRA_INFOS_indexes)/*">
+                                <xsl:variable name="TARGET" select="."/>
+
+                                <xsl:for-each select="$TARGET_EXTRA_INFOS_INDEX_NODES">
                                     <xsl:variable name="TARGET_EXTRA_INFOS_POS" select="."/>
-                                    <xsl:variable name="FIELD_VALUE" select="$TARGET/TD[position()=$TARGET_EXTRA_INFOS_POS]"/>
-                                    <!-- TODO map Aspro field/param types from input VOTABLE field -->
-                                    <!-- TODO add unit if any -->
-                                    <xsl:if test="$FIELD_VALUE!=''">
-                                        <parameter xsi:type="a:StringValue" name="{$TABLES/FIELD[position()=$TARGET_EXTRA_INFOS_POS]/@name}" value="{$FIELD_VALUE}"/>
+                                    <xsl:variable name="FIELD_VALUE" select="$TARGET/TD[position()=$TARGET_EXTRA_INFOS_POS]/text()"/>
+
+                                    <xsl:if test="$FIELD_VALUE !=''">
+                                        <xsl:variable name="FIELD_NODE" select="$TABLES/FIELD[position()=$TARGET_EXTRA_INFOS_POS]"/>
+                                        <field>
+                                            <xsl:attribute name="xsi:type">
+                                                <xsl:choose>
+                                                    <xsl:when test="$FIELD_NODE/@datatype = 'double' or $FIELD_NODE/@datatype = 'float'">a:NumberValue</xsl:when>
+                                                    <xsl:when test="$FIELD_NODE/@datatype = 'boolean'">a:BooleanValue</xsl:when>
+                                                    <xsl:otherwise>a:StringValue</xsl:otherwise>
+                                                </xsl:choose>
+                                            </xsl:attribute>
+                                            <xsl:attribute name="name">
+                                                <xsl:value-of select="$FIELD_NODE/@name" />
+                                            </xsl:attribute>
+                                            <xsl:attribute name="value">
+                                                <xsl:value-of select="$FIELD_VALUE" />
+                                            </xsl:attribute>
+                                            <xsl:if test="$FIELD_NODE/@unit">
+                                                <xsl:attribute name="unit">
+                                                    <xsl:value-of select="$FIELD_NODE/@unit" />
+                                                </xsl:attribute>
+                                            </xsl:if>
+                                        </field>
                                     </xsl:if>
                                 </xsl:for-each>
+
                             </calibratorInfos>
 
                         </target>
                     </xsl:if>
 
                 </xsl:for-each>
-
             </xsl:if>
 
             <!-- add calibrator info if present and create groups if any-->
@@ -729,41 +754,60 @@
 
                         <targetUserInfos>
 
-                            <!-- groups -->
-                            <xsl:for-each select="set:distinct(./TABLE/DATA/TABLEDATA/TR/TD[position()=$GROUP_index])">
-                                <xsl:variable name="GROUPREF" select="."/>
-                                <xsl:variable name="GROUPPOS" select="position()"/>
-                                <group id="{$GROUPREF}">
-                                    <name> <xsl:value-of select="$TABLES/FIELD[position()=$GROUP_index]/@name"/> = <xsl:value-of select="$GROUPREF"/></name>
-                                    <!-- TODO use other values than USER for futur behaviour mapping -->
-                                    <category>[USER]</category>
-                                    <color>
-                                        <xsl:call-template name="getColor">
-                                            <xsl:with-param name="idx" select="$GROUPPOS" />
+                            <xsl:if test="$GROUP_index != ''">
+                                <xsl:variable name="GROUP_NODES" select="set:distinct(./TABLE/DATA/TABLEDATA/TR/TD[position()=$GROUP_index])"/>
+
+                                <!-- groups -->
+                                <xsl:for-each select="$GROUP_NODES">
+                                    <xsl:variable name="GROUP_REF" select="."/>
+                                    <xsl:variable name="GROUP_POS" select="position()"/>
+                                    <xsl:variable name="GROUP_ID">
+                                        <xsl:call-template name="getTargetId">
+                                            <xsl:with-param name="name" select="$GROUP_REF" />
                                         </xsl:call-template>
-                                    </color>
-                                </group>
-                            </xsl:for-each>
+                                    </xsl:variable>
 
-                            <!-- groupMembers -->
-                            <xsl:for-each select="set:distinct(./TABLE/DATA/TABLEDATA/TR/TD[position()=$GROUP_index])">
-                                <xsl:variable name="GROUPREF" select="."/>
-                                <xsl:variable name="TARGET_IDS">
-                                    <xsl:for-each select="$RESOURCE//DATA/TABLEDATA/TR[TD[position()=$GROUP_index and .=$GROUPREF]]">
-                                        <xsl:variable name="TARGET_ID">
-                                            <xsl:call-template name="getTargetId">
-                                                <xsl:with-param name="name" select="./TD[position()=$NAME_index]" />
+                                    <group id="{$GROUP_ID}">
+                                        <name>
+                                            <xsl:value-of select="$TABLES/FIELD[position()=$GROUP_index]/@name"/> = <xsl:value-of select="$GROUP_REF"/>
+                                        </name>
+                                        <!-- TODO use other values than USER for futur behaviour mapping -->
+                                        <category>[USER]</category>
+                                        <color>
+                                            <xsl:call-template name="getColor">
+                                                <xsl:with-param name="idx" select="$GROUP_POS" />
                                             </xsl:call-template>
-                                        </xsl:variable>
-                                        <xsl:value-of select="$TARGET_ID"/><xsl:value-of select="' '"/>
-                                    </xsl:for-each>
-                                </xsl:variable>
+                                        </color>
+                                    </group>
+                                </xsl:for-each>
 
-                                <groupMembers>
-                                    <groupRef><xsl:value-of select="$GROUPREF"/></groupRef>
-                                    <targets><xsl:value-of select="$TARGET_IDS"/></targets>
-                                </groupMembers>
-                            </xsl:for-each>
+                                <!-- groupMembers -->
+                                <xsl:for-each select="$GROUP_NODES">
+                                    <xsl:variable name="GROUP_REF" select="."/>
+                                    <xsl:variable name="GROUP_ID">
+                                        <xsl:call-template name="getTargetId">
+                                            <xsl:with-param name="name" select="$GROUP_REF" />
+                                        </xsl:call-template>
+                                    </xsl:variable>
+
+                                    <xsl:variable name="TARGET_IDS">
+                                        <xsl:for-each select="$TABLES/DATA/TABLEDATA/TR[TD[position()=$GROUP_index and text()=$GROUP_REF]]">
+                                            <xsl:variable name="TARGET_ID">
+                                                <xsl:call-template name="getTargetId">
+                                                    <xsl:with-param name="name" select="./TD[position()=$NAME_index]" />
+                                                </xsl:call-template>
+                                            </xsl:variable>
+                                            <xsl:value-of select="$TARGET_ID"/><xsl:value-of select="' '"/>
+                                        </xsl:for-each>
+                                    </xsl:variable>
+
+                                    <groupMembers>
+                                        <groupRef><xsl:value-of select="$GROUP_ID"/></groupRef>
+                                        <targets><xsl:value-of select="$TARGET_IDS"/></targets>
+                                    </groupMembers>
+
+                                </xsl:for-each>
+                            </xsl:if>
 
                             <!-- list of all calibrators -->
                             <calibrators>
