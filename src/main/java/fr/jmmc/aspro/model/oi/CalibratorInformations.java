@@ -107,6 +107,29 @@ public class CalibratorInformations
     }
     
 //--simple--preserve
+
+    /**
+     * Return a deep "copy" of this instance
+     * @return deep "copy" of this instance
+     */
+    @Override
+    public final Object clone() {
+        final CalibratorInformations copy = (CalibratorInformations) super.clone();
+
+        // note : parameters / fields are not cloned (immutable & read-only)
+        
+        // Simple copy of parameters (BaseValue instances) :
+        if (copy.parameters != null) {
+            copy.parameters = OIBase.copyList(copy.parameters);
+        }
+
+        // Simple copy of fields (BaseValue instances) :
+        if (copy.fields != null) {
+            copy.fields = OIBase.copyList(copy.fields);
+        }        
+        return copy;
+    }
+    
     @Override
     protected boolean areEquals(final OIBase o) {
         if (!super.areEquals(o)) {
@@ -115,6 +138,39 @@ public class CalibratorInformations
         final CalibratorInformations other = (CalibratorInformations) o;
         return (areEquals(this.getParameters(), other.getParameters()) // may create lists
                 && areEquals(this.getFields(), other.getFields())); // may create lists
+    }
+    
+    /**
+     * Merge calibrators information on the given instance with information from the source instance
+     * @param calInfos instance to update
+     * @param source source where information comes from
+     */
+    public static void merge(final CalibratorInformations calInfos, final CalibratorInformations source) {
+        // Replace previous values with the same name, add new ones
+        final List<BaseValue> parameters = calInfos.getParameters();
+        
+        for (BaseValue v : source.getParameters()) {
+            int pos = find(parameters, v.getName());
+            if (pos != -1) {
+                // overwrite existing value:
+                parameters.set(pos, v);
+            } else {
+                // add new value:
+                parameters.add(v);
+            }
+        }
+        final List<BaseValue> fields = calInfos.getFields();
+        
+        for (BaseValue v : source.getFields()) {
+            int pos = find(fields, v.getName());
+            if (pos != -1) {
+                // overwrite existing value:
+                fields.set(pos, v);
+            } else {
+                // add new value:
+                fields.add(v);
+            }
+        }
     }
 
     /**
@@ -271,6 +327,16 @@ public class CalibratorInformations
         }
         return null;
     }
+    
+    private final static int find(final List<BaseValue> list, final String name) {
+        for (int i = 0, len = list.size(); i < len; i++) {
+            final BaseValue v = list.get(i);
+            if (name.equals(v.getName())) {
+                return i;
+            }
+        }
+        return -1;
+    }    
 //--simple--preserve
 
 }

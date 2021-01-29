@@ -155,7 +155,7 @@ public class TargetRawObservation
     public final Object clone() {
         final TargetRawObservation copy = (TargetRawObservation) super.clone();
 
-        // note : targets are not cloned as only there (immutable) identifier is useful
+        // note : targetRef is not cloned as only there (immutable) identifier is useful
         // see  : updateTargetReferences(Map<ID, Target>) to replace target instances to have a clean object graph
         // i.e. (no leaking references)
         

@@ -298,7 +298,7 @@ public final class TargetImporter {
                         sb.append("Skip target ").append(newTarget.getName()).append("\n");
                         targets.remove(newTarget);
                     } else {
-                        Target.mergeTarget(newTarget, resolvedTarget);
+                        Target.merge(newTarget, resolvedTarget);
                         // format the target name:
                         newTarget.updateNameAndIdentifier(resolvedTarget.getName());
 
@@ -357,7 +357,7 @@ public final class TargetImporter {
                 mapTargetsNewToOld.put(newTarget, oldTarget);
 
                 // copy non empty values into old target:
-                Target.mergeTarget(oldTarget, newTarget);
+                Target.merge(oldTarget, newTarget);
 
                 // report message:
                 sb.append(targetName).append(" updated\n");

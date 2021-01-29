@@ -1226,7 +1226,10 @@ public class Target
         if (copy.configuration != null) {
             copy.configuration = (TargetConfiguration) copy.configuration.clone();
         }
-        // note: calibrator informations are not cloned at all
+        
+        if (copy.calibratorInfos != null) {
+            copy.calibratorInfos = (CalibratorInformations) copy.calibratorInfos.clone();
+        }
 
         return copy;
     }
@@ -1507,7 +1510,7 @@ public class Target
             target.setSPECTYP(null);
         }        
         
-        mergeTarget(target, source);
+        merge(target, source);
     }
     
     /**
@@ -1515,7 +1518,7 @@ public class Target
      * @param target target to update
      * @param source target where information comes from
      */
-    public static void mergeTarget(final Target target, final Target source) {
+    public static void merge(final Target target, final Target source) {
         // skip name, id
         // skip useAnalyticalModel, model, userModel, configuration, calibratorInfos
 
@@ -1587,6 +1590,13 @@ public class Target
         }
         if (target.getFLUXN() == null && source.getFLUXN() != null) {
             target.setFLUXN(source.getFLUXN());
+        }
+        if (source.getCalibratorInfos() != null) {
+            // merge calibratorInfos:
+            if (target.getCalibratorInfos() == null) {
+                target.setCalibratorInfos(new CalibratorInformations());
+            }
+            CalibratorInformations.merge(target.getCalibratorInfos(), source.getCalibratorInfos());
         }
     }
 
