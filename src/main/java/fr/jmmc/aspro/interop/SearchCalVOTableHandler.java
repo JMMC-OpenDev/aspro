@@ -118,7 +118,7 @@ public final class SearchCalVOTableHandler {
                             it.remove();
 
                             // reuse science target data to update scienceTarget object:
-                            Target.mergeTarget(scienceTarget, cal);
+                            Target.merge(scienceTarget, cal);
                         }
                     }
                 }
@@ -262,9 +262,9 @@ public final class SearchCalVOTableHandler {
 
             } else {
                 // target already exist: always replace old target by the SearchCal calibrator (gilles)
-                
+
                 // copy non empty values into new calibrator:
-                Target.mergeTarget(newCal, oldCal);
+                Target.merge(newCal, oldCal);
 
                 // check if the existing target had calibrators:
                 if (editTargetUserInfos.hasCalibrators(oldCal)) {
