@@ -84,7 +84,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
     public void resetFilters() {
         this.jListInstruments.clearSelection();
     }
-    
+
     public RawObservationTablePanel setData(final List<RawObservation> observations) {
         this.observations = observations;
         filterData();
@@ -473,18 +473,27 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
 
         final File file = new File("/home/bourgesl/ASPRO2/obsportal_targets.asprox");
 
-        try {
-            ObservationSetting observation = ObservationManager.getInstance().loadObservation(file, null);
+        SwingUtils.invokeLaterEDT(new Runnable() {
+            /**
+             * Show the application frame using EDT
+             */
+            @Override
+            public void run() {
+                try {
+                    ObservationManager.getInstance().load(file);
+                    ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
-            // Merge all raw obs:
-            final List<RawObservation> obsList = new ArrayList<RawObservation>();
-            for (TargetRawObservation targetRawObs : observation.getTargetObservations()) {
-                obsList.addAll(targetRawObs.getObservations());
+                    // Merge all raw obs:
+                    final List<RawObservation> obsList = new ArrayList<RawObservation>();
+                    for (TargetRawObservation targetRawObs : observation.getTargetObservations()) {
+                        obsList.addAll(targetRawObs.getObservations());
+                    }
+                    showFrameData(JFrame.EXIT_ON_CLOSE, "Observations", obsList);
+
+                } catch (IOException ioe) {
+                    logger.error("IO exception occured:", ioe);
+                }
             }
-            showFrameData(JFrame.EXIT_ON_CLOSE, "Observations", obsList);
-
-        } catch (IOException ioe) {
-            logger.error("IO exception occured:", ioe);
-        }
+        });
     }
 }

@@ -1073,7 +1073,6 @@ public class RawObservation
      * Return an HTML representation of the RawObservation Times used by tooltips in the given string buffer
      * @param sb string buffer to fill
      * @param showDate bits (1 = start, 2 = end) 
-     * @param showId true to indicate the obs id
      */
     public final void timeToHtml(final StringBuffer sb, final int showDate) {
         sb.append("<hr><b>ID:</b> ").append(getObsId());
