@@ -47,6 +47,7 @@ import fr.jmmc.jmcs.logging.LoggingService;
 import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
+import fr.jmmc.oitools.model.DataModel;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -138,6 +139,10 @@ public final class Aspro2 extends App {
 
         // TODO: decide to shift colors for baselines (detailled observability):
 //        SharedSeriesAttributes.INSTANCE.setOffsetIdx(StarObservabilityData.TYPE_BASE_LINE);
+
+        // Enable OI columns for OIFits datamodel
+        DataModel.setOiModelColumnsSupport(true);
+
         logger.debug("Aspro2.initServices: handler exit");
     }
 

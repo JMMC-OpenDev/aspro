@@ -188,10 +188,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         this.chart.addProgressListener(this);
         this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
 
-        // zoom options :
-        this.chartPanel.setDomainZoomable(Constants.ENABLE_ZOOM);
-        this.chartPanel.setRangeZoomable(Constants.ENABLE_ZOOM);
-
         this.chartPanel.setMinimumSize(new Dimension(650, 500));
         this.add(this.chartPanel);
     }

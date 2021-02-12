@@ -12,6 +12,7 @@ import fr.jmmc.aspro.model.rawobs.RawObservation;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
+import fr.jmmc.oiexplorer.core.gui.chart.EnhancedXYBarRenderer;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Paint;

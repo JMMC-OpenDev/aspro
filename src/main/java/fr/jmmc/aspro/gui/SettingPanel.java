@@ -50,6 +50,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     /* Tab names */
     /** name of the tab pane corresponding to the observation description */
     public static final String TAB_OBS_DESC = "Notebook";
+    /** name of the tab pane corresponding to the observation panel */
+    public static final String TAB_OBS_PLAN = "Obs plan";
     /** name of the tab pane corresponding to the interferometer map */
     public static final String TAB_INTERFEROMETER_MAP = "Map";
     /** name of the tab pane corresponding to the observability panel */
@@ -219,6 +221,16 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         // register the observation form as an observation listener :
         ObservationManager.getInstance().register(obsDescForm);
 
+        // create the observation table:
+        final ObservationTablePanel obsTablePanel = new ObservationTablePanel();
+        obsTablePanel.setName("obsTablePanel");
+
+        // add the map panel :
+        this.jTabbedPane.addTab(TAB_OBS_PLAN, obsTablePanel);
+
+        // register the observation form as an observation listener :
+        ObservationManager.getInstance().register(obsTablePanel);
+        
         // create the map panel :
         final InterferometerMapPanel mapPanel = new InterferometerMapPanel();
         mapPanel.setName("mapPanel");

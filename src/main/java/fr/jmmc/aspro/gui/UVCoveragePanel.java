@@ -858,10 +858,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.chart.addProgressListener(this);
         this.chartPanel = ChartUtils.createSquareChartPanel(this.chart, true); // show tooltips
 
-        // zoom options :
-        this.chartPanel.setDomainZoomable(Constants.ENABLE_ZOOM);
-        this.chartPanel.setRangeZoomable(Constants.ENABLE_ZOOM);
-
         // define zoom listener :
         this.chartPanel.setZoomEventListener(this);
 

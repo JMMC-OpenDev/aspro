@@ -95,13 +95,13 @@ public final class RawObservationTableModel extends AbstractTableModel {
             return name;
         }
     }
-    /** LITpro Columns (all) */
+    /** Definition of Columns (all) */
     private static final ColumnDef[] COLUMNS = ColumnDef.values();
     /** empty collection */
     private static final List<RawObservation> EMPTY = Collections.emptyList();
 
     /* members */
-    /** list of parameters (row) present in the table */
+    /** list of raw observations (row) present in the table */
     private List<RawObservation> observations = EMPTY;
 
     /**
@@ -112,7 +112,7 @@ public final class RawObservationTableModel extends AbstractTableModel {
     }
 
     /**
-     * Define the data to use in this table model for a single target model
+     * Define the data to use in this table model
      *
      * @param observations
      */

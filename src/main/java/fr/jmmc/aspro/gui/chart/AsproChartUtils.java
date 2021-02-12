@@ -5,6 +5,7 @@ package fr.jmmc.aspro.gui.chart;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
+import fr.jmmc.oiexplorer.core.gui.chart.EnhancedXYBarRenderer;
 import java.awt.Color;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
