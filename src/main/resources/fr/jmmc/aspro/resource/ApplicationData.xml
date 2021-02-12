@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.02 beta 3"/>
-    <compilation date="28/01/2021" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.02 beta 4"/>
+    <compilation date="12/02/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,12 @@
 
     <releasenotes>
         <release version="21.02">
-            <pubDate>Thu, 28 Jan 2021 09:00:00 GMT</pubDate>
+            <pubDate>Fri, 12 Feb 2021 18:00:00 GMT</pubDate>
+            <prerelease version="21.02 beta 4">
+                <change type="BUGFIX">Improved OIFITS generation to add theoretical model values and errors in NS_MODEL_ columns (OI-Interface); these new columns and residuals are available in the OIFits viewer</change>
+                <change type="BUGFIX">Improved OIFITS data simulation to remove bias on random VIS2 at low SNR</change>
+                <change type="FEATURE">Added a new tabbed pane 'Observation plan' to display observations and targets as an unified table. General &amp; global filters are coming...</change>
+            </prerelease>
             <prerelease version="21.02 beta 3">
                 <change type="FEATURE">Added a new observability filter 'Show groups' to only show targets belonging to the selected target user groups</change>
                 <change type="FEATURE">Enable observability filters 'Show groups' and 'Hide unobservable' by default</change>

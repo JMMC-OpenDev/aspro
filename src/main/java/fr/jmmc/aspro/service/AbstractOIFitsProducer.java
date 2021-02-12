@@ -49,6 +49,8 @@ public abstract class AbstractOIFitsProducer {
 
     /** enable DEBUG mode */
     public final static boolean DEBUG = false;
+    /** enable DEBUG mode */
+    public final static boolean DEBUG_V2 = false;
     /** use sampled mean(sample) instead of theoretical value */
     protected final static boolean DO_USE_SAMPLED_MEAN = false;
     /** flag to show compute task statistics */
@@ -93,12 +95,23 @@ public abstract class AbstractOIFitsProducer {
     protected double[][] visError = null;
     /** internal complex visibility error [row][waveLength] without photometry */
     protected double[][] visErrorNoPhot = null;
+
+    /** number of photons in each photometric channel (photometric flux) [row][waveLength] */
+    protected double[][] nbPhotPhoto = null;
+    /** error on the number of photons in each photometric channel (photometric flux) [row][waveLength] */
+    protected double[][] errPhotPhoto = null;
+    /** squared correlated flux [row][waveLength] */
+    protected double[][] sqCorrFlux = null;
+    /** error on squared correlated flux [row][waveLength] */
+    protected double[][] errSqCorrFlux = null;
+
+    /** internal complex visibility SNR flag [row][waveLength] */
+    protected boolean[][] visSnrFlag = null;
+
     /** internal complex distribution [row] */
     protected ComplexDistribution[] visRndDist = null;
     /** internal random index [row][waveLength] */
     protected int[][] visRndIdx = null;
-    /** internal complex visibility SNR flag [row][waveLength] */
-    protected boolean[][] visSnrFlag = null;
 
     /**
      * Protected constructor
@@ -120,9 +133,9 @@ public abstract class AbstractOIFitsProducer {
         // OIFits preferences:
         this.supersampling = supersampling;
         this.mathMode = mathMode;
-        
+
         this.snrThreshold = snrThreshold;
-        
+
         logger.debug("snr threshold: {}", snrThreshold);
     }
 
@@ -653,7 +666,14 @@ public abstract class AbstractOIFitsProducer {
 
             final double[][] cVisError = new double[nRows][nChannels];
             final double[][] cVisErrorNoPhot = new double[nRows][nChannels];
+
+            final double[][] cNbPhotPhoto = new double[nRows][nChannels];
+            final double[][] cErrPhotPhoto = new double[nRows][nChannels];
+            final double[][] cSqCorrFlux = new double[nRows][nChannels];
+            final double[][] cErrSqCorrFlux = new double[nRows][nChannels];
+
             final boolean[][] cVisSnrFlag = new boolean[nRows][nChannels];
+
             final ComplexDistribution[] cVisRndDist = new ComplexDistribution[nRows];
 
             // use the same sample index per ha point (as distributions are different instances)
@@ -666,6 +686,12 @@ public abstract class AbstractOIFitsProducer {
             for (int k = 0, l; k < nRows; k++) {
                 final double[] cVisErrorRow = cVisError[k];
                 final double[] cVisErrorRowNoPhot = cVisErrorNoPhot[k];
+
+                final double[] nbPhotPhotoRow = cNbPhotPhoto[k];
+                final double[] errPhotPhotoRow = cErrPhotPhoto[k];
+                final double[] sqCorrFluxRow = cSqCorrFlux[k];
+                final double[] errSqCorrFluxRow = cErrSqCorrFlux[k];
+
                 final boolean[] cVisSnrFlagRow = cVisSnrFlag[k];
 
                 if (ns == null) {
@@ -686,6 +712,12 @@ public abstract class AbstractOIFitsProducer {
                         cVisErrorRow[l] = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp, true);
                         // complex visibility error without photometric error:
                         cVisErrorRowNoPhot[l] = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp, false);
+
+                        // extra Vis2 columns (photo + square correlated fluxes):
+                        nbPhotPhotoRow[l] = ns.getNbPhotPhoto(ptIdx[k], l);
+                        errPhotPhotoRow[l] = ns.getErrorPhotPhoto(ptIdx[k], l);
+                        sqCorrFluxRow[l] = ns.getSqCorrFlux(ptIdx[k], l);
+                        errSqCorrFluxRow[l] = ns.getErrorSqCorrFlux(ptIdx[k], l);
 
                         // check SNR(V2) without any bias:
                         final double snrV2 = ns.getSNRVis2NoBias(ptIdx[k], l);
@@ -718,9 +750,15 @@ public abstract class AbstractOIFitsProducer {
             this.visComplex = cVis;
             this.visError = cVisError;
             this.visErrorNoPhot = cVisErrorNoPhot;
+
+            this.nbPhotPhoto = cNbPhotPhoto;
+            this.errPhotPhoto = cErrPhotPhoto;
+            this.sqCorrFlux = cSqCorrFlux;
+            this.errSqCorrFlux = cErrSqCorrFlux;
+
+            this.visSnrFlag = cVisSnrFlag;
             this.visRndDist = cVisRndDist;
             this.visRndIdx = cVisRndIdx;
-            this.visSnrFlag = cVisSnrFlag;
 
             logger.info("computeModelVisibilities: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
