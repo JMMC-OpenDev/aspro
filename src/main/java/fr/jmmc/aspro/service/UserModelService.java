@@ -1360,7 +1360,10 @@ public final class UserModelService {
 
         // see https://en.wikipedia.org/wiki/Airy_disk
         // airy disk: zero  at 1.22 lambda / diameter
-        final double airyRadius = 1.22d * lambda / diameter;
+        // 2021.08.02: false according to Michel tallon:
+        // final double airyRadius = 1.22d * lambda / diameter;
+        
+        final double airyRadius = 1.0289939700094716812373007996939122676849365234375 * lambda / diameter;
 
         // check airy radius vs image Fov:
         final double imageRadius = 0.5 * fitsImage.getOrigMaxAngle();
