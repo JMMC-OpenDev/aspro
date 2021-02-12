@@ -57,9 +57,6 @@ public final class NoiseService implements VisNoiseService {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(NoiseService.class.getName());
 
-    /** flag to use the new numeric approach = statistical distributions */
-    public final static boolean USE_DISTRIB_APPROACH = true;
-
     /** enable bound checks on iPoint / iChannel */
     private final static boolean DO_CHECKS = false;
 
@@ -402,7 +399,7 @@ public final class NoiseService implements VisNoiseService {
         this.frameRatio = 1.0;
         if (insMode.getFrameTime() != null) {
             this.frameRatio = insMode.getFrameTime() / this.dit;
-        }        
+        }
 
         final double effectiveFrameTime = frameRatio * this.dit;
         // ratio in time [0..1]
@@ -583,7 +580,7 @@ public final class NoiseService implements VisNoiseService {
 
         if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
             final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
-    
+
             final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
 
             final FringeTracker ft = instrument.getFringeTracker();
@@ -597,7 +594,7 @@ public final class NoiseService implements VisNoiseService {
                 this.fringeTrackerMaxDit = ft.getMaxIntegration();
                 this.fringeTrackerMaxFrameTime = this.fringeTrackerMaxDit;
                 this.ftBand = ft.getBand();
-                
+
                 // use specific FT DIT defined for this instrument mode:
                 if (insMode.getFtDit() != null) {
                     this.fringeTrackerMaxDit = insMode.getFtDit();
@@ -841,7 +838,7 @@ public final class NoiseService implements VisNoiseService {
 
         if (useStrehlCorrection) {
             strehlPerChannel = new double[nObs][];
-            
+
             if (this.instrumentName.startsWith(AsproConstants.INS_SPICA)) {
                 // SPICA case (waiting for CHARA AO):
                 final double strehl;
@@ -853,7 +850,7 @@ public final class NoiseService implements VisNoiseService {
                     strehl = 0.1;
                 }
                 addInformation("Strehl (SPICA): " + NumberUtils.format(strehl));
-                
+
                 for (int n = 0; n < nObs; n++) {
                     strehlPerChannel[n] = new double[waveLengths.length];
                     Arrays.fill(strehlPerChannel[n], strehl);
@@ -1029,7 +1026,7 @@ public final class NoiseService implements VisNoiseService {
                     // FT is asked, can work, and is useful (need to integrate longer)
                     obsDit = Math.min(obsDit * nbFrameToSaturation, totalObsTime);
                     obsDit = Math.min(obsDit, fringeTrackerMaxDit);
-                    
+
                     // Fix frame ratio:
                     this.frameRatio = fringeTrackerMaxFrameTime / fringeTrackerMaxDit;
 
@@ -1155,10 +1152,8 @@ public final class NoiseService implements VisNoiseService {
         double v2 = visAmp * visAmp;
         double errV2 = computeVis2Error(iMidPoint, iChannel, v2);
         double snr = v2 / errV2;
-        double bias = getVis2Bias(iMidPoint, iChannel);
 
-        logger.info("computeVis2Error({}) :{} SNR= {} bias= {}", NumberUtils.trimTo5Digits(v2), errV2, NumberUtils.trimTo3Digits(snr),
-                bias);
+        logger.info("computeVis2Error({}) :{} SNR= {} bias= {}", NumberUtils.trimTo5Digits(v2), errV2, NumberUtils.trimTo3Digits(snr));
     }
 
     double[] computeTargetFlux() {
@@ -1295,21 +1290,6 @@ public final class NoiseService implements VisNoiseService {
     }
 
     /**
-     * Return the bias on V2
-     * It returns 0 if the photometry is not available
-     *
-     * @param iPoint index of the observable point
-     * @param iChannel index of the channel
-     * @return bias on V2 or 0 if the photometry is not available
-     */
-    public double getVis2Bias(final int iPoint, final int iChannel) {
-        if (check(iPoint, iChannel)) {
-            return Double.NaN;
-        }
-        return this.params[iPoint].biasV2[iChannel];
-    }
-
-    /**
      * Prepare numeric constants for square visibility error
      *
      * Note: this method is statefull and NOT thread safe
@@ -1329,9 +1309,6 @@ public final class NoiseService implements VisNoiseService {
         final double[] sqCorFluxCoef = param.sqCorFluxCoef;
         final double[] varSqCorFluxCoef = param.varSqCorFluxCoef;
         final double[] varSqCorFluxConst = param.varSqCorFluxConst;
-
-        // 2017 07: compute normalized bias on V2 from squared flux bias
-        final double[] biasV2 = param.biasV2;
 
         if (usePhotometry) {
             for (int i = 0; i < nWLen; i++) {
@@ -1367,22 +1344,6 @@ public final class NoiseService implements VisNoiseService {
             varSqCorFluxConst[i] = FastMath.pow2(nbTotPhot)
                     + nbTotPhot * (1.0 + 2.0 * nbPixInterf[i] * FastMath.pow2(ron))
                     + (3.0 + nbPixInterf[i]) * nbPixInterf[i] * FastMath.pow(ron, 4.0);
-
-// TODO: fix all the bias estimation on V2 + calibration ...
-            // normalized bias on V2:
-            // Vcal^2=1 => k = 1 / |Fc_cal|^2 ie scaling factor car mesures photo identiques (FiFj_cal / FiFj_src = 1)
-            // correlated flux (include instrumental visibility loss) for vis2 = 1.0:
-            // use the total number photons for nbFrames or not ?
-            if (sqCorFluxCoef[i] != 0.0) { 
-                biasV2[i] = (nbTotPhot + nbPixInterf[i] * FastMath.pow2(ron)) / sqCorFluxCoef[i];
-                // repeat OBS measurements to reach totalObsTime minutes:
-                biasV2[i] *= totFrameCorrection; // bias divided by SQRT(nbFrames) like error
-
-                // Limit excessively large bias:
-                biasV2[i] = Math.min(biasV2[i], MAX_ERR_V2);
-            } else {
-                biasV2[i] = 0.0;
-            }
         }
 
         if (logger.isDebugEnabled()) {
@@ -1393,8 +1354,6 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("varSqCorFluxCoef              : {}", Arrays.toString(varSqCorFluxCoef));
             logger.debug("varSqCorFluxConst[iMidChannel]: {}", varSqCorFluxConst[iMidChannel]);
             logger.debug("varSqCorFluxConst             : {}", Arrays.toString(varSqCorFluxConst));
-            logger.debug("biasV2[iMidChannel]           : {}", biasV2[iMidChannel]);
-            logger.debug("biasV2                        : {}", Arrays.toString(biasV2));
         }
     }
 
@@ -1638,12 +1597,6 @@ public final class NoiseService implements VisNoiseService {
         // Limit excessively large errors (very low transmission or strehl):
         visAmpErr = Math.min(visAmpErr, MAX_ERR_V);
 
-        if (NoiseService.USE_DISTRIB_APPROACH) {
-            // I disagree: it seems a bivariate distribution (2 independent variables C = re + i * im)
-            // var(re)=var(im)=var(amp) for a circular normal distribution
-            return visAmpErr;
-        }
-
         // Distribute the error on RE/IM parts for an uniform error distribution :
         // see These Martin Vannier (2003) p 76
         // sigma2(visRe) = 1/2 ( sigma2(visRe) + sigma2(visIm) ) = sigma2(vis) / 2
@@ -1663,12 +1616,23 @@ public final class NoiseService implements VisNoiseService {
     private double computeVisError(final int iPoint, final int iChannel, final double visAmp, final boolean usePhot) {
         // vis2 error without bias :
         final double errV2 = computeVis2Error(iPoint, iChannel, visAmp * visAmp, usePhot);
-
+        if (errV2 >= MAX_ERR_V2) {
+            return MAX_ERR_V;
+        }
         // dvis = d(vis2) / (2 * vis) :
         // in log scale: (dv / v) = (1/2) (dv2 / v2)
         final double visAmpErr = errV2 / (2d * visAmp);
-
         return visAmpErr;
+    }
+
+    public static double deriveVis2Error(final double cVisError, final double visAmp) {
+        if (cVisError >= MAX_ERR_V) {
+            return MAX_ERR_V2;
+        }
+        final double visAmpErr = cVisError * VIS_CPX_TO_VIS_AMP_ERR;
+
+        final double errV2 = visAmpErr * (2d * visAmp);
+        return errV2;
     }
 
     public double computeBiasedVisPhiError(final double visPhi, final double errVisPhi) {
@@ -1823,8 +1787,6 @@ public final class NoiseService implements VisNoiseService {
         final double[] errSqCorrFlux;
         /** (W) SNR on squared visibility */
         final double[] snrV2;
-        /** (W) bias on squared visibility */
-        final double[] biasV2;
 
         /** (W) t3 phi error - coefficient */
         final double[] t3photCoef;
@@ -1850,7 +1812,6 @@ public final class NoiseService implements VisNoiseService {
             this.sqCorrFlux = init(nWLen);
             this.errSqCorrFlux = init(nWLen);
             this.snrV2 = init(nWLen);
-            this.biasV2 = init(nWLen);
             this.t3photCoef = init(nWLen);
             this.t3photCoef2 = init(nWLen);
             this.t3photCoef3 = init(nWLen);
