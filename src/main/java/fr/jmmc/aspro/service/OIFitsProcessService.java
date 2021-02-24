@@ -14,7 +14,6 @@ import static fr.jmmc.jmcs.util.StatUtils.SAMPLING_FACTOR_MEAN;
 import static fr.jmmc.jmcs.util.StatUtils.SAMPLING_FACTOR_VARIANCE;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.MutableComplex;
-import static fr.jmmc.jmal.model.VisNoiseService.VIS_CPX_TO_VIS_AMP_ERR;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oitools.model.DataModel;
@@ -416,7 +415,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         final MutableComplex visComplexNoisy = new MutableComplex();
 
         final NoiseService ns = this.noiseService;
-        
+
         final boolean instrumentVisDiff = true; // TODO: refine
 
         if (this.hasModel && (ns != null) && !isAmber && instrumentVisDiff) {
@@ -506,7 +505,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                     }
                     // note: normalization is done below ie substract mean(cpxVis)
                 }
-                    
+
                 // Iterate on wave lengths :
                 for (l = 0; l < nWaveLengths; l++) {
                     // Get pure complex visibility:
@@ -685,7 +684,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                                 // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
                                 s_vamp_err = Math.sqrt(
                                         SAMPLING_FACTOR_VARIANCE * (vamp_sum_diff_square - (SAMPLING_FACTOR_MEAN * (vamp_sum_diff * vamp_sum_diff)))
-                                ) * VIS_CPX_TO_VIS_AMP_ERR; // single dimension only !
+                                );
 
                                 // error(vphi):
                                 // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
@@ -890,7 +889,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                         // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
                         s_v2_err = Math.sqrt(
                                 SAMPLING_FACTOR_VARIANCE * (v2_sum_diff_square - (SAMPLING_FACTOR_MEAN * (v2_sum_diff * v2_sum_diff)))
-                        ) * VIS_CPX_TO_VIS_AMP_ERR; // single dimension only !
+                        );
 
                         if (DEBUG) {
                             /*                            
@@ -1156,7 +1155,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                         // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
                         s_t3amp_err = Math.sqrt(
                                 SAMPLING_FACTOR_VARIANCE * (t3amp_sum_diff_square - (SAMPLING_FACTOR_MEAN * (t3amp_sum_diff * t3amp_sum_diff)))
-                        ) * VIS_CPX_TO_VIS_AMP_ERR; // single dimension only !
+                        );
 
                         // mean(T3phi):
                         s_t3phi_mean = (t3phi_sum_sin != 0.0) ? FastMath.atan2(t3phi_sum_sin, t3phi_sum_cos) : 0.0;

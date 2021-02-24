@@ -49,8 +49,6 @@ public abstract class AbstractOIFitsProducer {
 
     /** enable DEBUG mode */
     public final static boolean DEBUG = false;
-    /** enable DEBUG mode */
-    public final static boolean DEBUG_V2 = false;
     /** use sampled mean(sample) instead of theoretical value */
     protected final static boolean DO_USE_SAMPLED_MEAN = false;
     /** flag to show compute task statistics */

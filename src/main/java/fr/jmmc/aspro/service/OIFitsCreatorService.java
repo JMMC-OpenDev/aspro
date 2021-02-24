@@ -33,7 +33,6 @@ import static fr.jmmc.jmcs.util.StatUtils.SAMPLING_FACTOR_VARIANCE;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.MutableComplex;
-import static fr.jmmc.jmal.model.VisNoiseService.VIS_CPX_TO_VIS_AMP_ERR;
 import fr.jmmc.jmcs.gui.task.InterruptableThread;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
@@ -726,9 +725,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final MutableComplex visComplexNoisy = new MutableComplex();
 
         final NoiseService ns = this.noiseService;
+
+        final boolean useVisDiff = this.instrumentVisDiff && false;
+
         if (this.hasModel && !isAmber && (ns != null)) {
             logger.info("createOIVis: {} VisAmp/Phi errors computed using {} random complex visiblities",
-                    this.instrumentVisDiff ? "Differential" : "Absolute", N_SAMPLES);
+                    useVisDiff ? "Differential" : "Absolute", N_SAMPLES);
         }
 
         // vars:
@@ -762,6 +764,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final MutableComplex cpxVisSum = new MutableComplex();
         final MutableComplex cpxVisRef = new MutableComplex();
         final MutableComplex cpxVisDiff = new MutableComplex();
+
+        int chi2_nb = 0;
+        double chi2_amp_sum = 0.0;
 
         // Iterate on observable UV points :
         for (int i = 0, j, k, l, n; i < nObsPoints; i++) {
@@ -838,7 +843,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         visRndIdxRow = this.visRndIdx[k];
                     }
 
-                    if (!isAmber && instrumentVisDiff) {
+                    if (!isAmber && useVisDiff) {
                         // Compute Vref (complex) as mean(V) along wavelength axis:
 
                         // reset:
@@ -902,7 +907,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                             if (instrumentVis) {
 
                                 if (ns == null) {
-                                    if (instrumentVisDiff) {
+                                    if (useVisDiff) {
                                         re = visComplex[k][l].getReal();
                                         im = visComplex[k][l].getImaginary();
 
@@ -932,7 +937,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     // complex visibility error : visErrRe = visErrIm = visAmpErr or Complex.NaN :
                                     visErrCplx = visError[k][l];
 
-                                    if (instrumentVisDiff) {
+                                    if (useVisDiff) {
                                         re = visRe;
                                         im = visIm;
 
@@ -968,7 +973,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         im = visIm + (visErrCplx * distIm[n]);
 
                                         // amplitude:
-                                        if (instrumentVisDiff) {
+                                        if (useVisDiff) {
                                             /* then construct Cref by substracting current R and I
                                              * at that Wlen and make the arithmetic mean */
                                             cpxVisRef.updateComplex(
@@ -1041,7 +1046,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
                                     s_vamp_err = Math.sqrt(
                                             SAMPLING_FACTOR_VARIANCE * (vamp_sum_diff_square - (SAMPLING_FACTOR_MEAN * (vamp_sum_diff * vamp_sum_diff)))
-                                    ) * VIS_CPX_TO_VIS_AMP_ERR; // single dimension only !
+                                    );
 
                                     // error(vphi):
                                     // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
@@ -1052,12 +1057,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     /* Complex visibility is a Normal distribution, 
                                      * no test needed on normality ? because vis diff ? */
                                     if (DEBUG) {
-                                        final double vamp_err = visErrCplx * VIS_CPX_TO_VIS_AMP_ERR;
                                         logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_vamp_mean / s_vamp_err) + " AMP "
                                                 + " avg= " + s_vamp_mean + " vamp= " + vamp + " ratio: " + (s_vamp_mean / vamp)
-                                                + " stddev= " + s_vamp_err + " errAmp= " + vamp_err + " ratio: " + (s_vamp_err / vamp_err)
+                                                + " stddev= " + s_vamp_err + " errAmp= " + visErrCplx + " ratio: " + (s_vamp_err / visErrCplx)
                                         );
-                                        logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_vphi_mean / s_vphi_err) + " PHI "
+                                        logger.info("Sampling[" + N_SAMPLES + "] snr=" + ((PI + s_vphi_mean) / s_vphi_err) + " PHI "
                                                 + " avg= " + s_vphi_mean + " vphi= " + vphi + " ratio: " + ((PI + s_vphi_mean) / (PI + vphi))
                                                 + " stddev= " + s_vphi_err
                                         );
@@ -1068,6 +1072,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         final int nSample = visRndIdxRow[l];
                                         vamp = vamp_samples[nSample];
                                         vphi = vphi_samples[nSample];
+
+                                        if (DEBUG) {
+                                            // chi2 = sum ( (x - x_th) / err ) ^2
+                                            chi2_nb++;
+                                            diff = (vamp - vampTh) / s_vamp_err;
+                                            chi2_amp_sum += diff * diff;
+                                        }
                                     } else if (DO_USE_SAMPLED_MEAN) {
                                         vamp = s_vamp_mean;
                                         vphi = s_vphi_mean;
@@ -1076,10 +1087,24 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     errPhi = s_vphi_err;
 
                                     if (useInstrumentBias) {
-                                        errPhi = ns.computeBiasedVisPhiError(vphi, errPhi);
-                                        errAmp = Math.max(errAmp, errPhi);
+                                        final double biasedErr = ns.computeBiasedVisPhiError(vphi, errPhi);
+
+                                        if (biasedErr > errPhi) {
+                                            errPhi = Math.sqrt(biasedErr * biasedErr + errPhi * errPhi);
+
+                                            // add this bias on error on random samples (uniform or normal distribution ?):
+                                            if (this.doNoise) {
+                                                // update nth sample (mimic normal law) but independent random :
+                                                // just add gaussian noise (variance addition):
+                                                vphi += biasedErr * distIm[visRndIdxRow[l]];
+                                            }
+
+                                            // TODO: make noisy vamp ?
+                                            errAmp = Math.max(errAmp, errPhi);
+                                        }
                                     }
-                                }
+
+                                } // sampling ?
 
                                 // Set values:
                                 visAmp[k][l] = vamp;
@@ -1132,7 +1157,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             if (isAmber && (ns != null)) {
                 OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, this.visError, nWaveLengths, this.visRndDist);
                 // TODO: generate noisy samples if doNoise
-            } else if (!isAmber && instrumentVisDiff) {
+            } else if (!isAmber && useVisDiff) {
                 double vamp_sum;
                 /* Normalize differential visibilities to 1 */
                 for (int k = 0, l; k < visAmp.length; k++) {
@@ -1151,6 +1176,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             }
         }
         this.oiFitsFile.addOiTable(vis);
+
+        // Chi2:
+        if (chi2_nb != 0) {
+            final double chi2_amp_red = chi2_amp_sum / chi2_nb; // degrees of freedom = ??
+            logger.info("VISAMP: chi2 = " + chi2_amp_sum + " (n = " + chi2_nb + "): red_chi2: " + chi2_amp_red);
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("createOIVis: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
@@ -1228,6 +1259,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final double[] im_samples = new double[N_SAMPLES];
 
         double cRe, cIm, s_c2amp_mean;
+        int chi2_nb = 0;
+        double chi2_sum = 0.0;
 
         // Iterate on observable UV points :
         for (int i = 0, j, k, l, n; i < this.nObsPoints; i++) {
@@ -1369,7 +1402,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
                                 s_v2_err = Math.sqrt(
                                         SAMPLING_FACTOR_VARIANCE * (v2_sum_diff_square - (SAMPLING_FACTOR_MEAN * (v2_sum_diff * v2_sum_diff)))
-                                ) * VIS_CPX_TO_VIS_AMP_ERR; // single dimension only !
+                                );
 
                                 /*
                                 * This test on mean() is cheap and interesting to detect non gaussian behaviour = mean diverges and sigma too, but less fast !
@@ -1389,7 +1422,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     doFlag = true;
                                 }
 
-                                if (DEBUG || DEBUG_V2) {
+                                if (DEBUG) {
                                     logger.info("Sampling[" + N_SAMPLES + "] SNR=" + (v2Th / v2ThErr) + " snr=" + (s_v2_mean / s_v2_err) + " V2"
                                             + " (err(re,im)= " + errCVis + ")"
                                             + " avg= " + s_v2_mean + " V2= " + v2Th + " ratio: " + (s_v2_mean / v2Th)
@@ -1397,17 +1430,27 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     );
                                 }
 
-                                if (this.doNoise) {
-                                    // Use the corresponding sample:
-                                    v2 = v2_samples[visRndIdxRow[l]];
-                                } else if (DO_USE_SAMPLED_MEAN) {
-                                    v2 = s_v2_mean;
-                                } else {
-                                    v2 = v2Th;
+                                if (!doFlag) {
+                                    if (this.doNoise) {
+                                        // Use the corresponding sample:
+                                        v2 = v2_samples[visRndIdxRow[l]];
+
+                                        if (DEBUG) {
+                                            // chi2 = sum ( (v2 - v2_th) / err ) ^2
+                                            chi2_nb++;
+                                            diff = (v2 - v2Th) / s_v2_err;
+                                            chi2_sum += diff * diff;
+                                        }
+                                    } else if (DO_USE_SAMPLED_MEAN) {
+                                        v2 = s_v2_mean;
+                                    } else {
+                                        v2 = v2Th;
+                                    }
+                                    v2Err = s_v2_err;
                                 }
-                                v2Err = s_v2_err;
                             } // sampling ?
 
+                            // If flagged, then use theoretical errors:
                             if (doFlag) {
                                 // use theoretical value & error if SNR < 3 or not Normal Law !
                                 v2 = v2Th;
@@ -1421,9 +1464,19 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 }
                             }
 
-                            // If flagged, then use theoretical errors:
                             if (useInstrumentBias) {
-                                v2Err = ns.computeBiasedVis2Error(v2, v2Err);
+                                final double biasedErr = ns.computeBiasedVis2Error(v2, v2Err);
+
+                                if (biasedErr > v2Err) {
+                                    v2Err = Math.sqrt(biasedErr * biasedErr + v2Err * v2Err);
+
+                                    // add this bias on error on random samples (uniform or normal distribution ?):
+                                    if (this.doNoise) {
+                                        // update nth sample (mimic normal law) but independent random :
+                                        // just add gaussian noise (variance addition):
+                                        v2 += biasedErr * distIm[visRndIdxRow[l]];
+                                    }
+                                }
                             }
 
                             if (DEBUG_SNR) {
@@ -1470,6 +1523,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         System.arraycopy(vis.getStaIndex(), 0, vis2.getStaIndex(), 0, nRows);
 
         this.oiFitsFile.addOiTable(vis2);
+
+        // Chi2:
+        if (chi2_nb != 0) {
+            final double chi2_red = chi2_sum / chi2_nb; // degrees of freedom = ??
+            logger.info("VIS2: chi2 = " + chi2_sum + " (n = " + chi2_nb + "): red_chi2: " + chi2_red);
+        }
 
         if (DEBUG_SNR) {
             final double[][] snrWL = new double[3][nWaveLengths];
@@ -1624,6 +1683,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         double sRe12, sIm12, sRe23, sIm23, sRe31, sIm31;
 
         final int nWaveLengths = this.waveLengths.length;
+
+        int chi2_nb = 0;
+        double chi2_amp_sum = 0.0;
 
         // Iterate on observable UV points :
         for (int i = 0, j, k, l, vp, n; i < this.nObsPoints; i++) {
@@ -1870,7 +1932,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
                                 s_t3amp_err = Math.sqrt(
                                         SAMPLING_FACTOR_VARIANCE * (t3amp_sum_diff_square - (SAMPLING_FACTOR_MEAN * (t3amp_sum_diff * t3amp_sum_diff)))
-                                ) * VIS_CPX_TO_VIS_AMP_ERR; // single dimension only !
+                                );
 
                                 // error(t3phi):
                                 // note: this algorithm ensures correctness (stable) even if the mean used in diff is wrong !
@@ -1897,6 +1959,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     // amplitude error t3AmpErr = t3Amp * t3PhiErr :
                                     errAmp = t3amp * errPhi;
 
+                                    // note: errAmp is wrong (approximation) in comparison below:
                                     logger.info("Sampling[" + N_SAMPLES + "] snr=" + Math.abs(s_t3amp_mean / s_t3amp_err) + " (low: " + doFlag + ") AMP "
                                             + " avg= " + s_t3amp_mean + " T3amp= " + t3amp + " ratio: " + (s_t3amp_mean / t3amp)
                                             + " stddev= " + s_t3amp_err + " errAmp= " + errAmp + " ratio: " + (s_t3amp_err / errAmp)
@@ -1907,22 +1970,31 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     );
                                 }
 
-                                if (this.doNoise) {
-                                    // Use the corresponding sample among vis, vis2, t3 on any baselines !
-                                    final int nSample = visRndIdxRow[l];
-                                    t3amp = t3amp_samples[nSample];
-                                    t3phi = t3phi_samples[nSample];
-                                } else if (DO_USE_SAMPLED_MEAN) {
-                                    t3amp = s_t3amp_mean;
-                                    t3phi = s_t3phi_mean;
+                                if (!doFlag) {
+                                    if (this.doNoise) {
+                                        // Use the corresponding sample among vis, vis2, t3 on any baselines !
+                                        final int nSample = visRndIdxRow[l];
+                                        t3amp = t3amp_samples[nSample];
+                                        t3phi = t3phi_samples[nSample];
+
+                                        if (DEBUG) {
+                                            // chi2 = sum ( (x - x_th) / err ) ^2
+                                            chi2_nb++;
+                                            diff = (t3amp - t3ampTh) / s_t3amp_err;
+                                            chi2_amp_sum += diff * diff;
+                                        }
+
+                                    } else if (DO_USE_SAMPLED_MEAN) {
+                                        t3amp = s_t3amp_mean;
+                                        t3phi = s_t3phi_mean;
+                                    }
+                                    errAmp = s_t3amp_err;
+                                    errPhi = s_t3phi_err;
                                 }
-                                errAmp = s_t3amp_err;
-                                errPhi = s_t3phi_err;
                             }
 
+                            // If flagged, then use theoretical errors:
                             if (doFlag) {
-                                // use theoretical value & error if SNR < 3 !                            
-
                                 // theoretical phase closure error (rad) :
                                 errPhi = ns.computeT3PhiError(i, l, cvis12.abs(), cvis23.abs(), cvis13.abs()); // abs(c13) = abs(c31)
 
@@ -1942,8 +2014,21 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                             }
 
                             if (useInstrumentBias) {
-                                errPhi = ns.computeBiasedT3PhiError(t3phi, errPhi);
-                                errAmp = Math.max(errAmp, errPhi);
+                                final double biasedErr = ns.computeBiasedT3PhiError(t3phi, errPhi);
+
+                                if (biasedErr > errPhi) {
+                                    errPhi = Math.sqrt(biasedErr * biasedErr + errPhi * errPhi);
+
+                                    // add this bias on error on random samples (uniform or normal distribution ?):
+                                    if (this.doNoise) {
+                                        // update nth sample (mimic normal law) but independent random :
+                                        // just add gaussian noise (variance addition):
+                                        t3phi += biasedErr * distIm_23[visRndIdxRow[l]];
+                                    }
+
+                                    // TODO: make noisy t3amp ?
+                                    errAmp = Math.max(errAmp, errPhi);
+                                }
                             }
                         }
 
@@ -1984,6 +2069,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         }
 
         this.oiFitsFile.addOiTable(t3);
+
+        // Chi2:
+        if (chi2_nb != 0) {
+            final double chi2_amp_red = chi2_amp_sum / chi2_nb; // degrees of freedom = ??
+            logger.info("T3AMP: chi2 = " + chi2_amp_sum + " (n = " + chi2_nb + "): red_chi2: " + chi2_amp_red);
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("createOIT3: duration = {} ms.", 1e-6d * (System.nanoTime() - start));

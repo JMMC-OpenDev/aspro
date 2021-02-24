@@ -1601,7 +1601,9 @@ public final class NoiseService implements VisNoiseService {
         // see These Martin Vannier (2003) p 76
         // sigma2(visRe) = 1/2 ( sigma2(visRe) + sigma2(visIm) ) = sigma2(vis) / 2
         // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) :
-        return visAmpErr * VIS_AMP_TO_VIS_CPX_ERR;
+        // No, circular normal distribution:
+        // visErrRe = visErrIm = visAmpErr
+        return visAmpErr;
     }
 
     /**
@@ -1629,7 +1631,7 @@ public final class NoiseService implements VisNoiseService {
         if (cVisError >= MAX_ERR_V) {
             return MAX_ERR_V2;
         }
-        final double visAmpErr = cVisError * VIS_CPX_TO_VIS_AMP_ERR;
+        final double visAmpErr = cVisError; // visErrRe = visErrIm = visAmpErr
 
         final double errV2 = visAmpErr * (2d * visAmp);
         return errV2;
