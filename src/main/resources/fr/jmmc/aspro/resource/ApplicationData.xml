@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.02 beta 4"/>
-    <compilation date="12/02/2021" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.02 beta 5"/>
+    <compilation date="24/02/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,10 +229,13 @@
 
     <releasenotes>
         <release version="21.02">
-            <pubDate>Fri, 12 Feb 2021 18:00:00 GMT</pubDate>
+            <pubDate>Wed, 24 Feb 2021 14:00:00 GMT</pubDate>
+            <prerelease version="21.02 beta 5">
+                <change type="FEATURE">Improved OIFITS generation to generate noisy observables when instrument and calibration biases are enabled (V2, VPHI, T3PHI)</change>
+            </prerelease>
             <prerelease version="21.02 beta 4">
-                <change type="BUGFIX">Improved OIFITS generation to add theoretical model values and errors in NS_MODEL_ columns (OI-Interface); these new columns and residuals are available in the OIFits viewer</change>
-                <change type="BUGFIX">Improved OIFITS data simulation to remove bias on random VIS2 at low SNR</change>
+                <change type="FEATURE">Improved OIFITS generation to add theoretical model values and errors in NS_MODEL_ columns (OI-Interface); these new columns and residuals are available in the OIFits viewer</change>
+                <change type="FEATURE">Improved OIFITS data simulation to have proper residuals and remove bias on random VIS2 at low SNR</change>
                 <change type="FEATURE">Added a new tabbed pane 'Observation plan' to display observations and targets as an unified table. General &amp; global filters are coming...</change>
             </prerelease>
             <prerelease version="21.02 beta 3">
