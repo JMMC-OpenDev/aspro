@@ -42,6 +42,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     private static final long serialVersionUID = 1;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(SettingPanel.class.getName());
+    /** enable / disable Obs Plan */
+    private static final boolean ENABLE_OBS_PLAN = false;
     /** default mouse cursor refresh period = 100 ms */
     private static final int REFRESH_PERIOD = 100;
     /** shared tooltip manager */
@@ -221,15 +223,17 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         // register the observation form as an observation listener :
         ObservationManager.getInstance().register(obsDescForm);
 
-        // create the observation table:
-        final ObservationTablePanel obsTablePanel = new ObservationTablePanel();
-        obsTablePanel.setName("obsTablePanel");
+        if (ENABLE_OBS_PLAN) {
+            // create the observation table:
+            final ObservationTablePanel obsTablePanel = new ObservationTablePanel();
+            obsTablePanel.setName("obsTablePanel");
 
-        // add the map panel :
-        this.jTabbedPane.addTab(TAB_OBS_PLAN, obsTablePanel);
+            // add the map panel :
+            this.jTabbedPane.addTab(TAB_OBS_PLAN, obsTablePanel);
 
-        // register the observation form as an observation listener :
-        ObservationManager.getInstance().register(obsTablePanel);
+            // register the observation form as an observation listener :
+            ObservationManager.getInstance().register(obsTablePanel);
+        }
         
         // create the map panel :
         final InterferometerMapPanel mapPanel = new InterferometerMapPanel();
