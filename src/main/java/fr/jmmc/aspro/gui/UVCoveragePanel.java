@@ -93,7 +93,6 @@ import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
 import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
 import fr.jmmc.oiexplorer.core.gui.chart.ZoomEventListener;
 import fr.jmmc.oiexplorer.core.gui.chart.dataset.SharedSeriesAttributes;
-import fr.jmmc.oiexplorer.core.util.Constants;
 import static fr.jmmc.oiexplorer.core.util.FitsImageUtils.checkBounds;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -635,6 +634,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelLeft.add(jCheckBoxAddNoise, gridBagConstraints);
 
+        jCheckBoxUseBias.setSelected(true);
         jCheckBoxUseBias.setText("Use inst. & cal. error bias");
         jCheckBoxUseBias.setToolTipText("if enabled, correct error with both instrumental visibility / phase biases and calibration bias");
         jCheckBoxUseBias.setName("jCheckBoxUseBias"); // NOI18N
@@ -1753,7 +1753,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // Use OIFits preferences:
             final int supersamplingOIFits = this.myPreferences.getPreferenceAsInt(Preferences.OIFITS_SUPER_SAMPLING);
             final MathMode mathModeOIFits = this.myPreferences.getOIFitsMathMode();
-            final double snrThresholdOIFits = this.myPreferences.getPreferenceAsDouble(Preferences.OIFITS_SNR_THRESHOLD);
+            // use 1/2 to make SNR(VIS) < TH and not SNR(VIS2) < TH ( SNR(VIS2) = SNR(VIS) / 2 )
+            final double snrThresholdOIFits = this.myPreferences.getPreferenceAsDouble(Preferences.OIFITS_SNR_THRESHOLD) / 2.0;
 
             // update the status bar :
             StatusBar.show(MSG_COMPUTING_COVERAGE);
@@ -2282,7 +2283,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // - check obsData (main version)
                 // - check supersamplingOIFits
                 // - check doNoise: noiseService.isDoNoise()
-                // - check useInstrumentBias: noiseService.isUseInstrumentBias()
+                // - check useInstrumentBias: noiseService.isUseCalibrationBias()
                 if (currentUVData.isOIFitsValid(uvDataCollection)) {
                     // means no reset and current OIFits data are correct:
                     return true;
@@ -3433,7 +3434,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                             // line tooltip use index of (x2, y2) point:
                             tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
-                                    generateTooltipRawObs(uvBL.getName(), rawObs, 
+                                    generateTooltipRawObs(uvBL.getName(), rawObs,
                                             -u[0], -v[0], u[1], v[1])); // start
 
                             // note: NaN will close shape
@@ -3863,7 +3864,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         sb.append(" m<br><b>Pos. angle</b>: ");
         FormatterUtils.format(this.df1, sb, FastMath.toDegrees(FastMath.atan2(u_start, v_start)));
         sb.append(" deg");
-        
+
         rawObs.timeToHtml(sb, 2); // show end
 
         // use U and V to display radius and position angle:
