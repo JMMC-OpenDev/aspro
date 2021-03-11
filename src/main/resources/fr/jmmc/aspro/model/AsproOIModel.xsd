@@ -2387,27 +2387,33 @@
                 </xsd:annotation>
             </xsd:element>
 
-            <!-- TODO: add interfero and photo coefficients for the thermal noise residual (structure function) -->
-
-            <!-- biases -->
+            <!-- former biases (before 2021.3) -->
             <xsd:element name="instrumentVisibilityBias" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The Typical Fixed Visibility Bias (percent of V) (typically 1)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="instrumentVis2CalibrationBias" type="xsd:double" minOccurs="0">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The Typical Vis2 Calibration Bias (proportional to V2) (typically 5)
+                        The Typical Visibility bias (percent of V) (typically 1)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="instrumentPhaseBias" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The Typical Phase/Phase Closure Bias in degrees (typically 1)
+                        The Typical Visibility/Closure Phase bias in degrees (typically 1)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <!-- advanced biases (after 2021.3) -->
+            <xsd:element name="instrumentBias" type="BiasValue" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The instrument bias values
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="calibrationBias" type="BiasValue" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The (optional) calibration bias values
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2431,6 +2437,71 @@
 
     </xsd:complexType>
 
+
+
+
+    <!-- BiasValue -->
+    <xsd:complexType name="BiasValue">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes a bias value corresponding to the (optional) criteria: telescope, atmosphere quality
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The bias value
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:attribute name="type" type="BiasType" use="required">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The type of bias
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="unit" type="BiasUnit">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The optional unit to indicate absolute ('ABS', default), relative ('REL') or flux ('JY') values
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <!-- criterias -->
+                <xsd:attribute name="band" type="SpectralBand">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Optional band (criteria) for broadband instruments
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="atmosphereQuality" type="AtmosphereQuality">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Define the required atmosphere quality / seeing (used by noise modelling)
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="telescope" type="xsd:IDREF">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Optional Telescope Reference (criteria)
+                        </xsd:documentation>
+                        <xsd:appinfo>
+                            <jaxb:property>
+                                <jaxb:baseType name="Telescope" />
+                            </jaxb:property>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+
+
+
     <!-- ObservationSequence -->
     <xsd:complexType name="ObservationSequence">
         <xsd:annotation>
@@ -2449,6 +2520,9 @@
             </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
+
+
+
 
     <!-- Exposure -->
     <xsd:complexType name="Exposure">
@@ -2532,10 +2606,38 @@
                 </xsd:annotation>
             </xsd:element>
 
-            <xsd:element name="visDiff" type="xsd:boolean" minOccurs="0">
+            <xsd:element name="oiVis" type="xsd:boolean" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
-                        This flag indicates that this instrument estimates differential visiblities (optional)
+                        This flag indicates that this instrument produces OI_VIS tables (optional, true by default)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="oiVisData" type="xsd:boolean" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        This flag indicates that this instrument estimates correlated fluxes in the OI_VIS.VISDATA column (optional, false by default)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="oiVisAmpDiff" type="xsd:boolean" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        This flag indicates that this instrument estimates differential visibilities for the OI_VIS.VISAMP column (optional, false by default))
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="oiVisPhiDiff" type="xsd:boolean" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        This flag indicates that this instrument estimates differential visibilities for the OI_VIS.VISPHI column (optional, false by default))
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="oiVis2Extra" type="xsd:boolean" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        This flag indicates that this instrument estimates squared correlated fluxes in the OI_VIS2.NS_CORRSQ column (optional, false by default)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2825,6 +2927,69 @@
 
         </xsd:sequence>
     </xsd:complexType>
+
+
+
+
+    <!-- BiasType -->
+    <xsd:simpleType name="BiasType">
+        <xsd:annotation>
+            <xsd:documentation>
+                BiasType describes all supported types of instrumental or calibration biases
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="VIS">
+                <xsd:annotation>
+                    <xsd:documentation>Visibility (absolute or differential) according to the instrument</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="VISPHI">
+                <xsd:annotation>
+                    <xsd:documentation>Visibility Phase (absolute or differential) according to the instrument</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="T3PHI">
+                <xsd:annotation>
+                    <xsd:documentation>Closure Phase</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="PHOT">
+                <xsd:annotation>
+                    <xsd:documentation>Photometry error</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+
+
+    <!-- BiasUnit -->
+    <xsd:simpleType name="BiasUnit">
+        <xsd:annotation>
+            <xsd:documentation>
+                BiasUnit describes all supported units (absolute, relative, jansky)
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="ABS">
+                <xsd:annotation>
+                    <xsd:documentation>Absolute value</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="REL">
+                <xsd:annotation>
+                    <xsd:documentation>Relative value</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="JY">
+                <xsd:annotation>
+                    <xsd:documentation>Jansky (flux)</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
 
 
 
