@@ -33,7 +33,11 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="alias" type="{http://www.w3.org/2001/XMLSchema}NCName" minOccurs="0"/&gt;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
- *         &lt;element name="visDiff" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
+ *         &lt;element name="oiVis" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
+ *         &lt;element name="oiVisData" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
+ *         &lt;element name="oiVisAmpDiff" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
+ *         &lt;element name="oiVisPhiDiff" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
+ *         &lt;element name="oiVis2Extra" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="fringeTracker" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="fringeTrackerRequired" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="setup" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentSetup" maxOccurs="unbounded"/&gt;
@@ -52,7 +56,11 @@ import fr.jmmc.aspro.model.OIBase;
     "alias",
     "description",
     "numberChannels",
-    "visDiff",
+    "oiVis",
+    "oiVisData",
+    "oiVisAmpDiff",
+    "oiVisPhiDiff",
+    "oiVis2Extra",
     "fringeTracker",
     "fringeTrackerRequired",
     "setups",
@@ -73,7 +81,11 @@ public class FocalInstrument
     @XmlElement(required = true)
     protected String description;
     protected int numberChannels;
-    protected Boolean visDiff;
+    protected Boolean oiVis;
+    protected Boolean oiVisData;
+    protected Boolean oiVisAmpDiff;
+    protected Boolean oiVisPhiDiff;
+    protected Boolean oiVis2Extra;
     @XmlElement(type = Object.class)
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
@@ -173,27 +185,123 @@ public class FocalInstrument
     }
 
     /**
-     * Gets the value of the visDiff property.
+     * Gets the value of the oiVis property.
      * 
      * @return
      *     possible object is
      *     {@link Boolean }
      *     
      */
-    public Boolean isVisDiff() {
-        return visDiff;
+    public Boolean isOiVis() {
+        return oiVis;
     }
 
     /**
-     * Sets the value of the visDiff property.
+     * Sets the value of the oiVis property.
      * 
      * @param value
      *     allowed object is
      *     {@link Boolean }
      *     
      */
-    public void setVisDiff(Boolean value) {
-        this.visDiff = value;
+    public void setOiVis(Boolean value) {
+        this.oiVis = value;
+    }
+
+    /**
+     * Gets the value of the oiVisData property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isOiVisData() {
+        return oiVisData;
+    }
+
+    /**
+     * Sets the value of the oiVisData property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setOiVisData(Boolean value) {
+        this.oiVisData = value;
+    }
+
+    /**
+     * Gets the value of the oiVisAmpDiff property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isOiVisAmpDiff() {
+        return oiVisAmpDiff;
+    }
+
+    /**
+     * Sets the value of the oiVisAmpDiff property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setOiVisAmpDiff(Boolean value) {
+        this.oiVisAmpDiff = value;
+    }
+
+    /**
+     * Gets the value of the oiVisPhiDiff property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isOiVisPhiDiff() {
+        return oiVisPhiDiff;
+    }
+
+    /**
+     * Sets the value of the oiVisPhiDiff property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setOiVisPhiDiff(Boolean value) {
+        this.oiVisPhiDiff = value;
+    }
+
+    /**
+     * Gets the value of the oiVis2Extra property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isOiVis2Extra() {
+        return oiVis2Extra;
+    }
+
+    /**
+     * Sets the value of the oiVis2Extra property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setOiVis2Extra(Boolean value) {
+        this.oiVis2Extra = value;
     }
 
     /**
@@ -384,17 +492,33 @@ public class FocalInstrument
         if (this.name == null) {
             throw new IllegalStateException("Invalid name !");
         }
-        
+
+        if (isOiVis() == null) {
+            setOiVis(Boolean.TRUE); // true by default
+        }
+        if (isOiVisData() == null) {
+            setOiVisData(Boolean.FALSE); // false by default
+        }
+        if (isOiVisAmpDiff() == null) {
+            setOiVisAmpDiff(Boolean.FALSE); // false by default
+        }
+        if (isOiVisPhiDiff() == null) {
+            setOiVisPhiDiff(Boolean.FALSE); // false by default
+        }
+        if (isOiVis2Extra() == null) {
+            setOiVis2Extra(Boolean.FALSE); // false by default
+        }
+
         if (isEmpty(this.setups)) {
             throw new IllegalStateException("Missing setup !");
         }
-        
+
         // TODO: check setupIds unicity (map) ?
         // Check setups:
         for (FocalInstrumentSetup setup : getSetups()) {
             setup.init(logger);
         }
-        
+
         // Use first setup as default:
         final boolean singleSetup = getSetups().size() == 1;
         final FocalInstrumentSetup defSetup = getSetups().get(0);
@@ -403,7 +527,7 @@ public class FocalInstrument
         for (FocalInstrumentMode insMode : getModes()) {
             insMode.init(logger);
 
-            if (insMode.getSetupRef()== null) {
+            if (insMode.getSetupRef() == null) {
                 // Define the setup to the default setup:
                 insMode.setSetupRef(defSetup);
                 if (!singleSetup) {
@@ -413,7 +537,7 @@ public class FocalInstrument
             } else {
                 // check if the setup exists and belongs to this instrument setups:
                 if (!getSetups().contains(insMode.getSetupRef())) {
-                    throw new IllegalStateException("Invalid setupRef[" + insMode.getSetupRef().getName()+ "] "
+                    throw new IllegalStateException("Invalid setupRef[" + insMode.getSetupRef().getName() + "] "
                             + "defined in the instrument mode [" + insMode.getName() + "] "
                             + "of the instrument [" + this.getName() + "] !");
                 }
@@ -426,9 +550,14 @@ public class FocalInstrument
         logger.info("  name: {}", getName());
         logger.info("  alias: {}", getAlias());
         logger.info("  description: {}", getDescription());
-        
+
         logger.info("  numberChannels: {}", getNumberChannels());
-        logger.info("  visDiff: {}", isVisDiff());
+        
+        logger.info("  oiVis:        {}", isOiVis());
+        logger.info("  oiVisData:    {}", isOiVisData());
+        logger.info("  oiVisAmpDiff: {}", isOiVisAmpDiff());
+        logger.info("  oiVisPhiDiff: {}", isOiVisPhiDiff());
+        logger.info("  oiVis2Extra:  {}", isOiVis2Extra());
         
         logger.info("  fringeTracker: {}", getFringeTracker());
         logger.info("  fringeTrackerRequired: {}", isFringeTrackerRequired());

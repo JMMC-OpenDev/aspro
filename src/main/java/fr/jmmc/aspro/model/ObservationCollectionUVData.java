@@ -122,14 +122,13 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
         // parameter: supersamplingOIFits, doDataNoise, useInstrumentBias
         // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
         // and warning container
-
         // check if computation needed:
         // - check same target
         // - check observation (target and UV version includes main version)
         // - check obsData (main version)
         // - check supersamplingOIFits
         // - check doNoise: noiseService.isDoNoise()
-        // - check useInstrumentBias: noiseService.isUseInstrumentBias()
+        // - check useInstrumentBias: noiseService.isUseCalibrationBias()
         if (!getTargetName().equals(uvDataCollection.getTargetName())) {
             return false;
         }
@@ -157,7 +156,7 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
             if (current.isDoNoise() != other.isDoNoise()) {
                 return false;
             }
-            if (current.isUseInstrumentBias() != other.isUseInstrumentBias()) {
+            if (current.isUseCalibrationBias() != other.isUseCalibrationBias()) {
                 return false;
             }
             if (current.getSnrThreshold() != other.getSnrThreshold()) {
