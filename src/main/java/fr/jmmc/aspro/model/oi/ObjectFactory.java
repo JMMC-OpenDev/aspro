@@ -390,6 +390,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link BiasValue }
+     * 
+     */
+    public BiasValue createBiasValue() {
+        return new BiasValue();
+    }
+
+    /**
      * Create an instance of {@link ObservationSequence }
      * 
      */

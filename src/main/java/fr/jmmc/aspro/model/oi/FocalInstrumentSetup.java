@@ -1,6 +1,8 @@
 
 package fr.jmmc.aspro.model.oi;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -42,8 +44,9 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="transmission" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="instrumentVisibility" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="instrumentVisibilityBias" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
- *         &lt;element name="instrumentVis2CalibrationBias" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="instrumentPhaseBias" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="instrumentBias" type="{http://www.jmmc.fr/aspro-oi/0.1}BiasValue" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="calibrationBias" type="{http://www.jmmc.fr/aspro-oi/0.1}BiasValue" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="sequence" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationSequence" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *       &lt;attribute name="useStrehlCorrection" type="{http://www.w3.org/2001/XMLSchema}boolean" default="true" /&gt;
@@ -72,8 +75,9 @@ import fr.jmmc.aspro.model.OIBase;
     "transmission",
     "instrumentVisibility",
     "instrumentVisibilityBias",
-    "instrumentVis2CalibrationBias",
     "instrumentPhaseBias",
+    "instrumentBias",
+    "calibrationBias",
     "sequence"
 })
 public class FocalInstrumentSetup
@@ -100,8 +104,9 @@ public class FocalInstrumentSetup
     protected Double transmission;
     protected Double instrumentVisibility;
     protected Double instrumentVisibilityBias;
-    protected Double instrumentVis2CalibrationBias;
     protected Double instrumentPhaseBias;
+    protected List<BiasValue> instrumentBias;
+    protected List<BiasValue> calibrationBias;
     protected ObservationSequence sequence;
     @XmlAttribute(name = "useStrehlCorrection")
     protected Boolean useStrehlCorrection;
@@ -469,30 +474,6 @@ public class FocalInstrumentSetup
     }
 
     /**
-     * Gets the value of the instrumentVis2CalibrationBias property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Double }
-     *     
-     */
-    public Double getInstrumentVis2CalibrationBias() {
-        return instrumentVis2CalibrationBias;
-    }
-
-    /**
-     * Sets the value of the instrumentVis2CalibrationBias property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Double }
-     *     
-     */
-    public void setInstrumentVis2CalibrationBias(Double value) {
-        this.instrumentVis2CalibrationBias = value;
-    }
-
-    /**
      * Gets the value of the instrumentPhaseBias property.
      * 
      * @return
@@ -514,6 +495,64 @@ public class FocalInstrumentSetup
      */
     public void setInstrumentPhaseBias(Double value) {
         this.instrumentPhaseBias = value;
+    }
+
+    /**
+     * Gets the value of the instrumentBias property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the instrumentBias property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getInstrumentBias().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link BiasValue }
+     * 
+     * 
+     */
+    public List<BiasValue> getInstrumentBias() {
+        if (instrumentBias == null) {
+            instrumentBias = new ArrayList<BiasValue>();
+        }
+        return this.instrumentBias;
+    }
+
+    /**
+     * Gets the value of the calibrationBias property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the calibrationBias property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getCalibrationBias().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link BiasValue }
+     * 
+     * 
+     */
+    public List<BiasValue> getCalibrationBias() {
+        if (calibrationBias == null) {
+            calibrationBias = new ArrayList<BiasValue>();
+        }
+        return this.calibrationBias;
     }
 
     /**
@@ -601,6 +640,24 @@ public class FocalInstrumentSetup
     public String toString() {
         return "FocalInstrumentSetup[" + ((this.name != null) ? this.name : "undefined") + "]";
     }
+    
+    public BiasValue getInstrumentBias(final BiasType type, final SpectralBand band, final AtmosphereQuality atmQual, final Telescope tel) {
+        for (BiasValue val : getInstrumentBias()) {
+            if (val.match(type, band, atmQual, tel)) {
+                return val; // first, so take care of ordering values
+            }
+        }
+        return null;
+    }
+    
+    public BiasValue getCalibrationBias(final BiasType type, final SpectralBand band, final AtmosphereQuality atmQual, final Telescope tel) {
+        for (BiasValue val : getCalibrationBias()) {
+            if (val.match(type, band, atmQual, tel)) {
+                return val; // first, so take care of ordering values
+            }
+        }
+        return null;
+    }
 
     /**
      * Initialize and check this instance
@@ -649,13 +706,19 @@ public class FocalInstrumentSetup
             logger.warn("Invalid instrumentVisibility !");
             setInstrumentVisibility(Double.NaN);
         }
-        if (this.instrumentVisibilityBias == null) {
-            logger.warn("Invalid instrumentVisibilityBias !");
-            setInstrumentVisibilityBias(Double.NaN);
-        }
-        if (this.instrumentPhaseBias == null) {
-            logger.warn("Invalid instrumentPhaseBias !");
-            setInstrumentPhaseBias(Double.NaN);
+        if (this.instrumentBias == null) {
+            if (this.instrumentVisibilityBias == null) {
+                logger.warn("Invalid instrumentVisibilityBias !");
+                setInstrumentVisibilityBias(Double.NaN);
+            }
+            if (this.instrumentPhaseBias == null) {
+                logger.warn("Invalid instrumentPhaseBias !");
+                setInstrumentPhaseBias(Double.NaN);
+            }
+        } else {
+            if (this.calibrationBias == null) {
+                logger.warn("Invalid calibrationBias !");
+            }
         }
 
         // Optional values:
@@ -714,9 +777,11 @@ public class FocalInstrumentSetup
         logger.info("    instrumentVisibility: {}", getInstrumentVisibility());
 
         logger.info("    instrumentVisibilityBias: {}", getInstrumentVisibilityBias());
-        logger.info("    instrumentVis2CalibrationBias: {}", getInstrumentVis2CalibrationBias());
         logger.info("    instrumentPhaseBias: {}", getInstrumentPhaseBias());
 
+        logger.info("    instrumentBias: {}", getInstrumentBias());
+        logger.info("    calibrationBias: {}", getCalibrationBias());
+        
         if (getSequence() != null) {
             getSequence().dump(logger);
         }
