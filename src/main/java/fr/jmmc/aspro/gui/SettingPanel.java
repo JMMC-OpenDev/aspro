@@ -14,6 +14,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetRawObservation;
 import fr.jmmc.aspro.model.rawobs.RawObservation;
 import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.ObjectUtils;
@@ -43,7 +44,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(SettingPanel.class.getName());
     /** enable / disable Obs Plan */
-    private static final boolean ENABLE_OBS_PLAN = false;
+    private static final boolean ENABLE_OBS_PLAN = ApplicationDescription.isBetaVersion();
     /** default mouse cursor refresh period = 100 ms */
     private static final int REFRESH_PERIOD = 100;
     /** shared tooltip manager */
