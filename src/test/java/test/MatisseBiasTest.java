@@ -27,16 +27,18 @@ public class MatisseBiasTest {
         testBias(Band.N, rel_e_vis_N, e_phot_N);
     }
 
-    private static void testBias(final Band band, final double rel_e_vis, final double err_phot_jy) {
-        System.out.println("Test MATISSE bias  (" + band + ", zero_point = " + band.getZeroPoint() + ") err_phot = " + err_phot_jy + " Jy, err_vis = " + (100.0 * rel_e_vis) + " %");
+    private static void testBias(final Band band, final double rel_e_vis, final double err_phot_tel_jy) {
+        System.out.println("Test MATISSE bias  (" + band + ", zero_point = " + band.getZeroPoint() + ") err_phot_tel = " + err_phot_tel_jy + " Jy, err_vis = " + (100.0 * rel_e_vis) + " %");
         System.out.println("mag\tflux(Jy)\te_phot(%)\te_V2(%)\tSNR(V2)\te_V(%)\tSNR(V)");
 
         for (int mag = -2; mag <= 10; mag++) {
-            double flux_density = band.magToJy(mag); // Jy
-            double rel_e_phot = err_phot_jy / flux_density;
-            double rel_e_v2 = 2.0 * rel_e_vis; // dV2 / V2 = 2 dv / v
-            double rel_v2_error = Math.sqrt(rel_e_v2 * rel_e_v2 + 2.0 * rel_e_phot * rel_e_phot);
-            double rel_e_v = rel_v2_error / 2.0; // back
+            final double flux_density = band.magToJy(mag); // Jy
+            final double rel_e_phot = err_phot_tel_jy / flux_density; // depends on mag and telescope (UT/AT)
+
+            // (dV2 / V2) = 2 (dv / v)
+            final double rel_e_v2 = 2.0 * rel_e_vis; // depends on atmosphere quality
+            final double rel_v2_error = Math.sqrt(rel_e_v2 * rel_e_v2 + 2.0 * rel_e_phot * rel_e_phot);
+            final double rel_e_v = rel_v2_error / 2.0; // back
 
             System.out.println("" + mag
                     + "\t" + flux_density

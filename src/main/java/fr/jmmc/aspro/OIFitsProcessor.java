@@ -205,6 +205,8 @@ public final class OIFitsProcessor {
             // load OIFITS:
             final OIFitsFile oiFitsFile = OIFitsLoader.loadOIFits(inputFile);
             logger.info("OIFits: {}", oiFitsFile);
+            
+            // Handle analytical model:
 
             // load and prepare images:
             final UserModel userModel = new UserModel();

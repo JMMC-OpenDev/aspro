@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,8 +85,8 @@ public abstract class AbstractOIFitsProducer {
     protected NoiseService noiseService = null;
     /** flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid */
     protected boolean doNoise = false;
-    /** SNR threshold to flag values with low SNR */
-    protected final double snrThreshold;
+    /** SNR threshold on V^2 to flag values with low SNR */
+    protected final double snrVis2Th;
     /* complex visibility fields */
     /** internal computed complex visibility [row][waveLength] */
     protected Complex[][] visComplex = null;
@@ -132,7 +133,7 @@ public abstract class AbstractOIFitsProducer {
         this.supersampling = supersampling;
         this.mathMode = mathMode;
 
-        this.snrThreshold = snrThreshold;
+        this.snrVis2Th = snrThreshold;
 
         logger.debug("snr threshold: {}", snrThreshold);
     }
@@ -142,7 +143,7 @@ public abstract class AbstractOIFitsProducer {
      * @param warningContainer warning container to use if needed
      * @return true if OK; false if user model is invalid (so discard computation)
      */
-    protected boolean prepareUserModel(final WarningContainer warningContainer) {
+    protected final boolean prepareUserModel(final WarningContainer warningContainer) {
         if (this.hasModel) {
             final boolean useAnalyticalModel = this.target.hasAnalyticalModel();
 
@@ -318,7 +319,7 @@ public abstract class AbstractOIFitsProducer {
      * and store this data in local reference table
      * @return true if complex visibilities are computed; false otherwise
      */
-    protected boolean computeModelVisibilities() {
+    protected final boolean computeModelVisibilities() {
         boolean computed = false;
 
         if (this.hasModel) {
@@ -695,6 +696,12 @@ public abstract class AbstractOIFitsProducer {
                 if (ns == null) {
                     Arrays.fill(cVisErrorRow, Double.NaN);
                     Arrays.fill(cVisErrorRowNoPhot, Double.NaN);
+
+                    Arrays.fill(nbPhotPhotoRow, Double.NaN);
+                    Arrays.fill(errPhotPhotoRow, Double.NaN);
+                    Arrays.fill(sqCorrFluxRow, Double.NaN);
+                    Arrays.fill(errSqCorrFluxRow, Double.NaN);
+
                     Arrays.fill(cVisSnrFlagRow, true);
                 } else {
                     final ImmutableComplex[] cVisRow = cVis[k];
@@ -718,9 +725,9 @@ public abstract class AbstractOIFitsProducer {
                         errSqCorrFluxRow[l] = ns.getErrorSqCorrFlux(ptIdx[k], l);
 
                         // check SNR(V2) without any bias:
-                        final double snrV2 = ns.getSNRVis2NoBias(ptIdx[k], l);
+                        final double snrV2 = ns.getSNRVis2(ptIdx[k], l);
 
-                        if (snrV2 < snrThreshold) {
+                        if (snrV2 < snrVis2Th) {
                             cVisSnrFlagRow[l] = true;
 //                            System.out.println("Low SNR["+this.waveLengths[l]+"]: " + snrV2);
                         }
@@ -734,7 +741,7 @@ public abstract class AbstractOIFitsProducer {
                             final int[] cVisRndIdxRow = cVisRndIdx[k] = new int[nChannels];
                             for (l = 0; l < nChannels; l++) {
                                 // Choose the jth sample (uniform probability):
-                                cVisRndIdxRow[l] = this.random.nextInt(N_SAMPLES);
+                                cVisRndIdxRow[l] = getNextRandomSampleIndex();
                             }
                         }
                     } else {
@@ -765,11 +772,15 @@ public abstract class AbstractOIFitsProducer {
 
     protected abstract UVFreqTable computeSpatialFreqTable(final double[] sampleWaveLengths);
 
+    protected final int getNextRandomSampleIndex() {
+        return this.random.nextInt(N_SAMPLES);
+    }
+
     /**
      * Return the OIFits supersampling
      * @return OIFits supersampling
      */
-    public int getSupersampling() {
+    public final int getSupersampling() {
         return supersampling;
     }
 
@@ -777,7 +788,7 @@ public abstract class AbstractOIFitsProducer {
      * Return the OIFits MathMode
      * @return OIFits MathMode
      */
-    public MathMode getMathMode() {
+    public final MathMode getMathMode() {
         return mathMode;
     }
 
@@ -785,7 +796,7 @@ public abstract class AbstractOIFitsProducer {
      * Return the flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid
      * @return flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid
      */
-    public boolean isDoNoise() {
+    public final boolean isDoNoise() {
         return doNoise;
     }
 
@@ -793,15 +804,15 @@ public abstract class AbstractOIFitsProducer {
      * Return the SNR threshold to flag values with low SNR
      * @return SNR threshold to flag values with low SNR
      */
-    public double getSnrThreshold() {
-        return snrThreshold;
+    public final double getSnrThreshold() {
+        return snrVis2Th;
     }
 
     /**
      * Return the noise service
      * @return noise service
      */
-    public NoiseService getNoiseService() {
+    public final NoiseService getNoiseService() {
         return noiseService;
     }
 
@@ -1185,6 +1196,15 @@ they are overlapped <=> (y2 - x1) * (x2 - y1) >= 0
      */
     protected static double convertWL(final double wl) {
         return NumberUtils.trimTo5Digits(wl / AsproConstants.MICRO_METER);
+    }
+
+    protected static double toDegrees(final double angRad) {
+        return Double.isNaN(angRad) ? Double.NaN : FastMath.toDegrees(angRad);
+    }
+
+    protected static double computeCumulativeError(final double err1, final double err2) {
+        // sum of variances:
+        return Math.sqrt(err1 * err1 + err2 * err2);
     }
 
     protected final static class UVFreqTable {
