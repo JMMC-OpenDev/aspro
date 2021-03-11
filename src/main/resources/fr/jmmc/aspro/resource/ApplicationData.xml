@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.02 beta 5"/>
-    <compilation date="24/02/2021" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.03 beta 6"/>
+    <compilation date="11/03/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -228,27 +228,32 @@
     </menubar>
 
     <releasenotes>
-        <release version="21.02">
-            <pubDate>Wed, 24 Feb 2021 14:00:00 GMT</pubDate>
-            <prerelease version="21.02 beta 5">
+        <release version="21.03">
+            <pubDate>Thu, 11 Mar 2021 16:00:00 GMT</pubDate>
+            <prerelease version="21.03 beta 6">
+                <change type="FEATURE">Improved Target Editor to edit LMN fluxes in jansky by default (automatic conversion to ASPRO2 magnitudes)</change>
+                <change type="FEATURE">Set 'Use inst. & cal. error bias' enabled by default</change>
+                <change type="FEATURE">Improved handling of instrument and calibration biases for MATISSE (VISAMP, VISPHI, T3PHI)</change>
+            </prerelease>
+            <prerelease version="21.03 beta 5">
                 <change type="FEATURE">Improved OIFITS generation to generate noisy observables when instrument and calibration biases are enabled (V2, VPHI, T3PHI)</change>
             </prerelease>
-            <prerelease version="21.02 beta 4">
+            <prerelease version="21.03 beta 4">
                 <change type="FEATURE">Improved OIFITS generation to add theoretical model values and errors in NS_MODEL_ columns (OI-Interface); these new columns and residuals are available in the OIFits viewer</change>
                 <change type="FEATURE">Improved OIFITS data simulation to have proper residuals and remove bias on random VIS2 at low SNR</change>
                 <change type="FEATURE">Added a new tabbed pane 'Observation plan' to display observations and targets as an unified table. General &amp; global filters are coming...</change>
             </prerelease>
-            <prerelease version="21.02 beta 3">
+            <prerelease version="21.03 beta 3">
                 <change type="FEATURE">Added a new observability filter 'Show groups' to only show targets belonging to the selected target user groups</change>
                 <change type="FEATURE">Enable observability filters 'Show groups' and 'Hide unobservable' by default</change>
                 <change type="FEATURE">Increased maximum number of imported targets to 10,000 (large survey)</change>
                 <change type="FEATURE">Updated SearchCal / GetStar integration to get more target information</change>
                 <change type="FEATURE">Enhanced VOTable handling (import / export) to exchange more target information (groups, extra columns)</change>
             </prerelease>
-            <prerelease version="20.09 beta 2">
+            <prerelease version="21.03 beta 2">
                 <change type="BUGFIX">Enhanced OIFits export actions (file or SAMP) to merge OIFits files when multiple configurations are selected (better OImaging integration)</change>
             </prerelease>
-            <prerelease version="20.09 beta 1">
+            <prerelease version="21.03 beta 1">
                 <change type="BUGFIX">Fixed retrieved fields from JMMC ObsPortal (smaller band width)</change>
             </prerelease>
         </release>
