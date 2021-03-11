@@ -60,6 +60,8 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
     public final static String OIFITS_SUPER_SAMPLING = "oifits.supersampling";
     /** Preference : SNR Threshold (V2) to flag out low SNR values */
     public final static String OIFITS_SNR_THRESHOLD = "oifits.snr.threshold";
+    /** Preference : edit fluxes using Jansky */
+    public final static String FLUX_EDITOR_JY = "flux.edit.jy";
 
     /**
      * Private constructor that must be empty.
@@ -145,6 +147,8 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
         setDefaultPreference(OIFITS_SUPER_SAMPLING, AsproConstants.DEFAULT_SUPER_SAMPLING);
         setDefaultPreference(OIFITS_MATH_MODE, MathMode.FAST.toString());
         setDefaultPreference(OIFITS_SNR_THRESHOLD, AsproConstants.DEFAULT_SNR_THRESHOLD);
+        
+        setDefaultPreference(FLUX_EDITOR_JY, Boolean.TRUE);
     }
 
     /**

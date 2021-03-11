@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.CalibratorInfoTableModel;
 import fr.jmmc.aspro.gui.util.TargetJTree;
 import fr.jmmc.aspro.gui.util.TargetList;
@@ -17,9 +18,11 @@ import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.TargetDEComparator;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
+import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmal.star.StarResolverListener;
 import fr.jmmc.jmal.star.StarResolverResult;
+import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.GenericJTree;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -28,6 +31,8 @@ import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.UrlUtils;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
@@ -38,6 +43,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.swing.JFormattedTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
@@ -60,7 +66,8 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class TargetForm extends javax.swing.JPanel implements StarResolverListener, PropertyChangeListener,
-                                                                    TreeSelectionListener, ListSelectionListener {
+                                                                    TreeSelectionListener, ListSelectionListener,
+                                                                    ActionListener {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -89,6 +96,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     /* Swing */
     /** JList model containing calibrators */
     private GenericListModel<Target> calibratorsModel;
+    /** preference singleton */
+    private final Preferences myPreferences = Preferences.getInstance();
 
     /**
      * Creates new form TargetForm (used by NetBeans editor only)
@@ -157,9 +166,16 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         this.jFieldMagJ.addPropertyChangeListener("value", this);
         this.jFieldMagH.addPropertyChangeListener("value", this);
         this.jFieldMagK.addPropertyChangeListener("value", this);
+
         this.jFieldMagL.addPropertyChangeListener("value", this);
         this.jFieldMagM.addPropertyChangeListener("value", this);
         this.jFieldMagN.addPropertyChangeListener("value", this);
+
+        this.jRadioButtonFluxMag.setSelected(!this.myPreferences.getPreferenceAsBoolean(Preferences.FLUX_EDITOR_JY));
+        this.jRadioButtonFluxJy.setSelected(this.myPreferences.getPreferenceAsBoolean(Preferences.FLUX_EDITOR_JY));
+
+        this.jRadioButtonFluxMag.addActionListener(this);
+        this.jRadioButtonFluxJy.addActionListener(this);
 
         // add document listener to target description :
         this.jTextAreaTargetInfos.getDocument().addDocumentListener(new DocumentListener() {
@@ -432,9 +448,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             this.jFieldMagJ.setValue(target.getFLUXJ());
             this.jFieldMagH.setValue(target.getFLUXH());
             this.jFieldMagK.setValue(target.getFLUXK());
-            this.jFieldMagL.setValue(target.getFLUXL());
-            this.jFieldMagM.setValue(target.getFLUXM());
-            this.jFieldMagN.setValue(target.getFLUXN());
+            updateIRFluxes();
 
             // spectral type :
             this.jFieldSpecType.setText(target.getSPECTYP());
@@ -467,6 +481,67 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             this.setAutoUpdateTarget(prevAutoUpdateTarget);
 
             autoLockForm();
+        }
+    }
+
+    private void updateIRFluxes() {
+        final Target target = this.currentTarget;
+
+        // disable the automatic update target :
+        final boolean prevAutoUpdateTarget = this.setAutoUpdateTarget(false);
+        try {
+            // note : setText() / setValue() methods fire a property change event :
+
+            this.jFieldMagL.setValue(convertMagToFlux(Band.L, target.getFLUXL()));
+            this.jFieldMagM.setValue(convertMagToFlux(Band.M, target.getFLUXM()));
+            this.jFieldMagN.setValue(convertMagToFlux(Band.N, target.getFLUXN()));
+
+        } finally {
+            // restore the automatic update target :
+            this.setAutoUpdateTarget(prevAutoUpdateTarget);
+        }
+    }
+
+    private boolean isEditIRFluxesInJy() {
+        return this.jRadioButtonFluxJy.isSelected();
+    }
+
+    private Double convertMagToFlux(final Band band, final Double value) {
+        if ((value != null) && isEditIRFluxesInJy()) {
+            // convert to Jansky:
+            return band.magToJy(value);
+        }
+        return value;
+    }
+
+    private Double convertFluxToMag(final Band band, final Double value) {
+        if ((value != null) && isEditIRFluxesInJy()) {
+            // convert from Jansky:
+            return band.jyToMag(value);
+        }
+        return value;
+    }
+
+    /**
+     * Process any comboBox or radio change event
+     * @param e action event
+     */
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        if (e.getSource() == this.jRadioButtonFluxMag) {
+            try {
+                this.myPreferences.setPreference(Preferences.FLUX_EDITOR_JY, Boolean.FALSE);
+            } catch (PreferencesException pe) {
+                logger.error("property failure : ", pe);
+            }
+            updateIRFluxes();
+        } else if (e.getSource() == this.jRadioButtonFluxJy) {
+            try {
+                this.myPreferences.setPreference(Preferences.FLUX_EDITOR_JY, Boolean.TRUE);
+            } catch (PreferencesException pe) {
+                logger.error("property failure : ", pe);
+            }
+            updateIRFluxes();
         }
     }
 
@@ -512,26 +587,40 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                     // check the new value :
                     final double val = value.doubleValue();
 
+                    boolean invalid = false;
+
                     if (field == this.jFieldParaErr) {
                         // check if error is negative :
                         if (val < 0d) {
                             if (logger.isDebugEnabled()) {
-                                logger.debug("Parallax Error negative: {}", val);
+                                logger.info("Parallax Error negative: {}", val);
                             }
-
-                            field.setValue(oldValue);
-                            return;
+                            invalid = true;
                         }
                     } else if (field.getName().startsWith("FLUX")) {
-                        // check if magnitudes are in range [-10;30]
-                        if (val < -10d || val > 30d) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Magnitude {} invalid : {}", field.getName(), val);
-                            }
+                        if (!isEditIRFluxesInJy()
+                                || ((field != this.jFieldMagL) && (field != this.jFieldMagM) && (field != this.jFieldMagN))) {
 
-                            field.setValue(oldValue);
-                            return;
+                            // check if magnitudes are in range [-10;30]
+                            if ((val < -10.0) || (val > 30.0)) {
+                                logger.info("Magnitude {} invalid : {}", field.getName(), val);
+                                invalid = true;
+                            }
                         }
+                    }
+
+                    if (invalid) {
+                        // disable the automatic update target :
+                        final boolean prevAutoUpdateTarget = this.setAutoUpdateTarget(false);
+                        try {
+                            // note : setText() / setValue() methods fire a property change event :
+                            field.setValue(oldValue);
+
+                        } finally {
+                            // restore the automatic update target :
+                            this.setAutoUpdateTarget(prevAutoUpdateTarget);
+                        }
+                        return;
                     }
                 }
 
@@ -564,11 +653,29 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                 } else if (field == this.jFieldMagK) {
                     this.currentTarget.setFLUXK(value);
                 } else if (field == this.jFieldMagL) {
-                    this.currentTarget.setFLUXL(value);
+                    final Double mag = convertFluxToMag(Band.L, value);
+                    if ((mag == null) || (!Double.isNaN(mag))) {
+                        this.currentTarget.setFLUXL(mag);
+                    } else {
+                        logger.info("Flux {} (jy) invalid : {}", field.getName(), value);
+                        updateIRFluxes(); // reset invalid input
+                    }
                 } else if (field == this.jFieldMagM) {
-                    this.currentTarget.setFLUXM(value);
+                    final Double mag = convertFluxToMag(Band.M, value);
+                    if ((mag == null) || (!Double.isNaN(mag))) {
+                        this.currentTarget.setFLUXM(mag);
+                    } else {
+                        logger.info("Flux {} (jy) invalid : {}", field.getName(), value);
+                        updateIRFluxes(); // reset invalid input
+                    }
                 } else if (field == this.jFieldMagN) {
-                    this.currentTarget.setFLUXN(value);
+                    final Double mag = convertFluxToMag(Band.N, value);
+                    if ((mag == null) || (!Double.isNaN(mag))) {
+                        this.currentTarget.setFLUXN(mag);
+                    } else {
+                        logger.info("Flux {} (jy) invalid : {}", field.getName(), value);
+                        updateIRFluxes(); // reset invalid input
+                    }
                 } else {
                     logger.warn("unsupported field: {}", field);
                 }
@@ -645,6 +752,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        buttonGroupFluxUnit = new javax.swing.ButtonGroup();
         jPanelLeft = new javax.swing.JPanel();
         starSearchField = new fr.jmmc.jmal.star.EditableStarResolverWidget(true);
         jScrollPaneTreeTargets = new javax.swing.JScrollPane();
@@ -699,12 +807,17 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jFieldMagH = new JFormattedTextField(getNumberFieldFormatter());
         jLabelMagK = new javax.swing.JLabel();
         jFieldMagK = new JFormattedTextField(getNumberFieldFormatter());
+        jSeparator6 = new javax.swing.JSeparator();
         jLabelMagL = new javax.swing.JLabel();
         jFieldMagL = new JFormattedTextField(getNumberFieldFormatter());
         jLabelMagM = new javax.swing.JLabel();
         jFieldMagM = new JFormattedTextField(getNumberFieldFormatter());
         jLabelMagN = new javax.swing.JLabel();
         jFieldMagN = new JFormattedTextField(getNumberFieldFormatter());
+        jLabelMagIRType = new javax.swing.JLabel();
+        jPanelFluxUnit = new javax.swing.JPanel();
+        jRadioButtonFluxMag = new javax.swing.JRadioButton();
+        jRadioButtonFluxJy = new javax.swing.JRadioButton();
         jSeparator4 = new javax.swing.JSeparator();
         jLabelSysVel = new javax.swing.JLabel();
         jFieldSysVel = new JFormattedTextField(getNumberFieldFormatter());
@@ -1037,7 +1150,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelPMRA, gridBagConstraints);
 
-        jFieldPMRA.setColumns(5);
+        jFieldPMRA.setColumns(6);
         jFieldPMRA.setName("PMRA"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1056,7 +1169,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelRMDEC, gridBagConstraints);
 
-        jFieldPMDEC.setColumns(5);
+        jFieldPMDEC.setColumns(6);
         jFieldPMDEC.setName("PMDEC"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -1087,7 +1200,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagB, gridBagConstraints);
 
-        jFieldMagB.setColumns(5);
+        jFieldMagB.setColumns(6);
         jFieldMagB.setName("FLUXB"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1104,7 +1217,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagV, gridBagConstraints);
 
-        jFieldMagV.setColumns(5);
+        jFieldMagV.setColumns(6);
         jFieldMagV.setName("FLUXV"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -1121,7 +1234,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagG, gridBagConstraints);
 
-        jFieldMagG.setColumns(5);
+        jFieldMagG.setColumns(6);
         jFieldMagG.setName("FLUXG"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1138,7 +1251,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagR, gridBagConstraints);
 
-        jFieldMagR.setColumns(5);
+        jFieldMagR.setColumns(6);
         jFieldMagR.setName("FLUXR"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -1155,7 +1268,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagI, gridBagConstraints);
 
-        jFieldMagI.setColumns(5);
+        jFieldMagI.setColumns(6);
         jFieldMagI.setName("FLUXI"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1172,7 +1285,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagJ, gridBagConstraints);
 
-        jFieldMagJ.setColumns(5);
+        jFieldMagJ.setColumns(6);
         jFieldMagJ.setName("FLUXJ"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -1189,7 +1302,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagH, gridBagConstraints);
 
-        jFieldMagH.setColumns(5);
+        jFieldMagH.setColumns(6);
         jFieldMagH.setName("FLUXH"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1206,7 +1319,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagK, gridBagConstraints);
 
-        jFieldMagK.setColumns(5);
+        jFieldMagK.setColumns(6);
         jFieldMagK.setName("FLUXK"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -1214,20 +1327,27 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jFieldMagK, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weighty = 0.02;
+        jPanelTarget.add(jSeparator6, gridBagConstraints);
 
         jLabelMagL.setText("L");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagL, gridBagConstraints);
 
-        jFieldMagL.setColumns(5);
+        jFieldMagL.setColumns(6);
         jFieldMagL.setName("FLUXL"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jFieldMagL, gridBagConstraints);
@@ -1235,16 +1355,16 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelMagM.setText("M");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagM, gridBagConstraints);
 
-        jFieldMagM.setColumns(5);
+        jFieldMagM.setColumns(6);
         jFieldMagM.setName("FLUXM"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jFieldMagM, gridBagConstraints);
@@ -1252,22 +1372,48 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelMagN.setText("N");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelMagN, gridBagConstraints);
 
-        jFieldMagN.setColumns(5);
+        jFieldMagN.setColumns(6);
         jFieldMagN.setName("FLUXN"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jFieldMagN, gridBagConstraints);
+
+        jLabelMagIRType.setText("flux unit:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelTarget.add(jLabelMagIRType, gridBagConstraints);
+
+        buttonGroupFluxUnit.add(jRadioButtonFluxMag);
+        jRadioButtonFluxMag.setText("mag");
+        jRadioButtonFluxMag.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jPanelFluxUnit.add(jRadioButtonFluxMag);
+
+        buttonGroupFluxUnit.add(jRadioButtonFluxJy);
+        jRadioButtonFluxJy.setSelected(true);
+        jRadioButtonFluxJy.setText("jy");
+        jRadioButtonFluxJy.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jPanelFluxUnit.add(jRadioButtonFluxJy);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelTarget.add(jPanelFluxUnit, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 12;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weighty = 0.02;
@@ -1277,17 +1423,17 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelSysVel.setToolTipText("radial velocity in km/s");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelSysVel, gridBagConstraints);
 
-        jFieldSysVel.setColumns(5);
+        jFieldSysVel.setColumns(6);
         jFieldSysVel.setName("SYSVEL"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jFieldSysVel, gridBagConstraints);
@@ -1296,16 +1442,16 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelParallax.setToolTipText("parallax in mas");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelParallax, gridBagConstraints);
 
-        jFieldParallax.setColumns(5);
+        jFieldParallax.setColumns(6);
         jFieldParallax.setName("PARALLAX"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jFieldParallax, gridBagConstraints);
@@ -1314,22 +1460,22 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelParaErr.setToolTipText("Error in parallax (mas/yr)");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelParaErr, gridBagConstraints);
 
-        jFieldParaErr.setColumns(5);
+        jFieldParaErr.setColumns(6);
         jFieldParaErr.setName("PARA_ERR"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jFieldParaErr, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridy = 15;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weighty = 0.02;
@@ -1338,7 +1484,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelSpecTypes.setText("Spectral type");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridy = 16;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelSpecTypes, gridBagConstraints);
@@ -1347,7 +1493,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jFieldSpecType.setColumns(10);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridy = 16;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -1358,7 +1504,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelObjTypes.setText("Object types");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 17;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelObjTypes, gridBagConstraints);
@@ -1367,7 +1513,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jFieldObjTypes.setColumns(10);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 17;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -1377,7 +1523,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelIds.setText("Identifiers");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 17;
+        gridBagConstraints.gridy = 18;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelIds, gridBagConstraints);
@@ -1392,7 +1538,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 17;
+        gridBagConstraints.gridy = 18;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -1404,7 +1550,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jLabelCalibratorInfos.setToolTipText("user or calibrator additional information");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 18;
+        gridBagConstraints.gridy = 19;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jLabelCalibratorInfos, gridBagConstraints);
@@ -1420,7 +1566,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 18;
+        gridBagConstraints.gridy = 19;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 0.2;
@@ -2004,6 +2150,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         return (CalibratorInfoTableModel) this.jTableCalibratorInfos.getModel();
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroupFluxUnit;
     private javax.swing.JButton jButtonAfter;
     private javax.swing.JButton jButtonBefore;
     private javax.swing.JButton jButtonDeleteTarget;
@@ -2042,6 +2189,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JLabel jLabelMagG;
     private javax.swing.JLabel jLabelMagH;
     private javax.swing.JLabel jLabelMagI;
+    private javax.swing.JLabel jLabelMagIRType;
     private javax.swing.JLabel jLabelMagJ;
     private javax.swing.JLabel jLabelMagK;
     private javax.swing.JLabel jLabelMagL;
@@ -2064,10 +2212,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JPanel jPanelActions;
     private javax.swing.JPanel jPanelCalibrators;
     private javax.swing.JPanel jPanelDescription;
+    private javax.swing.JPanel jPanelFluxUnit;
     private javax.swing.JPanel jPanelLeft;
     private javax.swing.JPanel jPanelRight;
     private javax.swing.JPanel jPanelTarget;
     private javax.swing.JPanel jPanelTargetActions;
+    private javax.swing.JRadioButton jRadioButtonFluxJy;
+    private javax.swing.JRadioButton jRadioButtonFluxMag;
     private javax.swing.JScrollPane jScrollPaneCalibratorInfos;
     private javax.swing.JScrollPane jScrollPaneCalibrators;
     private javax.swing.JScrollPane jScrollPaneIds;
@@ -2079,6 +2230,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
+    private javax.swing.JSeparator jSeparator6;
     private javax.swing.JTable jTableCalibratorInfos;
     private javax.swing.JTextArea jTextAreaIds;
     private javax.swing.JTextArea jTextAreaTargetInfos;
@@ -2124,7 +2276,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
      * @return number formatter
      */
     private static NumberFormatter getNumberFieldFormatter() {
-        final NumberFormatter nf = new NumberFormatter(new DecimalFormat("####.####")) {
+        final NumberFormatter nf = new NumberFormatter(new DecimalFormat("####.#####")) {
             /** default serial UID for Serializable interface */
             private static final long serialVersionUID = 1;
 
