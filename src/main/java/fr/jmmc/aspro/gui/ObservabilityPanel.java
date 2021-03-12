@@ -1378,13 +1378,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             final ObservabilityData obsData = chartData.getFirstObsData();
 
             final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
+            final boolean doDetailedOutput = obsData.isDoDetailedOutput();
 
             // Enable or disable the 'Night only' option:
             this.jCheckBoxNightOnly.setEnabled(!doBaseLineLimits && observation.getWhen().isNightRestriction());
 
             // Enable or disable the 'Show related' option:
-            this.jCheckBoxListFilters.setEnabled(!doBaseLineLimits);
-            this.jCheckBoxShowRelated.setEnabled(!doBaseLineLimits && isSelectedFilter());
+            this.jCheckBoxListFilters.setEnabled(!doBaseLineLimits && !doDetailedOutput);
+            this.jCheckBoxShowRelated.setEnabled(!doBaseLineLimits && !doDetailedOutput && isSelectedFilter());
 
             // disable chart & plot notifications:
             this.chart.setNotify(false);
@@ -1442,7 +1443,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                         observation.getRawObsFilterInsNames(),
                         chartData,
                         obsData.getDateMin(), obsData.getDateMax(),
-                        doBaseLineLimits);
+                        doBaseLineLimits, doDetailedOutput);
 
             } finally {
                 // restore chart & plot notifications:
@@ -1474,7 +1475,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                              final List<String> rawObsFilterInsNames,
                              final ObservationCollectionObsData chartData,
                              final Date min, final Date max,
-                             final boolean doBaseLineLimits) {
+                             final boolean doBaseLineLimits,
+                             final boolean doDetailedOutput) {
 
         // Get Global SharedSeriesAttributes:
         final SharedSeriesAttributes globalAttrs = SharedSeriesAttributes.INSTANCE;
@@ -1483,7 +1485,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final boolean single = chartData.isSingle();
         final int obsLen = chartData.size();
 
-        final boolean colorByGroup = single && !doBaseLineLimits && !chartData.getFirstObsData().isDoDetailedOutput();
+        final boolean colorByGroup = single && !doBaseLineLimits && !doDetailedOutput;
 
         // Target list :
         final List<Target> targets;
@@ -1497,7 +1499,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final Map<Integer, List<XYAnnotation>> annotations = new HashMap<Integer, List<XYAnnotation>>(obsLen * targets.size());
 
         // Get filters:
-        final boolean hasFilters = !(doBaseLineLimits) && isSelectedFilter(); // disable filters for baseline limits
+        final boolean hasFilters = !doBaseLineLimits && !doDetailedOutput && isSelectedFilter(); // disable filters for baseline limits and detailed output
         ObservabilityFilter[] selectedFilters = null;
 
         if (hasFilters) {
