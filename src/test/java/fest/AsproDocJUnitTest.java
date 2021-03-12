@@ -124,6 +124,10 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @BeforeClass
     public static void intializeAndStartApplication() {
+        logger.info("AsproDocJUnitTest.intializeAndStartApplication()");
+
+        // GNOME3: window issue:
+        setScreenshotTakerMargins(40, 0, 0, 0);
 
         AsproDocJUnitTest.prepareAsproTest();
 
@@ -484,7 +488,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
                 + window.panel("jPanelConfigurations").component().getWidth();
 
         // Get plot's title to show PoPs in use:
-        final int height = getMainFormHeight(window) + 64;
+        final int height = getMainFormHeight(window) + 50;
 
         // waits for computation to finish :
         AsproTestUtils.checkRunningTasks();
@@ -520,7 +524,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         openObservation("Aspro2_sample_with_calibrators.asprox");
 
-        window.list("jListTargets").selectItem("HD 3546 (cal)");
+        window.list("jListTargets").selectItem("HD 1583 (cal)");
 
         // waits for computation to finish :
         AsproTestUtils.checkRunningTasks();
@@ -545,13 +549,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         dialog.tabbedPane().selectTab(TargetEditorDialog.TAB_MODELS);
 
-        dialog.tree().selectPath("Models/HD 3546 (cal)/disk1");
+        dialog.tree().selectPath("Models/HD 1583 (cal)/disk1");
 
         saveScreenshot(dialog, "Aspro2-calibrators-Model.png");
 
         dialog.tabbedPane().selectTab(TargetEditorDialog.TAB_TARGETS);
 
-        dialog.tree().selectPath("Targets/HIP1234/HD 3546 (cal)");
+        dialog.tree().selectPath("Targets/HIP1234/HD 1583 (cal)");
 
         saveScreenshot(dialog, "Aspro2-calibrators-Target.png");
 
@@ -664,6 +668,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
             openObservation("Aspro2_sample_AO_on_SiriusB.asprox");
 
+            // Capture observability plot :
+            showPlotTab(SettingPanel.TAB_OBSERVABILITY, "Aspro2-GroupAO-obs.png");
+
             // target editor with calibrators :
             window.button("jButtonTargetEditor").click();
 
@@ -733,14 +740,14 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             openObservation("Aspro2_sample_rawobs.asprox");
 
             window.resizeTo(new Dimension(1100, 1000));
-            
+
             // waits for computation to finish :
             AsproTestUtils.checkRunningTasks();
-            
+
             // Filter raw obs by selecting only the GRAVITY instrument:
             final int insIdx = AsproConstants.INS_OBS_LIST.indexOf("GRAVITY");
             window.list("jListInstruments").selectItem(insIdx);
-            
+
             enableTooltips(true);
 
             // Capture observability plot :
@@ -786,7 +793,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-
     public void m099_captureMoon() {
         openObservation("Aspro2_sample_moon.asprox");
 
@@ -823,6 +829,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     @Test
     @GUITest
     public void m100_showInteropMenu() {
+        // hack to solve focus trouble in menu items :
         window.menuItemWithPath("Interop").click();
         captureMainForm("Aspro2-interop-menu.png");
 
@@ -878,21 +885,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     @Test
     @GUITest
     public void m102_shouldCallLITpro() {
-        // select tab to let menu lost focus:
-        getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
-
-        window.list("jListTargets").selectItem("HD 1234");
-
-        // waits for computation to finish :
-        AsproTestUtils.checkRunningTasks();
-
-        // Export UV Coverage plot as PDF :
-        getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
-
-        // Export OIFits / OB :
-        exportOIFits();
-        exportOB();
-
         // hack to solve focus trouble in menu items :
         window.menuItemWithPath("Interop").focus();
 
@@ -942,6 +934,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         confirmDialogDontSave();
 
         window.fileChooser().selectFile(new File(TEST_FOLDER + obsFileName)).approve();
+
+        pauseMedium();
     }
 
     /**

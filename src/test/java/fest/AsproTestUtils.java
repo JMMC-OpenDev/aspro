@@ -36,6 +36,8 @@ public final class AsproTestUtils {
    */
   public static void checkRunningTasks() {
     logger.debug("checkRunningTasks : enter");
+    
+    pause(200);
 
     pause(new Condition("TaskRunning") {
 
