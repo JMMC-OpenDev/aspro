@@ -43,7 +43,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import javax.swing.JFormattedTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
@@ -852,7 +851,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelLeft.add(starSearchField, gridBagConstraints);
 
         jScrollPaneTreeTargets.setMinimumSize(new java.awt.Dimension(80, 100));
-        jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(160, 100));
+        jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(100, 100));
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Targets");
         jTreeTargets.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
@@ -1600,7 +1599,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Target notes" + ObservabilityPanel.SUFFIX_INFO));
         jPanelDescription.setMinimumSize(new java.awt.Dimension(10, 50));
-        jPanelDescription.setPreferredSize(new java.awt.Dimension(100, 80));
+        jPanelDescription.setPreferredSize(new java.awt.Dimension(50, 50));
         jPanelDescription.setLayout(new java.awt.GridBagLayout());
 
         jTextAreaTargetInfos.setColumns(20);

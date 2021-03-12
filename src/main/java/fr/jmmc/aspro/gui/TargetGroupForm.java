@@ -130,7 +130,9 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
         this.jTreeGroups.addTreeSelectionListener(this);
         this.jTreeGroups.setCellRenderer(cellRenderer);
 
-        this.checkBoxListGroups.setModel(new GenericListModel<TargetGroup>(this.editTargetUserInfos.getGroups()));
+        if (this.editTargetUserInfos != null) {
+            this.checkBoxListGroups.setModel(new GenericListModel<TargetGroup>(this.editTargetUserInfos.getGroups()));
+        }
         this.checkBoxListGroups.setCellRenderer(TargetGroupRenderer.INSTANCE);
 
         this.checkBoxListGroups.getCheckBoxListSelectionModel().addListSelectionListener(new ListSelectionListener() {

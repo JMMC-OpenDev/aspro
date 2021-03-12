@@ -188,7 +188,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         this.chart.addProgressListener(this);
         this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
 
-        this.chartPanel.setMinimumSize(new Dimension(650, 500));
+        this.chartPanel.setMinimumSize(new Dimension(650, 400));
         this.add(this.chartPanel);
     }
 

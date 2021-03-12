@@ -340,9 +340,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jSplitPane.setPreferredSize(new java.awt.Dimension(320, 400));
 
         jScrollPaneForm.setMinimumSize(new java.awt.Dimension(200, 400));
-        jScrollPaneForm.setPreferredSize(new java.awt.Dimension(220, 400));
+        jScrollPaneForm.setPreferredSize(new java.awt.Dimension(200, 400));
 
-        jPanelLeft.setMinimumSize(new java.awt.Dimension(185, 550));
+        jPanelLeft.setMinimumSize(new java.awt.Dimension(185, 400));
         jPanelLeft.setLayout(new java.awt.GridBagLayout());
 
         jLabelAOSetup.setText("AO setup");
@@ -862,7 +862,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.chartPanel.setZoomEventListener(this);
 
         // define min and prefered size for chart panel used by the split pane container :
-        this.chartPanel.setMinimumSize(new Dimension(650, 500));
+        this.chartPanel.setMinimumSize(new Dimension(400, 400));
         this.jSplitPane.setRightComponent(this.chartPanel);
 
         // define change listeners :

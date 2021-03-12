@@ -41,7 +41,7 @@
               <Dimension value="[200, 400]"/>
             </Property>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="[220, 400]"/>
+              <Dimension value="[200, 400]"/>
             </Property>
           </Properties>
           <Constraints>
@@ -55,7 +55,7 @@
             <Container class="javax.swing.JPanel" name="jPanelLeft">
               <Properties>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[185, 550]"/>
+                  <Dimension value="[185, 400]"/>
                 </Property>
               </Properties>
 

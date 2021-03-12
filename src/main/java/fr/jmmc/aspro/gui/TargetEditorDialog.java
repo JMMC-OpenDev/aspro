@@ -13,6 +13,7 @@ import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JDialog;
@@ -97,7 +98,15 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
             // 1. Create the dialog
             dialog = new JDialog(App.getFrame(), "Target Editor", true);
 
-            final Dimension dim = new Dimension(800, 700);
+            // get screen size to adjust minimum window size :
+            final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+            logger.debug("screen size = {} x {}", screenSize.getWidth(), screenSize.getHeight());
+
+            // hack for screens smaller than 1152x864 screens :
+            final int h = (screenSize.getHeight() >= 768) ? 800 : 700;
+
+            final Dimension dim = new Dimension(800, h);
             dialog.setMinimumSize(dim);
             dialog.addComponentListener(new ComponentResizeAdapter(dim));
 

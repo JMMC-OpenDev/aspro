@@ -176,7 +176,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         setLayout(new java.awt.BorderLayout());
 
         jSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        jSplitPane.setResizeWeight(0.05);
+        jSplitPane.setResizeWeight(0.1);
         jSplitPane.setContinuousLayout(true);
 
         jSplitPaneMain.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
