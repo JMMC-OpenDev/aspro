@@ -5,6 +5,7 @@ package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.oitools.model.InstrumentNameMatcher;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -117,7 +118,10 @@ public interface AsproConstants {
                 "GRAVITY",
                 "MATISSE"
             }));
-    
+
+    /** VLTI MATISSE matcher */
+    public final static InstrumentNameMatcher MATCHER_MATISSE = new InstrumentNameMatcher(INS_MATISSE, true);
+
     /** JMMC legal notice on plots */
     public static final String JMMC_ANNOTATION = "Made by ASPRO 2/JMMC ";
     /** JMMC legal notice on plots */
