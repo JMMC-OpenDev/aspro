@@ -257,6 +257,15 @@ public final class AsproMatisseTest extends JmcsFestSwingJUnitTestCase {
         // Capture plot screenshot :
         final JPanelFixture plot = window.panel("plotChartPanel");
         saveScreenshot(plot, obsFileName + "-SNR.png");
+        
+        // select preset 'V_V2_T3_ERR/EFF_WAVE':
+        comboPlotDef.selectItem(plotDefNames.length - 2); // last corresponds to 'V2_T3_SNR/EFF_WAVE'
+
+        // let plot update:
+        pauseMedium();
+
+        // Capture plot screenshot :
+        saveScreenshot(plot, obsFileName + "-ERR.png");
     }
 
     private void openObservation(final String obsFileName) {

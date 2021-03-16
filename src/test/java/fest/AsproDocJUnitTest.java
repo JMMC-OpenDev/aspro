@@ -767,7 +767,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
             // move the mouse on plot:
             // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 768, 452);
+            robot().moveMouse(window.component(), 740, 452);
 
             // let tooltip appear:
             pauseMedium();
