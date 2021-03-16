@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.03 beta 6"/>
-    <compilation date="11/03/2021" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.03 beta 7"/>
+    <compilation date="16/03/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,14 +229,17 @@
 
     <releasenotes>
         <release version="21.03">
-            <pubDate>Thu, 11 Mar 2021 16:00:00 GMT</pubDate>
+            <pubDate>Tue, 16 Mar 2021 14:00:00 GMT</pubDate>
+            <prerelease version="21.03 beta 7">
+                <change type="FEATURE">Improved MATISSE ETC to adopt the specific correlated flux error for phases (VISPHI, T3PHI)</change>
+            </prerelease>
             <prerelease version="21.03 beta 6">
                 <change type="FEATURE">Improved Target Editor to edit LMN fluxes in jansky by default (automatic conversion to ASPRO2 magnitudes)</change>
                 <change type="FEATURE">Set 'Use inst. &amp; cal. error bias' enabled by default</change>
                 <change type="FEATURE">Improved handling of instrument and calibration biases for MATISSE (VISAMP, VISPHI, T3PHI)</change>
             </prerelease>
             <prerelease version="21.03 beta 5">
-                <change type="FEATURE">Improved OIFITS generation to generate noisy observables when instrument and calibration biases are enabled (V2, VPHI, T3PHI)</change>
+                <change type="FEATURE">Improved OIFITS generation to generate noisy observables when instrument and calibration biases are enabled (V2, VISPHI, T3PHI)</change>
             </prerelease>
             <prerelease version="21.03 beta 4">
                 <change type="FEATURE">Improved OIFITS generation to add theoretical model values and errors in NS_MODEL_ columns (OI-Interface); these new columns and residuals are available in the OIFits viewer</change>
