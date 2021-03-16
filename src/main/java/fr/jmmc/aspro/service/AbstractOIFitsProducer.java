@@ -85,15 +85,15 @@ public abstract class AbstractOIFitsProducer {
     protected NoiseService noiseService = null;
     /** flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid */
     protected boolean doNoise = false;
-    /** SNR threshold on V^2 to flag values with low SNR */
-    protected final double snrVis2Th;
+    /** SNR threshold to flag values with low SNR */
+    protected final double snrThreshold;
     /* complex visibility fields */
     /** internal computed complex visibility [row][waveLength] */
     protected Complex[][] visComplex = null;
-    /** internal complex visibility error [row][waveLength] */
-    protected double[][] visError = null;
-    /** internal complex visibility error [row][waveLength] without photometry */
-    protected double[][] visErrorNoPhot = null;
+    /** internal complex visibility error [row][waveLength] for amplitudes with photometry */
+    protected double[][] visAmpError = null;
+    /** internal complex visibility error [row][waveLength] for phases without photometry */
+    protected double[][] visPhiError = null;
 
     /** number of photons in each photometric channel (photometric flux) [row][waveLength] */
     protected double[][] nbPhotPhoto = null;
@@ -104,8 +104,10 @@ public abstract class AbstractOIFitsProducer {
     /** error on squared correlated flux [row][waveLength] */
     protected double[][] errSqCorrFlux = null;
 
-    /** internal complex visibility SNR flag [row][waveLength] */
-    protected boolean[][] visSnrFlag = null;
+    /** internal complex visibility SNR flag on amplitudes [row][waveLength] */
+    protected boolean[][] visAmpSNRFlag = null;
+    /** internal complex visibility SNR flag on phases [row][waveLength] */
+    protected boolean[][] visPhiSNRFlag = null;
 
     /** internal complex distribution [row] */
     protected ComplexDistribution[] visRndDist = null;
@@ -133,7 +135,7 @@ public abstract class AbstractOIFitsProducer {
         this.supersampling = supersampling;
         this.mathMode = mathMode;
 
-        this.snrVis2Th = snrThreshold;
+        this.snrThreshold = snrThreshold;
 
         logger.debug("snr threshold: {}", snrThreshold);
     }
@@ -592,7 +594,6 @@ public abstract class AbstractOIFitsProducer {
                     cVis[k] = convertArray(cmVis[k], nChannels);
                 }
             } else {
-
                 // Prepare mapping of sampled channels:
                 final int[] fromWL = new int[nChannels];
                 final int[] endWL = new int[nChannels];
@@ -663,15 +664,16 @@ public abstract class AbstractOIFitsProducer {
                 stat.prepare(nBl);
             }
 
-            final double[][] cVisError = new double[nRows][nChannels];
-            final double[][] cVisErrorNoPhot = new double[nRows][nChannels];
+            final double[][] cVisAmpError = new double[nRows][nChannels];
+            final double[][] cVisPhiError = new double[nRows][nChannels];
 
             final double[][] cNbPhotPhoto = new double[nRows][nChannels];
             final double[][] cErrPhotPhoto = new double[nRows][nChannels];
             final double[][] cSqCorrFlux = new double[nRows][nChannels];
             final double[][] cErrSqCorrFlux = new double[nRows][nChannels];
 
-            final boolean[][] cVisSnrFlag = new boolean[nRows][nChannels];
+            final boolean[][] cVisAmpSNRFlag = new boolean[nRows][nChannels];
+            final boolean[][] cVisPhiSNRFlag = new boolean[nRows][nChannels];
 
             final ComplexDistribution[] cVisRndDist = new ComplexDistribution[nRows];
 
@@ -679,63 +681,91 @@ public abstract class AbstractOIFitsProducer {
             // to ensure T3 sample is correlated with C12, C23, C13 samples:
             final int[][] cVisRndIdx = new int[nRows][];
 
-            int prevPt = -1;
+            int pt, prevPt = -1;
 
             // Iterate on rows :
             for (int k = 0, l; k < nRows; k++) {
-                final double[] cVisErrorRow = cVisError[k];
-                final double[] cVisErrorRowNoPhot = cVisErrorNoPhot[k];
+                final double[] cVisAmpErrorRow = cVisAmpError[k];
+                final double[] cVisPhiErrorRow = cVisPhiError[k];
 
                 final double[] nbPhotPhotoRow = cNbPhotPhoto[k];
                 final double[] errPhotPhotoRow = cErrPhotPhoto[k];
                 final double[] sqCorrFluxRow = cSqCorrFlux[k];
                 final double[] errSqCorrFluxRow = cErrSqCorrFlux[k];
 
-                final boolean[] cVisSnrFlagRow = cVisSnrFlag[k];
+                final boolean[] cVisAmpSNRFlagRow = cVisAmpSNRFlag[k];
+                final boolean[] cVisPhiSNRFlagRow = cVisPhiSNRFlag[k];
 
-                if (ns == null) {
-                    Arrays.fill(cVisErrorRow, Double.NaN);
-                    Arrays.fill(cVisErrorRowNoPhot, Double.NaN);
+                if ((ns == null) || (stat == null)) {
+                    Arrays.fill(cVisAmpErrorRow, Double.NaN);
+                    Arrays.fill(cVisPhiErrorRow, Double.NaN);
 
                     Arrays.fill(nbPhotPhotoRow, Double.NaN);
                     Arrays.fill(errPhotPhotoRow, Double.NaN);
                     Arrays.fill(sqCorrFluxRow, Double.NaN);
                     Arrays.fill(errSqCorrFluxRow, Double.NaN);
 
-                    Arrays.fill(cVisSnrFlagRow, true);
+                    Arrays.fill(cVisAmpSNRFlagRow, true);
+                    Arrays.fill(cVisPhiSNRFlagRow, true);
                 } else {
                     final ImmutableComplex[] cVisRow = cVis[k];
                     // select a different complex distribution per row:
                     cVisRndDist[k] = stat.get();
+                    pt = ptIdx[k];
 
                     double visAmp;
                     // Iterate on spectral channels:
                     for (l = 0; l < nChannels; l++) {
                         visAmp = cVisRow[l].abs();
 
-                        // complex visibility error or Complex.NaN:
-                        cVisErrorRow[l] = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp, true);
-                        // complex visibility error without photometric error:
-                        cVisErrorRowNoPhot[l] = ns.computeVisComplexErrorValue(ptIdx[k], l, visAmp, false);
+                        // complex visibility error for phases (no photometry):
+                        // note: call this method first as it modifies internally other vectors:
+                        cVisPhiErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, false);
+
+                        // complex visibility error for amplitudes (with photometry):
+                        cVisAmpErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, true);
 
                         // extra Vis2 columns (photo + square correlated fluxes):
-                        nbPhotPhotoRow[l] = ns.getNbPhotPhoto(ptIdx[k], l);
-                        errPhotPhotoRow[l] = ns.getErrorPhotPhoto(ptIdx[k], l);
-                        sqCorrFluxRow[l] = ns.getSqCorrFlux(ptIdx[k], l);
-                        errSqCorrFluxRow[l] = ns.getErrorSqCorrFlux(ptIdx[k], l);
+                        nbPhotPhotoRow[l] = ns.getNbPhotPhoto(pt, l);
+                        errPhotPhotoRow[l] = ns.getErrorPhotPhoto(pt, l);
+                        sqCorrFluxRow[l] = ns.getSqCorrFlux(pt, l);
+                        errSqCorrFluxRow[l] = ns.getErrorSqCorrFlux(pt, l);
 
-                        // check SNR(V2) without any bias:
-                        final double snrV2 = ns.getSNRVis2(ptIdx[k], l);
+                        // check SNR(V) for amplitudes:
+                        final double snrVisAmp = visAmp / cVisAmpErrorRow[l];
 
-                        if (snrV2 < snrVis2Th) {
-                            cVisSnrFlagRow[l] = true;
-//                            System.out.println("Low SNR["+this.waveLengths[l]+"]: " + snrV2);
+                        if (snrVisAmp < snrThreshold) {
+                            cVisAmpSNRFlagRow[l] = true;
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Low SNR[{}] (amp): {} < {}", this.waveLengths[l], snrVisAmp, snrThreshold);
+                            }
                         }
+
+                        // check SNR(V) for phases:
+                        final double snrVisPhi = visAmp / cVisPhiErrorRow[l];
+
+                        if (snrVisPhi < snrThreshold) {
+                            cVisPhiSNRFlagRow[l] = true;
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Low SNR[{}] (phi): {} < {}", this.waveLengths[l], snrVisPhi, snrThreshold);
+                            }
+                        }
+
                         // TODO: make SNR(V2) stats per channel to add warning if no channel is below 3 !
                     }
 
-                    if (ptIdx[k] != prevPt) {
-                        prevPt = ptIdx[k];
+                    if (DEBUG) {
+                        final int iRef = ns.getIndexRefChannel();
+                        visAmp = cVisRow[iRef].abs();
+
+                        logger.info("cVisAmpErrorRow(mid) = {} % (SNR = {}) (SNR V2 = {})",
+                                100.0 * (cVisAmpErrorRow[iRef] / visAmp), (visAmp / cVisAmpErrorRow[iRef]), (visAmp / cVisAmpErrorRow[iRef]) / 2.0);
+                        logger.info("cVisPhiErrorRow(mid) = {} % (SNR = {})",
+                                100.0 * (cVisPhiErrorRow[iRef] / visAmp), (visAmp / cVisPhiErrorRow[iRef]));
+                    }
+
+                    if (pt != prevPt) {
+                        prevPt = pt;
 
                         if (this.doNoise) {
                             final int[] cVisRndIdxRow = cVisRndIdx[k] = new int[nChannels];
@@ -753,15 +783,17 @@ public abstract class AbstractOIFitsProducer {
 
             computed = true;
             this.visComplex = cVis;
-            this.visError = cVisError;
-            this.visErrorNoPhot = cVisErrorNoPhot;
+            this.visAmpError = cVisAmpError;
+            this.visPhiError = cVisPhiError;
 
             this.nbPhotPhoto = cNbPhotPhoto;
             this.errPhotPhoto = cErrPhotPhoto;
             this.sqCorrFlux = cSqCorrFlux;
             this.errSqCorrFlux = cErrSqCorrFlux;
 
-            this.visSnrFlag = cVisSnrFlag;
+            this.visAmpSNRFlag = cVisAmpSNRFlag;
+            this.visPhiSNRFlag = cVisPhiSNRFlag;
+
             this.visRndDist = cVisRndDist;
             this.visRndIdx = cVisRndIdx;
 
@@ -805,7 +837,7 @@ public abstract class AbstractOIFitsProducer {
      * @return SNR threshold to flag values with low SNR
      */
     public final double getSnrThreshold() {
-        return snrVis2Th;
+        return snrThreshold;
     }
 
     /**
@@ -1200,6 +1232,10 @@ they are overlapped <=> (y2 - x1) * (x2 - y1) >= 0
 
     protected static double toDegrees(final double angRad) {
         return Double.isNaN(angRad) ? Double.NaN : FastMath.toDegrees(angRad);
+    }
+
+    protected static double toAngle(final double re, final double im) {
+        return (im == 0.0) ? 0.0 : FastMath.atan2(im, re);
     }
 
     protected static double computeCumulativeError(final double err1, final double err2) {

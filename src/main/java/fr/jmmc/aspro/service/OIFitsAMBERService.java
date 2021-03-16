@@ -22,17 +22,18 @@ public final class OIFitsAMBERService {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(OIFitsAMBERService.class.getName());
     /** constant used by abacusErrPhi */
-    public final static double ASYMPTOT = Math.PI / Math.sqrt(3d);
+    private final static double ASYMPTOT = Math.PI / Math.sqrt(3.0);
     /** polynomial coefficients used by abacusErrPhi */
     private final static double abacusCoeff[] = {
-        2.7191808010909d,
-        -17.1901043936273d,
-        45.0654103760899d,
-        -63.4441678243197d,
-        52.3098941426378d,
-        -25.8090699917488d,
-        7.84352873962491d,
-        -1.57308595820081d};
+        2.71918080109099,
+        -17.1901043936273,
+        45.0654103760899,
+        -63.4441678243197,
+        52.3098941426378,
+        -25.8090699917488,
+        7.84352873962491,
+        -1.57308595820081
+    };
 
     /**
      * Forbidden constructor
@@ -46,7 +47,7 @@ public final class OIFitsAMBERService {
      * @param vis OI_VIS table
      * @param visComplex complex visibility [row][waveLength]
      * @param visError complex visibility error [row][waveLength]
-     * @param waveLengths wavelengths
+     * @param nbLVis
      * @param visRndDist complex normal distribution to sample complex visibilities
      */
     public static void amdlibFakeAmberDiffVis(final OIVis vis,
@@ -80,7 +81,7 @@ public final class OIFitsAMBERService {
         final double[] phiVect = new double[N_SAMPLES];
 
         Complex phasor, w1Avg;
-        double x, squareModulus, cosPhi, sinPhi;
+        double x, squareModulus;
 
         // Output in OI_VIS table :
         final double[][] visAmp = vis.getVisAmp();
@@ -90,7 +91,7 @@ public final class OIFitsAMBERService {
         final double[][] visPhiErr = vis.getVisPhiErr();
 
         // distribution samples:
-        double[] distRe = null, distIm = null;
+        double[] distRe, distIm;
         double visRe, visIm, visErrCplx;
 
         // Compute complex visibility samples:
@@ -183,7 +184,7 @@ public final class OIFitsAMBERService {
                 );
 
                 /* store */
-                visPhi[iRow][lVis] = /* ((double) (N_SAMPLES - 1) / (double) N_SAMPLES) */ FastMath.toDegrees(w1Avg.getArgument());
+                visPhi[iRow][lVis] = FastMath.toDegrees(w1Avg.getArgument());
 
                 /* WE USE THE STATISTICAL ERROR FOR BINNING */
                 w1Avg = w1Avg.conjugate();
@@ -195,130 +196,93 @@ public final class OIFitsAMBERService {
                     phiVect[n] = w1[iRow][lVis][n].multiply(w1Avg).getArgument();
                 }
 
+                // do not divide by SQRT(N_SAMPLES) as initial distribution correspond to 1 sigma
                 x = amdlibRmsTable(phiVect);
 
-                /* Err on Phi must be corrected with an abacus*/
-                // do not divide by SQRT(N_SAMPLES) as initial distribution correspond to 1 sigma
+                /* Err on Phi must be corrected with an abacus */
                 visPhiErr[iRow][lVis] = FastMath.toDegrees(amdlibAbacusErrPhi(x));
             }
         }
 
         // Use latest approach (2013) for VisAmp:
-        if (true) {
-            /* Amplitude of Differential Visibility (VisAmp)
-             * substract averaged phase from each complex vis; store in, e.g., w1 */
-            for (iRow = 0; iRow < nRows; iRow++) {
 
-                for (lVis = 0; lVis < nbLVis; lVis++) {
-                    /* Buildup a phasor out of the differential phase */
-                    x = FastMath.toRadians(visPhi[iRow][lVis]);
-                    phasor = new ImmutableComplex(FastMath.cos(x), -FastMath.sin(x)); // immutable complex for safety
+        /* Amplitude of Differential Visibility (VisAmp)
+         * substract averaged phase from each complex vis; store in, e.g., w1 */
+        for (iRow = 0; iRow < nRows; iRow++) {
 
-                    /* Subtract differential phase phasor from the complex coherent
-                       flux to obtain a clean coherent flux w1 */
-                    // bivariate distribution (complex normal):
-                    for (n = 0; n < N_SAMPLES; n++) {
-                        w1[iRow][lVis][n] = cNopTable[iRow][lVis][n].multiply(phasor);
-                    }
+            for (lVis = 0; lVis < nbLVis; lVis++) {
+                /* Buildup a phasor out of the differential phase */
+                x = FastMath.toRadians(visPhi[iRow][lVis]);
+                phasor = new ImmutableComplex(FastMath.cos(x), -FastMath.sin(x)); // immutable complex for safety
+
+                /* Subtract differential phase phasor from the complex coherent
+                      flux to obtain a clean coherent flux w1 */
+                // bivariate distribution (complex normal):
+                for (n = 0; n < N_SAMPLES; n++) {
+                    w1[iRow][lVis][n] = cNopTable[iRow][lVis][n].multiply(phasor);
                 }
             }
+        }
 
-            /* recompute differential vis on these values that are now in w1 */
-            // bivariate distribution (complex normal):
-            for (n = 0; n < N_SAMPLES; n++) {
+        /* recompute differential vis on these values that are now in w1 */
+        // bivariate distribution (complex normal):
+        for (n = 0; n < N_SAMPLES; n++) {
 
-                for (iRow = 0; iRow < nRows; iRow++) {
-                    // reset:
-                    cpxVis.updateComplex(0d, 0d);
+            for (iRow = 0; iRow < nRows; iRow++) {
+                // reset:
+                cpxVis.updateComplex(0d, 0d);
 
-                    /* sum all R and I */
-                    for (lVis = 0; lVis < nbLVis; lVis++) {
-                        cpxVis.add(w1[iRow][lVis][n]);
-                    }
+                /* sum all R and I */
+                for (lVis = 0; lVis < nbLVis; lVis++) {
+                    cpxVis.add(w1[iRow][lVis][n]);
+                }
 
-                    /* then construct Cref by substracting current R and I 
-                     * at that Wlen and make the arithmetic mean */
-                    for (lVis = 0; lVis < nbLVis; lVis++) {
-                        cRefTable[iRow][lVis][n] = new ImmutableComplex(
-                                (cpxVis.getReal() - w1[iRow][lVis][n].getReal()) * normFactorWL,
-                                (cpxVis.getImaginary() - w1[iRow][lVis][n].getImaginary()) * normFactorWL); // immutable complex for safety
-                    }
+                /* then construct Cref by substracting current R and I 
+                    * at that Wlen and make the arithmetic mean */
+                for (lVis = 0; lVis < nbLVis; lVis++) {
+                    cRefTable[iRow][lVis][n] = new ImmutableComplex(
+                            (cpxVis.getReal() - w1[iRow][lVis][n].getReal()) * normFactorWL,
+                            (cpxVis.getImaginary() - w1[iRow][lVis][n].getImaginary()) * normFactorWL); // immutable complex for safety
                 }
             }
+        }
 
-            /* Now the interspectrum is w1*~cRefTable. Store back in w1. */
-            for (iRow = 0; iRow < nRows; iRow++) {
+        /* Now the interspectrum is w1*~cRefTable. Store back in w1. */
+        for (iRow = 0; iRow < nRows; iRow++) {
 
-                for (lVis = 0; lVis < nbLVis; lVis++) {
-                    squareModulus = 0.0;
+            for (lVis = 0; lVis < nbLVis; lVis++) {
+                squareModulus = 0.0;
 
-                    // bivariate distribution (complex normal):
-                    for (n = 0; n < N_SAMPLES; n++) {
-                        phasor = cRefTable[iRow][lVis][n].conjugate();
+                // bivariate distribution (complex normal):
+                for (n = 0; n < N_SAMPLES; n++) {
+                    phasor = cRefTable[iRow][lVis][n].conjugate();
 
-                        w1[iRow][lVis][n] = w1[iRow][lVis][n].multiply(phasor);
+                    w1[iRow][lVis][n] = w1[iRow][lVis][n].multiply(phasor);
 
-                        /* Hack to get the differential visibility normalized to 1
-                         * compute the squared modulus of cRefTable */
-                        squareModulus += phasor.getReal();
+                    /* Hack to get the differential visibility normalized to 1
+                        * compute the squared modulus of cRefTable */
+                    squareModulus += phasor.getReal();
 
-                        /* perform mean of R and I of w1 that is now the depistoned interspectrum and compute visamp
-                         * populate serie of R and I of w in cpxVisVect*/
-                        cpxVisVectR[n] = w1[iRow][lVis][n].getReal();
-                    }
-                    squareModulus /= N_SAMPLES;
-
-                    x = amdlibAvgTable(cpxVisVectR);
-
-                    /* Store differential visibilities */
-                    // suppose pow(p1p2,0.5) = 1 (already normalized in Aspro2)
-                    visAmp[iRow][lVis] = x / squareModulus; // / pow(p1p2,0.5)
-
-                    /* variance will be taken as the statistical variance, i use cpxVisVectR to store temporarily the values */
-                    // bivariate distribution (complex normal):
-                    for (n = 0; n < N_SAMPLES; n++) {
-                        cpxVisVectR[n] /= squareModulus;
-                    }
-
-                    // do not divide by SQRT(N_SAMPLES) as initial distribution correspond to 1 sigma
-                    visAmpErr[iRow][lVis] = amdlibRmsTable(cpxVisVectR);
+                    /* perform mean of R and I of w1 that is now the depistoned interspectrum and compute visamp
+                        * populate serie of R and I of w in cpxVisVect*/
+                    cpxVisVectR[n] = w1[iRow][lVis][n].getReal();
                 }
-            }
-        } else {
-            /* Now for the differential vis, we use cNopTable/cRefTable. Store in w1.
-             * note this is not exactly as complicated as in the computeDiff yorick
-             * implementation by Millour */
-            for (iRow = 0; iRow < nRows; iRow++) {
+                squareModulus /= N_SAMPLES;
 
-                for (lVis = 0; lVis < nbLVis; lVis++) {
+                x = amdlibAvgTable(cpxVisVectR);
 
-                    // bivariate distribution (complex normal):
-                    for (n = 0; n < N_SAMPLES; n++) {
-                        phasor = cRefTable[iRow][lVis][n];
+                /* Store differential visibilities */
+                // suppose pow(p1p2,0.5) = 1 (already normalized in Aspro2)
+                visAmp[iRow][lVis] = x / squareModulus; // / pow(p1p2,0.5)
 
-                        w1[iRow][lVis][n] = cNopTable[iRow][lVis][n].divide(phasor);
-                    }
+                /* variance will be taken as the statistical variance, i use cpxVisVectR to store temporarily the values */
+                // bivariate distribution (complex normal):
+                for (n = 0; n < N_SAMPLES; n++) {
+                    cpxVisVectR[n] /= squareModulus;
                 }
-            }
 
-            /* Compute mean VisAmp as average of selected frames. */
-            for (iRow = 0; iRow < nRows; iRow++) {
-
-                for (lVis = 0; lVis < nbLVis; lVis++) {
-                    /* see eq 2.8 */
-                    x = FastMath.toRadians(visPhi[iRow][lVis]);
-                    cosPhi = FastMath.cos(x);
-                    sinPhi = FastMath.sin(x); // sinAndCos ?
-
-                    // bivariate distribution (complex normal):
-                    for (n = 0; n < N_SAMPLES; n++) {
-                        /* The W1 vector */
-                        cpxVisVectR[n] = cosPhi * w1[iRow][lVis][n].getReal() + sinPhi * w1[iRow][lVis][n].getImaginary();
-                    }
-
-                    visAmp[iRow][lVis] = amdlibAvgTable(cpxVisVectR);
-                    visAmpErr[iRow][lVis] = amdlibRmsTable(cpxVisVectR);
-                }
+                // do not divide by SQRT(N_SAMPLES) as initial distribution correspond to 1 sigma
+                visAmpErr[iRow][lVis] = amdlibRmsTable(cpxVisVectR);
             }
         }
 
@@ -427,20 +391,15 @@ public final class OIFitsAMBERService {
      * @param x parameter
      * @return phase rms from the cross-spectrum variance
      */
-    private static double amdlibAbacusErrPhi(final double x) {
-
-        if (true) {
-            return x;
-        }
-
-        if (x > ASYMPTOT) {
+    public static double amdlibAbacusErrPhi(final double x) {
+        if (Double.isNaN(x) || (x > ASYMPTOT)) {
             return Double.NaN;
         }
-        if (x > 1.74413d) {
-            return (0.691d / (ASYMPTOT - x));
+        if (x > 1.74413) {
+            return (0.691 / (ASYMPTOT - x));
         }
-        if (x < 0.1d) {
-            return (x);
+        if (x < 0.1) {
+            return x;
         }
         final double x2 = x * x;
         final double x3 = x2 * x;
@@ -449,14 +408,9 @@ public final class OIFitsAMBERService {
         final double x6 = x3 * x3;
         final double x7 = x6 * x;
 
-        final double z = abacusCoeff[0] * x7
-                + abacusCoeff[1] * x6
-                + abacusCoeff[2] * x5
-                + abacusCoeff[3] * x4
-                + abacusCoeff[4] * x3
-                + abacusCoeff[5] * x2
-                + abacusCoeff[6] * x
-                + abacusCoeff[7];
+        final double z = abacusCoeff[0] * x7 + abacusCoeff[1] * x6 + abacusCoeff[2] * x5 + abacusCoeff[3] * x4
+                + abacusCoeff[4] * x3 + abacusCoeff[5] * x2 + abacusCoeff[6] * x + abacusCoeff[7];
+
         return FastMath.pow(10d, z);
     }
 

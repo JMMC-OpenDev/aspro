@@ -68,7 +68,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                                 final UserModelService.MathMode mathMode,
                                 final boolean doApodization, final double diameter) {
 
-        super(target, supersampling, mathMode, 3.0); // snrVis2Th = 3
+        super(target, supersampling, mathMode, 3.0); // snrThreshold = 3
 
         this.oiFitsFile = oifitsFile;
 
@@ -390,9 +390,6 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         DataModel.setOiVisComplexSupport(false);
 
         // Columns :
-        final float[][][] visData = vis.getVisData();
-        final float[][][] visErr = vis.getVisErr();
-
         final double[][] visAmp = vis.getVisAmp();
         final double[][] visAmpErr = vis.getVisAmpErr();
 
@@ -404,9 +401,10 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         final int nWaveLengths = this.waveLengths.length;
 
         // generate correlated fluxes (VISDATA):
+        // TODO: refine if OIVIS has OIFITS2 (VISAMPTYPE / VISPHITYPE) keywords ?
         final boolean useVisDiff = isAmber
                 || insName.startsWith(AsproConstants.INS_GRAVITY)
-                || insName.startsWith(AsproConstants.INS_MATISSE);// TODO: refine if OIVIS has keyword OIFITS2 ?
+                || AsproConstants.MATCHER_MATISSE.match(insName);
 
         if (this.hasModel && !isAmber) {
             logger.info("createOIVis: {} VisAmp/Phi", useVisDiff ? "Differential" : "Absolute");
@@ -531,8 +529,9 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
         if (hasModel) {
             /* Compute visAmp / visPhi as amber does */
-            if (isAmber) {
-                OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, this.visError, nWaveLengths, this.visRndDist);
+            if (isAmber && false) {
+                // note: distributions are needed (disabled for now)
+                OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, this.visAmpError, nWaveLengths, this.visRndDist);
                 // TODO: generate noisy samples if doNoise
             } else if (!isAmber && useVisDiff) {
                 double vamp_sum;
@@ -776,7 +775,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                         t3amp = Math.sqrt(t3Re * t3Re + t3Im * t3Im);
 
                         // pure phase [-PI;PI] in degrees :
-                        t3phi = (t3Im != 0.0) ? FastMath.atan2(t3Im, t3Re) : 0.0;
+                        t3phi = toAngle(t3Re, t3Im);
 
                         doFlag = flags[k][l]; // real data flag
 
