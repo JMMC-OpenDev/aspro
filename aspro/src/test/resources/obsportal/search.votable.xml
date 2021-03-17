@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Produced with astropy.io.votable version 4.0
+     http://www.astropy.org/ -->
+<VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ivoa.net/xml/VOTable/v1.4">
+ <RESOURCE type="results">
+  <TABLE>
+   <FIELD ID="exp_id" arraysize="*" datatype="unicodeChar" name="exp_id" ucd="meta.id"/>
+   <FIELD ID="exp_header" arraysize="*" datatype="unicodeChar" name="exp_header" ucd="meta.id"/>
+   <FIELD ID="exp_mjd_start" datatype="double" name="exp_mjd_start" ucd="time.start;obs.exposure"/>
+   <FIELD ID="exp_mjd_end" datatype="double" name="exp_mjd_end" ucd="time.end;obs.exposure"/>
+   <FIELD ID="exp_projected_baselines" arraysize="*" datatype="unicodeChar" name="exp_projected_baselines" ucd="instr.baseline"/>
+   <FIELD ID="exp_validation_level" datatype="int" name="exp_validation_level" ucd="meta.code.qual"/>
+   <FIELD ID="exp_tau0" datatype="double" name="exp_tau0" ucd="time.processing"/>
+   <FIELD ID="exp_temperature" datatype="double" name="exp_temperature" ucd="phys.temperature"/>
+   <FIELD ID="exp_seeing" datatype="double" name="exp_seeing" ucd="instr.obsty.seeing"/>
+   <FIELD ID="obs_id" arraysize="*" datatype="unicodeChar" name="obs_id" ucd="meta.id"/>
+   <FIELD ID="obs_type" arraysize="*" datatype="unicodeChar" name="obs_type" ucd="meta.id;class"/>
+   <FIELD ID="obs_program" arraysize="*" datatype="unicodeChar" name="obs_program" ucd="meta.id"/>
+   <FIELD ID="interferometer_name" arraysize="*" datatype="unicodeChar" name="interferometer_name" ucd="meta.id"/>
+   <FIELD ID="interferometer_stations" arraysize="*" datatype="unicodeChar" name="interferometer_stations"/>
+   <FIELD ID="instrument_name" arraysize="*" datatype="unicodeChar" name="instrument_name" ucd="meta.id;instr"/>
+   <FIELD ID="instrument_mode" arraysize="*" datatype="unicodeChar" name="instrument_mode" ucd="meta.id;instr.setup"/>
+   <FIELD ID="instrument_submode" arraysize="*" datatype="unicodeChar" name="instrument_submode" ucd="meta.id;instr.setup"/>
+   <FIELD ID="target_id" arraysize="*" datatype="unicodeChar" name="target_id" ucd="meta.id"/>
+   <FIELD ID="target_name" arraysize="*" datatype="unicodeChar" name="target_name" ucd="meta.id;meta.main"/>
+   <FIELD ID="target_ra" datatype="double" name="target_ra" ucd="pos.eq.ra;meta.main" unit="deg"/>
+   <FIELD ID="target_dec" datatype="double" name="target_dec" ucd="pos.eq.dec;meta.main" unit="deg"/>
+   <DATA>
+    <TABLEDATA>
+     <TR>
+      <TD>GRAVI.2020-01-09T03:34:07.546_1</TD>
+      <TD>GRAVI.2020-01-09T03:34:07.546</TD>
+      <TD>58857.14869845</TD>
+      <TD>58857.1514762278</TD>
+      <TD>{'U1-U2': {'length': {'start': '55.9040', 'end': '55.8970'}, 'angle': {'start': '3.3000', 'end': '4.0000'}}, 'U1-U3': {'length': {'start': '102.0940', 'end': '102.0770'}, 'angle': {'start': '8.2000', 'end': '8.9000'}}, 'U1-U4': {'length': {'start': '126.7160', 'end': '126.9170'}, 'angle': {'start': '29.9210', 'end': '30.8160'}}, 'U2-U3': {'length': {'start': '46.6400', 'end': '46.6410'}, 'angle': {'start': '14.1000', 'end': '14.9000'}}, 'U2-U4': {'length': {'start': '80.6940', 'end': '81.0780'}, 'angle': {'start': '47.9770', 'end': '48.9590'}}, 'U3-U4': {'length': {'start': '49.3540', 'end': '49.8580'}, 'angle': {'start': '79.7460', 'end': '80.5870'}}}</TD>
+      <TD>1</TD>
+      <TD>0.0049675</TD>
+      <TD>12.3</TD>
+      <TD>0.71</TD>
+      <TD>44050</TD>
+      <TD>science</TD>
+      <TD>0104.C-0425(A)</TD>
+      <TD>VLTI</TD>
+      <TD>U1 U2 U3 U4</TD>
+      <TD>GRAVITY</TD>
+      <TD>HIGH-COMBINED</TD>
+      <TD>SINGLE</TD>
+      <TD>33138</TD>
+      <TD>BKH2005_08576nr408</TD>
+      <TD>134.872365</TD>
+      <TD>-43.76717</TD>
+     </TR>
+     <TR>
+      <TD>GRAVI.2020-01-09T03:43:31.570_1</TD>
+      <TD>GRAVI.2020-01-09T03:43:31.570</TD>
+      <TD>58857.1552265</TD>
+      <TD>58857.1580042778</TD>
+      <TD>{'U1-U2': {'length': {'start': '55.8860', 'end': '55.8760'}, 'angle': {'start': '4.7000', 'end': '5.3000'}}, 'U1-U3': {'length': {'start': '102.0550', 'end': '102.0340'}, 'angle': {'start': '9.7000', 'end': '10.4000'}}, 'U1-U4': {'length': {'start': '127.1570', 'end': '127.3560'}, 'angle': {'start': '31.8860', 'end': '32.7670'}}, 'U2-U3': {'length': {'start': '46.6410', 'end': '46.6400'}, 'angle': {'start': '15.8000', 'end': '16.5000'}}, 'U2-U4': {'length': {'start': '81.5370', 'end': '81.9140'}, 'angle': {'start': '50.1250', 'end': '51.0840'}}, 'U3-U4': {'length': {'start': '50.4540', 'end': '50.9400'}, 'angle': {'start': '81.5850', 'end': '82.4030'}}}</TD>
+      <TD>1</TD>
+      <TD>0.0061105</TD>
+      <TD>12.61</TD>
+      <TD>0.635</TD>
+      <TD>44050</TD>
+      <TD>science</TD>
+      <TD>0104.C-0425(A)</TD>
+      <TD>VLTI</TD>
+      <TD>U1 U2 U3 U4</TD>
+      <TD>GRAVITY</TD>
+      <TD>HIGH-COMBINED</TD>
+      <TD>SINGLE</TD>
+      <TD>33138</TD>
+      <TD>BKH2005_08576nr408</TD>
+      <TD>134.872365</TD>
+      <TD>-43.76717</TD>
+     </TR>
+     <TR>
+      <TD>GRAVI.2020-01-09T03:48:07.581_1</TD>
+      <TD>GRAVI.2020-01-09T03:48:07.581</TD>
+      <TD>58857.15842108</TD>
+      <TD>58857.1611988578</TD>
+      <TD>{'U1-U2': {'length': {'start': '55.8750', 'end': '55.8630'}, 'angle': {'start': '5.4000', 'end': '6.0000'}}, 'U1-U3': {'length': {'start': '102.0320', 'end': '102.0090'}, 'angle': {'start': '10.5000', 'end': '11.1000'}}, 'U1-U4': {'length': {'start': '127.3710', 'end': '127.5670'}, 'angle': {'start': '32.8360', 'end': '33.7110'}}, 'U2-U3': {'length': {'start': '46.6400', 'end': '46.6390'}, 'angle': {'start': '16.6000', 'end': '17.3000'}}, 'U2-U4': {'length': {'start': '81.9440', 'end': '82.3170'}, 'angle': {'start': '51.1580', 'end': '52.1050'}}, 'U3-U4': {'length': {'start': '50.9780', 'end': '51.4550'}, 'angle': {'start': '82.4670', 'end': '83.2740'}}}</TD>
+      <TD>1</TD>
+      <TD>0.0065995</TD>
+      <TD>12.46</TD>
+      <TD>0.625</TD>
+      <TD>44050</TD>
+      <TD>science</TD>
+      <TD>0104.C-0425(A)</TD>
+      <TD>VLTI</TD>
+      <TD>U1 U2 U3 U4</TD>
+      <TD>GRAVITY</TD>
+      <TD>HIGH-COMBINED</TD>
+      <TD>SINGLE</TD>
+      <TD>33138</TD>
+      <TD>BKH2005_08576nr408</TD>
+      <TD>134.872365</TD>
+      <TD>-43.76717</TD>
+     </TR>
+     <TR>
+      <TD>GRAVI.2020-01-09T03:57:28.605_1</TD>
+      <TD>GRAVI.2020-01-09T03:57:28.605</TD>
+      <TD>58857.16491441</TD>
+      <TD>58857.1676921878</TD>
+      <TD>{'U1-U2': {'length': {'start': '55.8470', 'end': '55.8320'}, 'angle': {'start': '6.7000', 'end': '7.4000'}}, 'U1-U3': {'length': {'start': '101.9780', 'end': '101.9500'}, 'angle': {'start': '11.9000', 'end': '12.6000'}}, 'U1-U4': {'length': {'start': '127.7980', 'end': '127.9880'}, 'angle': {'start': '34.7490', 'end': '35.6100'}}, 'U2-U3': {'length': {'start': '46.6360', 'end': '46.6320'}, 'angle': {'start': '18.2000', 'end': '18.9000'}}, 'U2-U4': {'length': {'start': '82.7580', 'end': '83.1200'}, 'angle': {'start': '53.2230', 'end': '54.1480'}}, 'U3-U4': {'length': {'start': '52.0150', 'end': '52.4740'}, 'angle': {'start': '84.2270', 'end': '85.0150'}}}</TD>
+      <TD>1</TD>
+      <TD>0.006371</TD>
+      <TD>12.41</TD>
+      <TD>0.71</TD>
+      <TD>44050</TD>
+      <TD>science</TD>
+      <TD>0104.C-0425(A)</TD>
+      <TD>VLTI</TD>
+      <TD>U1 U2 U3 U4</TD>
+      <TD>GRAVITY</TD>
+      <TD>HIGH-COMBINED</TD>
+      <TD>SINGLE</TD>
+      <TD>33138</TD>
+      <TD>BKH2005_08576nr408</TD>
+      <TD>134.872365</TD>
+      <TD>-43.76717</TD>
+     </TR>
+     <TR>
+      <TD>GRAVI.2020-01-09T04:02:04.617_1</TD>
+      <TD>GRAVI.2020-01-09T04:02:04.617</TD>
+      <TD>58857.16810899</TD>
+      <TD>58857.1708867678</TD>
+      <TD>{'U1-U2': {'length': {'start': '55.8310', 'end': '55.8150'}, 'angle': {'start': '7.4000', 'end': '8.0000'}}, 'U1-U3': {'length': {'start': '101.9480', 'end': '101.9170'}, 'angle': {'start': '12.7000', 'end': '13.3000'}}, 'U1-U4': {'length': {'start': '128.0010', 'end': '128.1880'}, 'angle': {'start': '35.6700', 'end': '36.5310'}}, 'U2-U3': {'length': {'start': '46.6320', 'end': '46.6270'}, 'angle': {'start': '18.9000', 'end': '19.7000'}}, 'U2-U4': {'length': {'start': '83.1460', 'end': '83.5050'}, 'angle': {'start': '54.2130', 'end': '55.1340'}}, 'U3-U4': {'length': {'start': '52.5060', 'end': '52.9590'}, 'angle': {'start': '85.0700', 'end': '85.8560'}}}</TD>
+      <TD>1</TD>
+      <TD>0.00643</TD>
+      <TD>12.48</TD>
+      <TD>0.705</TD>
+      <TD>44050</TD>
+      <TD>science</TD>
+      <TD>0104.C-0425(A)</TD>
+      <TD>VLTI</TD>
+      <TD>U1 U2 U3 U4</TD>
+      <TD>GRAVITY</TD>
+      <TD>HIGH-COMBINED</TD>
+      <TD>SINGLE</TD>
+      <TD>33138</TD>
+      <TD>BKH2005_08576nr408</TD>
+      <TD>134.872365</TD>
+      <TD>-43.76717</TD>
+     </TR>
+     <TR>
+      <TD>GRAVI.2020-01-09T04:11:25.640_1</TD>
+      <TD>GRAVI.2020-01-09T04:11:25.640</TD>
+      <TD>58857.17460232</TD>
+      <TD>58857.1773800978</TD>
+      <TD>{'U1-U2': {'length': {'start': '55.7930', 'end': '55.7730'}, 'angle': {'start': '8.8000', 'end': '9.4000'}}, 'U1-U3': {'length': {'start': '101.8770', 'end': '101.8410'}, 'angle': {'start': '14.1000', 'end': '14.8000'}}, 'U1-U4': {'length': {'start': '128.4030', 'end': '128.5780'}, 'angle': {'start': '37.5440', 'end': '38.3840'}}, 'U2-U3': {'length': {'start': '46.6200', 'end': '46.6130'}, 'angle': {'start': '20.5000', 'end': '21.3000'}}, 'U2-U4': {'length': {'start': '83.9230', 'end': '84.2650'}, 'angle': {'start': '56.2150', 'end': '57.1090'}}, 'U3-U4': {'length': {'start': '53.4840', 'end': '53.9130'}, 'angle': {'start': '86.7780', 'end': '87.5410'}}}</TD>
+      <TD>1</TD>
+      <TD>0.007254</TD>
+      <TD>12.58</TD>
+      <TD>0.49</TD>
+      <TD>44050</TD>
+      <TD>science</TD>
+      <TD>0104.C-0425(A)</TD>
+      <TD>VLTI</TD>
+      <TD>U1 U2 U3 U4</TD>
+      <TD>GRAVITY</TD>
+      <TD>HIGH-COMBINED</TD>
+      <TD>SINGLE</TD>
+      <TD>33138</TD>
+      <TD>BKH2005_08576nr408</TD>
+      <TD>134.872365</TD>
+      <TD>-43.76717</TD>
+     </TR>
+     <TR>
+      <TD>GRAVI.2020-01-09T04:15:58.651_1</TD>
+      <TD>GRAVI.2020-01-09T04:15:58.651</TD>
+      <TD>58857.17776217</TD>
+      <TD>58857.1805399478</TD>
+      <TD>{'U1-U2': {'length': {'start': '55.7720', 'end': '55.7500'}, 'angle': {'start': '9.4000', 'end': '10.0000'}}, 'U1-U3': {'length': {'start': '101.8390', 'end': '101.7990'}, 'angle': {'start': '14.8000', 'end': '15.5000'}}, 'U1-U4': {'length': {'start': '128.5880', 'end': '128.7570'}, 'angle': {'start': '38.4370', 'end': '39.2710'}}, 'U2-U3': {'length': {'start': '46.6130', 'end': '46.6040'}, 'angle': {'start': '21.3000', 'end': '22.0000'}}, 'U2-U4': {'length': {'start': '84.2860', 'end': '84.6200'}, 'angle': {'start': '57.1650', 'end': '58.0490'}}, 'U3-U4': {'length': {'start': '53.9400', 'end': '54.3590'}, 'angle': {'start': '87.5880', 'end': '88.3450'}}}</TD>
+      <TD>1</TD>
+      <TD>0.007996</TD>
+      <TD>12.78</TD>
+      <TD>0.485</TD>
+      <TD>44050</TD>
+      <TD>science</TD>
+      <TD>0104.C-0425(A)</TD>
+      <TD>VLTI</TD>
+      <TD>U1 U2 U3 U4</TD>
+      <TD>GRAVITY</TD>
+      <TD>HIGH-COMBINED</TD>
+      <TD>SINGLE</TD>
+      <TD>33138</TD>
+      <TD>BKH2005_08576nr408</TD>
+      <TD>134.872365</TD>
+      <TD>-43.76717</TD>
+     </TR>
+     <TR>
+      <TD>GRAVI.2020-01-09T04:27:16.681_1</TD>
+      <TD>GRAVI.2020-01-09T04:27:16.681</TD>
+      <TD>58857.18560973</TD>
+      <TD>58857.1883875078</TD>
+      <TD>{'U1-U2': {'length': {'start': '55.7110', 'end': '55.6850'}, 'angle': {'start': '11.0000', 'end': '11.6000'}}, 'U1-U3': {'length': {'start': '101.7270', 'end': '101.6800'}, 'angle': {'start': '16.6000', 'end': '17.2000'}}, 'U1-U4': {'length': {'start': '129.0200', 'end': '129.1700'}, 'angle': {'start': '40.6310', 'end': '41.4490'}}, 'U2-U3': {'length': {'start': '46.5860', 'end': '46.5740'}, 'angle': {'start': '23.2000', 'end': '23.9000'}}, 'U2-U4': {'length': {'start': '85.1540', 'end': '85.4660'}, 'angle': {'start': '59.4890', 'end': '60.3510'}}, 'U3-U4': {'length': {'start': '55.0280', 'end': '55.4220'}, 'angle': {'start': '89.5780', 'end': '90.3190'}}}</TD>
+      <TD>1</TD>
+      <TD>0.00754</TD>
+      <TD>12.96</TD>
+      <TD>0.655</TD>
+      <TD>44050</TD>
+      <TD>science</TD>
+      <TD>0104.C-0425(A)</TD>
+      <TD>VLTI</TD>
+      <TD>U1 U2 U3 U4</TD>
+      <TD>GRAVITY</TD>
+      <TD>HIGH-COMBINED</TD>
+      <TD>SINGLE</TD>
+      <TD>33138</TD>
+      <TD>BKH2005_08576nr408</TD>
+      <TD>134.872365</TD>
+      <TD>-43.76717</TD>
+     </TR>
+    </TABLEDATA>
+   </DATA>
+  </TABLE>
+ </RESOURCE>
+</VOTABLE>

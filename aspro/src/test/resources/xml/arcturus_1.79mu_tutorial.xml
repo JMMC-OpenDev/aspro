@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+  <files>
+    <file name="arcturus.1.79mu.oifits" href="data:image/fits;base64,..." id="fileId1">
+      <oitarget>
+        <target>alphaboo</target>
+      </oitarget>
+    </file>
+  </files>
+  <targets>
+    <target>
+      <ident>alphaboo</ident>
+      <fileLink fileRef="fileId1"/>
+      <model name="disk1" type="disk">
+        <desc>/* DOCUMENT lpb_disk(ufreq, vfreq, flux_weight, x, y, diameter)
+   
+    Returns the Fourier transform, computed at spatial frequencies
+    (UFREQ,VFREQ) given in 1/rad, of a normalized uniform disk of diameter
+    DIAMETER (milliarcsecond) and centered at coordinates (X,Y)
+    (milliarcsecond).
+
+    FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
+    The function returns an error if DIAMETER is negative, so it is advised
+    to set a VMIN bound to zero or more on this parameter.
+    
+    UFREQ and VFREQ must be conformable. The returned array is always
+    complex and with dimensions dimsof(UFREQ,VFREQ).
+
+SEE ALSO: lpb_functions
+*/
+        </desc>
+        <parameter name="flux_weight1" type="flux_weight" id="flux_weight1">
+          <value>1.0</value>
+          <minValue>0.0</minValue>
+          <hasFixedValue>true</hasFixedValue>
+        </parameter>
+        <parameter name="x1" type="x" id="x1">
+          <units>mas</units>
+          <value>0.0</value>
+          <hasFixedValue>true</hasFixedValue>
+        </parameter>
+        <parameter name="y1" type="y" id="y1">
+          <units>mas</units>
+          <value>0.0</value>
+          <hasFixedValue>true</hasFixedValue>
+        </parameter>
+        <parameter name="diameter1" type="diameter" id="diameter1">
+          <units>mas</units>
+          <value>10.0</value>
+          <minValue>5.0</minValue>
+          <maxValue>15.0</maxValue>
+          <hasFixedValue>false</hasFixedValue>
+        </parameter>
+      </model>
+      <model name="disk2" type="disk">
+        <desc>/* DOCUMENT lpb_disk(ufreq, vfreq, flux_weight, x, y, diameter)
+   
+    Returns the Fourier transform, computed at spatial frequencies
+    (UFREQ,VFREQ) given in 1/rad, of a normalized uniform disk of diameter
+    DIAMETER (milliarcsecond) and centered at coordinates (X,Y)
+    (milliarcsecond).
+
+    FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
+    The function returns an error if DIAMETER is negative, so it is advised
+    to set a VMIN bound to zero or more on this parameter.
+    
+    UFREQ and VFREQ must be conformable. The returned array is always
+    complex and with dimensions dimsof(UFREQ,VFREQ).
+
+SEE ALSO: lpb_functions
+*/
+        </desc>
+        <parameter name="flux_weight2" type="flux_weight">
+          <value>1.0</value>
+          <minValue>0.0</minValue>
+          <hasFixedValue>false</hasFixedValue>
+        </parameter>
+        <parameter name="x2" type="x">
+          <units>mas</units>
+          <value>0.0</value>
+          <hasFixedValue>false</hasFixedValue>
+        </parameter>
+        <parameter name="y2" type="y">
+          <units>mas</units>
+          <value>0.0</value>
+          <hasFixedValue>false</hasFixedValue>
+        </parameter>
+        <parameter name="diameter2" type="diameter">
+          <units>mas</units>
+          <value>0.0</value>
+          <minValue>0.0</minValue>
+          <hasFixedValue>false</hasFixedValue>
+        </parameter>
+      </model>
+      <normalize>true</normalize>
+      <residuals>
+        <residual name="VIS2" type="default"/>
+      </residuals>
+    </target>
+  </targets>
+  <parameters/>
+  <fitter>standard</fitter>
+  <results/>
+  <userInfo>Tuturial settings file for the example 1 :
+  Angular diameter of a single star
+  </userInfo>
+</settings>

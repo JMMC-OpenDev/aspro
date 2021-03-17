@@ -1,0 +1,305 @@
+# telstats
+
+
+# Data file for the parameters of the telescopes as used by the
+# astrometric model.
+#
+# The data for each station begins with a line of the form
+# [South/East/West] [station number]
+# and is terminated by the line
+# END
+#
+# Data can be entered in any order between these two lines.
+# Note that angles can be entered as decimal degrees
+# or in traditional sexagesimal notation.
+#
+# If a data item is missing a default value will be assigned.  The
+# defaults can be found in astromod.h
+#
+# The recognized labels and their data fields are:
+#
+# LONG    - longitude of the telescope
+# LAT     - latitude of the telescope
+# XOFFSET - East offset in microns from S1
+# YOFFSET - North offset in microns from S1
+# ZOFFSET - vertical (+ is up) offset in microns from S1
+# EC      - Cos(El) effects in microns
+# SAS	  - Swash Sin component in microns
+# SAC	  - Swash Cos component in microns
+# HSA2	  - Harmonic sin(2*Az) in microns
+# WLF	  - white light fringe position in microns
+# AIRPATH - amount of airpath  in microns using default beam
+#	    The numbers here represent the differential airpath in the
+#	    beam combining lab. They do not include path within the scopes
+#	    and in the beam combining lab, which are assumed to be the same.
+#	    Note that this assumes the default Beam and default Pop are used
+# INTERNAL- Pathlength (with default beam) for internal fringes
+# LIGHT	  - length of light pipe in microns
+#	    Note that this assumes the default Beam dn default Pop are used
+# TROTMAT - rotation matrix used for the tip/tilt system
+# AROTMAT - rotation matrix used for the aquisition system
+# DEFBEAM - Default beam to assume
+# BEAMX   - Extra airpath to add when using beam X on this scope
+# DEFPOP  - Default POP
+# POPX	  - Extra airpath to add when using POP X on this scope
+#
+# NOTE: OPLE assumes that the order of telescopes will be S1 S2 E1 E2 W1 W2
+# if this isn't true then things will go horribly wrong!
+
+# Right now the S1 positions are set to zero all around as an origin
+# in particular it will NEVER have harmonics.
+# Beam positions never measured, but seem to be good on the sky
+# to a few 100 microns
+# For pop measurements see Theo's log book 5 page 174
+S1
+LONG    -118 3 25.31272
+LAT       34 13 27.78130
+XOFFSET	0.0
+YOFFSET 0.0
+ZOFFSET 0.0
+EC	0.0
+SAS	0.0
+SAC	0.0
+HSA2	0.0
+WLF	0.0000000
+AIRPATH	0.0
+INTERNAL 0
+LIGHT	0.0
+DEFBEAM 5
+BEAM1	 416200.000
+BEAM2	 208100.000
+BEAM3	      0.000
+BEAM4	-208100.000
+BEAM5	-416200.000
+BEAM6	-624300.000
+DEFPOP  1
+POP1            0.000
+POP2     36563466.066
+POP3     73128180.086
+POP4    109724732.920
+POP5    143035830.878
+END
+
+S2
+LONG    -118 3 25.54165
+LAT       34 13 28.86734
+# From all 2010 data 4mm solution
+#XOFFSET   -5746621.507
+#YOFFSET   33580153.034
+#ZOFFSET     634644.726
+#LIGHT      4102222.014
+# From all 2012 data 2.5mm solution
+XOFFSET   -5746856.890
+YOFFSET   33581561.446
+ZOFFSET     635519.155
+LIGHT      4092893.853
+EC              0.000
+SAS	        0.000
+SAC	        0.000
+HSA2	        0.000
+WLF             0.000
+# This is the old number from the 2012 solution
+#AIRPATH         584200.0
+# This number includes the extra path from the new WFS optical table
+#AIRPATH		990200.000
+# This has the extra 0.7097m*2 offset added by the LABAO.
+AIRPATH 	2409600.000
+INTERNAL        375290
+DEFBEAM 	6
+BEAM1		416200.000
+BEAM2		208100.000
+BEAM3		0
+BEAM4		-208100.000
+BEAM5		-416200.000
+BEAM6		-624300.000
+DEFPOP  2
+POP1    -36544924.414
+POP2            0.000
+POP3     36567644.670
+POP4     73157661.492
+POP5    106467153.124
+END
+
+# From baseline solution.
+E1
+LONG    -118 3 20.42986
+LAT       34 13 37.69028
+# From all 2010 data 4mm solution
+#XOFFSET  125333692.968
+#YOFFSET  305932267.373
+#ZOFFSET   -5908839.526
+#LIGHT     11256266.953
+# From all 2012 data 2.5mm solution
+XOFFSET  125332477.873
+YOFFSET  305934252.825
+ZOFFSET   -5911377.995
+LIGHT     11259794.703
+EC	         0.000
+SAS	         0.000
+SAC	         0.000
+HSA2	         0.000
+WLF              0.000
+AIRPATH          4254500.0
+INTERNAL 	 0.000
+DEFBEAM 	6
+BEAM1		416200.000
+BEAM2		208100.000
+BEAM3		0
+BEAM4		-208100.000
+BEAM5		-416200.000
+BEAM6		-624300.000
+DEFPOP  1
+POP1            0.0
+POP2     36586550.0
+POP3     73120786.0
+POP4    109708072.0
+POP5    143020030.0
+END
+
+# From baseline solution.
+E2
+LONG    -118  3 22.58100
+LAT       34 13 36.51405
+# From all 2010 data 4mm solution
+#XOFFSET   70396030.473
+#YOFFSET  269713886.603
+#ZOFFSET   -2798776.588
+#LIGHT     22695157.268
+# From all 2013 data 2.5mm solution
+XOFFSET   70394847.986
+YOFFSET  269715332.908
+ZOFFSET   -2799046.780
+LIGHT     22697827.994
+EC	         0.000
+SAS	         0.000
+SAC	         0.000
+HSA2	         0.000
+WLF              0.000
+AIRPATH   	3670300.0
+INTERNAL 	372598.020
+DEFBEAM 	5
+BEAM1		416200.000
+BEAM2		208100.000
+BEAM3		0
+BEAM4		-208100.000
+BEAM5		-416200.000
+BEAM6		-624300.000
+DEFPOP  3
+POP1    -73112068.000
+POP2    -36537942.000
+POP3     0.0
+POP4     36578964.000
+POP5     69921124.000
+END
+
+W1
+LONG      -118 3 32.20446
+LAT        34 13 34.76364
+# From all 2010 data 4mm solution
+#XOFFSET -175072406.694
+#YOFFSET  216318944.229
+#ZOFFSET  -10790506.411
+#LIGHT     27286559.039
+# From all 2012 data 2.5mm solution
+XOFFSET -175071927.982
+YOFFSET  216320939.168
+ZOFFSET  -10791048.377
+LIGHT     27290684.165
+EC	          0.000
+SAS	          0.000
+SAC	          0.000
+HSA2	          0.000
+WLF               0.000
+AIRPATH      1835150.0
+INTERNAL 0
+DEFBEAM 	5
+BEAM1		 416200.000
+BEAM2		 208100.000
+BEAM3		      0.000
+BEAM4		-208100.000
+BEAM5		-416200.000
+BEAM6		-624300.000
+DEFPOP  3
+POP1    -73109480.0
+POP2    -36536268.0
+POP3            0.0
+POP4     36594084.0
+POP5     69905974.0
+END
+
+W2
+LONG     -118 3 28.04483
+LAT       34 13 34.22249
+# From all 2010 data 4mm solution
+#XOFFSET  -69092828.745
+#YOFFSET  199333846.999
+#ZOFFSET     466562.781
+#LIGHT    -10869860.323
+# From all 2012 data 2.5mm solution
+XOFFSET  -69091262.937
+YOFFSET  199335418.222
+ZOFFSET     465199.124
+LIGHT    -10864114.917
+EC	         0.000
+SAS	         0.000
+SAC	         0.000
+HSA2	         0.000
+WLF              0.000
+AIRPATH          2406650.0
+INTERNAL	382658
+DEFBEAM 	6
+BEAM1		416200.000
+BEAM2		208100.000
+BEAM3		0
+BEAM4		-208100.000
+BEAM5		-416200.000
+BEAM6		-624300.000
+DEFPOP  5
+POP1    -143055000.000
+POP2    -106455324.0
+POP3     -69911098.0
+POP4     -33306356.0
+POP5             0.0
+END
+
+# S3 at P4 (like S1)
+P4
+XOFFSET 65901016.2
+YOFFSET 173941757.2
+ZOFFSET  2077237.8
+AIRPATH	0.0
+INTERNAL 0
+LIGHT	0.0
+BEAM1	 416200.000
+BEAM2	 208100.000
+BEAM3	      0.000
+BEAM4	-208100.000
+BEAM5	-416200.000
+BEAM6	-624300.000
+POP1            0.000
+POP2     36563466.066
+POP3     73128180.086
+POP4    109724732.920
+POP5    143035830.878
+END
+
+# S3 at P5 (like S1)
+P5
+XOFFSET 48299942.0
+YOFFSET 147734146.1
+ZOFFSET  2868250.1
+AIRPATH	0.0
+INTERNAL 0
+LIGHT	0.0
+BEAM1	 416200.000
+BEAM2	 208100.000
+BEAM3	      0.000
+BEAM4	-208100.000
+BEAM5	-416200.000
+BEAM6	-624300.000
+POP1            0.000
+POP2     36563466.066
+POP3     73128180.086
+POP4    109724732.920
+POP5    143035830.878
+END

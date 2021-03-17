@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:observationSetting xmlns:ns2="http://www.jmmc.fr/aspro-oi/0.1">
+    <name>default</name>
+    <when>
+        <date>2018-07-08</date>
+    </when>
+    <interferometerConfiguration>
+        <name>CHARA</name>
+    </interferometerConfiguration>
+    <instrumentConfiguration>
+        <name>VEGA</name>
+        <stations>S1 E1 W2</stations>
+    </instrumentConfiguration>
+    <target>
+        <name>ETA TAU</name>
+        <RA>56.8711521</RA>
+        <DEC>24.1051372</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+    </target>
+</ns2:observationSetting>
