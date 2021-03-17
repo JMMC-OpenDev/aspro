@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.03 beta 7"/>
-    <compilation date="16/03/2021" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.03"/>
+    <compilation date="17/03/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -228,13 +228,17 @@
     </menubar>
 
     <releasenotes>
+        <!-- ObsPlan disabled in public release -->
+<!--
+                <change type="FEATURE">Added a new tabbed pane 'Observation plan' to display observations and targets as an unified table. General &amp; global filters are coming...</change>
+-->
         <release version="21.03">
-            <pubDate>Tue, 16 Mar 2021 14:00:00 GMT</pubDate>
+            <pubDate>Wed, 17 Mar 2021 10:00:00 GMT</pubDate>
             <prerelease version="21.03 beta 7">
-                <change type="FEATURE">Improved MATISSE ETC to adopt the specific correlated flux error for phases (VISPHI, T3PHI)</change>
+                <change type="FEATURE">Improved MATISSE ETC to use its specific correlated flux error estimator for phases (VISPHI, T3PHI)</change>
             </prerelease>
             <prerelease version="21.03 beta 6">
-                <change type="FEATURE">Improved Target Editor to edit LMN fluxes in jansky by default (automatic conversion to ASPRO2 magnitudes)</change>
+                <change type="FEATURE">Improved Target Editor to edit L / M / N fluxes in jansky by default (automatic conversion from / to ASPRO2 magnitudes)</change>
                 <change type="FEATURE">Set 'Use inst. &amp; cal. error bias' enabled by default</change>
                 <change type="FEATURE">Improved handling of instrument and calibration biases for MATISSE (VISAMP, VISPHI, T3PHI)</change>
             </prerelease>
@@ -243,8 +247,7 @@
             </prerelease>
             <prerelease version="21.03 beta 4">
                 <change type="FEATURE">Improved OIFITS generation to add theoretical model values and errors in NS_MODEL_ columns (OI-Interface); these new columns and residuals are available in the OIFits viewer</change>
-                <change type="FEATURE">Improved OIFITS data simulation to have proper residuals and remove bias on random VIS2 at low SNR</change>
-                <change type="FEATURE">Added a new tabbed pane 'Observation plan' to display observations and targets as an unified table. General &amp; global filters are coming...</change>
+                <change type="FEATURE">Improved OIFITS data simulation to have proper residuals and removed a bias on random VIS2 at low SNR</change>
             </prerelease>
             <prerelease version="21.03 beta 3">
                 <change type="FEATURE">Added a new observability filter 'Show groups' to only show targets belonging to the selected target user groups</change>
