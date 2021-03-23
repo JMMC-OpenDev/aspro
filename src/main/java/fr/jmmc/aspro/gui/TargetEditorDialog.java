@@ -33,6 +33,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     private static final long serialVersionUID = 1;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(TargetEditorDialog.class.getName());
+    /** Target Editor key to remember file dialog dimensions */
+    private final static String TARGET_EDITOR_DIMENSION_KEY = "___ASPRO2_TARGET_EDITOR_DIMENSION";
     /** Tab Targets */
     public static final String TAB_TARGETS = "Targets";
     /** Tab Models */
@@ -122,6 +124,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
             // 4. Size the dialog.
             WindowUtils.setClosingKeyboardShortcuts(dialog);
             dialog.pack();
+            
+            // Restore, then automatically save window size changes:
+            WindowUtils.rememberWindowSize(dialog, TARGET_EDITOR_DIMENSION_KEY);            
 
             // Center it :
             dialog.setLocationRelativeTo(dialog.getOwner());
