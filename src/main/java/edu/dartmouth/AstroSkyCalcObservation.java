@@ -61,12 +61,12 @@ public final class AstroSkyCalcObservation {
         final double latRad = this.site.lat.radians();
         this.cosLat = FastMath.cos(latRad);
         this.sinLat = FastMath.sin(latRad);
-        
+
         // approx means you can't use a negative elevation for the obs to
         // compensate for higher terrain.
         // depression of the horizon in degrees
         final double horiz = Const.DEG_IN_RADIAN * Math.sqrt(2d * sc.site.elevhoriz / (1000d * Const.EARTHRAD_IN_KM));
-        this.rise_set_alt = -(0.83d + horiz);        
+        this.rise_set_alt = -(0.83d + horiz);
     }
 
     /**
@@ -84,7 +84,7 @@ public final class AstroSkyCalcObservation {
         // Proper motion handling:
         final Celest target;
 
-        if (pmRa != null && pmDec != null) {
+        if ((pmRa != null) && (pmDec != null)) {
             final double years = (jd - Const.J2000) * Const.DAY_IN_YEAR;
 
             if (isLogDebug) {
@@ -92,7 +92,6 @@ public final class AstroSkyCalcObservation {
             }
 
             // pmRA is given in RA*cos(DE) cf ASCC (Proper Motion in RA*cos(DE)):
-
             // RAJ2000_ep2000 "RAJ2000+(2000-1991.25)*pmRA/cos(DEJ2000*PI/180)/1000/3600"
             final double deltaRa = years * (pmRa / FastMath.cos(FastMath.toRadians(dec))) * 1e-3d * ALX.ARCSEC_IN_DEGREES;
 
@@ -104,7 +103,7 @@ public final class AstroSkyCalcObservation {
             }
 
             // RA (decimal hours), DEC (degrees)
-            target = new Celest(AngleUtils.deg2hours(ra + deltaRa), dec + deltaDec, AsproConstants.EPOCH_J2000);
+            target = new Celest(AngleUtils.deg2hours(ra + deltaRa), (dec + deltaDec), AsproConstants.EPOCH_J2000);
         } else {
             // RA (decimal hours), DEC (degrees)
             target = new Celest(AngleUtils.deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
@@ -188,7 +187,7 @@ public final class AstroSkyCalcObservation {
             }
             return Double.POSITIVE_INFINITY;
         }
-        
+
         // observation.moonobj gives the angular distance with moon in degrees
         final double moonSeparation = this.observation.moonobj;
 
