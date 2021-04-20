@@ -8,7 +8,7 @@ import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ObservationVersion;
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.aspro.model.oi.Target;

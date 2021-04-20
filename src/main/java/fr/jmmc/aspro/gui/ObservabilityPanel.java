@@ -23,7 +23,7 @@ import fr.jmmc.aspro.gui.util.ObservabilityFilter;
 import fr.jmmc.aspro.gui.util.TargetGroupRenderer;
 import fr.jmmc.aspro.model.ObservationCollectionObsData;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;

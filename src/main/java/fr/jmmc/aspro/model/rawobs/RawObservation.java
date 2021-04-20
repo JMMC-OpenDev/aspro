@@ -777,6 +777,19 @@ public class RawObservation
         return uvPoints;
     }
 
+
+    /** distance (as) defined by RawObsManager.analyze() */
+    @javax.xml.bind.annotation.XmlTransient
+    private double dist = Double.NaN;
+
+    public double getDist() {
+        return dist;
+    }
+
+    public void setDist(final double dist) {
+        this.dist = dist;
+    }    
+    
     /**
      * Prepare this observation ie compute and resolve internal references
      * @param logger logger to use
@@ -1067,6 +1080,9 @@ public class RawObservation
             sb.append(getTargetName());
         }
         sb.append("<br>Coords:</b> ").append(getRa()).append(' ').append(getDec());
+        if (!Double.isNaN(getDist())) {
+            sb.append("<br>Dist:</b> ").append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(getDist())).append(" as");
+        }
     }
 
     /**

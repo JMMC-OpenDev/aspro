@@ -6,7 +6,7 @@ package fr.jmmc.aspro.ob;
 import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;

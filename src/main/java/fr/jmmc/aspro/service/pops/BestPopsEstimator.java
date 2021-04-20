@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service.pops;
 
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 
 /**
  * This interface defines two methods to be implemented by a Best Pops estimator:

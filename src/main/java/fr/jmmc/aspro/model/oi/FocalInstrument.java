@@ -465,7 +465,6 @@ public class FocalInstrument
                 max = mode.getWaveLengthMax();
             }
         }
-
         setWaveLengthMin(min);
         setWaveLengthMax(max);
     }

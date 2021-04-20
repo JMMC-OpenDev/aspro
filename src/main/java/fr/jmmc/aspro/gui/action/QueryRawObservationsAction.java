@@ -228,7 +228,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
                             method.addParameter("dec", de);
 
                             // add radius ?
-                            // method.addParameter("radius", 10.0);
+                            method.addParameter("radius", "30.0");
                             // add instrument (name) ?
                             
                             // filter fields:

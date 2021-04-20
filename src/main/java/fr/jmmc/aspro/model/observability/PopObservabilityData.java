@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.model.observability;
 
 import fr.jmmc.aspro.model.BestPoPsObservabilityContext;
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.service.pops.BestPopsEstimator;
 import fr.jmmc.jmcs.util.NumberUtils;
 import java.util.ArrayList;

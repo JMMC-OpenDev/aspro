@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.observability.PopCombination;
 import fr.jmmc.aspro.model.observability.PopObservabilityData;
 import fr.jmmc.aspro.service.pops.BestPopsEstimator;

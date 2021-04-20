@@ -20,6 +20,7 @@ import fr.jmmc.oitools.model.OIT3;
 import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.OIWavelength;
+import fr.jmmc.oitools.model.range.Range;
 import fr.nom.tam.fits.FitsException;
 import java.io.IOException;
 import net.jafama.FastMath;
@@ -226,8 +227,9 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         }
 
         // Get wavelength range for the selected instrument mode :
-        final double lambdaMin = AsproConstants.MICRO_METER * oiWaveLength.getEffBandMin();
-        final double lambdaMax = AsproConstants.MICRO_METER * oiWaveLength.getEffBandMax();
+        final Range effWaveRange = oiWaveLength.getEffWaveRange();
+        final double lambdaMin = AsproConstants.MICRO_METER * effWaveRange.getMin();
+        final double lambdaMax = AsproConstants.MICRO_METER * effWaveRange.getMax();
 
         // TODO: handle properly spectral channels (rebinning):
         int nWaveLengths = oiWaveLength.getNWave();

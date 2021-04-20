@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 import java.util.List;
 
 /**

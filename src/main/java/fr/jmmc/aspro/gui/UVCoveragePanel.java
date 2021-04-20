@@ -22,7 +22,7 @@ import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.OIFitsData;
 import fr.jmmc.aspro.model.ObservationCollectionUVData;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;

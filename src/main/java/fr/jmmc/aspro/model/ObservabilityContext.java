@@ -3,6 +3,9 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.oitools.model.range.RangeFactory;
+import fr.jmmc.oitools.model.range.Range;
+import fr.jmmc.oitools.model.range.RangeLimit;
 import fr.jmmc.aspro.service.DelayLineService;
 import java.util.ArrayList;
 import java.util.List;

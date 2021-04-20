@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.service.pops;
 
 import cern.jet.stat.Probability;
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 
 /**
  * This advanced Best Pops estimator uses the normal distribution (gaussian) 

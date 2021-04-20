@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.model.OIBase;
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageHDU;
 

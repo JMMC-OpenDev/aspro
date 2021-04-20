@@ -6,7 +6,7 @@ package fr.jmmc.aspro.ob;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.OBManager;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.ob.InstrumentConfiguration;
 import fr.jmmc.aspro.model.ob.InterferometerConfiguration;
 import fr.jmmc.aspro.model.ob.OBItem;

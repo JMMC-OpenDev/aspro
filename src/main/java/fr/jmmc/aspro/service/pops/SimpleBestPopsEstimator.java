@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service.pops;
 
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 
 /**
  * This simple Best Pops estimator behaves like Aspro2 best PoPs algorithm (until dec 2012): 

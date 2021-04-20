@@ -15,7 +15,7 @@ import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.HorizonShape;
 import fr.jmmc.aspro.model.BestPoPsObservabilityContext;
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.ObservabilityContext;
 import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;

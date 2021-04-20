@@ -7,7 +7,7 @@ import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ConfigurationManager;
-import fr.jmmc.aspro.model.Range;
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.ObservabilityContext;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;

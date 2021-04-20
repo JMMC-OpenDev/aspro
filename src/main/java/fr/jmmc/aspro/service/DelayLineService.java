@@ -5,8 +5,8 @@ package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
-import fr.jmmc.aspro.model.Range;
-import fr.jmmc.aspro.model.RangeFactory;
+import fr.jmmc.oitools.model.range.Range;
+import fr.jmmc.oitools.model.range.RangeFactory;
 import fr.jmmc.aspro.util.AngleUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
