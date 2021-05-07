@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.04 beta 1"/>
-    <compilation date="17/03/2021" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.05 beta 2"/>
+    <compilation date="07/05/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -228,9 +228,12 @@
     </menubar>
 
     <releasenotes>
-        <release version="21.04">
+        <release version="21.05">
+            <prerelease version="21.05 beta 2">
+                <change type="FEATURE">Added information (FT, atm) in OB sent to the A2p2 tool (Aspro to ESO p2)</change>
+            </prerelease>
             <!-- ObsPlan disabled in public release -->
-            <prerelease version="21.04 beta 1">
+            <prerelease version="21.05 beta 1">
                 <change type="FEATURE">Added a new tabbed pane 'Observation plan' to display observations and targets as an unified table. General &amp; global filters are coming...</change>
             </prerelease>
         </release>
