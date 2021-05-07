@@ -18,6 +18,7 @@ import fr.jmmc.aspro.model.ob.ObservingBlockDefinition;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
+import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -28,6 +29,7 @@ import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetGroupMembers;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.jmal.Band;
@@ -89,7 +91,7 @@ public class ExportOBXml {
 
         // compute observability data:
         os.compute();
-        
+
         return os;
     }
 
@@ -106,16 +108,16 @@ public class ExportOBXml {
                                final ObservationSetting observation,
                                final ObservabilityService os,
                                final Target target) throws IOException {
-        
+
         if (logger.isDebugEnabled()) {
             logger.debug("process target {} to file: ", target.getName(), file);
         }
-        
+
         if (observation != null && target != null) {
             final ObservingBlockDefinition obd = new ObservingBlockDefinition();
-            
+
             fill(obd, observation, os, target);
-            
+
             OBManager.getInstance().saveObject(file, obd);
         }
     }
@@ -135,17 +137,13 @@ public class ExportOBXml {
                              final ObservabilityService os,
                              final Target target) throws IllegalStateException, IOException {
 
-        // Interferometer configuration
-        obd.setInterferometerConfiguration(getInterferometerConfiguration(observation));
-
-        // set AOsetup (from given target):
         final TargetConfiguration targetConf = target.getConfiguration();
-        if (targetConf != null && targetConf.getAoSetup() != null) {
-            obd.getInterferometerConfiguration().setAoSetup(targetConf.getAoSetup());
-        }
+        
+        // Interferometer configuration
+        obd.setInterferometerConfiguration(getInterferometerConfiguration(observation, targetConf));
 
         // Instrument configuration
-        obd.setInstrumentConfiguration(getInstrumentConfiguration(observation));
+        obd.setInstrumentConfiguration(getInstrumentConfiguration(observation, targetConf));
 
         // Observation configuration - SCI
         final ObservationConfiguration obSCI = getObservationConfiguration(observation, os, target);
@@ -153,9 +151,9 @@ public class ExportOBXml {
 
         // Observation configuration - CAL
         Target firstCalibrator = null;
-        
+
         final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
-        
+
         if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
             // use first calibrator in calibrator list :
             final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
@@ -166,7 +164,7 @@ public class ExportOBXml {
                 }
             }
         }
-        
+
         ObservationConfiguration obCAL = null;
         if (firstCalibrator != null) {
             obCAL = getObservationConfiguration(observation, os, firstCalibrator);
@@ -177,7 +175,7 @@ public class ExportOBXml {
         final ObservationSchedule obsSch = new ObservationSchedule();
         final OBItem sci = new OBItem(obSCI);
         final OBItem cal = (obCAL != null) ? new OBItem(obCAL) : null;
-        
+
         if (cal != null) {
             obsSch.getOBS().add(cal);
         }
@@ -187,16 +185,18 @@ public class ExportOBXml {
         }
         obd.setObservationSchedule(obsSch);
     }
-    
-    private static InterferometerConfiguration getInterferometerConfiguration(final ObservationSetting observation) {
+
+    private static InterferometerConfiguration getInterferometerConfiguration(final ObservationSetting observation,
+                                                                              final TargetConfiguration targetConf) {
+
         final InterferometerConfiguration intConf = new InterferometerConfiguration();
-        
+
         final fr.jmmc.aspro.model.oi.InterferometerConfiguration obsIntConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
         intConf.setName(obsIntConf.getInterferometer().getName());
         intConf.setVersion(obsIntConf.getVersion());
-        
+
         intConf.setStations(observation.getInstrumentConfiguration().getStations());
-        
+
         final String confAltName = ConfigurationManager.getInstance().getInstrumentConfigurationAltName(
                 observation.getInterferometerConfiguration().getName(),
                 observation.getInstrumentConfiguration().getName(),
@@ -220,30 +220,42 @@ public class ExportOBXml {
         if (relatedChannels != null) {
             intConf.setChannels(Channel.toString(relatedChannels));
         }
-        
+
+        // set AOsetup (from given target):
+        if (targetConf != null && targetConf.getAoSetup() != null) {
+            intConf.setAoSetup(targetConf.getAoSetup());
+        }
+
         return intConf;
     }
-    
-    private static InstrumentConfiguration getInstrumentConfiguration(final ObservationSetting observation) {
-        final InstrumentConfiguration insConf = new InstrumentConfiguration();
+
+    private static InstrumentConfiguration getInstrumentConfiguration(final ObservationSetting observation,
+                                                                      final TargetConfiguration targetConf) {
         
+        final InstrumentConfiguration insConf = new InstrumentConfiguration();
+
         insConf.setName(observation.getInstrumentConfiguration().getName());
         insConf.setInstrumentMode(observation.getInstrumentConfiguration().getInstrumentMode());
-        
+
+        insConf.setAcquisitionTime(observation.getInstrumentConfiguration().getAcquisitionTime());
+
+        if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
+            insConf.setFringeTrackerMode(targetConf.getFringeTrackerMode());
+        }
         return insConf;
     }
-    
+
     private static ObservationConfiguration getObservationConfiguration(final ObservationSetting observation,
                                                                         final ObservabilityService os,
                                                                         final Target target) {
-        
+
         final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
         final boolean isCalibrator = (targetUserInfos != null && targetUserInfos.isCalibrator(target));
-        
+
         final ObservationConfiguration obsConf = new ObservationConfiguration();
         obsConf.setId(target.getId());
         obsConf.setType(isCalibrator ? ObservationType.CALIBRATION : ObservationType.SCIENCE);
-        
+
         final fr.jmmc.aspro.model.ob.Target obTarget = getTarget(target);
         obsConf.setSCTarget(obTarget);
 
@@ -251,13 +263,13 @@ public class ExportOBXml {
         Double diameter = null;
         if (isCalibrator) {
             final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
-            
+
             final SpectralBand insBand = SpectralBandUtils.findBand(Band.findBand(insMode.getWaveLength()));
-            
+
             diameter = target.getDiameter(insBand);
         }
         obTarget.setDIAMETER(diameter);
-        
+
         if (targetUserInfos != null) {
             // Handle OB targets (AO / FT / Guide)
             final TargetInformation targetInfo = targetUserInfos.getOrCreateTargetInformation(target);
@@ -282,39 +294,45 @@ public class ExportOBXml {
         // constraints
         final ObservationConstraints obsCons = new ObservationConstraints();
 
+        // Atmosphere:
+        final AtmosphereQuality atmQual = observation.getWhen().getAtmosphereQuality();
+        obsCons.setAtmosphereQuality(atmQual.value());
+        obsCons.setSeeing(AtmosphereQualityUtils.getSeeing(atmQual)); // as
+        obsCons.setTau0(AtmosphereQualityUtils.getCoherenceTime(atmQual) * 0.001); // s
+
         // Compute Observability data:
         final ObservabilityData obsData = os.getData();
-        
+
         final StarData starData = obsData.getStarData(target.getName());
         if (starData != null) {
             final List<Range> obsRangesHA = starData.getObsRangesHA();
-            
+
             if (logger.isDebugEnabled()) {
                 logger.debug("obsRangesHA: {}", obsRangesHA);
             }
-            
+
             if (obsRangesHA != null) {
                 // target is observable :
                 processHARanges(obsCons.getHAintervals(), obsRangesHA);
-                
+
                 final List<DateTimeInterval> lstRanges = os.convertHARangesToDateInterval(obsRangesHA, starData.getPrecRA());
                 if (logger.isDebugEnabled()) {
                     logger.debug("lst ranges: {}", lstRanges);
                 }
-                
+
                 if (lstRanges != null) {
                     processLSTRanges(obsCons.getLSTintervals(), lstRanges);
                 }
             }
         }
-        
+
         if (!obsCons.getHAintervals().isEmpty()) {
             obsConf.setObservationConstraints(obsCons);
         }
-        
+
         return obsConf;
     }
-    
+
     private static Target getFirstTargetForGroup(final TargetUserInformations targetUserInfos,
                                                  final TargetInformation targetInfo,
                                                  final String groupId) {
@@ -327,9 +345,9 @@ public class ExportOBXml {
         }
         return null;
     }
-    
+
     private static fr.jmmc.aspro.model.ob.Target getTarget(final Target target) {
-        
+
         final fr.jmmc.aspro.model.ob.Target t = new fr.jmmc.aspro.model.ob.Target();
         t.setName(target.getName());
         t.setRA(target.getRA());
@@ -357,40 +375,40 @@ public class ExportOBXml {
         t.setFLUXN(target.getFLUXN());
         return t;
     }
-    
+
     private static void processHARanges(final List<String> haIntervals, final List<Range> obsRangesHA) {
         final StringBuilder sb = new StringBuilder(12);
-        
+
         for (Range range : obsRangesHA) {
             sb.setLength(0);
-            
+
             sb.append(df2.format(range.getMin()));
             sb.append(SEP_TIME);
             sb.append(df2.format(range.getMax()));
-            
+
             haIntervals.add(sb.toString());
         }
     }
-    
+
     private static void processLSTRanges(final List<String> lstIntervals, final List<DateTimeInterval> lstRanges) {
         final StringBuilder sb = new StringBuilder(12);
-        
+
         final Calendar cal = new GregorianCalendar();
-        
+
         for (DateTimeInterval interval : lstRanges) {
             sb.setLength(0);
-            
+
             final Date start = interval.getStartDate();
             final Date end = interval.getEndDate();
-            
+
             cal.setTime(start);
             final int secStart = convertDateToSeconds(cal);
-            
+
             cal.setTime(end);
             final int secEnd = convertDateToSeconds(cal);
-            
+
             boolean valid = false;
-            
+
             if (end.before(start)) {
                 // single interval over midnight:
                 if (((86400 + secEnd) - secStart) > P2_LST_MIN_DURATION) {
@@ -401,12 +419,12 @@ public class ExportOBXml {
                     valid = true;
                 }
             }
-            
+
             if (valid) {
                 sb.append(timeFormatter.format(interval.getStartDate()));
                 sb.append(SEP_TIME);
                 sb.append(timeFormatter.format(interval.getEndDate()));
-                
+
                 lstIntervals.add(sb.toString());
             } else {
                 logger.info("invalid interval: {}", interval);
@@ -424,7 +442,7 @@ public class ExportOBXml {
         final int h = cal.get(Calendar.HOUR_OF_DAY);
         final int m = cal.get(Calendar.MINUTE);
         final int s = cal.get(Calendar.SECOND);
-        
+
         return h * 3600 + m * 60 + s;
     }
 
@@ -444,7 +462,7 @@ public class ExportOBXml {
      * @return Observing block file name
      */
     public static String generateOBFileName(final Target target, final String customPrefix) {
-        
+
         final ObservationManager om = ObservationManager.getInstance();
 
         // use main observation :
@@ -455,15 +473,15 @@ public class ExportOBXml {
         if (insMode == null) {
             throw new IllegalStateException("The instrumentMode is empty !");
         }
-        
+
         final TargetConfiguration targetConf = target.getConfiguration();
-        
+
         final boolean useFT = (targetConf != null && targetConf.getFringeTrackerMode() != null);
-        
+
         final String suffix = StringUtils.removeUnderscores(insMode.getName()) + '_' + (useFT ? "FT" : "noFT");
         final String prefix = (customPrefix != null) ? customPrefix
                 : (om.isCalibrator(target) ? OB_CALIBRATOR : OB_SCIENCE);
-        
+
         return generateFileName(observation, target.getName(), prefix, suffix, MimeType.ASPRO_OB_XML.getExtension());
     }
 
@@ -481,7 +499,7 @@ public class ExportOBXml {
     private static String generateFileName(final ObservationSetting observation, final String targetName,
                                            final String prefix, final String suffix,
                                            final String extension) {
-        
+
         final StringBuilder sb = new StringBuilder(32);
         if (prefix != null) {
             sb.append(prefix).append('_');
@@ -490,17 +508,17 @@ public class ExportOBXml {
         // replace invalid characters :
         final String altTargetName = StringUtils.removeNonAlphaNumericChars(targetName);
         sb.append(altTargetName).append('_');
-        
+
         final String instrumentName = observation.getInstrumentConfiguration().getName();
         sb.append(instrumentName).append('_');
-        
+
         final String baseLine = StringUtils.removeWhiteSpaces(observation.getInstrumentConfiguration().getStations());
         sb.append(baseLine);
-        
+
         if (suffix != null) {
             sb.append('_').append(suffix);
         }
-        
+
         final String date = observation.getWhen().getDate().toString();
         sb.append('_').append(date);
 
@@ -508,9 +526,9 @@ public class ExportOBXml {
         if (sb.length() > 64) {
             sb.setLength(64);
         }
-        
+
         sb.append('.').append(extension);
-        
+
         return sb.toString();
     }
 }

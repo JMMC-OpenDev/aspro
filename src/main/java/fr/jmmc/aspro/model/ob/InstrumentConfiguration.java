@@ -24,6 +24,8 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="instrumentMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="acquisitionTime" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="fringeTrackerMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -35,7 +37,9 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "InstrumentConfiguration", propOrder = {
     "name",
-    "instrumentMode"
+    "instrumentMode",
+    "acquisitionTime",
+    "fringeTrackerMode"
 })
 public class InstrumentConfiguration
     extends OIBase
@@ -44,6 +48,8 @@ public class InstrumentConfiguration
     @XmlElement(required = true)
     protected String name;
     protected String instrumentMode;
+    protected Double acquisitionTime;
+    protected String fringeTrackerMode;
 
     /**
      * Gets the value of the name property.
@@ -91,6 +97,54 @@ public class InstrumentConfiguration
      */
     public void setInstrumentMode(String value) {
         this.instrumentMode = value;
+    }
+
+    /**
+     * Gets the value of the acquisitionTime property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getAcquisitionTime() {
+        return acquisitionTime;
+    }
+
+    /**
+     * Sets the value of the acquisitionTime property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setAcquisitionTime(Double value) {
+        this.acquisitionTime = value;
+    }
+
+    /**
+     * Gets the value of the fringeTrackerMode property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getFringeTrackerMode() {
+        return fringeTrackerMode;
+    }
+
+    /**
+     * Sets the value of the fringeTrackerMode property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setFringeTrackerMode(String value) {
+        this.fringeTrackerMode = value;
     }
 
 }

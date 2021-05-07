@@ -139,15 +139,6 @@
                 </xsd:annotation>
             </xsd:element>
 
-            <!-- AO mode -->
-            <xsd:element name="aoSetup" type="xsd:string" minOccurs="0">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The Adaptive Optics Setup (among possible Adaptive Optics available)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-
             <xsd:element name="pops" type="xsd:string" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -160,6 +151,15 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         The list of channels for this configuration (V1 V2) used by CHARA and VLTI (optional)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- AO mode -->
+            <xsd:element name="aoSetup" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The Adaptive Optics Setup (among possible Adaptive Optics available)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -192,9 +192,22 @@
                 </xsd:annotation>
             </xsd:element>
 
-            <!-- other parameters ? -->
-            <!-- fringe tracker mode (enabled, group track, fringe track ...) -->
-            <!-- total integration time ? -->
+            <xsd:element name="acquisitionTime" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The Total Acquisition time per observed u,v point (seconds)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- fringe tracker mode -->
+            <xsd:element name="fringeTrackerMode" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The fringe tracker mode (among possible FringeTracker modes)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -274,6 +287,28 @@
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
+            <xsd:element name="atmosphereQuality" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Define the required atmosphere quality / seeing (used by noise modelling)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="seeing" type="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The seeing in arcsecs
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="tau0" type="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Coherence time (tau0) in ms
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="HAinterval" type="xsd:string" minOccurs="1" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -291,8 +326,6 @@
             </xsd:element>
 
             <!-- other parameters ? -->
-            <!-- seeing ? -->
-            <!-- atmosphere quality ? -->
         </xsd:sequence>
     </xsd:complexType>
 

@@ -26,9 +26,9 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="version" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="confAltName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
- *         &lt;element name="aoSetup" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="pops" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="channels" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="aoSetup" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -43,9 +43,9 @@ import fr.jmmc.aspro.model.OIBase;
     "version",
     "stations",
     "confAltName",
-    "aoSetup",
     "pops",
-    "channels"
+    "channels",
+    "aoSetup"
 })
 public class InterferometerConfiguration
     extends OIBase
@@ -57,9 +57,9 @@ public class InterferometerConfiguration
     @XmlElement(required = true)
     protected String stations;
     protected String confAltName;
-    protected String aoSetup;
     protected String pops;
     protected String channels;
+    protected String aoSetup;
 
     /**
      * Gets the value of the name property.
@@ -158,30 +158,6 @@ public class InterferometerConfiguration
     }
 
     /**
-     * Gets the value of the aoSetup property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getAoSetup() {
-        return aoSetup;
-    }
-
-    /**
-     * Sets the value of the aoSetup property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setAoSetup(String value) {
-        this.aoSetup = value;
-    }
-
-    /**
      * Gets the value of the pops property.
      * 
      * @return
@@ -227,6 +203,30 @@ public class InterferometerConfiguration
      */
     public void setChannels(String value) {
         this.channels = value;
+    }
+
+    /**
+     * Gets the value of the aoSetup property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getAoSetup() {
+        return aoSetup;
+    }
+
+    /**
+     * Sets the value of the aoSetup property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setAoSetup(String value) {
+        this.aoSetup = value;
     }
 
 }
