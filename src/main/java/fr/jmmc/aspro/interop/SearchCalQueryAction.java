@@ -155,7 +155,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
         }
 
         final Band band = Band.findBand(lambda);
-        // Scenario SearchCal on VJHKN bands:
+        // Get band for SearchCal scenario:
         final SpectralBand insBand = getSearchCalBand(band);
 
         if (logger.isDebugEnabled()) {
@@ -226,13 +226,11 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
     }
 
     /**
-     * Find the SpectralBand corresponding to the given Band to query SearchCal
+     * Find the SpectralBand corresponding to the given Band to query SearchCal (VJHKLMN)
      * @param band band to use
      * @return SpectralBand or null
      */
     public static SpectralBand getSearchCalBand(final Band band) {
-        // TODO: update this once SearchCal v5 is available = 1 single scenario 
-        // but all bands used by the magnitude filter !
         switch (band) {
             case U:
                 // band U not supported by SearchCal:
@@ -241,25 +239,23 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
             case V:
             case R:
             case I:
-                // VBRI: use scenario V for VEGA:
+                // BVRI: use band V:
                 return SpectralBand.V;
             case J:
-                // use scenario K but band J:
                 return SpectralBand.J;
             case H:
-                // use scenario K but band H:
                 return SpectralBand.H;
             case K:
-                // use scenario K:
                 return SpectralBand.K;
             case L:
+                return SpectralBand.L;
             case M:
-            // LM: what to do ?
+                return SpectralBand.M;
             case N:
-                // use scenario N for MIDI:
                 return SpectralBand.N;
             case Q:
-            // band Q not supported by SearchCal:
+                // band Q not supported by SearchCal:
+                return null;
             default:
                 return null;
         }
