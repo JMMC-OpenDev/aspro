@@ -30,8 +30,8 @@ public final class UserModelAnimator {
     private static final Logger logger = LoggerFactory.getLogger(UserModelAnimator.class.getName());
     /** singleton instance */
     private static UserModelAnimator instance = new UserModelAnimator();
-    /** default image refresh period = 2 seconds */
-    private static final int REFRESH_PERIOD = 2 * 1000;
+    /** default image refresh period = 0.1 seconds */
+    private static final int REFRESH_PERIOD = 100;
     /** debug mode for register/unregister actions */
     private static final boolean DEBUG = false;
 
