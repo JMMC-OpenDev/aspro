@@ -24,7 +24,10 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="instrumentMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="acquisitionTime" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="instrumentWaveLengthRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="instrumentWaveBandRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="fringeTrackerMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
@@ -38,7 +41,10 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "InstrumentConfiguration", propOrder = {
     "name",
     "instrumentMode",
+    "dit",
     "acquisitionTime",
+    "instrumentWaveLengthRef",
+    "instrumentWaveBandRef",
     "fringeTrackerMode"
 })
 public class InstrumentConfiguration
@@ -48,7 +54,10 @@ public class InstrumentConfiguration
     @XmlElement(required = true)
     protected String name;
     protected String instrumentMode;
+    protected Double dit;
     protected Double acquisitionTime;
+    protected Double instrumentWaveLengthRef;
+    protected Double instrumentWaveBandRef;
     protected String fringeTrackerMode;
 
     /**
@@ -100,6 +109,30 @@ public class InstrumentConfiguration
     }
 
     /**
+     * Gets the value of the dit property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getDit() {
+        return dit;
+    }
+
+    /**
+     * Sets the value of the dit property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setDit(Double value) {
+        this.dit = value;
+    }
+
+    /**
      * Gets the value of the acquisitionTime property.
      * 
      * @return
@@ -121,6 +154,54 @@ public class InstrumentConfiguration
      */
     public void setAcquisitionTime(Double value) {
         this.acquisitionTime = value;
+    }
+
+    /**
+     * Gets the value of the instrumentWaveLengthRef property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getInstrumentWaveLengthRef() {
+        return instrumentWaveLengthRef;
+    }
+
+    /**
+     * Sets the value of the instrumentWaveLengthRef property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setInstrumentWaveLengthRef(Double value) {
+        this.instrumentWaveLengthRef = value;
+    }
+
+    /**
+     * Gets the value of the instrumentWaveBandRef property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getInstrumentWaveBandRef() {
+        return instrumentWaveBandRef;
+    }
+
+    /**
+     * Sets the value of the instrumentWaveBandRef property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setInstrumentWaveBandRef(Double value) {
+        this.instrumentWaveBandRef = value;
     }
 
     /**

@@ -18,6 +18,7 @@ import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
@@ -83,10 +84,14 @@ public final class UVCoverageService {
     private double haStep;
     /** observation time expressed in hour angle (see acquisitionTime) */
     private double haObsTime;
-    /** lower wavelength of the selected instrument (meter) */
-    private double instrumentMinWaveLength;
-    /** central wavelength of the selected instrument mode (meter) */
+    /** reference wavelength of the selected instrument mode (meter) */
     private double lambda;
+    /** lower wavelength of the selected instrument mode (meter) */
+    private double lambdaMin;
+    /** upper wavelength of the selected instrument mode (meter) */
+    private double lambdaMax;
+    /** selected target */
+    private Target target = null;
     /** selected instrument mode */
     private FocalInstrumentMode instrumentMode = null;
     /** observation sky calc instance */
@@ -159,7 +164,7 @@ public final class UVCoverageService {
             // target name :
             this.data.setTargetName(this.targetName);
 
-            // central wave length :
+            // reference wave length :
             this.data.setLambda(this.lambda);
 
             // Is the target visible :
@@ -168,7 +173,6 @@ public final class UVCoverageService {
                 this.sco.defineSite(this.sc);
 
                 // get Target coordinates precessed to JD CENTER and define target to get later az/alt positions from JSkyCalc :
-                final Target target = this.observation.getTarget(targetName);
                 this.sco.defineTarget(this.obsData.jdCenter(), target.getRADeg(), target.getDECDeg(), target.getPMRA(), target.getPMDEC());
 
                 if (this.doUVSupport) {
@@ -396,10 +400,6 @@ public final class UVCoverageService {
 
                 this.data.setTargetPointInfos(targetPointInfos);
 
-                // Get wavelength range for the selected instrument mode :
-                final double lambdaMin = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin();
-                final double lambdaMax = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMax();
-
                 if (logger.isDebugEnabled()) {
                     logger.debug("lambdaMin: {}", lambdaMin);
                     logger.debug("lambdaMax: {}", lambdaMax);
@@ -492,23 +492,58 @@ public final class UVCoverageService {
         // Get starData for the selected target name :
         this.starData = this.obsData.getStarData(this.targetName);
 
+        // get current target :
+        this.target = this.observation.getTarget(this.targetName);
+
         if (logger.isDebugEnabled()) {
             logger.debug("starData: {}", this.starData);
+            logger.debug("target: {}", this.target);
         }
 
         // Get lower wavelength for the selected instrument:
-        this.instrumentMinWaveLength = AsproConstants.MICRO_METER
+        final double instrumentMinWaveLength = AsproConstants.MICRO_METER
                 * this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
 
         this.instrumentMode = this.observation.getInstrumentConfiguration().getFocalInstrumentMode();
         if (instrumentMode == null) {
             throw new IllegalStateException("The instrumentMode is empty !");
         }
-        this.lambda = AsproConstants.MICRO_METER * instrumentMode.getWaveLength();
+
+        // use target's wavelength ref instead of default value:
+        this.lambda = instrumentMode.getEffWaveLengthRef();
+
+        boolean useWavelengthRangeRestriction = instrumentMode.isWavelengthRangeRestriction();
+        double effBand = instrumentMode.getEffWaveLengthBandRef();
+
+        if (target != null) {
+            final TargetConfiguration targetConf = target.getConfiguration();
+
+            if (targetConf != null && targetConf.getInstrumentWaveLengthRef() != null) {
+                lambda = targetConf.getInstrumentWaveLengthRef();
+            }
+
+            if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
+                final String ftMode = targetConf.getFringeTrackerMode();
+
+                // TODO: handle FT modes properly: GroupTrack is hard coded !
+                // disable wavelength restrictions if FT enabled (basic GRA4MAT support, TODO: refine wavelength ranges for GRA4MAT)
+                useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith("GroupTrack") && (instrumentMode.getFtWaveLengthBandRef() == null));
+                if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
+                    effBand = instrumentMode.getFtWaveLengthBandRef();
+                }
+            }
+        }
+
+        // Get wavelength range for the selected instrument mode :
+        final Range wlRange = new Range();
+        lambda = AsproConstants.MICRO_METER * instrumentMode.getEffectiveWavelengthRange(lambda, useWavelengthRangeRestriction, effBand, wlRange);
+        lambdaMin = AsproConstants.MICRO_METER * wlRange.getMin();
+        lambdaMax = AsproConstants.MICRO_METER * wlRange.getMax();
 
         if (logger.isDebugEnabled()) {
             logger.debug("instrumentMode: {}", instrumentMode.getName());
             logger.debug("lambda:    {}", this.lambda);
+            logger.debug("wlRange:   {}", wlRange);
         }
 
         // hour angle step in decimal hours :
@@ -525,7 +560,7 @@ public final class UVCoverageService {
         // note : use the lower wave length of the instrument to
         // - make all uv segment visible
         // - avoid to much model computations (when the instrument mode changes)
-        this.uvMaxFreq /= this.instrumentMinWaveLength;
+        this.uvMaxFreq /= instrumentMinWaveLength;
 
         // Define precisely the maxUV for maxBaselines:
         final FocalInstrumentConfiguration insConf = observation.getInstrumentConfiguration().getInstrumentConfiguration();
@@ -550,10 +585,6 @@ public final class UVCoverageService {
             addWarning("OIFits data not available");
         } else {
             // thread safety : TODO: observation can change ... extract observation info in prepare ??
-
-            // get current target :
-            final Target target = this.observation.getTarget(this.targetName);
-
             if (target != null) {
                 // Create the OIFitsCreatorService / NoiseService :
 
@@ -621,18 +652,48 @@ public final class UVCoverageService {
             // Get baselines :
             final List<BaseLine> baseLines = obsData.getBaseLines();
 
-            final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
-            if (insMode == null) {
+            final FocalInstrumentMode instrumentMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+            if (instrumentMode == null) {
                 throw new IllegalStateException("The instrumentMode is empty !");
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("instrumentMode: {}", insMode.getName());
+                logger.debug("instrumentMode: {}", instrumentMode.getName());
+            }
+
+            // get current target :
+            final Target target = observation.getTarget(starData.getName());
+
+            // use target's wavelength ref instead of default value:
+            double lambda = instrumentMode.getEffWaveLengthRef();
+
+            boolean useWavelengthRangeRestriction = instrumentMode.isWavelengthRangeRestriction();
+            double effBand = instrumentMode.getEffWaveLengthBandRef();
+
+            if (target != null) {
+                final TargetConfiguration targetConf = target.getConfiguration();
+
+                if (targetConf != null && targetConf.getInstrumentWaveLengthRef() != null) {
+                    lambda = targetConf.getInstrumentWaveLengthRef();
+                }
+
+                if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
+                    final String ftMode = targetConf.getFringeTrackerMode();
+
+                    // TODO: handle FT modes properly: GroupTrack is hard coded !
+                    // disable wavelength restrictions if FT enabled (basic GRA4MAT support, TODO: refine wavelength ranges for GRA4MAT)
+                    useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith("GroupTrack") && (instrumentMode.getFtWaveLengthBandRef() == null));
+                    if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
+                        effBand = instrumentMode.getFtWaveLengthBandRef();
+                    }
+                }
             }
 
             // Get wavelength range for the selected instrument mode :
-            final double lambdaMin = AsproConstants.MICRO_METER * insMode.getWaveLengthMin();
-            final double lambdaMax = AsproConstants.MICRO_METER * insMode.getWaveLengthMax();
+            final Range wlRange = new Range();
+            instrumentMode.getEffectiveWavelengthRange(lambda, useWavelengthRangeRestriction, effBand, wlRange);            
+            final double lambdaMin = AsproConstants.MICRO_METER * wlRange.getMin();
+            final double lambdaMax = AsproConstants.MICRO_METER * wlRange.getMax();
 
             if (logger.isDebugEnabled()) {
                 logger.debug("lambdaMin: {}", lambdaMin);

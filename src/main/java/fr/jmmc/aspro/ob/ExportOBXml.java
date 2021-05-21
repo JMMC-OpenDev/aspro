@@ -21,6 +21,7 @@ import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
+import fr.jmmc.aspro.model.oi.FringeTracker;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Target;
@@ -34,6 +35,7 @@ import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmcs.data.MimeType;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +66,9 @@ public class ExportOBXml {
     public static final String OB_SCIENCE = "SCI";
     /** file prefix for calibrator targets */
     public static final String OB_CALIBRATOR = "CAL";
+    /** NONE value */
+    public static final String VALUE_NONE = "NONE";
+
     /** time separator */
     public static final char SEP_TIME = '/';
     /** P2 minimal duration = 10 minutes in seconds */
@@ -138,7 +143,7 @@ public class ExportOBXml {
                              final Target target) throws IllegalStateException, IOException {
 
         final TargetConfiguration targetConf = target.getConfiguration();
-        
+
         // Interferometer configuration
         obd.setInterferometerConfiguration(getInterferometerConfiguration(observation, targetConf));
 
@@ -197,12 +202,13 @@ public class ExportOBXml {
 
         intConf.setStations(observation.getInstrumentConfiguration().getStations());
 
-        final String confAltName = ConfigurationManager.getInstance().getInstrumentConfigurationAltName(
+        final String confAltBaselines = ConfigurationManager.getInstance().getInstrumentConfigurationAltBaselines(
                 observation.getInterferometerConfiguration().getName(),
                 observation.getInstrumentConfiguration().getName(),
                 observation.getInstrumentConfiguration().getStations());
-        if (confAltName != null) {
-            intConf.setConfAltName(confAltName);
+
+        if (confAltBaselines != null) {
+            intConf.setConfAltName(confAltBaselines);
         }
 
         // CHARA Pops:
@@ -231,17 +237,54 @@ public class ExportOBXml {
 
     private static InstrumentConfiguration getInstrumentConfiguration(final ObservationSetting observation,
                                                                       final TargetConfiguration targetConf) {
-        
+
         final InstrumentConfiguration insConf = new InstrumentConfiguration();
 
         insConf.setName(observation.getInstrumentConfiguration().getName());
         insConf.setInstrumentMode(observation.getInstrumentConfiguration().getInstrumentMode());
-
         insConf.setAcquisitionTime(observation.getInstrumentConfiguration().getAcquisitionTime());
 
+        String ftMode = VALUE_NONE;
         if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
-            insConf.setFringeTrackerMode(targetConf.getFringeTrackerMode());
+            ftMode = targetConf.getFringeTrackerMode();
         }
+        insConf.setFringeTrackerMode(ftMode); // "NONE" if undefined
+
+        final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+
+        // use target's wavelength ref instead of default value:
+        double wlRef = insMode.getEffWaveLengthRef();
+
+        if (targetConf != null && targetConf.getInstrumentWaveLengthRef() != null) {
+            wlRef = targetConf.getInstrumentWaveLengthRef();
+        }
+
+        final double dlRef = insMode.getEffWaveLengthBandRef();
+
+        // DIT:
+        double dit = insMode.getSetupRef().getDit();
+        if (insMode.getDit() != null) {
+            dit = insMode.getDit();
+        }
+
+        // MATISSE:
+        if (!VALUE_NONE.equals(insConf.getFringeTrackerMode())) {
+            if (insMode.getFtDit() != null) {
+                dit = insMode.getFtDit();
+            } else {
+                final FringeTracker ft = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getFringeTracker();;
+                if (ft != null) {
+                    // TODO: handle FT modes properly: GroupTrack is hard coded !
+                    if (!ftMode.startsWith("GroupTrack")) {
+                        dit = ft.getMaxIntegration();
+                    }
+                }
+            }
+        }
+        insConf.setDit(dit);
+        insConf.setInstrumentWaveLengthRef(NumberUtils.trimTo5Digits(wlRef));
+        insConf.setInstrumentWaveBandRef(NumberUtils.trimTo5Digits(dlRef));
+
         return insConf;
     }
 
@@ -362,17 +405,55 @@ public class ExportOBXml {
         t.setIDS(target.getIDS());
         t.setOBJTYP(target.getOBJTYP());
         t.setSPECTYP(target.getSPECTYP());
-        t.setFLUXB(target.getFLUXB());
-        t.setFLUXV(target.getFLUXV());
-        t.setFLUXG(target.getFLUXG());
-        t.setFLUXR(target.getFLUXR());
-        t.setFLUXI(target.getFLUXI());
-        t.setFLUXJ(target.getFLUXJ());
-        t.setFLUXH(target.getFLUXH());
-        t.setFLUXK(target.getFLUXK());
-        t.setFLUXL(target.getFLUXL());
-        t.setFLUXM(target.getFLUXM());
-        t.setFLUXN(target.getFLUXN());
+
+        if (target.getFLUXB() != null) {
+            t.setFLUXB(NumberUtils.trimTo3Digits(target.getFLUXB()));
+        }
+        if (target.getFLUXV() != null) {
+            t.setFLUXV(NumberUtils.trimTo3Digits(target.getFLUXV()));
+        }
+        if (target.getFLUXG() != null) {
+            t.setFLUXG(NumberUtils.trimTo3Digits(target.getFLUXG()));
+        }
+
+        if (target.getFLUXR() != null) {
+            t.setFLUXR(NumberUtils.trimTo3Digits(target.getFLUXR()));
+        }
+        if (target.getFLUXI() != null) {
+            t.setFLUXI(NumberUtils.trimTo3Digits(target.getFLUXI()));
+        }
+
+        if (target.getFLUXJ() != null) {
+            t.setFLUXJ(NumberUtils.trimTo3Digits(target.getFLUXJ()));
+        }
+        if (target.getFLUXH() != null) {
+            t.setFLUXH(NumberUtils.trimTo3Digits(target.getFLUXH()));
+        }
+        if (target.getFLUXK() != null) {
+            t.setFLUXK(NumberUtils.trimTo3Digits(target.getFLUXK()));
+        }
+
+        if (target.getFLUXL() != null) {
+            t.setFLUXL(NumberUtils.trimTo3Digits(target.getFLUXL()));
+        }
+        if (target.getFLUXM() != null) {
+            t.setFLUXM(NumberUtils.trimTo3Digits(target.getFLUXM()));
+        }
+        if (target.getFLUXN() != null) {
+            t.setFLUXN(NumberUtils.trimTo3Digits(target.getFLUXN()));
+        }
+
+        // convert to Jansky:
+        if (target.getFLUXL() != null) {
+            t.setFLUXLJY(NumberUtils.trimTo3Digits(Band.L.magToJy(target.getFLUXL())));
+        }
+        if (target.getFLUXM() != null) {
+            t.setFLUXMJY(NumberUtils.trimTo3Digits(Band.M.magToJy(target.getFLUXM())));
+        }
+        if (target.getFLUXN() != null) {
+            t.setFLUXNJY(NumberUtils.trimTo3Digits(Band.N.magToJy(target.getFLUXN())));
+        }
+
         return t;
     }
 

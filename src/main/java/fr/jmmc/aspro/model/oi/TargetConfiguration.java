@@ -26,6 +26,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="HAMax" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="aoSetup" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="fringeTrackerMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="instrumentWaveLengthRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -39,7 +40,8 @@ import fr.jmmc.aspro.model.OIBase;
     "haMin",
     "haMax",
     "aoSetup",
-    "fringeTrackerMode"
+    "fringeTrackerMode",
+    "instrumentWaveLengthRef"
 })
 public class TargetConfiguration
     extends OIBase
@@ -51,6 +53,7 @@ public class TargetConfiguration
     protected Double haMax;
     protected String aoSetup;
     protected String fringeTrackerMode;
+    protected Double instrumentWaveLengthRef;
 
     /**
      * Gets the value of the haMin property.
@@ -146,6 +149,30 @@ public class TargetConfiguration
      */
     public void setFringeTrackerMode(String value) {
         this.fringeTrackerMode = value;
+    }
+
+    /**
+     * Gets the value of the instrumentWaveLengthRef property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getInstrumentWaveLengthRef() {
+        return instrumentWaveLengthRef;
+    }
+
+    /**
+     * Sets the value of the instrumentWaveLengthRef property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setInstrumentWaveLengthRef(Double value) {
+        this.instrumentWaveLengthRef = value;
     }
     
 //--simple--preserve

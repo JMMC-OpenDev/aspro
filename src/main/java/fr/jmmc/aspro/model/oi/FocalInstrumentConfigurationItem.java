@@ -28,6 +28,7 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
  *         &lt;element name="altName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="altBaselines" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}IDREFS"/&gt;
  *         &lt;element name="channels" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/&gt;
  *         &lt;element name="delayLines" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/&gt;
@@ -43,6 +44,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FocalInstrumentConfigurationItem", propOrder = {
     "altName",
+    "altBaselines",
     "stations",
     "channels",
     "delayLines",
@@ -53,6 +55,7 @@ public class FocalInstrumentConfigurationItem
 {
 
     protected String altName;
+    protected String altBaselines;
     @XmlList
     @XmlElement(required = true, type = Object.class)
     @XmlIDREF
@@ -96,6 +99,30 @@ public class FocalInstrumentConfigurationItem
      */
     public void setAltName(String value) {
         this.altName = value;
+    }
+
+    /**
+     * Gets the value of the altBaselines property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getAltBaselines() {
+        return altBaselines;
+    }
+
+    /**
+     * Sets the value of the altBaselines property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setAltBaselines(String value) {
+        this.altBaselines = value;
     }
 
     /**
@@ -270,6 +297,13 @@ public class FocalInstrumentConfigurationItem
         this.maxBaseLine = maxBaseLine;
     }
 
+    public String getDisplayAltName() {
+        if (getAltBaselines() != null) {
+            return getAltName() + " [" + getAltBaselines()+"]";
+        }
+        return getAltName();
+    }    
+    
     @Override
     public final String toString() {
         return "FocalInstrumentConfigurationItem [ stations: " + getName() + " - pops: " + getPops() + " - channels: " + getChannels() + " - "

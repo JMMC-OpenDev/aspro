@@ -46,6 +46,9 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="FLUX_L" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_M" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_N" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_L_JY" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_M_JY" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_N_JY" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="DIAMETER" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
@@ -81,6 +84,9 @@ import fr.jmmc.aspro.model.OIBase;
     "fluxl",
     "fluxm",
     "fluxn",
+    "fluxljy",
+    "fluxmjy",
+    "fluxnjy",
     "diameter"
 })
 public class Target
@@ -135,6 +141,12 @@ public class Target
     protected Double fluxm;
     @XmlElement(name = "FLUX_N")
     protected Double fluxn;
+    @XmlElement(name = "FLUX_L_JY")
+    protected Double fluxljy;
+    @XmlElement(name = "FLUX_M_JY")
+    protected Double fluxmjy;
+    @XmlElement(name = "FLUX_N_JY")
+    protected Double fluxnjy;
     @XmlElement(name = "DIAMETER")
     protected Double diameter;
 
@@ -704,6 +716,78 @@ public class Target
      */
     public void setFLUXN(Double value) {
         this.fluxn = value;
+    }
+
+    /**
+     * Gets the value of the fluxljy property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXLJY() {
+        return fluxljy;
+    }
+
+    /**
+     * Sets the value of the fluxljy property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXLJY(Double value) {
+        this.fluxljy = value;
+    }
+
+    /**
+     * Gets the value of the fluxmjy property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXMJY() {
+        return fluxmjy;
+    }
+
+    /**
+     * Sets the value of the fluxmjy property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXMJY(Double value) {
+        this.fluxmjy = value;
+    }
+
+    /**
+     * Gets the value of the fluxnjy property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXNJY() {
+        return fluxnjy;
+    }
+
+    /**
+     * Sets the value of the fluxnjy property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXNJY(Double value) {
+        this.fluxnjy = value;
     }
 
     /**

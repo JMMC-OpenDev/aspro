@@ -561,6 +561,7 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <!-- TODO: migrate fields (samplingPeriod / acquisitionTime) into TargetConfiguration -->
             <xsd:element name="samplingPeriod" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -975,6 +976,17 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+
+            <!-- instrument settings -->
+            <xsd:element name="instrumentWaveLengthRef" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The (optional) reference wavelength (micrometer) within the instrument mode's wavelength range
+                        refining the bandpass in high resolution (all detector can not be read out in 1 DIT)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
         </xsd:sequence>
     </xsd:complexType>
 
@@ -1418,6 +1430,14 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         The alternative name for this configuration (Small, Large...) known at the interferometer (optional)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="altBaselines" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The alternative baselines for this configuration in ["small", "medium", "large", "astrometric", "UTs"]
+                        handled by the interferometer (optional)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2742,7 +2762,16 @@
             <xsd:element name="waveLengthBandRef" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The maximal bandwith for the reference wave length of this instrument mode (micrometer) that can be read by the detector within 1 DIT
+                        The maximal bandwith for the reference wave length of this instrument mode (micrometer)
+                        that can be read by the detector within 1 DIT
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="ft_waveLengthBandRef" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The maximal bandwith for the reference wave length of this instrument mode (micrometer)
+                        with fringe tracker enabled that can be read by the detector within 1 DIT (FT)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>

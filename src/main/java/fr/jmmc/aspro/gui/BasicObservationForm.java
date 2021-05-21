@@ -946,7 +946,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
             // define alternative names for tooltips:
             ((ConfigurationJList) jListInstrumentConfigurations).setAltNames(
-                    cm.getInstrumentConfigurationAltNames(configurationName, instrumentAlias)
+                    cm.getInstrumentConfigurationDisplayAltNames(configurationName, instrumentAlias)
             );
 
             FocalInstrumentConfiguration insConf = null;

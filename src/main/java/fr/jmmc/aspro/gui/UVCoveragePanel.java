@@ -34,6 +34,8 @@ import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.observability.TargetPointInfo;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
+import fr.jmmc.aspro.model.oi.FocalInstrument;
+import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -235,6 +237,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private String interferometerConfigurationCacheKey = null;
     /** current instrument key to track changes */
     private String instrumentCacheKey = null;
+    /** current instrument mode key to track changes */
+    private String instrumentModeCacheKey = null;
     /** current AO key to track changes */
     private String aoCacheKey = null;
     /** selected target name  */
@@ -255,6 +259,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private boolean doAutoRefresh = true;
     /** flag to enable / disable the automatic update of the observation when any swing component changes */
     private boolean doAutoUpdateObservation = true;
+    /** custom adapter for WL Ref fields */
+    private FieldSliderAdapter wlRefAdapter = null;
     /** custom adapter for HA min fields */
     private FieldSliderAdapter haMinAdapter = null;
     /** custom adapter for HA max fields */
@@ -312,6 +318,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jFieldSamplingPeriod = new javax.swing.JFormattedTextField();
         jLabelObsDuration = new javax.swing.JLabel();
         jFieldObsDuration = new javax.swing.JFormattedTextField();
+        jLabelWLRef = new javax.swing.JLabel();
+        jSliderWLRef = new javax.swing.JSlider();
+        jTargetWLRef = new javax.swing.JLabel();
+        jFieldWLRef = new javax.swing.JFormattedTextField();
         jLabelHAMin = new javax.swing.JLabel();
         jSliderHAMin = new javax.swing.JSlider();
         jTargetHAMin = new javax.swing.JLabel();
@@ -380,14 +390,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jLabelAtmQual.setText("Atmosphere quality");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 2;
         jPanelLeft.add(jLabelAtmQual, gridBagConstraints);
 
         jComboBoxAtmQual.setModel(new DefaultComboBoxModel(AtmosphereQualityUtils.getAtmosphereQualityList()));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
@@ -396,20 +406,20 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jLabelFTMode.setText("Fringe tracker mode");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = 2;
         jPanelLeft.add(jLabelFTMode, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 0, 1);
         jPanelLeft.add(jComboBoxFTMode, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weighty = 0.1;
@@ -420,7 +430,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jLabelUVMax.setToolTipText("");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 23;
         gridBagConstraints.gridwidth = 2;
         jPanelLeft.add(jLabelUVMax, gridBagConstraints);
 
@@ -432,7 +442,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jSliderUVMax.setPreferredSize(new java.awt.Dimension(80, 30));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 24;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jSliderUVMax, gridBagConstraints);
@@ -443,7 +453,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jFieldUVMax.setName("jFieldUVMax"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 24;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jFieldUVMax, gridBagConstraints);
 
@@ -451,7 +461,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jLabelSamplingPeriod.setToolTipText("One set of calibrated visibilities in the u-v plane is taken at this interval (minutes)");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.gridwidth = 2;
         jPanelLeft.add(jLabelSamplingPeriod, gridBagConstraints);
 
@@ -460,7 +470,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jFieldSamplingPeriod.setMinimumSize(new java.awt.Dimension(40, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jFieldSamplingPeriod, gridBagConstraints);
@@ -469,7 +479,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jLabelObsDuration.setToolTipText("<html><b>Time REALLY spent on source</b>, in seconds, per calibrated point\n<br>Default values corresponds to the typical time according to the instrument (1 OB)\n</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridy = 12;
         gridBagConstraints.gridwidth = 2;
         jPanelLeft.add(jLabelObsDuration, gridBagConstraints);
 
@@ -478,10 +488,43 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jFieldObsDuration.setMinimumSize(new java.awt.Dimension(40, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jFieldObsDuration, gridBagConstraints);
+
+        jLabelWLRef.setText("WL Ref.");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 15;
+        jPanelLeft.add(jLabelWLRef, gridBagConstraints);
+
+        jSliderWLRef.setMajorTickSpacing(30);
+        jSliderWLRef.setMaximum(240);
+        jSliderWLRef.setPaintTicks(true);
+        jSliderWLRef.setMaximumSize(new java.awt.Dimension(80, 32767));
+        jSliderWLRef.setPreferredSize(new java.awt.Dimension(80, 30));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 16;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        jPanelLeft.add(jSliderWLRef, gridBagConstraints);
+
+        jTargetWLRef.setText("targetWLRef");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 15;
+        jPanelLeft.add(jTargetWLRef, gridBagConstraints);
+
+        jFieldWLRef.setColumns(6);
+        jFieldWLRef.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00#"))));
+        jFieldWLRef.setMinimumSize(new java.awt.Dimension(50, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 16;
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        jPanelLeft.add(jFieldWLRef, gridBagConstraints);
 
         jLabelHAMin.setText("HA min");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -553,7 +596,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jCheckBoxPlotUVSupport.setText("<html>Plot rise/set uv tracks</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 21;
+        gridBagConstraints.gridy = 25;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         jPanelLeft.add(jCheckBoxPlotUVSupport, gridBagConstraints);
@@ -570,7 +613,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jCheckBoxModelImage.setText("<html>Underplot a model image</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 23;
+        gridBagConstraints.gridy = 26;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         jPanelLeft.add(jCheckBoxModelImage, gridBagConstraints);
@@ -578,25 +621,25 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jLabelImageMode.setText("Plot what ...");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 24;
+        gridBagConstraints.gridy = 27;
         jPanelLeft.add(jLabelImageMode, gridBagConstraints);
 
         jComboBoxImageMode.setModel(new DefaultComboBoxModel(ImageMode.values()));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 24;
+        gridBagConstraints.gridy = 27;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 0, 1);
         jPanelLeft.add(jComboBoxImageMode, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 25;
+        gridBagConstraints.gridy = 28;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 0, 1);
         jPanelLeft.add(animatorPanel, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 26;
+        gridBagConstraints.gridy = 30;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weighty = 0.1;
@@ -608,7 +651,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jCheckBoxDoOIFits.setName("jCheckBoxDoOIFits"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 27;
+        gridBagConstraints.gridy = 31;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelLeft.add(jCheckBoxDoOIFits, gridBagConstraints);
@@ -629,18 +672,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jCheckBoxAddNoise.setName("jCheckBoxAddNoise"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 28;
+        gridBagConstraints.gridy = 32;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelLeft.add(jCheckBoxAddNoise, gridBagConstraints);
 
-        jCheckBoxUseBias.setSelected(true);
         jCheckBoxUseBias.setText("Use inst. & cal. error bias");
         jCheckBoxUseBias.setToolTipText("if enabled, correct error with both instrumental visibility / phase biases and calibration bias");
         jCheckBoxUseBias.setName("jCheckBoxUseBias"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 29;
+        gridBagConstraints.gridy = 33;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelLeft.add(jCheckBoxUseBias, gridBagConstraints);
@@ -924,12 +966,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             }
         });
 
+        this.wlRefAdapter = new FieldSliderAdapter(jSliderWLRef, jFieldWLRef, 0d, 0d, 0d);
+        this.wlRefAdapter.addChangeListener(this);
+
         this.haMinAdapter = new FieldSliderAdapter(jSliderHAMin, jFieldHAMin, AsproConstants.HA_MIN, AsproConstants.HA_MAX, AsproConstants.HA_MIN);
         this.haMinAdapter.addChangeListener(this);
 
         this.haMaxAdapter = new FieldSliderAdapter(jSliderHAMax, jFieldHAMax, AsproConstants.HA_MIN, AsproConstants.HA_MAX, AsproConstants.HA_MAX);
         this.haMaxAdapter.addChangeListener(this);
 
+        this.jTargetWLRef.setText(null);
         this.jTargetHAMin.setText(null);
         this.jTargetHAMax.setText(null);
 
@@ -1080,12 +1126,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     }
 
     /**
-     * Refresh the information relative to the instrument : sampling time and instrument modes
+     * Refresh the information relative to the instrument : sampling time, instrument modes
      * @param observation current observation settings
      */
     private void updateInstrumentData(final ObservationSetting observation) {
         // use the real instrument name (not alias):
-        final String insName = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getName();
+        final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
+        final String insName = instrument.getName();
         final String insKey = observation.getInterferometerConfiguration().getName() + '@' + insName;
 
         // test if the instrument changed :
@@ -1112,8 +1159,46 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 logger.trace("jComboBoxInstrumentMode updated: {}", this.jComboBoxInstrumentMode.getSelectedItem());
             }
 
-            // refresh the fringe tracker modes that depends on the interferometer :
+            // refresh the fringe tracker modes that depends on the instrument :
             this.updateComboFTModes(observation);
+        }
+    }
+
+    /**
+     * Refresh the information relative to the instrument mode : wavelength range
+     * @param observation current observation settings
+     */
+    private void updateInstrumentModeData(final ObservationSetting observation) {
+        // use the real instrument name (not alias):
+        final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
+        final String insName = instrument.getName();
+        final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+        final String insModeKey = observation.getInterferometerConfiguration().getName() + '@' + insName + '@' + insMode.getName();
+
+        // TODO: handle GRA4MAT (hide or refine wavelength restrictions)
+        // test if the instrument changed :
+        final boolean changed = (insName != null) && (insMode.getName() != null) && !insModeKey.equals(this.instrumentModeCacheKey);
+        if (changed) {
+            this.instrumentModeCacheKey = insModeKey;
+            logger.debug("instrument mode changed : {}", insMode);
+
+            // adjust wave length range:
+            this.wlRefAdapter.reset(insMode.getWaveLengthMin(), insMode.getWaveLengthMax(), insMode.getEffWaveLengthRef());
+
+            final boolean wlRestrictions = insMode.isWavelengthRangeRestriction();
+
+            if (wlRestrictions) {
+                this.jTargetWLRef.setText("[" + NumberUtils.trimTo3Digits(insMode.getWaveLengthMin())
+                        + " - " + NumberUtils.trimTo3Digits(insMode.getWaveLengthMax())
+                        + "] (" + NumberUtils.trimTo3Digits(insMode.getEffWaveLengthBandRef()) + ")"
+                );
+            } else {
+                this.jTargetWLRef.setText(null);
+            }
+            this.jLabelWLRef.setVisible(wlRestrictions);
+            this.jTargetWLRef.setVisible(wlRestrictions);
+            this.jSliderWLRef.setVisible(wlRestrictions);
+            this.jFieldWLRef.setVisible(wlRestrictions);
         }
     }
 
@@ -1295,25 +1380,21 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 logger.debug("instrument mode changed: {}", this.jComboBoxInstrumentMode.getSelectedItem());
             }
             fireObservationUpdateEvent();
-
         } else if (e.getSource() == this.jComboBoxAOSetup) {
             if (logger.isDebugEnabled()) {
                 logger.debug("ao changed: {}", this.jComboBoxAOSetup.getSelectedItem());
             }
             fireObservationUpdateEvent();
-
         } else if (e.getSource() == this.jComboBoxFTMode) {
             if (logger.isDebugEnabled()) {
                 logger.debug("ft mode changed: {}", this.jComboBoxFTMode.getSelectedItem());
             }
             fireObservationUpdateEvent();
-
         } else if (e.getSource() == this.jComboBoxAtmQual) {
             if (logger.isDebugEnabled()) {
                 logger.debug("atmQuality changed: {}", this.jComboBoxAtmQual.getSelectedItem());
             }
             fireObservationUpdateEvent();
-
         } else if (e.getSource() == this.jComboBoxImageMode) {
             if (logger.isDebugEnabled()) {
                 logger.debug("image mode changed: {}", this.jComboBoxImageMode.getSelectedItem());
@@ -1365,7 +1446,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.haMaxAdapter.setMinValue(source.getValue());
 
             fireObservationUpdateEvent();
-
         } else if (source == this.haMaxAdapter) {
             if (logger.isDebugEnabled()) {
                 logger.debug("haMax changed: {}", source.getValue());
@@ -1373,12 +1453,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.haMinAdapter.setMaxValue(source.getValue());
 
             fireObservationUpdateEvent();
-
         } else if (source == this.uvMaxAdapter) {
             if (logger.isDebugEnabled()) {
                 logger.debug("U-V Max changed: {}", source.getValue());
             }
             refreshPlot();
+        } else if (source == this.wlRefAdapter) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("WL Ref changed: {}", source.getValue());
+            }
+            fireObservationUpdateEvent();
         }
     }
 
@@ -1419,6 +1503,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // refresh data related to the instrument :
             this.instrumentCacheKey = null;
             this.updateInstrumentData(observation);
+
+            // refresh data related to the instrument mode:
+            this.instrumentModeCacheKey = null;
+            this.updateInstrumentModeData(observation);
 
             // update the selected instrument mode :
             if (observation.getInstrumentConfiguration().getInstrumentMode() != null) {
@@ -1512,9 +1600,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         // Refresh the UI widgets related to Observation Main changes :
         // disable the automatic update observation :
-        final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+        boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
         // disable the automatic refresh :
-        final boolean prevAutoRefresh = this.setAutoRefresh(false);
+        boolean prevAutoRefresh = this.setAutoRefresh(false);
         try {
             // update data related to the interferometer :
             this.updateInteferometerData(event.getObservation());
@@ -1524,7 +1612,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // refresh data related to the instrument :
             this.updateInstrumentData(event.getObservation());
-
         } finally {
             // restore the automatic refresh :
             this.setAutoRefresh(prevAutoRefresh);
@@ -1544,6 +1631,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // Change the instrument mode :
             changed |= om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
 
+            // TODO: migrate fields (samplingPeriod / acquisitionTime) into TargetConfiguration
             // Update the sampling period :
             final Number samplingPeriod = (Number) this.jFieldSamplingPeriod.getValue();
             changed |= om.setInstrumentSamplingPeriod(Double.valueOf(samplingPeriod.doubleValue()));
@@ -1574,12 +1662,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 // update ft mode :
                 changed |= om.setTargetFTMode(targetName, (String) this.jComboBoxFTMode.getSelectedItem());
+
+                // update wavelength ref:
+                Double wlRef = null;
+                if (jSliderWLRef.isVisible()) {
+                    wlRef = Double.valueOf(this.wlRefAdapter.getValue());
+                }
+                changed |= om.setTargetInstrumentWaveLengthRef(targetName, wlRef);
             }
 
             if (changed) {
                 // update change flag to make the ObservationManager fire an observation refresh event later
                 event.setChanged(changeType);
             }
+
+            // refresh data related to the instrument mode:
+            this.updateInstrumentModeData(event.getObservation()); // may trigger another update (wl ref changed)
         }
     }
 
@@ -3568,6 +3666,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private javax.swing.JFormattedTextField jFieldObsDuration;
     private javax.swing.JFormattedTextField jFieldSamplingPeriod;
     private javax.swing.JFormattedTextField jFieldUVMax;
+    private javax.swing.JFormattedTextField jFieldWLRef;
     private javax.swing.JLabel jLabelAOSetup;
     private javax.swing.JLabel jLabelAtmQual;
     private javax.swing.JLabel jLabelFTMode;
@@ -3578,6 +3677,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private javax.swing.JLabel jLabelObsDuration;
     private javax.swing.JLabel jLabelSamplingPeriod;
     private javax.swing.JLabel jLabelUVMax;
+    private javax.swing.JLabel jLabelWLRef;
     private javax.swing.JPanel jPanelLeft;
     private javax.swing.JPanel jPanelSpacer;
     private javax.swing.JScrollPane jScrollPaneForm;
@@ -3587,9 +3687,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private javax.swing.JSlider jSliderHAMax;
     private javax.swing.JSlider jSliderHAMin;
     private javax.swing.JSlider jSliderUVMax;
+    private javax.swing.JSlider jSliderWLRef;
     private javax.swing.JSplitPane jSplitPane;
     private javax.swing.JLabel jTargetHAMax;
     private javax.swing.JLabel jTargetHAMin;
+    private javax.swing.JLabel jTargetWLRef;
     // End of variables declaration//GEN-END:variables
     /** drawing started time value */
     private long chartDrawStartTime = 0l;

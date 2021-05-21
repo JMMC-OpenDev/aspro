@@ -1056,13 +1056,13 @@ public final class ConfigurationManager extends BaseOIManager {
      * @param instrumentAlias name or alias of the instrument
      * @return list of all instrument configuration alternative names
      */
-    public Vector<String> getInstrumentConfigurationAltNames(final String configurationName, final String instrumentAlias) {
+    public Vector<String> getInstrumentConfigurationDisplayAltNames(final String configurationName, final String instrumentAlias) {
         final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
         if (ic != null) {
             final Vector<String> v = new Vector<String>(ic.getConfigurations().size());
             for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
                 // may be null
-                v.add(c.getAltName());
+                v.add(c.getDisplayAltName());
             }
             return v;
         }
@@ -1070,19 +1070,19 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
-     * Return the instrument configuration alternative name for the given interferometer configuration and instrument name
+     * Return the instrument configuration alternative baselines for the given interferometer configuration and instrument name
      * @param configurationName name of the interferometer configuration
      * @param instrumentAlias name or alias of the instrument
      * @param confName configuration name (stations)
      * @return instrument configuration alternative name or null
      */
-    public String getInstrumentConfigurationAltName(final String configurationName, final String instrumentAlias, final String confName) {
+    public String getInstrumentConfigurationAltBaselines(final String configurationName, final String instrumentAlias, final String confName) {
         final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
         if (ic != null) {
             for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
                 // may be null
                 if (confName.equals(c.getName())) {
-                    return c.getAltName();
+                    return c.getAltBaselines();
                 }
             }
         }

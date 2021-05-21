@@ -192,10 +192,36 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <xsd:element name="dit" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The detector individual integration time in seconds (typically less than 0.1s)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="acquisitionTime" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
                         The Total Acquisition time per observed u,v point (seconds)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="instrumentWaveLengthRef" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The (optional) reference wavelength (micrometer) within the instrument mode's wavelength range
+                        refining the bandpass in high resolution (all detector can not be read out in 1 DIT)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="instrumentWaveBandRef" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The (optional) reference wavelength bandwidth (micrometer) within the instrument mode's bandwidth
+                        refining the bandpass in high resolution (all detector can not be read out in 1 DIT)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -582,6 +608,32 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         Flux magnitude in band N
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- fluxes in jansky -->
+
+            <xsd:element name="FLUX_L_JY" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux in jansky in band L
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_M_JY" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux in jansky in band M
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="FLUX_N_JY" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux in jansky in band N
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>

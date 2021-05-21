@@ -34,6 +34,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="waveLengthMax" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthBandRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="ft_waveLengthBandRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="setupRef" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="frameTime" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
@@ -58,6 +59,7 @@ import fr.jmmc.aspro.model.OIBase;
     "waveLengthMax",
     "waveLengthRef",
     "waveLengthBandRef",
+    "ftWaveLengthBandRef",
     "setupRef",
     "dit",
     "frameTime",
@@ -78,6 +80,8 @@ public class FocalInstrumentMode
     protected Double waveLengthMax;
     protected Double waveLengthRef;
     protected Double waveLengthBandRef;
+    @XmlElement(name = "ft_waveLengthBandRef")
+    protected Double ftWaveLengthBandRef;
     @XmlElement(type = Object.class)
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
@@ -258,6 +262,30 @@ public class FocalInstrumentMode
      */
     public void setWaveLengthBandRef(Double value) {
         this.waveLengthBandRef = value;
+    }
+
+    /**
+     * Gets the value of the ftWaveLengthBandRef property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFtWaveLengthBandRef() {
+        return ftWaveLengthBandRef;
+    }
+
+    /**
+     * Sets the value of the ftWaveLengthBandRef property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFtWaveLengthBandRef(Double value) {
+        this.ftWaveLengthBandRef = value;
     }
 
     /**
@@ -445,6 +473,29 @@ public class FocalInstrumentMode
         return 0.5d * (this.waveLengthMax + this.waveLengthMin);
     }
 
+    /**
+     * Return the effective reference wave length (read only)
+     * @return effective reference wave length
+     */
+    public final double getEffWaveLengthRef() {
+        if (getWaveLengthRef() != null) {
+            final double wlRef = getWaveLengthRef();
+            if ((wlRef >= getWaveLengthMin()) && (wlRef <= getWaveLengthMax())) {
+                return wlRef;
+            }
+        }
+        return getWaveLength();
+    }
+
+    /**
+     * Return the effective reference bandwidth (read only)
+     * @return effective reference bandwidth
+     */
+    public final double getEffWaveLengthBandRef() {
+        return (isWavelengthRangeRestriction()) ? getWaveLengthBandRef().doubleValue()
+                : (getWaveLengthMax() - getWaveLengthMin());
+    }
+
     /** spectral channels (derived from resolution)(read-only) */
     @javax.xml.bind.annotation.XmlTransient
     protected int spectralChannels = -1;
@@ -458,10 +509,21 @@ public class FocalInstrumentMode
             if (this.waveLengthMin == null || this.waveLengthMax == null) {
                 this.spectralChannels = 1;
             } else {
-                this.spectralChannels = Math.max(1, (int) Math.round(getResolution() * (this.waveLengthMax - this.waveLengthMin) / getWaveLength()));
+                this.spectralChannels = getSpectralChannels(getEffWaveLengthRef(), getEffWaveLengthBandRef(), getResolution());
             }
         }
         return this.spectralChannels;
+    }
+
+    /**
+     * Return true if the wavelength range is restricted (dit limit)
+     * @return true if the wavelength range is restricted (dit limit)
+     */
+    public boolean isWavelengthRangeRestriction() {
+        if (getWaveLengthBandRef() != null) {
+            return ((getWaveLengthMax() - getWaveLengthMin()) > getWaveLengthBandRef());
+        }
+        return false;
     }
 
     /**
@@ -502,7 +564,7 @@ public class FocalInstrumentMode
     }
 
     /**
-    * Initialize and check this instance
+     * Initialize and check this instance
      * @param logger logger to use
      * @throws IllegalStateException if the configuration is severly invalid !
      */
@@ -510,33 +572,31 @@ public class FocalInstrumentMode
         if (this.name == null) {
             throw new IllegalStateException("Invalid name !");
         }
-        
+
         // setup is tested at higher level !
-        
         // dit and ditMin are optional.
-        
         if (this.table != null) {
             this.table.init(logger);
-            
+
             final double[] lambda = this.table.getColumn(SpectralSetupQuantity.LAMBDA).getValues();
             final double[] delta_lambda = this.table.getColumn(SpectralSetupQuantity.DELTA_LAMBDA).getValues();
 
             final int nbRows = this.table.getNbRows();
-            
+
             // Define the number of spectral channels:
             this.spectralChannels = nbRows;
-            
+
             // Define wavelength min/max and resolution:
             int ch = 0;
             setWaveLengthMin(lambda[ch] - 0.5 * delta_lambda[ch]);
-            
+
             ch = nbRows - 1;
             setWaveLengthMax(lambda[ch] + 0.5 * delta_lambda[ch]);
-            
+
             ch = nbRows / 2;
             setResolution(lambda[ch] / delta_lambda[ch]);
         }
-        
+
         if (this.waveLengthMin == null) {
             logger.warn("Invalid waveLengthMin !");
             setWaveLengthMin(Double.NaN);
@@ -576,9 +636,36 @@ public class FocalInstrumentMode
             logger.info("  table: {}", table);
         }
 
-        logger.info ("}");
+        logger.info("}");
     }
-  
+
+    public double getEffectiveWavelengthRange(final double lambda, final boolean useWavelengthRangeRestriction,
+                                              final double effband, final fr.jmmc.oitools.model.range.Range range) {
+        double min = getWaveLengthMin();
+        double max = getWaveLengthMax();
+
+        double wlRef = lambda;
+
+        if (useWavelengthRangeRestriction) {
+            final double halfBand = 0.5 * effband;
+            if (wlRef < min + halfBand) {
+                wlRef = min + halfBand;
+            }
+            if (wlRef > max - halfBand) {
+                wlRef = max - halfBand;
+            }
+            min = wlRef - halfBand;
+            max = wlRef + halfBand;
+        }
+        range.setMin(min);
+        range.setMax(max);
+
+        return wlRef;
+    }
+
+    public static int getSpectralChannels(final double wavelength, final double waveBand, final double resolution) {
+        return Math.max(1, (int) Math.round(resolution * waveBand / wavelength));
+    }
 //--simple--preserve
 
 }

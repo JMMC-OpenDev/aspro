@@ -380,9 +380,8 @@ public final class NoiseService implements VisNoiseService {
 
         final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
-        final FocalInstrumentSetup insSetup = observation.getInstrumentConfiguration().getFocalInstrumentMode().getSetupRef();
-
         final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+        final FocalInstrumentSetup insSetup = insMode.getSetupRef();
 
         // use alias or real instrument name:
         this.instrumentName = instrument.getAliasOrName();
@@ -590,14 +589,10 @@ public final class NoiseService implements VisNoiseService {
         final double lambdaMin = this.waveLengths[0];
         final double lambdaMax = this.waveLengths[nSpectralChannels - 1];
 
-        if (insMode.getWaveLengthBandRef() != null) {
-            final double deltaLambda = (lambdaMax - lambdaMin) / AsproConstants.MICRO_METER;
-            final double maxDeltaLambda = insMode.getWaveLengthBandRef();
-
-            if (deltaLambda > maxDeltaLambda) {
-                addWarning("Detector can not be read completely within 1 DIT: the wavelength range is restricted to "
-                        + df.format(maxDeltaLambda) + " " + SpecialChars.UNIT_MICRO_METER);
-            }
+        // TODO: fix message if FT enabled (no restriction ...)
+        if (insMode.isWavelengthRangeRestriction()) {
+            addWarning("Detector can not be read completely within 1 DIT: the wavelength range is restricted to "
+                    + df.format(insMode.getWaveLengthBandRef()) + " " + SpecialChars.UNIT_MICRO_METER);
         }
 
         final SpectralSetup table = insMode.getTable();
@@ -611,6 +606,7 @@ public final class NoiseService implements VisNoiseService {
                 throw new IllegalStateException("Missing lambda column within spectral table !");
             }
 
+            // TODO: fix check ranges
             for (int i = 0; i < lambda.length; i++) {
                 if (Math.abs(lambda[i] - lambdaMin) < 1e-15) {
                     firstIdx = i;

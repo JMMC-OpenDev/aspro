@@ -21,6 +21,7 @@ import fr.jmmc.aspro.model.oi.SpectralSetup;
 import fr.jmmc.aspro.model.oi.SpectralSetupQuantity;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
@@ -48,6 +49,7 @@ import fr.jmmc.oitools.model.OITarget;
 import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.OIWavelength;
+import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.oitools.util.CombUtils;
 import fr.nom.tam.fits.FitsException;
 import java.io.IOException;
@@ -283,20 +285,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         if (logger.isDebugEnabled()) {
             logger.debug("instrumentMode: {}", instrumentMode.getName());
         }
-
-        // Get wavelength range for the selected instrument mode :
-        final double lambdaMin = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin();
-        final double lambdaMax = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMax();
-
-        // TODO: handle properly spectral channels (rebinning):
-        int nWaveLengths = instrumentMode.getSpectralChannels();
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("lambdaMin: {}", lambdaMin);
-            logger.debug("lambdaMax: {}", lambdaMax);
-            logger.debug("nChannels: {}", nWaveLengths);
-        }
-
         // prepare wavelengths independently of the user model Fits cube (wavelengths):
         final double waveBand;
 
@@ -306,11 +294,96 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             this.waveBands = table.getAndScaleColumn(SpectralSetupQuantity.DELTA_LAMBDA, AsproConstants.MICRO_METER);
             waveBand = StatUtils.mean(this.waveBands);
         } else {
+            // Get wavelength range for the selected instrument mode :
+            final double lambdaMin = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin();
+            final double lambdaMax = AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMax();
+
+            // TODO: handle properly spectral channels (rebinning):
+            final int nWaveLengths = instrumentMode.getSpectralChannels();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("lambdaMin: {}", lambdaMin);
+                logger.debug("lambdaMax: {}", lambdaMax);
+                logger.debug("nChannels: {}", nWaveLengths);
+            }
             // TODO: handle variable bandwdith:
             waveBand = (lambdaMax - lambdaMin) / nWaveLengths;
             this.waveLengths = computeWaveLengths(lambdaMin, waveBand, nWaveLengths);
             this.waveBands = new double[nWaveLengths];
             Arrays.fill(waveBands, waveBand);
+        }
+
+        int nWaveLengths = this.waveLengths.length;
+
+        // Filter wavelength range (restriction):
+        {
+            // use target's wavelength ref instead of default value:
+            double lambda = instrumentMode.getEffWaveLengthRef();
+
+            boolean useWavelengthRangeRestriction = instrumentMode.isWavelengthRangeRestriction();
+            double effBand = instrumentMode.getEffWaveLengthBandRef();
+
+            if (target != null) {
+                final TargetConfiguration targetConf = target.getConfiguration();
+
+                if (targetConf != null && targetConf.getInstrumentWaveLengthRef() != null) {
+                    lambda = targetConf.getInstrumentWaveLengthRef();
+                }
+
+                if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
+                    final String ftMode = targetConf.getFringeTrackerMode();
+
+                    // TODO: handle FT modes properly: GroupTrack is hard coded !
+                    // disable wavelength restrictions if FT enabled (basic GRA4MAT support, TODO: refine wavelength ranges for GRA4MAT)
+                    useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith("GroupTrack") && (instrumentMode.getFtWaveLengthBandRef() == null));
+                    if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
+                        effBand = instrumentMode.getFtWaveLengthBandRef();
+                    }
+                }
+            }
+
+            // Get wavelength range for the selected instrument mode :
+            final Range wlRange = new Range();
+            instrumentMode.getEffectiveWavelengthRange(lambda, useWavelengthRangeRestriction, effBand, wlRange);            
+            final double lambdaMin = AsproConstants.MICRO_METER * wlRange.getMin();
+            final double lambdaMax = AsproConstants.MICRO_METER * wlRange.getMax();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("lambdaMin: {}", lambdaMin);
+                logger.debug("lambdaMax: {}", lambdaMax);
+            }
+
+            if ((lambdaMin > waveLengths[0]) || (lambdaMax < waveLengths[nWaveLengths - 1])) {
+                // check WLen range:
+                int firstIdx = -1, lastIdx = -1;
+
+                for (int i = 0; i < waveLengths.length; i++) {
+                    if (Math.abs(waveLengths[i] - lambdaMin) < waveBands[i]) {
+                        firstIdx = i;
+                        break;
+                    }
+                }
+
+                for (int i = waveLengths.length - 1; i >= 0; i--) {
+                    if (Math.abs(waveLengths[i] - lambdaMax) < waveBands[i]) {
+                        lastIdx = i + 1; // exclusive
+                        break;
+                    }
+                }
+                logger.debug("idx : {} - {}", firstIdx, lastIdx);
+
+                if (firstIdx == -1 || lastIdx == -1) {
+                    throw new IllegalStateException("Invalid range within spectral table !");
+                }
+
+                if (firstIdx > 0 || lastIdx < nWaveLengths - 1) {
+                    this.waveLengths = Arrays.copyOfRange(this.waveLengths, firstIdx, lastIdx);
+                    this.waveBands = Arrays.copyOfRange(this.waveBands, firstIdx, lastIdx);
+                }
+
+                // refresh:
+                nWaveLengths = this.waveLengths.length;
+            }
         }
 
         // Initial Wavelength information:

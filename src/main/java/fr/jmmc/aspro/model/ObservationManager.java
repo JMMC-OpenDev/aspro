@@ -1119,6 +1119,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     public boolean setInstrumentSamplingPeriod(final Double samplingPeriod) {
         final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
 
+        // TODO: migrate fields (samplingPeriod / acquisitionTime) into TargetConfiguration
         // period can be null :
         final boolean changed = isChanged(samplingPeriod, instrumentChoice.getSamplingPeriod());
         if (changed) {
@@ -1140,6 +1141,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     public boolean setInstrumentAcquisitionTime(final Double obsDuration) {
         final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
 
+        // TODO: migrate fields (samplingPeriod / acquisitionTime) into TargetConfiguration
         // obsDuration can be null :
         final boolean changed = isChanged(obsDuration, instrumentChoice.getAcquisitionTime());
         if (changed) {
@@ -1504,7 +1506,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         // special case :
         final String aoSetup = (aoSetupName != null && aoSetupName.isEmpty()) ? null : aoSetupName;
 
-        // ftMode can be null :
+        // aoSetup can be null :
         final boolean changed = isChanged(aoSetup, targetConf.getAoSetup());
         if (changed) {
             if (logger.isTraceEnabled()) {
@@ -1538,6 +1540,30 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 logger.trace("setTargetFTMode: {}", mode);
             }
             targetConf.setFringeTrackerMode(mode);
+        }
+        return changed;
+    }
+
+    /**
+     * Set the wavelength reference for the related instrument mode and given target name
+     * Used by UVCoveragePanel.updateObservation()
+     *
+     * @param name name of the target
+     * @param wavelengthRef sampling period (m) or null if undefined
+     * @return true if the value changed
+     */
+    public boolean setTargetInstrumentWaveLengthRef(final String name, final Double wavelengthRef) {
+        final TargetConfiguration targetConf = getTargetConfiguration(name);
+        if (targetConf == null) {
+            return false;
+        }
+
+        final boolean changed = isChanged(wavelengthRef, targetConf.getInstrumentWaveLengthRef());
+        if (changed) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("setTargetInstrumentWaveLengthRef: {}", wavelengthRef);
+            }
+            targetConf.setInstrumentWaveLengthRef(wavelengthRef);
         }
         return changed;
     }
