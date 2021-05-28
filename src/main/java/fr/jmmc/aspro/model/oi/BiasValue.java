@@ -200,13 +200,6 @@ public class BiasValue
     }
     
 //--simple--preserve
-    
-    /**
-     * Gets the squared value of the value property.
-     */
-    public double getSquaredValue() {
-        return value * value;
-    }
 
     @Override
     public String toString() {

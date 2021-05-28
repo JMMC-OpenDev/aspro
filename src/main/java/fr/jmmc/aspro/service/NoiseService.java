@@ -77,6 +77,9 @@ public final class NoiseService implements VisNoiseService {
     /** maximum error on Vis2 to avoid excessively large errors */
     private final static double MAX_ERR_V2 = MAX_ERR_V * MAX_ERR_V;
 
+    /** enable bias handling (only for debugging / ETC tests) */
+    private final static boolean USE_BIAS = true;
+
     /* members */
     /** instrument name */
     private String instrumentName = null;
@@ -155,22 +158,26 @@ public final class NoiseService implements VisNoiseService {
     private final boolean useCalibrationBias;
     /** true to use instrument or calibration bias; false to compute only theoretical error */
     private boolean useBias;
+    /** true to use random bias per UV point (same for all wavelengths); false to use pure random on wavelength (former approach) */
+    private boolean useRandomUVCalBias;
     /** flag to prepare instrumentalVisRelBias / instrumentalVis2RelBias using instrumentalPhotRelBias */
     private boolean prepareVisRelBias = false;
     /** (W) Typical Photometric Bias (relative) */
     private double[] instrumentalPhotRelBias = null;
-    /** (W) Typical Vis Bias (relative = a) in y = a*x + b */
+    /** (W) Typical Vis Bias (relative) */
     private double[] instrumentalVisRelBias = null;
-    /** (W) Typical Vis Bias (absolute = b) in y = a*x + b */
-    private double[] instrumentalVisBias = null;
+    /** (W) Typical Vis Calibration Bias (absolute) */
+    private double[] instrumentalVisCalBias = null;
+    /** (W) Typical Vis2 Bias (relative) */
+    private double[] instrumentalVis2RelBias = null;
     /** (W) Typical Vis. Phase Bias (rad) */
     private double[] instrumentalVisPhaseBias = null;
-    /** (W) Typical Vis2 Bias (relative = a) in y = a*x + b */
-    private double[] instrumentalVis2RelBias = null;
-    /** (W) Typical Vis2 Bias (absolute = b) in y = a*x + b */
-    private double[] instrumentalVis2Bias = null;
+    /** (W) Typical Vis. Phase Calibration Bias (rad) */
+    private double[] instrumentalVisPhaseCalBias = null;
     /** (W) Typical Phase Closure Bias (rad) */
     private double[] instrumentalT3PhaseBias = null;
+    /** (W) Typical Phase Closure Calibration Bias (rad) */
+    private double[] instrumentalT3PhaseCalBias = null;
 
     /* instrument mode parameters */
     /** number of spectral channels */
@@ -254,7 +261,7 @@ public final class NoiseService implements VisNoiseService {
                            final double[] waveLengths,
                            final double[] waveBands) {
 
-        this.useCalibrationBias = useCalibrationBias;
+        this.useCalibrationBias = USE_BIAS && useCalibrationBias;
         this.warningContainer = warningContainer;
 
         // Get spectral channels:
@@ -440,21 +447,26 @@ public final class NoiseService implements VisNoiseService {
 
         final boolean insHasInstrumentBias = (!insSetup.getInstrumentBias().isEmpty());
 
-        if (this.useCalibrationBias || insHasInstrumentBias) {
+        if (USE_BIAS && (this.useCalibrationBias || insHasInstrumentBias)) {
             this.useBias = true;
             logger.debug("useBias : {}", this.useBias);
 
             this.instrumentalPhotRelBias = new double[nSpectralChannels];
             this.instrumentalVisRelBias = new double[nSpectralChannels];
-            this.instrumentalVisBias = new double[nSpectralChannels];
-
+            this.instrumentalVisCalBias = new double[nSpectralChannels];
             this.instrumentalVis2RelBias = new double[nSpectralChannels];
-            this.instrumentalVis2Bias = new double[nSpectralChannels];
 
             this.instrumentalVisPhaseBias = new double[nSpectralChannels];
+            this.instrumentalVisPhaseCalBias = new double[nSpectralChannels];
+
             this.instrumentalT3PhaseBias = new double[nSpectralChannels];
+            this.instrumentalT3PhaseCalBias = new double[nSpectralChannels];
 
             if (insHasInstrumentBias) {
+                // New approach to sample calibration bias:
+                this.useRandomUVCalBias = (this.useCalibrationBias);
+                logger.debug("useRandomUVCalBias : {}", this.useRandomUVCalBias);
+
                 // telescope is known:
                 final Telescope tel = this.telescope;
                 // AtmosphereQuality is known:
@@ -475,113 +487,115 @@ public final class NoiseService implements VisNoiseService {
 
                         logger.debug("bias type: {} ins bias: {} cal bias: {}", type, insBias, calBias);
 
+                        // note: calibration bias are always absolute (amp / phi)
                         // sum of variance:
                         switch (type) {
                             case VIS:
                                 if (insBias != null) {
                                     if (insBias.getUnit() == BiasUnit.REL) {
-                                        this.instrumentalVisRelBias[i] += insBias.getSquaredValue();
+                                        this.instrumentalVisRelBias[i] = insBias.getValue();
                                     } else {
-                                        this.instrumentalVisBias[i] += insBias.getSquaredValue();
+                                        logger.warn("Absolute Vis instrumental bias not supported !");
                                     }
                                 }
                                 if (calBias != null) {
                                     if (calBias.getUnit() == BiasUnit.REL) {
-                                        this.instrumentalVisRelBias[i] += calBias.getSquaredValue();
+                                        logger.warn("Relative Vis calibration bias not supported !");
                                     } else {
-                                        this.instrumentalVisBias[i] += calBias.getSquaredValue();
+                                        this.instrumentalVisCalBias[i] = calBias.getValue();
                                     }
                                 }
-                                // Convert absolute variances to absolute errors:
-                                this.instrumentalVisBias[i] = Math.sqrt(this.instrumentalVisBias[i]);
                                 break;
                             case VISPHI:
                                 if (insBias != null) {
                                     if (insBias.getUnit() == BiasUnit.REL) {
-                                        logger.warn("Relative VisPhi bias not supported !");
+                                        logger.warn("Relative VisPhi instrumental bias not supported !");
                                     } else {
-                                        this.instrumentalVisPhaseBias[i] += insBias.getSquaredValue();
+                                        this.instrumentalVisPhaseBias[i] = insBias.getValue();
                                     }
                                 }
                                 if (calBias != null) {
                                     if (calBias.getUnit() == BiasUnit.REL) {
-                                        logger.warn("Relative VisPhi bias not supported !");
+                                        logger.warn("Relative VisPhi calibration bias not supported !");
                                     } else {
-                                        this.instrumentalVisPhaseBias[i] += calBias.getSquaredValue();
+                                        this.instrumentalVisPhaseCalBias[i] = calBias.getValue();
                                     }
                                 }
                                 /* Convert Phase bias to radians */
-                                // Convert absolute variances to absolute errors:
-                                this.instrumentalVisPhaseBias[i] = FastMath.toRadians(Math.sqrt(this.instrumentalVisPhaseBias[i]));
+                                this.instrumentalVisPhaseBias[i] = FastMath.toRadians(this.instrumentalVisPhaseBias[i]);
+                                this.instrumentalVisPhaseCalBias[i] = FastMath.toRadians(this.instrumentalVisPhaseCalBias[i]);
                                 break;
                             case T_3_PHI:
                                 if (insBias != null) {
                                     if (insBias.getUnit() == BiasUnit.REL) {
-                                        logger.warn("Relative T3Phi bias not supported !");
+                                        logger.warn("Relative T3Phi instrumental bias not supported !");
                                     } else {
-                                        this.instrumentalT3PhaseBias[i] += insBias.getSquaredValue();
+                                        this.instrumentalT3PhaseBias[i] = insBias.getValue();
                                     }
                                 }
                                 if (calBias != null) {
                                     if (calBias.getUnit() == BiasUnit.REL) {
-                                        logger.warn("Relative T3Phi bias not supported !");
+                                        logger.warn("Relative T3Phi calibration bias not supported !");
                                     } else {
-                                        this.instrumentalT3PhaseBias[i] += calBias.getSquaredValue();
+                                        this.instrumentalT3PhaseCalBias[i] = calBias.getValue();
                                     }
                                 }
                                 /* Convert Phase bias to radians */
-                                // Convert absolute variances to absolute errors:
-                                this.instrumentalT3PhaseBias[i] = FastMath.toRadians(Math.sqrt(this.instrumentalT3PhaseBias[i]));
+                                this.instrumentalT3PhaseBias[i] = FastMath.toRadians(this.instrumentalT3PhaseBias[i]);
+                                this.instrumentalT3PhaseCalBias[i] = FastMath.toRadians(this.instrumentalT3PhaseCalBias[i]);
                                 break;
                             case PHOT:
                                 if (insBias != null) {
                                     if (insBias.getUnit() != BiasUnit.JY) {
-                                        logger.warn("Only JY supported for Phot bias !");
+                                        logger.warn("Only JY supported for Photometric instrumental bias !");
                                     } else {
-                                        this.instrumentalPhotRelBias[i] += insBias.getValue(); // initial: e_phot_jy
+                                        this.instrumentalPhotRelBias[i] = insBias.getValue(); // initial: e_phot_jy
                                     }
                                 }
                                 if (calBias != null) {
-                                    logger.warn("Calibration bias not supported for Phot bias !");
+                                    logger.warn("Calibration bias not supported for Photometric bias !");
                                 }
                                 break;
                             default:
                         }
                     } // type
-
-                    // absolute vis2 error = absolute vis error:
-                    this.instrumentalVis2Bias[i] = instrumentalVisBias[i];
                 } // channels
 
                 // instrumentalPhotRelBias is incomplete (e_phot_jy only)
                 // instrumentalVis2RelBias is undefined yet
-                logger.debug("instrumentalVisRelBias:   {}", Arrays.toString(instrumentalVisRelBias));   // rel
-                logger.debug("instrumentalVisBias:      {}", Arrays.toString(instrumentalVisBias));     // abs
-                logger.debug("instrumentalVis2Bias:     {}", Arrays.toString(instrumentalVis2Bias));    // abs
+                if (logger.isDebugEnabled()) {
+                    logger.debug("instrumentalPhotRelBias:     {}", Arrays.toString(instrumentalPhotRelBias));     // e_phot_jy
 
-                logger.debug("instrumentalVisPhaseBias: {}", Arrays.toString(instrumentalVisPhaseBias)); // rad
-                logger.debug("instrumentalT3PhaseBias:  {}", Arrays.toString(instrumentalT3PhaseBias));  // rad
+                    logger.debug("instrumentalVisRelBias:      {}", Arrays.toString(instrumentalVisRelBias));      // rel
+                    logger.debug("instrumentalVisCalBias:      {}", Arrays.toString(instrumentalVisCalBias));      // abs
 
-                logger.debug("instrumentalPhotRelBias:  {}", Arrays.toString(instrumentalPhotRelBias));  // e_phot_jy
+                    logger.debug("instrumentalVisPhaseBias:    {}", Arrays.toString(instrumentalVisPhaseBias));    // rad
+                    logger.debug("instrumentalVisPhaseCalBias: {}", Arrays.toString(instrumentalVisPhaseCalBias)); // rad
 
+                    logger.debug("instrumentalT3PhaseBias:     {}", Arrays.toString(instrumentalT3PhaseBias));     // rad
+                    logger.debug("instrumentalT3PhaseCalBias:  {}", Arrays.toString(instrumentalT3PhaseCalBias));  // rad
+                }
                 /* see next steps in prepareTarget() */
                 this.prepareVisRelBias = true;
 
             } else {
-                // former approach:
+                // former approach: absolute biases
+
                 /* Get Vis bias (percents) */
                 final double visBias = 0.01 * insSetup.getInstrumentVisibilityBias();
-                Arrays.fill(this.instrumentalVis2Bias, visBias);
-                Arrays.fill(this.instrumentalVisBias, visBias);
+                Arrays.fill(this.instrumentalVisCalBias, visBias);
 
                 /* Convert Phase bias to radians */
                 final double phiBias = FastMath.toRadians(insSetup.getInstrumentPhaseBias());
 
-                Arrays.fill(this.instrumentalT3PhaseBias, phiBias);
-                Arrays.fill(this.instrumentalVisPhaseBias, phiBias);
+                Arrays.fill(this.instrumentalVisPhaseCalBias, phiBias);
+                Arrays.fill(this.instrumentalT3PhaseCalBias, phiBias);
 
-                logger.debug("instrumentalVisibilityBias    : {}", instrumentalVis2Bias);
-                logger.debug("instrumentalT3PhaseBias       : {}", instrumentalT3PhaseBias);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("instrumentalVisCalBias:      {}", Arrays.toString(instrumentalVisCalBias));    // abs
+                    logger.debug("instrumentalVisPhaseCalBias: {}", Arrays.toString(instrumentalVisPhaseCalBias)); // rad
+                    logger.debug("instrumentalT3PhaseBias:     {}", Arrays.toString(instrumentalT3PhaseBias)); // rad
+                }
             }
         }
 
@@ -860,7 +874,7 @@ public final class NoiseService implements VisNoiseService {
 
                 // (dV2 / V2) = 2 (dv / v)
                 final double rel_e_v2 = 2.0 * this.instrumentalVisRelBias[i];
-                final double rel_v2_error = Math.sqrt(rel_e_v2 * rel_e_v2 + 2.0 * rel_e_phot * rel_e_phot); // VIS2 implies 2 photometry
+                final double rel_v2_error = Math.sqrt(rel_e_v2 * rel_e_v2 + 2.0 * rel_e_phot * rel_e_phot); // VIS2 implies 2 photometries
                 final double rel_e_v = rel_v2_error / 2.0; // 1/2 error
 
                 if (false) {
@@ -870,16 +884,16 @@ public final class NoiseService implements VisNoiseService {
                     );
                 }
                 this.instrumentalPhotRelBias[i] = rel_e_phot;
-
                 this.instrumentalVisRelBias[i] = rel_e_v;
                 this.instrumentalVis2RelBias[i] = rel_v2_error;
 
             } // channels
 
-            logger.debug("instrumentalPhotRelBias:  {}", Arrays.toString(instrumentalPhotRelBias));  // e_phot_jy
-
-            logger.debug("instrumentalVisRelBias:   {}", Arrays.toString(instrumentalVisRelBias));   // rel
-            logger.debug("instrumentalVis2RelBias:  {}", Arrays.toString(instrumentalVis2RelBias));   // rel
+            if (logger.isDebugEnabled()) {
+                logger.debug("instrumentalPhotRelBias:  {}", Arrays.toString(instrumentalPhotRelBias));  // e_phot_jy
+                logger.debug("instrumentalVisRelBias:   {}", Arrays.toString(instrumentalVisRelBias));   // rel
+                logger.debug("instrumentalVis2RelBias:  {}", Arrays.toString(instrumentalVis2RelBias));   // rel
+            }
         }
 
         Target ftTarget = null;
@@ -1389,6 +1403,10 @@ public final class NoiseService implements VisNoiseService {
         return useBias;
     }
 
+    public boolean isUseRandomUVCalBias() {
+        return useRandomUVCalBias;
+    }
+
     public int getIndexRefChannel() {
         return iRefChannel;
     }
@@ -1832,24 +1850,44 @@ public final class NoiseService implements VisNoiseService {
     }
 
     public double getVisAmpBias(final int iChannel, final double vamp) {
-        final double visBias = (instrumentalVisBias[iChannel] + instrumentalVisRelBias[iChannel] * vamp);
-        return Math.max(visBias, vamp * getVisPhiBias(iChannel)); // absolute
+        return instrumentalVisRelBias[iChannel] * vamp;
+    }
+
+    public double getVisAmpCalBias(final int iChannel) {
+        return instrumentalVisCalBias[iChannel];
     }
 
     public double getVisPhiBias(final int iChannel) {
         return instrumentalVisPhaseBias[iChannel]; // absolute in radians
     }
 
+    public double getVisPhiCalBias(final int iChannel) {
+        return instrumentalVisPhaseCalBias[iChannel]; // absolute in radians
+    }
+
     public double getVis2Bias(final int iChannel, final double vis2) {
-        return (instrumentalVis2Bias[iChannel] + instrumentalVis2RelBias[iChannel] * vis2); // absolute
+        return instrumentalVis2RelBias[iChannel] * vis2; // absolute
+    }
+
+    public double getVis2CalBias(final int iChannel, final double vis2) {
+        // d(V2) = 2V d(V)
+        return instrumentalVisCalBias[iChannel] * 2.0 * Math.sqrt(vis2); // absolute
     }
 
     public double getT3AmpBias(final int iChannel, final double t3amp) {
         return t3amp * getT3PhiBias(iChannel); // absolute
     }
 
+    public double getT3AmpCalBias(final int iChannel, final double t3amp) {
+        return t3amp * getT3PhiCalBias(iChannel); // absolute
+    }
+
     public double getT3PhiBias(final int iChannel) {
         return instrumentalT3PhaseBias[iChannel]; // absolute in radians
+    }
+
+    public double getT3PhiCalBias(final int iChannel) {
+        return instrumentalT3PhaseCalBias[iChannel]; // absolute in radians
     }
 
     /* --- VisNoiseService implementation --- */
