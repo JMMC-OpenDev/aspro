@@ -197,7 +197,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         boolean doRandomUVCalBias = false;
 
         // do not generate errors for the DEMO interferometer
-        if (!"DEMO".equalsIgnoreCase(this.arrNameKeyword)) {
+        if ((this.waveLengths.length != 0) && !"DEMO".equalsIgnoreCase(this.arrNameKeyword)) {
             // Prepare the noise service with exact wavelengths:
             // note: NoiseService parameter dependencies:
             // observation {target}
@@ -377,60 +377,62 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 }
                 logger.debug("idx : {} - {}", firstIdx, lastIdx);
 
-// TODO: handle case where range is not found (hole in LM band at 4.2-4.5):
+                // handle special case where range is not found (hole in LM band at 4.2-4.5):
                 if (firstIdx == -1 || lastIdx == -1) {
-                    System.out.println("waveLengths: " + Arrays.toString(waveLengths));
-                    System.out.println("wlRange: " + wlRange);
-                    System.out.println("lambda: " + lambda);
-                    System.out.println("effBand: " + effBand);                    
-                    
-                    throw new IllegalStateException("Invalid range within wavelength table !");
+                    logger.info("no matching wavelengths in {}", wlRange);
+                    this.waveLengths = new double[0];
+                    this.waveBands = new double[0];
+                    nWaveLengths = 0;
+                } else {
+                    if (firstIdx > 0 || lastIdx < nWaveLengths - 1) {
+                        this.waveLengths = Arrays.copyOfRange(this.waveLengths, firstIdx, lastIdx);
+                        this.waveBands = Arrays.copyOfRange(this.waveBands, firstIdx, lastIdx);
+                    }
+                    // refresh:
+                    nWaveLengths = this.waveLengths.length;
                 }
-
-                if (firstIdx > 0 || lastIdx < nWaveLengths - 1) {
-                    this.waveLengths = Arrays.copyOfRange(this.waveLengths, firstIdx, lastIdx);
-                    this.waveBands = Arrays.copyOfRange(this.waveBands, firstIdx, lastIdx);
-                }
-
-                // refresh:
-                nWaveLengths = this.waveLengths.length;
             }
         }
 
-        // Initial Wavelength information:
-        String firstChannel = Double.toString(convertWL(this.waveLengths[0]));
-        String lastChannel = (nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[nWaveLengths - 1])) : null;
+        if (nWaveLengths == 0) {
+            addWarning(warningContainer, this.instrumentName + " instrument mode: 0 channels (matching WL Ref)");
+            this.isModelWLValid = false;
+        } else {
+            // Initial Wavelength information:
+            String firstChannel = Double.toString(convertWL(this.waveLengths[0]));
+            String lastChannel = (nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[nWaveLengths - 1])) : null;
 
-        addInformation(warningContainer, this.instrumentName + " instrument mode: "
-                + nWaveLengths + " channels "
-                + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] "
-                + "(band: " + convertWL(waveBand) + " " + SpecialChars.UNIT_MICRO_METER + ')');
+            addInformation(warningContainer, this.instrumentName + " instrument mode: "
+                    + nWaveLengths + " channels "
+                    + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] "
+                    + "(band: " + convertWL(waveBand) + " " + SpecialChars.UNIT_MICRO_METER + ')');
 
-        // keep number of channels:
-        final int nChannels = nWaveLengths;
+            // keep number of channels:
+            final int nChannels = nWaveLengths;
 
-        // Keep only spectral channels where user model is defined:
-        // note: Instrument spectral channels (waveLengths, waveBand, lambdaMin, lambdaMax) can be modified by this method:
-        this.isModelWLValid = prepareUserModel(warningContainer);
+            // Keep only spectral channels where user model is defined:
+            // note: Instrument spectral channels (waveLengths, waveBand, lambdaMin, lambdaMax) can be modified by this method:
+            this.isModelWLValid = prepareUserModel(warningContainer);
 
-        // refresh:
-        nWaveLengths = this.waveLengths.length;
+            // refresh:
+            nWaveLengths = this.waveLengths.length;
 
-        // adjust used spectral channels in information and log:
-        if (nWaveLengths != nChannels) {
-            // Wavelength information:
-            firstChannel = Double.toString(convertWL(this.waveLengths[0]));
-            lastChannel = (nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[nWaveLengths - 1])) : null;
+            // adjust used spectral channels in information and log:
+            if (nWaveLengths != nChannels) {
+                // Wavelength information:
+                firstChannel = Double.toString(convertWL(this.waveLengths[0]));
+                lastChannel = (nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[nWaveLengths - 1])) : null;
 
-            addWarning(warningContainer, "Restricted instrument mode: "
-                    + this.waveLengths.length + " channels "
-                    + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] ");
-        }
+                addWarning(warningContainer, "Restricted instrument mode: "
+                        + this.waveLengths.length + " channels "
+                        + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] ");
+            }
 
-        this.insNameKeyword = this.instrumentName + '_' + firstChannel + ((lastChannel != null) ? ("-" + lastChannel) : "") + '-' + nWaveLengths + "ch";
+            this.insNameKeyword = this.instrumentName + '_' + firstChannel + ((lastChannel != null) ? ("-" + lastChannel) : "") + '-' + nWaveLengths + "ch";
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("insNameKeyword: {}", insNameKeyword);
+            if (logger.isDebugEnabled()) {
+                logger.debug("insNameKeyword: {}", insNameKeyword);
+            }
         }
     }
 
