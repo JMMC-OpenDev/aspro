@@ -94,7 +94,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
             public void propertyChange(final PropertyChangeEvent evt) {
                 final double minElevNew = ((Number) jFieldMinElev.getValue()).doubleValue();
 
-                if (minElevNew < 0d || minElevNew >= 90d) {
+                if (minElevNew <= 0.0 || minElevNew >= 90.0) {
                     // invalid value :
                     jFieldMinElev.setValue(myPreferences.getPreferenceAsDouble(Preferences.MIN_ELEVATION));
                 }
@@ -112,7 +112,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
             public void propertyChange(final PropertyChangeEvent evt) {
                 final double snrNew = ((Number) jFieldSNRTh.getValue()).doubleValue();
 
-                if (snrNew < 0d) {
+                if (snrNew <= 0.0) {
                     // invalid value :
                     jFieldSNRTh.setValue(myPreferences.getPreferenceAsDouble(Preferences.OIFITS_SNR_THRESHOLD));
                 }
