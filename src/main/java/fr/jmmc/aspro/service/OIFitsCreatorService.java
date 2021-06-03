@@ -114,8 +114,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private final boolean useCalibrationBias;
     /** true to use instrument or calibration bias; false to compute only theoretical error */
     private final boolean useBias;
-    /** true to use random bias per UV point (same for all wavelengths); false to use pure random on wavelength (former approach) */
-    private final boolean useRandomUVCalBias;
+    /** true to use random bias; false to disable random sampling, only adjust error */
+    private final boolean useRandomCalBias;
     /** interferometer description */
     private InterferometerDescription interferometer = null;
     /** instrument name */
@@ -194,7 +194,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         this.useCalibrationBias = useCalibrationBias;
         boolean doBias = false;
-        boolean doRandomUVCalBias = false;
+        boolean doRandomCalBias = false;
 
         // do not generate errors for the DEMO interferometer
         if ((this.waveLengths.length != 0) && !"DEMO".equalsIgnoreCase(this.arrNameKeyword)) {
@@ -209,13 +209,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             if (ns.isValid()) {
                 this.noiseService = ns;
                 doBias = ns.isUseBias();
-                doRandomUVCalBias = ns.isUseRandomUVCalBias();
+                doRandomCalBias = ns.isUseRandomCalBias();
             }
         }
         // do noise :
         this.doNoise = (doDataNoise && (this.noiseService != null));
         this.useBias = doBias;
-        this.useRandomUVCalBias = doRandomUVCalBias;
+        this.useRandomCalBias = doRandomCalBias;
     }
 
     /**
@@ -855,7 +855,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final double[] vamp_samples = new double[N_SAMPLES];
         final double[] vphi_samples = new double[N_SAMPLES];
         int[] visRndIdxRow = null;
-        int visRndIdxCalAmp = 0, visRndIdxCalPhi = 0;
         boolean doFlag;
 
         final double normFactorWL = 1.0 / (nWaveLengths - 1);
@@ -941,12 +940,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                         // Get proper index:
                         visRndIdxRow = this.visRndIdx[k];
-                    }
-
-                    if (useRandomUVCalBias) {
-                        // Calibration bias only depend on time, not wavelength:
-                        visRndIdxCalAmp = getNextRandomSampleIndex();
-                        visRndIdxCalPhi = getNextRandomSampleIndex();
                     }
 
                     if (!isAmber && doVisDiff) {
@@ -1297,10 +1290,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                             errAmp = computeCumulativeError(errAmp, biasAmp);
 
                                             // add this bias on random samples (normal distribution):
-                                            if (this.doNoise) {
+                                            if (this.doNoise && useRandomCalBias) {
                                                 // update nth sample (mimic normal law) but independent random :
-                                                // just add gaussian noise (variance addition) depending on time (not wavelength):
-                                                vamp += biasAmp * distRe[useRandomUVCalBias ? visRndIdxCalAmp : getNextRandomSampleIndex()];
+                                                // just add gaussian noise (variance addition):
+                                                vamp += biasAmp * distRe[getNextRandomSampleIndex()];
                                             }
                                         }
 
@@ -1320,10 +1313,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                             errPhi = computeCumulativeError(errPhi, biasPhi);
 
                                             // add this bias on random samples (normal distribution):
-                                            if (this.doNoise) {
+                                            if (this.doNoise && useRandomCalBias) {
                                                 // update nth sample (mimic normal law) but independent random :
-                                                // just add gaussian noise (variance addition) depending on time (not wavelength):
-                                                vphi += biasPhi * distIm[useRandomUVCalBias ? visRndIdxCalPhi : getNextRandomSampleIndex()];
+                                                // just add gaussian noise (variance addition):
+                                                vphi += biasPhi * distIm[getNextRandomSampleIndex()];
                                             }
                                         }
                                     }
@@ -1469,7 +1462,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         final double[] v2_samples = new double[N_SAMPLES];
         int[] visRndIdxRow = null;
-        int visRndIdxCal = 0;
         boolean doFlag;
 
         final double[] re_samples = new double[N_SAMPLES];
@@ -1516,11 +1508,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                     // Get proper index:
                     visRndIdxRow = this.visRndIdx[k];
-                }
-
-                if (useRandomUVCalBias) {
-                    // Calibration bias only depend on time, not wavelength:
-                    visRndIdxCal = getNextRandomSampleIndex();
                 }
 
                 // Iterate on wave lengths :
@@ -1692,10 +1679,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 v2Err = computeCumulativeError(v2Err, biasV2);
 
                                 // add this bias on random samples (normal distribution):
-                                if (this.doNoise) {
+                                if (this.doNoise && useRandomCalBias) {
                                     // update nth sample (mimic normal law) but independent random :
-                                    // just add gaussian noise (variance addition) depending on time (not wavelength):
-                                    v2 += biasV2 * distIm[useRandomUVCalBias ? visRndIdxCal : getNextRandomSampleIndex()];
+                                    // just add gaussian noise (variance addition):
+                                    v2 += biasV2 * distIm[getNextRandomSampleIndex()];
                                 }
                             }
                         }
@@ -1886,7 +1873,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final double[] t3amp_samples = new double[N_SAMPLES];
         final double[] t3phi_samples = new double[N_SAMPLES];
         int[] visRndIdxRow;
-        int visRndIdxCalAmp = 0, visRndIdxCalPhi = 0;
         boolean doFlag;
 
         double[] distRe_12 = null, distIm_12 = null;
@@ -2021,12 +2007,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         if (dist12 == dist23 || dist23 == dist13 || dist12 == dist13) {
                             logger.warn("Bad distribution associations !");
                         }
-                    }
-
-                    if (useRandomUVCalBias) {
-                        // Calibration bias only depend on time, not wavelength:
-                        visRndIdxCalAmp = getNextRandomSampleIndex();
-                        visRndIdxCalPhi = getNextRandomSampleIndex();
                     }
 
                     // Iterate on wave lengths :
@@ -2256,10 +2236,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     errAmp = computeCumulativeError(errAmp, biasAmp);
 
                                     // add this bias on random samples (normal distribution):
-                                    if (this.doNoise) {
+                                    if (this.doNoise && useRandomCalBias) {
                                         // update nth sample (mimic normal law) but independent random :
                                         // just add gaussian noise (variance addition) depending on time (not wavelength):
-                                        t3amp += biasAmp * distRe_23[useRandomUVCalBias ? visRndIdxCalAmp : getNextRandomSampleIndex()];
+                                        t3amp += biasAmp * distRe_23[getNextRandomSampleIndex()];
                                     }
                                 }
 
@@ -2279,10 +2259,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                     errPhi = computeCumulativeError(errPhi, biasPhi);
 
                                     // add this bias on random samples (normal distribution):
-                                    if (this.doNoise) {
+                                    if (this.doNoise && useRandomCalBias) {
                                         // update nth sample (mimic normal law) but independent random :
                                         // just add gaussian noise (variance addition) depending on time (not wavelength):
-                                        t3phi += biasPhi * distIm_23[useRandomUVCalBias ? visRndIdxCalPhi : getNextRandomSampleIndex()];
+                                        t3phi += biasPhi * distIm_23[getNextRandomSampleIndex()];
                                     }
                                 }
                             }

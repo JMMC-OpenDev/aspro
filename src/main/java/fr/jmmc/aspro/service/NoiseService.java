@@ -158,8 +158,8 @@ public final class NoiseService implements VisNoiseService {
     private final boolean useCalibrationBias;
     /** true to use instrument or calibration bias; false to compute only theoretical error */
     private boolean useBias;
-    /** true to use random bias per UV point (same for all wavelengths); false to use pure random on wavelength (former approach) */
-    private boolean useRandomUVCalBias;
+    /** true to use random bias; false to disable random sampling, only adjust error */
+    private boolean useRandomCalBias;
     /** flag to prepare instrumentalVisRelBias / instrumentalVis2RelBias using instrumentalPhotRelBias */
     private boolean prepareVisRelBias = false;
     /** (W) Typical Photometric Bias (relative) */
@@ -449,7 +449,7 @@ public final class NoiseService implements VisNoiseService {
 
         if (USE_BIAS && (this.useCalibrationBias || insHasInstrumentBias)) {
             this.useBias = true;
-            logger.debug("useBias : {}", this.useBias);
+            this.useRandomCalBias = true; // default
 
             this.instrumentalPhotRelBias = new double[nSpectralChannels];
             this.instrumentalVisRelBias = new double[nSpectralChannels];
@@ -463,9 +463,8 @@ public final class NoiseService implements VisNoiseService {
             this.instrumentalT3PhaseCalBias = new double[nSpectralChannels];
 
             if (insHasInstrumentBias) {
-                // New approach to sample calibration bias:
-                this.useRandomUVCalBias = (this.useCalibrationBias);
-                logger.debug("useRandomUVCalBias : {}", this.useRandomUVCalBias);
+                // New approach to only add calibration bias into error without random sampling:
+                this.useRandomCalBias = false;
 
                 // telescope is known:
                 final Telescope tel = this.telescope;
@@ -598,6 +597,8 @@ public final class NoiseService implements VisNoiseService {
                 }
             }
         }
+        logger.debug("useBias : {}", this.useBias);
+        logger.debug("useRandomCalBias : {}", this.useRandomCalBias);
 
         // Check wavelength range:
         final double lambdaMin = this.waveLengths[0];
@@ -1403,8 +1404,8 @@ public final class NoiseService implements VisNoiseService {
         return useBias;
     }
 
-    public boolean isUseRandomUVCalBias() {
-        return useRandomUVCalBias;
+    public boolean isUseRandomCalBias() {
+        return useRandomCalBias;
     }
 
     public int getIndexRefChannel() {
@@ -1870,8 +1871,9 @@ public final class NoiseService implements VisNoiseService {
     }
 
     public double getVis2CalBias(final int iChannel, final double vis2) {
-        // d(V2) = 2V d(V)
-        return instrumentalVisCalBias[iChannel] * 2.0 * Math.sqrt(vis2); // absolute
+        // upper-limit for V = 1:
+        // max [ d(V2) ] = max [ 2V d(V) ] = 2 d(V)
+        return 2.0 * instrumentalVisCalBias[iChannel]; // absolute
     }
 
     public double getT3AmpBias(final int iChannel, final double t3amp) {

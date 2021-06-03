@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.05 beta 4"/>
-    <compilation date="28/05/2021" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.06 beta 4"/>
+    <compilation date="03/06/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -228,22 +228,23 @@
     </menubar>
 
     <releasenotes>
-        <release version="21.05">
-            <pubDate>Fri, 28 May 2021 16:00:00 GMT</pubDate>
-            <prerelease version="21.05 beta 4">
-                <change type="FEATURE">Improved calibration bias sampling for MATISSE (only 1 random bias sample per UV point, not per wavelength)</change>
+        <release version="21.06">
+            <pubDate>Thu, 03 Jun 2021 16:00:00 GMT</pubDate>
+            <prerelease version="21.06 beta 4">
+                <change type="FEATURE">Discarded calibration bias sampling for MATISSE</change>
+                <change type="FEATURE">Set 'Use inst. &amp; cal. error bias' disabled by default</change>
             </prerelease>
-            <prerelease version="21.05 beta 3">
+            <prerelease version="21.06 beta 3">
                 <change type="FEATURE">Improved wavelength restrictions (MATISSE_LM / SPICA):
                     new wavelength editor in the UV Coverage panel to define properly the reference wavelength (high resolution).
                     The spectral bandwith depends on the instrument mode and the fringe tracker mode</change>
             </prerelease>
-            <prerelease version="21.05 beta 2">
+            <prerelease version="21.06 beta 2">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1089">Fixed L/M magnitudes sent to SearchCal</change>
                 <change type="FEATURE">Added information (FT, atm, dit, fluxes in jansky) in OB sent to the A2p2 tool (Aspro to ESO p2)</change>
             </prerelease>
-            <!-- ObsPlan disabled in public release -->
-            <prerelease version="21.05 beta 1">
+<!-- ObsPlan disabled in public release -->
+            <prerelease version="21.06 beta 1">
                 <change type="FEATURE">Added a new tabbed pane 'Observation plan' to display observations and targets as an unified table. General &amp; global filters are coming...</change>
             </prerelease>
         </release>
