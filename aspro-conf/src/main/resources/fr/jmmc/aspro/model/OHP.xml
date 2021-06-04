@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+*******************************************************************************
+* JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+*******************************************************************************
+-->
+<!--
+    Document   : OHP.xml
+    Updated on : 23/11/2015
+    Author     : Gilles DUVERT, JMMC
+    Description:
+        Observatire de Haute Provence, France (any telescopes)
+-->
+
+<a:interferometerSetting
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+    xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+    <description>
+        <name>OHP</name>
+
+        <description>Observatoire de Haute Provence</description>
+        <position>
+            <posX>4578388.339468362</posX>
+            <posY>457970.3129110449</posY>
+            <posZ>-4403094.774959671</posZ>
+        </position>
+
+        <timezone>Europe/Paris</timezone>
+
+        <!--
+          Atmospheric Restrictions ??
+        -->
+        <windPointingRestriction>90.0</windPointingRestriction>
+
+        <!-- For now we have only one shared instance of 1m telescope -->
+        <telescope>
+            <name>T193</name>
+            <diameter>1.93</diameter>
+            <maxElevation>90</maxElevation>
+
+            <adaptiveOptics>
+              <name>AO_TIP_TILT</name>
+              <band>V</band>
+              <!-- tip tilt -->
+              <setup>
+                  <name>TIP_TILT</name>
+                  <numberSubPupils>4</numberSubPupils>
+                  <dit>2.0</dit> <!-- 500 Hz -->
+                  <ron>1.0</ron> <!-- 1e- -->
+                  <quantumEfficiency>0.70</quantumEfficiency>
+              </setup>
+            </adaptiveOptics>
+
+            <!--
+              Moon Pointing Restrictions = Just warning below 20 deg
+            -->
+            <moonPointingRestriction>
+                <warningThreshold>20.0</warningThreshold>
+                <restriction>
+                    <separation>1.0</separation>
+                </restriction>
+            </moonPointingRestriction>
+
+        </telescope>
+        <station>
+            <name>OHP_1m93</name>
+            <telescope>T193</telescope>
+            <relativePosition>
+                <posX>0</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+        </station>
+
+        <!-- channels (B1) -->
+        <channel>
+            <name>FakeChannel</name>
+        </channel>
+
+        <!-- Fake DL -->
+        <delayLine>
+            <name>FakeDL</name>
+            <maximumThrow>0</maximumThrow>
+        </delayLine>
+
+
+        <focalInstrument>
+            <name>Fake</name>
+            <description>Fake instrument (1T)</description>
+            <numberChannels>1</numberChannels>
+
+            <setup>
+                <name>FAKE_SETUP</name>
+                <description>Fake instrument (1T)</description>
+                <defaultSamplingTime>60</defaultSamplingTime>
+
+                <dit>NaN</dit>
+                <ron>NaN</ron>
+                <detectorSaturation>NaN</detectorSaturation>
+
+                <fracFluxInInterferometry>NaN</fracFluxInInterferometry>
+                <fracFluxInPhotometry>NaN</fracFluxInPhotometry>
+
+                <nbPixInterferometry>NaN</nbPixInterferometry>
+                <nbPixPhotometry>NaN</nbPixPhotometry>
+
+                <transmission>NaN</transmission>
+                <instrumentVisibility>NaN</instrumentVisibility>
+
+                <instrumentVisibilityBias>NaN</instrumentVisibilityBias>
+                <instrumentPhaseBias>NaN</instrumentPhaseBias>
+            </setup>
+
+            <!-- H band -->
+            <mode>
+                <name>LARGE-H</name>
+                <resolution>35</resolution>
+                <waveLengthMin>1.504785</waveLengthMin>
+                <waveLengthMax>1.8375</waveLengthMax>
+            </mode>
+
+            <!-- K band -->
+            <mode>
+                <name>LARGE-K</name>
+                <resolution>51</resolution>
+                <waveLengthMin>1.915</waveLengthMin>
+                <waveLengthMax>2.195</waveLengthMax>
+            </mode>
+
+        </focalInstrument>
+
+    </description>
+
+
+
+    <!-- configurations are displayed (GUI) in the same order they are present below -->
+
+    <configuration>
+        <version>Default</version>
+        <interferometer>OHP</interferometer>
+        <instrument>
+            <focalInstrument>Fake</focalInstrument>
+            <configuration>
+                <stations>OHP_1m93</stations>
+            </configuration>
+            <!--
+                        <configuration>
+                            <stations>PHOTO</stations>
+                        </configuration>
+            -->
+        </instrument>
+    </configuration>
+
+</a:interferometerSetting>

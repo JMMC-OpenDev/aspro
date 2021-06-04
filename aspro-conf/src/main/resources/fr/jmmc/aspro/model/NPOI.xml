@@ -1,0 +1,947 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ *******************************************************************************
+ -->
+<!--
+    Document   : NPOI.xml
+    Created on : 12 june 2013
+    Author     : bourges laurent
+    Description:
+        NPOI interferometer.
+-->
+
+<a:interferometerSetting
+   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+   xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+  <description>
+    <name>NPOI</name>
+
+    <description>NPOI interferometer: Navy Precision Optical Interferometer</description>
+
+    <!--
+        latitude = 35.09666 deg
+        longitude = -111.535 deg
+        altitude = 2200.66 meters.
+
+        The Earth centered positions I get by using AIPS are:
+        Array BX=  -1918330.53593    BY=  -4861255.23840    BZ=   3647911.86843
+        which take into account the fact that the Earth is not spherical.
+    -->
+    <position>
+      <posX>-1918339.14820342</posX>
+      <posY>-4861277.062827713</posY>
+      <posZ>3647919.7752522016</posZ>
+    </position>
+
+    <timezone>US/Arizona</timezone>
+
+    <!-- All the siderostats use an aperture with a diameter of 12cm -->
+
+    <!-- astrometric station -->
+    <telescope>
+      <name>AS</name>
+      <diameter>0.12</diameter>
+      <!-- no zenithal limit -->
+      <maxElevation>90.0</maxElevation>
+
+      <adaptiveOptics>
+        <name>AS_TIP_TILT</name>
+        <band>V</band>
+        <!-- tip tilt -->
+        <setup>
+            <name>TIP_TILT_AS</name>
+            <numberSubPupils>4</numberSubPupils>
+            <dit>2.0</dit> <!-- 500 Hz -->
+            <ron>1.0</ron> <!-- 1e- -->
+            <quantumEfficiency>0.70</quantumEfficiency>
+        </setup>
+      </adaptiveOptics>
+
+      <!--
+        Moon Pointing Restrictions on NPOI:
+        default as 5 deg
+      -->
+      <moonPointingRestriction>
+        <warningThreshold>10</warningThreshold>
+        <restriction>
+          <separation>5.0</separation>
+        </restriction>
+      </moonPointingRestriction>
+    </telescope>
+
+    <!-- imaging station -->
+    <telescope>
+      <name>IS</name>
+      <diameter>0.12</diameter>
+      <!-- no zenithal limit -->
+      <maxElevation>90.0</maxElevation>
+
+      <adaptiveOptics>
+        <name>IS_TIP_TILT</name>
+        <band>V</band>
+        <!-- tip tilt -->
+        <setup>
+            <name>TIP_TILT_IS</name>
+            <numberSubPupils>4</numberSubPupils>
+            <dit>2.0</dit> <!-- 500 Hz -->
+            <ron>1.0</ron> <!-- 1e- -->
+            <quantumEfficiency>0.70</quantumEfficiency>
+        </setup>
+      </adaptiveOptics>
+
+      <!--
+        Moon Pointing Restrictions on NPOI:
+        default as 5 deg
+      -->
+      <moonPointingRestriction>
+        <warningThreshold>10</warningThreshold>
+        <restriction>
+          <separation>5.0</separation>
+        </restriction>
+      </moonPointingRestriction>
+    </telescope>
+
+
+<!-- TODO: configure pop links -->
+
+<!-- astrometric stations -->
+    <station>
+      <name>AC0</name>
+      <telescope>AS</telescope>
+      <relativePosition>
+        <posX>3.2427611631967475</posX>
+        <posY>-0.5</posY>
+        <posZ>-4.6145530702835</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>13.608125</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>AE0</name>
+      <telescope>AS</telescope>
+      <relativePosition>
+        <posX>7.414088447352563</posX>
+        <posY>16.989338</posY>
+        <posZ>-10.55213604888239</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>31.844942</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>AW0</name>
+      <telescope>AS</telescope>
+      <relativePosition>
+        <posX>8.909948202284827</posX>
+        <posY>-20.389906999999997</posY>
+        <posZ>-12.680246297382213</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>27.607237</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>AN0</name>
+      <telescope>AS</telescope>
+      <relativePosition>
+        <posX>-9.903440183719736</posX>
+        <posY>-0.627131</posY>
+        <posZ>14.078174323868035</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>20.869627</delayLineFixedOffset>
+    </station>
+
+
+<!-- imaging stations -->
+
+<!-- North stations -->
+
+    <station>
+      <name>N00</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-0.4024703571343481</posX>
+        <posY>1.19</posY>
+        <posZ>0.5727282179429876</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>4.2787</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N01</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-1.67312677037279</posX>
+        <posY>0.94</posY>
+        <posZ>2.380913020305848</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>6.5024</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N02</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-2.823042076470928</posX>
+        <posY>0.72</posY>
+        <posZ>4.017279357285813</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>8.515</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N03</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-4.415674775416848</posX>
+        <posY>0.42</posY>
+        <posZ>6.283646734003064</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>11.3009</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N04</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-7.273214311070719</posX>
+        <posY>-0.13</posY>
+        <posZ>10.350017081398274</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>16.3017</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N05</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-11.844127652810815</posX>
+        <posY>-1.01</posY>
+        <posZ>16.854573270893635</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>24.2996</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N06</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-19.790042417948946</posX>
+        <posY>-2.53</posY>
+        <posZ>28.16186465942519</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>38.2017</delayLineFixedOffset>
+    </station>
+
+<!-- disabled N7+ stations -->
+<!--
+    <station>
+      <name>N07</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-32.24937475952226</posX>
+        <posY>-4.92</posY>
+        <posZ>45.8918939206031</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>60.004</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N08</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-53.90802954988068</posX>
+        <posY>-9.08</posY>
+        <posZ>76.71285387762073</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>97.9059</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N09</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-88.02601668181242</posX>
+        <posY>-15.62</posY>
+        <posZ>125.26384309581628</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>157.6071</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N10</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-143.90040140512093</posX>
+        <posY>-26.34</posY>
+        <posZ>204.77488340967278</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>255.3744</delayLineFixedOffset>
+    </station>
+-->
+
+<!-- East stations -->
+
+    <station>
+      <name>E02</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>1.0395319503252456</posX>
+        <posY>5.599513</posY>
+        <posZ>-1.4598945512114876</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>8.429731</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E03</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>1.8801115254704548</posX>
+        <posY>8.969999999999999</posY>
+        <posZ>-2.675458960962242</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>12.1386</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E04</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>2.8486276862750457</posX>
+        <posY>12.787536</posY>
+        <posZ>-4.044355638842767</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>16.3778</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E05</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>4.67440571928893</posX>
+        <posY>20.04</posY>
+        <posZ>-6.651829159823556</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>24.2239</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E06</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>7.888418999833223</posX>
+        <posY>32.77</posY>
+        <posZ>-11.225473071682556</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>38.1257</delayLineFixedOffset>
+    </station>
+
+<!-- disabled E7+ stations -->
+<!--
+    <station>
+      <name>E07</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>12.925048040543066</posX>
+        <posY>52.73</posY>
+        <posZ>-18.392757627654802</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>59.9281</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E08</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>21.687402673010872</posX>
+        <posY>87.42999999999999</posY>
+        <posZ>-30.861869115442133</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>97.8296</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E09</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>35.486386346188524</posX>
+        <posY>142.1</posY>
+        <posZ>-50.49826515920171</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>157.5308</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E10</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>58.28345728958409</posX>
+        <posY>232.38</posY>
+        <posZ>-82.9392277898295</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>256.1367</delayLineFixedOffset>
+    </station>
+-->
+
+<!-- West stations -->
+
+    <station>
+      <name>W01</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>0.8221894438601683</posX>
+        <posY>-1.24</posY>
+        <posZ>-1.1700019309406746</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>3.8568</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W02</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>1.5638848162934669</posX>
+        <posY>-2.9899999999999998</posY>
+        <posZ>-2.2254582182927516</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>6.0361</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W03</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>2.558561556068356</posX>
+        <posY>-5.35</posY>
+        <posZ>-3.6409150997804214</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>8.9591</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W04</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>4.156943831544767</posX>
+        <posY>-9.139999999999999</posY>
+        <posZ>-5.915464308182572</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>13.6561</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W05</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>6.882243106997352</posX>
+        <posY>-15.58</posY>
+        <posZ>-9.793652526825086</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>21.654</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W06</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>11.614144591591188</posX>
+        <posY>-26.79</posY>
+        <posZ>-16.527300003497643</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>35.556</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W07</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>18.900290231014377</posX>
+        <posY>-44.203123</posY>
+        <posZ>-27.0373448621005</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>57.172455</delayLineFixedOffset>
+    </station>
+
+<!-- disabled W8+ stations -->
+<!--
+    <station>
+      <name>W08</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>31.933148050345277</posX>
+        <posY>-74.91</posY>
+        <posZ>-45.441893177933615</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>95.2603</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W09</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>52.25215150909936</posX>
+        <posY>-123.03</posY>
+        <posZ>-74.35648635236959</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>154.9614</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W10</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>85.46745512574408</posX>
+        <posY>-201.7</posY>
+        <posZ>-121.62292799603587</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>252.5676</delayLineFixedOffset>
+    </station>
+-->
+
+<!-- what are OR stations ? (disabled) -->
+<!--
+    <station>
+      <name>ORC</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>-11.499153060981374</posX>
+        <posY>15.0</posY>
+        <posZ>16.363663369799646</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>24.2996</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>ORE</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>6.899491836588825</posX>
+        <posY>51.0</posY>
+        <posZ>-9.818198021879788</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>59.9281</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>ORW</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>37.94720510123854</posX>
+        <posY>-74.0</posY>
+        <posZ>-54.00008912033883</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>95.2603</delayLineFixedOffset>
+    </station>
+
+            <station>
+              <name>ORN</name>
+              <telescope>IS</telescope>
+              <relativePosition>
+                <posX>-55.77089234575967</posX>
+                <posY>1.0</posY>
+                <posZ>79.36376734352828</posZ>
+              </relativePosition>
+              <delayLineFixedOffset>97.9059</delayLineFixedOffset>
+            </station>
+        -->
+
+        <!-- add all other possible stations (i.e. positions) -->
+
+        <!-- 6 or 9 channels: 3 east, 3 west, 3 north ? -->
+        <channel>
+            <name>Channel1</name>
+        </channel>
+        <channel>
+            <name>Channel2</name>
+        </channel>
+        <channel>
+            <name>Channel3</name>
+        </channel>
+        <channel>
+            <name>Channel4</name>
+        </channel>
+        <channel>
+            <name>Channel5</name>
+        </channel>
+        <channel>
+            <name>Channel6</name>
+        </channel>
+
+        <!-- The maximum delay we have in the FDL tanks is 35m (2X17.5m). -->
+        <delayLine>
+            <name>DL1</name>
+            <maximumThrow>35</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL2</name>
+            <maximumThrow>35</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL3</name>
+            <maximumThrow>35</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL4</name>
+            <maximumThrow>35</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL5</name>
+            <maximumThrow>35</maximumThrow>
+        </delayLine>
+        <delayLine>
+            <name>DL6</name>
+            <maximumThrow>35</maximumThrow>
+        </delayLine>
+
+        <!-- TODO: pops on NPOI -->
+        <!-- how many (6) + 6 optical path length (per beam ?) -->
+        <!--
+            <pop>
+              <name>PoP1</name>
+              <index>1</index>
+            </pop>
+            <pop>
+              <name>PoP2</name>
+              <index>2</index>
+            </pop>
+            <pop>
+              <name>PoP3</name>
+              <index>3</index>
+            </pop>
+            <pop>
+              <name>PoP4</name>
+              <index>4</index>
+            </pop>
+            <pop>
+              <name>PoP5</name>
+              <index>5</index>
+            </pop>
+            <pop>
+              <name>PoP6</name>
+              <index>5</index>
+            </pop>
+        -->
+
+        <!-- instruments (4T) -->
+
+        <focalInstrument>
+            <name>CLASSIC_4T</name>
+            <description>Classic instrument (4T)</description>
+            <numberChannels>4</numberChannels>
+
+            <setup>
+                <name>SETUP_CLASSIC_4T</name>
+                <description>Classic instrument (4T)</description>
+                <defaultSamplingTime>30</defaultSamplingTime>
+
+                <dit>0.01</dit>
+                <ron>10</ron>
+                <detectorSaturation>50000</detectorSaturation>
+
+                <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
+                <fracFluxInPhotometry>0.2</fracFluxInPhotometry>
+
+                <nbPixInterferometry>4</nbPixInterferometry>
+                <nbPixPhotometry>4</nbPixPhotometry>
+
+                <transmission>0.01</transmission>
+                <instrumentVisibility>0.9</instrumentVisibility>
+
+                <instrumentVisibilityBias>0.1</instrumentVisibilityBias>
+                <instrumentPhaseBias>0.01</instrumentPhaseBias>
+            </setup>
+
+            <mode>
+                <name>R</name>
+                <resolution>50</resolution>
+                <waveLengthMin>0.560</waveLengthMin>
+                <waveLengthMax>0.850</waveLengthMax>
+            </mode>
+        </focalInstrument>
+
+
+        <focalInstrument>
+            <name>VISION_4T</name>
+            <description>VISION instrument 4T</description>
+            <numberChannels>4</numberChannels>
+
+            <setup>
+                <name>SETUP_VISION_4T</name>
+                <description>VISION instrument 4T</description>
+                <defaultSamplingTime>40</defaultSamplingTime>
+
+                <dit>0.010</dit>
+                <ron>0.0</ron>
+                <detectorSaturation>65653</detectorSaturation>
+
+                <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
+                <fracFluxInPhotometry>0.2</fracFluxInPhotometry>
+
+                <nbPixInterferometry>128</nbPixInterferometry>
+                <nbPixPhotometry>128</nbPixPhotometry>
+
+                <transmission>0.01</transmission>
+                <instrumentVisibility>0.9</instrumentVisibility>
+
+                <instrumentVisibilityBias>1</instrumentVisibilityBias>
+                <instrumentPhaseBias>1</instrumentPhaseBias>
+            </setup>
+
+            <mode>
+                <name>Low_Res</name>
+                <resolution>200</resolution>
+                <waveLengthMin>0.580</waveLengthMin>
+                <waveLengthMax>0.850</waveLengthMax>
+            </mode>
+            <mode>
+                <name>Hi_Res</name>
+                <resolution>2000</resolution>
+                <waveLengthMin>0.580</waveLengthMin>
+                <waveLengthMax>0.850</waveLengthMax>
+            </mode>
+
+        </focalInstrument>
+
+
+        <!-- instruments (5T) -->
+
+        <focalInstrument>
+            <name>VISION_5T</name>
+            <description>VISION instrument 5T</description>
+            <numberChannels>5</numberChannels>
+
+            <setup>
+                <name>SETUP_VISION_5T</name>
+                <description>VISION instrument 5T</description>
+                <defaultSamplingTime>40</defaultSamplingTime>
+
+                <dit>0.010</dit>
+                <ron>0.0</ron>
+                <detectorSaturation>65653</detectorSaturation>
+
+                <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
+                <fracFluxInPhotometry>0.2</fracFluxInPhotometry>
+
+                <nbPixInterferometry>128</nbPixInterferometry>
+                <nbPixPhotometry>128</nbPixPhotometry>
+
+                <transmission>0.01</transmission>
+                <instrumentVisibility>0.9</instrumentVisibility>
+
+                <instrumentVisibilityBias>1</instrumentVisibilityBias>
+                <instrumentPhaseBias>1</instrumentPhaseBias>
+            </setup>
+
+            <mode>
+                <name>Low_Res</name>
+                <resolution>200</resolution>
+                <waveLengthMin>0.580</waveLengthMin>
+                <waveLengthMax>0.850</waveLengthMax>
+            </mode>
+            <mode>
+                <name>Hi_Res</name>
+                <resolution>2000</resolution>
+                <waveLengthMin>0.580</waveLengthMin>
+                <waveLengthMax>0.850</waveLengthMax>
+            </mode>
+
+        </focalInstrument>
+
+
+        <!-- instruments (6T) -->
+
+        <focalInstrument>
+            <name>VISION_6T</name>
+            <description>VISION instrument 6T</description>
+            <numberChannels>6</numberChannels>
+
+            <setup>
+                <name>SETUP_VISION_6T</name>
+                <description>VISION instrument 6T</description>
+                <defaultSamplingTime>40</defaultSamplingTime>
+
+                <dit>0.010</dit>
+                <ron>0.0</ron>
+                <detectorSaturation>65653</detectorSaturation>
+
+                <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
+                <fracFluxInPhotometry>0.2</fracFluxInPhotometry>
+
+                <nbPixInterferometry>128</nbPixInterferometry>
+                <nbPixPhotometry>128</nbPixPhotometry>
+
+                <transmission>0.01</transmission>
+                <instrumentVisibility>0.9</instrumentVisibility>
+
+                <instrumentVisibilityBias>1</instrumentVisibilityBias>
+                <instrumentPhaseBias>1</instrumentPhaseBias>
+            </setup>
+
+            <mode>
+                <name>Low_Res</name>
+                <resolution>200</resolution>
+                <waveLengthMin>0.580</waveLengthMin>
+                <waveLengthMax>0.850</waveLengthMax>
+            </mode>
+            <mode>
+                <name>Hi_Res</name>
+                <resolution>2000</resolution>
+                <waveLengthMin>0.580</waveLengthMin>
+                <waveLengthMax>0.850</waveLengthMax>
+            </mode>
+
+        </focalInstrument>
+
+    </description>
+
+
+
+
+    <configuration>
+        <interferometer>NPOI</interferometer>
+
+        <!-- instruments (4T) -->
+
+        <instrument>
+            <focalInstrument>CLASSIC_4T</focalInstrument>
+
+            <configuration>
+                <stations>E06 AE0 AC0 AN0</stations>
+            </configuration>
+            <configuration>
+                <stations>E06 AE0 AC0 AW0</stations>
+            </configuration>
+            <configuration>
+                <stations>E06 AE0 AC0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>E06 AE0 AN0 AW0</stations>
+            </configuration>
+            <configuration>
+                <stations>E06 AE0 AN0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>E06 AE0 AW0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>E06 AC0 AN0 AW0</stations>
+            </configuration>
+            <configuration>
+                <stations>E06 AC0 AN0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>E06 AC0 AW0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>E06 AN0 AW0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AE0 AC0 AN0 AW0</stations>
+            </configuration>
+            <configuration>
+                <stations>AE0 AC0 AN0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AE0 AC0 AW0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AE0 AN0 AW0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AC0 AN0 AW0 W07</stations>
+            </configuration>
+        </instrument>
+
+        <instrument>
+            <focalInstrument>VISION_4T</focalInstrument>
+
+            <configuration>
+                <stations>AW0 AE0 AC0 AN0</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AE0 AC0 E06</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AE0 AC0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AE0 AN0 E06</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AE0 AN0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AE0 E06 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AC0 AN0 E06</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AC0 AN0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AC0 E06 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AN0 E06 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AE0 AC0 AN0 E06</stations>
+            </configuration>
+            <configuration>
+                <stations>AE0 AC0 AN0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AE0 AC0 E06 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AE0 AN0 E06 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AC0 AN0 E06 W07</stations>
+            </configuration>
+        </instrument>
+
+
+        <!-- instruments (5T) -->
+
+        <instrument>
+            <focalInstrument>VISION_5T</focalInstrument>
+
+            <configuration>
+                <stations>AW0 AE0 AC0 AN0 E06</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AE0 AC0 AN0 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AE0 AC0 E06 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AE0 AN0 E06 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AW0 AC0 AN0 E06 W07</stations>
+            </configuration>
+            <configuration>
+                <stations>AE0 AC0 AN0 E06 W07</stations>
+            </configuration>
+        </instrument>
+
+
+        <!-- instruments (6T) -->
+
+        <instrument>
+            <focalInstrument>VISION_6T</focalInstrument>
+
+            <configuration>
+                <stations>AW0 AE0 AC0 AN0 E06 W07</stations>
+            </configuration>
+        </instrument>
+
+    </configuration>
+
+</a:interferometerSetting>

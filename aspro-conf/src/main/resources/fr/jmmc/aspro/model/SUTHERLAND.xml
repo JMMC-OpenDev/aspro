@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+*******************************************************************************
+* JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+*******************************************************************************
+-->
+<!--
+    Document   : SUTHERLAND.xml
+    Updated on : 07/07/2014
+    Author     : Laurent BOURGES, JMMC
+    Description:
+        SAAO SutherLand Observatory (any telescopes)
+-->
+
+<a:interferometerSetting
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+    xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+    <description>
+        <name>Sutherland</name>
+
+        <description>South African Astronomical Observatory (SAAO) Sutherland Facilities</description>
+        <position>
+            <posX>5041291.575926414</posX>
+            <posY>1916106.2325445698</posY>
+            <posZ>-3397059.7534978483</posZ>
+        </position>
+
+        <timezone>Africa/Johannesburg</timezone>
+
+        <!--
+          Atmospheric Restrictions ??
+        -->
+        <windPointingRestriction>90.0</windPointingRestriction>
+
+        <!-- For now we have only one shared instance of 1m telescope -->
+        <telescope>
+            <name>T1m</name>
+            <diameter>1.0</diameter>
+            <maxElevation>86.0</maxElevation>
+
+            <adaptiveOptics>
+              <name>T1m_TIP_TILT</name>
+              <band>V</band>
+              <!-- tip tilt -->
+              <setup>
+                  <name>TIP_TILT_T1m</name>
+                  <numberSubPupils>4</numberSubPupils>
+                  <dit>2.0</dit> <!-- 500 Hz -->
+                  <ron>1.0</ron> <!-- 1e- -->
+                  <quantumEfficiency>0.70</quantumEfficiency>
+              </setup>
+            </adaptiveOptics>
+
+            <!--
+              Moon Pointing Restrictions = Just warning below 20 deg
+            -->
+            <moonPointingRestriction>
+                <warningThreshold>20.0</warningThreshold>
+                <restriction>
+                    <separation>1.0</separation>
+                </restriction>
+            </moonPointingRestriction>
+
+        </telescope>
+
+        <telescope>
+            <name>T10m</name>
+            <diameter>10.0</diameter> <!-- hexagonal array of ~11.1 x ~9.8 m -->
+            <maxElevation>86.0</maxElevation>
+
+            <adaptiveOptics>
+              <name>T10m_TIP_TILT</name>
+              <band>V</band>
+              <!-- tip tilt -->
+              <setup>
+                  <name>TIP_TILT_T10m</name>
+                  <numberSubPupils>90</numberSubPupils>
+                  <dit>2.0</dit> <!-- 500 Hz -->
+                  <ron>1.0</ron> <!-- 1e- -->
+                  <quantumEfficiency>0.70</quantumEfficiency>
+              </setup>
+            </adaptiveOptics>
+
+            <!--
+              Moon Pointing Restrictions = Just warning below 20 deg
+            -->
+            <moonPointingRestriction>
+                <warningThreshold>20.0</warningThreshold>
+                <restriction>
+                    <separation>1.0</separation>
+                </restriction>
+            </moonPointingRestriction>
+
+        </telescope>
+
+        <station>
+            <name>SALT</name>
+            <telescope>T10m</telescope>
+            <relativePosition>
+                <posX>0</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+        </station>
+
+        <station>
+            <name>PHOTO</name>
+            <telescope>T1m</telescope>
+            <relativePosition>
+                <posX>0</posX>
+                <posY>0</posY>
+                <posZ>0</posZ>
+            </relativePosition>
+        </station>
+
+        <!-- channels (B1) -->
+        <channel>
+            <name>FakeChannel</name>
+        </channel>
+
+        <!-- Fake DL -->
+        <delayLine>
+            <name>FakeDL</name>
+            <maximumThrow>0</maximumThrow>
+        </delayLine>
+
+
+        <focalInstrument>
+            <name>Fake</name>
+            <description>Fake instrument (1T)</description>
+            <numberChannels>1</numberChannels>
+
+            <setup>
+                <name>FAKE_SETUP</name>
+                <description>Fake instrument (1T)</description>
+                <defaultSamplingTime>60</defaultSamplingTime>
+
+                <dit>NaN</dit>
+                <ron>NaN</ron>
+                <detectorSaturation>NaN</detectorSaturation>
+
+                <fracFluxInInterferometry>NaN</fracFluxInInterferometry>
+                <fracFluxInPhotometry>NaN</fracFluxInPhotometry>
+
+                <nbPixInterferometry>NaN</nbPixInterferometry>
+                <nbPixPhotometry>NaN</nbPixPhotometry>
+
+                <transmission>NaN</transmission>
+                <instrumentVisibility>NaN</instrumentVisibility>
+
+                <instrumentVisibilityBias>NaN</instrumentVisibilityBias>
+                <instrumentPhaseBias>NaN</instrumentPhaseBias>
+            </setup>
+
+            <!-- H band -->
+            <mode>
+                <name>LARGE-H</name>
+                <resolution>35</resolution>
+                <waveLengthMin>1.504785</waveLengthMin>
+                <waveLengthMax>1.8375</waveLengthMax>
+            </mode>
+
+            <!-- K band -->
+            <mode>
+                <name>LARGE-K</name>
+                <resolution>51</resolution>
+                <waveLengthMin>1.915</waveLengthMin>
+                <waveLengthMax>2.195</waveLengthMax>
+            </mode>
+
+        </focalInstrument>
+
+    </description>
+
+
+
+    <!-- configurations are displayed (GUI) in the same order they are present below -->
+
+    <configuration>
+        <version>Default</version>
+        <interferometer>Sutherland</interferometer>
+        <instrument>
+            <focalInstrument>Fake</focalInstrument>
+            <configuration>
+                <stations>SALT</stations>
+            </configuration>
+            <configuration>
+                <stations>PHOTO</stations>
+            </configuration>
+        </instrument>
+    </configuration>
+
+</a:interferometerSetting>
