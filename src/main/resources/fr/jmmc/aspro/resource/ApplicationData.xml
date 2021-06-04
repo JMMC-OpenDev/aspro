@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.06 beta 4"/>
-    <compilation date="03/06/2021" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.06"/>
+    <compilation date="04/06/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,7 @@
 
     <releasenotes>
         <release version="21.06">
-            <pubDate>Thu, 03 Jun 2021 16:00:00 GMT</pubDate>
+            <pubDate>Fri, 04 Jun 2021 16:00:00 GMT</pubDate>
             <prerelease version="21.06 beta 4">
                 <change type="FEATURE">Discarded calibration bias sampling for MATISSE</change>
                 <change type="FEATURE">Set 'Use inst. &amp; cal. error bias' disabled by default</change>
