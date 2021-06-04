@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <schemaVersion>2018.04</schemaVersion>
+    <targetVersion>2019.09</targetVersion>
+    <name>default</name>
+    <when>
+        <date>2005-04-28</date>
+        <nightRestriction>true</nightRestriction>
+        <atmosphereQuality>Average</atmosphereQuality>
+    </when>
+    <interferometerConfiguration>
+        <name>VLTI Period 88</name>
+        <minElevation>0.0</minElevation>
+    </interferometerConfiguration>
+    <instrumentConfiguration>
+        <name>AMBER</name>
+        <stations>UT1 UT2 UT3</stations>
+        <pops></pops>
+        <instrumentMode>Low_JHK</instrumentMode>
+        <samplingPeriod>60.0</samplingPeriod>
+        <acquisitionTime>300.0</acquisitionTime>
+    </instrumentConfiguration>
+    <target id="ZERO">
+        <name>ZERO</name>
+        <RA>00:00:00.000</RA>
+        <DEC>-20:00:00.000</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <IDS>ZERO</IDS>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <configuration>
+            <HAMin>-12.0</HAMin>
+            <HAMax>12.0</HAMax>
+            <aoSetup>MACAO</aoSetup>
+        </configuration>
+    </target>
+    <target id="MAX">
+        <name>MAX</name>
+        <RA>23:59:00.000</RA>
+        <DEC>-20:00:00.000</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <IDS>MAX</IDS>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <configuration>
+            <HAMin>-12.0</HAMin>
+            <HAMax>12.0</HAMax>
+        </configuration>
+    </target>
+    <targetUserInfos>
+        <group id="JMMC_AO">
+            <name>AO Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the Adaptive Optics system</description>
+            <color>#F781BF</color>
+        </group>
+        <group id="JMMC_FT">
+            <name>FT Star</name>
+            <category>[OB]</category>
+            <description>Group gathering stars used by the Fringe Tracking system</description>
+            <color>#75C147</color>
+        </group>
+        <group id="JMMC_GUIDE">
+            <name>Guide Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the telescope guiding</description>
+            <color>#5BAFD6</color>
+        </group>
+    </targetUserInfos>
+    <variant>
+        <stations>UT1 UT2 UT3</stations>
+    </variant>
+</a:observationSetting>

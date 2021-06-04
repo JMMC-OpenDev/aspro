@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <schemaVersion>2018.04</schemaVersion>
+    <targetVersion>2019.09</targetVersion>
+    <name>default</name>
+    <when>
+        <date>2011-10-15</date>
+        <nightRestriction>true</nightRestriction>
+        <atmosphereQuality>Excellent</atmosphereQuality>
+    </when>
+    <interferometerConfiguration>
+        <name>CHARA</name>
+        <minElevation>20.0</minElevation>
+    </interferometerConfiguration>
+    <instrumentConfiguration>
+        <name>VEGA_3T</name>
+        <stations>W2 W1 E2</stations>
+        <pops>123</pops>
+        <instrumentMode>R2656</instrumentMode>
+        <samplingPeriod>40.0</samplingPeriod>
+        <acquisitionTime>300.0</acquisitionTime>
+    </instrumentConfiguration>
+    <target id="HIP1234">
+        <name>HIP1234</name>
+        <RA>00:15:21.5509030652</RA>
+        <DEC>+28:35:13.846943724</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>16.2</SYSVEL>
+        <PMRA>54.045</PMRA>
+        <PMDEC>-86.431</PMDEC>
+        <PARALLAX>14.0538</PARALLAX>
+        <PARA_ERR>0.2289</PARA_ERR>
+        <IDS>AG+28 25,AGKR 186,BD+27 25,GSC 01736-00683,HD 1094,HIC 1234,HIP 1234,PPM 89559,SAO 73846,TD1 103,TYC 1736-683-1,YZ 28 84,uvby98 100001094,2MASS J00152153+2835139,Gaia DR1 2859970275176107648,GEN# +1.00001094,Gaia DR2 2859970279471313664</IDS>
+        <OBJTYP>*,PM*,IR,UV</OBJTYP>
+        <SPECTYP>F5</SPECTYP>
+        <FLUX_B>7.77</FLUX_B>
+        <FLUX_V>7.347</FLUX_V>
+        <FLUX_G>7.2025</FLUX_G>
+        <FLUX_J>6.416</FLUX_J>
+        <FLUX_H>6.22</FLUX_H>
+        <FLUX_K>6.163</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="elong_disk1" type="elong_disk">
+            <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter, 
+elong_ratio, major_axis_pos_angle) 
+
+Returns the Fourier transform, at spatial frequencies (UFREQ,VFREQ) 
+given in 1/rad, of a normalized ellipse centered at coordinates (X,Y) (milliarcsecond) 
+with a ratio ELONG_RATIO between the major diameter and the minor one MINOR_AXIS_DIAMETER, 
+turned from the positive vertical semi-axis (i.e. North direction) with angle 
+MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis 
+(i.e. East direction). (the elongation is along the major_axis) 
+
+|North 
+|               For avoiding degenerescence, the domain of variation 
+|---&gt;East       of MAJOR_AXIS_POS_ANGLE is 180 degrees, 
+|               for ex. from 0 to 180 degrees. 
+
+ELONG_RATIO = major_axis / minor_axis 
+
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
+The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO 
+is smaller than 1. 
+
+UFREQ and VFREQ must be conformable. The returned array is always 
+complex and with dimensions dimsof(UFREQ,VFREQ). 
+</desc>
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="minor_axis_diameter1" type="minor_axis_diameter">
+                <units>mas</units>
+                <value>6.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="elong_ratio1" type="elong_ratio">
+                <value>1.3</value>
+                <minValue>1.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="major_axis_pos_angle1" type="major_axis_pos_angle">
+                <units>degrees</units>
+                <value>20.0</value>
+                <minValue>0.0</minValue>
+                <maxValue>180.0</maxValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <configuration>
+            <HAMin>-12.0</HAMin>
+            <HAMax>12.0</HAMax>
+        </configuration>
+    </target>
+    <target id="ETA_TAU">
+        <name>ETA TAU</name>
+        <RA>03:47:29.0765529</RA>
+        <DEC>+24:06:18.488347</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>5.4</SYSVEL>
+        <PMRA>19.34</PMRA>
+        <PMDEC>-43.67</PMDEC>
+        <PARALLAX>8.09</PARALLAX>
+        <PARA_ERR>0.42</PARA_ERR>
+        <IDS>2MASS J03472908+2406184,PLX 821,Cl* Melotte 22 K 60,Cl* Melotte 22 VM 32,Cl* Melotte 22 MSH 194,Cl* Melotte 22 MSK 141,Cl* Melotte 22 TRU 414,Cl* Melotte 22 WCZ 236,[JE82] 124,* eta Tau,* 25 Tau,AG+23 323,BD+23 541,BDS 1875 A,CCDM J03474+2407A,CEL 344,EM* MWC 74,FK5 139,GC 4541,GCRV 2135,GEN# +5.20221432,GSC 01800-02202,HD 23630,HGAM 274,HIC 17702,HIP 17702,HR 1165,IDS 03415+2348 A,IRAS 03445+2357,IRC +20063,JP11 4669,JP11 4680,N30 776,NAME Alcyone,PMC 90-93 100,PPM 92898,ROT 3785,SAO 76199,SKY# 5771,SRS 30139,TYC 1800-2202-1,UBV 3639,VDB 23,XZ 4911,[B10] 869,EPIC 200007767,[KSP2003] G166.6680-23.4550,[SCG94] O 165,[SCG94] X 180,uvby98 520221432,Cl Melotte 22 1432,ALS 15094,1E 0344.5+2357,[KSP2003] J034729.04+240619.4,WDS J03475+2406A,Cl* Melotte 22 HII 1432,** STF 4008A,** STFA 8A,WEB 3382,Gaia DR2 66714384141781760</IDS>
+        <OBJTYP>**,*,*iC,*iN,Em*,Be*,PM*,IR,UV,X</OBJTYP>
+        <SPECTYP>B7III</SPECTYP>
+        <FLUX_B>2.78</FLUX_B>
+        <FLUX_V>2.873</FLUX_V>
+        <FLUX_G>2.773</FLUX_G>
+        <FLUX_R>2.84</FLUX_R>
+        <FLUX_I>2.88</FLUX_I>
+        <FLUX_J>2.735</FLUX_J>
+        <FLUX_H>2.735</FLUX_H>
+        <FLUX_K>2.636</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
+    </target>
+    <target id="HD_1234">
+        <name>HD 1234</name>
+        <RA>00:16:27.6598684930</RA>
+        <DEC>-36:47:46.635648661</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>-10.44</SYSVEL>
+        <VELTYP>Opt</VELTYP>
+        <PMRA>-15.397</PMRA>
+        <PMDEC>-16.553</PMDEC>
+        <PARALLAX>4.8283</PARALLAX>
+        <PARA_ERR>0.0361</PARA_ERR>
+        <IDS>2MASS J00162766-3647467,CD-37 56,CPC 18 68,CPD-37 14,GSC 06996-00075,HD 1234,HIC 1311,HIP 1311,PPM 275860,SAO 192435,SRS 3031,TYC 6996-75-1,uvby98 100001234,Gaia DR1 2308678821500431360,GEN# +1.00001234,Gaia DR2 2308678825796092800</IDS>
+        <OBJTYP>*,IR</OBJTYP>
+        <SPECTYP>F3V</SPECTYP>
+        <FLUX_B>9.65</FLUX_B>
+        <FLUX_V>9.19</FLUX_V>
+        <FLUX_G>9.0923</FLUX_G>
+        <FLUX_J>8.318</FLUX_J>
+        <FLUX_H>8.131</FLUX_H>
+        <FLUX_K>8.112</FLUX_K>
+        <useAnalyticalModel>true</useAnalyticalModel>
+        <tm:model name="elong_disk1" type="elong_disk">
+            <desc>Returns the Fourier transform of a normalized ellipse centered at coordinates (X,Y) 
+(milliarcsecond) with a ratio ELONG_RATIO between the major diameter and the minor one 
+MINOR_AXIS_DIAMETER, turned from the positive vertical semi-axis (i.e. North direction) 
+with angle MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis 
+(i.e. East direction). (the elongation is along the major_axis) 
+
+For avoiding degenerescence, the domain of variation of MAJOR_AXIS_POS_ANGLE is 180 
+degrees, for ex. from 0 to 180 degrees. 
+
+ELONG_RATIO = major_axis / minor_axis 
+FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
+
+The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO is 
+smaller than 1.</desc>
+            <tm:parameter name="flux_weight1" type="flux_weight">
+                <value>1.0</value>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="x1" type="x">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="y1" type="y">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="minor_axis_diameter1" type="minor_axis_diameter">
+                <units>mas</units>
+                <value>3.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="elong_ratio1" type="elong_ratio">
+                <value>1.3</value>
+                <minValue>1.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter name="major_axis_pos_angle1" type="major_axis_pos_angle">
+                <units>degrees</units>
+                <value>120.0</value>
+                <minValue>0.0</minValue>
+                <maxValue>180.0</maxValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <configuration>
+            <HAMin>-4.0</HAMin>
+            <HAMax>4.0</HAMax>
+        </configuration>
+    </target>
+    <targetUserInfos>
+        <group id="JMMC_AO">
+            <name>AO Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the Adaptive Optics system</description>
+            <color>#F781BF</color>
+        </group>
+        <group id="JMMC_FT">
+            <name>FT Star</name>
+            <category>[OB]</category>
+            <description>Group gathering stars used by the Fringe Tracking system</description>
+            <color>#75C147</color>
+        </group>
+        <group id="JMMC_GUIDE">
+            <name>Guide Star</name>
+            <category>[OB]</category>
+            <description>Group indicating stars used by the telescope guiding</description>
+            <color>#5BAFD6</color>
+        </group>
+    </targetUserInfos>
+    <variant>
+        <stations>W2 W1 E2</stations>
+    </variant>
+    <extendedConfiguration>
+        <name>CHARA</name>
+        <interferometer>CHARA</interferometer>
+        <instrument>
+            <focalInstrument>VEGA_3T</focalInstrument>
+            <configuration>
+                <stations>W2 W1 E2</stations>
+                <channels>V1 V3 V6</channels>
+                <delayLines></delayLines>
+                <pops>PoP1 PoP2 PoP3</pops>
+            </configuration>
+        </instrument>
+    </extendedConfiguration>
+</a:observationSetting>

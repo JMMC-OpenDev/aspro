@@ -1,0 +1,170 @@
+<a:observationSetting xsi:schemaLocation="http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd http://www.jmmc.fr/jmcs/models/0.1 targetModel.xsd" xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Sirius</name>
+    <!--Calibrators-->
+    <target>
+        <name>* alf CMa</name>
+        <RA>06:45:08.913260</RA>
+        <DEC>-16:42:57.870999</DEC>
+        <EQUINOX>2000.</EQUINOX>
+        <SYSVEL>-7.6</SYSVEL>
+        <PMRA>-552.63</PMRA>
+        <PMDEC>-1206.4</PMDEC>
+        <PARALLAX>379.21</PARALLAX>
+        <PARA_ERR>1.58</PARA_ERR>
+        <IDS>HIP 32349,HD 48915,2MASS J06450887-1642566,DM -1601591,SBC9 416,WDS J06451-1643,</IDS>
+        <OBJTYP>,SB*,*,*,PM*,V*,UV,IR,**,**,</OBJTYP>
+        <SPECTYP>A1V+DA</SPECTYP>
+        <FLUX_B>-1.429</FLUX_B>
+        <FLUX_V>-1.121</FLUX_V>
+        <FLUX_R>-1.163273</FLUX_R>
+        <FLUX_I>-1.343894</FLUX_I>
+        <FLUX_J>-1.391</FLUX_J>
+        <FLUX_H>-1.391</FLUX_H>
+        <FLUX_K>-1.39</FLUX_K>
+        <FLUX_N>-0.986</FLUX_N>
+        <tm:model type="disk" name="disk1">
+            <tm:parameter type="flux_weight" name="flux_weight1">
+                <value>1.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter type="x" name="x1">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter type="y" name="y1">
+                <units>mas</units>
+                <value>0.0</value>
+                <hasFixedValue>true</hasFixedValue>
+            </tm:parameter>
+            <tm:parameter type="diameter" name="diameter1">
+                <units>mas</units>
+                <value>0.0</value>
+                <minValue>0.0</minValue>
+                <hasFixedValue>false</hasFixedValue>
+            </tm:parameter>
+        </tm:model>
+        <calibratorInfos>
+            <parameter xsi:type="a:StringValue" name="SearchCalServerVersion" value="SearchCal Server v6.0.0"/>
+            <parameter xsi:type="a:NumberValue" name="baseMax" value="0.0" unit="m"/>
+            <parameter xsi:type="a:NumberValue" name="wlen" value="0.0" unit="um"/>
+            <field xsi:type="a:StringValue" name="HD" value="48915"/>
+            <field xsi:type="a:StringValue" name="HIP" value="32349"/>
+            <field xsi:type="a:StringValue" name="DM" value="-1601591"/>
+            <field xsi:type="a:StringValue" name="TYC1" value="5949"/>
+            <field xsi:type="a:StringValue" name="TYC2" value="2777"/>
+            <field xsi:type="a:StringValue" name="TYC3" value="1"/>
+            <field xsi:type="a:StringValue" name="2MASS" value="06450887-1642566"/>
+            <field xsi:type="a:StringValue" name="SBC9" value="416"/>
+            <field xsi:type="a:StringValue" name="WDS" value="06451-1643"/>
+            <field xsi:type="a:StringValue" name="AKARI" value="200102088"/>
+            <field xsi:type="a:StringValue" name="WISE" value="J064508.34-164310.1"/>
+            <field xsi:type="a:StringValue" name="SIMBAD" value="* alf CMa"/>
+            <field xsi:type="a:StringValue" name="opt" value="U"/>
+            <field xsi:type="a:StringValue" name="TARGET_ID" value="Sirius"/>
+            <field xsi:type="a:StringValue" name="XMATCH_MAIN_FLAG" value="0"/>
+            <field xsi:type="a:NumberValue" name="XM_SIMBAD_sep" value="0.3390077" unit="as"/>
+            <field xsi:type="a:StringValue" name="GroupSize" value="0"/>
+            <field xsi:type="a:StringValue" name="RAJ2000" value="06 45 08.913260" unit="h:m:s"/>
+            <field xsi:type="a:StringValue" name="DEJ2000" value="-16 42 57.870999" unit="d:m:s"/>
+            <field xsi:type="a:NumberValue" name="pmRa" value="-552.63" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" name="pmDec" value="-1206.4" unit="mas/yr"/>
+            <field xsi:type="a:NumberValue" name="plx" value="379.21" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="e_Plx" value="1.58"/>
+            <field xsi:type="a:StringValue" name="SpType" value="A1V+DA"/>
+            <field xsi:type="a:StringValue" name="ObjTypes" value=",SB*,*,*,PM*,V*,UV,IR,**,**,"/>
+            <field xsi:type="a:StringValue" name="VarFlag3" value="U"/>
+            <field xsi:type="a:StringValue" name="MultFlag" value="O"/>
+            <field xsi:type="a:StringValue" name="Comp" value="A"/>
+            <field xsi:type="a:NumberValue" name="sep1" value="10.2" unit="arcsec"/>
+            <field xsi:type="a:NumberValue" name="sep2" value="10.7" unit="arcsec"/>
+            <field xsi:type="a:NumberValue" name="RadVel" value="-7.6" unit="km/s"/>
+            <field xsi:type="a:NumberValue" name="RotVel" value="13" unit="km/s"/>
+            <field xsi:type="a:NumberValue" name="B" value="-1.429" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_B" value="0.01" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="V" value="-1.121" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_V" value="0.002" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="B-V" value="0.009" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_B-V" value="0.007" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="V-Icous" value="-0.02" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_V-Icous" value="0" unit="mag"/>
+            <field xsi:type="a:StringValue" name="ref_V-Icous" value="A"/>
+            <field xsi:type="a:NumberValue" name="R" value="-1.163273" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="I" value="-1.343894" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="Icous" value="-1.42" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="J" value="-1.391" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_J" value="0.109" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="H" value="-1.391" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_H" value="0.184" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="K" value="-1.39" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_K" value="0.214" unit="mag"/>
+            <field xsi:type="a:StringValue" name="Qflag" value="ACC"/>
+            <field xsi:type="a:NumberValue" name="N" value="-0.986" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_N" value="0.335" unit="mag"/>
+            <field xsi:type="a:StringValue" name="Qph_wise" value="UUBA"/>
+            <field xsi:type="a:NumberValue" name="S09" value="198" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="e_S09" value="6.93" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="F12" value="95.75203" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="e_F12" value="3.351321" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="S18" value="40.44" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="e_S18" value="0.144" unit="Jy"/>
+            <field xsi:type="a:StringValue" name="IRFlag" value="2"/>
+            <field xsi:type="a:NumberValue" name="Lflux_med" value="995.8" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="e_Lflux_med" value="75.44296" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="Mflux_med" value="535.9" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="e_Mflux_med" value="46.90509" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="Nflux_med" value="118" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="e_Nflux_med" value="24.75942" unit="Jy"/>
+            <field xsi:type="a:NumberValue" name="Jcous" value="-1.354636" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_Jcous" value="0.1038417" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="Hcous" value="-1.394265" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_Hcous" value="0.1794192" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="Kcous" value="-1.366" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="e_Kcous" value="0.214" unit="mag"/>
+            <field xsi:type="a:NumberValue" name="diam_vj" value="6.653165" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="e_diam_vj" value="0.9289771" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="diam_vh" value="6.420267" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="e_diam_vh" value="0.7816873" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="diam_vk" value="6.17148" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="e_diam_vk" value="0.7049846" unit="mas"/>
+            <field xsi:type="a:StringValue" name="diam_count" value="3"/>
+            <field xsi:type="a:NumberValue" name="LDD" value="6.380782" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="e_LDD" value="0.4759618" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="e_LDD_rel" value="7.459302" unit="%"/>
+            <field xsi:type="a:NumberValue" name="diam_chi2" value="0.0882"/>
+            <field xsi:type="a:StringValue" name="CalFlag" value="6"/>
+            <field xsi:type="a:BooleanValue" name="diamFlag" value="1"/>
+            <field xsi:type="a:NumberValue" name="Teff_SpType" value="9500" unit="K"/>
+            <field xsi:type="a:NumberValue" name="logg_SpType" value="4.16" unit="[cm/s2]"/>
+            <field xsi:type="a:NumberValue" name="UD_U" value="6.117774" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="UD_B" value="6.063444" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="UD_V" value="6.108849" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="UD_R" value="6.173666" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="UD_I" value="6.222332" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="UD_J" value="6.270342" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="UD_H" value="6.297314" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="UD_K" value="6.309263" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="UD_L" value="6.342245" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="UD_M" value="6.351563" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="UD_N" value="6.361318" unit="mas"/>
+            <field xsi:type="a:NumberValue" name="Av" value="0"/>
+            <field xsi:type="a:NumberValue" name="e_Av" value="0.1483554"/>
+            <field xsi:type="a:NumberValue" name="Av_fit_chi2" value="1.0501"/>
+            <field xsi:type="a:NumberValue" name="dist_plx" value="2.637061" unit="pc"/>
+            <field xsi:type="a:NumberValue" name="e_dist_plx" value="0.01098747" unit="pc"/>
+            <field xsi:type="a:NumberValue" name="dist_fit" value="3.515052" unit="pc"/>
+            <field xsi:type="a:NumberValue" name="e_dist_fit" value="0.2506758" unit="pc"/>
+            <field xsi:type="a:NumberValue" name="dist_fit_chi2" value="16.1845"/>
+            <field xsi:type="a:StringValue" name="color_table_index" value="84"/>
+            <field xsi:type="a:StringValue" name="color_table_delta" value="0"/>
+            <field xsi:type="a:StringValue" name="color_table_index_fix" value="0"/>
+            <field xsi:type="a:StringValue" name="color_table_delta_fix" value="0"/>
+            <field xsi:type="a:StringValue" name="lum_class" value="5"/>
+            <field xsi:type="a:StringValue" name="lum_class_delta" value="0"/>
+            <field xsi:type="a:StringValue" name="SpType_JMMC" value="A1.00V"/>
+            <field xsi:type="a:StringValue" name="Name" value="TYC 5949-2777-1"/>
+            <field xsi:type="a:BooleanValue" name="deletedFlag" value="0"/>
+        </calibratorInfos>
+    </target>
+</a:observationSetting>
