@@ -102,13 +102,11 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
 
             // get screen size to adjust minimum window size :
             final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
             logger.debug("screen size = {} x {}", screenSize.getWidth(), screenSize.getHeight());
-
             // hack for screens smaller than 1152x864 screens :
-            final int h = (screenSize.getHeight() >= 768) ? 800 : 700;
+            final int height = (screenSize.getHeight() >= 850) ? 800 : 700;
 
-            final Dimension dim = new Dimension(800, h);
+            final Dimension dim = new Dimension(800, height);
             dialog.setMinimumSize(dim);
             dialog.addComponentListener(new ComponentResizeAdapter(dim));
 

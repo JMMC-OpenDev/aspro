@@ -300,18 +300,16 @@ public final class Aspro2 extends App {
 
             // get screen size to adjust minimum window size :
             final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
             logger.info("screen size = {} x {}", screenSize.getWidth(), screenSize.getHeight());
-
-            // hack for screens smaller than 1152x864 screens :
+            // hack for screens smaller than 1024x768 screens:
             final int appWidth = 950;
-            final int appHeightMin = 800;
-            final int appHeightPref = (screenSize.getHeight() >= 864) ? 950 : appHeightMin;
+            final int appHeightMin = (screenSize.getHeight() >= 850) ? 800 : 700;
+            final int appHeightPref = (screenSize.getHeight() >= 1000) ? 950 : appHeightMin;
 
             final Dimension dim = new Dimension(appWidth, appHeightMin);
             frame.setMinimumSize(dim);
-            frame.setPreferredSize(new Dimension(appWidth, appHeightPref));
             frame.addComponentListener(new ComponentResizeAdapter(dim));
+            frame.setPreferredSize(new Dimension(appWidth, appHeightPref));
 
             App.setFrame(frame);
 
@@ -335,7 +333,9 @@ public final class Aspro2 extends App {
             this.settingPanel.setName("settingPanel");
 
             // adds the panel in scrollPane
-            container.add(new JScrollPane(this.settingPanel), BorderLayout.CENTER);
+            final JScrollPane scrollPane = new JScrollPane(this.settingPanel);
+            this.settingPanel.setParentPane(scrollPane);
+            container.add(scrollPane, BorderLayout.CENTER);
 
             // Handle status bar
             container.add(StatusBar.getInstance(), BorderLayout.SOUTH);
