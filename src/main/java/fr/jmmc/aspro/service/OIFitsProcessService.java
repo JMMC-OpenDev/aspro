@@ -20,7 +20,6 @@ import fr.jmmc.oitools.model.OIT3;
 import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.OIWavelength;
-import fr.jmmc.oitools.model.range.Range;
 import fr.nom.tam.fits.FitsException;
 import java.io.IOException;
 import net.jafama.FastMath;
@@ -102,6 +101,8 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
             if (!prepare(oiWaveLength, warningContainer)) {
                 return false;
             }
+            
+            final double lambdaMin = StatUtils.min(this.waveLengths);
 
             for (OIData table : this.oiFitsFile.getOiDataList()) {
                 if (table.getOiWavelength() == oiWaveLength) {
@@ -110,7 +111,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                     if (this.hasModel && !target.isUseAnalyticalModel()) {
                         // Check user model:
                         validateOrPrepareUserModel(oiData, target.getUserModel(),
-                                useFastMode, fastError, doApodization, diameter, waveLengths[0]
+                                useFastMode, fastError, doApodization, diameter, lambdaMin
                         );
                     }
 
@@ -221,18 +222,19 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
     private boolean prepare(final OIWavelength oiWaveLength, final WarningContainer warningContainer) {
 
         final String instrumentName = oiWaveLength.getInsName();
-
         if (logger.isDebugEnabled()) {
             logger.debug("instrumentName: {}", instrumentName);
         }
 
-        // Get wavelength range for the selected instrument mode :
-        final Range effWaveRange = oiWaveLength.getEffWaveRange();
-        final double lambdaMin = AsproConstants.MICRO_METER * effWaveRange.getMin();
-        final double lambdaMax = AsproConstants.MICRO_METER * effWaveRange.getMax();
-
         // TODO: handle properly spectral channels (rebinning):
         int nWaveLengths = oiWaveLength.getNWave();
+
+        // prepare wavelengths independently of the user model Fits cube (wavelengths):
+        // note: wavelength array can be unordered:
+        this.waveLengths = oiWaveLength.getEffWaveAsDouble();
+
+        double lambdaMin = StatUtils.min(this.waveLengths);
+        double lambdaMax = StatUtils.max(this.waveLengths);
 
         if (logger.isDebugEnabled()) {
             logger.debug("lambdaMin: {}", lambdaMin);
@@ -240,17 +242,15 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
             logger.debug("nChannels: {}", nWaveLengths);
         }
 
-        // prepare wavelengths independently of the user model Fits cube (wavelengths):
-        final double waveBand;
-
-        this.waveLengths = oiWaveLength.getEffWaveAsDouble();
         this.waveBands = convertArray(oiWaveLength.getEffBand());
-        waveBand = StatUtils.mean(this.waveBands);
+        final double waveBand = StatUtils.mean(this.waveBands);
 
         // Initial Wavelength information:
-        String firstChannel = Double.toString(convertWL(this.waveLengths[0]));
-        String lastChannel = (nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[nWaveLengths - 1])) : null;
-
+        String firstChannel = Double.toString(convertWL(lambdaMin));
+        String lastChannel = null;
+        if (nWaveLengths > 1) {
+            lastChannel = Double.toString(convertWL(lambdaMax));
+        }
         addInformation(warningContainer, instrumentName + " instrument mode: "
                 + nWaveLengths + " channels "
                 + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] "
@@ -269,11 +269,16 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         // adjust used spectral channels in information and log:
         if (nWaveLengths != nChannels) {
             // Wavelength information:
-            firstChannel = Double.toString(convertWL(this.waveLengths[0]));
-            lastChannel = (nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[nWaveLengths - 1])) : null;
+            lambdaMin = StatUtils.min(this.waveLengths);
+            lambdaMax = StatUtils.max(this.waveLengths);
 
+            firstChannel = Double.toString(convertWL(lambdaMin));
+            lastChannel = null;
+            if (nWaveLengths > 1) {
+                lastChannel = Double.toString(convertWL(lambdaMax));
+            }
             addWarning(warningContainer, "Restricted instrument mode: "
-                    + this.waveLengths.length + " channels "
+                    + nWaveLengths + " channels "
                     + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] ");
         }
         return isModelWLValid;

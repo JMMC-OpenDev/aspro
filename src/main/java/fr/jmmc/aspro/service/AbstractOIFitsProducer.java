@@ -170,13 +170,13 @@ public abstract class AbstractOIFitsProducer {
                 }
 
                 if (isWL) {
-                    final double[] insWaves = this.waveLengths;
-                    final double[] insBands = this.waveBands;
-                    final int nWaves = insWaves.length;
+                    final double[] effWaves = this.waveLengths;
+                    final double[] effBands = this.waveBands;
+                    final int nWaves = effWaves.length;
 
-                    // Supposed wavelengths are sorted:
-                    final double lambdaMin = insWaves[0];
-                    final double lambdaMax = insWaves[nWaves - 1];
+                    // wavelength array can be unordered:
+                    final double lambdaMin = StatUtils.min(this.waveLengths);
+                    final double lambdaMax = StatUtils.max(this.waveLengths);
 
                     final double wlFirst = modelDataFirst.getWaveLength();
 
@@ -213,7 +213,7 @@ public abstract class AbstractOIFitsProducer {
                         // navigate among spectral channels:
                         if (logger.isDebugEnabled()) {
                             logger.debug("nWaves: {}", nWaves);
-                            logger.debug("insWaves: {}", Arrays.toString(insWaves));
+                            logger.debug("effWaves: {}", Arrays.toString(effWaves));
                         }
 
                         // note: hashset behaves like identity check:
@@ -225,8 +225,8 @@ public abstract class AbstractOIFitsProducer {
                         UserModelData modelWlLower, modelWlUpper;
 
                         for (int i = 0; i < nWaves; i++) {
-                            wl = insWaves[i];
-                            halfBand = 0.5d * insBands[i];
+                            wl = effWaves[i];
+                            halfBand = 0.5d * effBands[i];
 
                             wlLower = wl - halfBand;
                             wlUpper = wl + halfBand;
@@ -255,7 +255,7 @@ public abstract class AbstractOIFitsProducer {
 
                         if (uniqueModelDatas.isEmpty()) {
                             addWarning(warningContainer, "Incorrect model wavelength range [" + convertWL(wlFirst) + " - " + convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER
-                                    + "] smaller than the typical instrumental wavelength band [" + convertWL(StatUtils.mean(insBands)) + " " + SpecialChars.UNIT_MICRO_METER + ']');
+                                    + "] smaller than the typical instrumental wavelength band [" + convertWL(StatUtils.mean(effBands)) + " " + SpecialChars.UNIT_MICRO_METER + ']');
                             return false;
                         }
 
@@ -301,8 +301,8 @@ public abstract class AbstractOIFitsProducer {
                             this.waveLengths = new double[nChannels];
                             this.waveBands = new double[nChannels];
 
-                            System.arraycopy(insWaves, firstChannel, this.waveLengths, 0, nChannels);
-                            System.arraycopy(insBands, firstChannel, this.waveBands, 0, nChannels);
+                            System.arraycopy(effWaves, firstChannel, this.waveLengths, 0, nChannels);
+                            System.arraycopy(effBands, firstChannel, this.waveBands, 0, nChannels);
 
                             if (logger.isDebugEnabled()) {
                                 logger.debug("waveLengths: {}", Arrays.toString(waveLengths));
@@ -587,7 +587,7 @@ public abstract class AbstractOIFitsProducer {
 
             // Super sampling ?
             if (sampleWaveLengths == this.waveLengths) {
-                // Simple toShort array:
+                // Simply convert array:
                 // Iterate on rows :
                 for (int k = 0; k < nRows; k++) {
                     // Simple copy array:
@@ -601,26 +601,27 @@ public abstract class AbstractOIFitsProducer {
                 for (int l = 0; l < nChannels; l++) {
                     // Note: sometimes sub channels may overlap channel limits
                     final double halfBand = 0.5d * this.waveBands[l];
-                    final double wlMin = this.waveLengths[l] - halfBand;
-                    final double wlMax = this.waveLengths[l] + halfBand;
 
                     fromWL[l] = -1;
                     endWL[l] = -1;
 
                     for (int i = 0; i < nWLen; i++) {
-                        if (sampleWaveLengths[i] < wlMin) {
-                            continue;
+                        // note: wavelength array can be unordered:
+                        if (Math.abs(this.waveLengths[l] - sampleWaveLengths[i]) <= halfBand) {
+                            // within range:
+                            // identify part (fromWL - endWL)
+                            if (fromWL[l] == -1) {
+                                fromWL[l] = i;
+                                endWL[l] = i;
+                            } else {
+                                endWL[l] = i;
+                            }
+                        } else {
+                            // channel range already identified:
+                            if (endWL[l] != -1) {
+                                break;
+                            }
                         }
-                        if (sampleWaveLengths[i] > wlMax) {
-                            endWL[l] = i;
-                            break;
-                        }
-                        if (fromWL[l] == -1) {
-                            fromWL[l] = i;
-                        }
-                    }
-                    if (endWL[l] == -1) {
-                        endWL[l] = nWLen;
                     }
                 }
 
@@ -1100,15 +1101,31 @@ they are overlapped <=> (y2 - x1) * (x2 - y1) >= 0
         final int nWLen = waveLengths.length;
         final double[] wLen = new double[nWLen * nSamples];
 
-        double lambda, delta_lambda;
+        double lambda, delta_lambda, dl = waveBands[0];
+        double sign = 1.0;
 
         for (int i = 0, k = 0; i < nWLen; i++) {
             lambda = waveLengths[i];
-            delta_lambda = waveBands[i];
+            if (i + 1 < nWLen) {
+                // note: wavelength array can be unordered:
+                dl = waveLengths[i + 1] - lambda;
+                if (dl >= 0.0) {
+                    sign = 1.0;
+                } else {
+                    sign = -1.0;
+                    dl = -dl;
+                }
+            }
+            // preserve sign (increasing or decreasing) and reduce bandwidth if larger than (lambda1 - lambda2)
+            delta_lambda = sign * Math.min(dl, waveBands[i]);
 
             for (int j = 0; j < nSamples; j++) {
                 wLen[k++] = lambda + interp[j] * delta_lambda;
             }
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("waveLengths: {}", Arrays.toString(waveLengths));
+            logger.debug("resampleWaveLengths: {}", Arrays.toString(wLen));
         }
         return wLen;
     }

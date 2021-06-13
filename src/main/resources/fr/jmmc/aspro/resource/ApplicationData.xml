@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.06"/>
-    <compilation date="07/06/2021" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.06 beta 5"/>
+    <compilation date="13/06/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,13 @@
 
     <releasenotes>
         <release version="21.06">
-            <pubDate>Mon, 07 Jun 2021 16:00:00 GMT</pubDate>
+            <pubDate>Sun, 13 Jun 2021 15:00:00 GMT</pubDate>
+            <prerelease version="21.06 beta 5">
+                <change type="BUGFIX">Fixed the command line tool to compute interferometric observables
+                    from an OIFITS file (dataset) and an user model image cube (FITS) to properly handle OIWavelength tables
+                    (MATISSE OIWavelength tables are reversed ordered)</change>
+                <change type="BUGFIX">Fixed small screens support (1024x768)</change>
+            </prerelease>
             <prerelease version="21.06 beta 4">
                 <change type="FEATURE">Discarded calibration bias sampling for MATISSE</change>
                 <change type="FEATURE">Set 'Use inst. &amp; cal. error bias' disabled by default</change>
@@ -461,7 +467,7 @@
             <pubDate>Mon, 11 Sep 2017 12:00:00 GMT</pubDate>
             <prerelease version="0.9.9.3 beta 6">
                 <change type="FEATURE">Added a new command line tool to compute interferometric observables
-                    from an OIFITS file and a user model image (FITS) (noise modelling disabled).
+                    from an OIFITS file and an user model image (FITS) (noise modelling disabled).
                     Launch the command: java -jar aspro2-xxx.jar -process -input INPUT_OIFITS_FILE -image IMAGE_FITS_FILE -output OUTPUT_OIFITS_FILE
                 </change>
                 <change type="FEATURE">Updated to OITools 2 (OIFITS 2 support) but ASPRO2 writes only OIFITS 1 files</change>
