@@ -334,7 +334,8 @@ public final class Aspro2 extends App {
 
             // adds the panel in scrollPane
             final JScrollPane scrollPane = new JScrollPane(this.settingPanel);
-            this.settingPanel.setParentPane(scrollPane);
+            // wait until SettingPanel is properly fixed:
+            //this.settingPanel.setParentPane(scrollPane);
             container.add(scrollPane, BorderLayout.CENTER);
 
             // Handle status bar
