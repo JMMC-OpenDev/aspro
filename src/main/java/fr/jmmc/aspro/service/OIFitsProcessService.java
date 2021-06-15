@@ -502,7 +502,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                                 }
                                 // original data:
                                 vampTh = visAmp[k][l];
-                                vphiTh = visPhi[k][l];
+                                vphiTh = FastMath.toRadians(visPhi[k][l]);
 
                                 if (!doFlag) {
                                     // chi2 = sum ( (x - x_th) / err ) ^2
@@ -790,7 +790,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
                         // original data:
                         t3ampTh = t3Amp[k][l];
-                        t3phiTh = t3Phi[k][l];
+                        t3phiTh = FastMath.toRadians(t3Phi[k][l]);
 
                         if (!doFlag) {
                             // chi2 = sum ( (x - x_th) / err ) ^2
