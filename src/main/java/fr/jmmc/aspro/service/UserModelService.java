@@ -26,7 +26,6 @@ import fr.jmmc.jmal.model.function.math.Functions;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
-import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageFile;
 import fr.jmmc.oitools.image.FitsImageHDU;
@@ -1231,7 +1230,6 @@ public final class UserModelService {
         // Recycle large data arrays (weak reference cache) for fits cubes (many spectral channels having roughly same nData)
         final float[] data1D = getArray(nData * DATA_1D_POINT_SIZE);
 
-        double totalFlux = 0.0;
         float flux;
         double rowCoord, colCoord;
 
@@ -1253,28 +1251,12 @@ public final class UserModelService {
                     data1D[nUsedData] = flux;
                     data1D[nUsedData + 1] = (float) Functions.transformU(colCoord, rowCoord, cosTheta, sinTheta);
                     data1D[nUsedData + 2] = (float) Functions.transformV(colCoord, rowCoord, cosTheta, sinTheta);
-
-                    totalFlux += flux;
                     nUsedData += DATA_1D_POINT_SIZE;
                 }
             } // columns
         } // rows
 
         logger.info("prepareModelData: used pixels = {} / {}", nUsedData / DATA_1D_POINT_SIZE, nPixels);
-
-        // normalize flux to 1.0:
-        logger.info("prepareModelData: totalFlux: {}", totalFlux);
-
-        if (threshold != 0.0f) {
-            final double normFactor = 1.0 / totalFlux;
-            totalFlux = 0.0;
-
-            for (int i = 0; i < nUsedData; i += DATA_1D_POINT_SIZE) {
-                data1D[i] = (float) (normFactor * data1D[i]);
-                totalFlux += data1D[i];
-            }
-            logger.info("prepareModelData: totalFlux after normalization: {}", totalFlux);
-        }
 
         // trim array size:
         if (nUsedData != data1D.length) {
@@ -1362,7 +1344,6 @@ public final class UserModelService {
         // airy disk: zero  at 1.22 lambda / diameter
         // 2021.08.02: false according to Michel tallon:
         // final double airyRadius = 1.22d * lambda / diameter;
-        
         final double airyRadius = 1.0289939700094716812373007996939122676849365234375 * lambda / diameter;
 
         // check airy radius vs image Fov:
