@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.06 beta 5"/>
-    <compilation date="13/06/2021" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="21.07 beta 1"/>
+    <compilation date="16/07/2021" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -228,6 +228,15 @@
     </menubar>
 
     <releasenotes>
+        <release version="21.09">
+            <pubDate>Fri, 16 Jul 2021 21:00:00 GMT</pubDate>
+            <prerelease version="21.07 beta 1">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1109">Fixed W2 telescope to always use Pop 5 for the CHARA Array</change>
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1097">Fixed image flux normalization with fast mode enabled</change>
+                <change type="FEATURE">Added new ruler to measure both distance and angle on any FITS image</change>
+                <change type="FEATURE">Added Scientific Color Maps (v7)</change>
+            </prerelease>
+        </release>
         <release version="21.06">
             <pubDate>Sun, 13 Jun 2021 15:00:00 GMT</pubDate>
             <prerelease version="21.06 beta 5">
