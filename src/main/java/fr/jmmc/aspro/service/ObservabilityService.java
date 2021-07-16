@@ -2012,6 +2012,9 @@ public final class ObservabilityService {
                         azEl.getAzimuth(), azEl.getElevation());
             }
 
+            // TODO: check high elevation here (high / max elevation) ?
+            // not via profile
+            
             visible = true;
 
             // For every beam (station) :
@@ -2775,6 +2778,10 @@ public final class ObservabilityService {
         final int nBeams = this.beams.size();
         final int sizeBL = this.baseLines.size();
 
+        // Use arrays instead of List for performance:
+        final Beam[] bs = new Beam[nBeams];
+        this.beams.toArray(bs);
+
         final List<PopCombination> popCombs;
 
         // Get chosen PoPs :
@@ -2828,10 +2835,48 @@ public final class ObservabilityService {
             // Create the Pops combination:
             popCombs = new ArrayList<PopCombination>(sharedPopCombinations.size());
 
-            for (SharedPopCombination popComb : sharedPopCombinations) {
-                popCombs.add(new PopCombination(popComb));
+            // filter or not ?
+            boolean checkBeams = false;
+            int idxW2 = -1;
+
+            // Quick and Dirty hack to force W2 = Pop5:
+            if (true) {
+                 for (int i = 0; i < nBeams; i++) {
+                     if ("W2".equals(bs[i].getStation().getName())) {
+                         idxW2 = i;
+                         break;
+                     }
+                 }
+                 checkBeams = (idxW2 != -1);
             }
 
+            if (checkBeams) {
+                for (SharedPopCombination popComb : sharedPopCombinations) {
+                    // filter PoPs according to stations (W2=PoP5 2021.07 or predefined-user restrictions = selected PoPs only)
+                    
+                    // test W2=Pop5:
+                    if (idxW2 != -1) {
+                        final Pop p = popComb.getPops()[idxW2];
+                        // System.out.println("W2 pop: "+p + " in "+popComb);
+                        
+                        if (p.getIndex() != 5) {
+                            // skip
+                            continue;
+                        }
+                    }
+                    
+                    
+                    // Note : the pops are given in the same order as the beams/stations :
+                    // if accept(popComb)
+                    popCombs.add(new PopCombination(popComb));
+                }
+                
+                logger.debug("PoP combinations: {} / {}", popCombs.size(), sharedPopCombinations.size());
+            } else {
+                for (SharedPopCombination popComb : sharedPopCombinations) {
+                    popCombs.add(new PopCombination(popComb));
+                }
+            }
             this.data.setUserPops(false);
 
         } else {
@@ -2850,10 +2895,6 @@ public final class ObservabilityService {
                 logger.debug("User PoPs: {}", userComb);
             }
         }
-
-        // Use arrays instead of List for performance:
-        final Beam[] bs = new Beam[nBeams];
-        this.beams.toArray(bs);
 
         Beam b1, b2;
         Pop p1, p2;
