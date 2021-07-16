@@ -1,0 +1,9 @@
+/failed-gui-tests/
+/fest-screenshots/
+/test/
+/src/test/resources/VLTI_NewDatabase/
+/src/test/resources/amhra/private/
+/nbactions-dev.xml
+/nb-configuration.xml
+/nbactions.xml
+/target/
