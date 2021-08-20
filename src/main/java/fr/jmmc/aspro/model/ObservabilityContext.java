@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.oitools.model.range.RangeFactory;
 import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.oitools.model.range.RangeLimit;
@@ -52,6 +53,8 @@ public class ObservabilityContext implements RangeFactory {
     private final double[] haValues = new double[6];
     /** w = double[2] array to avoid array allocations for DelayLineService */
     private final double[] w = new double[2];
+    /** temporary azEl instance */
+    private final AzEl azEl = new AzEl();
 
     /**
      * Public constructor
@@ -84,6 +87,13 @@ public class ObservabilityContext implements RangeFactory {
      */
     public final double[] getHaValues() {
         return haValues;
+    }
+
+    /**
+    * @return temporary azEl instance
+    */
+    public AzEl getAzEl() {
+        return azEl;
     }
 
     /**
@@ -201,7 +211,7 @@ public class ObservabilityContext implements RangeFactory {
      * @param ranges List[Range] to recycle as List
      */
     public final void recycleAll(final List<List<Range>> ranges) {
-        if ((ranges != null) && ranges.isEmpty()) {
+        if ((ranges != null) && !ranges.isEmpty()) {
             final Range[] pr = rangePool;
             final List<Range>[] pl = rangeListPool;
             int nr = nRange;
@@ -246,7 +256,7 @@ public class ObservabilityContext implements RangeFactory {
      * @param ranges List[Range] to recycle
      */
     public final void recycleRanges(final List<Range> ranges) {
-        if (ranges != null) {
+        if ((ranges != null) && !ranges.isEmpty()) {
             final Range[] pr = rangePool;
             int nr = nRange;
 
@@ -298,7 +308,7 @@ public class ObservabilityContext implements RangeFactory {
      */
     @Override
     public final void dumpStats() {
-        logger.info("{}: {} created ranges - {} created lists.",
-                getClass().getSimpleName(), createdRanges, createdRangeLists);
+        logger.info("{}: {} created ranges ({} pool size) - {} created lists ({} pool size).",
+                getClass().getSimpleName(), createdRanges, nRange, createdRangeLists, nRangeList);
     }
 }

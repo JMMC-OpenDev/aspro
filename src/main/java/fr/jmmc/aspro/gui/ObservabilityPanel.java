@@ -1743,6 +1743,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             // Observable range limits without HA restrictions:
                             intervals = so.getVisibleNoSoftLimits();
                             if (intervals != null) {
+                                final String desc = so.getVisibleNoSoftLimitsDesc();
                                 final Color fillPaint = getSoftLimitsPaint(paint);
                                 final Paint highlightPaint = SlidingXYPlotAdapter.getHighlightPaint(fillPaint);
 
@@ -1751,7 +1752,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                     addAnnotation(annotations, pos,
                                             new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
                                                     ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint, highlightPaint, Layer.BACKGROUND,
-                                                    this.slidingXYPlotAdapter.generateToolTip(target, legendLabel, "Moon, Wind, HA", so, interval.getStartDate(), interval.getEndDate())));
+                                                    this.slidingXYPlotAdapter.generateToolTip(target, legendLabel, desc, so, interval.getStartDate(), interval.getEndDate())));
                                 }
                             }
 
@@ -1783,6 +1784,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             // Observable range limits without HA restrictions (background):
                             intervals = so.getVisibleNoSoftLimits();
                             if (intervals != null) {
+                                final String desc = so.getVisibleNoSoftLimitsDesc();
                                 final Color fillPaint = getSoftLimitsPaint(paint);
                                 final Paint highlightPaint = SlidingXYPlotAdapter.getHighlightPaint(fillPaint);
 
@@ -1791,7 +1793,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                     addAnnotation(annotations, pos,
                                             new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
                                                     ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint, highlightPaint, Layer.BACKGROUND,
-                                                    this.slidingXYPlotAdapter.generateToolTip(target, legendLabel, "Moon, Wind, HA", so, interval.getStartDate(), interval.getEndDate())));
+                                                    this.slidingXYPlotAdapter.generateToolTip(target, legendLabel, desc, so, interval.getStartDate(), interval.getEndDate())));
                                 }
                             }
 

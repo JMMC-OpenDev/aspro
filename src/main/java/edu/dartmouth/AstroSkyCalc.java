@@ -49,7 +49,7 @@ public final class AstroSkyCalc {
     /** minimal precision value in decimal hour */
     private final static double PREC_IN_DEC_HOUR = MSEC_IN_DEC_HOUR / 10d;
     /** cached log trace disabled */
-    private final static boolean isLogTrace = false;
+    private final static boolean DO_TRACE = false;
 
     /* members */
     /** cached log debug enabled */
@@ -789,7 +789,7 @@ public final class AstroSkyCalc {
         final double ha1 = rangeHA.getMin();
         final double ha2 = rangeHA.getMax();
 
-        if (isLogTrace) {
+        if (DO_TRACE) {
             logger.trace("ha1 = {}", ha1);
             logger.trace("ha2 = {}", ha2);
         }
@@ -797,7 +797,7 @@ public final class AstroSkyCalc {
         final double jd1 = convertHAToJD(ha1, precRA);
         final double jd2 = convertHAToJD(ha2, precRA);
 
-        if (isLogTrace) {
+        if (DO_TRACE) {
             logger.trace("jd1 = {}", toDateLST(jd1));
             logger.trace("jd2 = {}", toDateLST(jd2));
         }
@@ -810,12 +810,14 @@ public final class AstroSkyCalc {
      * @param ranges JD range list to convert
      * @param destRanges HA range list to append into
      * @param precRA precessed target right ascension in decimal hours
+     * @param rangeFactory Factory used to create Range instances
      */
-    public void convertJDToHARanges(final List<Range> ranges, final List<Range> destRanges, final double precRA) {
+    public void convertJDToHARanges(final List<Range> ranges, final List<Range> destRanges, final double precRA,
+                                    final RangeFactory rangeFactory) {
         if (ranges != null) {
             Range rangeHA;
             for (int i = 0, size = ranges.size(); i < size; i++) {
-                rangeHA = convertJDToHARange(ranges.get(i), precRA);
+                rangeHA = convertJDToHARange(ranges.get(i), precRA, rangeFactory);
                 if (rangeHA != null) {
                     destRanges.add(rangeHA);
                 }
@@ -827,13 +829,14 @@ public final class AstroSkyCalc {
      * Convert a JD range to an HA range but keep only ranges with an HA in [-12;12]
      * @param rangeJD JD range
      * @param precRA precessed target right ascension in decimal hours
+     * @param rangeFactory Factory used to create Range instances
      * @return HA range in [-12;12]
      */
-    public Range convertJDToHARange(final Range rangeJD, final double precRA) {
+    public Range convertJDToHARange(final Range rangeJD, final double precRA, final RangeFactory rangeFactory) {
         final double jd1 = rangeJD.getMin();
         final double jd2 = rangeJD.getMax();
 
-        if (isLogTrace) {
+        if (DO_TRACE) {
             logger.trace("jd1 = {}", toDateLST(jd1));
             logger.trace("jd2 = {}", toDateLST(jd2));
         }
@@ -841,7 +844,6 @@ public final class AstroSkyCalc {
         double ha1 = convertJDToHA(jd1, precRA);
         double ha2 = convertJDToHA(jd2, precRA);
 
-        // TODO: check modulo 24H ???
         if (ha1 < AsproConstants.HA_MIN) {
             ha1 = AsproConstants.HA_MIN;
         }
@@ -857,12 +859,12 @@ public final class AstroSkyCalc {
             ha2 = AsproConstants.HA_MAX;
         }
 
-        if (isLogTrace) {
+        if (DO_TRACE) {
             logger.trace("ha1 = {} h", ha1);
             logger.trace("ha2 = {} h", ha2);
         }
 
-        return new Range(ha1, ha2);
+        return (rangeFactory != null) ? rangeFactory.valueOf(ha1, ha2) : new Range(ha1, ha2);
     }
 
     /**
@@ -1011,7 +1013,7 @@ public final class AstroSkyCalc {
         if (localTZ == null) {
             throw new IllegalStateException("Site timezone is undefined !");
         }
-        if (isLogTrace) {
+        if (DO_TRACE) {
             logger.debug("date[UTC]: {}", date);
         }
         // number of milliseconds since January 1, 1970, 00:00:00 GMT (UTC)
@@ -1029,7 +1031,7 @@ public final class AstroSkyCalc {
         }
         date.setTime(milliseconds);
 
-        if (isLogTrace) {
+        if (DO_TRACE) {
             logger.debug("date[{}]: {}", localTZ.getID(), date);
         }
     }

@@ -46,8 +46,10 @@ public final class StarObservabilityData {
     private final int type;
     /** visible date intervals */
     private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>(3);
-    /** visible date intervals without soft limits (HA, moon, wind) */
+    /** visible date intervals without soft limits (HA, moon, wind, elev) */
     private List<DateTimeInterval> visibleNoSoftLimits = null;
+    /** description of visible date intervals without soft limits (HA, moon, wind, elev) */
+    private String visibleNoSoftLimitsDesc = null;
     /** list of visible date intervals for every Vcm limits */
     private List<List<DateTimeInterval>> visibleVcmLimits = null;
     /** list of every Vcm limits (description) */
@@ -127,19 +129,35 @@ public final class StarObservabilityData {
     }
 
     /**
-     * Return the visible date intervals without soft limits (HA, moon, wind)
-     * @return visible date intervals without soft limits (HA, moon, wind)
+     * Return the visible date intervals without soft limits (HA, moon, wind, elev)
+     * @return visible date intervals without soft limits (HA, moon, wind, elev)
      */
     public List<DateTimeInterval> getVisibleNoSoftLimits() {
         return visibleNoSoftLimits;
     }
 
     /**
-     * Return the visible date intervals without soft limits (HA, moon, wind)
-     * @param ranges visible date intervals without soft limits (HA, moon, wind)
+     * Define the visible date intervals without soft limits (HA, moon, wind, elev)
+     * @param ranges visible date intervals without soft limits (HA, moon, wind, elev)
      */
     public void setVisibleNoSoftLimits(final List<DateTimeInterval> ranges) {
         visibleNoSoftLimits = ranges;
+    }
+
+    /**
+    * Return the description of visible date intervals without soft limits (HA, moon, wind, elev)
+    * @return description of visible date intervals without soft limits (HA, moon, wind, elev)
+    */
+    public String getVisibleNoSoftLimitsDesc() {
+        return visibleNoSoftLimitsDesc;
+    }
+
+    /**
+    * Define the description of visible date intervals without soft limits (HA, moon, wind, elev)
+    * @param visibleNoSoftLimitsDesc description of visible date intervals without soft limits (HA, moon, wind, elev)
+    */
+    public void setVisibleNoSoftLimitsDesc(final String visibleNoSoftLimitsDesc) {
+        this.visibleNoSoftLimitsDesc = visibleNoSoftLimitsDesc;
     }
 
     /**
