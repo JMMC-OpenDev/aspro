@@ -1928,28 +1928,23 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             }
 
             for (WarningMessage message : warningContainer.getWarnings()) {
-                // avoid redudant logs of the same message:
-                if (!message.isLogged()) {
-                    String msg = message.getMessage();
+                String msg = message.getMessage();
 
-                    if (n < MAX_TOOLTIP_WARNINGS) {
-                        n++;
-                        sb.append(StringUtils.encodeTagContent(msg)).append("<br>");
-                        if (n == MAX_TOOLTIP_WARNINGS) {
-                            sb.append("...");
-                        }
+                if (n < MAX_TOOLTIP_WARNINGS) {
+                    n++;
+                    sb.append(StringUtils.encodeTagContent(msg)).append("<br>");
+                    if (n == MAX_TOOLTIP_WARNINGS) {
+                        sb.append("...");
                     }
-                    
-                    msg = StringUtils.removeTags(msg);
+                }
 
-                    // add message to the warning log:
-                    if (message.getLevel() == Level.Information) {
-                        _warningLogger.info(msg);
-                    } else {
-                        _warningLogger.warn(msg);
-                    }
-                    // flag message:
-                    message.setLogged(true);
+                msg = StringUtils.removeTags(msg);
+
+                // add message to the warning log:
+                if (message.getLevel() == Level.Information) {
+                    _warningLogger.info(msg);
+                } else {
+                    _warningLogger.warn(msg);
                 }
             }
             sb.append("</html>");

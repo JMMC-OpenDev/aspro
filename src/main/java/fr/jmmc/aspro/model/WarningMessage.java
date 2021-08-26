@@ -22,8 +22,6 @@ public final class WarningMessage {
     private final String message;
     /** message level */
     private final Level level;
-    /** flag indicating if this message was logged in the warning log */
-    private boolean logged = false;
 
     /**
      * Protected Constructor
@@ -60,22 +58,6 @@ public final class WarningMessage {
         return level;
     }
 
-    /**
-     * Return the flag indicating if this message was logged in the warning log
-     * @return flag indicating if this message was logged in the warning log
-     */
-    public boolean isLogged() {
-        return logged;
-    }
-
-    /**
-     * Define the flag indicating if this message was logged in the warning log
-     * @param logged flag indicating if this message was logged in the warning log
-     */
-    public void setLogged(final boolean logged) {
-        this.logged = logged;
-    }
-
     @Override
     public int hashCode() {
         int hash = 3;
@@ -101,14 +83,11 @@ public final class WarningMessage {
         if (this.level != other.getLevel()) {
             return false;
         }
-        if (this.logged != other.isLogged()) {
-            return false;
-        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "WarningMessage{level=" + level + ", logged=" + logged + ", message='" + message + '}';
+        return "WarningMessage{level=" + level + ", message='" + message + '}';
     }
 }
