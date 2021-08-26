@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.09 beta 2"/>
-    <compilation date="20/08/2021" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="21.09 beta 3"/>
+    <compilation date="26/08/2021" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,10 @@
 
     <releasenotes>
         <release version="21.09">
-            <pubDate>Fri, 20 Aug 2021 17:00:00 GMT</pubDate>
+            <pubDate>Thu, 26 Aug 2021 21:00:00 GMT</pubDate>
+            <prerelease version="21.09 beta 3">
+                <change type="BUGFIX">Fixed tooltips (transit) on the observability plot</change>
+            </prerelease>
             <prerelease version="21.09 beta 2">
                 <change type="FEATURE">CHARA: added a new warning indicating observable targets with high elevation (higher than 85 deg)</change>
                 <change type="FEATURE">CHARA: improved the observability plot to display high elevation ranges like HA constraints, moon avoidance and wind restriction (translucent area and dotted outline)</change>
