@@ -46,7 +46,6 @@ import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.service.RecentFilesManager;
 import fr.jmmc.jmcs.util.CollectionUtils;
 import fr.jmmc.jmcs.util.FileUtils;
-import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.nom.tam.fits.FitsException;
 import java.io.File;
@@ -966,6 +965,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 logger.trace("setInterferometerConfigurationName: {}", name);
             }
             interferometerChoice.setName(name);
+            // consistent with changed flag:
             interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfiguration(name));
         }
         return changed;
@@ -981,9 +981,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @return true if the value changed
      */
     public boolean setInstrumentConfigurationName(final String instrumentAlias) {
-        final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
+        final ObservationSetting observation = getMainObservation();
+        final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
 
-        // use the real instrument name (not alias):
+        // get the real instrument name (not alias):
         final String insName = instrumentChoice.getInstrumentConfiguration().getFocalInstrument().getName();
 
         // Update the instrument anyway:
@@ -992,7 +993,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         }
         instrumentChoice.setName(instrumentAlias);
         instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(
-                getMainObservation().getInterferometerConfiguration().getName(), instrumentAlias));
+                observation.getInterferometerConfiguration().getName(), instrumentAlias));
 
         // Check if the real instrument changed (alias / names may be the same):
         final boolean changed = !insName.equals(instrumentChoice.getInstrumentConfiguration().getFocalInstrument().getName());
@@ -1037,6 +1038,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                     logger.trace("setInstrumentConfigurationStations[{}]: {}", i, stations);
                 }
                 obsVariant.setStations(stations);
+                // consistent with changed flag:
                 obsVariant.setStationList(cm.getInstrumentConfigurationStations(
                         observation.getInterferometerConfiguration().getName(),
                         observation.getInstrumentConfiguration().getName(), stations));
@@ -1074,7 +1076,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 logger.trace("setInstrumentConfigurationPoPs: {}", pops);
             }
             instrumentChoice.setPops(pops);
-
+            // consistent with changed flag:
             instrumentChoice.setPopList(cm.parseInstrumentPoPs(
                     observation.getInterferometerConfiguration().getName(),
                     observation.getInstrumentConfiguration().getName(),
@@ -1095,16 +1097,27 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         final ObservationSetting observation = getMainObservation();
         final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
 
+        // get the real instrument mode:
+        final String insMode = (instrumentChoice.getFocalInstrumentMode() != null)
+                ? instrumentChoice.getFocalInstrumentMode().getName() : null;
+
+        // Update the instrument mode anyway:
+        if (logger.isTraceEnabled()) {
+            logger.trace("setInstrumentMode: {}", mode);
+        }
+
         // mode can be null :
-        final boolean changed = isChanged(mode, instrumentChoice.getInstrumentMode());
-        if (changed) {
-            if (logger.isTraceEnabled()) {
-                logger.trace("setInstrumentMode: {}", mode);
-            }
-            instrumentChoice.setInstrumentMode(mode);
-            instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(
-                    observation.getInterferometerConfiguration().getName(),
-                    observation.getInstrumentConfiguration().getName(), mode));
+        instrumentChoice.setInstrumentMode(mode);
+        instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(
+                observation.getInterferometerConfiguration().getName(),
+                observation.getInstrumentConfiguration().getName(), mode));
+
+        // Check if the real instrument mode changed:
+        final boolean changed = isChanged(insMode, (instrumentChoice.getFocalInstrumentMode() != null)
+                ? instrumentChoice.getFocalInstrumentMode().getName() : null);
+
+        if (logger.isTraceEnabled()) {
+            logger.trace("setInstrumentMode: changed={}", changed);
         }
         return changed;
     }
