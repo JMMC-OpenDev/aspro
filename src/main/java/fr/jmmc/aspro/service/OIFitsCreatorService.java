@@ -402,7 +402,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             String firstChannel = Double.toString(convertWL(this.waveLengths[0]));
             String lastChannel = (nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[nWaveLengths - 1])) : null;
 
-            addInformation(warningContainer, this.instrumentName + " instrument mode: "
+            addInformation(warningContainer, this.instrumentName + " " + instrumentMode.getName() + " instrument mode: "
                     + nWaveLengths + " channels "
                     + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] "
                     + "(band: " + convertWL(waveBand) + " " + SpecialChars.UNIT_MICRO_METER + ')');
