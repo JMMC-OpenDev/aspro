@@ -814,7 +814,7 @@ public final class AstroSkyCalc {
      */
     public void convertJDToHARanges(final List<Range> ranges, final List<Range> destRanges, final double precRA,
                                     final RangeFactory rangeFactory) {
-        if (ranges != null) {
+        if ((ranges != null) && !ranges.isEmpty()) {
             Range rangeHA;
             for (int i = 0, size = ranges.size(); i < size; i++) {
                 rangeHA = convertJDToHARange(ranges.get(i), precRA, rangeFactory);

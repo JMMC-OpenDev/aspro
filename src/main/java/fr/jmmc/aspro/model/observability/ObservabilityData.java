@@ -600,7 +600,7 @@ public final class ObservabilityData {
      * @param intervals interval list where new date intervals will be added
      */
     public void convertRangesToDateIntervals(final List<Range> rangesJD, final List<DateTimeInterval> intervals) {
-        if (rangesJD != null) {
+        if ((rangesJD != null) && !rangesJD.isEmpty()) {
             for (int i = 0, len = rangesJD.size(); i < len; i++) {
                 convertRangeToDateInterval(rangesJD.get(i), intervals);
             }
