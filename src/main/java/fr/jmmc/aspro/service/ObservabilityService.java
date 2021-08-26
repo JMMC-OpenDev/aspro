@@ -1222,7 +1222,7 @@ public final class ObservabilityService {
                 // Add Rise/Set :
                 final StarObservabilityData soRiseSet = new StarObservabilityData(targetName, "Rise/Set", StarObservabilityData.TYPE_RISE_SET);
                 // get target position (ha, az, el) at range boundaries:
-                getTargetPosition(soRiseSet, rangesJDRiseSet, precRA, precDEC, azEl, false);
+                addTargetPositions(soRiseSet, rangesJDRiseSet, precRA, precDEC, azEl, false);
                 starVisList.add(soRiseSet);
 
                 // convert JD ranges to date ranges :
@@ -1232,7 +1232,7 @@ public final class ObservabilityService {
                     // Add Horizon :
                     final StarObservabilityData soHorizon = new StarObservabilityData(targetName, "Horizon", StarObservabilityData.TYPE_HORIZON);
                     // get target position (ha, az, el) at range boundaries:
-                    getTargetPosition(soHorizon, rangesJDHorizon, precRA, precDEC, azEl, false);
+                    addTargetPositions(soHorizon, rangesJDHorizon, precRA, precDEC, azEl, false);
                     starVisList.add(soHorizon);
 
                     // convert JD ranges to date ranges :
@@ -1243,7 +1243,7 @@ public final class ObservabilityService {
                     // Add Moon separation :
                     final StarObservabilityData soMoon = new StarObservabilityData(targetName, "Moon Sep.", StarObservabilityData.TYPE_MOON_DIST);
                     // get target position (ha, az, el) at range boundaries:
-                    getTargetPosition(soMoon, rangesJDMoon, precRA, precDEC, azEl, false);
+                    addTargetPositions(soMoon, rangesJDMoon, precRA, precDEC, azEl, false);
                     starVisList.add(soMoon);
 
                     // convert JD ranges to date ranges :
@@ -1254,7 +1254,7 @@ public final class ObservabilityService {
                     // Add Horizon :
                     final StarObservabilityData soWind = new StarObservabilityData(targetName, "Wind", StarObservabilityData.TYPE_WIND);
                     // get target position (ha, az, el) at range boundaries:
-                    getTargetPosition(soWind, rangesJDWind, precRA, precDEC, azEl, false);
+                    addTargetPositions(soWind, rangesJDWind, precRA, precDEC, azEl, false);
                     starVisList.add(soWind);
 
                     // convert JD ranges to date ranges :
@@ -1288,7 +1288,7 @@ public final class ObservabilityService {
 
                         soBl = new StarObservabilityData(targetName, baseLine.getName(), StarObservabilityData.TYPE_BASE_LINE + i);
                         // get target position (ha, az, el) at range boundaries:
-                        getTargetPosition(soBl, obsRanges, precRA, precDEC, azEl, false);
+                        addTargetPositions(soBl, obsRanges, precRA, precDEC, azEl, false);
                         starVisList.add(soBl);
 
                         // convert JD ranges to date ranges :
@@ -1355,7 +1355,7 @@ public final class ObservabilityService {
                                     // Keep observability ranges with VCM Low restrictions:
 
                                     // get target position (ha, az, el) at range boundaries:
-                                    getTargetPosition(soBl, vcmComplementRanges, precRA, precDEC, azEl, false);
+                                    addTargetPositions(soBl, vcmComplementRanges, precRA, precDEC, azEl, false);
 
                                     // convert JD ranges to date ranges :
                                     final List<DateTimeInterval> visibleVcmLowLimits = new ArrayList<DateTimeInterval>(3);
@@ -1433,6 +1433,8 @@ public final class ObservabilityService {
 
             // store merge result as date intervals:
             if (finalRangesHardLimits != null) {
+                // get target position (ha, az, el) at transit:
+                addTargetPositionTransit(starObs, finalRangesHardLimits, precDEC, azEl, jdTransit);
 
                 // Show VCM limits as overlay:
                 if (checkDLMaxThrow) {
@@ -1493,7 +1495,7 @@ public final class ObservabilityService {
                             // Keep observability ranges with VCM Low restrictions:
 
                             // get target position (ha, az, el) at range boundaries:
-                            getTargetPosition(starObs, vcmComplementRanges, precRA, precDEC, azEl, false);
+                            addTargetPositions(starObs, vcmComplementRanges, precRA, precDEC, azEl, false);
 
                             final List<DateTimeInterval> visibleVcmLowLimits = new ArrayList<DateTimeInterval>(3);
 
@@ -1665,7 +1667,7 @@ public final class ObservabilityService {
                         }
 
                         // get target position (ha, az, el) at range boundaries:
-                        getTargetPosition(starObs, finalRangesHardLimits, precRA, precDEC, azEl, false);
+                        addTargetPositions(starObs, finalRangesHardLimits, precRA, precDEC, azEl, false);
 
                         // Keep observability ranges without HA restrictions:
                         final List<DateTimeInterval> visibleNoSoftLimits = new ArrayList<DateTimeInterval>(3);
@@ -1687,20 +1689,26 @@ public final class ObservabilityService {
                 // fast interrupt:
                 checkInterrupted();
 
-                // get detailled target position (ha, az, el) for the current target (ticks):
-                getTargetPosition(starObs, finalRanges, precRA, precDEC, azEl, true);
-
-                // convert JD ranges to date ranges :
-                convertRangesToDateIntervals(finalRanges, starObs.getVisible());
-
                 // update Star Data :
-                final List<Range> haObsRanges = new ArrayList<Range>(2);
-                this.sc.convertJDToHARanges(finalRanges, haObsRanges, precRA, null);
-                if (isLogDebug) {
-                    logger.debug("HA observability: {}", haObsRanges);
-                }
-                if (!haObsRanges.isEmpty()) {
-                    starData.setObsRangesHA(haObsRanges);
+                if (finalRanges.isEmpty()) {
+                    if (isLogDebug) {
+                        logger.debug("HA observability: []");
+                    }
+                } else {
+                    // get detailled target position (ha, az, el) for the current target (ticks):
+                    addTargetPositions(starObs, finalRanges, precRA, precDEC, azEl, true);
+
+                    // convert JD ranges to date ranges :
+                    convertRangesToDateIntervals(finalRanges, starObs.getVisible());
+
+                    final List<Range> haObsRanges = new ArrayList<Range>(2);
+                    this.sc.convertJDToHARanges(finalRanges, haObsRanges, precRA, null);
+                    if (isLogDebug) {
+                        logger.debug("HA observability: {}", haObsRanges);
+                    }
+                    if (!haObsRanges.isEmpty()) {
+                        starData.setObsRangesHA(haObsRanges);
+                    }
                 }
 
                 // recycle ranges & lists:
@@ -3386,14 +3394,13 @@ public final class ObservabilityService {
      * @param obsRangeJD observability ranges in JD
      * @param precRA precessed RA in decimal hours
      * @param precDEC precessed DEC in degrees
+     * @param azEl AzEl instance
      * @param doDetails flag to enable detailled (ticks and transit information)
      */
-    private void getTargetPosition(final StarObservabilityData starObs, final List<Range> obsRangeJD,
-                                   final double precRA, final double precDEC, final AzEl azEl,
-                                   final boolean doDetails) {
+    private void addTargetPositions(final StarObservabilityData starObs, final List<Range> obsRangeJD,
+                                    final double precRA, final double precDEC, final AzEl azEl,
+                                    final boolean doDetails) {
 
-        // Note: as JD ranges are in [LST0 -12; LST0 + 36], jds are fixed by getJDInLstRange(jd) 
-        // in LST range [0; 24] in order to have accurate target position
         final Map<Date, TargetPositionDate> targetPositions = starObs.getTargetPositions();
 
         // prepare cosDec/sinDec:
@@ -3404,44 +3411,41 @@ public final class ObservabilityService {
         double jd;
 
         if (doDetails) {
-            final int minElevation = (int) Math.round(this.minElev);
-
             // internal ticks for elevation :
-            for (int elevation = 20; elevation <= 80; elevation += 20) {
-                if (elevation > minElevation) {
-                    final double haElev = this.sco.getHAForElevation(precDEC, elevation);
+            if ((obsRangeJD != null) && !obsRangeJD.isEmpty()) {
+                final int minElevation = (int) Math.round(this.minElev);
 
-                    if (haElev > 0d) {
-                        jd = this.sc.convertHAToJD(-haElev, precRA);
-                        if (Range.contains(obsRangeJD, jd)) {
-                            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
-                        }
+                for (int elevation = 20; elevation <= 80; elevation += 20) {
+                    if (elevation > minElevation) {
+                        final double haElev = this.sco.getHAForElevation(precDEC, elevation); // solver
 
-                        jd = this.sc.convertHAToJD(haElev, precRA);
-                        if (Range.contains(obsRangeJD, jd)) {
-                            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
+                        if (haElev > 0d) {
+                            jd = this.sc.convertHAToJD(-haElev, precRA);
+                            if (Range.contains(obsRangeJD, jd)) {
+                                addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
+                            }
+
+                            jd = this.sc.convertHAToJD(haElev, precRA);
+                            if (Range.contains(obsRangeJD, jd)) {
+                                addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
+                            }
                         }
                     }
                 }
             }
+        }
 
-            // tick for transit :
-            jd = this.sc.convertHAToJD(0d, precRA);
-            if (Range.contains(obsRangeJD, jd)) {
+        // ticks for observability intervals (boundaries):
+        if (obsRangeJD != null) {
+            for (int i = 0, len = obsRangeJD.size(); i < len; i++) {
+                Range range = obsRangeJD.get(i);
+                jd = range.getMin();
+                addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
+
+                jd = range.getMax();
                 addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
             }
         }
-
-        // ticks for observability intervals (limits):
-        for (int i = 0, len = obsRangeJD.size(); i < len; i++) {
-            Range range = obsRangeJD.get(i);
-            jd = range.getMin();
-            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
-
-            jd = range.getMax();
-            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd, doDetails);
-        }
-
         if (isLogDebug) {
             logger.debug("elevations : {}", CollectionUtils.toString(targetPositions.values()));
         }
@@ -3461,7 +3465,8 @@ public final class ObservabilityService {
                                    final AzEl azEl, final double jd,
                                    final boolean showTicks) {
 
-        // fix JD in LST range [0; 24] in order to have accurate target position:
+        // Note: as JD ranges are in [LST0 -12; LST0 + 36], jds are fixed by getJDInLstRange(jd) 
+        // in LST range [0; 24] in order to have accurate target position
         final double jdIn = getJDInLstRange(jd);
         final double ha = this.sco.getTargetPosition(cosDec, sinDec, jdIn, azEl);
         final Date date = jdToDateInDateRange(jdIn);
@@ -3470,6 +3475,28 @@ public final class ObservabilityService {
             targetPositions.put(date, new TargetPositionDate(date, ha,
                     (int) Math.round(azEl.getAzimuth()), (int) Math.round(azEl.getElevation()), showTicks));
         }
+    }
+
+    /**
+     * Define HA / azimuth / elevation information about transit for the current target
+     * @param starObs star observability data
+     * @param obsRangeJD observability ranges in JD
+     * @param precDEC precessed DEC in degrees
+     * @param azEl AzEl instance
+     * @param jd jd at transit
+     */
+    private void addTargetPositionTransit(final StarObservabilityData starObs, final List<Range> obsRangeJD,
+                                          final double precDEC, final AzEl azEl, final double jd) {
+
+        // prepare cosDec/sinDec:
+        final double dec = FastMath.toRadians(precDEC);
+        final double cosDec = FastMath.cos(dec);
+        final double sinDec = FastMath.sin(dec);
+
+        // always set information for transit (tooltips):
+        final boolean showTicks = Range.contains(obsRangeJD, jd);
+
+        addTargetPosition(starObs.getTargetPositions(), cosDec, sinDec, azEl, jd, showTicks);
     }
 
     private void getTargetPosition(final double precDEC, final AzEl azEl, final double jd) {
