@@ -63,7 +63,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -331,12 +330,7 @@ public final class Aspro2 extends App {
         if (container != null) {
             this.settingPanel = new SettingPanel();
             this.settingPanel.setName("settingPanel");
-
-            // adds the panel in scrollPane
-            final JScrollPane scrollPane = new JScrollPane(this.settingPanel);
-            // wait until SettingPanel is properly fixed:
-            //this.settingPanel.setParentPane(scrollPane);
-            container.add(scrollPane, BorderLayout.CENTER);
+            container.add(settingPanel, BorderLayout.CENTER);
 
             // Handle status bar
             container.add(StatusBar.getInstance(), BorderLayout.SOUTH);

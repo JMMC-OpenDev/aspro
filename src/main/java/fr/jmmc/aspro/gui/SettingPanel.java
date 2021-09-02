@@ -23,6 +23,8 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -171,6 +173,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
 
         jSplitPane = new javax.swing.JSplitPane();
         jSplitPaneMain = new javax.swing.JSplitPane();
+        jScrollPaneTabbedPane = new javax.swing.JScrollPane();
         jTabbedPane = new javax.swing.JTabbedPane();
 
         setLayout(new java.awt.BorderLayout());
@@ -183,7 +186,9 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         jSplitPaneMain.setResizeWeight(0.9);
 
         jTabbedPane.setName("AsproTab"); // NOI18N
-        jSplitPaneMain.setLeftComponent(jTabbedPane);
+        jScrollPaneTabbedPane.setViewportView(jTabbedPane);
+
+        jSplitPaneMain.setLeftComponent(jScrollPaneTabbedPane);
 
         jSplitPane.setRightComponent(jSplitPaneMain);
 
@@ -235,7 +240,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
             // register the observation form as an observation listener :
             ObservationManager.getInstance().register(obsTablePanel);
         }
-        
+
         // create the map panel :
         final InterferometerMapPanel mapPanel = new InterferometerMapPanel();
         mapPanel.setName("mapPanel");
@@ -262,8 +267,16 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         this.jSplitPaneMain.setRightComponent(rawObsPanel);
         this.jSplitPaneMain.setOneTouchExpandable(true);
         resetRawObsPanel();
+
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                shouldShowRawObsPanel(rawObsPanel.isVisible());
+            }
+        });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane jScrollPaneTabbedPane;
     private javax.swing.JSplitPane jSplitPane;
     private javax.swing.JSplitPane jSplitPaneMain;
     private javax.swing.JTabbedPane jTabbedPane;
@@ -507,25 +520,28 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
 
     /**
      * Tell GUI to show or hide raw obs panel
+     * @param visible
      */
     public void shouldShowRawObsPanel(final boolean visible) {
-        if (rawObsPanel.isVisible() == visible) {
-            return;
+        if (rawObsPanel.isVisible() != visible) {
+            rawObsPanel.setVisible(visible);
         }
-        rawObsPanel.setVisible(visible);
-
-        final int totalHeight = (int) jSplitPaneMain.getBounds().getHeight();
-        final int dividerHeight = jSplitPaneMain.getDividerSize();
-        final int freeHeight = totalHeight - dividerHeight;
-
-        int rawObsPanelHeight = freeHeight;
-
         if (visible) {
+            final int totalHeight = (int) jSplitPaneMain.getBounds().getHeight();
+            final int dividerHeight = jSplitPaneMain.getDividerSize();
+            final int freeHeight = totalHeight - dividerHeight;
+
+            logger.debug("jSplitPaneMain Height: {}", totalHeight);
+            logger.debug("freeHeight: {}", freeHeight);
+
+            int rawObsPanelHeight = freeHeight;
+
             int prefHeight = rawObsPanel.getPreferredSize().height;
 
             rawObsPanelHeight -= Math.max(prefHeight, (int) Math.ceil(0.15 * freeHeight)); // 15%
-        }
 
-        jSplitPaneMain.setDividerLocation(rawObsPanelHeight);
+            logger.debug("divider location: {}", rawObsPanelHeight);
+            jSplitPaneMain.setDividerLocation(rawObsPanelHeight);
+        }
     }
 }
