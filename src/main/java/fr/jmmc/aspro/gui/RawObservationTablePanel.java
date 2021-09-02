@@ -250,7 +250,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
         jScrollPaneTable.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         jScrollPaneTable.setAutoscrolls(true);
         jScrollPaneTable.setName("jScrollPaneTable"); // NOI18N
-        jScrollPaneTable.setPreferredSize(new java.awt.Dimension(200, 200));
+        jScrollPaneTable.setPreferredSize(new java.awt.Dimension(100, 100));
         jScrollPaneTable.setViewportView(null);
 
         jTableObs.setModel(obsModel);
@@ -460,7 +460,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel {
         final JFrame frame = new JFrame(title);
         frame.setDefaultCloseOperation(frameCloseOperation);
 
-        frame.setMinimumSize(new Dimension(800, 800));
+        frame.setMinimumSize(new Dimension(800, 800)); // test
 
         frame.add(new RawObservationTablePanel().setData(observations));
         frame.pack();
