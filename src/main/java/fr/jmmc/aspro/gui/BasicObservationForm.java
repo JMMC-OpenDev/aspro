@@ -196,7 +196,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jLabelState = new javax.swing.JLabel();
         jLabelStatus = new javax.swing.JLabel();
 
-        setMinimumSize(new java.awt.Dimension(700, 130));
+        setMinimumSize(new java.awt.Dimension(700, 100));
         setPreferredSize(new java.awt.Dimension(900, getPreferredHeight()));
         setLayout(new java.awt.GridBagLayout());
 
@@ -2225,6 +2225,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     static int getPreferredHeight() {
-        return Math.max(130, Math.min(200, SwingUtils.adjustUISize(130)));
+        return Math.max(130, Math.min(250, SwingUtils.adjustUISize(130)));
     }
 }
