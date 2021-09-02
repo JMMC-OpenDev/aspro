@@ -75,6 +75,7 @@ import fr.jmmc.jmcs.gui.task.InterruptableThread;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.util.FieldSliderAdapter;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
@@ -346,13 +347,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         jSplitPane.setResizeWeight(0.05);
         jSplitPane.setContinuousLayout(true);
-        jSplitPane.setMinimumSize(new java.awt.Dimension(320, 400));
-        jSplitPane.setPreferredSize(new java.awt.Dimension(320, 400));
+        jSplitPane.setMinimumSize(new java.awt.Dimension(320, 100));
+        jSplitPane.setPreferredSize(new java.awt.Dimension(320, 100));
 
-        jScrollPaneForm.setMinimumSize(new java.awt.Dimension(200, 400));
-        jScrollPaneForm.setPreferredSize(new java.awt.Dimension(200, 400));
+        jScrollPaneForm.setMinimumSize(new java.awt.Dimension(200, 100));
+        jScrollPaneForm.setPreferredSize(new java.awt.Dimension(getPreferredWidth(), 200));
 
-        jPanelLeft.setMinimumSize(new java.awt.Dimension(185, 400));
+        jPanelLeft.setMinimumSize(new java.awt.Dimension(185, 200));
         jPanelLeft.setLayout(new java.awt.GridBagLayout());
 
         jLabelAOSetup.setText("AO setup");
@@ -903,8 +904,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // define zoom listener :
         this.chartPanel.setZoomEventListener(this);
 
-        // define min and prefered size for chart panel used by the split pane container :
-        this.chartPanel.setMinimumSize(new Dimension(400, 400));
+        // define min for chart panel used by the split pane container :
+        this.chartPanel.setMinimumSize(new Dimension(100, 100));
         this.jSplitPane.setRightComponent(this.chartPanel);
 
         // define change listeners :
@@ -4115,5 +4116,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             setToolTipText(AtmosphereQualityUtils.getTooltip(value.toString()));
             return this;
         }
+    }
+    
+    static int getPreferredWidth() {
+        return Math.max(200, Math.min(300, SwingUtils.adjustUISize(200)));
     }
 }
