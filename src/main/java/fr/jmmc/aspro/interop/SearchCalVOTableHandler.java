@@ -38,6 +38,8 @@ public final class SearchCalVOTableHandler {
     public static final double SCIENCE_DETECTION_DISTANCE = 1d * ALX.ARCSEC_IN_DEGREES;
     /** XSLT file path */
     private final static String XSLT_FILE = "fr/jmmc/aspro/interop/scvot2AsproObservation.xsl";
+    /** GetStar constant */
+    private final static String GET_STAR_NAME = "GetStar";
 
     /**
      * Private constructor
@@ -66,7 +68,7 @@ public final class SearchCalVOTableHandler {
         logger.info("VOTable transformation (XSLT) duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         if (document.length() == 0) {
-            logger.debug("document is empty (probably not one SearchCal VOTable)");
+            logger.debug("document is empty (probably not a SearchCal VOTable)");
 
             return false;
         }
@@ -77,137 +79,218 @@ public final class SearchCalVOTableHandler {
         try {
             final ObservationSetting searchCalObservation = om.load(new StringReader(document));
 
-            final List<Target> calibrators = searchCalObservation.getTargets();
+            // check GetStar / SearchCal command:
+            final String cmdName = searchCalObservation.getName();
+            logger.debug("cmdName: {}", cmdName);
 
-            final Target scienceTarget;
+            if (!GET_STAR_NAME.equalsIgnoreCase(cmdName)) {
+                // SearchCal case:
+                final List<Target> calibrators = searchCalObservation.getTargets();
 
-            if (calibrators.isEmpty()) {
-                scienceTarget = null;
+                final Target scienceTarget;
+
+                if (calibrators.isEmpty()) {
+                    scienceTarget = null;
+                } else {
+                    // first target is the science target (partial information only):
+                    scienceTarget = calibrators.remove(0);
+
+                    // format the target name:
+                    scienceTarget.updateNameAndIdentifier();
+
+                    logger.debug("science target: {}", scienceTarget);
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("calibrators:");
+                        for (Target cal : calibrators) {
+                            logger.debug(cal.toString());
+                        }
+                    }
+
+                    // Mimic SearchCal science object detection distance preference ("query.SCIENCE_DETECTION_DISTANCE")
+                    // @note SCIENCE_DISTANCE_CHECK : filter science target if distance is less than science object detection distance preference (1 arcsec):
+                    for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
+                        final Target cal = it.next();
+
+                        final BaseValue dist = cal.getCalibratorInfos().getField(CalibratorInformations.FIELD_DISTANCE);
+
+                        if (dist != null) {
+                            final double rowDistance = dist.getNumber().doubleValue();
+
+                            // If the distance is close enough to be detected as a science object
+                            if (rowDistance < SCIENCE_DETECTION_DISTANCE) {
+                                if (logger.isInfoEnabled()) {
+                                    logger.info("calibrator distance is [{}] - skip this calibrator considered as science object: {} - IDS = {}",
+                                            rowDistance, cal, cal.getIDS());
+                                }
+                                it.remove();
+
+                                // reuse science target data to update scienceTarget object:
+                                Target.merge(scienceTarget, cal);
+                            }
+                        }
+                    }
+
+                    // Add the SearchCalGuiVersion parameter to calibrators if missing:
+                    final StringValue paramSearchCalVersion = new StringValue();
+                    paramSearchCalVersion.setName(CalibratorInformations.PARAMETER_SCL_GUI_VERSION);
+                    paramSearchCalVersion.setValue(searchCalVersion);
+
+                    for (Target cal : calibrators) {
+                        if (cal.getCalibratorInfos().getParameter(CalibratorInformations.PARAMETER_SCL_GUI_VERSION) == null) {
+                            cal.getCalibratorInfos().getParameters().add(paramSearchCalVersion);
+                        }
+                    }
+                }
+
+                // Use invokeLater to avoid concurrency and ensure that 
+                // data model is modified and fire events using Swing EDT:
+                SwingUtils.invokeEDT(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (TargetEditorDialog.isTargetEditorActive()) {
+                            MessagePane.showErrorMessage("Please close the target editor first !");
+                            return;
+                        }
+
+                        // check the number of calibrators:
+                        if (calibrators.isEmpty()) {
+                            MessagePane.showErrorMessage("No calibrator found in SearchCal response !");
+                            return;
+                        }
+
+                        if (!TargetImporter.confirmImport(calibrators.size())) {
+                            return;
+                        }
+
+                        // find correct diameter among UD_ for the Aspro instrument band ...
+                        // or using alternate diameters (in order of priority): UD, LD, UDDK, DIA12
+                        om.defineCalibratorDiameter(calibrators);
+
+                        // use deep copy of the current observation to manipulate target and calibrator list properly:
+                        final ObservationSetting obsCloned = om.getMainObservation().deepClone();
+
+                        // Prepare the data model (editable targets and user infos):
+                        final List<Target> editTargets = obsCloned.getTargets();
+                        final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("initial targets:");
+                            for (Target t : editTargets) {
+                                logger.debug(t.toString());
+                            }
+                        }
+
+                        // Find any target (id + position) within 5 arcsecs:
+                        Target currentScienceTarget = Target.matchTarget(scienceTarget, editTargets);
+
+                        if (currentScienceTarget == null) {
+                            logger.info("Target '{}' not found in targets; adding it (partial information).", scienceTarget.getName());
+
+                            editTargets.add(scienceTarget);
+                            currentScienceTarget = scienceTarget;
+                        }
+
+                        final String report = mergeTargets(editTargets, editTargetUserInfos, currentScienceTarget, calibrators);
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("updated targets:");
+                            for (Target t : editTargets) {
+                                logger.debug(t.toString());
+                            }
+                        }
+
+                        // update the complete list of targets and force to update references:
+                        // needed to replace old target references by the new calibrator targets:
+                        om.updateTargets(editTargets, editTargetUserInfos);
+
+                        if (logger.isInfoEnabled()) {
+                            logger.info(report);
+                        }
+
+                        // bring this application to front:
+                        App.showFrameToFront();
+
+                        // display report message:
+                        MessagePane.showMessage(report);
+                    }
+                });
             } else {
-                // first target is the science target (partial information only):
-                scienceTarget = calibrators.remove(0);
-
-                // format the target name:
-                scienceTarget.updateNameAndIdentifier();
-
-                logger.debug("science target: {}", scienceTarget);
+                // GetStar case:
+                final List<Target> targets = searchCalObservation.getTargets();
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("calibrators:");
-                    for (Target cal : calibrators) {
-                        logger.debug(cal.toString());
+                    logger.debug("targets:");
+                    for (Target t : targets) {
+                        logger.debug(t.toString());
                     }
                 }
 
-                // Mimic SearchCal science object detection distance preference ("query.SCIENCE_DETECTION_DISTANCE")
-                // @note SCIENCE_DISTANCE_CHECK : filter science target if distance is less than science object detection distance preference (1 arcsec):
-                for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
-                    final Target cal = it.next();
+                // Use invokeLater to avoid concurrency and ensure that 
+                // data model is modified and fire events using Swing EDT:
+                SwingUtils.invokeEDT(new Runnable() {
+                    @Override
+                    public void run() {
 
-                    final BaseValue dist = cal.getCalibratorInfos().getField(CalibratorInformations.FIELD_DISTANCE);
+                        if (TargetEditorDialog.isTargetEditorActive()) {
+                            MessagePane.showErrorMessage("Please close the target editor first !");
+                            return;
+                        }
 
-                    if (dist != null) {
-                        final double rowDistance = dist.getNumber().doubleValue();
+                        // check the number of targets:
+                        if (targets.isEmpty()) {
+                            MessagePane.showErrorMessage("No target found in GetStar response !");
+                            return;
+                        }
 
-                        // If the distance is close enough to be detected as a science object
-                        if (rowDistance < SCIENCE_DETECTION_DISTANCE) {
-                            if (logger.isInfoEnabled()) {
-                                logger.info("calibrator distance is [{}] - skip this calibrator considered as science object: {} - IDS = {}",
-                                        rowDistance, cal, cal.getIDS());
+                        if (!TargetImporter.confirmImport(targets.size())) {
+                            return;
+                        }
+
+                        // find correct diameter among UD_ for the Aspro instrument band ...
+                        // or using alternate diameters (in order of priority): UD, LD, UDDK, DIA12
+                        om.defineCalibratorDiameter(targets);
+
+                        // use deep copy of the current observation to manipulate target and calibrator list properly:
+                        final ObservationSetting obsCloned = om.getMainObservation().deepClone();
+
+                        // Prepare the data model (editable targets and user infos):
+                        final List<Target> editTargets = obsCloned.getTargets();
+                        final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("initial targets:");
+                            for (Target t : editTargets) {
+                                logger.debug(t.toString());
                             }
-                            it.remove();
-
-                            // reuse science target data to update scienceTarget object:
-                            Target.merge(scienceTarget, cal);
                         }
-                    }
-                }
 
-                // Add the SearchCalGuiVersion parameter to calibrators if missing:
-                final StringValue paramSearchCalVersion = new StringValue();
-                paramSearchCalVersion.setName(CalibratorInformations.PARAMETER_SCL_GUI_VERSION);
-                paramSearchCalVersion.setValue(searchCalVersion);
+                        final String report = mergeTargets(editTargets, targets);
 
-                for (Target cal : calibrators) {
-                    if (cal.getCalibratorInfos().getParameter(CalibratorInformations.PARAMETER_SCL_GUI_VERSION) == null) {
-                        cal.getCalibratorInfos().getParameters().add(paramSearchCalVersion);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("updated targets:");
+                            for (Target t : editTargets) {
+                                logger.debug(t.toString());
+                            }
+                        }
+
+                        // update the complete list of targets and force to update references:
+                        // needed to replace old target references by the new calibrator targets:
+                        om.updateTargets(editTargets, editTargetUserInfos);
+
+                        if (logger.isInfoEnabled()) {
+                            logger.info(report);
+                        }
+
+                        // bring this application to front:
+                        App.showFrameToFront();
+
+                        // display report message:
+                        MessagePane.showMessage(report);
                     }
-                }
+                });
             }
-
-            // Use invokeLater to avoid concurrency and ensure that 
-            // data model is modified and fire events using Swing EDT:
-            SwingUtils.invokeEDT(new Runnable() {
-                @Override
-                public void run() {
-
-                    if (TargetEditorDialog.isTargetEditorActive()) {
-                        MessagePane.showErrorMessage("Please close the target editor first !");
-                        return;
-                    }
-
-                    // check the number of calibrators:
-                    if (calibrators.isEmpty()) {
-                        MessagePane.showErrorMessage("No calibrator found in SearchCal response !");
-                        return;
-                    }
-
-                    if (!TargetImporter.confirmImport(calibrators.size())) {
-                        return;
-                    }
-
-                    // find correct diameter among UD_ for the Aspro instrument band ...
-                    // or using alternate diameters (in order of priority): UD, LD, UDDK, DIA12
-                    om.defineCalibratorDiameter(calibrators);
-
-                    // use deep copy of the current observation to manipulate target and calibrator list properly:
-                    final ObservationSetting obsCloned = om.getMainObservation().deepClone();
-
-                    // Prepare the data model (editable targets and user infos):
-                    final List<Target> editTargets = obsCloned.getTargets();
-                    final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
-
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("initial targets:");
-                        for (Target t : editTargets) {
-                            logger.debug(t.toString());
-                        }
-                    }
-
-                    // Find any target (id + position) within 5 arcsecs:
-                    Target currentScienceTarget = Target.matchTarget(scienceTarget, editTargets);
-
-                    if (currentScienceTarget == null) {
-                        logger.info("Target '{}' not found in targets; adding it (partial information).", scienceTarget.getName());
-
-                        editTargets.add(scienceTarget);
-                        currentScienceTarget = scienceTarget;
-                    }
-
-                    final String report = mergeTargets(editTargets, editTargetUserInfos, currentScienceTarget, calibrators);
-
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("updated targets:");
-                        for (Target t : editTargets) {
-                            logger.debug(t.toString());
-                        }
-                    }
-
-                    // update the complete list of targets and force to update references:
-                    // needed to replace old target references by the new calibrator targets:
-                    om.updateTargets(editTargets, editTargetUserInfos);
-
-                    if (logger.isInfoEnabled()) {
-                        logger.info(report);
-                    }
-
-                    // bring this application to front:
-                    App.showFrameToFront();
-
-                    // display report message:
-                    MessagePane.showMessage(report);
-                }
-            });
 
         } catch (IllegalArgumentException iae) {
             // Report both Observation and VOTable in a new IllegalArgumentException to get them in the feedback report:
@@ -300,6 +383,54 @@ public final class SearchCalVOTableHandler {
                 // note: the position of the target is not the same:
                 editTargets.remove(oldCal);
                 editTargets.add(newCal);
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Merge targets (GetStar)
+     * @param editTargets edited list of targets
+     * @param targets list of targets
+     * @return merge operation report
+     */
+    private static String mergeTargets(final List<Target> editTargets, final List<Target> targets) {
+        // report buffer:
+        final StringBuilder sb = new StringBuilder(512);
+        sb.append("Import GetStar targets\n\n");
+
+        for (Target newTarget : targets) {
+            // format the target name:
+            newTarget.updateNameAndIdentifier();
+            String targetName = newTarget.getName();
+
+            newTarget.setOrigin(GET_STAR_NAME);
+
+            // Find any target (id + position) within 5 arcsecs:
+            // note: SearchCal considers internally duplicates within 10 arcsecs (and discard all of them)
+            final Target oldTarget = Target.matchTarget(newTarget, editTargets);
+
+            if (oldTarget == null) {
+                // append the missing target:
+                editTargets.add(newTarget);
+
+                // report message:
+                sb.append(targetName).append(" added\n");
+
+            } else {
+                // target already exist: merge information
+
+                // copy non empty values into old target:
+                Target.merge(oldTarget, newTarget);
+
+                // Add model if none already present:
+                // (do not merge with existing model)
+                if (!oldTarget.hasModel() || !oldTarget.hasAnalyticalModel()) {
+                    oldTarget.getModels().addAll(newTarget.getModels());
+                }
+
+                // report message:
+                sb.append(targetName).append(" merged with target [").append(oldTarget.getName()).append("]\n");
             }
         }
         return sb.toString();

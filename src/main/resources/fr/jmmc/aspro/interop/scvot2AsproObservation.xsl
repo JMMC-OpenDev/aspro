@@ -41,6 +41,16 @@
     <xsl:template match="VOT:RESOURCE">
 
         <!-- Get column indexes used to build the target list -->
+        <xsl:variable name="SIMBAD_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">SIMBAD</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="GAIA_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">GAIA</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
         <xsl:variable name="HIP_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="colName">HIP</xsl:with-param>
@@ -71,7 +81,7 @@
                 <xsl:with-param name="colName">WDS</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
-        <!-- TODO: use WISE / SIMBAD -->
+        <!-- TODO: use WISE -->
 
 
         <xsl:variable name="RA_index">
@@ -192,18 +202,12 @@
         <xsl:if test="$RA_index != '' and $DEC_index != ''">
 
             <!-- PARAM information used -->
-            <xsl:variable name="TARGET"     select="$table/VOT:PARAM[@name = 'objectName']/@value"/>
-            <xsl:variable name="TARGET_MAG" select="$table/VOT:PARAM[@name = 'mag']/@value"/>
-            <xsl:variable name="TARGET_RA"  select="translate($table/VOT:PARAM[@name = 'ra']/@value, ' ', ':')"/>
-            <xsl:variable name="TARGET_DEC" select="translate($table/VOT:PARAM[@name = 'dec']/@value, ' ', ':')"/>
+            <xsl:variable name="SCLSVR_CMD"     select="$table/VOT:PARAM[@name = 'ServerCommand']/@value"/>
+            <xsl:variable name="SCLSVR_VERSION" select="$table/VOT:PARAM[@name = 'SearchCalServerVersion']/@value"/>
+            <xsl:variable name="TARGET"         select="$table/VOT:PARAM[@name = 'objectName']/@value"/>
 
-            <xsl:variable name="BAND"     select="$table/VOT:PARAM[@name = 'band']/@value"/>
-            <xsl:variable name="BASEMAX"  select="$table/VOT:PARAM[@name = 'baseMax']/@value"/>
-            <xsl:variable name="WLEN"     select="$table/VOT:PARAM[@name = 'wlen']/@value"/>
-            <xsl:variable name="BRIGHT"   select="$table/VOT:PARAM[@name = 'bright']/@value"/>
-
-            <!-- check PARAM (objectName|band|baseMax|wlen|bright) -->
-            <xsl:if test="$TARGET != '' and $BAND != '' and $BASEMAX != '' and $WLEN != '' and $BRIGHT != ''">
+            <!-- check PARAM (objectName|ServerCommand|SearchCalServerVersion) -->
+            <xsl:if test="$TARGET != '' and $SCLSVR_CMD != '' and $SCLSVR_VERSION != '' ">
 
                 <!-- TODO: check equinox and HMS / DMS are really J2000 -->
                 <xsl:variable name="EQUINOX" select="translate(/VOT:VOTABLE/VOT:COOSYS/@equinox, 'J', '')"/>
@@ -216,83 +220,96 @@
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                     xsi:schemaLocation="http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd http://www.jmmc.fr/jmcs/models/0.1 targetModel.xsd">
 
-                    <xsl:comment>Science Object Name</xsl:comment>
                     <name>
-                        <xsl:value-of select="$TARGET"/>
+                        <xsl:value-of select="$SCLSVR_CMD"/>
                     </name>
 
-                    <target>
-                        <!-- no id attribute : defined by Aspro2 -->
+                    <xsl:variable name="TARGET_RA"      select="translate($table/VOT:PARAM[@name = 'ra']/@value, ' ', ':')"/>
+                    <xsl:variable name="TARGET_DEC"     select="translate($table/VOT:PARAM[@name = 'dec']/@value, ' ', ':')"/>
 
-                        <!-- identifier -->
-                        <name>
-                            <xsl:value-of select="$TARGET"/>
-                        </name>
+                    <!-- check PARAM (ra/dec) -->
+                    <xsl:if test="$TARGET_RA != '' and $TARGET_DEC != '' ">
 
-                        <!-- position -->
-                        <RA>
-                            <xsl:value-of select="$TARGET_RA"/>
-                        </RA>
-                        <DEC>
-                            <xsl:value-of select="$TARGET_DEC"/>
-                        </DEC>
-                        <EQUINOX>
-                            <xsl:value-of select="$EQUINOX"/>
-                        </EQUINOX>
+                        <xsl:comment>Science Object Name</xsl:comment>
+                        <target>
+                            <!-- no id attribute : defined by Aspro2 -->
 
-                        <!-- magnitudes -->
-                        <xsl:if test="$BAND = 'B'">
-                            <FLUX_B>
-                                <xsl:value-of select="$TARGET_MAG"/>
-                            </FLUX_B>
-                        </xsl:if>
-                        <xsl:if test="$BAND = 'V'">
-                            <FLUX_V>
-                                <xsl:value-of select="$TARGET_MAG"/>
-                            </FLUX_V>
-                        </xsl:if>
-                        <xsl:if test="$BAND = 'R'">
-                            <FLUX_R>
-                                <xsl:value-of select="$TARGET_MAG"/>
-                            </FLUX_R>
-                        </xsl:if>
-                        <xsl:if test="$BAND = 'I'">
-                            <FLUX_I>
-                                <xsl:value-of select="$TARGET_MAG"/>
-                            </FLUX_I>
-                        </xsl:if>
-                        <xsl:if test="$BAND = 'J'">
-                            <FLUX_J>
-                                <xsl:value-of select="$TARGET_MAG"/>
-                            </FLUX_J>
-                        </xsl:if>
-                        <xsl:if test="$BAND = 'H'">
-                            <FLUX_H>
-                                <xsl:value-of select="$TARGET_MAG"/>
-                            </FLUX_H>
-                        </xsl:if>
-                        <xsl:if test="$BAND = 'K'">
-                            <FLUX_K>
-                                <xsl:value-of select="$TARGET_MAG"/>
-                            </FLUX_K>
-                        </xsl:if>
-                        <xsl:if test="$BAND = 'L'">
-                            <FLUX_L>
-                                <xsl:value-of select="$TARGET_MAG"/>
-                            </FLUX_L>
-                        </xsl:if>
-                        <xsl:if test="$BAND = 'M'">
-                            <FLUX_M>
-                                <xsl:value-of select="$TARGET_MAG"/>
-                            </FLUX_M>
-                        </xsl:if>
-                        <xsl:if test="$BAND = 'N'">
-                            <FLUX_N>
-                                <xsl:value-of select="$TARGET_MAG"/>
-                            </FLUX_N>
-                        </xsl:if>
+                            <!-- identifier -->
+                            <name>
+                                <xsl:value-of select="$TARGET"/>
+                            </name>
 
-                    </target>
+                            <!-- position -->
+                            <RA>
+                                <xsl:value-of select="$TARGET_RA"/>
+                            </RA>
+                            <DEC>
+                                <xsl:value-of select="$TARGET_DEC"/>
+                            </DEC>
+                            <EQUINOX>
+                                <xsl:value-of select="$EQUINOX"/>
+                            </EQUINOX>
+
+                            <xsl:variable name="TARGET_MAG"     select="$table/VOT:PARAM[@name = 'mag']/@value"/>
+                            <xsl:variable name="BAND"           select="$table/VOT:PARAM[@name = 'band']/@value"/>
+
+                            <xsl:if test="$BAND != '' and $TARGET_MAG != '' ">
+
+                                <!-- magnitudes -->
+                                <xsl:if test="$BAND = 'B'">
+                                    <FLUX_B>
+                                        <xsl:value-of select="$TARGET_MAG"/>
+                                    </FLUX_B>
+                                </xsl:if>
+                                <xsl:if test="$BAND = 'V'">
+                                    <FLUX_V>
+                                        <xsl:value-of select="$TARGET_MAG"/>
+                                    </FLUX_V>
+                                </xsl:if>
+                                <xsl:if test="$BAND = 'R'">
+                                    <FLUX_R>
+                                        <xsl:value-of select="$TARGET_MAG"/>
+                                    </FLUX_R>
+                                </xsl:if>
+                                <xsl:if test="$BAND = 'I'">
+                                    <FLUX_I>
+                                        <xsl:value-of select="$TARGET_MAG"/>
+                                    </FLUX_I>
+                                </xsl:if>
+                                <xsl:if test="$BAND = 'J'">
+                                    <FLUX_J>
+                                        <xsl:value-of select="$TARGET_MAG"/>
+                                    </FLUX_J>
+                                </xsl:if>
+                                <xsl:if test="$BAND = 'H'">
+                                    <FLUX_H>
+                                        <xsl:value-of select="$TARGET_MAG"/>
+                                    </FLUX_H>
+                                </xsl:if>
+                                <xsl:if test="$BAND = 'K'">
+                                    <FLUX_K>
+                                        <xsl:value-of select="$TARGET_MAG"/>
+                                    </FLUX_K>
+                                </xsl:if>
+                                <xsl:if test="$BAND = 'L'">
+                                    <FLUX_L>
+                                        <xsl:value-of select="$TARGET_MAG"/>
+                                    </FLUX_L>
+                                </xsl:if>
+                                <xsl:if test="$BAND = 'M'">
+                                    <FLUX_M>
+                                        <xsl:value-of select="$TARGET_MAG"/>
+                                    </FLUX_M>
+                                </xsl:if>
+                                <xsl:if test="$BAND = 'N'">
+                                    <FLUX_N>
+                                        <xsl:value-of select="$TARGET_MAG"/>
+                                    </FLUX_N>
+                                </xsl:if>
+                            </xsl:if>
+
+                        </target>
+                    </xsl:if>
 
 
                     <xsl:comment>Calibrators</xsl:comment>
@@ -305,6 +322,16 @@
                         <!-- Note: topcat convert boolean to 'F' instead of 'false' -->
                         <xsl:if test="not($deletedFlag) or $deletedFlag = '0' or $deletedFlag = 'false' or $deletedFlag = 'F'">
 
+                            <xsl:variable name="ID_SIMBAD">
+                                <xsl:if test="VOT:TD[number($SIMBAD_index)]/text()">
+                                    <xsl:value-of select="VOT:TD[number($SIMBAD_index)]"/>
+                                </xsl:if>
+                            </xsl:variable>
+                            <xsl:variable name="ID_GAIA">
+                                <xsl:if test="VOT:TD[number($GAIA_index)]/text()">
+                                    <xsl:value-of select="concat('GAIA DR2 ',VOT:TD[number($GAIA_index)])"/>
+                                </xsl:if>
+                            </xsl:variable>
                             <xsl:variable name="ID_HD">
                                 <xsl:if test="VOT:TD[number($HD_index)]/text()">
                                     <xsl:value-of select="concat('HD ',VOT:TD[number($HD_index)])"/>
@@ -340,8 +367,11 @@
 
                             <xsl:variable name="name">
                                 <xsl:choose>
-                                    <xsl:when test="$ID_HD != ''">
-                                        <xsl:value-of select="$ID_HD"/>
+                                    <xsl:when test="$ID_SIMBAD != ''">
+                                        <xsl:value-of select="$ID_SIMBAD"/>
+                                    </xsl:when>
+                                    <xsl:when test="$ID_GAIA != ''">
+                                        <xsl:value-of select="$ID_GAIA"/>
                                     </xsl:when>
                                     <xsl:when test="$ID_HIP != ''">
                                         <xsl:value-of select="$ID_HIP"/>
@@ -357,6 +387,9 @@
                                     </xsl:when>
                                     <xsl:when test="$ID_WDS != ''">
                                         <xsl:value-of select="$ID_WDS"/>
+                                    </xsl:when>
+                                    <xsl:when test="$ID_HD != ''">
+                                        <xsl:value-of select="$ID_HD"/>
                                     </xsl:when>
                                     <xsl:otherwise>
                                         <xsl:value-of select="concat($RA2000, ' ', $DE2000)"/>
@@ -440,10 +473,12 @@
 
                                 <!-- identifiers (HD, HIP, 2MASS, DM, SBC9, WDS only) -->
                                 <IDS>
-                                    <xsl:if test="$ID_HD != ''">
-                                        <xsl:value-of select="$ID_HD"/>,</xsl:if>
+                                    <xsl:if test="$ID_GAIA != ''">
+                                        <xsl:value-of select="$ID_GAIA"/>,</xsl:if>
                                     <xsl:if test="$ID_HIP != ''">
                                         <xsl:value-of select="$ID_HIP"/>,</xsl:if>
+                                    <xsl:if test="$ID_HD != ''">
+                                        <xsl:value-of select="$ID_HD"/>,</xsl:if>
                                     <xsl:if test="$ID_twoMASS != ''">
                                         <xsl:value-of select="$ID_twoMASS"/>,</xsl:if>
                                     <xsl:if test="$ID_DM != ''">
@@ -552,17 +587,7 @@
                                 </tm:model>
 
                                 <calibratorInfos>
-
-                                    <xsl:choose>
-                                        <xsl:when test="$table/VOT:PARAM[@name = 'SearchCalServerVersion' and @value]">
-                                            <parameter xsi:type="a:StringValue" name="SearchCalServerVersion" value="{$table/VOT:PARAM[@name = 'SearchCalServerVersion']/@value}"/>
-                                        </xsl:when>
-                                        <xsl:otherwise>
-                                            <xsl:if test="starts-with($RESOURCE_NAME,'SearchCal')">
-                                                <parameter xsi:type="a:StringValue" name="SearchCalServerVersion" value="{$RESOURCE_NAME}"/>
-                                            </xsl:if>
-                                        </xsl:otherwise>
-                                    </xsl:choose>
+                                    <parameter xsi:type="a:StringValue" name="SearchCalServerVersion" value="{$SCLSVR_VERSION}"/>
 
                                     <!-- Build one parameter element per VOTable PARAM present in COPY_PARAMS -->
                                     <xsl:for-each select="$table/VOT:PARAM[contains($COPY_PARAMS, @name) and @value]">
