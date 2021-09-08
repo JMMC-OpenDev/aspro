@@ -302,7 +302,7 @@ public final class Aspro2 extends App {
             logger.info("screen size = {} x {}", screenSize.getWidth(), screenSize.getHeight());
             // hack for screens smaller than 1024x768 screens:
             final int appWidth = 950;
-            final int appHeightMin = (screenSize.getHeight() >= 850) ? 800 : 700;
+            final int appHeightMin = 700;
             final int appHeightPref = (screenSize.getHeight() >= 1000) ? 950 : appHeightMin;
 
             final Dimension dim = new Dimension(appWidth, appHeightMin);
