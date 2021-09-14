@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.09"/>
+    <program name="Aspro2" version="21.10 beta 1"/>
     <compilation date="08/09/2021" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -228,6 +228,12 @@
     </menubar>
 
     <releasenotes>
+        <release version="21.10">
+            <pubDate>Tue, 14 Sep 2021 13:00:00 GMT</pubDate>
+            <prerelease version="21.10 beta 1">
+                <change type="BUGFIX">Fixed SAMP interoperability (VO table): disable XSLT secure processing</change>
+            </prerelease>
+        </release>
         <release version="21.09">
             <pubDate>Wed, 08 Sep 2021 09:00:00 GMT</pubDate>
             <prerelease version="21.09 beta 5">
