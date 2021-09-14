@@ -1189,7 +1189,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             if (wlRestrictions) {
                 // adjust wave length range:
                 this.wlRefAdapter.reset(insMode.getWaveLengthMin(), insMode.getWaveLengthMax(), insMode.getEffWaveLengthRef());
-                
+
                 this.jTargetWLRef.setText("[" + NumberUtils.trimTo3Digits(insMode.getWaveLengthMin())
                         + " - " + NumberUtils.trimTo3Digits(insMode.getWaveLengthMax())
                         + "] (" + NumberUtils.trimTo3Digits(insMode.getEffWaveLengthBandRef()) + ")"
@@ -1318,6 +1318,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     final String ftMode = targetConf.getFringeTrackerMode();
                     this.jComboBoxFTMode.setSelectedItem((ftMode != null) ? ftMode : AsproConstants.NONE);
                 }
+
+                // update wl ref:
+                if (this.jFieldWLRef.isVisible()) {
+                    final Double wlRef = targetConf.getInstrumentWaveLengthRef();
+                    this.wlRefAdapter.setValue((wlRef != null) ? wlRef.doubleValue() : this.wlRefAdapter.getDefValue());
+                }
+
             } finally {
                 // restore the automatic update observation :
                 this.setAutoUpdateObservation(prevAutoUpdateObservation);
@@ -1667,9 +1674,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 // update wavelength ref:
                 Double wlRef = null;
-                if (jSliderWLRef.isVisible()) {
+                if (jFieldWLRef.isVisible()) {
                     wlRef = Double.valueOf(this.wlRefAdapter.getValue());
                 }
+                // note: wlref is set per target but it corresponds to instrument mode's restictions
+                // if disabled => reset all target's wl ref ?
+                // for now, it can be inconsistent (leaking wl ref values)
                 changed |= om.setTargetInstrumentWaveLengthRef(targetName, wlRef);
             }
 
@@ -4118,7 +4128,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             return this;
         }
     }
-    
+
     static int getPreferredWidth() {
         return Math.max(200, Math.min(300, SwingUtils.adjustUISize(200)));
     }
