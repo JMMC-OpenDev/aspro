@@ -1174,21 +1174,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
         final String insName = instrument.getName();
         final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
-        final String insModeKey = observation.getInterferometerConfiguration().getName() + '@' + insName + '@' + insMode.getName();
+        final String insModeName = (insMode != null) ? insMode.getName() : null; // invalid or missing mode
+        final String insModeKey = observation.getInterferometerConfiguration().getName() + '@' + insName + '@' + insModeName;
 
         // TODO: handle GRA4MAT (hide or refine wavelength restrictions)
         // test if the instrument changed :
-        final boolean changed = (insName != null) && (insMode.getName() != null) && !insModeKey.equals(this.instrumentModeCacheKey);
+        final boolean changed = (insName != null) && (insModeName != null) && !insModeKey.equals(this.instrumentModeCacheKey);
         if (changed) {
             this.instrumentModeCacheKey = insModeKey;
             logger.debug("instrument mode changed : {}", insMode);
 
-            // adjust wave length range:
-            this.wlRefAdapter.reset(insMode.getWaveLengthMin(), insMode.getWaveLengthMax(), insMode.getEffWaveLengthRef());
-
-            final boolean wlRestrictions = insMode.isWavelengthRangeRestriction();
+            final boolean wlRestrictions = (insMode != null) ? insMode.isWavelengthRangeRestriction() : false;
 
             if (wlRestrictions) {
+                // adjust wave length range:
+                this.wlRefAdapter.reset(insMode.getWaveLengthMin(), insMode.getWaveLengthMax(), insMode.getEffWaveLengthRef());
+                
                 this.jTargetWLRef.setText("[" + NumberUtils.trimTo3Digits(insMode.getWaveLengthMin())
                         + " - " + NumberUtils.trimTo3Digits(insMode.getWaveLengthMax())
                         + "] (" + NumberUtils.trimTo3Digits(insMode.getEffWaveLengthBandRef()) + ")"
