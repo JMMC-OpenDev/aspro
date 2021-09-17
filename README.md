@@ -6,18 +6,18 @@ This module contains the ASPRO2 java application developed by the JMMC technical
 
 
 See [ASPRO2](https://jmmc.fr/aspro)
-See [JMMC OpenDev @ github](https://jmmc.fr/JMMC-OpenDev)
+See [JMMC OpenDev @ github](https://github.com/JMMC-OpenDev/)
 
 
 ## Documentation
 
 This module contains the source code of the JMMC ASPRO2 Graphical interface.
 See the `pom.xml` file to get all dependencies, including other JMMC OpenDev modules:
-- [aspro-conf](https://jmmc.fr/JMMC-OpenDev/aspro-conf)
-- [oiexplorer-core](https://jmmc.fr/JMMC-OpenDev/oiexplorer-core)
-    - [jmcs](https://jmmc.fr/JMMC-OpenDev/jmcs)
-    - [jmal](https://jmmc.fr/JMMC-OpenDev/jmal)
-    - [oitools](https://jmmc.fr/JMMC-OpenDev/oitools)
+- [aspro-conf](https://github.com/JMMC-OpenDev/aspro-conf)
+- [oiexplorer-core](https://github.com/JMMC-OpenDev/oiexplorer-core)
+    - [jmcs](https://github.com/JMMC-OpenDev/jmcs)
+    - [jmal](https://github.com/JMMC-OpenDev/jmal)
+    - [oitools](https://github.com/JMMC-OpenDev/oitools)
 
 To be continued...
 
