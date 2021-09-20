@@ -969,6 +969,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         this.wlRefAdapter = new FieldSliderAdapter(jSliderWLRef, jFieldWLRef, 0d, 0d, 0d);
         this.wlRefAdapter.addChangeListener(this);
+        // hide field to ignore default values (0)
+        this.jFieldWLRef.setVisible(false);
 
         this.haMinAdapter = new FieldSliderAdapter(jSliderHAMin, jFieldHAMin, AsproConstants.HA_MIN, AsproConstants.HA_MAX, AsproConstants.HA_MIN);
         this.haMinAdapter.addChangeListener(this);
@@ -1659,8 +1661,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 logger.debug("onUpdateObservation : {}", targetName);
 
                 // Update target HA Min/Max :
-                if (om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()))
-                        || om.setTargetHAMax(targetName, Double.valueOf(this.haMaxAdapter.getValue()))) {
+                boolean changedHA = om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()));
+                changedHA |= om.setTargetHAMax(targetName, Double.valueOf(this.haMaxAdapter.getValue()));
+                if (changedHA) {
                     // Special case to force computing observability (HA restriction are also used):
                     changed = true;
                     changeType = ChangeType.MAIN;
