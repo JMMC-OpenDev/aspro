@@ -29,6 +29,7 @@ import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.service.BrowserLauncher;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.UrlUtils;
 import java.awt.event.ActionEvent;
@@ -44,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
@@ -52,6 +54,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.text.DefaultFormatter;
 import javax.swing.text.NumberFormatter;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -97,6 +101,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private GenericListModel<Target> calibratorsModel;
     /** preference singleton */
     private final Preferences myPreferences = Preferences.getInstance();
+
+    private static final TableCellRenderer RDR_NUM_INSTANCE = new TableCellNumberRenderer();
 
     /**
      * Creates new form TargetForm (used by NetBeans editor only)
@@ -201,6 +207,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         // Fix row height:
         SwingUtils.adjustRowHeight(jTableCalibratorInfos);
+
+        jTableCalibratorInfos.setDefaultRenderer(Double.class, RDR_NUM_INSTANCE);
     }
 
     /**
@@ -2331,4 +2339,47 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         return targetInfo;
     }
+
+    /**
+     * Used to format numbers in cells.
+     *
+     * @warning: No trace log implemented as this is very often called (performance).
+     */
+    private final static class TableCellNumberRenderer extends DefaultTableCellRenderer {
+
+        /** default serial UID for Serializable interface */
+        private static final long serialVersionUID = 1;
+
+        /**
+         * Constructor
+         */
+        private TableCellNumberRenderer() {
+            super();
+        }
+
+        /**
+         * Sets the <code>String</code> object for the cell being rendered to
+         * <code>value</code>.
+         *
+         * @param value  the string value for this cell; if value is
+         *          <code>null</code> it sets the text value to an empty string
+         * @see JLabel#setText
+         *
+         */
+        @Override
+        public void setValue(final Object value) {
+            String text = "";
+            if (value != null) {
+                if (value instanceof Double) {
+                    text = NumberUtils.format(((Double) value).doubleValue());
+                } else if (value instanceof Boolean) {
+                    text = ((Boolean) value).booleanValue() ? "True" : "False";
+                } else {
+                    text = value.toString();
+                }
+            }
+            setText(text);
+        }
+    }
+
 }
