@@ -9,6 +9,7 @@ import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,10 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
     public final static String OIFITS_SNR_THRESHOLD = "oifits.snr.threshold";
     /** Preference : edit fluxes using Jansky */
     public final static String FLUX_EDITOR_JY = "flux.edit.jy";
+    /** prefix for Obs table columns */
+    public static final String OBS_TABLE_COLUMNS_VISIBLE = "obs.columns.visible";
+    /** prefix for RawObs table columns */
+    public static final String RAWOBS_TABLE_COLUMNS_VISIBLE = "rawobs.columns.visible";
 
     /**
      * Private constructor that must be empty.
@@ -147,8 +152,11 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
         setDefaultPreference(OIFITS_SUPER_SAMPLING, AsproConstants.DEFAULT_SUPER_SAMPLING);
         setDefaultPreference(OIFITS_MATH_MODE, MathMode.FAST.toString());
         setDefaultPreference(OIFITS_SNR_THRESHOLD, AsproConstants.DEFAULT_SNR_THRESHOLD);
-        
+
         setDefaultPreference(FLUX_EDITOR_JY, Boolean.TRUE);
+
+        setDefaultPreference(OBS_TABLE_COLUMNS_VISIBLE, "");
+        setDefaultPreference(RAWOBS_TABLE_COLUMNS_VISIBLE, "");
     }
 
     /**
@@ -271,5 +279,23 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
             logger.debug("ignored invalid value: {}", value);
         }
         return MathMode.FAST;
+    }
+
+    public List<String> getObsTableVisibleColumns() {
+        return getPreferenceAsStringList(OBS_TABLE_COLUMNS_VISIBLE);
+    }
+
+    public void setObsTableVisibleColumns(final List<String> visibleColumns) {
+        logger.debug("setObsTableVisibleColumns: [{}]", visibleColumns);
+        setPreferenceAndSaveToFile(OBS_TABLE_COLUMNS_VISIBLE, visibleColumns);
+    }
+
+    public List<String> getRawObsTableVisibleColumns() {
+        return getPreferenceAsStringList(RAWOBS_TABLE_COLUMNS_VISIBLE);
+    }
+
+    public void setRawObsTableVisibleColumns(final List<String> visibleColumns) {
+        logger.debug("setRawObsTableVisibleColumns: [{}]", visibleColumns);
+        setPreferenceAndSaveToFile(RAWOBS_TABLE_COLUMNS_VISIBLE, visibleColumns);
     }
 }

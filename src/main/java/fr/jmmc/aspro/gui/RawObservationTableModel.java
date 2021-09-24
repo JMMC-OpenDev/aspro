@@ -5,9 +5,10 @@ package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.action.QueryRawObservationsAction;
 import fr.jmmc.aspro.model.rawobs.RawObservation;
+import fr.jmmc.jmcs.model.ColumnDesc;
+import fr.jmmc.jmcs.model.ColumnDescTableModel;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Laurent BOURGES
  */
-public final class RawObservationTableModel extends AbstractTableModel {
+public final class RawObservationTableModel extends ColumnDescTableModel {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -52,51 +53,17 @@ public final class RawObservationTableModel extends AbstractTableModel {
         TIME("Time (UTC)", String.class),
         LST_START("LST Start", Double.class);
 
-        /**
-         * Custom constructor
-         *
-         * @param name name of the column
-         * @param type class type of the column value
-         */
-        private ColumnDef(final String name, final Class<?> type) {
-            this.name = name;
-            this.type = type;
-        }
-        /** column name */
-        private final String name;
-        /** class type */
-        private final Class<?> type;
+        private final ColumnDesc columnDesc;
 
-        /**
-         * Return the name of the column
-         *
-         * @return name of the column
-         */
-        public String getName() {
-            return name;
+        private ColumnDef(String label, Class<?> dataClass) {
+            this.columnDesc = new ColumnDesc(name(), dataClass, ColumnDesc.SOURCE_UNDEFINED, label);
         }
 
-        /**
-         * Return the class type of the column value
-         *
-         * @return class type of the column value
-         */
-        public Class<?> getType() {
-            return type;
-        }
-
-        /**
-         * Return the name of the column
-         *
-         * @return name of the column
-         */
-        @Override
-        public String toString() {
-            return name;
+        public ColumnDesc getColumnDesc() {
+            return columnDesc;
         }
     }
-    /** Definition of Columns (all) */
-    private static final ColumnDef[] COLUMNS = ColumnDef.values();
+
     /** empty collection */
     private static final List<RawObservation> EMPTY = Collections.emptyList();
 
@@ -109,6 +76,10 @@ public final class RawObservationTableModel extends AbstractTableModel {
      */
     public RawObservationTableModel() {
         super();
+        // define fixed columns:
+        for (ColumnDef c : ColumnDef.values()) {
+            listColumnDesc.add(c.getColumnDesc());
+        }
     }
 
     /**
@@ -149,66 +120,18 @@ public final class RawObservationTableModel extends AbstractTableModel {
         return null;
     }
 
+    /**
+     * Return the model corresponding to the row at
+     * <code>rowIndex</code>
+     *
+     * @param	rowIndex	the row whose value is to be queried
+     * @return model
+     */
+    public RawObservation getObsAt(final int rowIndex) {
+        return this.observations.get(rowIndex);
+    }
+
     /* TableModel interface implementation */
-    /**
-     * Returns the number of columns in the model. A
-     * <code>JTable</code> uses this method to determine how many columns it
-     * should create and display by default.
-     *
-     * @return the number of columns in the model
-     * @see #getRowCount
-     */
-    @Override
-    public int getColumnCount() {
-        return COLUMNS.length;
-    }
-
-    /**
-     * Returns the name of the column at
-     * <code>columnIndex</code>. This is used
-     * to initialize the table's column header name. Note: this name does
-     * not need to be unique; two columns in a table can have the same name.
-     *
-     * @param	columnIndex	the index of the column
-     * @return the name of the column
-     */
-    @Override
-    public String getColumnName(final int columnIndex) {
-        return COLUMNS[columnIndex].getName();
-    }
-
-    /**
-     * Returns the most specific superclass for all the cell values
-     * in the column. This is used by the
-     * <code>JTable</code> to set up a
-     * default renderer and editor for the column.
-     *
-     * @param columnIndex the index of the column
-     * @return the common ancestor class of the object values in the model.
-     */
-    @Override
-    public Class<?> getColumnClass(final int columnIndex) {
-        return COLUMNS[columnIndex].getType();
-    }
-
-    /**
-     * Returns true if the cell at
-     * <code>rowIndex</code> and
-     * <code>columnIndex</code>
-     * is editable. Otherwise,
-     * <code>setValueAt</code> on the cell will not
-     * change the value of that cell.
-     *
-     * @param	rowIndex	the row whose value to be queried
-     * @param	columnIndex	the column whose value to be queried
-     * @return	true if the cell is editable
-     * @see #setValueAt
-     */
-    @Override
-    public boolean isCellEditable(final int rowIndex, final int columnIndex) {
-        return hasURL(columnIndex);
-    }
-
     /**
      * Returns the number of rows in the model. A
      * <code>JTable</code> uses this method to determine how many rows it
@@ -235,66 +158,82 @@ public final class RawObservationTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(final int rowIndex, final int columnIndex) {
         final RawObservation obs = getObsAt(rowIndex);
+        final ColumnDesc columnDesc = getColumnDesc(columnIndex);
 
-        if (obs != null) {
-            switch (COLUMNS[columnIndex]) {
-                case GID:
-                    return obs.getGroupId();
-                case ID:
-                    return obs.getObsId();
-                case TYPE:
-                    return obs.getType();
-                case PARENT_ID:
-                    return obs.getParentId();
-                case PROGRAM_ID:
-                    return obs.getProgramId();
-                case INTERF_NAME:
-                    return obs.getInterferometerName();
-                case INTERF_VERSION:
-                    return obs.getInterferometerVersion();
-                case STATIONS:
-                    return obs.getStations();
-                case POPS:
-                    return obs.getPops();
-                case INS_NAME:
-                    return obs.getInstrumentName();
-                case INS_MODE:
-                    return obs.getInstrumentMode();
-                case INS_SUB_MODE:
-                    return obs.getInstrumentSubMode();
-                case TARGET_NAME:
-                    return obs.getTargetName();
-                case TARGET_RA:
-                    return obs.getTargetRa();
-                case TARGET_DEC:
-                    return obs.getTargetDec();
-                case MJD_START:
-                    return obs.getMjdStart();
-                case TAU0:
-                    return (obs.getExpTau0() != null) ? 1000.0 * obs.getExpTau0() : null;
-                case TEMP:
-                    return obs.getExpTemp();
-                case SEEING:
-                    return obs.getExpSeeing();
-                case VALID:
-                    return obs.getValid();
-                case EXP_TIME:
-                    return obs.getExpTime();
-                case TARGET_RA_HMS:
-                    return obs.getRa();
-                case TARGET_DEC_DMS:
-                    return obs.getDec();
-                case DATE:
-                    return obs.getDateStart();
-                case TIME:
-                    return obs.getTimeStart();
-                case LST_START:
-                    return obs.getLstStart();
-                default:
-            }
+        switch (ColumnDef.valueOf(columnDesc.getName())) {
+            case GID:
+                return obs.getGroupId();
+            case ID:
+                return obs.getObsId();
+            case TYPE:
+                return obs.getType();
+            case PARENT_ID:
+                return obs.getParentId();
+            case PROGRAM_ID:
+                return obs.getProgramId();
+            case INTERF_NAME:
+                return obs.getInterferometerName();
+            case INTERF_VERSION:
+                return obs.getInterferometerVersion();
+            case STATIONS:
+                return obs.getStations();
+            case POPS:
+                return obs.getPops();
+            case INS_NAME:
+                return obs.getInstrumentName();
+            case INS_MODE:
+                return obs.getInstrumentMode();
+            case INS_SUB_MODE:
+                return obs.getInstrumentSubMode();
+            case TARGET_NAME:
+                return obs.getTargetName();
+            case TARGET_RA:
+                return obs.getTargetRa();
+            case TARGET_DEC:
+                return obs.getTargetDec();
+            case MJD_START:
+                return obs.getMjdStart();
+            case TAU0:
+                return (obs.getExpTau0() != null) ? 1000.0 * obs.getExpTau0() : null;
+            case TEMP:
+                return obs.getExpTemp();
+            case SEEING:
+                return obs.getExpSeeing();
+            case VALID:
+                return obs.getValid();
+            case EXP_TIME:
+                return obs.getExpTime();
+            case TARGET_RA_HMS:
+                return obs.getRa();
+            case TARGET_DEC_DMS:
+                return obs.getDec();
+            case DATE:
+                return obs.getDateStart();
+            case TIME:
+                return obs.getTimeStart();
+            case LST_START:
+                return obs.getLstStart();
+            default:
         }
-
         return null;
+    }
+
+    /**
+     * Returns true if the cell at
+     * <code>rowIndex</code> and
+     * <code>columnIndex</code>
+     * is editable. Otherwise,
+     * <code>setValueAt</code> on the cell will not
+     * change the value of that cell.
+     *
+     * @param	rowIndex	the row whose value to be queried
+     * @param	columnIndex	the column whose value to be queried
+     * @return	true if the cell is editable
+     * @see #setValueAt
+     */
+    @Override
+    public boolean isCellEditable(final int rowIndex, final int columnIndex) {
+        return hasURL(columnIndex);
     }
 
     /**
@@ -313,17 +252,4 @@ public final class RawObservationTableModel extends AbstractTableModel {
     public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
         // no-op
     }
-
-    /* custom */
-    /**
-     * Return the model corresponding to the row at
-     * <code>rowIndex</code>
-     *
-     * @param	rowIndex	the row whose value is to be queried
-     * @return model
-     */
-    public RawObservation getObsAt(final int rowIndex) {
-        return this.observations.get(rowIndex);
-    }
-
 }

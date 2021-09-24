@@ -3,37 +3,44 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.gui.ObservationTableModel.TargetObservation;
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.util.TargetObservation;
 import fr.jmmc.jmcs.Bootstrapper;
+import fr.jmmc.jmcs.gui.component.BasicTableColumnMovedListener;
 import fr.jmmc.jmcs.gui.component.BasicTableSorter;
 import fr.jmmc.jmcs.gui.util.AutofitTableColumns;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.model.TableEditorPanel;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.NumberUtils;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.Border;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +48,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author bourgesl
  */
-public final class ObservationTablePanel extends javax.swing.JPanel implements ObservationListener {
+public final class ObservationTablePanel extends javax.swing.JPanel implements BasicTableColumnMovedListener, ObservationListener {
 
     private static final long serialVersionUID = 1L;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(ObservationTablePanel.class.getName());
+
+    /** Table key to remember dialog dimensions */
+    private final static String TABLE_EDITOR_DIMENSION_KEY = "___ASPRO2_OBS_TABLE_EDITOR_DIMENSION";
 
     /* members */
     private List<TargetObservation> obsTargetList = null;
@@ -58,23 +68,87 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements O
 
         initComponents();
 
-        final EnhancedTableCellRenderer rdr = new EnhancedTableCellRenderer();
-        final EnhancedTableCellEditor editor = new EnhancedTableCellEditor();
-
         // Configure table sorting
         obsTableSorter = new BasicTableSorter(obsModel, jTableObs.getTableHeader());
+
+        // Process the listeners last to first, so register before jtable, not after:
+        obsTableSorter.addTableModelListener(new TableModelListener() {
+
+            @Override
+            public void tableChanged(final TableModelEvent e) {
+                // If the table structure has changed, reapply the custom renderer/editor on columns + auto-fit
+                if ((e.getSource() != obsTableSorter)
+                        || (e.getFirstRow() == TableModelEvent.HEADER_ROW)) {
+
+                    AutofitTableColumns.autoResizeTable(jTableObs, false, true);
+                }
+            }
+        });
+        obsTableSorter.setTableHeaderChangeListener(this);
+
         jTableObs.setModel(obsTableSorter);
 
         // Fix row height:
         SwingUtils.adjustRowHeight(jTableObs);
 
         // Use the internal cell renderer:
-        final TableColumnModel columnModel = jTableObs.getColumnModel();
-        for (int i = 0, len = columnModel.getColumnCount(); i < len; i++) {
-            final TableColumn tc = columnModel.getColumn(i);
-            tc.setCellRenderer(rdr);
-            tc.setCellEditor(editor);
-        }
+        final EnhancedTableCellRenderer rdr = new EnhancedTableCellRenderer();
+        final EnhancedTableCellEditor editor = new EnhancedTableCellEditor();
+        // match all types:
+        jTableObs.setDefaultRenderer(String.class, rdr);
+        jTableObs.setDefaultEditor(String.class, editor);
+        jTableObs.setDefaultRenderer(Number.class, rdr);
+        jTableObs.setDefaultEditor(Number.class, editor);
+
+        // load user preference for columns:
+        obsTableSorter.setVisibleColumnNames(Preferences.getInstance().getObsTableVisibleColumns());
+
+        // Decorate scrollpane corner:
+        final JButton cornerButton = new JButton();
+        cornerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                final List<String> prevVisibleColumns = obsTableSorter.getVisibleColumnNames();
+
+                // show the table editor dialog to select displayed columns:
+                final List<String> newVisibleColumns = TableEditorPanel.showEditor(
+                        obsModel.getColumnNames(), prevVisibleColumns, TABLE_EDITOR_DIMENSION_KEY
+                );
+
+                if (newVisibleColumns != null) {
+                    // Update visible columns if needed:
+                    if (!prevVisibleColumns.equals(newVisibleColumns)) {
+                        setVisibleColumnNames(newVisibleColumns);
+                    }
+                }
+            }
+        });
+        jScrollPaneTable.setCorner(JScrollPane.LOWER_RIGHT_CORNER, cornerButton);
+    }
+
+    @Override
+    public void tableColumnMoved(BasicTableSorter source) {
+        // save preference after resultSetTableSorter updated:
+        updateVisibleColumnsPreferences();
+    }
+
+    /** 
+     * modify the user selected columns in BasicTableSorter
+     * Used when Table Editor dialog returns and we must apply the user choices.
+     * @param visibleColumnNames the new list of columns selected by user.
+     */
+    private void setVisibleColumnNames(final List<String> visibleColumnNames) {
+        logger.debug("setVisibleColumnNames: {}", visibleColumnNames);
+
+        obsTableSorter.setVisibleColumnNames(visibleColumnNames);
+        // save preference after resultSetTableSorter updated:
+        updateVisibleColumnsPreferences();
+    }
+
+    private void updateVisibleColumnsPreferences() {
+        final List<String> visibleColumnNames = obsTableSorter.getVisibleColumnNames();
+        logger.debug("updateVisibleColumnsPreferences: {}", visibleColumnNames);
+        Preferences.getInstance().setObsTableVisibleColumns(visibleColumnNames);
     }
 
     /**
@@ -115,11 +189,7 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements O
             // no filter:
             filtered = obsTargetList;
         }
-        obsModel.setData(obsTargetList);
-
-        if (filtered != null) {
-            AutofitTableColumns.autoResizeTable(jTableObs, false, true);
-        }
+        obsModel.setData(filtered);
     }
 
     private boolean hasURL(final int column) {
@@ -316,7 +386,7 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements O
         }
     }
 
-    final class EnhancedTableCellEditor extends AbstractCellEditor implements TableCellEditor {
+    private final class EnhancedTableCellEditor extends AbstractCellEditor implements TableCellEditor {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
