@@ -5,6 +5,7 @@
 <COOSYS ID="J2000" equinox="2000" epoch="J2000" system="eq_FK5"/>
 <RESOURCE name="aspro2">
 <TABLE name="Targets">
+<PARAM name="NIGHT" datatype="boolean" value="T"/>
 <FIELD name="NAME" datatype="char" ucd="meta.id;meta.main" arraysize="*">
 <DESCRIPTION>Target name (identifier)</DESCRIPTION>
 </FIELD>
@@ -66,6 +67,9 @@
 <FIELD name="FLUX_N" datatype="double" ucd="phot.mag;em.IR.8-15um" unit="mag">
 <DESCRIPTION>Magnitude N</DESCRIPTION>
 </FIELD>
+<FIELD name="comment" datatype="char" ucd="meta.note">
+<DESCRIPTION>User comment</DESCRIPTION>
+</FIELD>
 <DATA>
 <TABLEDATA>
 <TR>
@@ -88,7 +92,8 @@
 <TD/>
 <TD/>
 <TD/>
-</TR>
+<TD>special test comment with :
+- multilines </TD></TR>
 <TR>
 <TD>ETA TAU</TD>
 <TD>03:47:29.0765</TD>
@@ -109,7 +114,7 @@
 <TD>2.735</TD>
 <TD>2.636</TD>
 <TD/>
-</TR>
+<TD>comment</TD></TR>
 <TR>
 <TD>HD 1234</TD>
 <TD>00:16:27.6605</TD>
@@ -130,7 +135,7 @@
 <TD>8.131</TD>
 <TD>8.112</TD>
 <TD/>
-</TR>
+<TD>comment</TD></TR>
 <TR>
 <TD>HD 3546</TD>
 <TD>00:38:33.346</TD>
@@ -151,7 +156,7 @@
 <TD>2.154</TD>
 <TD>2.074</TD>
 <TD/>
-</TR>
+<TD>comment</TD></TR>
 <TR>
 <TD>HD 3590</TD>
 <TD>00:38:57.508</TD>
@@ -172,7 +177,7 @@
 <TD>3.7</TD>
 <TD>3.55</TD>
 <TD/>
-</TR>
+<TD>comment</TD></TR>
 <TR>
 <TD>HD 2767</TD>
 <TD>00:31:25.640</TD>
@@ -193,7 +198,7 @@
 <TD>3.522</TD>
 <TD>3.271</TD>
 <TD/>
-</TR>
+<TD>comment</TD></TR>
 <TR>
 <TD>HD 3421</TD>
 <TD>00:37:21.219</TD>
@@ -214,7 +219,7 @@
 <TD>3.32</TD>
 <TD>3.212</TD>
 <TD/>
-</TR>
+<TD>comment</TD></TR>
 <TR>
 <TD>HD 3651</TD>
 <TD>00:39:21.807</TD>
@@ -235,7 +240,7 @@
 <TD>4.064</TD>
 <TD>3.999</TD>
 <TD/>
-</TR>
+<TD>comment</TD></TR>
 <TR>
 <TD>HD 2910</TD>
 <TD>00:32:35.486</TD>
@@ -256,7 +261,7 @@
 <TD>3.159</TD>
 <TD>2.95</TD>
 <TD/>
-</TR>
+<TD>comment</TD></TR>
 <TR>
 <TD>HD 2841</TD>
 <TD>00:31:54.884</TD>
@@ -277,7 +282,7 @@
 <TD>3.07</TD>
 <TD>2.76</TD>
 <TD/>
-</TR>
+<TD>comment</TD></TR>
 </TABLEDATA>
 </DATA>
 </TABLE>
