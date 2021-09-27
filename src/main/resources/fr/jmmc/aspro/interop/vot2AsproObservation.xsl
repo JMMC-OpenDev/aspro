@@ -430,7 +430,10 @@
                         <xsl:value-of select="$DATE"/>
                     </date>
                     <nightRestriction>
-                        <xsl:value-of select="$NIGHT"/>
+                        <xsl:choose>
+                            <xsl:when test="$NIGHT = 'false' or $NIGHT = 'F'">false</xsl:when>
+                            <xsl:otherwise>true</xsl:otherwise>
+                        </xsl:choose>
                     </nightRestriction>
                     <atmosphereQuality>Average</atmosphereQuality>
                 </when>
