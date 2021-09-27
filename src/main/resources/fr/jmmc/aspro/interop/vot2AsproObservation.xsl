@@ -331,6 +331,13 @@
             </xsl:call-template>
         </xsl:variable>
 
+        <!-- TARGET_USER_INFORMATION -->
+
+        <xsl:variable name="DESCRIPTION_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="ucd11">meta.note</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
         <!-- group information (same table) -->
         <!-- TODO add support for multiple fields -->
         <xsl:variable name="GROUP_index">
@@ -744,7 +751,7 @@
             </xsl:if>
 
             <!-- add calibrator info if present and create groups if any-->
-            <xsl:if test="($SCI_TARGET_NAME_index != '' and $CAL_TARGET_NAME_index != '') or ($GROUP_index != '' and $NAME_index)">
+            <xsl:if test="($SCI_TARGET_NAME_index != '' and $CAL_TARGET_NAME_index != '') or ( ($DESCRIPTION_index != '' or $GROUP_index != '') and $NAME_index)">
                 <xsl:choose>
                     <!-- target defined -->
                     <xsl:when test="$NAME_index != ''">
@@ -811,6 +818,21 @@
 
                                 </xsl:for-each>
                             </xsl:if>
+                            <!-- first atttempt to convey note as a target decription
+                            next implementation should merge content with other targetInfo children -->
+                            <xsl:for-each select="$TABLES/DATA/TABLEDATA/TR[TD[position()=$DESCRIPTION_index and text()]]">
+                                <targetInfo>
+                                    <xsl:variable name="TARGET_ID">
+                                        <xsl:call-template name="getTargetId">
+                                            <xsl:with-param name="name" select="./TD[position()=$NAME_index]" />
+                                        </xsl:call-template>
+                                    </xsl:variable>
+                                    <targetRef>
+                                        <xsl:value-of select="$TARGET_ID"/>
+                                    </targetRef>
+                                    <description><xsl:copy-of select="./TD[position()=$DESCRIPTION_index]/text()"/></description>
+                                </targetInfo>
+                            </xsl:for-each>
 
                             <!-- list of all calibrators -->
                             <calibrators>
