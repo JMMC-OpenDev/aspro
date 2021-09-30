@@ -236,6 +236,7 @@
             </prerelease>
             <prerelease version="21.10 beta 2">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1148">Fixed UV plot's boundary issue related to unobservable target (axis length = 0)</change>
+                <change type="FEATURE">Enhanced VOTable handling to handle target description (ucd=meta.note) and improve NIGHT param reading (boolean or char datatype)</change>
             </prerelease>
             <prerelease version="21.10 beta 1">
                 <change type="BUGFIX">Fixed SAMP interoperability (VO table): disable XSLT secure processing</change>
