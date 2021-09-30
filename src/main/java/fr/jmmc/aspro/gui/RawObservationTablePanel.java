@@ -17,6 +17,7 @@ import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.model.TableEditorPanel;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -187,9 +188,10 @@ public final class RawObservationTablePanel extends javax.swing.JPanel implement
 
                 for (int i = 0; i < len; i++) {
                     final RawObservation rawObs = observations.get(i);
+                    final String rawObsInsName = rawObs.getInstrumentName();
 
-                    if (!rawObsFilterInsNames.contains(rawObs.getInstrumentName())) {
-                        logger.debug("skip rawObs instrument: {}", rawObs.getInstrumentName());
+                    if (!containsPartial(rawObsFilterInsNames, rawObsInsName)) {
+                        logger.debug("skip rawObs instrument: {}", rawObsInsName);
                         continue;
                     }
                     // TODO: other filters (chain)
@@ -198,6 +200,17 @@ public final class RawObservationTablePanel extends javax.swing.JPanel implement
             }
         }
         obsModel.setData(filtered);
+    }
+
+    private static boolean containsPartial(final List<String> acceptedValues, final String value) {
+        if (!StringUtils.isEmpty(value)) {
+            for (String accepted : acceptedValues) {
+                if (value.startsWith(accepted)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean hasURL(final int column) {
