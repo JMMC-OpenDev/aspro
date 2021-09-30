@@ -77,7 +77,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import javax.xml.datatype.XMLGregorianCalendar;
 import net.jafama.FastMath;
@@ -109,6 +108,8 @@ public final class ObservabilityService {
     private final static boolean DEBUG_SLOW_SERVICE = false;
     /** number of best Pops displayed in warnings */
     private final static int MAX_POPS_IN_WARNING = 15;
+    /** number of best Pops displayed in best / better PoPs lists */
+    private final static int MAX_POPS_IN_LIST = 4 * MAX_POPS_IN_WARNING;
     /** threshold to disable warnings 'Not observable' in terms of target list size */
     private final static int MAX_TARGETS_WARNING_NOT_OBSERVABLE = 100;
     /** jd step = half a minute */
@@ -749,7 +750,6 @@ public final class ObservabilityService {
         }
 
         // pop data per target
-        final Set<String> uniqueTargets = new HashSet<String>(nTargets);
         GroupedPopObservabilityData popMergeData;
         List<PopObservabilityData> flatPopDataList;
         PopObservabilityData popData;
@@ -758,8 +758,6 @@ public final class ObservabilityService {
         for (final List<PopObservabilityData> targetPopDataList : targetPopDataListResults) {
             // targetPopDataList can be null if the target never rises or is incompatible (skip) :
             if (targetPopDataList != null) {
-                uniqueTargets.add(targetPopDataList.get(0).getTargetName());
-
                 // rearrange results :
                 for (int i = 0, size = targetPopDataList.size(); i < size; i++) {
                     popData = targetPopDataList.get(i);
@@ -802,24 +800,45 @@ public final class ObservabilityService {
         int targetSize;
         int maxObsTarget = 0;
 
+        final int[] histTargets = new int[nTargets + 1];
+
         for (GroupedPopObservabilityData pm : popMergeList) {
             targetSize = pm.getPopDataList().size();
 
             if (targetSize > maxObsTarget) {
                 maxObsTarget = targetSize;
             }
+            // update histogram:
+            histTargets[targetSize]++;
         }
-
-        final int nObsTarget = uniqueTargets.size();
 
         if (isLogDebug) {
-            logger.debug("Observable targets : max: {} - total: {}", maxObsTarget, nObsTarget);
+            logger.debug("Observable targets : max: {} - total: {}", maxObsTarget, nTargets);
+
+            logger.debug("Histogram PoPs solutions per target count:");
+            for (int i = 0; i <= maxObsTarget; i++) {
+                if (histTargets[i] > 0) {
+                    logger.debug("n({}) = {}", i, histTargets[i]);
+                }
+            }
         }
 
-        if (maxObsTarget != nObsTarget) {
+        int minObsTarget = maxObsTarget;
+
+        int acc = 0;
+        for (int i = maxObsTarget; i >= 0; i--) {
+            acc += histTargets[i];
+            if (acc >= MAX_POPS_IN_LIST) {
+                minObsTarget = i;
+                break;
+            }
+        }
+
+        if (maxObsTarget != nTargets) {
             final StringBuffer sb = getBuffer();
             sb.append("Impossible to find a PoPs combination compatible with all observable targets (").append(maxObsTarget);
-            sb.append(" / ").append(nObsTarget).append(')');
+            sb.append(" / ").append(nTargets).append("): comparing combinations with ").append(minObsTarget);
+            sb.append(" targets at least");
             addWarning(sb.toString());
         }
 
@@ -828,7 +847,7 @@ public final class ObservabilityService {
             popMergeData = it.next();
 
             // Use all possible pop results having at least the good number of targets:
-            if (popMergeData.getPopDataList().size() != maxObsTarget) {
+            if (popMergeData.getPopDataList().size() >= minObsTarget) {
                 it.remove();
             }
         }
@@ -865,21 +884,25 @@ public final class ObservabilityService {
 
             if (popMergeList.size() > 1) {
                 // Observability Pops results:
-                final List<PopCombination> bestPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_WARNING);
-                final List<PopCombination> betterPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_WARNING);
+                final List<PopCombination> bestPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_LIST);
+                final List<PopCombination> betterPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_LIST);
 
                 final StringBuilder sbBestPops = new StringBuilder(128);
                 final StringBuilder sbBetterPops = new StringBuilder(128);
                 sbBestPops.append("Equivalent Best PoPs found: ");
 
                 // find all equivalent pop combinations :
-                for (int i = end, n = 0; i >= 0 && n < MAX_POPS_IN_WARNING; i--, n++) {
+                for (int i = end, n = 0; i >= 0 && n < MAX_POPS_IN_LIST; i--, n++) {
                     final GroupedPopObservabilityData pm = popMergeList.get(i);
                     if (popBestData.getEstimation() == pm.getEstimation()) {
-                        sbBestPops.append(pm.getPopCombination().getIdentifier()).append(' ');
+                        if (n < MAX_POPS_IN_WARNING) {
+                            sbBestPops.append(pm.getPopCombination().getIdentifier()).append(' ');
+                        }
                         bestPoPList.add(pm.getPopCombination());
                     } else {
-                        sbBetterPops.append(pm.getPopCombination().getIdentifier()).append(' ');
+                        if (n < MAX_POPS_IN_WARNING) {
+                            sbBetterPops.append(pm.getPopCombination().getIdentifier()).append(' ');
+                        }
                         betterPoPList.add(pm.getPopCombination());
                     }
                 }
@@ -1535,11 +1558,13 @@ public final class ObservabilityService {
                     if (Range.matchRange(finalRangesHardLimits, rangeJDHighElev)) {
                         checkHighElev = true;
 
-                        // note: transitElev is max != max(elevation) in finalRangesHardLimits
-                        final StringBuffer sb = getBuffer();
-                        sb.append("Target [").append(targetName).append("] transits at ");
-                        FormatterUtils.format(df1, sb, transitElev).append(" deg. Please check pointing restrictions.");
-                        addWarning(sb.toString());
+                        if (doWarnNotObservable) {
+                            // note: transitElev is max != max(elevation) in finalRangesHardLimits
+                            final StringBuffer sb = getBuffer();
+                            sb.append("Target [").append(targetName).append("] transits at ");
+                            FormatterUtils.format(df1, sb, transitElev).append(" deg. Please check pointing restrictions.");
+                            addWarning(sb.toString());
+                        }
                     }
                 }
 
@@ -1804,21 +1829,25 @@ public final class ObservabilityService {
 
             if (sizeCb > 1) {
                 // Observability Pops results:
-                final List<PopCombination> bestPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_WARNING);
-                final List<PopCombination> betterPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_WARNING);
+                final List<PopCombination> bestPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_LIST);
+                final List<PopCombination> betterPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_LIST);
 
                 final StringBuilder sbBestPops = new StringBuilder(128);
                 final StringBuilder sbBetterPops = new StringBuilder(128);
                 sbBestPops.append("Equivalent Best PoPs found: ");
 
                 // find all equivalent pop combinations :
-                for (int i = end, n = 0; i >= 0 && n < MAX_POPS_IN_WARNING; i--, n++) {
+                for (int i = end, n = 0; i >= 0 && n < MAX_POPS_IN_LIST; i--, n++) {
                     popData = popDataList.get(i);
                     if (popBestData.getMaxLength() == popData.getMaxLength()) {
-                        sbBestPops.append(popData.getPopCombination().getIdentifier()).append(' ');
+                        if (n < MAX_POPS_IN_WARNING) {
+                            sbBestPops.append(popData.getPopCombination().getIdentifier()).append(' ');
+                        }
                         bestPoPList.add(popData.getPopCombination());
                     } else {
-                        sbBetterPops.append(popData.getPopCombination().getIdentifier()).append(' ');
+                        if (n < MAX_POPS_IN_WARNING) {
+                            sbBetterPops.append(popData.getPopCombination().getIdentifier()).append(' ');
+                        }
                         betterPoPList.add(popData.getPopCombination());
                     }
                 }
@@ -3346,41 +3375,41 @@ public final class ObservabilityService {
     }
 
     /**
-     * Generate a target list for the base line limits (every 5 deg)
+     * Generate a target list for the base line limits (every 0.5 deg)
      * @return target list
      */
     private List<Target> generateTargetsForBaseLineLimits() {
 
         final double obsLat = FastMath.toDegrees(this.interferometer.getPosSph().getLatitude());
 
-        final int decStep = 1;
+        final double decStep = 0.5;
 
-        int decMin = decStep * (int) Math.round((obsLat - 90d + this.minElev) / decStep);
-        decMin = Math.max(decMin, -90);
+        double decMin = decStep * (int) Math.round((obsLat - 90.0 + this.minElev) / decStep);
+        decMin = Math.max(decMin, -90.0);
 
-        int decMax = decStep * (int) Math.round((obsLat + 90 - this.minElev) / decStep);
-        decMax = Math.min(decMax, 90);
+        double decMax = decStep * (int) Math.round((obsLat + 90.0 - this.minElev) / decStep);
+        decMax = Math.min(decMax, 90.0);
 
         final StringBuffer sb = getBuffer();
 
-        final List<Target> targets = new ArrayList<Target>((decMax - decMin) / decStep + 1);
-        Target t;
-        for (int i = decMax; i >= decMin; i -= decStep) {
-            t = new Target();
+        final List<Target> targets = new ArrayList<Target>((int) Math.ceil((decMax - decMin) / decStep) + 1);
+
+        for (double d = decMax; d >= decMin; d -= decStep) {
+            final Target t = new Target();
 
             // delta = n (deg)
             sb.append(SpecialChars.DELTA_UPPER).append(" = ");
-            if (i >= 0) {
+            if (d >= 0.0) {
                 /* always print sign '+' as DEC is typically within range [-90; 90] */
                 sb.append('+');
             }
-            sb.append(i);
+            sb.append(d);
             t.setName(sb.toString());
             sb.setLength(0); // recycle 
 
             // 12:00:00
             t.setRADeg(180d);
-            t.setDECDeg(i);
+            t.setDECDeg(d);
             t.setEQUINOX(AsproConstants.EPOCH_J2000);
 
             targets.add(t);
