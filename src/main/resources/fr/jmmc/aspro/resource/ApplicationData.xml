@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.10 beta 2"/>
-    <compilation date="20/09/2021" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="21.10 beta 3"/>
+    <compilation date="30/09/2021" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,11 @@
 
     <releasenotes>
         <release version="21.10">
-            <pubDate>Tue, 14 Sep 2021 13:00:00 GMT</pubDate>
+            <pubDate>Thu, 30 Sep 2021 15:00:00 GMT</pubDate>
+            <prerelease version="21.10 beta 3">
+                <change type="FEATURE">Enhanced best PoPs algorithm to display more combinations (45) for comparison and for large lists, retain more solutions (with less targets)</change>
+                <change type="FEATURE">Improved the observation log table to preserve table column order (preference) and select visible columns by clicking in the bottom right corner's button</change>
+            </prerelease>
             <prerelease version="21.10 beta 2">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1148">Fixed UV plot's boundary issue related to unobservable target (axis length = 0)</change>
             </prerelease>
