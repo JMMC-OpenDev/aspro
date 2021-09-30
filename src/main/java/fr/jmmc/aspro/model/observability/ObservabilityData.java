@@ -242,7 +242,7 @@ public final class ObservabilityData {
         final long offDateMin = dateCalc.getDateOffset(utDateMin);
 
         double jdOffset = 0.0;
-        
+
         if (offDateMin != 0l) {
             jdOffset = (dateCalc.getSiteStdZone() - (offDateMin / 3600000L)) / 24.0;
         }
@@ -276,11 +276,11 @@ public final class ObservabilityData {
         dateCalc.toDateString(sb, date);
 
         sb.append(" - ");
-        
+
         // DAY after midnight + 1h0m1s :
         date.setTime(midLocal + 3601000L);
         dateCalc.toDateString(sb, date);
-        
+
         this.dayRangeLabel = sb.toString();
     }
 
@@ -668,5 +668,5 @@ public final class ObservabilityData {
             }
         }
     }
-    
+
 }

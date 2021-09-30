@@ -145,17 +145,17 @@ public final class StarObservabilityData {
     }
 
     /**
-    * Return the description of visible date intervals without soft limits (HA, moon, wind, elev)
-    * @return description of visible date intervals without soft limits (HA, moon, wind, elev)
-    */
+     * Return the description of visible date intervals without soft limits (HA, moon, wind, elev)
+     * @return description of visible date intervals without soft limits (HA, moon, wind, elev)
+     */
     public String getVisibleNoSoftLimitsDesc() {
         return visibleNoSoftLimitsDesc;
     }
 
     /**
-    * Define the description of visible date intervals without soft limits (HA, moon, wind, elev)
-    * @param visibleNoSoftLimitsDesc description of visible date intervals without soft limits (HA, moon, wind, elev)
-    */
+     * Define the description of visible date intervals without soft limits (HA, moon, wind, elev)
+     * @param visibleNoSoftLimitsDesc description of visible date intervals without soft limits (HA, moon, wind, elev)
+     */
     public void setVisibleNoSoftLimitsDesc(final String visibleNoSoftLimitsDesc) {
         this.visibleNoSoftLimitsDesc = visibleNoSoftLimitsDesc;
     }
