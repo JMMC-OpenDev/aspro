@@ -229,9 +229,9 @@
 
     <releasenotes>
         <release version="21.10">
-            <pubDate>Thu, 30 Sep 2021 15:00:00 GMT</pubDate>
+            <pubDate>Oct, 04 Oct 2021 16:00:00 GMT</pubDate>
             <prerelease version="21.10 beta 3">
-                <change type="FEATURE">Enhanced best PoPs algorithm to display more combinations (45) for comparison and for large lists, retain more solutions (with less targets)</change>
+                <change type="FEATURE">Enhanced best PoPs algorithm to display more combinations for comparison and for large lists, retain more solutions (with less targets)</change>
                 <change type="FEATURE">Improved the observation log table to preserve table column order (preference) and select visible columns by clicking in the bottom right corner's button</change>
             </prerelease>
             <prerelease version="21.10 beta 2">
