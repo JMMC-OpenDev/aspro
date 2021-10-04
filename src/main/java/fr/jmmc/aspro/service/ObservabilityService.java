@@ -847,7 +847,7 @@ public final class ObservabilityService {
             popMergeData = it.next();
 
             // Use all possible pop results having at least the good number of targets:
-            if (popMergeData.getPopDataList().size() >= minObsTarget) {
+            if (popMergeData.getPopDataList().size() < minObsTarget) {
                 it.remove();
             }
         }
@@ -882,40 +882,38 @@ public final class ObservabilityService {
 
             final GroupedPopObservabilityData popBestData = popMergeList.get(end);
 
-            if (popMergeList.size() > 1) {
-                // Observability Pops results:
-                final List<PopCombination> bestPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_LIST);
-                final List<PopCombination> betterPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_LIST);
+            // Observability Pops results:
+            final List<PopCombination> bestPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_LIST);
+            final List<PopCombination> betterPoPList = new ArrayList<PopCombination>(MAX_POPS_IN_LIST);
 
-                final StringBuilder sbBestPops = new StringBuilder(128);
-                final StringBuilder sbBetterPops = new StringBuilder(128);
-                sbBestPops.append("Equivalent Best PoPs found: ");
+            final StringBuilder sbBestPops = new StringBuilder(128);
+            final StringBuilder sbBetterPops = new StringBuilder(128);
+            sbBestPops.append("Equivalent Best PoPs found: ");
 
-                // find all equivalent pop combinations :
-                for (int i = end, n = 0; i >= 0 && n < MAX_POPS_IN_LIST; i--, n++) {
-                    final GroupedPopObservabilityData pm = popMergeList.get(i);
-                    if (popBestData.getEstimation() == pm.getEstimation()) {
-                        if (n < MAX_POPS_IN_WARNING) {
-                            sbBestPops.append(pm.getPopCombination().getIdentifier()).append(' ');
-                        }
-                        bestPoPList.add(pm.getPopCombination());
-                    } else {
-                        if (n < MAX_POPS_IN_WARNING) {
-                            sbBetterPops.append(pm.getPopCombination().getIdentifier()).append(' ');
-                        }
-                        betterPoPList.add(pm.getPopCombination());
+            // find all equivalent pop combinations :
+            for (int i = end, n = 0; i >= 0 && n < MAX_POPS_IN_LIST; i--, n++) {
+                final GroupedPopObservabilityData pm = popMergeList.get(i);
+                if (popBestData.getEstimation() == pm.getEstimation()) {
+                    if (n < MAX_POPS_IN_WARNING) {
+                        sbBestPops.append(pm.getPopCombination().getIdentifier()).append(' ');
                     }
+                    bestPoPList.add(pm.getPopCombination());
+                } else {
+                    if (n < MAX_POPS_IN_WARNING) {
+                        sbBetterPops.append(pm.getPopCombination().getIdentifier()).append(' ');
+                    }
+                    betterPoPList.add(pm.getPopCombination());
                 }
+            }
 
-                this.data.setBestPopList(bestPoPList);
-                this.data.setBetterPopList(betterPoPList);
+            this.data.setBestPopList(bestPoPList);
+            this.data.setBetterPopList(betterPoPList);
 
-                addInformation(sbBestPops.toString());
+            addInformation(sbBestPops.toString());
 
-                if (sbBetterPops.length() > 0) {
-                    sbBetterPops.insert(0, "Next good PoPs: ");
-                    addInformation(sbBetterPops.toString());
-                }
+            if (sbBetterPops.length() > 0) {
+                sbBetterPops.insert(0, "Next good PoPs: ");
+                addInformation(sbBetterPops.toString());
             }
 
             bestPopCombination = popBestData.getPopCombination();

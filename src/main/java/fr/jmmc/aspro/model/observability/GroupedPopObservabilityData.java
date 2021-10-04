@@ -72,13 +72,17 @@ public final class GroupedPopObservabilityData implements Comparable<GroupedPopO
     }
 
     /**
-     * Simple comparator that takes into account only the estimation
+     * Comparator that takes into account the number of observable targets and the estimation
      * @param other pop merge data
-     * @return Double.compare(estimation1, estimation2)
+     * @return comparator result
      */
     @Override
     public int compareTo(final GroupedPopObservabilityData other) {
-        return Double.compare(this.estimation, other.getEstimation());
+        int res = Integer.compare(this.popDataList.size(), other.getPopDataList().size());
+        if (res == 0) {
+            res = Double.compare(this.estimation, other.getEstimation());
+        }
+        return res;
     }
 
     /**
@@ -132,7 +136,8 @@ public final class GroupedPopObservabilityData implements Comparable<GroupedPopO
     // TODO: use ToStringable
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(64).append(getIdentifier()).append(" [");
+        final StringBuilder sb = new StringBuilder(64).append(getIdentifier());
+        sb.append("(").append(this.popDataList.size()).append(") [");
         for (PopObservabilityData popData : this.popDataList) {
             sb.append('\t').append(popData.getTargetName()).append(" : ").append(NumberUtils.trimTo3Digits(popData.getMaxLength()));
         }
