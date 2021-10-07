@@ -33,6 +33,7 @@ import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
+import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationContext;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.ObservationVariant;
@@ -125,20 +126,26 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private boolean doAutoCheckTargets = true;
     /** flag to enable / disable the automatic selection check of the instrument configuration */
     private boolean doAutoCheckConfigurations = true;
-    /** current selected target to avoid empty list selection */
-    private Target currentTarget = null;
-    /** current selected instrument configuration to avoid empty list selection */
-    private String currentInstrumentConfiguration = null;
-    /** last Pop config given by the interferometer configuration */
-    private String lastConfPopConfig = null;
-    /** last configuration compatible with manual PoPs */
-    private String lastConfCompatibleWithPopConfig = null;
+    /** default list model for the PoPs combo box */
+    private final ComboBoxModel<String> defaultModelPops = new DefaultComboBoxModel<>(new String[]{POPS_MANUAL, POPS_AUTO});
     /** Wind widget */
     private WindWidget windWidget = null;
     /** Dedicated panel for target quick search */
     private SearchPanel _searchPanel = null;
+
+    /* cached data */
     /** loaded observation setup (Interferometer + Instrument + Config) */
     private String loadedObsSetup = null;
+    /** current selected target to avoid empty list selection */
+    private Target currentTarget = null;
+    /** current selected instrument configuration (S1 S2 E1) to avoid empty list selection */
+    private String currentInsConfiguration = null;
+    /** last Pop config given by the interferometer configuration (12455) */
+    private String lastConfPopConfig = null;
+    /** last instrument configuration (S1 S2 E1) compatible with manual PoPs */
+    private String lastInsConfCompatibleWithPopConfig = null;
+    /** last instrument configuration key ('S1 S2 E1@T/F') used by the best PoPs algorithm */
+    private String lastInsConfKeyForBestPops = null;
 
     /** Creates new form BasicObservationForm */
     public BasicObservationForm() {
@@ -178,7 +185,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jTextPoPs = new JFormattedTextField(getPopsFormatter());
         jPanelObsRight = new javax.swing.JPanel();
         jPanelObsBottom = new javax.swing.JPanel();
-        jComboBoxPops = new javax.swing.JComboBox();
+        jComboBoxPops = new javax.swing.JComboBox<>();
         jPanelConfigurations = new javax.swing.JPanel();
         jScrollPaneInstrumentConfigurations = new javax.swing.JScrollPane();
         jListInstrumentConfigurations = createConfigurationList();
@@ -416,7 +423,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jPanelMain.add(jPanelObsBottom, gridBagConstraints);
 
         jComboBoxPops.setMaximumRowCount(6);
-        jComboBoxPops.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "[Manual]", "[Auto]" }));
+        jComboBoxPops.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "[Manual]", "[Auto]" }));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
@@ -1204,7 +1211,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         }
 
         // memorize the first selected item :
-        currentInstrumentConfiguration = (String) jListInstrumentConfigurations.getSelectedValue();
+        currentInsConfiguration = (String) jListInstrumentConfigurations.getSelectedValue();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Instrument Configuration changed: {}", Arrays.toString(getInstrumentConfigurations()));
@@ -1232,7 +1239,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private void checkInstrumentConfigurationSelection() {
         // check if the automatic configuration check flag is enabled :
         if (doAutoCheckConfigurations) {
-            checkListSelection(jListInstrumentConfigurations, currentInstrumentConfiguration);
+            checkListSelection(jListInstrumentConfigurations, currentInsConfiguration);
         }
     }
 
@@ -1316,12 +1323,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         String popConfig = value;
         if (value != null) {
             // 1st selected configuration:
-            final String lastInstrumentConfiguration = lastConfCompatibleWithPopConfig;
+            final String lastInstrumentConfiguration = lastInsConfCompatibleWithPopConfig;
             logger.debug("Last Instrument Config: {}", lastInstrumentConfiguration);
 
             // parse the configuration (instrument = number of channels) + (interferometer = pop indexes [1-5]) :
             final List<Pop> listPoPs = cm.parseInstrumentPoPs((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
-                    (String) jComboBoxInstrument.getSelectedItem(), currentInstrumentConfiguration,
+                    (String) jComboBoxInstrument.getSelectedItem(), currentInsConfiguration,
                     popConfig, lastInstrumentConfiguration);
 
             if (listPoPs == null) {
@@ -1363,8 +1370,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jTextPoPs.setText((value != null) ? value.toString() : null);
 
         if (value != null) {
-            this.lastConfCompatibleWithPopConfig = currentInstrumentConfiguration;
-            logger.debug("Last Config set: {} with PoPs: {}", lastConfCompatibleWithPopConfig, value);
+            this.lastInsConfCompatibleWithPopConfig = currentInsConfiguration;
+            logger.debug("Last Config set: {} with PoPs: {}", lastInsConfCompatibleWithPopConfig, value);
         }
 
         final String text = jTextPoPs.getText();
@@ -1373,7 +1380,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         if (!(StringUtils.isEmpty(text))) {
             // check if the combo box has this value:
-            final ComboBoxModel comboModel = jComboBoxPops.getModel();
+            final ComboBoxModel<String> comboModel = jComboBoxPops.getModel();
 
             boolean found = false;
             for (int i = 0, len = comboModel.getSize(); i < len; i++) {
@@ -1599,11 +1606,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             // clear selected target :
             jListTargets.clearSelection();
             // reset cached values :
-            currentTarget = null;
-            currentInstrumentConfiguration = null;
-            lastConfPopConfig = null;
-            lastConfCompatibleWithPopConfig = null;
             loadedObsSetup = null;
+            currentTarget = null;
+            currentInsConfiguration = null;
+            lastConfPopConfig = null;
+            lastInsConfCompatibleWithPopConfig = null;
+            lastInsConfKeyForBestPops = null;
 
             // use observation context to enable/disable POPS FIRST (event ordering issue):
             makePopsEditable(isPopsEditable());
@@ -1834,7 +1842,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 break;
             case OBSERVABILITY_DONE:
                 if (event instanceof ObservabilityEvent) {
-                    updateObservabilityData(((ObservabilityEvent) event).getObservabilityData());
+                    updateObservabilityData(event.getObservationCollection(),
+                            ((ObservabilityEvent) event).getObservabilityData());
                 }
                 break;
             case WARNINGS_READY:
@@ -1851,43 +1860,65 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     /**
      * Update the observability Data
-     * and update star data (HA min / max)
+     * @param obsCollection observation collection to use
      * @param obsDataList observability data
      */
-    private void updateObservabilityData(final List<ObservabilityData> obsDataList) {
-        final int nObs = obsDataList.size();
+    private void updateObservabilityData(final ObservationCollection obsCollection,
+                                         final List<ObservabilityData> obsDataList) {
+        // are PoPs in use ?
+        if (!jComboBoxPops.isVisible()) {
+            resetComboBoxPops(POPS_AUTO);
+        } else {
+            final int nObs = obsDataList.size();
 
-        DefaultComboBoxModel comboPopsModel = null;
+            if (nObs == 1) {
+                final ObservationSetting observation = obsCollection.getFirstObservation();
+                final ObservabilityData obsData = obsDataList.get(0);
 
-        if (nObs == 1) {
-            final List<PopCombination> bestPopList = obsDataList.get(0).getBestPopList();
-            final List<PopCombination> betterPopList = obsDataList.get(0).getBetterPopList();
+                final String insConfKey = observation.getInstrumentConfiguration().getStations()
+                        + "@" + obsData.isDoBaseLineLimits();
 
-            if (bestPopList != null && betterPopList != null) {
-                final Vector<String> orderedPops = new Vector<String>(bestPopList.size() + betterPopList.size() + 1);
-                orderedPops.add(POPS_MANUAL);
-                orderedPops.add(POPS_AUTO);
+                final List<PopCombination> bestPopList = obsData.getBestPopList();
+                final List<PopCombination> betterPopList = obsData.getBetterPopList();
 
-                for (PopCombination p : bestPopList) {
-                    orderedPops.add(p.toString());
+                // PoPs list are null if [Manual]:
+                if (bestPopList != null && betterPopList != null) {
+                    final Vector<String> orderedPops = new Vector<String>(bestPopList.size() + betterPopList.size() + 2);
+                    orderedPops.add(POPS_MANUAL);
+                    orderedPops.add(POPS_AUTO);
+
+                    for (PopCombination p : bestPopList) {
+                        orderedPops.add(p.toString());
+                    }
+                    for (PopCombination p : betterPopList) {
+                        orderedPops.add(p.toString());
+                    }
+
+                    // single observation results:
+                    final ComboBoxModel<String> comboPopsModel = new DefaultComboBoxModel<>(orderedPops);
+                    comboPopsModel.setSelectedItem(POPS_AUTO);
+                    jComboBoxPops.setModel(comboPopsModel);
+
+                    lastInsConfKeyForBestPops = insConfKey;
+                } else {
+                    // check [Manual] ie is Pops combo box still valid ? (same stations)
+                    if ((lastInsConfKeyForBestPops != null) && !lastInsConfKeyForBestPops.equals(insConfKey)) {
+                        resetComboBoxPops((obsData.isUserPops() ? POPS_MANUAL : POPS_AUTO));
+                        lastInsConfKeyForBestPops = null;
+                    }
                 }
-                for (PopCombination p : betterPopList) {
-                    orderedPops.add(p.toString());
-                }
-
-                // single observation results:
-                comboPopsModel = new DefaultComboBoxModel(orderedPops);
-                comboPopsModel.setSelectedItem(POPS_AUTO);
+            } else if (nObs > 1) {
+                // multiple observation results but how to merge best PoPs solutions ?
+                // reset and restore auto or manual mode:
+                resetComboBoxPops((obsDataList.get(0).getBestPopList() != null) ? POPS_AUTO : POPS_MANUAL);
+                lastInsConfKeyForBestPops = null;
             }
-        } else if (nObs > 1) {
-            // multiple observation results:
-            comboPopsModel = new DefaultComboBoxModel(new String[]{POPS_MANUAL, POPS_AUTO});
-            // restore auto or manual mode:
-            comboPopsModel.setSelectedItem((obsDataList.get(0).getBestPopList() != null) ? POPS_AUTO : POPS_MANUAL);
         }
-        if (comboPopsModel != null) {
-            jComboBoxPops.setModel(comboPopsModel);
-        }
+    }
+
+    private void resetComboBoxPops(final String selectedItem) {
+        defaultModelPops.setSelectedItem(selectedItem);
+        jComboBoxPops.setModel(defaultModelPops);
     }
 
     /**
@@ -2010,7 +2041,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private javax.swing.JComboBox jComboBoxInstrument;
     private javax.swing.JComboBox jComboBoxInterferometer;
     private javax.swing.JComboBox jComboBoxInterferometerConfiguration;
-    private javax.swing.JComboBox jComboBoxPops;
+    private javax.swing.JComboBox<String> jComboBoxPops;
     private javax.swing.JSpinner jDateSpinner;
     private javax.swing.JFormattedTextField jFieldMinElev;
     private javax.swing.JLabel jLabelDate;
