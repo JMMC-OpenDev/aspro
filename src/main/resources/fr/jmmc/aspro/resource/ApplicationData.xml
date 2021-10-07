@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.10 beta 3"/>
-    <compilation date="04/10/2021" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="21.10 beta 4"/>
+    <compilation date="07/10/2021" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,12 @@
 
     <releasenotes>
         <release version="21.10">
-            <pubDate>Mon, 04 Oct 2021 16:00:00 GMT</pubDate>
+            <pubDate>Tue, 07 Oct 2021 16:00:00 GMT</pubDate>
+            <prerelease version="21.10 beta 4">
+                <change type="FEATURE">Improved the main setting panel to update the Pops combo box plot for baseline limits and reset best PoPs if the configuration changes</change>
+                <change type="FEATURE">Improved observability plot for baseline limits to support multiple configurations and report information and warning messages (CHARA PoPs)</change>
+                <change type="FEATURE">Improved observability plot with large lists (increased bar width and disabled bar outline)</change>
+            </prerelease>
             <prerelease version="21.10 beta 3">
                 <change type="FEATURE">Enhanced best PoPs algorithm to display more combinations for comparison and for large lists, retain more solutions (with less targets)</change>
                 <change type="FEATURE">Improved the observation log table to preserve table column order (preference) and select visible columns by clicking in the bottom right corner's button</change>
