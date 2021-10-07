@@ -25,6 +25,7 @@ import fr.jmmc.aspro.model.ObservationCollectionObsData;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.TimeRef;
+import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.event.TargetSelectionEvent;
@@ -1134,12 +1135,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // disable the automatic refresh :
         final boolean prevAutoRefresh = this.setAutoRefresh(false);
         try {
-            // if multiple configurations, disable baseline limits and detailed output :
+            // if multiple configurations, disable detailed output:
             if (!isSingle) {
-                this.jCheckBoxBaseLineLimits.setSelected(false);
                 this.jCheckBoxDetailedOutput.setSelected(false);
             }
-            this.jCheckBoxBaseLineLimits.setEnabled(isSingle);
             this.jCheckBoxDetailedOutput.setEnabled(isSingle && !this.jCheckBoxBaseLineLimits.isSelected());
 
         } finally {
@@ -1274,7 +1273,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                     };
                 }
 
-                // Is is better to use or not best Pops parallelism (use more threads ?) but compromise because best pops is only a part of observability (moon...)
+                // Is it better to use or not best Pops parallelism (use more threads ?) but compromise because best pops is only a part of observability (moon...)
                 // so fully parallel may be better !
                 final boolean useThreads = nObs > 1;
 
@@ -1307,39 +1306,50 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
             final ObservationCollection taskObsCollection = this.getObservationCollection();
 
-            // skip baseline limits case :
-            if (!this.doBaseLineLimits) {
-                // Fire the event ObservabilityDone and call UVCoveragePanel to refresh the UV Coverage plot :
+            final ObservationManager om = ObservationManager.getInstance();
 
-                final ObservationManager om = ObservationManager.getInstance();
+            // Fire the event ObservabilityDone and call UVCoveragePanel to refresh the UV Coverage plot :
+            // use the latest observation for computations to check versions :
+            final ObservationCollection lastObsCollection = om.getObservationCollection();
 
-                // use the latest observation for computations to check versions :
-                final ObservationCollection lastObsCollection = om.getObservationCollection();
-
-                if (taskObsCollection.getVersion().isSameMainVersion(lastObsCollection.getVersion())) {
-                    if (_logger.isDebugEnabled()) {
-                        _logger.debug("refreshUI: main version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
-                    }
-                    if (DEBUG_VERSIONS) {
-                        _logger.warn("refreshUI: main version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
-                    }
-
-                    // use latest observation collection to see possible UV widget changes :
-                    // note: observability data is also valid for any UV version :
-                    om.fireObservabilityDone(lastObsCollection, obsDataList);
-
-                } else {
-                    if (_logger.isDebugEnabled()) {
-                        _logger.debug("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
-                    }
-                    if (DEBUG_VERSIONS) {
-                        _logger.warn("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
-                    }
-                    // Skip = ignore these results
-                    // next iteration will see changes ...
-                    // Note: this is necessary as SharedSeriesAttributes (color) is global (consistency issue)
-                    return;
+            if (taskObsCollection.getVersion().isSameMainVersion(lastObsCollection.getVersion())) {
+                if (_logger.isDebugEnabled()) {
+                    _logger.debug("refreshUI: main version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
                 }
+                if (DEBUG_VERSIONS) {
+                    _logger.warn("refreshUI: main version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+                }
+
+                // use latest observation collection to see possible UV widget changes :
+                // note: observability data is also valid for any UV version :
+                // note: for baseline limits, UV widget will ignore this event, 
+                // but needed to update basic observation form (pops choice):
+                om.fireObservabilityDone(lastObsCollection, obsDataList);
+
+                if (this.doBaseLineLimits) {
+                    // merge warning container as the UV widget is ignored (interrupted pipeline):
+                    final WarningContainer mergedWarningContainer = new WarningContainer();
+
+                    // ObservabilityService warnings:
+                    for (int i = 0, len = obsDataList.size(); i < len; i++) {
+                        final ObservabilityData obsData = obsDataList.get(i);
+                        mergedWarningContainer.addWarnings(obsData.getWarningContainer());
+                    }
+
+                    // Fire a warnings ready event :
+                    om.fireWarningsReady(mergedWarningContainer);
+                }
+            } else {
+                if (_logger.isDebugEnabled()) {
+                    _logger.debug("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+                }
+                if (DEBUG_VERSIONS) {
+                    _logger.warn("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+                }
+                // Skip = ignore these results
+                // next iteration will see changes ...
+                // Note: this is necessary as SharedSeriesAttributes (color) is global (consistency issue)
+                return;
             }
 
             // Refresh the GUI using coherent data :
@@ -1690,27 +1700,32 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 colorIndex = globalAttrs.getColorIndex(legendLabel);
                             }
                              */
-                            if (!doBaseLineLimits && (colorIndex == StarObservabilityData.TYPE_STAR) && isCalibrator) {
-                                // use different color for calibrators :
-                                colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
+                            if (doBaseLineLimits) {
+                                // configuration 'CONF + PoPs':
+                                legendLabel = chartData.getConfigurationLabel().get(c);
+                            } else {
+                                if ((colorIndex == StarObservabilityData.TYPE_STAR) && isCalibrator) {
+                                    // use different color for calibrators :
+                                    colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
 
-                                // display differently orphan calibrators:
-                                if (orphanCalibrators.contains(target)) {
-                                    legendLabel = StarObservabilityData.LABEL_CALIBRATOR_ORPHAN;
-                                    paint = Color.ORANGE;
+                                    // display differently orphan calibrators:
+                                    if (orphanCalibrators.contains(target)) {
+                                        legendLabel = StarObservabilityData.LABEL_CALIBRATOR_ORPHAN;
+                                        paint = Color.ORANGE;
+                                    }
                                 }
-                            }
 
-                            // Not orphan calibrator case:
-                            if (paint == null) {
-                                if (colorByGroup && (group != null)) {
-                                    // Color by first group:
-                                    legendLabel = group.getName();
-                                    paint = group.getDecodedColor();
-                                } else {
-                                    // Main case: use original color index mapping:
-                                    // note : uses so.getInfo() to get baseline ...
-                                    legendLabel = so.getLegendLabel(colorIndex);
+                                // Not orphan calibrator case:
+                                if (paint == null) {
+                                    if (colorByGroup && (group != null)) {
+                                        // Color by first group:
+                                        legendLabel = group.getName();
+                                        paint = group.getDecodedColor();
+                                    } else {
+                                        // Main case: use original color index mapping:
+                                        // note : uses so.getInfo() to get baseline ...
+                                        legendLabel = so.getLegendLabel(colorIndex);
+                                    }
                                 }
                             }
                         } else {
@@ -1730,6 +1745,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
                         // add legend to tooltip:
                         labelList.add(legendLabel);
+
+                        // define legend entries:
+                        legendItems.put(legendLabel, paint);
 
                         // current position in dataset:
                         final Integer pos = NumberUtils.valueOf(n);
@@ -1776,9 +1794,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             }
 
                         } else {
-                            // define legend entries:
-                            legendItems.put(legendLabel, paint);
-
                             // add the Annotations :
                             // 24h date formatter like in france :
                             // Observable range limits without HA restrictions (background):

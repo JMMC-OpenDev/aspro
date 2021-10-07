@@ -76,6 +76,7 @@ import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.util.FieldSliderAdapter;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.util.CollectionUtils;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
@@ -1726,11 +1727,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 break;
             case OBSERVABILITY_DONE:
                 if (event instanceof ObservabilityEvent) {
-                    // reset:
-                    this.imageIndex = -1;
+                    final List<ObservabilityData> obsDataList = ((ObservabilityEvent) event).getObservabilityData();
 
-                    this.updateObservabilityData(((ObservabilityEvent) event).getObservabilityData());
-                    this.plot(event.getObservationCollection());
+                    // ignore event for baseline limits:
+                    if (CollectionUtils.isEmpty(obsDataList) || !obsDataList.get(0).isDoBaseLineLimits()) {
+                        // reset:
+                        this.imageIndex = -1;
+
+                        this.updateObservabilityData(obsDataList);
+                        this.plot(event.getObservationCollection());
+                    }
                 }
                 break;
             default:
