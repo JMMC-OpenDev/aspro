@@ -367,6 +367,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
         final double barWidth;
         final double rangeMin, rangeMax;
+        boolean drawOutline = true;
 
         if (newSize > 0) {
             rangeMin = -(2d / 3d);
@@ -377,8 +378,12 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             rangeMax = 1d;
         }
 
-        // adjust bar width :
-        if (newSize > 15) {
+        // adjust bar width:
+        if (newSize > 50) {
+            barWidth = 0.95d;
+            // disable outline (gray) to better see colored bars:
+            drawOutline = false;
+        } else if (newSize > 15) {
             barWidth = 0.8d;
         } else if (newSize > 6) {
             barWidth = 0.6d;
@@ -397,6 +402,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         }
 
         try {
+            // draw outline ?
+            this.renderer.setDrawBarOutline(drawOutline);
             // reset colors :
             this.renderer.clearSeriesPaints(false);
             // side effect with chart theme :
