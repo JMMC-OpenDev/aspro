@@ -43,6 +43,7 @@ import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ResourceUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oitools.util.CombUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -1357,92 +1358,91 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
-     * Parse and return the list of PoPs for the given interferometer configuration, instrument name and Pops string.
+     * Parse and return the list of PoPs for the given interferometer configuration, instrument name, Stations and Pops string.
      * The Pops string must only contain PoP indexes like '12', '111' or '541'.
-     * The length of this string must respect the number of channels of the instrument.
+     * The length of the Pops string must respect the number of stations of the instrument.
      * @param configurationName name of the interferometer configuration
      * @param instrumentName name of the instrument
-     * @param configPoPs Pops string
-     * @return list of PoPs
+     * @param stations Stations string
+     * @param inputPoPs Pops string
+     * @param prevStations previous stations corresponding to the Pops string to convert to the new Stations string
+     * @return list of PoPs or null if invalid
      */
     public List<Pop> parseInstrumentPoPs(final String configurationName, final String instrumentName,
                                          final String stations,
-                                         String configPoPs,
+                                         final String inputPoPs,
                                          final String prevStations) {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("parseInstrumentPoPs: [{}] for {} + {} @ {} (prev @ {})", configPoPs, configurationName, instrumentName,
+            logger.debug("parseInstrumentPoPs: [{}] for {} + {} @ {} (prev @ {})", inputPoPs, configurationName, instrumentName,
                     stations, prevStations);
         }
 
-        if (configPoPs != null && configPoPs.length() > 0) {
-            final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
-            if (ins != null) {
-                final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
-                if (c != null) {
-                    // number of channels :
-                    final int numChannels = ins.getNumberChannels();
+        if (StringUtils.isEmpty(stations) || StringUtils.isEmpty(inputPoPs)) {
+            return null;
+        }
 
-                    if (configPoPs.length() != numChannels) {
-                        // try parsing mapping [pop <=> telescope]
+        // number of stations :
+        final String[] splitStaNames = stations.split(" ");
+        final int nStations = splitStaNames.length;
 
-                        /*
-                        [551511] for CHARA + MIRC_5T @ S1 S2 W1 W2 E1 (prev @ S1 S2 W1 W2 E1 E2)
-                         */
-                        final String[] splitPrevStaNames = (prevStations != null) ? prevStations.split(" ") : null;
+        final InterferometerConfiguration ic = getInterferometerConfiguration(configurationName);
+        if (ic != null) {
+            String configPoPs = inputPoPs;
 
-                        if (splitPrevStaNames != null && splitPrevStaNames.length == configPoPs.length()) {
-                            final String[] splitStaNames = (stations != null) ? stations.split(" ") : null;
+            if (inputPoPs.length() != nStations) {
+                // try parsing mapping [pop <=> telescope]
 
-                            if (splitStaNames != null && splitStaNames.length == numChannels) {
-                                final Map<String, String> mapping = new HashMap<String, String>(8);
+                /*
+                [551511] for CHARA + MIRC_5T @ S1 S2 W1 W2 E1 (prev @ S1 S2 W1 W2 E1 E2)
+                 */
+                final String[] splitPrevStaNames = (prevStations != null) ? prevStations.split(" ") : null;
 
-                                final char[] pops = configPoPs.toCharArray();
+                if ((splitPrevStaNames != null) && (splitPrevStaNames.length == inputPoPs.length())) {
+                    final Map<String, String> mapping = new HashMap<String, String>(8);
 
-                                for (int i = 0; i < splitPrevStaNames.length; i++) {
-                                    final String staName = splitPrevStaNames[i];
-                                    final char pop = pops[i];
-                                    mapping.put(staName, Character.toString(pop));
-                                }
+                    final char[] pops = inputPoPs.toCharArray();
 
-                                final StringBuilder sbPops = new StringBuilder(numChannels);
-
-                                for (int i = 0; i < splitStaNames.length; i++) {
-                                    final String staName = splitStaNames[i];
-                                    final String pop = mapping.get(staName);
-                                    sbPops.append(pop != null ? pop : "*");
-                                }
-
-                                configPoPs = sbPops.toString();
-
-                                logger.debug("Fixed PoPs to: {}, for {}", configPoPs, stations);
-                            }
-                        }
+                    for (int i = 0; i < splitPrevStaNames.length; i++) {
+                        final String staName = splitPrevStaNames[i];
+                        final char pop = pops[i];
+                        mapping.put(staName, Character.toString(pop));
                     }
 
-                    final List<Pop> listPoPs = c.getInterferometer().getPops();
-                    final List<Pop> config = new ArrayList<Pop>(numChannels);
-                    int idx;
+                    final StringBuilder sbPops = new StringBuilder(nStations);
 
-                    if (configPoPs.length() == numChannels) {
-                        // valid length :
-                        for (char ch : configPoPs.toCharArray()) {
-                            idx = Character.digit(ch, 10);
-                            if (idx <= 0) {
-                                return null;
-                            }
-                            for (Pop pop : listPoPs) {
-                                if (pop.getIndex() == idx) {
-                                    config.add(pop);
-                                    break;
-                                }
-                            }
-                        }
-                        // check if all given numbers are valid (16 is invalid !) :
-                        if (config.size() == numChannels) {
-                            return config;
+                    for (int i = 0; i < splitStaNames.length; i++) {
+                        final String staName = splitStaNames[i];
+                        final String pop = mapping.get(staName);
+                        sbPops.append((pop != null) ? pop : "*"); // nice '*' (matching all) !
+                    }
+                    configPoPs = sbPops.toString();
+
+                    logger.debug("Fixed PoPs to: {} for {}", configPoPs, stations);
+                }
+            }
+
+            if (configPoPs.length() == nStations) {
+                // valid length
+                final List<Pop> listPoPs = ic.getInterferometer().getPops();
+                final List<Pop> config = new ArrayList<Pop>(nStations);
+
+                for (char ch : configPoPs.toCharArray()) {
+                    // should accept '*' (matching all) ?
+                    final int idx = Character.digit(ch, 10);
+                    if (idx <= 0) {
+                        return null;
+                    }
+                    for (Pop pop : listPoPs) {
+                        if (pop.getIndex() == idx) {
+                            config.add(pop);
+                            break;
                         }
                     }
+                }
+                // check if all given numbers are valid (16 is invalid !) :
+                if (config.size() == nStations) {
+                    return config;
                 }
             }
         }
@@ -1469,13 +1469,8 @@ public final class ConfigurationManager extends BaseOIManager {
         // A0 B0 C0 is equivalent to C0 B0 A0
         final String[] stations = stationNames.split(" ");
 
-        // number of stations in the string :
+        // number of stations in the given string:
         final int nStation = stations.length;
-
-        if (nStation != insConf.getFocalInstrument().getNumberChannels()) {
-            // bad value
-            return null;
-        }
 
         // generate station combinations (indexes) : :
         final List<int[]> iStations = CombUtils.generatePermutations(nStation);

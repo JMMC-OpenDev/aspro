@@ -1219,6 +1219,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         // update PoPs text field if the selected instrument configurations have associated PoPs in the configuration:
         updatePops();
+        validateCurrentPoPs();
 
         // group multiple calls into a single observation update event :
         fireObservationUpdateEvent();
