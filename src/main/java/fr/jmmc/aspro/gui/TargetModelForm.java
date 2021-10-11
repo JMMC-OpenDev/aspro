@@ -1556,7 +1556,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             final FitsImageHDU fitsImageHDU = userModel.getModelData(0).getFitsImageHDU();
 
             final String hduHeader = "ImageHDU#" + fitsImageHDU.getExtNb() + " has "
-                    + fitsImageHDU.getImageCount() + " images.\n\n" + fitsImageHDU.getHeaderCardsAsString("\n");
+                    + fitsImageHDU.getImageCount() + " images.\n\n" + fitsImageHDU.getHeaderAsString("\n");
 
             MessagePane.showMessage(hduHeader);
         }
