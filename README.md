@@ -5,7 +5,7 @@ This module contains the ASPRO2 java application developed by the JMMC technical
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 
-See [ASPRO2](https://jmmc.fr/aspro)
+See [ASPRO2](https://www.jmmc.fr/aspro)
 See [JMMC OpenDev @ github](https://github.com/JMMC-OpenDev/)
 
 
