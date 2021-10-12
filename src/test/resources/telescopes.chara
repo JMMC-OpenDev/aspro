@@ -1,6 +1,24 @@
-# telstats
-
-
+# 2021-07-08
+#
+# From first half of year. Includes TEC term.
+#
+# Added other scopes
+#
+# 2021_07_29 Added new offsets obtained from MIRC
+#
+# Test file. Uses current solution for S1...W2 and adds entries for
+# the new "F*" scopes, those with fibers.
+#
+# Long/Lat updated based on Google Earth Locations.
+#
+# This file has the beam positions and airpath adjusted for S1/S2
+# using calcbeams and using readbspos for all others.
+# 2019-05-29
+# Airpath of W1 and W2 updated based on measurments (log 12 page 82)
+# 2019_06_24
+# Used XYZ and POP positions set by Aaron's telescopes_2019_06_19.chara file.
+#
+# File telescopes.mircfitbeam Created by readiphase software 2019-04-17.
 # Data file for the parameters of the telescopes as used by the
 # astrometric model.
 #
@@ -24,24 +42,25 @@
 # YOFFSET - North offset in microns from S1
 # ZOFFSET - vertical (+ is up) offset in microns from S1
 # EC      - Cos(El) effects in microns
-# SAS	  - Swash Sin component in microns
-# SAC	  - Swash Cos component in microns
-# HSA2	  - Harmonic sin(2*Az) in microns
-# WLF	  - white light fringe position in microns
+# SAS     - Swash Sin component in microns
+# SAC     - Swash Cos component in microns
+# HSA2    - Harmonic sin(2*Az) in microns
+# WLF     - white light fringe position in microns
 # AIRPATH - amount of airpath  in microns using default beam
-#	    The numbers here represent the differential airpath in the
-#	    beam combining lab. They do not include path within the scopes
-#	    and in the beam combining lab, which are assumed to be the same.
-#	    Note that this assumes the default Beam and default Pop are used
+#           The numbers here represent the differential airpath in the
+#           beam combining lab. They do not include path within the scopes
+#           and in the beam combining lab, which are assumed to be the same.
+#           Note that this assumes the default Beam and default Pop are used
 # INTERNAL- Pathlength (with default beam) for internal fringes
-# LIGHT	  - length of light pipe in microns
-#	    Note that this assumes the default Beam dn default Pop are used
+#	    THIS IS NOW OBSOLETE AND NOT USED.
+# LIGHT   - length of light pipe in microns
+#           Note that this assumes the default Beam dn default Pop are used
 # TROTMAT - rotation matrix used for the tip/tilt system
 # AROTMAT - rotation matrix used for the aquisition system
 # DEFBEAM - Default beam to assume
 # BEAMX   - Extra airpath to add when using beam X on this scope
 # DEFPOP  - Default POP
-# POPX	  - Extra airpath to add when using POP X on this scope
+# POPX    - Extra airpath to add when using POP X on this scope
 #
 # NOTE: OPLE assumes that the order of telescopes will be S1 S2 E1 E2 W1 W2
 # if this isn't true then things will go horribly wrong!
@@ -51,255 +70,635 @@
 # Beam positions never measured, but seem to be good on the sky
 # to a few 100 microns
 # For pop measurements see Theo's log book 5 page 174
+
+# TELESCOPE DATA FOR S1
 S1
-LONG    -118 3 25.31272
-LAT       34 13 27.78130
-XOFFSET	0.0
-YOFFSET 0.0
-ZOFFSET 0.0
-EC	0.0
-SAS	0.0
-SAC	0.0
-HSA2	0.0
-WLF	0.0000000
-AIRPATH	0.0
-INTERNAL 0
-LIGHT	0.0
-DEFBEAM 5
-BEAM1	 416200.000
-BEAM2	 208100.000
-BEAM3	      0.000
-BEAM4	-208100.000
-BEAM5	-416200.000
-BEAM6	-624300.000
-DEFPOP  1
-POP1            0.000
-POP2     36563466.066
-POP3     73128180.086
-POP4    109724732.920
-POP5    143035830.878
+LONG		 -118 03 25.31
+LAT		   34 13 27.78
+XOFFSET		         0.000
+YOFFSET		         0.000
+ZOFFSET		         0.000
+AIRPATH		         0.000
+LIGHT		         0.000
+DEFBEAM		             5
+BEAM1		    419584.274
+BEAM2		    210779.846
+BEAM3		         0.000
+BEAM4		   -210317.016
+BEAM5		   -420906.067
+BEAM6		   -630805.373
+DEFPOP		             1
+POP1		         0.000
+POP2		  36562992.400
+POP3		  73128796.900
+POP4		 109724138.500
+POP5		 143035384.200
+EC		         0.000
+SAS		         0.000
+SAC		         0.000
+HSA2		         0.000
+WLF		         0.000
+INTERNAL	         0.000
 END
 
+# TELESCOPE DATA FOR F1
+F1
+LONG             -118 03 25.31
+LAT                34 13 27.78
+XOFFSET                  0.000
+YOFFSET                  0.000
+ZOFFSET                  0.000
+AIRPATH                  0.000
+LIGHT                    0.000
+DEFBEAM                      5
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       1
+POP1                     0.000
+POP2              	 0.000
+POP3              	 0.000
+POP4            	 0.000
+POP5             	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL                 0.000
+END
+
+
+# TELESCOPE DATA FOR S2
 S2
-LONG    -118 3 25.54165
-LAT       34 13 28.86734
-# From all 2010 data 4mm solution
-#XOFFSET   -5746621.507
-#YOFFSET   33580153.034
-#ZOFFSET     634644.726
-#LIGHT      4102222.014
-# From all 2012 data 2.5mm solution
-XOFFSET   -5746856.890
-YOFFSET   33581561.446
-ZOFFSET     635519.155
-LIGHT      4092893.853
-EC              0.000
-SAS	        0.000
-SAC	        0.000
-HSA2	        0.000
-WLF             0.000
-# This is the old number from the 2012 solution
-#AIRPATH         584200.0
-# This number includes the extra path from the new WFS optical table
-#AIRPATH		990200.000
-# This has the extra 0.7097m*2 offset added by the LABAO.
-AIRPATH 	2409600.000
-INTERNAL        375290
-DEFBEAM 	6
-BEAM1		416200.000
-BEAM2		208100.000
-BEAM3		0
-BEAM4		-208100.000
-BEAM5		-416200.000
-BEAM6		-624300.000
-DEFPOP  2
-POP1    -36544924.414
-POP2            0.000
-POP3     36567644.670
-POP4     73157661.492
-POP5    106467153.124
+LONG		 -118 03 25.54
+LAT		   34 13 28.87
+AIRPATH		    573633.833
+XOFFSET           -5746543.290
+YOFFSET           33579440.192
+ZOFFSET             645405.122
+LIGHT              4097770.712
+DEFBEAM		             6
+BEAM1		    419584.274
+BEAM2		    209369.004
+BEAM3		         0.000
+BEAM4		   -210760.772
+BEAM5		   -420354.843
+BEAM6		   -631273.985
+DEFPOP		             2
+POP1		 -36544988.200
+POP2		         0.000
+POP3		  36568253.200
+POP4		  73157497.200
+POP5		 106467192.500
+EC                   -4549.065
+SAS		         0.000
+SAC		         0.000
+HSA2		         0.000
+WLF		         0.000
+INTERNAL	    375290.000
 END
 
-# From baseline solution.
+# TELESCOPE DATA FOR F2
+F2
+LONG             -118 03 25.54
+LAT                34 13 28.87
+XOFFSET           -5747030.000
+YOFFSET           33578673.100
+ZOFFSET             639057.000
+AIRPATH             	 0.000
+LIGHT              	 0.000
+DEFBEAM                      6
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       1
+POP1             	 0.000
+POP2                     0.000
+POP3              	 0.000
+POP4              	 0.000
+POP5             	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
+END
+
+# TELESCOPE DATA FOR S3
+S3
+LONG             -118 03 25.10
+LAT                34 13 28.60
+XOFFSET             9601080.93
+YOFFSET            24722566.35
+ZOFFSET              649200.00
+AIRPATH             	 0.000
+LIGHT              	 0.000
+DEFBEAM                      6
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       1
+POP1             	 0.000
+POP2                     0.000
+POP3              	 0.000
+POP4              	 0.000
+POP5             	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
+END
+
+# TELESCOPE DATA FOR S4
+S4
+LONG             -118 03 28.70
+LAT                34 13 21.10
+XOFFSET           -82901641.10
+YOFFSET          -208264386.00
+ZOFFSET           -12350800.00
+AIRPATH             	 0.000
+LIGHT              	 0.000
+DEFBEAM                      6
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       1
+POP1             	 0.000
+POP2                     0.000
+POP3              	 0.000
+POP4              	 0.000
+POP5             	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
+END
+
+# TELESCOPE DATA FOR S5
+S5
+LONG             -118 03 27.50
+LAT                34 13 18.20
+XOFFSET           -52436672.77
+YOFFSET          -297154094.50
+ZOFFSET           -32350800.00
+AIRPATH             	 0.000
+LIGHT              	 0.000
+DEFBEAM                      6
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       1
+POP1             	 0.000
+POP2                     0.000
+POP3              	 0.000
+POP4              	 0.000
+POP5             	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
+END
+
+# TELESCOPE DATA FOR E1
 E1
-LONG    -118 3 20.42986
-LAT       34 13 37.69028
-# From all 2010 data 4mm solution
-#XOFFSET  125333692.968
-#YOFFSET  305932267.373
-#ZOFFSET   -5908839.526
-#LIGHT     11256266.953
-# From all 2012 data 2.5mm solution
-XOFFSET  125332477.873
-YOFFSET  305934252.825
-ZOFFSET   -5911377.995
-LIGHT     11259794.703
-EC	         0.000
-SAS	         0.000
-SAC	         0.000
-HSA2	         0.000
-WLF              0.000
-AIRPATH          4254500.0
-INTERNAL 	 0.000
-DEFBEAM 	6
-BEAM1		416200.000
-BEAM2		208100.000
-BEAM3		0
-BEAM4		-208100.000
-BEAM5		-416200.000
-BEAM6		-624300.000
-DEFPOP  1
-POP1            0.0
-POP2     36586550.0
-POP3     73120786.0
-POP4    109708072.0
-POP5    143020030.0
+LONG		 -118 03 20.43
+LAT		   34 13 37.69
+XOFFSET          125335714.373
+YOFFSET          305928946.975
+ZOFFSET           -5911176.797
+LIGHT             11245285.217
+AIRPATH		   4250500.000
+DEFBEAM		             6
+BEAM1		    419809.997
+BEAM2		    210045.978
+BEAM3		         0.000
+BEAM4		   -210669.979
+BEAM5		   -420954.973
+BEAM6		   -631390.929
+DEFPOP		             1
+POP1		         0.000
+POP2		  36586398.500
+POP3		  73120873.100
+POP4		 109707948.300
+POP5		 143019837.500
+EC                    1099.870
+SAS		         0.000
+SAC		         0.000
+HSA2		         0.000
+WLF		         0.000
+INTERNAL	         0.000
 END
 
-# From baseline solution.
+# TELESCOPE DATA FOR F3
+F3
+LONG             -118 03 20.43
+LAT                34 13 37.69
+XOFFSET          125334921.400
+YOFFSET          305928907.000
+ZOFFSET           -5912221.900
+AIRPATH             	 0.000
+LIGHT             	 0.000
+DEFBEAM                      6
+BEAM1                	 0.000
+BEAM2                	 0.000
+BEAM3                    0.000
+BEAM4               	 0.000
+BEAM5              	 0.000
+BEAM6               	 0.000
+DEFPOP                       1
+POP1                     0.000
+POP2              	 0.000
+POP3              	 0.000
+POP4             	 0.000
+POP5             	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL                 0.000
+END
+
+# TELESCOPE DATA FOR E2
 E2
-LONG    -118  3 22.58100
-LAT       34 13 36.51405
-# From all 2010 data 4mm solution
-#XOFFSET   70396030.473
-#YOFFSET  269713886.603
-#ZOFFSET   -2798776.588
-#LIGHT     22695157.268
-# From all 2013 data 2.5mm solution
-XOFFSET   70394847.986
-YOFFSET  269715332.908
-ZOFFSET   -2799046.780
-LIGHT     22697827.994
-EC	         0.000
-SAS	         0.000
-SAC	         0.000
-HSA2	         0.000
-WLF              0.000
-AIRPATH   	3670300.0
-INTERNAL 	372598.020
-DEFBEAM 	5
-BEAM1		416200.000
-BEAM2		208100.000
-BEAM3		0
-BEAM4		-208100.000
-BEAM5		-416200.000
-BEAM6		-624300.000
-DEFPOP  3
-POP1    -73112068.000
-POP2    -36537942.000
-POP3     0.0
-POP4     36578964.000
-POP5     69921124.000
+LONG		 -118 03 22.58
+LAT		   34 13 36.51
+XOFFSET           70394152.939
+YOFFSET          269713104.198
+ZOFFSET           -2794275.095
+LIGHT             22677530.221
+AIRPATH		   3680300.000
+DEFBEAM		             5
+BEAM1		    418909.967
+BEAM2		    209645.987
+BEAM3		         0.000
+BEAM4		   -210769.981
+BEAM5		   -421355.009
+BEAM6		   -631841.004
+DEFPOP		             3
+POP1		 -73112649.200
+POP2		 -36538781.500
+POP3		         0.000
+POP4		  36577981.000
+POP5		  69920509.000
+EC                   -1342.039
+SAS		         0.000
+SAC		         0.000
+HSA2		         0.000
+WLF		         0.000
+INTERNAL	    372598.020
 END
 
+# TELESCOPE DATA FOR F4
+F4
+LONG             -118 03 22.58
+LAT                34 13 36.51
+XOFFSET           70394169.000
+YOFFSET          269714366.900
+ZOFFSET           -2797838.700
+AIRPATH             	 0.000
+LIGHT             	 0.000
+DEFBEAM                      5
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       3
+POP1             	 0.000
+POP2             	 0.000
+POP3                     0.000
+POP4              	 0.000
+POP5              	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
+END
+
+# TELESCOPE DATA FOR E3
+E3
+LONG             -118 03 23.68
+LAT                34 13 33.31
+XOFFSET            45402034.62
+YOFFSET           171496539.20
+ZOFFSET             3649200.00
+AIRPATH             	 0.000
+LIGHT             	 0.000
+DEFBEAM                      5
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       3
+POP1             	 0.000
+POP2             	 0.000
+POP3                     0.000
+POP4              	 0.000
+POP5              	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
+END
+
+# TELESCOPE DATA FOR W1
 W1
-LONG      -118 3 32.20446
-LAT        34 13 34.76364
-# From all 2010 data 4mm solution
-#XOFFSET -175072406.694
-#YOFFSET  216318944.229
-#ZOFFSET  -10790506.411
-#LIGHT     27286559.039
-# From all 2012 data 2.5mm solution
-XOFFSET -175071927.982
-YOFFSET  216320939.168
-ZOFFSET  -10791048.377
-LIGHT     27290684.165
-EC	          0.000
-SAS	          0.000
-SAC	          0.000
-HSA2	          0.000
-WLF               0.000
-AIRPATH      1835150.0
-INTERNAL 0
-DEFBEAM 	5
-BEAM1		 416200.000
-BEAM2		 208100.000
-BEAM3		      0.000
-BEAM4		-208100.000
-BEAM5		-416200.000
-BEAM6		-624300.000
-DEFPOP  3
-POP1    -73109480.0
-POP2    -36536268.0
-POP3            0.0
-POP4     36594084.0
-POP5     69905974.0
+LONG		 -118 03 32.20
+LAT		   34 13 34.76
+XOFFSET         -175072887.015
+YOFFSET          216322284.803
+ZOFFSET          -10785037.158
+LIGHT             27308763.406
+AIRPATH		   1842354.000
+DEFBEAM		             5
+BEAM1		    420409.977
+BEAM2		    210145.980
+BEAM3		         0.000
+BEAM4		   -210149.989
+BEAM5		   -420255.005
+BEAM6		   -630540.967
+DEFPOP		             3
+POP1		 -73110185.500
+POP2		 -36536101.900
+POP3		         0.000
+POP4		  36593570.700
+POP5		  69907297.700
+EC                   -4720.305
+SAS		         0.000
+SAC		         0.000
+HSA2		         0.000
+WLF		         0.000
+INTERNAL	         0.000
 END
 
+# TELESCOPE DATA FOR F5
+F5
+LONG             -118 03 32.20
+LAT                34 13 34.76
+XOFFSET         -175074010.700
+YOFFSET          216322074.900
+ZOFFSET          -10797239.900
+AIRPATH             	 0.000
+LIGHT             	 0.000
+DEFBEAM                      5
+BEAM1               	 0.000
+BEAM2             	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       3
+POP1             	 0.000
+POP2             	 0.000
+POP3                     0.000
+POP4              	 0.000
+POP5              	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL                 0.000
+END
+
+# TELESCOPE DATA FOR W2
 W2
-LONG     -118 3 28.04483
-LAT       34 13 34.22249
-# From all 2010 data 4mm solution
-#XOFFSET  -69092828.745
-#YOFFSET  199333846.999
-#ZOFFSET     466562.781
-#LIGHT    -10869860.323
-# From all 2012 data 2.5mm solution
-XOFFSET  -69091262.937
-YOFFSET  199335418.222
-ZOFFSET     465199.124
-LIGHT    -10864114.917
-EC	         0.000
-SAS	         0.000
-SAC	         0.000
-HSA2	         0.000
-WLF              0.000
-AIRPATH          2406650.0
-INTERNAL	382658
-DEFBEAM 	6
-BEAM1		416200.000
-BEAM2		208100.000
-BEAM3		0
-BEAM4		-208100.000
-BEAM5		-416200.000
-BEAM6		-624300.000
-DEFPOP  5
-POP1    -143055000.000
-POP2    -106455324.0
-POP3     -69911098.0
-POP4     -33306356.0
-POP5             0.0
+LONG		 -118 03 28.04
+LAT		   34 13 34.22
+XOFFSET          -69092841.159
+YOFFSET          199331725.968
+ZOFFSET             469835.397
+LIGHT            -10866045.190
+AIRPATH		   2405131.000
+DEFBEAM		             6
+BEAM1		    419609.994
+BEAM2		    210245.997
+BEAM3		         0.000
+BEAM4		   -210469.961
+BEAM5		   -420654.982
+BEAM6		   -630841.017
+DEFPOP		             5
+POP1		-143055000.000
+POP2		-106455324.000
+POP3		 -69911098.000
+POP4		 -33306356.000
+POP5		         0.000
+EC                   -3922.953
+EC		         0.000
+SAS		         0.000
+SAC		         0.000
+HSA2		         0.000
+WLF		         0.000
+INTERNAL	    382658.000
 END
 
-# S3 at P4 (like S1)
-P4
-XOFFSET 65901016.2
-YOFFSET 173941757.2
-ZOFFSET  2077237.8
-AIRPATH	0.0
-INTERNAL 0
-LIGHT	0.0
-BEAM1	 416200.000
-BEAM2	 208100.000
-BEAM3	      0.000
-BEAM4	-208100.000
-BEAM5	-416200.000
-BEAM6	-624300.000
-POP1            0.000
-POP2     36563466.066
-POP3     73128180.086
-POP4    109724732.920
-POP5    143035830.878
+# TELESCOPE DATA FOR F6
+F6
+LONG		 -118 03 28.04
+LAT		   34 13 34.22
+XOFFSET		 -69090420.800
+YOFFSET		 199334184.900
+ZOFFSET		    465105.700
+AIRPATH             	 0.000
+LIGHT		 	 0.000
+DEFBEAM		             6
+BEAM1		    	 0.000
+BEAM2		    	 0.000
+BEAM3		         0.000
+BEAM4		   	 0.000
+BEAM5		   	 0.000
+BEAM6		   	 0.000
+DEFPOP		             5
+POP1			 0.000
+POP2			 0.000
+POP3		 	 0.000
+POP4		 	 0.000
+POP5		         0.000
+EC		         0.000
+SAS		         0.000
+SAC		         0.000
+HSA2		         0.000
+WLF		         0.000
+INTERNAL	    	 0.000
 END
 
-# S3 at P5 (like S1)
-P5
-XOFFSET 48299942.0
-YOFFSET 147734146.1
-ZOFFSET  2868250.1
-AIRPATH	0.0
-INTERNAL 0
-LIGHT	0.0
-BEAM1	 416200.000
-BEAM2	 208100.000
-BEAM3	      0.000
-BEAM4	-208100.000
-BEAM5	-416200.000
-BEAM6	-624300.000
-POP1            0.000
-POP2     36563466.066
-POP3     73128180.086
-POP4    109724732.920
-POP5    143035830.878
+# TELESCOPE DATA FOR W3
+W3
+LONG             -118 03 38.98
+LAT                34 13 27.00
+XOFFSET          -344715732.60
+YOFFSET           -24573859.19
+ZOFFSET            7649200.000
+AIRPATH             	 0.000
+LIGHT             	 0.000
+DEFBEAM                      5
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       3
+POP1             	 0.000
+POP2             	 0.000
+POP3                     0.000
+POP4              	 0.000
+POP5              	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
+END
+
+# TELESCOPE DATA FOR W4
+W4
+LONG             -118 03 46.50
+LAT                34 13 21.80
+XOFFSET          -539276098.50
+YOFFSET          -185634873.10
+ZOFFSET            -2350800.00
+AIRPATH             	 0.000
+LIGHT             	 0.000
+DEFBEAM                      5
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       3
+POP1             	 0.000
+POP2             	 0.000
+POP3                     0.000
+POP4              	 0.000
+POP5              	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
+END
+
+# TELESCOPE DATA FOR W5
+W5
+LONG             -118 03  3.90
+LAT                34 13 41.70
+XOFFSET          -987092669.40
+YOFFSET           431116945.10
+ZOFFSET             1649200.00
+AIRPATH             	 0.000
+LIGHT             	 0.000
+DEFBEAM                      5
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       3
+POP1             	 0.000
+POP2             	 0.000
+POP3                     0.000
+POP4              	 0.000
+POP5              	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
+END
+
+# TELESCOPE DATA FOR N1
+N1
+LONG             -118 03 34.50
+LAT                34 13 40.30
+XOFFSET          -232456940.20
+YOFFSET           388311587.30
+ZOFFSET           -26350800.00
+AIRPATH             	 0.000
+LIGHT             	 0.000
+DEFBEAM                      5
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       3
+POP1             	 0.000
+POP2             	 0.000
+POP3                     0.000
+POP4              	 0.000
+POP5              	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
+END
+
+# TELESCOPE DATA FOR N2
+N2
+LONG             -118 03 43.00
+LAT                34 13 51.10
+XOFFSET          -450327622.80
+YOFFSET           721675876.80
+ZOFFSET           -42350800.00
+AIRPATH             	 0.000
+LIGHT             	 0.000
+DEFBEAM                      5
+BEAM1               	 0.000
+BEAM2               	 0.000
+BEAM3                    0.000
+BEAM4              	 0.000
+BEAM5              	 0.000
+BEAM6              	 0.000
+DEFPOP                       3
+POP1             	 0.000
+POP2             	 0.000
+POP3                     0.000
+POP4              	 0.000
+POP5              	 0.000
+EC                       0.000
+SAS                      0.000
+SAC                      0.000
+HSA2                     0.000
+WLF                      0.000
+INTERNAL            	 0.000
 END
