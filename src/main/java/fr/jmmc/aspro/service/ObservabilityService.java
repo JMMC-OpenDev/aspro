@@ -2546,11 +2546,11 @@ public final class ObservabilityService {
             logger.debug("instrument: {}", this.instrument.getName());
         }
 
-        // check Pops :
+        // check Pops present in interferometer:
         this.hasPops = !this.interferometer.getPops().isEmpty();
 
         if (isLogDebug) {
-            logger.debug("hasPops: {}", this.hasPops);
+            logger.debug("hasPops(interferometer): {}", this.hasPops);
         }
 
         // wind restriction only if night limits are enabled :
@@ -2583,6 +2583,22 @@ public final class ObservabilityService {
 
         if (isLogDebug) {
             logger.debug("stations: {}", stations);
+        }
+
+        if (this.hasPops) {
+            // check Pops used by selected stations:
+            int nPopLinks = 0;
+            for (Station station : stations) {
+                if (!station.getPopLinks().isEmpty()) {
+                    nPopLinks++;
+                }
+            }
+
+            // enable best PoPs if 1 station requires PoPs at least:
+            this.hasPops = (nPopLinks != 0);
+            if (isLogDebug) {
+                logger.debug("hasPops(stations): {}", this.hasPops);
+            }
         }
 
         this.data.setStationNames(StringUtils.replaceWhiteSpacesByMinusSign(this.observation.getInstrumentConfiguration().getStations()));
@@ -2670,6 +2686,7 @@ public final class ObservabilityService {
 
             this.beams.add(beam);
 
+            // always true as horizon profiles include the max elevation restriction:
             if (station.getHorizon() != null && !station.getHorizon().getPoints().isEmpty()) {
                 this.hasHorizon = true;
             }
@@ -3067,6 +3084,10 @@ public final class ObservabilityService {
      */
     private double getPopOpticalLength(final Station station, final Pop pop) throws IllegalStateException {
         final List<PopLink> popLinks = station.getPopLinks();
+
+        if (popLinks.isEmpty()) {
+            return 0.0; // 2021.10: CHARA fibered stations
+        }
 
         PopLink pl;
         for (int i = 0, size = popLinks.size(); i < size; i++) {
