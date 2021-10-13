@@ -849,7 +849,7 @@ public final class AsproGenConfig {
                     for (InterferometerConfiguration ic : confToProcess) {
 
                         for (FocalInstrumentConfiguration insConf : ic.getInstruments()) {
-                            if (nTel == insConf.getFocalInstrument().getNumberChannels()) {
+                            if (nTel == insConf.getFocalInstrument().getNumberChannelsMax()) {
                                 // logger.info("checking instrument [{}]", insConf.getFocalInstrument().getName());
 
                                 for (FocalInstrumentConfigurationItem conf : insConf.getConfigurations()) {
@@ -942,7 +942,7 @@ public final class AsproGenConfig {
                     }
                 }
                 if (insConfPionier != null) {
-                    final int maxTel = insConfPionier.getFocalInstrument().getNumberChannels();
+                    final int maxTel = insConfPionier.getFocalInstrument().getNumberChannelsMax();
 
                     final List<List<int[]>> combsList = new ArrayList<List<int[]>>(maxTel - 2);
                     for (int i = maxTel - 1; i > 1; i--) {
@@ -995,7 +995,7 @@ public final class AsproGenConfig {
                                 logger.debug("sorted {}T conf: {}", nTel, ordSta);
 
                                 for (FocalInstrumentConfiguration insConf : icRelocate.getInstruments()) {
-                                    if (nTel == insConf.getFocalInstrument().getNumberChannels()) {
+                                    if (nTel == insConf.getFocalInstrument().getNumberChannelsMax()) {
 
                                         // check duplicates:
                                         boolean found = false;
@@ -1045,7 +1045,7 @@ public final class AsproGenConfig {
 
                         final int len = conf.getStations().size();
 
-                        if (len != insConf.getFocalInstrument().getNumberChannels()) {
+                        if (len != insConf.getFocalInstrument().getNumberChannelsMax()) {
                             logger.error("invalid configuration for the instrument: {} {} : {} {} {}", ic.getVersion(),
                                     insConf.getFocalInstrument().getName(),
                                     conf.getStations(), conf.getChannels(), conf.getDelayLines());

@@ -78,6 +78,8 @@ public final class ConfigurationManager extends BaseOIManager {
     private static volatile ConfigurationManager instance = null;
     /** empty vector */
     private final static Vector<String> EMPTY_VECTOR = new Vector<String>(0);
+    /** upper limit to generate combinations to match configurations */
+    private final static int MAX_NUM_STATIONS = 6;
 
     /* members */
     /** aspro conf description (version and release notes) */
@@ -335,6 +337,7 @@ public final class ConfigurationManager extends BaseOIManager {
         configuration.getInterferometerConfigurations().put(getConfigurationName(ic), ic);
 
         computeBaselineUVWBounds(ic);
+        computeInstrumentStationNumbers(ic);
 
         if (ic.getInterferometer() == null) {
             throw new IllegalStateException("The interferometer configuration '" + ic.getName()
@@ -429,12 +432,41 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
+     * Compute the min and max number of stations using all instrument baselines of the given interferometer configuration
+     * @param intConf interferometer configuration
+     */
+    private static void computeInstrumentStationNumbers(final InterferometerConfiguration intConf) {
+        // for each instrument:
+        for (FocalInstrumentConfiguration insConf : intConf.getInstruments()) {
+            int min = Integer.MAX_VALUE;
+            int max = 0;
+
+            // for each instrument configuration:
+            for (FocalInstrumentConfigurationItem c : insConf.getConfigurations()) {
+                int nChannels = c.getStations().size();
+
+                min = Math.min(min, nChannels);
+                max = Math.max(max, nChannels);
+            }
+
+            final FocalInstrument instrument = insConf.getFocalInstrument();
+            instrument.setNumberChannelsMin(min);
+            instrument.setNumberChannelsMax(max);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("computeInstrumentStationNumbers[{}] = [{} - {}] channels for configuration {}",
+                        instrument.getName(), min, max, intConf.getName());
+            }
+        }
+    }
+
+    /**
      * Compute the min and max baseline length (m) using all instrument baselines of the given interferometer configuration
      * @param intConf interferometer configuration
      */
     private static void computeBaselineUVWBounds(final InterferometerConfiguration intConf) {
-        double maxUV = 0d;
         double minUV = Double.POSITIVE_INFINITY;
+        double maxUV = 0d;
 
         final double[] minMax = new double[2];
 
@@ -480,8 +512,8 @@ public final class ConfigurationManager extends BaseOIManager {
      * @param minMax double[min; max]
      */
     public static void computeBaselineUVWBounds(final List<Station> stations, final double[] minMax) {
-        double maxUV = 0d;
         double minUV = Double.POSITIVE_INFINITY;
+        double maxUV = 0d;
 
         final int size = stations.size();
 
@@ -1472,10 +1504,24 @@ public final class ConfigurationManager extends BaseOIManager {
         // number of stations in the given string:
         final int nStation = stations.length;
 
-        // generate station combinations (indexes) : :
+        // Avoid too many permutations
+        if (nStation > MAX_NUM_STATIONS) {
+            return null;
+        }
+
+        final FocalInstrument instrument = insConf.getFocalInstrument();
+
+        if ((nStation < instrument.getNumberChannelsMin()) || (nStation > instrument.getNumberChannelsMax())) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Incompatible configuration [{}] for instrument {}", stationConf, instrument.getName());
+            }
+            return null;
+        }
+
+        // generate station combinations (indexes) :
         final List<int[]> iStations = CombUtils.generatePermutations(nStation);
 
-        final StringBuilder sb = new StringBuilder(16);
+        final StringBuilder sb = new StringBuilder(nStation * 4);
 
         int[] idx;
         // skip first permutation as it is equivalent to stationNames :

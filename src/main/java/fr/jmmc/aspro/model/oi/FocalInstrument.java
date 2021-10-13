@@ -32,7 +32,6 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
  *         &lt;element name="alias" type="{http://www.w3.org/2001/XMLSchema}NCName" minOccurs="0"/&gt;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
- *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
  *         &lt;element name="oiVis" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="oiVisData" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="oiVisAmpDiff" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
@@ -55,7 +54,6 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "alias",
     "description",
-    "numberChannels",
     "oiVis",
     "oiVisData",
     "oiVisAmpDiff",
@@ -80,7 +78,6 @@ public class FocalInstrument
     protected String alias;
     @XmlElement(required = true)
     protected String description;
-    protected int numberChannels;
     protected Boolean oiVis;
     protected Boolean oiVisData;
     protected Boolean oiVisAmpDiff;
@@ -166,22 +163,6 @@ public class FocalInstrument
      */
     public void setDescription(String value) {
         this.description = value;
-    }
-
-    /**
-     * Gets the value of the numberChannels property.
-     * 
-     */
-    public int getNumberChannels() {
-        return numberChannels;
-    }
-
-    /**
-     * Sets the value of the numberChannels property.
-     * 
-     */
-    public void setNumberChannels(int value) {
-        this.numberChannels = value;
     }
 
     /**
@@ -411,6 +392,44 @@ public class FocalInstrument
     }
     
 //--simple--preserve
+    /** lower number of channels of this instrument */
+    @javax.xml.bind.annotation.XmlTransient
+    protected int numberChannelsMin;
+
+    /**
+     * @return lower number of channels of this instrument
+     */
+    public int getNumberChannelsMin() {
+        return numberChannelsMin;
+    }
+
+    /**
+     * Define the lower number of channels of this instrument
+     * @param value lower number of channels of this instrument
+     */
+    public void setNumberChannelsMin(int value) {
+        this.numberChannelsMin = value;
+    }
+
+    /** higher number of channels of this instrument */
+    @javax.xml.bind.annotation.XmlTransient
+    protected int numberChannelsMax;
+
+    /**
+     * @return higher number of channels of this instrument
+     */
+    public int getNumberChannelsMax() {
+        return numberChannelsMin;
+    }
+
+    /**
+     * Define the higher number of channels of this instrument
+     * @param value higher number of channels of this instrument
+     */
+    public void setNumberChannelsMax(int value) {
+        this.numberChannelsMin = value;
+    }
+
     /** lower wave length of this instrument (micrometer) */
     @javax.xml.bind.annotation.XmlTransient
     protected double waveLengthMin;
@@ -550,14 +569,15 @@ public class FocalInstrument
         logger.info("  alias: {}", getAlias());
         logger.info("  description: {}", getDescription());
 
-        logger.info("  numberChannels: {}", getNumberChannels());
-        
+        logger.info("  numberChannelsMin: {}", getNumberChannelsMin());
+        logger.info("  numberChannelsMax: {}", getNumberChannelsMax());
+
         logger.info("  oiVis:        {}", isOiVis());
         logger.info("  oiVisData:    {}", isOiVisData());
         logger.info("  oiVisAmpDiff: {}", isOiVisAmpDiff());
         logger.info("  oiVisPhiDiff: {}", isOiVisPhiDiff());
         logger.info("  oiVis2Extra:  {}", isOiVis2Extra());
-        
+
         logger.info("  fringeTracker: {}", getFringeTracker());
         logger.info("  fringeTrackerRequired: {}", isFringeTrackerRequired());
 
