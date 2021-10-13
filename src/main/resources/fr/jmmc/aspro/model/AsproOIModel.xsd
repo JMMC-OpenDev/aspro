@@ -2618,13 +2618,6 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="numberChannels" type="xsd:int">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The number of channels used by this instrument
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
 
             <xsd:element name="oiVis" type="xsd:boolean" minOccurs="0">
                 <xsd:annotation>
