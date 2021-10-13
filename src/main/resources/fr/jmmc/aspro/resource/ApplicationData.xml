@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.10 beta 4"/>
-    <compilation date="07/10/2021" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="21.10 beta 5"/>
+    <compilation date="13/10/2021" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,10 @@
 
     <releasenotes>
         <release version="21.10">
-            <pubDate>Tue, 07 Oct 2021 16:00:00 GMT</pubDate>
+            <pubDate>Wed, 13 Oct 2021 16:00:00 GMT</pubDate>
+            <prerelease version="21.10 beta 5">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1152">Fixed findInstrumentConfigurationStations() to avoid too much permutations (max=6 and check numberChannelsMin/Max)</change>
+            </prerelease>
             <prerelease version="21.10 beta 4">
                 <change type="FEATURE">Improved the main setting panel to update the Pops combo box plot for baseline limits and reset best PoPs if the configuration changes</change>
                 <change type="FEATURE">Improved observability plot for baseline limits to support multiple configurations and report information and warning messages (CHARA PoPs)</change>
