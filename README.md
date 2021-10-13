@@ -31,3 +31,5 @@ Requirements:
 - Maven 3.6+
 
 See [JMMC Java Build](https://github.com/JMMC-OpenDev/jmmc-java-build)
+
+[![WorksWithOpenJDK](https://github.com/foojayio/badges/raw/main/works_with_openjdk/WorksWithOpenJDK-100.png)](https://foojay.io/works-with-openjdk)
