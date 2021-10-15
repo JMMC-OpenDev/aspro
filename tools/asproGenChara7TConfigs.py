@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" This script computes all tuples of stations for instruments with 2,3,4 channels """
+""" This script computes all tuples of stations for instruments with 2,3,4,5,6 channels """
 
 # all stations generated from:
 #   xmlstarlet sel -t -v "a:interferometerSetting/description/station/name" CHARA_7T.xml
@@ -21,6 +21,30 @@ nMobile=len(mt)
 
 
 print("<root>")
+
+# 2 telescopes (1T fixed + 1T mobile):
+print("<!-- 2T: 1f + 1m -->");
+for i in range (0, nFixed):
+  for n in range(0, nMobile):
+    print("<configuration><stations>"+ft[i]+" "+mt[n]+"</stations>")
+    print("<channels>V1 V2</channels></configuration>")
+
+# 3 telescopes (2T fixed + 1T mobile):
+print("<!-- 3T: 2f + 1m -->");
+for i in range (0, nFixed):
+  for j in range(i+1, nFixed):
+    for n in range(0, nMobile):
+      print("<configuration><stations>"+ft[i]+" "+ft[j]+" "+mt[n]+"</stations>")
+      print("<channels>V1 V2 V3</channels></configuration>")
+
+# 4 telescopes (3T fixed + 1T mobile):
+print("<!-- 4T: 3f + 1m -->");
+for i in range (0, nFixed):
+  for j in range(i+1, nFixed):
+    for k in range(j+1, nFixed):
+      for n in range(0, nMobile):
+        print("<configuration><stations>"+ft[i]+" "+ft[j]+" "+ft[k]+" "+mt[n]+"</stations>")
+        print("<channels>V1 V2 V3 V4</channels></configuration>")
 
 # 5 telescopes (4T fixed + 1T mobile):
 print("<!-- 5T: 4f + 1m -->");
