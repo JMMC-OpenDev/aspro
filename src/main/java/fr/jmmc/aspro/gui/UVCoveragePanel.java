@@ -3067,14 +3067,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     double max = dataMax.doubleValue();
 
                     if (colorScale == ColorScale.LOGARITHMIC) {
-                        final double log10Min = Math.log10(min);
-                        final double log10Max = Math.log10(max);
+                        // bounds:
+                        double minTen = Math.floor(Math.log10(min));
+                        double maxTen = Math.ceil(Math.log10(max));
 
-                        if ((int) log10Max - (int) log10Min == 0) {
-                            // fix data range to lower and upper pow(10):
-                            min = FastMath.pow(10d, Math.floor(log10Min));
-                            max = FastMath.pow(10d, Math.ceil(log10Max));
+                        if (maxTen == minTen) {
+                            minTen -= 1.0;
                         }
+
+                        min = (float) (0.999 * Math.pow(10.0, minTen)); // lower power of ten
+                        max = (float) (1.001 * Math.pow(10.0, maxTen)); // upper power of ten                        
                     }
                     if (logger.isDebugEnabled()) {
                         logger.debug("min = {} - max = {}", min, max);
