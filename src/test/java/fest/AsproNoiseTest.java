@@ -10,6 +10,7 @@ import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.preference.CommonPreferences;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
+import fr.jmmc.jmcs.data.preference.SessionSettingsPreferences;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
@@ -65,6 +66,7 @@ public final class AsproNoiseTest extends JmcsFestSwingJUnitTestCase {
 
         // reset Preferences:
         Preferences.getInstance().resetToDefaultPreferences();
+        SessionSettingsPreferences.getInstance().resetToDefaultPreferences();
         try {
             Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_SIZE, NumberUtils.valueOf(1024));
 
