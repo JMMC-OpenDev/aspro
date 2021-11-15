@@ -16,7 +16,7 @@
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:exslt="http://exslt.org/common"
-                xmlns:set="http://exslt.org/sets"
+                xmlns:set="http://exslt.org/sets"                
                 extension-element-prefixes="exslt"
                 exclude-result-prefixes="">
 
@@ -313,6 +313,13 @@
                 <xsl:with-param name="unit">mag</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
+        
+        <xsl:variable name="TARGET_MODEL_index">
+            <xsl:call-template name="getColumnIndex">
+                <!-- synced with a2p2.jmmc.Models.SAMP_UCD_MODEL-->
+                <xsl:with-param name="ucd11">meta.code.class;meta.modelled</xsl:with-param>                
+            </xsl:call-template>
+        </xsl:variable>
 
         <!-- target / calibrator information (separate table) -->
         <xsl:variable name="SCI_TARGET_NAME_index">
@@ -574,6 +581,7 @@
                         <xsl:variable name="FLUX_L"   select="./TD[$FLUX_L_index != '' and position()=$FLUX_L_index]/text()"/>
                         <xsl:variable name="FLUX_M"   select="./TD[$FLUX_M_index != '' and position()=$FLUX_M_index]/text()"/>
                         <xsl:variable name="FLUX_N"   select="./TD[$FLUX_N_index != '' and position()=$FLUX_N_index]/text()"/>
+                        <xsl:variable name="TARGET_MODEL"   select="./TD[$TARGET_MODEL_index != '' and position()=$TARGET_MODEL_index]/text()"/>
 
                         <target id="{$TARGET_ID}">
 
@@ -707,9 +715,14 @@
                                 </FLUX_N>
                             </xsl:if>
 
-                            <!-- no model -->
+                            
                             <useAnalyticalModel>true</useAnalyticalModel>
-
+                            <!-- a model may be given in a CDATA section or escape xml chars &gt; ...
+                            no check is performed at this stage (we may forward bad things) -->                                                                                    
+                            <xsl:if test="$TARGET_MODEL != ''">
+                                <xsl:value-of select="$TARGET_MODEL" disable-output-escaping="yes"/>
+                            </xsl:if>
+                            
                             <calibratorInfos>
                                 <xsl:variable name="TARGET" select="."/>
 
