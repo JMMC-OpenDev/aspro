@@ -19,7 +19,7 @@
     </company>
 
     <program name="Aspro2" version="21.10 beta 6"/>
-    <compilation date="16/11/2021" compiler="JDK 1.8.0"/>
+    <compilation date="18/11/2021" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,9 +229,10 @@
 
     <releasenotes>
         <release version="21.10">
-            <pubDate>Tue, 16 Nov 2021 16:00:00 GMT</pubDate>
+            <pubDate>Tue, 18 Nov 2021 16:00:00 GMT</pubDate>
             <prerelease version="21.10 beta 6">
                 <change type="FEATURE">Enhance SAMP interoperability (VO table) : support analytical models</change>
+                <change type="FEATURE">Added support for multiple calibrators in OB sent to the A2p2 tool</change>
                 <!-- bugfix http://trac.jmmc.fr/jmmc-sw/ticket/1157 -->
             </prerelease>
             <prerelease version="21.10 beta 5">
