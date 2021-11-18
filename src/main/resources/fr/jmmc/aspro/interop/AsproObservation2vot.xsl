@@ -163,6 +163,7 @@
                     </FIELD>
 
                     <!-- missing calibrator informations : angular diameter -->
+                    <!-- missing model information datatype="char" ucd="char meta.code.class;meta.modelled" arraysize="*" -->
 
                     <DATA>
                         <TABLEDATA>

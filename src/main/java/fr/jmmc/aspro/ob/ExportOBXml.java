@@ -6,7 +6,6 @@ package fr.jmmc.aspro.ob;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.OBManager;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.ob.InstrumentConfiguration;
 import fr.jmmc.aspro.model.ob.InterferometerConfiguration;
 import fr.jmmc.aspro.model.ob.OBItem;
@@ -37,6 +36,7 @@ import fr.jmmc.jmal.Band;
 import fr.jmmc.jmcs.data.MimeType;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
+import fr.jmmc.oitools.model.range.Range;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -154,28 +154,26 @@ public class ExportOBXml {
         final ObservationConfiguration obSCI = getObservationConfiguration(observation, os, target);
         obd.getObservationConfigurations().add(obSCI);
 
-        // Observation configuration - CAL
-        Target firstCalibrator = null;
-
+        // Observation configuration - CAL                 
+        ObservationConfiguration obCAL = null;
+        
         final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
 
         if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
-            // use first calibrator in calibrator list :
+            // use first calibrator in calibrator list for later reuse in schedule:
             final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
             if (targetInfo != null) {
                 final List<Target> calibrators = targetInfo.getCalibrators();
                 if (!calibrators.isEmpty()) {
-                    firstCalibrator = calibrators.get(0);
+                    for (Target calibrator : calibrators) {
+                        // keep first cal fot schedule
+                        obCAL = (obCAL != null) ? obCAL : getObservationConfiguration(observation, os, calibrator);
+                        obd.getObservationConfigurations().add(obCAL);
+                    }                                                   
                 }
             }
         }
-
-        ObservationConfiguration obCAL = null;
-        if (firstCalibrator != null) {
-            obCAL = getObservationConfiguration(observation, os, firstCalibrator);
-            obd.getObservationConfigurations().add(obCAL);
-        }
-
+                
         // Schedule
         final ObservationSchedule obsSch = new ObservationSchedule();
         final OBItem sci = new OBItem(obSCI);
