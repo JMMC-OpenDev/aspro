@@ -1057,8 +1057,8 @@ public final class UserModelService {
             FitsImageUtils.updateFitsImage(fitsImage, data, fitsImage.getDataMin(), fitsImage.getDataMax());
 
             // update ref pixel:
-            fitsImage.setPixRefRow(fitsImage.getPixRefRow() + ((newSize - nbRows) / 2));
-            fitsImage.setPixRefCol(fitsImage.getPixRefCol() + ((newSize - nbCols) / 2));
+            fitsImage.setPixRefRow(fitsImage.getPixRefRow() + ((newSize - nbRows) / 2.0));
+            fitsImage.setPixRefCol(fitsImage.getPixRefCol() + ((newSize - nbCols) / 2.0));
 
             nbRows = fitsImage.getNbRows();
             nbCols = fitsImage.getNbCols();
