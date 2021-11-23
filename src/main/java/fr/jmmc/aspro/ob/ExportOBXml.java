@@ -154,7 +154,7 @@ public class ExportOBXml {
         final ObservationConfiguration obSCI = getObservationConfiguration(observation, os, target);
         obd.getObservationConfigurations().add(obSCI);
 
-        // Observation configuration - CAL                 
+        // Observation configuration - CAL  (store first cal only for schedule) 
         ObservationConfiguration obCAL = null;
         
         final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
@@ -166,9 +166,11 @@ public class ExportOBXml {
                 final List<Target> calibrators = targetInfo.getCalibrators();
                 if (!calibrators.isEmpty()) {
                     for (Target calibrator : calibrators) {
-                        // keep first cal fot schedule
-                        obCAL = (obCAL != null) ? obCAL : getObservationConfiguration(observation, os, calibrator);
-                        obd.getObservationConfigurations().add(obCAL);
+                        
+                        final ObservationConfiguration ob = getObservationConfiguration(observation, os, calibrator);
+                        obd.getObservationConfigurations().add(ob);
+                        // keep first cal for schedule below
+                        obCAL = (obCAL != null) ? obCAL : ob;                        
                     }                                                   
                 }
             }
