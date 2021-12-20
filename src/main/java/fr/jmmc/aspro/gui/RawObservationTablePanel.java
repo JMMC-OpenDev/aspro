@@ -117,8 +117,12 @@ public final class RawObservationTablePanel extends javax.swing.JPanel implement
                 final List<String> prevVisibleColumns = obsTableSorter.getVisibleColumnNames();
 
                 // show the table editor dialog to select displayed columns:
-                final List<String> newVisibleColumns = TableEditorPanel.showEditor(
-                        obsModel.getColumnNames(), prevVisibleColumns, TABLE_EDITOR_DIMENSION_KEY
+                final List<String> newVisibleColumns = new ArrayList<>();                        
+                TableEditorPanel.showEditor(
+                        obsModel.getColumnNames(), prevVisibleColumns, // initial columns
+                        obsModel.getColumnNames(), prevVisibleColumns, // default columns (button reset)
+                        new ArrayList<>(0), newVisibleColumns, // resulting columns
+                        TABLE_EDITOR_DIMENSION_KEY
                 );
 
                 if (newVisibleColumns != null) {
