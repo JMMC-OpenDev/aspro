@@ -119,11 +119,9 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
                         TABLE_EDITOR_DIMENSION_KEY
                 );
 
-                if (newVisibleColumns != null) {
-                    // Update visible columns if needed:
-                    if (!prevVisibleColumns.equals(newVisibleColumns)) {
-                        setVisibleColumnNames(newVisibleColumns);
-                    }
+                // Update visible columns if needed:
+                if (!prevVisibleColumns.equals(newVisibleColumns)) {
+                    setVisibleColumnNames(newVisibleColumns);
                 }
             }
         });
