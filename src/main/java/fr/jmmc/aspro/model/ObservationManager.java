@@ -1398,18 +1398,17 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     }
 
     /**
-     * Update the list of targets using the given list of targets and target user informations
-     * (different instances) and fires a target change and an observation change event
-     * @param newTargets new target list
-     * @param newTargetUserInfos new target user informations
+     * Update the list of targets and target user informations using the given target edit context
+     * and fires a target change and an observation change event
+     * @param targetEditCtx target editor context
      */
-    public void updateTargets(final List<Target> newTargets, final TargetUserInformations newTargetUserInfos) {
+    public void updateTargets(final TargetEditContext targetEditCtx) {
 
         final List<Target> targets = getTargets();
         targets.clear();
-        targets.addAll(newTargets);
+        targets.addAll(targetEditCtx.getTargets());
 
-        getMainObservation().setTargetUserInfos(newTargetUserInfos);
+        getMainObservation().setTargetUserInfos(targetEditCtx.getTargetUserInfos());
 
         // check and update target references :
         getMainObservation().checkReferences();

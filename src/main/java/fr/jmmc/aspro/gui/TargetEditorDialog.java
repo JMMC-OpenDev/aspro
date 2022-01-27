@@ -4,16 +4,17 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.TargetEditContext;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.jmcs.gui.component.Disposable;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -40,16 +41,14 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     public static final String TAB_MODELS = "Models";
     /** Tab Targets */
     public static final String TAB_GROUPS = "Groups";
-    /** flag indicating that the target editor dialog is active */
-    private static boolean targetEditorActive = false;
+    /** target editor instance defined when the target editor dialog is active */
+    private static TargetEditorDialog targetEditor = null;
 
     /* members */
+    /** target edit context */
+    private final TargetEditContext targetEditCtx;
     /** editor result = true if the user validates the inputs */
     private boolean result = false;
-    /** list of edited targets (clone) */
-    private final List<Target> editTargets;
-    /** list of edited target user informations (clone) */
-    private final TargetUserInformations editTargetUserInfos;
     /* Swing */
     /** dialog window */
     private JDialog dialog;
@@ -57,11 +56,11 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     private Component currentComponent = null;
 
     /**
-     * Return the flag indicating that the target editor dialog is active
-     * @return flag indicating that the target editor dialog is active
+     * Return the target editor instance
+     * @return target editor or null if the editor is not active
      */
-    public static boolean isTargetEditorActive() {
-        return targetEditorActive;
+    public static TargetEditorDialog getTargetEditor() {
+        return targetEditor;
     }
 
     /**
@@ -71,6 +70,19 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
      * @return true if the model editor changed anything
      */
     public static boolean showEditor(final String targetName, final String selectedTab) {
+        return showEditor(targetName, selectedTab, null);
+    }
+
+    /**
+     * Display the model editor using the given target name as the initial selected target
+     * @param targetName optional target name to display only the models of this target
+     * @param selectedTab name of the selected tab (see TAB_xxx constants)
+     * @param userModelFile optional user model file to associate with the current target
+     * @return true if the model editor changed anything
+     */
+    public static boolean showEditor(final String targetName, final String selectedTab,
+                                     final File userModelFile) {
+
         logger.debug("showing Editor : {}", targetName);
 
         boolean result = false;
@@ -79,22 +91,21 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         TargetEditorDialog form = null;
 
         try {
-            // update flag to indicate that the editor is enabled :
-            targetEditorActive = true;
-
             final ObservationManager om = ObservationManager.getInstance();
 
-            // use deep copy of the current main observation to allow OK/cancel actions :
-            final ObservationSetting cloned = om.getMainObservation().deepClone();
-
             // Prepare the data model (editable targets and user infos) :
-            final List<Target> targets = cloned.getTargets();
-            final TargetUserInformations targetUserInfos = cloned.getOrCreateTargetUserInfos();
+            final TargetEditContext targetEditCtx = om.getMainObservation().createTargetEditContext();
 
-            form = new TargetEditorDialog(targets, targetUserInfos, selectedTab);
+            form = new TargetEditorDialog(targetEditCtx, selectedTab);
+            // set target editor instance:
+            targetEditor = form;
 
             // initialise the editor and select the target :
             form.initialize(targetName);
+
+            if (userModelFile != null) {
+                form.defineUserModel(userModelFile);
+            }
 
             // 1. Create the dialog
             dialog = new JDialog(App.getFrame(), "Target Editor", true);
@@ -115,9 +126,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
             // 4. Size the dialog.
             WindowUtils.setClosingKeyboardShortcuts(dialog);
             dialog.pack();
-            
+
             // Restore, then automatically save window size changes:
-            WindowUtils.rememberWindowSize(dialog, TARGET_EDITOR_DIMENSION_KEY);            
+            WindowUtils.rememberWindowSize(dialog, TARGET_EDITOR_DIMENSION_KEY);
 
             // Center it :
             dialog.setLocationRelativeTo(dialog.getOwner());
@@ -133,12 +144,11 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
 
                 // update the complete list of targets and force to update references :
                 // and fire target and observation change events :
-                om.updateTargets(form.getEditTargets(), form.getEditTargetUserInfos());
+                om.updateTargets(form.getTargetEditCtx());
             }
-
         } finally {
-            // update flag to indicate that the editor is disabled :
-            targetEditorActive = false;
+            // reset the target editor instance to indicate that the editor is disabled:
+            targetEditor = null;
 
             if (form != null) {
                 logger.debug("dispose TargetEditorDialog ...");
@@ -151,7 +161,6 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
                 dialog.dispose();
             }
         }
-
         return result;
     }
 
@@ -159,35 +168,24 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
      * Creates new form TargetEditorDialog (used to test swing interface in NetBeans)
      */
     public TargetEditorDialog() {
-        this(new ArrayList<Target>(0), new TargetUserInformations(), TAB_TARGETS);
+        this(new TargetEditContext(), TAB_TARGETS);
     }
 
     /**
-     * Creates new form TargetEditorDialog with the given list of targets and user information
-     * @param targets list of targets to edit
-     * @param targetUserInfos target user informations
+     * Creates new TargetEditorDialog form with the given list of targets and user information
+     * @param targetEditCtx target editor context
      * @param selectedTab name of the selected tab (see TAB_xxx constants)
      */
-    protected TargetEditorDialog(final List<Target> targets, final TargetUserInformations targetUserInfos,
-                                 final String selectedTab) {
+    protected TargetEditorDialog(final TargetEditContext targetEditCtx, final String selectedTab) {
         super();
 
         // Define shared data model with tabbed forms :
-        this.editTargets = targets;
-        this.editTargetUserInfos = targetUserInfos;
+        this.targetEditCtx = targetEditCtx;
 
         // initialize swing components :
         initComponents();
 
-        // Select tab:
-        if (selectedTab != null) {
-            for (int i = 0, size = this.jTabbedPane.getTabCount(); i < size; i++) {
-                if (selectedTab.equals(this.jTabbedPane.getTitleAt(i))) {
-                    this.jTabbedPane.setSelectedIndex(i);
-                    break;
-                }
-            }
-        }
+        selectTab(selectedTab);
 
         // Register a change listener for the tabbed panel :
         this.jTabbedPane.addChangeListener(new ChangeListener() {
@@ -197,38 +195,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
              */
             @Override
             public final void stateChanged(final ChangeEvent ce) {
-                final Component selected = jTabbedPane.getSelectedComponent();
-
-                if (selected != targetModelForm) {
-                    targetModelForm.disableForm();
-                }
-
-                final Target target = getCurrentTarget();
-
-                if (selected == targetForm) {
-                    // select the target :
-                    targetForm.selectTarget(target);
-                } else if (selected == targetModelForm) {
-                    // refresh the tree according to the new target / calibrator list
-                    // and select the target :
-                    targetModelForm.initialize((target != null) ? target.getName() : null);
-                } else if (selected == targetGroupForm) {
-                    // refresh the tree according to the new target / calibrator list
-                    // and select the target :
-                    targetGroupForm.initialize((target != null) ? target.getName() : null);
-                }
-                currentComponent = selected;
-            }
-
-            private Target getCurrentTarget() {
-                if (currentComponent == targetForm) {
-                    return targetForm.getCurrentTarget();
-                } else if (currentComponent == targetModelForm) {
-                    return targetModelForm.getCurrentTarget();
-                } else if (currentComponent == targetGroupForm) {
-                    return targetGroupForm.getCurrentTarget();
-                }
-                return null;
+                refreshDialog();
             }
         });
     }
@@ -240,15 +207,81 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     void initialize(final String targetName) {
         this.currentComponent = jTabbedPane.getSelectedComponent();
 
-        // Generate trees and select the target :
+        logger.warn("initialize: {}", targetName);
+
+        // Generate trees and select the target:
         if (currentComponent == targetModelForm) {
             // only initialize Model form (model animator) if displayed:
             this.targetModelForm.initialize(targetName);
         }
 
         this.targetForm.initialize(targetName);
-
         this.targetGroupForm.initialize(targetName);
+    }
+
+    public void closeDialog() {
+        // cancel:
+        if (this.dialog != null) {
+            this.dialog.setVisible(false);
+        }
+    }
+
+    public void defineUserModel(final File userModelFile) {
+        if (userModelFile != null) {
+            selectTab(TAB_MODELS);
+
+            // Use invokeLater to selection change issues with form:
+            SwingUtils.invokeLaterEDT(new Runnable() {
+                /**
+                 * Update tree selection
+                 */
+                @Override
+                public void run() {
+                    targetModelForm.defineUserModel(userModelFile);
+                }
+            });
+        }
+    }
+
+    private void selectTab(final String selectedTab) {
+        // Select tab:
+        if (selectedTab != null) {
+            for (int i = 0, size = this.jTabbedPane.getTabCount(); i < size; i++) {
+                if (selectedTab.equals(this.jTabbedPane.getTitleAt(i))) {
+                    this.jTabbedPane.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+        // will call refreshDialog via change listener if needed
+    }
+
+    public void refreshDialog() {
+        // Get target from the current component:
+        final Target target = getCurrentTarget();
+        logger.debug("refreshDialog: {}", target);
+
+        // Change the current component:
+        final Component selected = jTabbedPane.getSelectedComponent();
+        this.currentComponent = selected;
+
+        if (selected != targetModelForm) {
+            targetModelForm.disableForm();
+        }
+
+        if (selected == targetForm) {
+            // select the target :
+            // targetForm.selectTarget(target);
+            targetForm.initialize((target != null) ? target.getName() : null);
+        } else if (selected == targetModelForm) {
+            // refresh the tree according to the new target / calibrator list
+            // and select the target :
+            targetModelForm.initialize((target != null) ? target.getName() : null);
+        } else if (selected == targetGroupForm) {
+            // refresh the tree according to the new target / calibrator list
+            // and select the target :
+            targetGroupForm.initialize((target != null) ? target.getName() : null);
+        }
     }
 
     /**
@@ -265,6 +298,17 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         this.currentComponent = null;
     }
 
+    private Target getCurrentTarget() {
+        if (currentComponent == targetForm) {
+            return targetForm.getCurrentTarget();
+        } else if (currentComponent == targetModelForm) {
+            return targetModelForm.getCurrentTarget();
+        } else if (currentComponent == targetGroupForm) {
+            return targetGroupForm.getCurrentTarget();
+        }
+        return null;
+    }
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -276,9 +320,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         java.awt.GridBagConstraints gridBagConstraints;
 
         jTabbedPane = new javax.swing.JTabbedPane();
-        targetForm = new TargetForm(this.editTargets, this.editTargetUserInfos);
-        targetModelForm = new TargetModelForm(this.editTargets, this.editTargetUserInfos);
-        targetGroupForm = new TargetGroupForm(this.editTargets, this.editTargetUserInfos);
+        targetForm = new TargetForm(this.getEditTargets(), this.getEditTargetUserInfos());
+        targetModelForm = new TargetModelForm(this.getEditTargets(), this.getEditTargetUserInfos());
+        targetGroupForm = new TargetGroupForm(this.getEditTargets(), this.getEditTargetUserInfos());
         jPanelButtons = new javax.swing.JPanel();
         jButtonCancel = new javax.swing.JButton();
         jButtonOK = new javax.swing.JButton();
@@ -342,9 +386,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
 }//GEN-LAST:event_jButtonOKActionPerformed
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
-        if (this.dialog != null) {
-            this.dialog.setVisible(false);
-        }
+        closeDialog();
 }//GEN-LAST:event_jButtonCancelActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonCancel;
@@ -365,11 +407,19 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     }
 
     /**
+     * Return the target edit context
+     * @return target edit context
+     */
+    public TargetEditContext getTargetEditCtx() {
+        return targetEditCtx;
+    }
+
+    /**
      * Return the list of target that is edited by this editor
      * @return list of target
      */
     private List<Target> getEditTargets() {
-        return editTargets;
+        return targetEditCtx.getTargets();
     }
 
     /**
@@ -377,7 +427,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
      * @return target user informations
      */
     private TargetUserInformations getEditTargetUserInfos() {
-        return editTargetUserInfos;
+        return targetEditCtx.getTargetUserInfos();
     }
 
     /**

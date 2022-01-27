@@ -21,6 +21,7 @@ import fr.jmmc.aspro.gui.action.TargetEditorAction;
 import fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
+import fr.jmmc.aspro.interop.ImageSampMessageHandler;
 import fr.jmmc.aspro.interop.ObservationSampMessageHandler;
 import fr.jmmc.aspro.interop.SearchCalQueryAction;
 import fr.jmmc.aspro.interop.SendOBAction;
@@ -404,10 +405,12 @@ public final class Aspro2 extends App {
      */
     @Override
     protected void declareInteroperability() {
-        // Add handler to load votable (any target list or calibrators)
+        // Add handler to load votables (any target list or calibrators)
         new VotableSampMessageHandler();
         // Add handler to load observations (targets):
         new ObservationSampMessageHandler();
+        // Add handler to load fits images:
+        new ImageSampMessageHandler();
     }
 
     /**

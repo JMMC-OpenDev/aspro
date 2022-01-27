@@ -1506,6 +1506,33 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       getModelParameterTableModel().fireTableDataChanged();
   }//GEN-LAST:event_jButtonNormalizeFluxesActionPerformed
 
+    void defineUserModel(final File userModelFile) {
+        if ((this.currentTarget == null) || (userModelFile == null)) {
+            return;
+        }
+        // mimics actions:
+        // click on user model radio button:
+        this.currentTarget.setUseAnalyticalModel(Boolean.FALSE);
+        // reselect target to change panel visibility:
+        processTargetSelection(currentTarget);
+
+        // from jButtonOpenFileActionPerformed:
+        final UserModel userModel = this.currentTarget.getOrCreateUserModel();
+
+        disableAnimator();
+
+        userModel.setFile(userModelFile.getAbsolutePath());
+        userModel.setName(userModelFile.getName());
+
+        // reset Transforms:
+        userModel.setScaleX(null);
+        userModel.setScaleY(null);
+        userModel.setRotation(null);
+
+        // trigger reload user model:
+        triggerReloadUserModel(true);
+    }
+
   private void jButtonOpenFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenFileActionPerformed
       if (this.currentTarget == null) {
           return;

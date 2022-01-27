@@ -27,7 +27,7 @@
       <SubComponents>
         <Component class="fr.jmmc.aspro.gui.TargetForm" name="targetForm">
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TargetForm(this.editTargets, this.editTargetUserInfos)"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TargetForm(this.getEditTargets(), this.getEditTargetUserInfos())"/>
           </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
@@ -40,7 +40,7 @@
         </Component>
         <Component class="fr.jmmc.aspro.gui.TargetModelForm" name="targetModelForm">
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TargetModelForm(this.editTargets, this.editTargetUserInfos)"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TargetModelForm(this.getEditTargets(), this.getEditTargetUserInfos())"/>
           </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
@@ -53,7 +53,7 @@
         </Component>
         <Component class="fr.jmmc.aspro.gui.TargetGroupForm" name="targetGroupForm">
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TargetGroupForm(this.editTargets, this.editTargetUserInfos)"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TargetGroupForm(this.getEditTargets(), this.getEditTargetUserInfos())"/>
           </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
