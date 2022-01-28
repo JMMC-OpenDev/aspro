@@ -175,39 +175,37 @@ public final class TargetImporter {
                 SwingUtils.invokeEDT(new Runnable() {
                     @Override
                     public void run() {
-                        if (TargetEditorDialog.isTargetEditorActive()) {
-                            MessagePane.showErrorMessage("Please close the target editor first !");
-                            return;
-                        }
-
                         // check the number of targets:
                         if (targets.isEmpty()) {
                             MessagePane.showErrorMessage("No target found: missing name or RA/DEC coordinates (J2000) !");
                             return;
                         }
 
-                        if (!confirmImport(targets.size())) {
-                            return;
-                        }
-
                         final ObservationManager om = ObservationManager.getInstance();
 
                         // get the observationContext.operation:
-                        final boolean isOperationNew = (!forceAddTargets && loadedObservation.getContext() != null) ? loadedObservation.getContext().isOperationNew() : false;
+                        final boolean isOperationNew = (!forceAddTargets && loadedObservation.getContext() != null)
+                                ? loadedObservation.getContext().isOperationNew() : false;
 
                         if (!isOperationNew
-                                || loadedObservation.getInterferometerConfiguration() == null
-                                || loadedObservation.getInstrumentConfiguration() == null) {
+                                || (loadedObservation.getInterferometerConfiguration() == null)
+                                || (loadedObservation.getInstrumentConfiguration() == null)) {
+
+                            if (!confirmImport(targets.size())) {
+                                return;
+                            }
 
                             // empty configuration: add targets only
                             final TargetUserInformations targetUserInfos = loadedObservation.getOrCreateTargetUserInfos();
 
-                            // use deep copy of the current observation to manipulate target and calibrator list properly:
-                            final ObservationSetting obsCloned = om.getMainObservation().deepClone();
+                            final TargetEditorDialog targetEditor = TargetEditorDialog.getTargetEditor();
 
-                            // Prepare the data model (editable targets and user infos):
-                            final List<Target> editTargets = obsCloned.getTargets();
-                            final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
+                            // Prepare the data model (editable targets and user infos) :
+                            final TargetEditContext editTargetCtx = (targetEditor != null) ? targetEditor.getTargetEditCtx()
+                                    : om.getMainObservation().createTargetEditContext();
+
+                            final List<Target> editTargets = editTargetCtx.getTargets();
+                            final TargetUserInformations editTargetUserInfos = editTargetCtx.getTargetUserInfos();
 
                             if (logger.isDebugEnabled()) {
                                 logger.debug("initial targets:");
@@ -226,26 +224,37 @@ public final class TargetImporter {
                                 }
                             }
 
-                            // update the complete list of targets and force to update references:
-                            // needed to replace old target references by the new targets:
-                            om.updateTargets(editTargets, editTargetUserInfos);
+                            if (targetEditor != null) {
+                                // refresh target editor:
+                                targetEditor.refreshDialog();
+                            } else {
+                                // update the complete list of targets and force to update references:
+                                // needed to replace old target references by the new calibrator targets:
+                                om.updateTargets(editTargetCtx);
+                            }
 
                             if (logger.isInfoEnabled()) {
                                 logger.info(report);
                             }
 
-                            // bring this application to front:
-                            App.showFrameToFront();
-
                             // display report message:
                             MessagePane.showMessage(report);
 
                         } else {
-                            om.resetAndChangeObservation(loadedObservation);
-                        }
+                            if (MessagePane.showConfirmMessage("Are you sure you want to load the incoming observation ?")) {
 
-                        // bring this application to front:
-                        App.showFrameToFront();
+                                final TargetEditorDialog targetEditor = TargetEditorDialog.getTargetEditor();
+                                if (targetEditor != null) {
+                                    targetEditor.closeDialog();
+                                }
+
+                                // load the complete observation:
+                                om.resetAndChangeObservation(loadedObservation);
+
+                                // bring this application to front:
+                                App.showFrameToFront();
+                            }
+                        }
                     }
                 });
             }
@@ -402,7 +411,7 @@ public final class TargetImporter {
                 }
             }
         }
-        
+
         final IdentityHashMap<TargetGroup, TargetGroup> mapGroupsNewToOld = new IdentityHashMap<TargetGroup, TargetGroup>(4);
 
         for (TargetGroup oldGroup : editTargetUserInfos.getGroups()) {
@@ -441,7 +450,7 @@ public final class TargetImporter {
             if (oldGroup == null) {
                 oldGroup = newGroup;
                 mapGroupsNewToOld.put(newGroup, oldGroup);
-                
+
                 editTargetUserInfos.addGroup(newGroup);
 
                 final TargetGroupMembers tgm = targetUserInfos.getGroupMembers(newGroup);

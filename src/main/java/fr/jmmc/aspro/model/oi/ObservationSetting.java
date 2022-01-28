@@ -1,4 +1,3 @@
-
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -571,6 +570,29 @@ public class ObservationSetting
         return copy;
     }
 
+    /**
+     * Return a TargetEditContext to edit target information (deeply cloned List of Target + TargetUserInformations)
+     * @return new TargetEditContext instance
+     */
+    public final fr.jmmc.aspro.model.TargetEditContext createTargetEditContext() {
+        // Deep copy of targets :
+        final List<Target> editTargets = OIBase.deepCopyList(this.getTargets());
+        final TargetUserInformations editTargetUserInfos;
+
+        // Deep copy of target user infos :
+        if (targetUserInfos == null) {
+            editTargetUserInfos = new TargetUserInformations();
+        } else {
+            // deep copy objects but not targets (already done previously, only used for id / idref) :
+            editTargetUserInfos = (TargetUserInformations) targetUserInfos.clone();
+
+            // replace old target instances by cloned target instances :
+            editTargetUserInfos.updateTargetReferences(Target.createTargetIndex(editTargets));
+        }
+
+        return new fr.jmmc.aspro.model.TargetEditContext(editTargets, editTargetUserInfos);
+    }
+
     @Override
     protected boolean areEquals(final OIBase o) {
         if (!super.areEquals(o)) {
@@ -617,7 +639,7 @@ public class ObservationSetting
      * @param targets list of targets
      * @param targetUserInfos target user infos
      * @param targetObservations target raw observations
-    */
+     */
     public static void checkReferences(final List<Target> targets,
                                        final TargetUserInformations targetUserInfos,
                                        final List<TargetRawObservation> targetObservations) {

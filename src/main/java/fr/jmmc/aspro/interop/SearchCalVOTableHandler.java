@@ -6,6 +6,7 @@ package fr.jmmc.aspro.interop;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.TargetEditContext;
 import fr.jmmc.aspro.model.TargetImporter;
 import fr.jmmc.aspro.model.oi.BaseValue;
 import fr.jmmc.aspro.model.oi.CalibratorInformations;
@@ -14,7 +15,6 @@ import fr.jmmc.aspro.model.oi.StringValue;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmal.ALX;
-import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.service.XslTransform;
@@ -148,12 +148,6 @@ public final class SearchCalVOTableHandler {
                 SwingUtils.invokeEDT(new Runnable() {
                     @Override
                     public void run() {
-
-                        if (TargetEditorDialog.isTargetEditorActive()) {
-                            MessagePane.showErrorMessage("Please close the target editor first !");
-                            return;
-                        }
-
                         // check the number of calibrators:
                         if (calibrators.isEmpty()) {
                             MessagePane.showErrorMessage("No calibrator found in SearchCal response !");
@@ -168,12 +162,14 @@ public final class SearchCalVOTableHandler {
                         // or using alternate diameters (in order of priority): UD, LD, UDDK, DIA12
                         om.defineCalibratorDiameter(calibrators);
 
-                        // use deep copy of the current observation to manipulate target and calibrator list properly:
-                        final ObservationSetting obsCloned = om.getMainObservation().deepClone();
+                        final TargetEditorDialog targetEditor = TargetEditorDialog.getTargetEditor();
 
-                        // Prepare the data model (editable targets and user infos):
-                        final List<Target> editTargets = obsCloned.getTargets();
-                        final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
+                        // Prepare the data model (editable targets and user infos) :
+                        final TargetEditContext editTargetCtx = (targetEditor != null) ? targetEditor.getTargetEditCtx()
+                                : om.getMainObservation().createTargetEditContext();
+
+                        final List<Target> editTargets = editTargetCtx.getTargets();
+                        final TargetUserInformations editTargetUserInfos = editTargetCtx.getTargetUserInfos();
 
                         if (logger.isDebugEnabled()) {
                             logger.debug("initial targets:");
@@ -201,16 +197,18 @@ public final class SearchCalVOTableHandler {
                             }
                         }
 
-                        // update the complete list of targets and force to update references:
-                        // needed to replace old target references by the new calibrator targets:
-                        om.updateTargets(editTargets, editTargetUserInfos);
+                        if (targetEditor != null) {
+                            // refresh target editor:
+                            targetEditor.refreshDialog();
+                        } else {
+                            // update the complete list of targets and force to update references:
+                            // needed to replace old target references by the new calibrator targets:
+                            om.updateTargets(editTargetCtx);
+                        }
 
                         if (logger.isInfoEnabled()) {
                             logger.info(report);
                         }
-
-                        // bring this application to front:
-                        App.showFrameToFront();
 
                         // display report message:
                         MessagePane.showMessage(report);
@@ -233,11 +231,6 @@ public final class SearchCalVOTableHandler {
                     @Override
                     public void run() {
 
-                        if (TargetEditorDialog.isTargetEditorActive()) {
-                            MessagePane.showErrorMessage("Please close the target editor first !");
-                            return;
-                        }
-
                         // check the number of targets:
                         if (targets.isEmpty()) {
                             MessagePane.showErrorMessage("No target found in GetStar response !");
@@ -252,12 +245,13 @@ public final class SearchCalVOTableHandler {
                         // or using alternate diameters (in order of priority): UD, LD, UDDK, DIA12
                         om.defineCalibratorDiameter(targets);
 
-                        // use deep copy of the current observation to manipulate target and calibrator list properly:
-                        final ObservationSetting obsCloned = om.getMainObservation().deepClone();
+                        final TargetEditorDialog targetEditor = TargetEditorDialog.getTargetEditor();
 
-                        // Prepare the data model (editable targets and user infos):
-                        final List<Target> editTargets = obsCloned.getTargets();
-                        final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
+                        // Prepare the data model (editable targets and user infos) :
+                        final TargetEditContext editTargetCtx = (targetEditor != null) ? targetEditor.getTargetEditCtx()
+                                : om.getMainObservation().createTargetEditContext();
+
+                        final List<Target> editTargets = editTargetCtx.getTargets();
 
                         if (logger.isDebugEnabled()) {
                             logger.debug("initial targets:");
@@ -275,16 +269,18 @@ public final class SearchCalVOTableHandler {
                             }
                         }
 
-                        // update the complete list of targets and force to update references:
-                        // needed to replace old target references by the new calibrator targets:
-                        om.updateTargets(editTargets, editTargetUserInfos);
+                        if (targetEditor != null) {
+                            // refresh target editor:
+                            targetEditor.refreshDialog();
+                        } else {
+                            // update the complete list of targets and force to update references:
+                            // needed to replace old target references by the new calibrator targets:
+                            om.updateTargets(editTargetCtx);
+                        }
 
                         if (logger.isInfoEnabled()) {
                             logger.info(report);
                         }
-
-                        // bring this application to front:
-                        App.showFrameToFront();
 
                         // display report message:
                         MessagePane.showMessage(report);
