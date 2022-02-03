@@ -101,7 +101,10 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
         jTableObs.setDefaultEditor(Number.class, editor);
 
         // load user preference for columns:
-        obsTableSorter.setVisibleColumnNames(Preferences.getInstance().getObsTableVisibleColumns());
+        final List<String> prefVisibleColumnNames = Preferences.getInstance().getObsTableVisibleColumns();
+        obsTableSorter.setVisibleColumnNames(
+                !prefVisibleColumnNames.isEmpty() ? prefVisibleColumnNames : obsModel.getColumnNames()
+        );
 
         // Decorate scrollpane corner:
         final JButton cornerButton = new JButton();
@@ -114,7 +117,7 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
                 final List<String> newVisibleColumns = new ArrayList<>();
                 TableEditorPanel.showEditor(
                         obsModel.getColumnNames(), prevVisibleColumns, // initial columns 
-                        obsModel.getColumnNames(), prevVisibleColumns, // default columns (button reset)
+                        obsModel.getColumnNames(), obsModel.getColumnNames(), // default columns (button reset)
                         new ArrayList<>(0), newVisibleColumns, // resulting columns
                         TABLE_EDITOR_DIMENSION_KEY
                 );

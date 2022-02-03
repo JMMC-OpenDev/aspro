@@ -815,6 +815,7 @@ public class RawObservation
         this.interferometerRef = cm.getInterferometerDescription(getInterferometerName());
 
         // instrument
+        // TODO: ensure instrument belongs to the interferometerRef !
         this.instrumentRef = cm.getInterferometerInstrumentByMode(getInstrumentName(), getInstrumentMode());
 
         // instrument mode
@@ -824,7 +825,7 @@ public class RawObservation
         this.uvPoints = fr.jmmc.aspro.model.util.ProjectedBaselineUtils.parse(getProjectedBaselines(), instrumentModeRef);
 
         // Validate:
-        this.validate();
+        this.validate(logger);
 
         // Prepare computations (observability, uv):
         if (isValid(INVALID_TIMES)) {
@@ -886,7 +887,7 @@ public class RawObservation
         logger.debug("prepared: {}", this);
     }
 
-    private void validate() {
+    private void validate(final org.slf4j.Logger logger) {
         int flag = 0;
         if (this.getType() == null) {
             logger.debug("Missing type for observation[{}]", getObsId());
