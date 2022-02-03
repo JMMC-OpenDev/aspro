@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VOTABLE version="1.4" xmlns="http://www.ivoa.net/xml/VOTable/v1.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ivoa.net/xml/VOTable/v1.4">
+ <RESOURCE type="results">
+  <PARAM ID="status" arraysize="*" datatype="unicodeChar" name="status" value="OK"/>
+  <PARAM ID="last_mod_date" arraysize="*" datatype="unicodeChar" name="last_mod_date" value="2022-01-14 10:40:32+00:00"/>
+  <TABLE>
+   <FIELD ID="exp_id" arraysize="*" datatype="unicodeChar" name="exp_id" ucd="meta.id"/>
+   <FIELD ID="exp_header_id" arraysize="*" datatype="unicodeChar" name="exp_header_id" ucd="meta.id"/>
+   <FIELD ID="exp_mjd_start" datatype="double" name="exp_mjd_start" ucd="time.start;obs.exposure" unit="d"/>
+   <FIELD ID="exp_mjd_end" datatype="double" name="exp_mjd_end" ucd="time.end;obs.exposure" unit="d"/>
+   <FIELD ID="exp_projected_baselines" arraysize="*" datatype="unicodeChar" name="exp_projected_baselines" ucd="instr.baseline"/>
+   <FIELD ID="exp_validation_level" datatype="int" name="exp_validation_level" ucd="meta.code.qual"/>
+   <FIELD ID="exp_validation_log" arraysize="*" datatype="unicodeChar" name="exp_validation_log"/>
+   <FIELD ID="exp_tau0" datatype="double" name="exp_tau0" ucd="time.processing" unit="s"/>
+   <FIELD ID="exp_temperature" datatype="double" name="exp_temperature" ucd="phys.temperature" unit="deg"/>
+   <FIELD ID="exp_seeing" datatype="double" name="exp_seeing" ucd="instr.obsty.seeing" unit="as"/>
+   <FIELD ID="exp_date_updated" arraysize="*" datatype="unicodeChar" name="exp_date_updated" ucd="time.processing"/>
+   <FIELD ID="exp_date_release" arraysize="*" datatype="unicodeChar" name="exp_date_release" ucd="time.release;obs"/>
+   <FIELD ID="obs_id" datatype="int" name="obs_id" ucd="meta.id"/>
+   <FIELD ID="obs_type" arraysize="*" datatype="unicodeChar" name="obs_type" ucd="meta.id;class"/>
+   <FIELD ID="obs_program" arraysize="*" datatype="unicodeChar" name="obs_program" ucd="meta.id"/>
+   <FIELD ID="obs_program_title" arraysize="*" datatype="unicodeChar" name="obs_program_title" ucd="meta.title"/>
+   <FIELD ID="obs_program_pi_coi" arraysize="*" datatype="unicodeChar" name="obs_program_pi_coi" ucd="meta.curation;obs.observer"/>
+   <FIELD ID="interferometer_name" arraysize="*" datatype="unicodeChar" name="interferometer_name" ucd="meta.id"/>
+   <FIELD ID="interferometer_stations" arraysize="*" datatype="unicodeChar" name="interferometer_stations"/>
+   <FIELD ID="instrument_name" arraysize="*" datatype="unicodeChar" name="instrument_name" ucd="meta.id;instr"/>
+   <FIELD ID="instrument_mode" arraysize="*" datatype="unicodeChar" name="instrument_mode" ucd="meta.id;instr.setup"/>
+   <FIELD ID="instrument_submode" arraysize="*" datatype="unicodeChar" name="instrument_submode" ucd="meta.id;instr.setup"/>
+   <FIELD ID="instrument_em_min" datatype="double" name="instrument_em_min" ucd="em.wl;stat.min" unit="m"/>
+   <FIELD ID="instrument_em_max" datatype="double" name="instrument_em_max" ucd="em.wl;stat.max" unit="m"/>
+   <FIELD ID="instrument_em_res_power" datatype="double" name="instrument_em_res_power" ucd="spect.resolution"/>
+   <FIELD ID="target_id" datatype="int" name="target_id" ucd="meta.id"/>
+   <FIELD ID="target_name" arraysize="*" datatype="unicodeChar" name="target_name" ucd="meta.id;meta.main"/>
+   <FIELD ID="target_ra" datatype="double" name="target_ra" ucd="pos.eq.ra;meta.main" unit="deg"/>
+   <FIELD ID="target_dec" datatype="double" name="target_dec" ucd="pos.eq.dec;meta.main" unit="deg"/>
+   <DATA>
+    <TABLEDATA>
+<TR>
+<TD>SPICA.SCIDET:20220114:104042_target_1</TD>
+<TD>SPICA.SCIDET:20220114:104042_target</TD>
+<TD>59593.44481</TD>
+<TD>59593.4449257407</TD>
+<TD/>
+<TD>0</TD>
+<TD>["Missing 'HIERARCH ISS CONF NTEL'", "Missing 'EXPTIME'", "Missing 'HIERARCH ISS AMBI TAU0 START'", "Missing 'HIERARCH ISS AMBI TAU0 END'", "Missing 'HIERARCH ISS AMBI TEMP'", "Missing 'HIERARCH ISS AMBI FWHM START'", "Missing 'HIERARCH ISS AMBI FWHM END'"]</TD>
+<TD>NaN</TD>
+<TD>NaN</TD>
+<TD>NaN</TD>
+<TD>2022-01-14 10:40:32+00:00</TD>
+<TD/>
+<TD>30</TD>
+<TD>science</TD>
+<TD>SPICA_DEV_TESTS</TD>
+<TD/>
+<TD/>
+<TD>CHARA</TD>
+<TD/>
+<TD>SPICA</TD>
+<TD>LR</TD>
+<TD/>
+<TD>6e-07</TD>
+<TD>9e-07</TD>
+<TD>150</TD>
+<TD>4</TD>
+<TD>hd79929</TD>
+<TD>139.3996</TD>
+<TD>27.42218</TD>
+</TR>
+<TR>
+<TD>SPICA.2021-09-24T17:25:45.325079_1</TD>
+<TD>SPICA.2021-09-24T17:25:45.325079</TD>
+<TD>59542.2708333333</TD>
+<TD>59542.2710648148</TD>
+<TD/>
+<TD>0</TD>
+<TD>["Missing 'HIERARCH ISS CONF NTEL'", "Missing 'EXPTIME'", "Missing 'HIERARCH ISS AMBI TAU0 START'", "Missing 'HIERARCH ISS AMBI TAU0 END'", "Missing 'HIERARCH ISS AMBI TEMP'", "Missing 'HIERARCH ISS AMBI FWHM START'", "Missing 'HIERARCH ISS AMBI FWHM END'"]</TD>
+<TD>NaN</TD>
+<TD>NaN</TD>
+<TD>NaN</TD>
+<TD>2021-09-24 17:25:45+00:00</TD>
+<TD/>
+<TD>28</TD>
+<TD>science</TD>
+<TD>V3</TD>
+<TD/>
+<TD/>
+<TD>CHARA</TD>
+<TD/>
+<TD>SPICA</TD>
+<TD>LR</TD>
+<TD/>
+<TD>6e-07</TD>
+<TD>9e-07</TD>
+<TD>150</TD>
+<TD>3</TD>
+<TD>eps Per</TD>
+<TD>59.4634614</TD>
+<TD>40.0102144</TD>
+</TR>
+<TR>
+<TD>SPICA.2021-09-24T17:25:54.708810_1</TD>
+<TD>SPICA.2021-09-24T17:25:54.708810</TD>
+<TD>59542.2708333333</TD>
+<TD>59542.2710648148</TD>
+<TD/>
+<TD>0</TD>
+<TD>["Missing 'HIERARCH ISS CONF NTEL'", "Missing 'EXPTIME'", "Missing 'HIERARCH ISS AMBI TAU0 START'", "Missing 'HIERARCH ISS AMBI TAU0 END'", "Missing 'HIERARCH ISS AMBI TEMP'", "Missing 'HIERARCH ISS AMBI FWHM START'", "Missing 'HIERARCH ISS AMBI FWHM END'"]</TD>
+<TD>NaN</TD>
+<TD>NaN</TD>
+<TD>NaN</TD>
+<TD>2021-09-24 17:25:54+00:00</TD>
+<TD/>
+<TD>29</TD>
+<TD>science</TD>
+<TD>V3</TD>
+<TD/>
+<TD/>
+<TD>CHARA</TD>
+<TD/>
+<TD>SPICA</TD>
+<TD>LR</TD>
+<TD/>
+<TD>6e-07</TD>
+<TD>9e-07</TD>
+<TD>150</TD>
+<TD>3</TD>
+<TD>eps Per</TD>
+<TD>59.4634614</TD>
+<TD>40.0102144</TD>
+</TR>
+    </TABLEDATA>
+   </DATA>
+  </TABLE>
+ </RESOURCE>
+</VOTABLE>
