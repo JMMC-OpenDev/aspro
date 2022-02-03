@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="21.10 beta 7"/>
-    <compilation date="23/11/2021" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="22.03 beta 8"/>
+    <compilation date="28/01/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -228,32 +228,36 @@
     </menubar>
 
     <releasenotes>
-        <release version="21.10">
-            <pubDate>Tue, 23 Nov 2021 08:00:00 GMT</pubDate>
-            <prerelease version="21.10 beta 7">                
-                <change type="FEATURE">Added support for multiple calibrators in OB sent to the A2p2 tool</change>                
+        <release version="22.03">
+            <pubDate>Fri, 28 Jan 2022 15:00:00 GMT</pubDate>
+            <prerelease version="22.03 beta 8">
+                <change type="FEATURE">Added SAMP 'load.fits.image' handler by opening the Target editor and associating the given model file to the current target (AMHRA)</change>
+                <change type="FEATURE">Improved TargetEditor to handle SAMP interoperability (target merged with the editor state)</change>
             </prerelease>
-            <prerelease version="21.10 beta 6">
+            <prerelease version="22.03 beta 7">
+                <change type="FEATURE">Added support for multiple calibrators in OB sent to the A2p2 tool</change>
+            </prerelease>
+            <prerelease version="22.03 beta 6">
                 <change type="FEATURE">Enhance SAMP interoperability (VO table) : support analytical models</change>
                 <!-- bugfix http://trac.jmmc.fr/jmmc-sw/ticket/1157 -->
             </prerelease>
-            <prerelease version="21.10 beta 5">
+            <prerelease version="22.03 beta 5">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1152">Fixed findInstrumentConfigurationStations() to avoid too much permutations (max=6 and check numberChannelsMin/Max)</change>
             </prerelease>
-            <prerelease version="21.10 beta 4">
+            <prerelease version="22.03 beta 4">
                 <change type="FEATURE">Improved the main setting panel to update the Pops combo box plot for baseline limits and reset best PoPs if the configuration changes</change>
                 <change type="FEATURE">Improved observability plot for baseline limits to support multiple configurations and report information and warning messages (CHARA PoPs)</change>
                 <change type="FEATURE">Improved observability plot with large lists (increased bar width and disabled bar outline)</change>
             </prerelease>
-            <prerelease version="21.10 beta 3">
+            <prerelease version="22.03 beta 3">
                 <change type="FEATURE">Enhanced best PoPs algorithm to display more combinations for comparison and for large lists, retain more solutions (with less targets)</change>
                 <change type="FEATURE">Improved the observation log table to preserve table column order (preference) and select visible columns by clicking in the bottom right corner's button</change>
             </prerelease>
-            <prerelease version="21.10 beta 2">
+            <prerelease version="22.03 beta 2">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1148">Fixed UV plot's boundary issue related to unobservable target (axis length = 0)</change>
                 <change type="FEATURE">Enhanced VOTable handling to handle target description (ucd=meta.note) and improve NIGHT param reading (boolean or char datatype)</change>
             </prerelease>
-            <prerelease version="21.10 beta 1">
+            <prerelease version="22.03 beta 1">
                 <change type="BUGFIX">Fixed SAMP interoperability (VO table): disable XSLT secure processing</change>
             </prerelease>
         </release>
