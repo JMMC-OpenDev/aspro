@@ -114,7 +114,11 @@ public final class RawObservationTableModel extends ColumnDescTableModel {
                 return QueryRawObservationsAction.OBS_SERVER_GET_OBS_URL + id;
             }
             if (column == ColumnDef.PROGRAM_ID.ordinal()) {
-                return QueryRawObservationsAction.ESO_GET_PROG_URL + id;
+                // TODO: handle program Id for CHARA or CHARA instruments
+                final RawObservation obs = getObsAt(row);
+                if ((obs != null) && ("VLTI".equals(obs.getInterferometerName()))) {
+                    return QueryRawObservationsAction.ESO_GET_PROG_URL + id;
+                }
             }
         }
         return null;
