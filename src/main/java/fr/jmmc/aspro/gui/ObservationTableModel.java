@@ -162,7 +162,7 @@ public final class ObservationTableModel extends ColumnDescTableModel {
             case TYPE:
                 return (targetUserInfos != null && targetUserInfos.isCalibrator(target)) ? ObservationType.CALIBRATOR : ObservationType.SCIENCE;
             case PROGRAM_ID:
-                return obs.getDescription(); // TODO
+                return null; // TODO
             // Interferometer:
             case INTERF_NAME:
                 return obs.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer().getName();
