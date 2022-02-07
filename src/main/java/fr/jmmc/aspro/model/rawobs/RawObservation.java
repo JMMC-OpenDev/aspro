@@ -801,13 +801,13 @@ public class RawObservation
                               final fr.jmmc.aspro.model.ConfigurationManager cm) {
 
         // Fix invalid optional fields:
-        if (Double.isNaN(getExpTau0())) {
+        if ((getExpTau0() != null) && Double.isNaN(getExpTau0())) {
             setExpTau0(null);
         }
-        if (Double.isNaN(getExpTemp())) {
+        if ((getExpTemp() != null) && Double.isNaN(getExpTemp())) {
             setExpTemp(null);
         }
-        if (Double.isNaN(getExpSeeing())) {
+        if ((getExpSeeing() != null) && Double.isNaN(getExpSeeing())) {
             setExpSeeing(null);
         }
         
