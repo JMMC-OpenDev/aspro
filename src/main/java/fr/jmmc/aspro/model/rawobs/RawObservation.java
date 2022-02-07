@@ -800,6 +800,17 @@ public class RawObservation
                               final java.util.Map sharedContext,
                               final fr.jmmc.aspro.model.ConfigurationManager cm) {
 
+        // Fix invalid optional fields:
+        if (Double.isNaN(getExpTau0())) {
+            setExpTau0(null);
+        }
+        if (Double.isNaN(getExpTemp())) {
+            setExpTemp(null);
+        }
+        if (Double.isNaN(getExpSeeing())) {
+            setExpSeeing(null);
+        }
+        
         // Convert exposure time:
         this.expTime = Math.max(0.0, (getMjdEnd() - getMjdStart()) * 86400.0);
         if (Double.isNaN(getExpTime())) {
