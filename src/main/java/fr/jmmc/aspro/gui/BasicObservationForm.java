@@ -850,7 +850,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             }
         });
 
-        // define interferometer names (constant) :
+        // define interferometer names :
+        // TODO: make it more dynamic (no more constant) in 2022 (load dynamic config => event ?)
         jComboBoxInterferometer.setModel(new DefaultComboBoxModel(cm.getInterferometerNames()));
 
         // reset status :
