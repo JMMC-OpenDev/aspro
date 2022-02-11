@@ -7,7 +7,6 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.util.AsproModelVersion;
-import fr.jmmc.aspro.model.util.TargetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
