@@ -28,6 +28,8 @@ public abstract class BaseOIManager extends BaseXmlManager {
     public static final String CONF_CLASSLOADER_PATH = "fr/jmmc/aspro/model/";
     /** package name for JAXB generated code */
     private final static String OI_JAXB_PATH = "fr.jmmc.aspro.model.oi";
+    /** Debug xml events */
+    private final static boolean DEBUG_XML_EVENTS = false;
 
     /**
      * Protected constructor
@@ -81,9 +83,15 @@ public abstract class BaseOIManager extends BaseXmlManager {
 
         // This custom ID Resolver resolves xsd:IDREF(s) pointing to configuration elements (InterferometerDescription):
         try {
+            if (DEBUG_XML_EVENTS) {
+                // Debugging XML events (validation):
+                u.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
+            }
             u.setProperty(IDResolver.class.getName(), new AsproConfigurationIDResolver(ConfigurationManager.getInstance().getInitialConfiguration()));
         } catch (PropertyException pe) {
             throw new XmlBindException("JAXB Unmarshaller.setProperty() failure:", pe);
+        } catch (JAXBException je) {
+            throw new XmlBindException("JAXB Unmarshaller.setEventHandler() failure:", je);
         }
         return u;
     }
