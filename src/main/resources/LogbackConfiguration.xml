@@ -59,6 +59,8 @@
     <logger name="fr.jmmc.aspro.model" level="INFO"/>
     <logger name="fr.jmmc.aspro.model.ConfigurationManager" level="INFO"/>
 
+    <logger name="fr.jmmc.jaxb.AsproConfigurationIDResolver" level="INFO"/>
+
     <logger name="fr.jmmc.aspro.ob" level="INFO"/>
 
     <logger name="fr.jmmc.aspro.service" level="INFO"/>

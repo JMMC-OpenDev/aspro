@@ -2611,10 +2611,18 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="altName" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The alternative names for this instrument used to resolve former names (optional)
+                         (MIRC_5T for MIRC ...)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="description" type="xsd:string">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Description of the focal instrument
+                        Description of this instrument
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>

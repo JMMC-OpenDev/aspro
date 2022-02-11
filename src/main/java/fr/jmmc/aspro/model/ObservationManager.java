@@ -1926,10 +1926,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfiguration(interferometerConfiguration));
 
         final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
-        final String instrumentAlias = instrumentChoice.getName();
+        String instrumentAlias = instrumentChoice.getName();
 
         if (interferometerChoice.getInterferometerConfiguration() == null) {
-            logger.info("the interferometer configuration [{}] is not supported.", interferometerConfiguration);
+            logger.info("The interferometer configuration [{}] is not supported.", interferometerConfiguration);
 
             // use the first interferometer configuration that has the instrument:
             interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfigurationWithInstrument(instrumentAlias));
@@ -1938,7 +1938,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 interferometerConfiguration = interferometerChoice.getInterferometerConfiguration().getName();
                 interferometerChoice.setName(interferometerConfiguration);
 
-                logger.info("A correct instrument configuration is [{}]. Save your file to keep this modification", interferometerConfiguration);
+                logger.info("A correct interferometer configuration is [{}]. Save your file to keep this modification", interferometerConfiguration);
             } else {
                 throw new IllegalStateException("The interferometer configuration [" + interferometerConfiguration + "] is invalid"
                         + " and none has the instrument [" + instrumentAlias + "] !");
@@ -1946,10 +1946,23 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         }
 
         instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(interferometerConfiguration, instrumentAlias));
+        FocalInstrumentConfiguration insConf = instrumentChoice.getInstrumentConfiguration();
 
-        final FocalInstrumentConfiguration insConf = instrumentChoice.getInstrumentConfiguration();
         if (insConf == null) {
-            throw new IllegalStateException("The instrument [" + instrumentAlias + "] is invalid !");
+            logger.info("The instrument [{}] is not supported.", instrumentAlias);
+
+            // use the instrument configuration that has the instrument using altNames:
+            instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfigurationByAltNames(interferometerConfiguration, instrumentAlias));
+            insConf = instrumentChoice.getInstrumentConfiguration();
+
+            if (insConf != null) {
+                instrumentAlias = insConf.getFocalInstrument().getName();
+                instrumentChoice.setName(instrumentAlias);
+
+                logger.info("A correct instrument is [{}]. Save your file to keep this modification", instrumentAlias);
+            } else {
+                throw new IllegalStateException("The instrument [" + instrumentAlias + "] is invalid !");
+            }
         }
 
         // first resolve / fix observation variants :
@@ -1958,7 +1971,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
             // fix invalid stations :
             if (obsVariant.getStationList() == null) {
-                logger.info("the instrument configuration [{}] is incorrect, trying to match a possible configuration ...", obsVariant.getStations());
+                logger.info("The instrument configuration [{}] is incorrect, trying to match a possible configuration ...", obsVariant.getStations());
 
                 final String stationIds = ConfigurationManager.findInstrumentConfigurationStations(insConf, obsVariant.getStations());
 
@@ -1966,7 +1979,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                     throw new IllegalStateException("The instrument configuration [" + obsVariant.getStations() + "] is invalid !");
                 }
 
-                logger.info("the correct instrument configuration is [{}]. Save your file to keep this modification", stationIds);
+                logger.info("A correct instrument configuration is [{}]. Save your file to keep this modification", stationIds);
 
                 obsVariant.setStations(stationIds);
                 obsVariant.setStationList(ConfigurationManager.getInstrumentConfigurationStations(insConf, stationIds));

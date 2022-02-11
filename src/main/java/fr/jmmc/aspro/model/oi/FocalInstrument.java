@@ -31,6 +31,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
  *         &lt;element name="alias" type="{http://www.w3.org/2001/XMLSchema}NCName" minOccurs="0"/&gt;
+ *         &lt;element name="altName" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="oiVis" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="oiVisData" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
@@ -53,6 +54,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "FocalInstrument", propOrder = {
     "name",
     "alias",
+    "altNames",
     "description",
     "oiVis",
     "oiVisData",
@@ -76,6 +78,8 @@ public class FocalInstrument
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "NCName")
     protected String alias;
+    @XmlElement(name = "altName")
+    protected List<String> altNames;
     @XmlElement(required = true)
     protected String description;
     protected Boolean oiVis;
@@ -139,6 +143,35 @@ public class FocalInstrument
      */
     public void setAlias(String value) {
         this.alias = value;
+    }
+
+    /**
+     * Gets the value of the altNames property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the altNames property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getAltNames().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * 
+     * 
+     */
+    public List<String> getAltNames() {
+        if (altNames == null) {
+            altNames = new ArrayList<String>();
+        }
+        return this.altNames;
     }
 
     /**
@@ -419,7 +452,7 @@ public class FocalInstrument
      * @return higher number of channels of this instrument
      */
     public int getNumberChannelsMax() {
-        return numberChannelsMin;
+        return numberChannelsMax;
     }
 
     /**
@@ -427,7 +460,7 @@ public class FocalInstrument
      * @param value higher number of channels of this instrument
      */
     public void setNumberChannelsMax(int value) {
-        this.numberChannelsMin = value;
+        this.numberChannelsMax = value;
     }
 
     /** lower wave length of this instrument (micrometer) */
@@ -567,6 +600,7 @@ public class FocalInstrument
         logger.info("Instrument[{}] {", getName());
         logger.info("  name: {}", getName());
         logger.info("  alias: {}", getAlias());
+        logger.info("  altNames: {}", getAltNames());
         logger.info("  description: {}", getDescription());
 
         logger.info("  numberChannelsMin: {}", getNumberChannelsMin());
