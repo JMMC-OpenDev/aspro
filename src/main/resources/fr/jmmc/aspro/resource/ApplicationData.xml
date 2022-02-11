@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.03 beta 8"/>
-    <compilation date="28/01/2022" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="22.03 beta 9"/>
+    <compilation date="11/02/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,10 @@
 
     <releasenotes>
         <release version="22.03">
-            <pubDate>Fri, 28 Jan 2022 15:00:00 GMT</pubDate>
+            <pubDate>Fri, 11 Feb 2022 17:00:00 GMT</pubDate>
+            <prerelease version="22.03 beta 9">
+                <change type="FEATURE">Improved loading observation files (asprox) to fix former instrument references (CHARA simplified instruments)</change>
+            </prerelease>
             <prerelease version="22.03 beta 8">
                 <change type="FEATURE">Added SAMP 'load.fits.image' handler by opening the Target editor and associating the given model file to the current target (AMHRA)</change>
                 <change type="FEATURE">Improved TargetEditor to handle SAMP interoperability (target merged with the editor state)</change>
