@@ -2732,6 +2732,20 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <!-- instrument setup reference -->
+            <xsd:element name="setupRef" type="xsd:IDREF" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The instrument setup associated with this instrument mode
+                    </xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:property>
+                            <jaxb:baseType name="FocalInstrumentSetup" />
+                        </jaxb:property>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="resolution" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -2774,20 +2788,6 @@
                         The maximal bandwith for the reference wave length of this instrument mode (micrometer)
                         with fringe tracker enabled that can be read by the detector within 1 DIT (FT)
                     </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-
-            <!-- instrument setup reference -->
-            <xsd:element name="setupRef" type="xsd:IDREF" minOccurs="0" maxOccurs="1">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The instrument setup associated with this instrument mode
-                    </xsd:documentation>
-                    <xsd:appinfo>
-                        <jaxb:property>
-                            <jaxb:baseType name="FocalInstrumentSetup" />
-                        </jaxb:property>
-                    </xsd:appinfo>
                 </xsd:annotation>
             </xsd:element>
 

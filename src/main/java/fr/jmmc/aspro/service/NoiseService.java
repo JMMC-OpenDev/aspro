@@ -647,27 +647,18 @@ public final class NoiseService implements VisNoiseService {
             // Get table data:
             SpectralSetupColumn col;
             // transmission:
-            col = table.getColumn(SpectralSetupQuantity.TRANSMISSION, telescope);
-            if (col == null) {
-                col = table.getColumn(SpectralSetupQuantity.TRANSMISSION);
-            }
+            col = table.getColumnOrDefault(SpectralSetupQuantity.TRANSMISSION, telescope);
             if (col != null) {
                 this.transmission = Arrays.copyOfRange(col.getValues(), firstIdx, lastIdx);
             }
             // visibility:
-            col = table.getColumn(SpectralSetupQuantity.VISIBILITY, telescope);
-            if (col == null) {
-                col = table.getColumn(SpectralSetupQuantity.VISIBILITY);
-            }
+            col = table.getColumnOrDefault(SpectralSetupQuantity.VISIBILITY, telescope);
             if (col != null) {
                 this.instrumentalVisibility = Arrays.copyOfRange(col.getValues(), firstIdx, lastIdx);
             }
 
             // nb photon thermal per beam per second (background):
-            col = table.getColumn(SpectralSetupQuantity.NB_PHOTON_THERMAL, telescope);
-            if (col == null) {
-                col = table.getColumn(SpectralSetupQuantity.NB_PHOTON_THERMAL);
-            }
+            col = table.getColumnOrDefault(SpectralSetupQuantity.NB_PHOTON_THERMAL, telescope);
             if (col != null) {
                 this.nbPhotThermal = Arrays.copyOfRange(col.getValues(), firstIdx, lastIdx);
             }

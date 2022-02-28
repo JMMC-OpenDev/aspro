@@ -271,6 +271,20 @@ public class SpectralSetup
     }
 
     /**
+     * Return the column of the given quantity matching the given telescope or without telescope if no match
+     * @param quantity quantity to look up
+     * @param telescope optional telescope to look up
+     * @return column or null if the column was not found
+     */
+    public SpectralSetupColumn getColumnOrDefault(final SpectralSetupQuantity quantity, final Telescope telescope) {
+        SpectralSetupColumn col = getColumn(quantity, telescope);
+        if (col == null) {
+            col = getColumn(quantity);
+        }
+        return col;
+    }
+    
+    /**
      * Return the column of the given quantity and optionally matching the given telescope
      * @param quantity quantity to look up
      * @param telescope optional telescope to look up
@@ -279,7 +293,7 @@ public class SpectralSetup
     public SpectralSetupColumn getColumn(final SpectralSetupQuantity quantity, final Telescope telescope) {
         for (SpectralSetupColumn c : getColumns()) {
             if (c.getQuantity() == quantity) {
-                if (telescope != null && c.getTelescope() != null
+                if ((telescope != null) && (c.getTelescope() != null)
                         && !c.getTelescope().getName().equals(telescope.getName())) {
                     continue;
                 }

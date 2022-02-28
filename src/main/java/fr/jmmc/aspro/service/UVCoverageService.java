@@ -480,8 +480,6 @@ public final class UVCoverageService {
     private void prepareObservation() throws IllegalStateException {
         // Get AstroSkyCalc instance :
         this.sc = this.obsData.getDateCalc();
-        // Copy station names :
-        this.data.setStationNames(this.obsData.getStationNames());
         // Get beams :
         this.beams = this.obsData.getBeams();
         // Get baselines :

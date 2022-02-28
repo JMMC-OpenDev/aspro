@@ -25,8 +25,6 @@ public final class UVCoverageData {
     private double uvMaxFreq;
     /** central wave length (meter) */
     private double lambda;
-    /** configuration i.e. station names */
-    private String stationNames;
     /** base line list */
     private List<BaseLine> baseLines = null;
     /** list of uv points corresponding to the target rise/set */
@@ -107,22 +105,6 @@ public final class UVCoverageData {
      */
     public void setLambda(final double lambda) {
         this.lambda = lambda;
-    }
-
-    /**
-     * Return the configuration i.e. station names
-     * @return configuration i.e. station names
-     */
-    public String getStationNames() {
-        return stationNames;
-    }
-
-    /**
-     * Define the configuration i.e. station names
-     * @param stationNames configuration i.e. station names
-     */
-    public void setStationNames(final String stationNames) {
-        this.stationNames = stationNames;
     }
 
     /**

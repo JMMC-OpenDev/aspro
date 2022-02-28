@@ -564,7 +564,6 @@ public class FocalInstrument
             throw new IllegalStateException("Missing setup !");
         }
 
-        // TODO: check setupIds unicity (map) ?
         // Check setups:
         for (FocalInstrumentSetup setup : getSetups()) {
             setup.init(logger);
