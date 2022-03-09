@@ -56,6 +56,15 @@ public final class TargetUtils {
         return ALX.toDMS(ALX.parseDEC(dec));
     }
 
+    public static double computeDistanceInArcsec(final Target refTarget, final Target otherTarget) {
+        return computeDistanceInDegrees(refTarget, otherTarget) * ALX.DEG_IN_ARCSEC;
+    }
+
+    public static double computeDistanceInDegrees(final Target refTarget, final Target otherTarget) {
+        return CoordUtils.computeDistanceInDegrees(refTarget.getRADeg(), refTarget.getDECDeg(),
+                otherTarget.getRADeg(), otherTarget.getDECDeg());
+    }
+
     /**
      * Check the distance between the given source target and the given list of targets (5 arcesecs)
      * @param srcTarget source target
@@ -64,14 +73,11 @@ public final class TargetUtils {
      * @throws IllegalArgumentException if the target is too close to another target present in the given list of targets
      */
     public static TargetMatch matchTargetCoordinates(final Target srcTarget, final List<Target> targets) throws IllegalArgumentException {
-        final double srcRaDeg = srcTarget.getRADeg();
-        final double srcDecDeg = srcTarget.getDECDeg();
-
         double distance, min = Double.MAX_VALUE;
         Target match = null;
 
         for (Target target : targets) {
-            distance = CoordUtils.computeDistanceInDegrees(srcRaDeg, srcDecDeg, target.getRADeg(), target.getDECDeg());
+            distance = computeDistanceInDegrees(srcTarget, target);
 
             if (distance <= SAME_TARGET_DISTANCE) {
                 // check simbad identifiers to avoid false-positives:

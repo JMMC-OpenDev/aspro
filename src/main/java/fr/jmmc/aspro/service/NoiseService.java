@@ -32,6 +32,7 @@ import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
+import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.VisNoiseService;
@@ -926,8 +927,10 @@ public final class NoiseService implements VisNoiseService {
             } else {
                 fringeTrackerMag = flux.doubleValue();
                 if (ftTarget != target) {
-                    addInformation("FT associated to target [" + ftTarget.getName() + "]: "
-                            + df.format(fringeTrackerMag) + " mag");
+                    final double distAs = TargetUtils.computeDistanceInArcsec(target, ftTarget);
+                    addInformation("FT associated to target [" + ftTarget.getName() + "] ("
+                            + ftBand + '=' + df.format(fringeTrackerMag) + " mag "
+                            + "sep=" + NumberUtils.trimTo3Digits(distAs) + " as)");
                 }
             }
             if (logger.isDebugEnabled()) {
@@ -971,8 +974,10 @@ public final class NoiseService implements VisNoiseService {
                             + fluxAOBand + '=' + df.format(adaptiveOpticsMag) + " mag)");
                 }
                 if (aoTarget != target) {
+                    final double distAs = TargetUtils.computeDistanceInArcsec(target, aoTarget);
                     addInformation("AO associated to target [" + aoTarget.getName() + "] ("
-                            + fluxAOBand + '=' + df.format(adaptiveOpticsMag) + " mag)");
+                            + fluxAOBand + '=' + df.format(adaptiveOpticsMag) + " mag "
+                            + "sep=" + NumberUtils.trimTo3Digits(distAs) + " as)");
                 }
             }
         }
