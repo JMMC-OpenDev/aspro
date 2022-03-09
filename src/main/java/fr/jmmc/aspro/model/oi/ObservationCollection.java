@@ -244,7 +244,7 @@ public class ObservationCollection
    * @param separator delimiter string
    * @return string containing up to 3 configuration(s) or 'MULTI CONFIGURATION'
    */
-  public final String getDisplayConfigurations(final String separator) {
+  public String getDisplayConfigurations(final String separator) {
     return getDisplayConfigurations(separator, false);
   }
 
@@ -279,7 +279,6 @@ public class ObservationCollection
     for (ObservationSetting observation : getObservations()) {
       sb.append(observation.getInstrumentConfiguration().getStations()).append(separator);
     }
-
     sb.delete(sb.length() - separator.length(), sb.length());
   }
 //--simple--preserve

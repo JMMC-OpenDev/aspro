@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.03 beta 10"/>
-    <compilation date="01/03/2022" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="22.03 beta 11"/>
+    <compilation date="09/03/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,7 +229,18 @@
 
     <releasenotes>
         <release version="22.03">
-            <pubDate>Tue, 01 Mar 2022 09:00:00 GMT</pubDate>
+            <pubDate>Wed, 09 Mar 2022 14:00:00 GMT</pubDate>
+            <prerelease version="22.03 beta 11">
+                <change type="FEATURE">Improved displayed CHARA Current &amp; Fixed PoPs to use the station order given by the 6T configuration (MIRCX)</change>
+                <change type="FEATURE">Added new CHARA PoPs actions 'set' &amp; 'clear' respectively to set PoPs with the current best PoPs value
+                    and reset the fixed PoPs ([Auto] = any Pop value)</change>
+                <change type="FEATURE">Added new CHARA fixed PoPs widgets to define PoPs associated to stations ('-' means any Pop value [1-5])</change>
+                <change type="FEATURE">Improved CHARA PoPs field [Manual] to handle the wildcard digit '8' corresponding to any Pop value [1-5]</change>
+                <change type="FEATURE">Improved chart titles to display the full CHARA configuration as 'SS(n)-...'
+                    where 'SS' indicates the station and 'n' the Pop value associuated to the corresponding station;
+                    for example: 'CHARA 2022B - MIRCX-MYSTIC - E1(1)-W2(5)-W1(1)-S2(5)-S1(5)-E2(3)'
+                </change>
+            </prerelease>
             <prerelease version="22.03 beta 10">
                 <change type="FEATURE">Updated CHARA MIRCX-MYSTIC instrument to provide new instrument modes (K band)</change>
             </prerelease>
@@ -251,7 +262,7 @@
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1152">Fixed findInstrumentConfigurationStations() to avoid too much permutations (max=6 and check numberChannelsMin/Max)</change>
             </prerelease>
             <prerelease version="22.03 beta 4">
-                <change type="FEATURE">Improved the main setting panel to update the Pops combo box plot for baseline limits and reset best PoPs if the configuration changes</change>
+                <change type="FEATURE">Improved the main setting panel to update the PoPs combo box plot for baseline limits and reset best PoPs if the configuration changes</change>
                 <change type="FEATURE">Improved observability plot for baseline limits to support multiple configurations and report information and warning messages (CHARA PoPs)</change>
                 <change type="FEATURE">Improved observability plot with large lists (increased bar width and disabled bar outline)</change>
             </prerelease>
@@ -577,7 +588,7 @@
             </prerelease>
             <prerelease version="0.9.9.2 beta 1">
                 <change type="FEATURE">Added preference 'Bypass GUI restrictions' to enable / disable Gui limitations on the main fields (PIVOT / VEGA interoperability)</change>
-                <change type="FEATURE">Added a status tooltip giving the (initial) loaded observation setup: interferometer instrument configuration Pops</change>
+                <change type="FEATURE">Added a status tooltip giving the (initial) loaded observation setup: interferometer instrument configuration PoPs</change>
             </prerelease>
         </release>
         <release version="0.9.9.1">
@@ -751,7 +762,7 @@
             <prerelease version="0.9.6 beta 7">
                 <change type="FEATURE">Improved the memory footprint for user models (fits cubes): efficient checksum computation
                     and optimized memory used by model image / FFT computations</change>
-                <change type="FEATURE">Improved quick sort used by the Best Pops algorithm</change>
+                <change type="FEATURE">Improved quick sort used by the Best PoPs algorithm</change>
                 <change type="CHANGE">Improved OutOfMemoryError handling to display first explanations in the Feedback report
                     and then only indicate them in the status bar (more than 3 errors).</change>
             </prerelease>
@@ -839,7 +850,7 @@
                 <change type="FEATURE">Modified OIFits INSNAME values to have a meaningfull instrument mode description: Instrument_lambdaFirst-lambdaLast-Nch;
                     lambdaFirst, lambdaLast, N are respectively the wavelength of the first and last spectral channels, the number of spectral channels
                     (for example: AMBER_1.48347-2.52552-37ch)</change>
-                <change type="CHANGE">Improved global performance (Best Pops, model image, astronomical computations) using Java Fast Math library (jafama 2.0)</change>
+                <change type="CHANGE">Improved global performance (Best PoPs, model image, astronomical computations) using Java Fast Math library (jafama 2.0)</change>
             </prerelease>
             <prerelease version="0.9.4 beta 11">
                 <change type="FEATURE">Modified evaluation of moon avoidance rules to use target fluxes (V)</change>
@@ -853,7 +864,7 @@
             </prerelease>
             <prerelease version="0.9.4 beta 9">
                 <change type="FEATURE">Added a 'Find' feature (Previous / Next) to select a target in the target list by pattern matching on its name</change>
-                <change type="CHANGE">Modified warning messages (CHARA configuration and Pops settings) considered as information messages:
+                <change type="CHANGE">Modified warning messages (CHARA configuration and PoPs settings) considered as information messages:
                     status is then 'Information'</change>
                 <change type="FEATURE">Added filters on the observability plot (Hide calibrators and unobservable targets)</change>
                 <change type="FEATURE">Added target selection handling in the observability plot to display it highlighted and scroll to it</change>
@@ -880,12 +891,12 @@
             <prerelease version="0.9.4 beta 5">
                 <change type="FEATURE">Enabled parallelization of the observability computation in multi configuration mode</change>
                 <change type="FEATURE">Enhanced parallelization of the Best PoPs algorithm</change>
-                <change type="BUGFIX">Fixed NPE exception in Best Pops algorithm when targets never rise</change>
+                <change type="BUGFIX">Fixed NPE exception in Best PoPs algorithm when targets never rise</change>
             </prerelease>
             <prerelease version="0.9.4 beta 4">
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/390">Fixed the color scale on UV coverage plot to use degrees instead of radians when representing the model phase</change>
                 <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/402">Fixed OIFits viewer compatiblity with OpenJDK 1.6.24 and 1.7.x</change>
-                <change type="CHANGE">Improved Pops GUI ie improved synchronization between Pops text field and Best Pops combo box</change>
+                <change type="CHANGE">Improved PoPs GUI ie improved synchronization between PoPs text field and Best PoPs combo box</change>
             </prerelease>
             <prerelease version="0.9.4 beta 3">
                 <change type="FEATURE">Changed Observability plot to show HA constraints, moon avoidance and wind restriction using translucent area and dotted outline</change>
@@ -895,7 +906,7 @@
             </prerelease>
             <prerelease version="0.9.4 beta 2">
                 <change type="FEATURE">Added HA constraints (per target) in the observability computation displayed using translucent area and dotted outline</change>
-                <change type="FEATURE">Added a combo box in the main settings to see estimated best Pops combinations and their effect on observability</change>
+                <change type="FEATURE">Added a combo box in the main settings to see estimated best PoPs combinations and their effect on observability</change>
                 <change type="FEATURE">Enhanced the Best PoPs algorithm to take new rules into account (transit distance and HA constraints);
                     it is based on a normal law estimator that allows more control (gaussian variance and average estimation versus min estimation)</change>
                 <change type="CHANGE">Optimized Best PoPs algorithm (multithreading)</change>
@@ -1185,7 +1196,7 @@
                     always use the bright scenario as the faint scenario is not available for all instrumental bands</change>
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/145">Changed color for orphan calibrators in the observability plot</change>
                 <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/143">Fixed export OB for CHARA VEGA to handle properly calibrators in the StarList format</change>
-                <change>Automatic Pops set with values defined in CHARA VEGA configuration dedicated to June 2011 run (read-only)</change>
+                <change>Automatic PoPs set with values defined in CHARA VEGA configuration dedicated to June 2011 run (read-only)</change>
                 <change>Added CHARA VEGA configuration dedicated to June 2011 runs and minor changes in CHARA configuration (sorted instrument list)</change>
             </prerelease>
             <prerelease version="0.8.1 beta 2">

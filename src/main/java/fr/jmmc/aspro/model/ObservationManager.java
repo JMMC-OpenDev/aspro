@@ -25,6 +25,7 @@ import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.ObservationVariant;
+import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
@@ -33,6 +34,7 @@ import fr.jmmc.aspro.model.oi.TargetRawObservation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.oi.WhenSetting;
+import fr.jmmc.aspro.model.util.PopsUtils;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.aspro.service.UserModelService;
@@ -55,8 +57,10 @@ import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -971,6 +975,28 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         return changed;
     }
 
+    /**
+     * Set the fixed Pops (allPops)
+     * Used by BasicObservationForm.updateObservation()
+
+     * @param popsFixed optional Map of (Station, Pop)
+     * @return true if the value changed
+     */
+    public boolean setInterferometerPopsFixed(final TreeMap<String, Pop> popsFixed) {
+        final InterferometerConfigurationChoice interferometerChoice = getMainObservation().getInterferometerConfiguration();
+
+        final boolean changed = isChanged(interferometerChoice.getFixedPops(), popsFixed);
+        if (changed) {
+            final Map<String, Pop> popsFixedCopy = (!CollectionUtils.isEmpty(popsFixed)) ? new TreeMap<>(popsFixed) : null;
+            if (logger.isTraceEnabled()) {
+                logger.trace("setInterferometerPopsFixed: {}", popsFixedCopy);
+            }
+            interferometerChoice.setFixedPops(popsFixedCopy);
+            interferometerChoice.setAllPops(PopsUtils.toString(popsFixed));
+        }
+        return changed;
+    }
+
     // --- INSTRUMENT ------------------------------------------------------------
     /**
      * Set the instrument configuration (instrument for a given interferometer + period)
@@ -1038,22 +1064,24 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                     logger.trace("setInstrumentConfigurationStations[{}]: {}", i, stations);
                 }
                 obsVariant.setStations(stations);
-                // consistent with changed flag:
-                obsVariant.setStationList(cm.getInstrumentConfigurationStations(
-                        observation.getInterferometerConfiguration().getName(),
-                        observation.getInstrumentConfiguration().getName(), stations));
             }
+            // always update references:
+            obsVariant.setStationList(cm.getInstrumentConfigurationStations(
+                    observation.getInterferometerConfiguration().getName(),
+                    observation.getInstrumentConfiguration().getName(), stations));
         }
 
         // then update the instrument configuration for model compatibility :
+        obsVariant = obsVariants.get(0);
+
+        final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
+
         if (changed) {
-            obsVariant = obsVariants.get(0);
-
-            final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
-
             instrumentChoice.setStations(obsVariant.getStations());
-            instrumentChoice.setStationList(obsVariant.getStationList());
         }
+        // always update references:
+        instrumentChoice.setStationList(obsVariant.getStationList());
+
         return changed;
     }
 
@@ -1076,12 +1104,11 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 logger.trace("setInstrumentConfigurationPoPs: {}", pops);
             }
             instrumentChoice.setPops(pops);
-            // consistent with changed flag:
-            instrumentChoice.setPopList(cm.parseInstrumentPoPs(
-                    observation.getInterferometerConfiguration().getName(),
-                    observation.getInstrumentConfiguration().getName(),
-                    observation.getInstrumentConfiguration().getStations(), pops, null));
         }
+        // always update references:
+        instrumentChoice.setPopList(cm.parseInstrumentPoPs(
+                observation.getInterferometerConfiguration().getName(),
+                observation.getInstrumentConfiguration().getStations(), pops));
         return changed;
     }
 
@@ -1919,7 +1946,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
      */
     private void updateObservation(final ObservationSetting observation) throws IllegalStateException {
-        // ugly code to update all resolved references used on post load :
+        // update all resolved references used on post load :
         final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
 
         String interferometerConfiguration = interferometerChoice.getName();
@@ -1943,6 +1970,17 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 throw new IllegalStateException("The interferometer configuration [" + interferometerConfiguration + "] is invalid"
                         + " and none has the instrument [" + instrumentAlias + "] !");
             }
+        }
+
+        if (interferometerChoice.getAllPops() != null) {
+            logger.debug("allPops: {}", interferometerChoice.getAllPops());
+
+            final List<Pop> listPoPs = interferometerChoice.getInterferometerConfiguration().getInterferometer().getPops();
+
+            final TreeMap<String, Pop> popsFixed = PopsUtils.fromString(interferometerChoice.getAllPops(), listPoPs);
+            logger.debug("popsFixed: {}", popsFixed);
+
+            interferometerChoice.setFixedPops(popsFixed);
         }
 
         instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(interferometerConfiguration, instrumentAlias));
@@ -1992,8 +2030,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         instrumentChoice.setStationList(obsVariant.getStationList());
 
         // pops can be undefined :
-        instrumentChoice.setPopList(cm.parseInstrumentPoPs(interferometerConfiguration, instrumentAlias, obsVariant.getStations(),
-                instrumentChoice.getPops(), null));
+        instrumentChoice.setPopList(cm.parseInstrumentPoPs(interferometerConfiguration,
+                obsVariant.getStations(), instrumentChoice.getPops()));
 
         // instrument mode can be undefined :
         instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(interferometerConfiguration, instrumentAlias, instrumentChoice.getInstrumentMode()));

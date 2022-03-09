@@ -11,6 +11,8 @@ import fr.jmmc.aspro.model.ObservationVersion;
 import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
+import fr.jmmc.aspro.model.oi.Pop;
+import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,8 +67,8 @@ public final class ObservabilityData {
     private final Map<String, List<StarObservabilityData>> mapStarVisibilities = new HashMap<String, List<StarObservabilityData>>();
     /** flag indicating to use user PoPs */
     private boolean userPops;
-    /** optional best PoPs combination */
-    private PopCombination bestPops;
+    /** optional used PoPs combination */
+    private PopCombination usedPops;
     /** optional best PoPs combinations */
     private List<PopCombination> bestPopList;
     /** optional good PoPs combinations */
@@ -77,8 +79,8 @@ public final class ObservabilityData {
     /* other useful data for UV coverage */
     /** AstroSkyCalc instance useful to convert HA in LST or UTC */
     private AstroSkyCalc dateCalc = null;
-    /** configuration */
-    private String stationNames;
+    /** resolved reference to the list of Stations (read only) */
+    private List<Station> stationList = null;
     /** beam list */
     private List<Beam> beams = null;
     /** base line list */
@@ -382,19 +384,19 @@ public final class ObservabilityData {
     }
 
     /**
-     * Return the optional best PoPs combination
-     * @return optional best PoPs combination
+     * Return the optional used PoPs combination (user or best)
+     * @return optional used PoPs combination
      */
-    public PopCombination getBestPops() {
-        return bestPops;
+    public PopCombination getUsedPops() {
+        return usedPops;
     }
 
     /**
-     * Define the optional best PoPs combination
-     * @param bestPops optional best PoPs combination
+     * Define the optional used PoPs combination (user or best)
+     * @param bestPops optional used PoPs combination
      */
-    public void setBestPops(final PopCombination bestPops) {
-        this.bestPops = bestPops;
+    public void setUsedPops(final PopCombination bestPops) {
+        this.usedPops = bestPops;
     }
 
     public List<PopCombination> getBestPopList() {
@@ -411,6 +413,25 @@ public final class ObservabilityData {
 
     public void setBetterPopList(List<PopCombination> betterPopList) {
         this.betterPopList = betterPopList;
+    }
+
+    public boolean getStationNameWithPops(final StringBuilder sb) {
+        // has Pops:
+        if ((stationList != null) && (usedPops != null)) {
+            final Pop[] pops = usedPops.getPops();
+            sb.setLength(0);
+
+            // Use "XX(i)-" format:
+            for (int i = 0, len = stationList.size(); i < len; i++) {
+                sb.append(stationList.get(i).getName());
+                sb.append('(');
+                sb.append(pops[i].getIndex());
+                sb.append(")-");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            return true;
+        }
+        return false;
     }
 
     /* other useful data for UV coverage */
@@ -431,19 +452,19 @@ public final class ObservabilityData {
     }
 
     /**
-     * Return the configuration
-     * @return configuration
+     * Return the list of Stations
+     * @return list of Stations
      */
-    public String getStationNames() {
-        return stationNames;
+    public List<Station> getStationList() {
+        return stationList;
     }
 
     /**
-     * Define the configuration
-     * @param stationNames configuration
+     * Define the list of Stations
+     * @param stationList list of Stations
      */
-    public void setStationNames(final String stationNames) {
-        this.stationNames = stationNames;
+    public void setStationList(final List<Station> stationList) {
+        this.stationList = stationList;
     }
 
     /**

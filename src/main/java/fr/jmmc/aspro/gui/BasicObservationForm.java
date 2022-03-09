@@ -10,6 +10,7 @@ import edu.dartmouth.Site;
 import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
+import fr.jmmc.aspro.gui.util.PopListRenderer;
 import fr.jmmc.aspro.gui.util.TargetList;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
@@ -38,6 +39,7 @@ import fr.jmmc.aspro.model.oi.ObservationContext;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Pop;
+import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmal.star.EditableStarResolverWidget;
@@ -51,6 +53,7 @@ import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.logging.LogbackGui;
 import fr.jmmc.jmcs.logging.LoggingService;
+import fr.jmmc.jmcs.util.CollectionUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.StringUtils;
@@ -72,12 +75,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JSpinner.DateEditor;
 import javax.swing.ListModel;
@@ -114,6 +122,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private final static String POPS_AUTO = "[Auto]";
     /** maximum of warnings shown in tooltips */
     private final static int MAX_TOOLTIP_WARNINGS = 100;
+    /** fixed font */
+    private final static Font FIXED_FONT = new Font(Font.MONOSPACED, Font.PLAIN, SwingUtils.adjustUISize(12));
     /** configuration manager */
     private final static ConfigurationManager cm = ConfigurationManager.getInstance();
     /** observation manager */
@@ -146,6 +156,22 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private String lastInsConfCompatibleWithPopConfig = null;
     /** last instrument configuration key ('S1 S2 E1@T/F') used by the best PoPs algorithm */
     private String lastInsConfKeyForBestPops = null;
+
+    // Fixed Pops handling (2022.3):
+    /** current Pops (from observability data) as (station = Pop) */
+    private Map<String, Pop> popsCurrentMap = null;
+    /** fixed Pops (from observability data) as (station = Pop) */
+    private TreeMap<String, Pop> popsFixed = null;
+    /** last stations for Pops used */
+    private List<String> lastStationsForPops = null;
+    /** default stations for Pops */
+    private final List<String> defStationsForPops = new ArrayList<>();
+    /** station labels (ordered like the interferometer pops list) */
+    private final List<JLabel> popsStationLabels = new ArrayList<>();
+    /** pops combo boxes (ordered like the interferometer pops list) */
+    private final List<JComboBox> popsComboBoxes = new ArrayList<>();
+    /** map of station to list index in previous fields */
+    private final Map<String, Integer> stationToPopsWidgetIndex = new HashMap<>();
 
     /** Creates new form BasicObservationForm */
     public BasicObservationForm() {
@@ -183,9 +209,17 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jComboBoxInstrument = new javax.swing.JComboBox();
         jLabelPops = new javax.swing.JLabel();
         jTextPoPs = new JFormattedTextField(getPopsFormatter());
+        jComboBoxPops = new javax.swing.JComboBox<>();
+        jButtonPopsSet = new javax.swing.JButton();
+        jButtonPopsClear = new javax.swing.JButton();
+        jPanelFixedPops = new javax.swing.JPanel();
+        jLabelFixedPops = new javax.swing.JLabel();
+        jPanelFixedPopsGen = new javax.swing.JPanel();
+        jLabelCurrentPops = new javax.swing.JLabel();
+        jTextFieldCurrentPops = new javax.swing.JTextField();
+        jPanelFixedPopsSpacer = new javax.swing.JPanel();
         jPanelObsRight = new javax.swing.JPanel();
         jPanelObsBottom = new javax.swing.JPanel();
-        jComboBoxPops = new javax.swing.JComboBox<>();
         jPanelConfigurations = new javax.swing.JPanel();
         jScrollPaneInstrumentConfigurations = new javax.swing.JScrollPane();
         jListInstrumentConfigurations = createConfigurationList();
@@ -323,7 +357,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 4;
+        gridBagConstraints.gridheight = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.1;
         jPanelMain.add(jPanelObsLeft, gridBagConstraints);
@@ -334,14 +368,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 4);
         jPanelMain.add(jLabelInterferometer, gridBagConstraints);
 
         jComboBoxInterferometer.setName("jComboBoxInterferometer"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
@@ -352,14 +386,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 4);
         jPanelMain.add(jLabelPeriod, gridBagConstraints);
 
         jComboBoxInterferometerConfiguration.setName("jComboBoxInterferometerConfiguration"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         jPanelMain.add(jComboBoxInterferometerConfiguration, gridBagConstraints);
@@ -370,14 +404,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 4);
         jPanelMain.add(jLabelInstrument, gridBagConstraints);
 
         jComboBoxInstrument.setName("jComboBoxInstrument"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         jPanelMain.add(jComboBoxInstrument, gridBagConstraints);
@@ -388,11 +422,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
         jPanelMain.add(jLabelPops, gridBagConstraints);
 
         jTextPoPs.setColumns(6);
-        jTextPoPs.setToolTipText("<html>\ndefine a specific PoPs combination (PoP 1 to 5) by giving the list of PoP numbers<br>\nin the same order than stations of the selected base line. For example:<ul>\n<li>VEGA_2T with baseline S1-S2<br>'34' means PoP3 on S1 and PoP4 on S2</li>\n<li>MIRC (4T) with baseline S1-S2-E1-W2<br>'1255' means PoP1 on S1, PoP2 on S2 and Pop5 on E1 and W2</li>\n</ul>\n<b>If you leave this field blank, ASPRO 2 will compute the 'best PoP' combination<br>\nmaximizing the observability of your complete list of targets</b>\n</html>");
+        jTextPoPs.setToolTipText("<html>\ndefine a specific PoPs combination (PoP 1 to 5) by giving the list of PoP numbers<br>\nin the same order than stations of the selected base line. For example:<ul>\n<li>CLASSIC (2T) with baseline S1-S2<br>'34' means PoP3 on S1 and PoP4 on S2</li>\n<li>MIRC (4T) with baseline S1-S2-E1-W2<br>'1255' means PoP1 on S1, PoP2 on S2 and Pop5 on E1 and W2</li>\n</ul>\n<b>If you leave this field blank, ASPRO 2 will compute the 'best PoP' combination<br>\nmaximizing the observability of your complete list of targets</b>\n<br>The Pop value '8' is the wildcard value (any Pop)\n</html>");
         jTextPoPs.setMinimumSize(new java.awt.Dimension(60, 20));
         jTextPoPs.setName("jTextPoPs"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -400,27 +434,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
         jPanelMain.add(jTextPoPs, gridBagConstraints);
-
-        jPanelObsRight.setMinimumSize(new java.awt.Dimension(4, 4));
-        jPanelObsRight.setPreferredSize(new java.awt.Dimension(4, 4));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
-        jPanelMain.add(jPanelObsRight, gridBagConstraints);
-
-        jPanelObsBottom.setPreferredSize(new java.awt.Dimension(1, 1));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.gridwidth = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 1.0;
-        jPanelMain.add(jPanelObsBottom, gridBagConstraints);
 
         jComboBoxPops.setMaximumRowCount(6);
         jComboBoxPops.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "[Manual]", "[Auto]" }));
@@ -428,14 +443,114 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 4);
         jPanelMain.add(jComboBoxPops, gridBagConstraints);
+
+        jButtonPopsSet.setText("set");
+        jButtonPopsSet.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonPopsSet.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPopsSetActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
+        jPanelMain.add(jButtonPopsSet, gridBagConstraints);
+
+        jButtonPopsClear.setText("clear");
+        jButtonPopsClear.setToolTipText("Reset all fixed Pops (any)");
+        jButtonPopsClear.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonPopsClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPopsClearActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 3;
+        jPanelMain.add(jButtonPopsClear, gridBagConstraints);
+
+        jPanelFixedPops.setLayout(new java.awt.GridBagLayout());
+
+        jLabelFixedPops.setText("Fixed:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        jPanelFixedPops.add(jLabelFixedPops, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        jPanelFixedPops.add(jPanelFixedPopsGen, gridBagConstraints);
+
+        jLabelCurrentPops.setText("Current:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        jPanelFixedPops.add(jLabelCurrentPops, gridBagConstraints);
+
+        jTextFieldCurrentPops.setEditable(false);
+        jTextFieldCurrentPops.setColumns(36);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        jPanelFixedPops.add(jTextFieldCurrentPops, gridBagConstraints);
+
+        jPanelFixedPopsSpacer.setMinimumSize(new java.awt.Dimension(4, 4));
+        jPanelFixedPopsSpacer.setPreferredSize(new java.awt.Dimension(4, 4));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.1;
+        jPanelFixedPops.add(jPanelFixedPopsSpacer, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanelMain.add(jPanelFixedPops, gridBagConstraints);
+
+        jPanelObsRight.setMinimumSize(new java.awt.Dimension(4, 4));
+        jPanelObsRight.setPreferredSize(new java.awt.Dimension(4, 4));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.1;
+        jPanelMain.add(jPanelObsRight, gridBagConstraints);
+
+        jPanelObsBottom.setPreferredSize(new java.awt.Dimension(1, 1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 0.1;
+        jPanelMain.add(jPanelObsBottom, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.weightx = 0.1;
         add(jPanelMain, gridBagConstraints);
 
         jPanelConfigurations.setBorder(javax.swing.BorderFactory.createTitledBorder("Configuration(s)"));
@@ -648,6 +763,38 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
           JSkyCalc.showJSkyCalc(site, name, ra, dec, selectedTarget.getName(), observation.getWhen().getDate());
       }
   }//GEN-LAST:event_jButtonSkyCalcActionPerformed
+
+    private void jButtonPopsSetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPopsSetActionPerformed
+        if (popsCurrentMap != null) {
+            // disable the automatic update observation :
+            final boolean prevAutoUpdateObservation = setAutoUpdateObservation(false);
+            try {
+                // Define fixed Pops combo boxes (only Pops used):
+                setFixedPopsComboBox(popsCurrentMap);
+            } finally {
+                // restore the automatic update observation :
+                setAutoUpdateObservation(prevAutoUpdateObservation);
+            }
+            // group multiple calls into a single observation update event :
+            fireObservationUpdateEvent();
+        }
+    }//GEN-LAST:event_jButtonPopsSetActionPerformed
+
+    private void jButtonPopsClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPopsClearActionPerformed
+        // disable the automatic update observation :
+        final boolean prevAutoUpdateObservation = setAutoUpdateObservation(false);
+        try {
+            // Reset all fixed Pops combo boxes:
+            for (JComboBox comboBox : popsComboBoxes) {
+                comboBox.setSelectedItem(Pop.ANY_POP);
+            }
+        } finally {
+            // restore the automatic update observation :
+            setAutoUpdateObservation(prevAutoUpdateObservation);
+        }
+        // group multiple calls into a single observation update event :
+        fireObservationUpdateEvent();
+    }//GEN-LAST:event_jButtonPopsClearActionPerformed
 
     /**
      * Process the remove target action
@@ -888,11 +1035,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         // Adjust fonts:
         jLabelStatus.setFont(new Font(Font.DIALOG, Font.BOLD, SwingUtils.adjustUISize(18)));
-        final Font fixedFont = new Font(Font.MONOSPACED, Font.PLAIN, SwingUtils.adjustUISize(12));
-        jListTargets.setFont(fixedFont);
-        jListInstrumentConfigurations.setFont(fixedFont);
-        jComboBoxPops.setFont(fixedFont);
-        jTextPoPs.setFont(fixedFont);
+
+        jListTargets.setFont(FIXED_FONT);
+        jListInstrumentConfigurations.setFont(FIXED_FONT);
+        jComboBoxPops.setFont(FIXED_FONT);
+        jTextPoPs.setFont(FIXED_FONT);
+        jTextFieldCurrentPops.setFont(FIXED_FONT);
     }
 
     /**
@@ -1154,6 +1302,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 updateComboInstrumentConfiguration();
                 checkPops();
                 synchronizePops(false);
+                updateOrderedFixedPops();
                 updateWindRestriction();
 
             } else if (e.getSource() == jComboBoxInterferometerConfiguration) {
@@ -1162,11 +1311,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 }
                 updateComboInstrument();
                 updateComboInstrumentConfiguration();
+                updateOrderedFixedPops();
             } else if (e.getSource() == jComboBoxInstrument) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Instrument changed: {}", jComboBoxInstrument.getSelectedItem());
                 }
                 updateComboInstrumentConfiguration();
+                updateOrderedFixedPops();
                 validateCurrentPoPs();
             } else if (e.getSource() == jComboBoxPops) {
                 final String selectedPops = jComboBoxPops.getSelectedItem().toString();
@@ -1284,12 +1435,153 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * If false, reset the PoPs text field
      */
     private void checkPops() {
-        final boolean hasPops = cm.hasPoPs((String) jComboBoxInterferometer.getSelectedItem());
+        final String interferometerName = (String) jComboBoxInterferometer.getSelectedItem();
+
+        List<Pop> popList = cm.getPoPs(interferometerName);
+        logger.debug("popList: {}", popList);
+
+        final boolean hasPops = !CollectionUtils.isEmpty(popList);
+
+        // reset on interferometer change:
+        popsCurrentMap = null;
+        popsFixed = null;
 
         // note: label pops is only visible if the interferometer has Pops:
         jLabelPops.setVisible(hasPops);
         jTextPoPs.setVisible(hasPops);
         jComboBoxPops.setVisible(hasPops);
+        jButtonPopsSet.setVisible(hasPops);
+        jButtonPopsClear.setVisible(hasPops);
+        jPanelFixedPops.setVisible(hasPops);
+
+        jPanelFixedPopsGen.removeAll();
+        resetFixedPops();
+
+        if (hasPops) {
+            // Add any Pop (null):
+            popList = new ArrayList<>(popList);
+            popList.add(0, Pop.ANY_POP);
+
+            final List<Station> stationsWithPops = cm.getStationsWithPoPs(interferometerName);
+            logger.debug("stationsWithPops: {}", stationsWithPops);
+
+            int i = 0;
+            for (final Station station : stationsWithPops) {
+                final String name = station.getName();
+                stationToPopsWidgetIndex.put(name, i++);
+                defStationsForPops.add(name);
+
+                final JLabel label = new JLabel(" " + name);
+                label.setFont(FIXED_FONT);
+                popsStationLabels.add(label);
+
+                @SuppressWarnings("unchecked")
+                final JComboBox comboBox = new JComboBox(new GenericListModel<Pop>(popList, true));
+                comboBox.setPrototypeDisplayValue("X");
+                comboBox.setRenderer(PopListRenderer.INSTANCE);
+                comboBox.setFont(FIXED_FONT);
+                comboBox.setSelectedItem(Pop.ANY_POP); // any
+                comboBox.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        actionPerformedFixedPopsComboBox(name);
+                    }
+                });
+                popsComboBoxes.add(comboBox);
+
+                // same order as stations in interferometer configuration:
+                jPanelFixedPopsGen.add(label);
+                jPanelFixedPopsGen.add(comboBox);
+            }
+        }
+    }
+
+    private void resetFixedPops() {
+        defStationsForPops.clear();
+        popsStationLabels.clear();
+        popsComboBoxes.clear();
+        stationToPopsWidgetIndex.clear();
+    }
+
+    private void updateOrderedFixedPops() {
+        // enable PoPs only if the interferometer support it:
+        if (jLabelPops.isVisible()) {
+            // Get possible 6T configuration (first):
+            final String firstConf = (String) jListInstrumentConfigurations.getModel().getElementAt(0);
+            logger.debug("firstConf: {}", firstConf);
+
+            String[] stationNames = firstConf.split(" "); // ordered
+
+            // check first station has Pops (skip CHARA_7T):
+            if ((stationNames.length != defStationsForPops.size())
+                    || (stationToPopsWidgetIndex.get(stationNames[0]) == null)) {
+                stationNames = null;
+            }
+
+            final List<String> stationsForPops = (stationNames != null) ? Arrays.asList(stationNames) : defStationsForPops;
+            logger.debug("stationsForPops: {}", stationsForPops);
+
+            if (!ObjectUtils.areEquals(stationsForPops, lastStationsForPops)) {
+                jPanelFixedPopsGen.removeAll();
+
+                for (final String name : stationsForPops) {
+                    final Integer index = stationToPopsWidgetIndex.get(name);
+                    if (index != null) {
+                        final JLabel label = popsStationLabels.get(index);
+                        final JComboBox comboBox = popsComboBoxes.get(index);
+                        // same order as given stations:
+                        jPanelFixedPopsGen.add(label);
+                        jPanelFixedPopsGen.add(comboBox);
+                    }
+                }
+                lastStationsForPops = stationsForPops;
+            }
+        }
+    }
+
+    private void actionPerformedFixedPopsComboBox(final String name) {
+        final Integer index = stationToPopsWidgetIndex.get(name);
+        if (index != null) {
+            final JComboBox comboBox = popsComboBoxes.get(index);
+            final Pop selectedPop = (Pop) comboBox.getSelectedItem();
+
+            logger.debug("actionPerformedFixedPopsComboBox: {} = {}", name, selectedPop);
+
+            if (selectedPop == Pop.ANY_POP) {
+                if (popsFixed != null) {
+                    popsFixed.remove(name);
+                    if (popsFixed.isEmpty()) {
+                        popsFixed = null;
+                    }
+                }
+            } else {
+                if (popsFixed == null) {
+                    popsFixed = new TreeMap<>();
+                }
+                popsFixed.put(name, selectedPop);
+            }
+            logger.debug("popsFixed: {}", popsFixed);
+
+            fireObservationUpdateEvent();
+        }
+    }
+
+    private void setFixedPopsComboBox(final Map<String, Pop> fixedPops) {
+        if (jLabelPops.isVisible() && (fixedPops != null)) {
+            logger.debug("setFixedPopsComboBox: {}", fixedPops);
+
+            // already reset
+            for (Map.Entry<String, Pop> entry : fixedPops.entrySet()) {
+                final String name = entry.getKey();
+                final Pop pop = entry.getValue();
+
+                final Integer index = stationToPopsWidgetIndex.get(name);
+                if (index != null) {
+                    final JComboBox comboBox = popsComboBoxes.get(index);
+                    comboBox.setSelectedItem(pop);
+                }
+            }
+        }
     }
 
     /**
@@ -1299,6 +1591,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private void makePopsEditable(final boolean enabled) {
         jTextPoPs.setEnabled(enabled);
         jComboBoxPops.setEnabled(enabled);
+        jButtonPopsSet.setEnabled(enabled);
+        jButtonPopsClear.setEnabled(enabled);
     }
 
     /**
@@ -1330,8 +1624,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
             // parse the configuration (instrument = number of channels) + (interferometer = pop indexes [1-5]) :
             final List<Pop> listPoPs = cm.parseInstrumentPoPs((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
-                    (String) jComboBoxInstrument.getSelectedItem(), currentInsConfiguration,
-                    popConfig, lastInstrumentConfiguration);
+                    currentInsConfiguration, popConfig, lastInstrumentConfiguration, popsFixed);
 
             if (listPoPs == null) {
                 // invalid, reset the field to empty :
@@ -1342,7 +1635,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 logger.debug("fixed popConfig: {}", popConfig);
             }
         }
-
         // update combo box:
         updatePops(popConfig, false);
     }
@@ -1391,7 +1683,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                     break;
                 }
             }
-
             selected = (found) ? text : POPS_MANUAL;
         } else {
             selected = POPS_AUTO;
@@ -1426,7 +1717,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 }
 
                 // allow user inputs when no PoPs are defined in the configuration and not in multi-conf:
-                makePopsEditable(!isGuiRestrictionEnabled() || isPopsEditable() && (value == null || popMulti));
+                makePopsEditable(!isGuiRestrictionEnabled() || isPopsEditable() && ((value == null) && !popMulti));
             } else {
                 // fire a property change event:
                 updatePops(null, true);
@@ -1614,6 +1905,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             lastConfPopConfig = null;
             lastInsConfCompatibleWithPopConfig = null;
             lastInsConfKeyForBestPops = null;
+            popsCurrentMap = null;
+            popsFixed = null;
+            lastStationsForPops = null;
+            resetFixedPops();
 
             // use observation context to enable/disable POPS FIRST (event ordering issue):
             makePopsEditable(isPopsEditable());
@@ -1650,6 +1945,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             // update the selected pops (pops) :
             updatePops(instrumentChoice.getPops(), false);
 
+            // restore Pops widgets
+            setFixedPopsComboBox(interferometerChoice.getFixedPops());
+
             // constraints :
             // update the night restriction :
             jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
@@ -1663,7 +1961,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             // Update wind direction:
             windWidget.setEnabled(true); // to update its value
             final Double windAz = observation.getWhen().getWindAzimuth();
-            final boolean useWind = windAz != null;
+            final boolean useWind = (windAz != null);
             windWidget.setValue((useWind) ? windAz.doubleValue() : 0d);
             windWidget.setEnabled(useWind);
             jCheckBoxWind.setSelected(useWind);
@@ -1782,10 +2080,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
             // observation :
             changed |= om.setInterferometerConfigurationName((String) jComboBoxInterferometerConfiguration.getSelectedItem());
+            changed |= om.setInterferometerPopsFixed(this.popsFixed);
+
             changed |= om.setInstrumentConfigurationName((String) jComboBoxInstrument.getSelectedItem());
-
             changed |= om.setInstrumentConfigurationStations(getInstrumentConfigurations());
-
             changed |= om.setInstrumentConfigurationPoPs(jTextPoPs.getText());
 
             // constraints :
@@ -1871,6 +2169,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         if (!jComboBoxPops.isVisible()) {
             resetComboBoxPops(POPS_AUTO);
         } else {
+            // reset
+            this.popsCurrentMap = null;
+            this.jButtonPopsSet.setToolTipText(null);
+            this.jTextFieldCurrentPops.setText(null);
+
             final int nObs = obsDataList.size();
 
             if (nObs == 1) {
@@ -1879,6 +2182,46 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
                 final String insConfKey = observation.getInstrumentConfiguration().getStations()
                         + "@" + obsData.isDoBaseLineLimits();
+
+                logger.debug("updateObservabilityData: used PoPs = {}", obsData.getUsedPops());
+
+                if (obsData.getUsedPops() != null) {
+                    // Update current Pops:
+                    final List<Station> stations = obsData.getStationList();
+                    final Pop[] pops = obsData.getUsedPops().getPops();
+
+                    final Map<String, Pop> currentPops = new TreeMap<>();
+
+                    for (int i = 0; i < pops.length; i++) {
+                        currentPops.put(stations.get(i).getName(), pops[i]);
+                    }
+
+                    this.popsCurrentMap = currentPops;
+                    logger.debug("popsCurrentMap: {}", popsCurrentMap);
+
+                    final StringBuilder sb = new StringBuilder(32);
+                    obsData.getStationNameWithPops(sb);
+                    this.jButtonPopsSet.setToolTipText("Set fixed Pops with " + sb.toString());
+
+                    if (lastStationsForPops != null) {
+                        // Custom format:
+                        sb.setLength(0);
+                        sb.append(' ');
+                        for (String name : lastStationsForPops) {
+                            sb.append(name);
+                            sb.append('(');
+                            final Pop p = currentPops.get(name);
+                            if (p != null) {
+                                sb.append(p.getIndex());
+                            } else {
+                                sb.append('-');
+                            }
+                            sb.append(") ");
+                        }
+                        sb.deleteCharAt(sb.length() - 1);
+                        this.jTextFieldCurrentPops.setText(sb.toString());
+                    }
+                }
 
                 final List<PopCombination> bestPopList = obsData.getBestPopList();
                 final List<PopCombination> betterPopList = obsData.getBetterPopList();
@@ -2036,6 +2379,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonDeleteTarget;
+    private javax.swing.JButton jButtonPopsClear;
+    private javax.swing.JButton jButtonPopsSet;
     private javax.swing.JButton jButtonSkyCalc;
     private javax.swing.JButton jButtonTargetEditor;
     private javax.swing.JCheckBox jCheckBoxNightLimit;
@@ -2046,7 +2391,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private javax.swing.JComboBox<String> jComboBoxPops;
     private javax.swing.JSpinner jDateSpinner;
     private javax.swing.JFormattedTextField jFieldMinElev;
+    private javax.swing.JLabel jLabelCurrentPops;
     private javax.swing.JLabel jLabelDate;
+    private javax.swing.JLabel jLabelFixedPops;
     private javax.swing.JLabel jLabelInstrument;
     private javax.swing.JLabel jLabelInterferometer;
     private javax.swing.JLabel jLabelMinElev;
@@ -2059,6 +2406,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private javax.swing.JPanel jPanelConfLeft;
     private javax.swing.JPanel jPanelConfRight;
     private javax.swing.JPanel jPanelConfigurations;
+    private javax.swing.JPanel jPanelFixedPops;
+    private javax.swing.JPanel jPanelFixedPopsGen;
+    private javax.swing.JPanel jPanelFixedPopsSpacer;
     private javax.swing.JPanel jPanelMain;
     private javax.swing.JPanel jPanelObsBottom;
     private javax.swing.JPanel jPanelObsLeft;
@@ -2071,6 +2421,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private javax.swing.JPanel jPanelTargetsRight;
     private javax.swing.JScrollPane jScrollPaneInstrumentConfigurations;
     private javax.swing.JScrollPane jScrollPaneTargets;
+    private javax.swing.JTextField jTextFieldCurrentPops;
     private javax.swing.JFormattedTextField jTextPoPs;
     private fr.jmmc.jmal.star.EditableStarResolverWidget starSearchField;
     // End of variables declaration//GEN-END:variables
@@ -2258,6 +2609,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     static int getPreferredHeight() {
-        return Math.max(130, Math.min(250, SwingUtils.adjustUISize(130)));
+        return Math.max(130, Math.min(260, SwingUtils.adjustUISize(130)));
     }
 }

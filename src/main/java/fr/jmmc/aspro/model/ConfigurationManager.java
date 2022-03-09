@@ -968,16 +968,36 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
-     * Indicate if the given interferometer has PoPs
+     * Return the optional list of PoPs given the interferometer
      * @param interferometerName name of the interferometer
-     * @return true if the interferometer description has PoPs
+     * @return optional list of PoPs or null
      */
-    public boolean hasPoPs(final String interferometerName) {
+    public List<Pop> getPoPs(final String interferometerName) {
         final InterferometerDescription id = getInterferometerDescription(interferometerName);
         if (id != null) {
-            return !id.getPops().isEmpty();
+            return id.getPops();
         }
-        return false;
+        return null;
+    }
+
+    /**
+     * Return the optional list of stations having PoPs given the interferometer
+     * @param interferometerName name of the interferometer
+     * @return optional list of Station or null
+     */
+    public List<Station> getStationsWithPoPs(final String interferometerName) {
+        final InterferometerDescription id = getInterferometerDescription(interferometerName);
+        if (id != null) {
+            final List<Station> stations = new ArrayList<>(6);
+
+            for (Station station : id.getStations()) {
+                if (!station.getPopLinks().isEmpty()) {
+                    stations.add(station);
+                }
+            }
+            return stations;
+        }
+        return null;
     }
 
     /**
@@ -1293,6 +1313,7 @@ public final class ConfigurationManager extends BaseOIManager {
      * Return the list of all adaptive optics setups available for the given interferometer configuration and instrument name
      * @param configurationName name of the interferometer configuration
      * @param instrumentAlias name or alias of the instrument
+     * @param instrumentConfigurationName name of the instrument configuration
      * @return list of all adaptive optics setups
      */
     public Vector<String> getAdaptiveOpticsSetups(final String configurationName, final String instrumentAlias, final String instrumentConfigurationName) {
@@ -1447,19 +1468,35 @@ public final class ConfigurationManager extends BaseOIManager {
      * The Pops string must only contain PoP indexes like '12', '111' or '541'.
      * The length of the Pops string must respect the number of stations of the instrument.
      * @param configurationName name of the interferometer configuration
-     * @param instrumentName name of the instrument
+     * @param stations Stations string
+     * @param inputPoPs Pops string
+     * @return list of PoPs or null if invalid
+     */
+    public List<Pop> parseInstrumentPoPs(final String configurationName,
+                                         final String stations,
+                                         final String inputPoPs) {
+        return parseInstrumentPoPs(configurationName, stations, inputPoPs, null, null);
+    }
+
+    /**
+     * Parse and return the list of PoPs for the given interferometer configuration, instrument name, Stations and Pops string.
+     * The Pops string must only contain PoP indexes like '12', '111' or '541'.
+     * The length of the Pops string must respect the number of stations of the instrument.
+     * @param configurationName name of the interferometer configuration
      * @param stations Stations string
      * @param inputPoPs Pops string
      * @param prevStations previous stations corresponding to the Pops string to convert to the new Stations string
+     * @param mappingFixed optional fixed mapping (station = PoP)
      * @return list of PoPs or null if invalid
      */
-    public List<Pop> parseInstrumentPoPs(final String configurationName, final String instrumentName,
+    public List<Pop> parseInstrumentPoPs(final String configurationName,
                                          final String stations,
                                          final String inputPoPs,
-                                         final String prevStations) {
+                                         final String prevStations,
+                                         final Map<String, Pop> mappingFixed) {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("parseInstrumentPoPs: [{}] for {} + {} @ {} (prev @ {})", inputPoPs, configurationName, instrumentName,
+            logger.debug("parseInstrumentPoPs: [{}] for {} + {} @ {} (prev @ {})", inputPoPs, configurationName,
                     stations, prevStations);
         }
 
@@ -1467,44 +1504,50 @@ public final class ConfigurationManager extends BaseOIManager {
             return null;
         }
 
-        // number of stations :
-        final String[] splitStaNames = stations.split(" ");
-        final int nStations = splitStaNames.length;
-
         final InterferometerConfiguration ic = getInterferometerConfiguration(configurationName);
         if (ic != null) {
+            // number of stations :
+            final String[] splitStaNames = stations.split(" ");
+            final int nStations = splitStaNames.length;
+
             String configPoPs = inputPoPs;
 
-            if (inputPoPs.length() != nStations) {
-                // try parsing mapping [pop <=> telescope]
+            // Force reorder or use wildcard (8)
+            // try parsing mapping [pop <=> telescope]
 
-                /*
-                [551511] for CHARA + MIRC_5T @ S1 S2 W1 W2 E1 (prev @ S1 S2 W1 W2 E1 E2)
-                 */
-                final String[] splitPrevStaNames = (prevStations != null) ? prevStations.split(" ") : null;
+            /*
+            [551511] for CHARA + MIRC_5T @ S1 S2 W1 W2 E1 (prev @ S1 S2 W1 W2 E1 E2)
+             */
+            final String[] splitPrevStaNames = (prevStations != null) ? prevStations.split(" ") : null;
 
-                if ((splitPrevStaNames != null) && (splitPrevStaNames.length == inputPoPs.length())) {
-                    final Map<String, String> mapping = new HashMap<String, String>(8);
+            if ((splitPrevStaNames != null) && (splitPrevStaNames.length == inputPoPs.length())) {
+                final Map<String, String> mapping = new HashMap<String, String>(8);
 
-                    final char[] pops = inputPoPs.toCharArray();
+                final char[] pops = inputPoPs.toCharArray();
 
-                    for (int i = 0; i < splitPrevStaNames.length; i++) {
-                        final String staName = splitPrevStaNames[i];
-                        final char pop = pops[i];
-                        mapping.put(staName, Character.toString(pop));
-                    }
-
-                    final StringBuilder sbPops = new StringBuilder(nStations);
-
-                    for (int i = 0; i < splitStaNames.length; i++) {
-                        final String staName = splitStaNames[i];
-                        final String pop = mapping.get(staName);
-                        sbPops.append((pop != null) ? pop : "*"); // nice '*' (matching all) !
-                    }
-                    configPoPs = sbPops.toString();
-
-                    logger.debug("Fixed PoPs to: {} for {}", configPoPs, stations);
+                for (int i = 0; i < splitPrevStaNames.length; i++) {
+                    final String staName = splitPrevStaNames[i];
+                    final char pop = pops[i];
+                    mapping.put(staName, Character.toString(pop));
                 }
+
+                final StringBuilder sbPops = new StringBuilder(nStations);
+
+                for (int i = 0; i < splitStaNames.length; i++) {
+                    final String staName = splitStaNames[i];
+                    // priority: fixed first, then previous mapping:
+                    String pop = null;
+                    if (mappingFixed != null) {
+                        pop = Pop.getIndexAsString(mappingFixed.get(staName));
+                    }
+                    if (pop == null) {
+                        pop = mapping.get(staName);
+                    }
+                    sbPops.append((pop != null) ? pop : Pop.ANY_POP_S); // '8' means (matching all) !
+                }
+                configPoPs = sbPops.toString();
+
+                logger.debug("Fixed PoPs to: {} for {}", configPoPs, stations);
             }
 
             if (configPoPs.length() == nStations) {
@@ -1512,21 +1555,28 @@ public final class ConfigurationManager extends BaseOIManager {
                 final List<Pop> listPoPs = ic.getInterferometer().getPops();
                 final List<Pop> config = new ArrayList<Pop>(nStations);
 
+                int nPops = 0;
                 for (char ch : configPoPs.toCharArray()) {
-                    // should accept '*' (matching all) ?
+                    // should accept '8' (matching all) ?
                     final int idx = Character.digit(ch, 10);
-                    if (idx <= 0) {
+                    if (idx < 0) {
                         return null;
                     }
-                    for (Pop pop : listPoPs) {
-                        if (pop.getIndex() == idx) {
-                            config.add(pop);
-                            break;
+                    Pop p = null;
+                    // '8' means (matching all) :
+                    if (idx != Pop.ANY_POP_I) {
+                        for (Pop pop : listPoPs) {
+                            if (pop.getIndex() == idx) {
+                                p = pop;
+                                nPops++;
+                                break;
+                            }
                         }
                     }
+                    config.add(p);
                 }
                 // check if all given numbers are valid (16 is invalid !) :
-                if (config.size() == nStations) {
+                if ((nPops != 0) && (config.size() == nStations)) {
                     return config;
                 }
             }

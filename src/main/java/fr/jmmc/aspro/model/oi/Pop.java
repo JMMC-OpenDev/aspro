@@ -95,47 +95,83 @@ public class Pop
     }
     
 //--simple--preserve
+    /** Wilcard Pop instance */
+    public final static Pop ANY_POP = createAnyPop();
 
-  @Override
-  public final String toString() {
-    return this.name;
-  }
-
-  /**
-   * Return a string containing only the pop identifiers
-   * @param popList PoP1 ... PoPN
-   * @return string like '1...N'
-   */
-  public static String toString(final java.util.List<Pop> popList) {
-    return toString(new StringBuilder(popList.size()), popList);
-  }
-  
-  /**
-   * Return a string containing only the pop identifiers
-   * @param sb string builder used to build the identifier (not empty when exiting this method)
-   * @param popList PoP1 ... PoPN
-   * @return string like '1...N'
-   */
-  public static String toString(final StringBuilder sb, final java.util.List<Pop> popList) {
-    for (Pop pop : popList) {
-      sb.append(pop.getIndex());
+    private static Pop createAnyPop() {
+        Pop any = new Pop();
+        any.setName("ANY");
+        any.setIndex(ANY_POP_I);
+        any.indexString = "-";
+        return any;
     }
-    return sb.toString();
-  }
 
-  /**
-   * Return a string containing only the pop identifiers
-   * @param sb string builder used to build the identifier (not empty when exiting this method)
-   * @param pops PoP1 ... PoPN
-   * @return string like '1...N'
-   */
-  public static String toString(final StringBuilder sb, final Pop[] pops) {
-    for (Pop pop : pops) {
-      sb.append(pop.getIndex());
+    public static String getIndexAsString(final Pop pop) {
+        if ((pop == null) || (pop == ANY_POP)) {
+            return null;
+        }
+        return pop.getIndexAsString();
     }
-    return sb.toString();
-  }
-  
+
+    /** Wilcard index value as integer = 8 (looks like infinity) */
+    public final static int ANY_POP_I = 8;
+    /** Wilcard index value as String = "8" */
+    public final static String ANY_POP_S = "8";
+
+    /** resolved reference to the interferometer configuration (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private String indexString = null;
+
+    /**
+     * Get the value of the index property as String
+     * @return index as String
+     */
+    public String getIndexAsString() {
+        if (indexString == null) {
+            indexString = Integer.toString(index);
+        }
+        return indexString;
+    }
+
+    @Override
+    public final String toString() {
+        return this.name;
+    }
+
+    /**
+     * Return a string containing only the pop identifiers
+     * @param popList PoP1 ... PoPN
+     * @return string like '1...N'
+     */
+    public static String toString(final java.util.List<Pop> popList) {
+        return toString(new StringBuilder(popList.size()), popList);
+    }
+
+    /**
+     * Return a string containing only the pop identifiers
+     * @param sb string builder used to build the identifier (not empty when exiting this method)
+     * @param popList PoP1 ... PoPN
+     * @return string like '1...N'
+     */
+    public static String toString(final StringBuilder sb, final java.util.List<Pop> popList) {
+        for (Pop pop : popList) {
+            sb.append((pop != null) ? pop.getIndex() : ANY_POP_I);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Return a string containing only the pop identifiers
+     * @param sb string builder used to build the identifier (not empty when exiting this method)
+     * @param pops PoP1 ... PoPN
+     * @return string like '1...N'
+     */
+    public static String toString(final StringBuilder sb, final Pop[] pops) {
+        for (Pop pop : pops) {
+            sb.append((pop != null) ? pop.getIndex() : ANY_POP_I);
+        }
+        return sb.toString();
+    }
 //--simple--preserve
 
 }

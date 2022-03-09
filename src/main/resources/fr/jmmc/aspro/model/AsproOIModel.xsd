@@ -514,6 +514,16 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+
+            <xsd:element name="allPops" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The mapping of PoPs associated to all stations using the format "SS:a ..."
+                        where SS is the station name and a the PoPs index.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
         </xsd:sequence>
     </xsd:complexType>
 

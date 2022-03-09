@@ -23,7 +23,6 @@ import fr.jmmc.oiexplorer.core.gui.chart.FastXYBubbleRenderer;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
 import fr.jmmc.oiexplorer.core.gui.chart.dataset.SharedSeriesAttributes;
-import fr.jmmc.oiexplorer.core.util.Constants;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
@@ -350,8 +349,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         XYSeries xySeries = null;
         String label;
         String[] blName, blLabel;
-        double[] blX1, blY1, blX2, blY2, blLen;
-        int n;
+        double[] blX1, blY1, blX2, blY2;
 
         final boolean single = chartData.isSingle();
 

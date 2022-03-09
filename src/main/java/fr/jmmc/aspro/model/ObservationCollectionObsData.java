@@ -5,6 +5,7 @@ package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
+import fr.jmmc.aspro.model.oi.Station;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,19 +41,30 @@ public class ObservationCollectionObsData extends ObservationCollection {
      * Prepare the configuration names using the format 'CONF + PoPs'
      */
     private final void prepareConfigurationNames() {
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(32);
 
         // Iterate over Observability data (multi conf) :
         for (ObservabilityData obsData : getObsDataList()) {
-            sb.append(obsData.getStationNames());
-            this.confNames.add(sb.toString());
+            final List<Station> stations = obsData.getStationList();
+            if (stations != null) {
+                sb.setLength(0);
 
-            if (!obsData.isUserPops() && obsData.getBestPops() != null) {
-                obsData.getBestPops().toString(sb);
+                // no Pops:
+                for (Station station : stations) {
+                    sb.append(station.getName());
+                    sb.append('-');
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                final String confName = sb.toString();
+                this.confNames.add(confName);
+
+                // has Pops:
+                if (obsData.getStationNameWithPops(sb)) {
+                    this.confLabels.add(sb.toString());
+                } else {
+                    this.confLabels.add(confName);
+                }
             }
-
-            this.confLabels.add(sb.toString());
-            sb.setLength(0);
         }
     }
 
@@ -92,7 +104,7 @@ public class ObservationCollectionObsData extends ObservationCollection {
      * Return the configuration names using the format 'CONF'
      * @return the configuration names using the format 'CONF'
      */
-    public final List<String> getConfigurationName() {
+    public final List<String> getConfigurationNames() {
         return this.confNames;
     }
 
@@ -100,7 +112,39 @@ public class ObservationCollectionObsData extends ObservationCollection {
      * Return the configuration labels using the format 'CONF + PoPs'
      * @return the configuration labels using the format 'CONF + PoPs'
      */
-    public final List<String> getConfigurationLabel() {
+    public final List<String> getConfigurationLabels() {
         return this.confLabels;
     }
+
+    /**
+     * Return a string containing up to 3 configuration(s) separated with the given delimiter string
+     * or 'MULTI CONFIGURATION' where space characters are replaced by '-'
+     * @param separator delimiter string
+     * @return string containing up to 3 configuration(s) or 'MULTI CONFIGURATION'
+     */
+    @Override
+    public String getDisplayConfigurations(final String separator) {
+        final List<String> labels = getConfigurationLabels();
+        final int size = labels.size();
+        final String result;
+        if (size <= 0) {
+            result = "";
+        } else if (size <= 1) {
+            result = labels.get(0); // with PoPs
+        } else if (size <= 3) {
+            final StringBuilder sb = new StringBuilder(32);
+
+            // Without PoPs:
+            for (String label : getConfigurationNames()) {
+                sb.append(label).append(separator);
+            }
+            sb.delete(sb.length() - separator.length(), sb.length());
+
+            result = sb.toString();
+        } else {
+            result = fr.jmmc.aspro.AsproConstants.MULTI_CONF;
+        }
+        return result;
+    }
+
 }

@@ -117,7 +117,7 @@ public final class ExportOBVega {
   public static void generate(final StringBuilder sb, final ObservationSetting observation, final ObservabilityData obsData) {
 
     // Prepare the Chara Setup according to the Pop configuration :
-    final String charaSetup = prepareCharaSetup(observation, obsData.getBestPops().getPops());
+    final String charaSetup = prepareCharaSetup(observation, obsData.getUsedPops().getPops());
 
     // Prepare the Vega Setup according to the instrument mode :
     final String vegaSetup = prepareVegaSetup(observation);

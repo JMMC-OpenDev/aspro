@@ -29,13 +29,13 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="version" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="setupRef" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="resolution" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthMin" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthMax" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="waveLengthBandRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="ft_waveLengthBandRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
- *         &lt;element name="setupRef" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="frameTime" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="ft_dit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
@@ -54,13 +54,13 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "FocalInstrumentMode", propOrder = {
     "name",
     "version",
+    "setupRef",
     "resolution",
     "waveLengthMin",
     "waveLengthMax",
     "waveLengthRef",
     "waveLengthBandRef",
     "ftWaveLengthBandRef",
-    "setupRef",
     "dit",
     "frameTime",
     "ftDit",
@@ -75,6 +75,10 @@ public class FocalInstrumentMode
     @XmlElement(required = true)
     protected String name;
     protected String version;
+    @XmlElement(type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREF")
+    protected FocalInstrumentSetup setupRef;
     protected Double resolution;
     protected Double waveLengthMin;
     protected Double waveLengthMax;
@@ -82,10 +86,6 @@ public class FocalInstrumentMode
     protected Double waveLengthBandRef;
     @XmlElement(name = "ft_waveLengthBandRef")
     protected Double ftWaveLengthBandRef;
-    @XmlElement(type = Object.class)
-    @XmlIDREF
-    @XmlSchemaType(name = "IDREF")
-    protected FocalInstrumentSetup setupRef;
     protected Double dit;
     protected Double frameTime;
     @XmlElement(name = "ft_dit")
@@ -142,6 +142,30 @@ public class FocalInstrumentMode
      */
     public void setVersion(String value) {
         this.version = value;
+    }
+
+    /**
+     * Gets the value of the setupRef property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Object }
+     *     
+     */
+    public FocalInstrumentSetup getSetupRef() {
+        return setupRef;
+    }
+
+    /**
+     * Sets the value of the setupRef property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Object }
+     *     
+     */
+    public void setSetupRef(FocalInstrumentSetup value) {
+        this.setupRef = value;
     }
 
     /**
@@ -286,30 +310,6 @@ public class FocalInstrumentMode
      */
     public void setFtWaveLengthBandRef(Double value) {
         this.ftWaveLengthBandRef = value;
-    }
-
-    /**
-     * Gets the value of the setupRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Object }
-     *     
-     */
-    public FocalInstrumentSetup getSetupRef() {
-        return setupRef;
-    }
-
-    /**
-     * Sets the value of the setupRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Object }
-     *     
-     */
-    public void setSetupRef(FocalInstrumentSetup value) {
-        this.setupRef = value;
     }
 
     /**

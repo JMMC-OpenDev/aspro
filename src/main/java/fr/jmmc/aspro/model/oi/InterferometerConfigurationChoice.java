@@ -24,6 +24,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="minElevation" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
+ *         &lt;element name="allPops" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -35,7 +36,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "InterferometerConfigurationChoice", propOrder = {
     "name",
-    "minElevation"
+    "minElevation",
+    "allPops"
 })
 public class InterferometerConfigurationChoice
     extends OIBase
@@ -44,6 +46,7 @@ public class InterferometerConfigurationChoice
     @XmlElement(required = true)
     protected String name;
     protected double minElevation;
+    protected String allPops;
 
     /**
      * Gets the value of the name property.
@@ -84,36 +87,81 @@ public class InterferometerConfigurationChoice
     public void setMinElevation(double value) {
         this.minElevation = value;
     }
+
+    /**
+     * Gets the value of the allPops property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getAllPops() {
+        return allPops;
+    }
+
+    /**
+     * Sets the value of the allPops property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setAllPops(String value) {
+        this.allPops = value;
+    }
     
 //--simple--preserve
-  /** resolved reference to the interferometer configuration (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private InterferometerConfiguration interferometerConfiguration = null;
+    /** resolved reference to the interferometer configuration (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private InterferometerConfiguration interferometerConfiguration = null;
 
-  /**
-   * Return the reference to the interferometer configuration (read only)
-   * @return interferometer configuration or null
-   */
-  public final InterferometerConfiguration getInterferometerConfiguration() {
-    return interferometerConfiguration;
-  }
+    /**
+     * Return the reference to the interferometer configuration (read only)
+     * @return interferometer configuration or null
+     */
+    public final InterferometerConfiguration getInterferometerConfiguration() {
+        return interferometerConfiguration;
+    }
 
-  /**
-   * Define the reference to the interferometer configuration (read only)
-   * @param interferometerConfiguration interferometer configuration
-   */
-  public final void setInterferometerConfiguration(final InterferometerConfiguration interferometerConfiguration) {
-    this.interferometerConfiguration = interferometerConfiguration;
-  }
+    /**
+     * Define the reference to the interferometer configuration (read only)
+     * @param interferometerConfiguration interferometer configuration
+     */
+    public final void setInterferometerConfiguration(final InterferometerConfiguration interferometerConfiguration) {
+        this.interferometerConfiguration = interferometerConfiguration;
+    }
+
+    /** resolved reference to the list of PoPs (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private java.util.Map<String, Pop> popsFixed = null;
+
+    /**
+     * Return the reference to the list of PoPs (read only)
+     * @return list of PoPs or null
+     */
+    public final java.util.Map<String, Pop> getFixedPops() {
+        return popsFixed;
+    }
+
+    /**
+     * Define the reference to the list of PoPs (read only)
+     * @param popMapping list of PoPs
+     */
+    public final void setFixedPops(final java.util.Map<String, Pop> popMapping) {
+        this.popsFixed = popMapping;
+    }
 
     @Override
     protected boolean areEquals(final OIBase o) {
         if (!super.areEquals(o)) {
             return false;
         }
-        final InterferometerConfigurationChoice other = (InterferometerConfigurationChoice)o;
+        final InterferometerConfigurationChoice other = (InterferometerConfigurationChoice) o;
         return (areEquals(this.name, other.getName())
-                && areEquals(this.minElevation, other.getMinElevation()));
+                && areEquals(this.minElevation, other.getMinElevation())
+                && areEquals(this.allPops, other.getAllPops()));
     }
 
 //--simple--preserve

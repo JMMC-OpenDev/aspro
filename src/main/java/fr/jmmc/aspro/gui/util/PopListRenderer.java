@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
-import fr.jmmc.aspro.model.oi.TargetGroup;
+import fr.jmmc.aspro.model.oi.Pop;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
@@ -11,21 +11,20 @@ import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 
 /**
- * This custom renderer defines the target group label and color
+ * This custom renderer uses the PoP index
  * @author bourgesl
  */
-public final class TargetGroupRenderer extends DefaultListCellRenderer {
+public final class PopListRenderer extends DefaultListCellRenderer {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
     /** singleton */
-    public final static TargetGroupRenderer INSTANCE = new TargetGroupRenderer();
+    public final static PopListRenderer INSTANCE = new PopListRenderer();
 
     /**
      * Private constructor
      */
-    private TargetGroupRenderer() {
-        super();
+    private PopListRenderer() {
     }
 
     /**
@@ -55,27 +54,18 @@ public final class TargetGroupRenderer extends DefaultListCellRenderer {
             final boolean isSelected,
             final boolean cellHasFocus) {
 
-        final TargetGroup group = (value instanceof TargetGroup) ? (TargetGroup) value : null;
-
         final String val;
         if (value == null) {
             val = null;
-        } else if (group != null) {
-            val = group.getName();
+        } else if (value instanceof Pop) {
+            val = ((Pop) value).getIndexAsString();
         } else {
             val = value.toString();
         }
 
-        // reset background color:
         super.getListCellRendererComponent(
                 list, val, index,
                 isSelected, cellHasFocus);
-
-        if (group != null) {
-            setToolTipText(group.getTooltip());
-            setBackground(group.getDecodedColor());
-            setForeground(group.getOverDecodedColor());
-        }
 
         return this;
     }

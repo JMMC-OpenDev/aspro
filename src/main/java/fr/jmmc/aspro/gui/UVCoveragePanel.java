@@ -2589,9 +2589,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
                 sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
                 sb.append(chartData.getDisplayConfigurations(" / "));
-                if ((chartData.isSingle() || obsData.isUserPops()) && obsData.getBestPops() != null) {
-                    obsData.getBestPops().toString(sb);
-                }
                 ChartUtils.addSubtitle(this.chart, sb.toString());
 
                 sb.setLength(0);
@@ -3224,7 +3221,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             if (!single) {
                 // 1 color per configuration (i.e. per XYSeries) :
-                label = chartData.getConfigurationLabel().get(c);
+                label = chartData.getConfigurationLabels().get(c);
                 xySeries = new XYSeries(label, false);
                 xySeries.setNotify(false);
 
@@ -3293,7 +3290,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 nPoints = uvData.getNPoints();
                 targetPointInfos = uvData.getTargetPointInfos();
 
-                confName = chartData.getConfigurationLabel().get(c);
+                confName = chartData.getConfigurationLabels().get(c);
 
                 if (!single) {
                     serieKey = confName;
@@ -3400,7 +3397,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 if (!single) {
                     // 1 color per configuration (i.e. per XYSeries) :
-                    xySeries = dataset.getSeries(chartData.getConfigurationLabel().get(c));
+                    xySeries = dataset.getSeries(chartData.getConfigurationLabels().get(c));
                 }
 
                 // TODO: adjust capacity of xySeries !

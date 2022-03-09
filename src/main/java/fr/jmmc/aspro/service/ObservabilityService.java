@@ -83,7 +83,6 @@ import net.jafama.FastMath;
 import fr.jmmc.jmcs.util.CollectionUtils;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
-import fr.jmmc.jmcs.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -554,7 +553,7 @@ public final class ObservabilityService {
                     this.bpObsCtx.setPopCombs(new PopCombination[0]);
 
                 } else {
-                    this.data.setBestPops(bestPopCombination);
+                    this.data.setUsedPops(bestPopCombination);
 
                     // use the user defined PoPs configuration :
                     this.popCombinations.clear();
@@ -1861,8 +1860,8 @@ public final class ObservabilityService {
                 }
             }
 
-            if (this.data.getBestPops() == null) {
-                this.data.setBestPops(popBestData.getPopCombination());
+            if (this.data.getUsedPops() == null) {
+                this.data.setUsedPops(popBestData.getPopCombination());
             }
 
             return popBestData.getRangesBL();
@@ -2594,14 +2593,14 @@ public final class ObservabilityService {
                 }
             }
 
-            // enable best PoPs if 1 station requires PoPs at least:
+            // enable PoPs if 1 station requires PoPs at least:
             this.hasPops = (nPopLinks != 0);
             if (isLogDebug) {
                 logger.debug("hasPops(stations): {}", this.hasPops);
             }
         }
 
-        this.data.setStationNames(StringUtils.replaceWhiteSpacesByMinusSign(this.observation.getInstrumentConfiguration().getStations()));
+        this.data.setStationList(stations);
 
         // All telescopes have the same properties for a given baseline :
         final Telescope tel = stations.get(0).getTelescope();
@@ -2901,7 +2900,15 @@ public final class ObservabilityService {
         // Get chosen PoPs :
         final List<Pop> userPoPs = this.observation.getInstrumentConfiguration().getPopList();
 
-        if (userPoPs == null || userPoPs.size() != nBeams) {
+        final Map<String, Pop> popsFixed = this.observation.getInterferometerConfiguration().getFixedPops();
+
+        if (isLogDebug) {
+            logger.debug("preparePopCombinations: userPoPs  = {}", userPoPs);
+            logger.debug("preparePopCombinations: popsFixed = {}", popsFixed);
+        }
+
+        // note: null means Any pop, so use combinations:
+        if ((userPoPs == null) || (userPoPs.size() != nBeams) || userPoPs.contains(null)) {
             // Compute key:
             final StringBuilder sb = new StringBuilder(16);
             sb.append(this.interferometer.getName()).append('_').append(nBeams);
@@ -2950,40 +2957,70 @@ public final class ObservabilityService {
             popCombs = new ArrayList<PopCombination>(sharedPopCombinations.size());
 
             // filter or not ?
-            boolean checkBeams = false;
-            int idxW2 = -1;
+            final int[] popsMatch = new int[nBeams]; // 0 by default
 
-            // Quick and Dirty hack to force W2 = Pop5:
-            if (true) {
+            // Force W2 = Pop5:
+            for (int i = 0; i < nBeams; i++) {
+                if ("W2".equals(bs[i].getStation().getName())) {
+                    popsMatch[i] = 5;
+                    break;
+                }
+            }
+
+            // check fixed Pops (null=any):
+            if (popsFixed != null) {
                 for (int i = 0; i < nBeams; i++) {
-                    if ("W2".equals(bs[i].getStation().getName())) {
-                        idxW2 = i;
-                        break;
+                    final String name = bs[i].getStation().getName();
+                    final Pop p = popsFixed.get(name);
+                    if (p != null) {
+                        // overwrite:
+                        popsMatch[i] = p.getIndex();
                     }
                 }
-                checkBeams = (idxW2 != -1);
+            }
+
+            // check user Pops (null=any):
+            if ((userPoPs != null) && (userPoPs.size() == nBeams)) {
+                for (int i = 0; i < nBeams; i++) {
+                    final Pop p = userPoPs.get(i);
+                    if (p != null) {
+                        // overwrite:
+                        popsMatch[i] = p.getIndex();
+                    }
+                }
+            }
+
+            if (isLogDebug) {
+                logger.debug("popsMatch: {}", Arrays.toString(popsMatch));
+            }
+
+            boolean checkBeams = false;
+
+            for (int i = 0; i < nBeams; i++) {
+                if (popsMatch[i] != 0) {
+                    checkBeams = true;
+                    break;
+                }
             }
 
             if (checkBeams) {
                 for (SharedPopCombination popComb : sharedPopCombinations) {
-                    // filter PoPs according to stations (W2=PoP5 2021.07 or predefined-user restrictions = selected PoPs only)
+                    // filter PoPs according to stations (W2=PoP5 since 2021.07 or predefined-user restrictions = selected PoPs only)
+                    final Pop[] pops = popComb.getPops();
 
-                    // test W2=Pop5:
-                    if (idxW2 != -1) {
-                        final Pop p = popComb.getPops()[idxW2];
-                        // System.out.println("W2 pop: "+p + " in "+popComb);
-
-                        if (p.getIndex() != 5) {
-                            // skip
-                            continue;
+                    boolean valid = true;
+                    for (int i = 0; i < nBeams; i++) {
+                        if ((popsMatch[i] != 0) && (popsMatch[i] != pops[i].getIndex())) {
+                            valid = false;
+                            break;
                         }
                     }
 
                     // Note : the pops are given in the same order as the beams/stations :
-                    // if accept(popComb)
-                    popCombs.add(new PopCombination(popComb));
+                    if (valid) {
+                        popCombs.add(new PopCombination(popComb));
+                    }
                 }
-
                 logger.debug("PoP combinations: {} / {}", popCombs.size(), sharedPopCombinations.size());
             } else {
                 for (SharedPopCombination popComb : sharedPopCombinations) {
@@ -3002,7 +3039,7 @@ public final class ObservabilityService {
             popCombs.add(userComb);
 
             this.data.setUserPops(true);
-            this.data.setBestPops(userComb);
+            this.data.setUsedPops(userComb);
 
             if (isLogDebug) {
                 logger.debug("User PoPs: {}", userComb);
@@ -3082,7 +3119,7 @@ public final class ObservabilityService {
      *
      * @throws IllegalStateException if bad configuration (missing pop value in switchyard)
      */
-    private double getPopOpticalLength(final Station station, final Pop pop) throws IllegalStateException {
+    private static double getPopOpticalLength(final Station station, final Pop pop) throws IllegalStateException {
         final List<PopLink> popLinks = station.getPopLinks();
 
         if (popLinks.isEmpty()) {

@@ -1408,9 +1408,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
                 sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
                 sb.append(chartData.getDisplayConfigurations(" / "));
-                if ((chartData.isSingle() || obsData.isUserPops()) && obsData.getBestPops() != null) {
-                    obsData.getBestPops().toString(sb);
-                }
                 ChartUtils.addSubtitle(this.chart, sb.toString());
 
                 if (!doBaseLineLimits && (observation.getWhen().isNightRestriction()
@@ -1702,7 +1699,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                              */
                             if (doBaseLineLimits) {
                                 // configuration 'CONF + PoPs':
-                                legendLabel = chartData.getConfigurationLabel().get(c);
+                                legendLabel = chartData.getConfigurationLabels().get(c);
                             } else {
                                 if ((colorIndex == StarObservabilityData.TYPE_STAR) && isCalibrator) {
                                     // use different color for calibrators :
@@ -1730,9 +1727,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             }
                         } else {
                             // configuration 'CONF + PoPs':
-                            legendLabel = chartData.getConfigurationLabel().get(c);
+                            legendLabel = chartData.getConfigurationLabels().get(c);
                             // add alias 'CONF' <=> 'CONF + PoPs':
-                            globalAttrs.addColorAlias(chartData.getConfigurationName().get(c), legendLabel);
+                            globalAttrs.addColorAlias(chartData.getConfigurationNames().get(c), legendLabel);
 
                             // 1 color per configuration (incompatible with Detailed output : too complex i.e. unreadable) :
                             colorIndex = globalAttrs.getColorIndex(legendLabel);
