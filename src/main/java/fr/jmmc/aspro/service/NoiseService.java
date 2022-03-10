@@ -27,7 +27,6 @@ import fr.jmmc.aspro.model.oi.SpectralSetup;
 import fr.jmmc.aspro.model.oi.SpectralSetupColumn;
 import fr.jmmc.aspro.model.oi.SpectralSetupQuantity;
 import fr.jmmc.aspro.model.oi.TargetGroup;
-import fr.jmmc.aspro.model.oi.TargetGroupMembers;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
@@ -38,6 +37,7 @@ import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
+import fr.jmmc.oitools.image.FitsUnit;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -899,9 +899,9 @@ public final class NoiseService implements VisNoiseService {
             final TargetInformation targetInfo = targetUserInfos.getOrCreateTargetInformation(target);
 
             // FT
-            ftTarget = getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
+            ftTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
             // AO
-            aoTarget = getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+            aoTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
         }
         if (ftTarget == null) {
             ftTarget = target;
@@ -927,10 +927,12 @@ public final class NoiseService implements VisNoiseService {
             } else {
                 fringeTrackerMag = flux.doubleValue();
                 if (ftTarget != target) {
-                    final double distAs = TargetUtils.computeDistanceInArcsec(target, ftTarget);
+                    final double dist = TargetUtils.computeDistanceInDegrees(target, ftTarget);
+                    final FitsUnit axisUnit = FitsUnit.getAngleDegUnit(dist);
                     addInformation("FT associated to target [" + ftTarget.getName() + "] ("
-                            + ftBand + '=' + df.format(fringeTrackerMag) + " mag "
-                            + "sep=" + NumberUtils.trimTo3Digits(distAs) + " as)");
+                            + ftBand + '=' + df.format(fringeTrackerMag) + " mag, "
+                            + "dist: " + NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(dist, axisUnit))
+                            + " " + axisUnit.getStandardRepresentation() + ")");
                 }
             }
             if (logger.isDebugEnabled()) {
@@ -974,10 +976,12 @@ public final class NoiseService implements VisNoiseService {
                             + fluxAOBand + '=' + df.format(adaptiveOpticsMag) + " mag)");
                 }
                 if (aoTarget != target) {
-                    final double distAs = TargetUtils.computeDistanceInArcsec(target, aoTarget);
+                    final double dist = TargetUtils.computeDistanceInDegrees(target, aoTarget);
+                    final FitsUnit axisUnit = FitsUnit.getAngleDegUnit(dist);
                     addInformation("AO associated to target [" + aoTarget.getName() + "] ("
-                            + fluxAOBand + '=' + df.format(adaptiveOpticsMag) + " mag "
-                            + "sep=" + NumberUtils.trimTo3Digits(distAs) + " as)");
+                            + fluxAOBand + '=' + df.format(adaptiveOpticsMag) + " mag, "
+                            + "dist: " + NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(dist, axisUnit))
+                            + " " + axisUnit.getStandardRepresentation() + ")");
                 }
             }
         }
@@ -996,20 +1000,6 @@ public final class NoiseService implements VisNoiseService {
             addWarning(AsproConstants.WARN_MISSING_MAGS + " on target [" + target.getName() + "] "
                     + "in following bands: " + mags.toString());
         }
-    }
-
-    // TODO: refactor this method (same in ExportOBXml)
-    private static Target getFirstTargetForGroup(final TargetUserInformations targetUserInfos,
-                                                 final TargetInformation targetInfo,
-                                                 final String groupId) {
-        final TargetGroup g = targetUserInfos.getGroupById(groupId);
-        if (g != null) {
-            final TargetGroupMembers tgm = targetInfo.getGroupMembers(g);
-            if (tgm != null && !tgm.isEmpty()) {
-                return tgm.getTargets().get(0);
-            }
-        }
-        return null;
     }
 
     /**

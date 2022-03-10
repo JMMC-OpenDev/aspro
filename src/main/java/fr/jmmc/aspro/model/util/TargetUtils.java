@@ -56,10 +56,6 @@ public final class TargetUtils {
         return ALX.toDMS(ALX.parseDEC(dec));
     }
 
-    public static double computeDistanceInArcsec(final Target refTarget, final Target otherTarget) {
-        return computeDistanceInDegrees(refTarget, otherTarget) * ALX.DEG_IN_ARCSEC;
-    }
-
     public static double computeDistanceInDegrees(final Target refTarget, final Target otherTarget) {
         return CoordUtils.computeDistanceInDegrees(refTarget.getRADeg(), refTarget.getDECDeg(),
                 otherTarget.getRADeg(), otherTarget.getDECDeg());

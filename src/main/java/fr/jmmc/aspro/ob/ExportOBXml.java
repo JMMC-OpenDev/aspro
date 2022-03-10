@@ -26,7 +26,6 @@ import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetGroup;
-import fr.jmmc.aspro.model.oi.TargetGroupMembers;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
@@ -156,7 +155,7 @@ public class ExportOBXml {
 
         // Observation configuration - CAL  (store first cal only for schedule) 
         ObservationConfiguration obCAL = null;
-        
+
         final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
 
         if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
@@ -166,16 +165,16 @@ public class ExportOBXml {
                 final List<Target> calibrators = targetInfo.getCalibrators();
                 if (!calibrators.isEmpty()) {
                     for (Target calibrator : calibrators) {
-                        
+
                         final ObservationConfiguration ob = getObservationConfiguration(observation, os, calibrator);
                         obd.getObservationConfigurations().add(ob);
                         // keep first cal for schedule below
-                        obCAL = (obCAL != null) ? obCAL : ob;                        
-                    }                                                   
+                        obCAL = (obCAL != null) ? obCAL : ob;
+                    }
                 }
             }
         }
-                
+
         // Schedule
         final ObservationSchedule obsSch = new ObservationSchedule();
         final OBItem sci = new OBItem(obSCI);
@@ -318,17 +317,20 @@ public class ExportOBXml {
             final TargetInformation targetInfo = targetUserInfos.getOrCreateTargetInformation(target);
 
             // AO
-            final Target aoTarget = getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+            final Target aoTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo,
+                    TargetGroup.GROUP_AO);
             if (aoTarget != null) {
                 obsConf.setAOTarget(getTarget(aoTarget));
             }
             // FT
-            final Target ftTarget = getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
+            final Target ftTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo,
+                    TargetGroup.GROUP_FT);
             if (ftTarget != null) {
                 obsConf.setFTTarget(getTarget(ftTarget));
             }
             // GUIDE
-            final Target gsTarget = getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_GUIDE);
+            final Target gsTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo,
+                    TargetGroup.GROUP_GUIDE);
             if (gsTarget != null) {
                 obsConf.setGSTarget(getTarget(gsTarget));
             }
@@ -374,19 +376,6 @@ public class ExportOBXml {
         }
 
         return obsConf;
-    }
-
-    private static Target getFirstTargetForGroup(final TargetUserInformations targetUserInfos,
-                                                 final TargetInformation targetInfo,
-                                                 final String groupId) {
-        final TargetGroup g = targetUserInfos.getGroupById(groupId);
-        if (g != null) {
-            final TargetGroupMembers tgm = targetInfo.getGroupMembers(g);
-            if (tgm != null && !tgm.isEmpty()) {
-                return tgm.getTargets().get(0);
-            }
-        }
-        return null;
     }
 
     private static fr.jmmc.aspro.model.ob.Target getTarget(final Target target) {

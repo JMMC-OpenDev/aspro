@@ -6,11 +6,16 @@ package fr.jmmc.aspro.gui.util;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetGroupMembers;
+import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.jmcs.util.ColorEncoder;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
+import fr.jmmc.oitools.image.FitsUnit;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.util.List;
 import javax.swing.JList;
 import javax.swing.ListModel;
 
@@ -146,11 +151,82 @@ public final class TargetList extends JList {
                 }
             }
 
+            final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
+            if (targetInfo != null) {
+                boolean startDist = true;
+                // Distances to calibrator stars:
+                List<Target> targets = targetInfo.hasCalibrators() ? targetInfo.getCalibrators() : null;
+                if (targets != null) {
+                    if (startDist) {
+                        startDist = false;
+                        sb.append("<hr>");
+                    } else {
+                        sb.append("<br>");
+                    }
+                    addDistances(sb, target, targets, "Calibrators");
+                }
+                // Distances to ancillary stars:
+                // AO
+                targets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+                if (targets != null) {
+                    if (startDist) {
+                        startDist = false;
+                        sb.append("<hr>");
+                    } else {
+                        sb.append("<br>");
+                    }
+                    addDistances(sb, target, targets, "AO stars");
+                }
+                // FT
+                targets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
+                if (targets != null) {
+                    if (startDist) {
+                        startDist = false;
+                        sb.append("<hr>");
+                    } else {
+                        sb.append("<br>");
+                    }
+                    addDistances(sb, target, targets, "FT stars");
+                }
+                // GUIDE
+                targets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_GUIDE);
+                if (targets != null) {
+                    if (startDist) {
+                        startDist = false;
+                        sb.append("<hr>");
+                    } else {
+                        sb.append("<br>");
+                    }
+                    addDistances(sb, target, targets, "Guide stars");
+                }
+            }
+
             // Add target notes:
             final String userDescription = targetUserInfos.getDescription(target);
             if (userDescription != null) {
                 sb.append("<hr><b>Notes</b>:<br>").append(StringUtils.replaceCR(userDescription, "<br>"));
             }
         }
+    }
+
+    public static void addDistances(final StringBuilder sb, final Target refTarget, final List<Target> targets, final String prefix) {
+        sb.append("<b>").append(prefix).append("</b>: ");
+
+        int n = 0;
+        for (Target t : targets) {
+            final double dist = TargetUtils.computeDistanceInDegrees(refTarget, t);
+            final FitsUnit axisUnit = FitsUnit.getAngleDegUnit(dist);
+
+            if (n == 3) {
+                sb.append("<br>");
+                n = 0;
+            }
+            sb.append(t.getName()).append(" (");
+            sb.append(NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(dist, axisUnit)));
+            sb.append(" ").append(axisUnit.getStandardRepresentation());
+            sb.append("), ");
+            n++;
+        }
+        sb.deleteCharAt(sb.length() - 2);
     }
 }

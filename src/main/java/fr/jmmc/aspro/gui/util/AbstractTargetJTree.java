@@ -6,6 +6,9 @@ package fr.jmmc.aspro.gui.util;
 import fr.jmmc.jmcs.gui.component.GenericJTree;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.util.TargetUtils;
+import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.oitools.image.FitsUnit;
 import java.awt.event.MouseEvent;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -79,8 +82,31 @@ public class AbstractTargetJTree<E> extends GenericJTree<E> {
                 final TreePath path = getPathForRow(index);
                 final DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
 
-                final String tooltip = getTooltipText(node.getUserObject());
+                final Object userObject = node.getUserObject();
+                String tooltip = getTooltipText(userObject);
 
+                if (userObject instanceof Target) {
+                    // check parents for other Target to compute distance:
+                    Target parentTarget = null;
+                    for (TreePath p = path.getParentPath(); p != null; p = p.getParentPath()) {
+                        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) p.getLastPathComponent();
+                        final Object parentUserObject = parentNode.getUserObject();
+
+                        if (parentUserObject instanceof Target) {
+                            parentTarget = (Target) parentUserObject;
+                            break;
+                        }
+                    }
+                    if (parentTarget != null) {
+                        final double dist = TargetUtils.computeDistanceInDegrees((Target) userObject, parentTarget);
+                        final FitsUnit axisUnit = FitsUnit.getAngleDegUnit(dist);
+
+                        tooltip = tooltip.replace("</html>",
+                                "<hr><b>Distance to " + parentTarget.getName() + "</b>: "
+                                + NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(dist, axisUnit))
+                                + " " + axisUnit.getStandardRepresentation() + " </html>");
+                    }
+                }
                 lastIndex = index;
                 lastTooltip = tooltip;
                 return tooltip;

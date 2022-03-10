@@ -648,6 +648,25 @@ public class TargetUserInformations
         return removed;
     }
 
+    public static Target getFirstTargetForGroup(final TargetUserInformations targetUserInfos,
+                                                final TargetInformation targetInfo,
+                                                final String groupId) {
+        final List<Target> targets = getTargetsForGroup(targetUserInfos, targetInfo, groupId);
+        return (targets != null) ? targets.get(0) : null;
+    }
+
+    public static List<Target> getTargetsForGroup(final TargetUserInformations targetUserInfos,
+                                                  final TargetInformation targetInfo,
+                                                  final String groupId) {
+        final TargetGroup g = targetUserInfos.getGroupById(groupId);
+        if (g != null) {
+            final TargetGroupMembers tgm = targetInfo.getGroupMembers(g);
+            if (tgm != null && !tgm.isEmpty()) {
+                return tgm.getTargets();
+            }
+        }
+        return null;
+    }
 //--simple--preserve
 
 }
