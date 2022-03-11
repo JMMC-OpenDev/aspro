@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.03 beta 11"/>
-    <compilation date="09/03/2022" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="22.03 beta 12"/>
+    <compilation date="11/03/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -229,12 +229,16 @@
 
     <releasenotes>
         <release version="22.03">
-            <pubDate>Wed, 09 Mar 2022 14:00:00 GMT</pubDate>
+            <pubDate>Fri, 11 Mar 2022 16:00:00 GMT</pubDate>
+            <prerelease version="22.03 beta 12">
+                <change type="FEATURE">Improved tooltips on the observability plot to display angular distances on science objects to calibrator and ancillary stars (AO, FT, GS)</change>
+                <change type="FEATURE">Improved tooltips in Target Editor's navigation trees to display angular distances on calibrator and ancillary stars (AO, FT, GS) to their science object</change>
+            </prerelease>
             <prerelease version="22.03 beta 11">
+                <change type="FEATURE">Added new CHARA fixed PoPs widgets to define PoPs associated to stations ('-' means any Pop value [1-5])</change>
                 <change type="FEATURE">Improved displayed CHARA Current &amp; Fixed PoPs to use the station order given by the 6T configuration (MIRCX)</change>
                 <change type="FEATURE">Added new CHARA PoPs actions 'set' &amp; 'clear' respectively to set PoPs with the current best PoPs value
                     and reset the fixed PoPs ([Auto] = any Pop value)</change>
-                <change type="FEATURE">Added new CHARA fixed PoPs widgets to define PoPs associated to stations ('-' means any Pop value [1-5])</change>
                 <change type="FEATURE">Improved CHARA PoPs field [Manual] to handle the wildcard digit '8' corresponding to any Pop value [1-5]</change>
                 <change type="FEATURE">Improved chart titles to display the full CHARA configuration as 'SS(n)-...'
                     where 'SS' indicates the station and 'n' the Pop value associuated to the corresponding station;
