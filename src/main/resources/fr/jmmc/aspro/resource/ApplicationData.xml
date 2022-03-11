@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.03 beta 12"/>
+    <program name="Aspro2" version="22.03"/>
     <compilation date="11/03/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -229,7 +229,7 @@
 
     <releasenotes>
         <release version="22.03">
-            <pubDate>Fri, 11 Mar 2022 16:00:00 GMT</pubDate>
+            <pubDate>Fri, 11 Mar 2022 16:30:00 GMT</pubDate>
             <prerelease version="22.03 beta 12">
                 <change type="FEATURE">Improved tooltips on the observability plot to display angular distances on science objects to calibrator and ancillary stars (AO, FT, GS)</change>
                 <change type="FEATURE">Improved tooltips in Target Editor's navigation trees to display angular distances on calibrator and ancillary stars (AO, FT, GS) to their science object</change>
