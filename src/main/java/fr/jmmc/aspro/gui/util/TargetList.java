@@ -221,7 +221,7 @@ public final class TargetList extends JList {
                 sb.append("<br>");
                 n = 0;
             }
-            sb.append(t.getName()).append(" (");
+            sb.append("<b>").append(t.getName()).append("</b> (");
             sb.append(NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(dist, axisUnit)));
             sb.append(" ").append(axisUnit.getStandardRepresentation());
             sb.append("), ");
