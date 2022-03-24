@@ -64,6 +64,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     private final static String FAKE_EMAIL = "FAKE_EMAIL";
     private static String CURRENT_EMAIL = "";
+    
+    private static final int M_TOP = 14; /* font scale = 1.0 */
 
     private static void defineEmailPref(final String email) {
         try {
@@ -129,7 +131,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         logger.info("AsproDocJUnitTest.intializeAndStartApplication()");
 
         // GNOME3: window issue:
-        setScreenshotTakerMargins(40, 0, 0, 0);
+        setScreenshotTakerMargins(M_TOP, 0, 0, 0);
+        
+        logger.warn("Using top margin = {} px", M_TOP);
 
         AsproDocJUnitTest.prepareAsproTest();
 
@@ -258,8 +262,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             enableTooltips(true);
 
             // move the mouse on the first observability interval (top right corner):
-            // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 390, 410);
+            robot().moveMouse(window.component(), 380, 440); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
@@ -334,8 +337,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             enableTooltips(true);
 
             // move the mouse on one uv measurement:
-            // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 690, 590);
+            robot().moveMouse(window.component(), 690, 610); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
@@ -473,48 +475,83 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     @Test
     @GUITest
     public void m020_shouldShowCharaPoPs() {
+        final Dimension oldSize = window.target.getSize();
+        try {
+            window.resizeTo(new Dimension(1200, 950));
 
-        // show observability plot :
-        getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
+            openObservation("Aspro2_sample.asprox");
+            
+            // show observability plot :
+            getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
-        window.list("jListTargets").selectItem("HIP1234");
+            window.list("jListTargets").selectItem("HIP1234");
 
-        final JPanelFixture form = window.panel("observationForm");
+            final JPanelFixture form = window.panel("observationForm");
 
-        // select CHARA interferometer :
-        form.comboBox("jComboBoxInterferometer").selectItem("CHARA");
+            // select CHARA interferometer:
+            form.comboBox("jComboBoxInterferometer").selectItem("CHARA");
 
-        final int left = 5 + window.panel("jPanelTargets").component().getWidth();
+            // waits for computation to finish :
+            AsproTestUtils.checkRunningTasks();
+            
+            captureMainForm("Aspro2-main-chara.png");
 
-        final int width = 5 + window.panel("jPanelMain").component().getWidth()
-                + window.panel("jPanelConfigurations").component().getWidth();
+            final int left = 5 + window.panel("jPanelTargets").component().getWidth();
 
-        // Get plot's title to show PoPs in use:
-        final int height = getMainFormHeight(window) + 50;
+            final int width = 5 + window.panel("jPanelMain").component().getWidth()
+                    + window.panel("jPanelConfigurations").component().getWidth();
 
-        // waits for computation to finish :
-        AsproTestUtils.checkRunningTasks();
+            // Get plot's title to show PoPs in use:
+            final int height = getMainFormHeight(window) + 50;
 
-        saveCroppedScreenshotOf("popsAuto.png", left, 0, width, height);
+            saveCroppedScreenshotOf("popsAuto.png", left, 0, width, height);
 
-        // set PoPs to '34' (manual):
-        final JFormattedTextField jTextPoPs = (JFormattedTextField) form.textBox("jTextPoPs").component();
+            // set PoPs to '34' (manual):
+            final JFormattedTextField jTextPoPs = (JFormattedTextField) form.textBox("jTextPoPs").component();
 
-        GuiActionRunner.execute(new GuiTask() {
-            @Override
-            protected void executeInEDT() {
-                // Integer field :
-                jTextPoPs.setValue(NumberUtils.valueOf(34));
-            }
-        });
+            GuiActionRunner.execute(new GuiTask() {
+                @Override
+                protected void executeInEDT() {
+                    // Integer field :
+                    jTextPoPs.setValue(NumberUtils.valueOf(34));
+                }
+            });
 
-        // waits for computation to finish :
-        AsproTestUtils.checkRunningTasks();
+            // waits for computation to finish :
+            AsproTestUtils.checkRunningTasks();
 
-        // show observability plot (force plot refresh) :
-        getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
+            // show observability plot (force plot refresh) :
+            getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
-        saveCroppedScreenshotOf("popsUser.png", left, 0, width, height);
+            saveCroppedScreenshotOf("popsUser.png", left, 0, width, height);
+
+            GuiActionRunner.execute(new GuiTask() {
+                @Override
+                protected void executeInEDT() {
+                    // Integer field :
+                    jTextPoPs.setValue(null);
+                }
+            });
+            
+            // select CHARA interferometer:
+            form.comboBox("jComboBoxInstrument").selectItem("MIRCX-MYSTIC");
+            
+            // waits for computation to finish :
+            AsproTestUtils.checkRunningTasks();
+
+            saveCroppedScreenshotOf("popsAuto-6T.png", left, 0, width, height);
+            
+            window.button("jButtonPopsSet").click();
+            
+            // change configuration:
+            window.list("jListInstrumentConfigurations").selectItem(5);
+
+            saveCroppedScreenshotOf("popsFixed-5T.png", left, 0, width, height);
+            
+        } finally {
+            // Restore size:
+            window.resizeTo(oldSize);
+        }
     }
 
     /**
@@ -573,9 +610,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     public void m022_shouldOpenSampleMultiConf() {
 
         openObservation("Aspro2_sample_multi.asprox");
-
-        // waits for computation to finish :
-        AsproTestUtils.checkRunningTasks();
 
         // Capture map plot :
         showPlotTab(SettingPanel.TAB_INTERFEROMETER_MAP, "Aspro2-multiConf-map.png");
@@ -707,8 +741,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             enableTooltips(true);
 
             // move the mouse on Status Warning:
-            // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 760, 215);
+            robot().moveMouse(window.component(), 760, 250); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
@@ -743,9 +776,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
             window.resizeTo(new Dimension(1100, 1000));
 
-            // waits for computation to finish :
-            AsproTestUtils.checkRunningTasks();
-
             // Filter raw obs by selecting only the GRAVITY instrument:
             final int insIdx = AsproConstants.INS_OBS_LIST.indexOf("GRAVITY");
             window.list("jListInstruments").selectItem(insIdx);
@@ -756,8 +786,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
             // move the mouse on plot:
-            // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 760, 490);
+            robot().moveMouse(window.component(), 760, 540); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
@@ -768,8 +797,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
 
             // move the mouse on plot:
-            // note: check window margin issue (gnome3):
-            robot().moveMouse(window.component(), 740, 452);
+            robot().moveMouse(window.component(), 760, 500); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
@@ -797,9 +825,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     @GUITest
     public void m099_captureMoon() {
         openObservation("Aspro2_sample_moon.asprox");
-
-        // waits for computation to finish :
-        AsproTestUtils.checkRunningTasks();
 
         // Capture observability plot :
         getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
@@ -938,6 +963,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         window.fileChooser().selectFile(new File(TEST_FOLDER + obsFileName)).approve();
 
         pauseMedium();
+
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
     }
 
     /**
@@ -1067,7 +1095,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         final Point pf = com.getLocationOnScreen();
 
         // distance including window bar + menu bar (+ borders):
-        int height = (pf.y - pw.y);
+        int height = (pf.y - pw.y - M_TOP);
 
         height += com.getHeight();
 

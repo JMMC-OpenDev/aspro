@@ -124,6 +124,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private final static int MAX_TOOLTIP_WARNINGS = 100;
     /** fixed font */
     private final static Font FIXED_FONT = new Font(Font.MONOSPACED, Font.PLAIN, SwingUtils.adjustUISize(12));
+    /** fixed font (smaller) */
+    private final static Font FIXED_FONT_SMALLER = new Font(Font.MONOSPACED, Font.PLAIN, SwingUtils.adjustUISize(11));
     /** configuration manager */
     private final static ConfigurationManager cm = ConfigurationManager.getInstance();
     /** observation manager */
@@ -439,6 +441,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         jComboBoxPops.setMaximumRowCount(6);
         jComboBoxPops.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "[Manual]", "[Auto]" }));
+        jComboBoxPops.setName("jComboBoxPops"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
@@ -448,6 +451,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         jButtonPopsSet.setText("set");
         jButtonPopsSet.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonPopsSet.setName("jButtonPopsSet"); // NOI18N
         jButtonPopsSet.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonPopsSetActionPerformed(evt);
@@ -462,6 +466,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jButtonPopsClear.setText("clear");
         jButtonPopsClear.setToolTipText("Reset all fixed Pops (any)");
         jButtonPopsClear.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonPopsClear.setName("jButtonPopsClear"); // NOI18N
         jButtonPopsClear.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonPopsClearActionPerformed(evt);
@@ -1040,7 +1045,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jListInstrumentConfigurations.setFont(FIXED_FONT);
         jComboBoxPops.setFont(FIXED_FONT);
         jTextPoPs.setFont(FIXED_FONT);
-        jTextFieldCurrentPops.setFont(FIXED_FONT);
+        jTextFieldCurrentPops.setFont(FIXED_FONT_SMALLER);
     }
 
     /**
@@ -1472,14 +1477,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 defStationsForPops.add(name);
 
                 final JLabel label = new JLabel(" " + name);
-                label.setFont(FIXED_FONT);
+                label.setFont(FIXED_FONT_SMALLER);
                 popsStationLabels.add(label);
 
                 @SuppressWarnings("unchecked")
                 final JComboBox comboBox = new JComboBox(new GenericListModel<Pop>(popList, true));
                 comboBox.setPrototypeDisplayValue("X");
                 comboBox.setRenderer(PopListRenderer.INSTANCE);
-                comboBox.setFont(FIXED_FONT);
+                comboBox.setFont(FIXED_FONT_SMALLER);
                 comboBox.setSelectedItem(Pop.ANY_POP); // any
                 comboBox.addActionListener(new ActionListener() {
                     @Override
@@ -2609,6 +2614,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     static int getPreferredHeight() {
-        return Math.max(130, Math.min(260, SwingUtils.adjustUISize(130)));
+        return Math.max(160, Math.min(320, SwingUtils.adjustUISize(160)));
     }
 }

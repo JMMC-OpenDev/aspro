@@ -83,7 +83,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     /** GetStar URL (query by identifier) */
     private static final String GETSTAR_QUERY_ID = "http://apps.jmmc.fr/~sclws/getstar/sclwsGetStarProxy.php?star=";
     /** Mag converter URL */
-    private static final String MAG_CONV_ID = "http://ssc.spitzer.caltech.edu/warmmission/propkit/pet/magtojy/#fnu_to_mag";
+    private static final String MAG_CONV_ID = "http://irsa.ipac.caltech.edu/data/SPITZER/docs/dataanalysistools/tools/pet/magtojy/";
 
     /* members */
     /** list of edited targets (clone) */
