@@ -76,6 +76,9 @@ public interface AsproConstants {
     /** fast user mode error choices */
     public final static Vector<Double> FAST_ERROR = new Vector<Double>(Arrays.asList(
             new Double[]{
+                Double.valueOf(0.01),
+                Double.valueOf(0.02),
+                Double.valueOf(0.05),
                 Double.valueOf(0.1),
                 Double.valueOf(0.2),
                 Double.valueOf(0.5),
