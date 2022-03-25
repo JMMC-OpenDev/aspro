@@ -26,10 +26,12 @@ import fr.jmmc.jmal.model.function.math.Functions;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
+import static fr.jmmc.oiexplorer.core.util.FitsImageUtils.updateDataRange;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageFile;
 import fr.jmmc.oitools.image.FitsImageHDU;
 import fr.nom.tam.fits.FitsException;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
@@ -197,6 +199,7 @@ public final class UserModelService {
 
         final long start = System.nanoTime();
 
+        // Step 1: prepare images and get ROI:
         for (final FitsImage fitsImage : fitsImageHDU.getFitsImages()) {
             // Set User transform (scale & rotation):
             defineUserTransform(userModel, fitsImage);
@@ -205,9 +208,9 @@ public final class UserModelService {
 
                 // note: fits image instance can be modified by image preparation:
                 // can throw IllegalArgumentException if image has invalid keyword(s) / data:
-                prepareImage(fitsImage, modelData, useFastMode, fastError, doApodise, diameter, lambdaMin);
+                prepareImageStep1(fitsImage, modelData, useFastMode, fastError, doApodise, diameter, lambdaMin);
 
-                logger.info("Prepared FitsImage: {}", fitsImage.toString());
+                logger.debug("Prepared FitsImage: {}", fitsImage);
 
                 modelDataList.add(modelData);
             } catch (IllegalArgumentException iae) {
@@ -218,8 +221,6 @@ public final class UserModelService {
             }
         }
 
-        logger.info("prepareUserModel: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-
         // exception occured during image preparation(s):
         if (firstException != null) {
             logger.warn("FitsImage preparation has failure(s):\n{}", preparationReport.toString());
@@ -228,6 +229,21 @@ public final class UserModelService {
                 throw firstException;
             }
         }
+
+        // Step 2: adjust ROI to largest area for FITS cubes:
+        updateRoi(modelDataList);
+
+        // prepare images (roi + data1d):
+        for (final UserModelData modelData : modelDataList) {
+            prepareImageStep2(modelData);
+
+            logger.info("Prepared FitsImage: {}", modelData.getFitsImage());
+        }
+
+        // update min/max range to be consistent accross the cube:
+        updateDataRange(fitsImageHDU);
+
+        logger.info("prepareUserModel: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         // update cached data if no exception occured:
         userModel.setModelDataList(modelDataList);
@@ -284,7 +300,7 @@ public final class UserModelService {
             throw new IllegalStateException("Fits image is empty !");
         }
 
-        // Suppose the image is square (see FitsImageUtils.prepareImage):
+        // Suppose the image is square (see FitsImageUtils.prepareImageStep1):
         if (fitsImage.getNbCols() != fitsImage.getNbRows()) {
             throw new IllegalStateException("Fits image must be a square image !");
         }
@@ -858,9 +874,9 @@ public final class UserModelService {
      * @param lambdaMin minimum wavelength in meters (used only for gray images) (apodization)
      * @throws IllegalArgumentException if image has invalid keyword(s) / data
      */
-    public static void prepareImage(final FitsImage fitsImage, final UserModelData modelData,
-                                    final boolean useFastMode, final double fastError,
-                                    final boolean doApodise, final double diameter, final double lambdaMin) throws IllegalArgumentException {
+    public static void prepareImageStep1(final FitsImage fitsImage, final UserModelData modelData,
+                                         final boolean useFastMode, final double fastError,
+                                         final boolean doApodise, final double diameter, final double lambdaMin) throws IllegalArgumentException {
 
         if (!fitsImage.isDataRangeDefined()) {
             // update boundaries excluding zero values:
@@ -911,11 +927,11 @@ public final class UserModelService {
         logger.info("Total flux: {}", initialTotalFlux);
 
         // 2 - Normalize data (total flux):
-        if (!NumberUtils.equals(initialTotalFlux, 1.0, 0.01)) {
+        if (!NumberUtils.equals(initialTotalFlux, 1.0, 1e-3)) {
             final double normFactor = 1.0 / initialTotalFlux;
 
             final ImageNormalizeJob normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
-            logger.info("ImageNormalizeJob - factor: {}", normFactor);
+            logger.debug("ImageNormalizeJob - factor: {}", normFactor);
 
             normJob.forkAndJoin();
 
@@ -930,14 +946,12 @@ public final class UserModelService {
             final double error = Math.max(0.0, Math.min(fastError, 0.1)); // clamp error between [0% - 10%]
             logger.info("Fast error: {} %", 100.0 * error);
 
-            final double totalFlux = fitsImage.getSum();
-            logger.info("Total flux: {}", totalFlux);
-
             final int nData = fitsImage.getNData();
             final float[] data1D = sortData(fitsImage);
 
-            final double upperThreshold = totalFlux * (1.0 - error);
-            logger.info("UpperThreshold: {}", upperThreshold);
+            // Use 1.0 as data are normalized:
+            final double upperThreshold = (1.0 - error);
+            logger.debug("UpperThreshold: {}", upperThreshold);
 
             final int thIdx = findThresholdIndex(data1D, upperThreshold);
 
@@ -946,7 +960,7 @@ public final class UserModelService {
                 logger.info("Ratio: {} % selected pixels", NumberUtils.trimTo3Digits(thPixRatio));
 
                 thresholdFlux = data1D[thIdx];
-                logger.info("ThresholdFlux: {}", thresholdFlux);
+                logger.debug("thresholdFlux: {}", thresholdFlux);
             } else {
                 thresholdFlux = 0.0f;
             }
@@ -971,17 +985,11 @@ public final class UserModelService {
         // 3 - Locate useful data values inside image:
         final ImageRegionThresholdJob regionJob = new ImageRegionThresholdJob(data, nbCols, nbRows, thresholdFlux);
 
-        logger.info("ImageRegionThresholdJob: thresholdImage: {}", thresholdFlux);
+        logger.info("ImageRegionThresholdJob: thresholdFlux: {}", thresholdFlux);
         regionJob.forkAndJoin();
 
         // 4 - Extract ROI:
-        // keep the center of the ROI and keep the image square (width = height = even number):
         int rows1, rows2, cols1, cols2;
-
-        final float halfRows = 0.5f * nbRows;
-        final float halfCols = 0.5f * nbCols;
-
-        final float distToCenter;
 
         // use non zero area:
         rows1 = regionJob.getRowLowerIndex();
@@ -989,18 +997,60 @@ public final class UserModelService {
         cols1 = regionJob.getColumnLowerIndex();
         cols2 = regionJob.getColumnUpperIndex();
 
-        logger.info("ImageRegionThresholdJob: row indexes: {} - {}", rows1, rows2);
-        logger.info("ImageRegionThresholdJob: col indexes: {} - {}", cols1, cols2);
+        logger.info("ImageRegionThresholdJob: row indexes: [{} - {}]", rows1, rows2);
+        logger.info("ImageRegionThresholdJob: col indexes: [{} - {}]", cols1, cols2);
+
+        // end of step 1:
+        modelData.setFitsImage(fitsImage);
+        modelData.setThresholdFlux(thresholdFlux);
+        modelData.setRoi(new Rectangle(rows1, cols1, rows2 - rows1, cols2 - cols1));
+    }
+
+    public static void updateRoi(final List<UserModelData> modelDataList) {
+        int rows1 = Integer.MAX_VALUE, rows2 = Integer.MIN_VALUE;
+        int cols1 = Integer.MAX_VALUE, cols2 = Integer.MIN_VALUE;
+
+        // Get overall ROI on all images:
+        for (final UserModelData modelData : modelDataList) {
+            final Rectangle roi = modelData.getRoi();
+
+            if (roi.x < rows1) {
+                rows1 = roi.x;
+            }
+            int max = roi.x + roi.width;
+            if (max > rows2) {
+                rows2 = max;
+            }
+
+            if (roi.y < cols1) {
+                cols1 = roi.y;
+            }
+            max = roi.y + roi.height;
+            if (max > cols2) {
+                cols2 = max;
+            }
+        }
+
+        logger.info("updateRoi: row indexes: [{} - {}]", rows1, rows2);
+        logger.info("updateRoi: col indexes: [{} - {}]", cols1, cols2);
+
+        final UserModelData modelDataFirst = modelDataList.get(0);
+        final int nbRows = modelDataFirst.getFitsImage().getNbRows();
+        final int nbCols = modelDataFirst.getFitsImage().getNbCols();
+
+        // keep the center of the ROI and keep the image square (width = height = even number):
+        final float halfRows = 0.5f * nbRows;
+        final float halfCols = 0.5f * nbCols;
 
         final float rowDistToCenter = Math.max(Math.abs(halfRows - rows1), Math.abs(halfRows - rows2));
         final float colDistToCenter = Math.max(Math.abs(halfCols - cols1), Math.abs(halfCols - cols2));
 
-        logger.info("ImageRegionThresholdJob: rowDistToCenter: {}", rowDistToCenter);
-        logger.info("ImageRegionThresholdJob: colDistToCenter: {}", colDistToCenter);
+        logger.info("updateRoi: rowDistToCenter: {}", rowDistToCenter);
+        logger.info("updateRoi: colDistToCenter: {}", colDistToCenter);
 
         // ensure minimum size to 2 pixels + proper rounding:
-        distToCenter = Math.max(1f, Math.max(rowDistToCenter, colDistToCenter)) + 0.5f;
-        logger.info("ImageRegionThresholdJob: distToCenter: {}", distToCenter);
+        final float distToCenter = Math.max(1f, Math.max(rowDistToCenter, colDistToCenter)) + 0.5f;
+        logger.info("updateRoi: distToCenter: {}", distToCenter);
 
         // range check ?
         rows1 = (int) Math.floor(halfRows - distToCenter);
@@ -1011,7 +1061,7 @@ public final class UserModelService {
             rows2++;
         }
 
-        logger.info("ImageRegionThresholdJob: even row indexes: {} - {}", rows1, rows2);
+        logger.info("updateRoi: even row indexes: {} - {}", rows1, rows2);
 
         // range check ?
         cols1 = (int) Math.floor(halfCols - distToCenter);
@@ -1022,7 +1072,36 @@ public final class UserModelService {
             cols2++;
         }
 
-        logger.info("ImageRegionThresholdJob: even col indexes: {} - {}", cols1, cols2);
+        logger.info("updateRoi: even col indexes: {} - {}", cols1, cols2);
+
+        for (final UserModelData modelData : modelDataList) {
+            modelData.setRoi(new Rectangle(rows1, cols1, rows2 - rows1, cols2 - cols1));
+        }
+    }
+
+    /**
+     * Prepare the given image for FFT and direct Fourier transform.
+     * Update the given FitsImage by the prepared FitsImage ready for FFT and prepared model data for direct Fourier transform
+     * @param modelData prepared model data for direct Fourier transform
+     */
+    public static void prepareImageStep2(final UserModelData modelData) {
+        final FitsImage fitsImage = modelData.getFitsImage();
+
+        // in place modifications:
+        float[][] data = fitsImage.getData();
+        int nbRows = fitsImage.getNbRows();
+        int nbCols = fitsImage.getNbCols();
+
+        // 4 - Extract ROI:
+        int rows1, rows2, cols1, cols2;
+
+        // use non zero area:
+        final Rectangle roi = modelData.getRoi();
+        modelData.setRoi(null); // reset
+        rows1 = roi.x;
+        rows2 = roi.x + roi.width;
+        cols1 = roi.y;
+        cols2 = roi.y + roi.height;
 
         // update fits image:
         // note: this extraction does not check boundary overlapping:
@@ -1096,7 +1175,7 @@ public final class UserModelService {
         modelData.setFitsImage(fitsImage);
 
         // 7 - prepare model data to compute direct Fourier transform:
-        prepareModelData(fitsImage, modelData, thresholdFlux);
+        prepareModelData(fitsImage, modelData, modelData.getThresholdFlux());
     }
 
     /**
@@ -1136,14 +1215,14 @@ public final class UserModelService {
             } // columns
         } // rows
 
-        logger.info("FitsImage: used pixels = {} / {}", n1D, nData);
+        logger.debug("FitsImage: used pixels = {} / {}", n1D, nData);
 
         // Ideally use parallel sort (JDK 1.8+):
 //        edu.sorting.DualPivotQuicksort.sort(data1D, ParallelJobExecutor.getInstance().getMaxParallelJob(), 0, n1D);
         // For now use JDK sort (compatible with JDK 6/7):
         Arrays.sort(data1D, 0, n1D);
 
-        logger.info("FitsImage: {} float sorted.", n1D);
+        logger.debug("FitsImage: {} float sorted.", n1D);
 
         if (n1D != nData) {
             return Arrays.copyOf(data1D, n1D);

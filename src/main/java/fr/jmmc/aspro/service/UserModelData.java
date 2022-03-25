@@ -7,6 +7,7 @@ import fr.jmmc.aspro.model.OIBase;
 import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageHDU;
+import java.awt.Rectangle;
 
 /**
  * This class gathers prepared user model data as FitsImage (FFT) and 1D arrays (exact FT) (normalized flux and X/Y spatial coordinates) 
@@ -17,6 +18,10 @@ public final class UserModelData extends OIBase {
     /* members */
     /** FFT ready fits image */
     private FitsImage fitsImage = null;
+    /** threahold flux */
+    private float thresholdFlux = 0f;
+    /** image ROI */
+    private Rectangle roi = null;
     /** wavelength range of the fits image (fits cube) */
     private Range wavelengthRange = null;
     /** 
@@ -41,6 +46,22 @@ public final class UserModelData extends OIBase {
      */
     public FitsImage getFitsImage() {
         return fitsImage;
+    }
+
+    public float getThresholdFlux() {
+        return thresholdFlux;
+    }
+
+    public void setThresholdFlux(float thresholdFlux) {
+        this.thresholdFlux = thresholdFlux;
+    }
+
+    public Rectangle getRoi() {
+        return roi;
+    }
+
+    public void setRoi(Rectangle roi) {
+        this.roi = roi;
     }
 
     /* image meta data */
@@ -115,17 +136,17 @@ public final class UserModelData extends OIBase {
     }
 
     /**
-    * Return the airy radius (apodization)
-    * @return airy radius (apodization)
-    */
+     * Return the airy radius (apodization)
+     * @return airy radius (apodization)
+     */
     public double getAiryRadius() {
         return airyRadius;
     }
 
     /**
-    * Define the airy radius (apodization)
-    * @param airyRadius airy radius (apodization)
-    */
+     * Define the airy radius (apodization)
+     * @param airyRadius airy radius (apodization)
+     */
     public void setAiryRadius(final double airyRadius) {
         this.airyRadius = airyRadius;
     }
