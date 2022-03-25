@@ -8,7 +8,6 @@ import fr.jmmc.aspro.gui.util.AnimatorPanel;
 import fr.jmmc.aspro.gui.util.ModelJTree;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
-import fr.jmmc.aspro.gui.util.UserModelAnimator;
 import fr.jmmc.aspro.gui.util.UserModelAnimator.UserModelAnimatorListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -80,12 +79,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private static final Logger logger = LoggerFactory.getLogger(TargetModelForm.class.getName());
     /** OIFits MimeType */
     private final static MimeType mimeType = MimeType.FITS_IMAGE;
-    /** user model animator singleton */
-    private final static UserModelAnimator animator = UserModelAnimator.getInstance();
     /** default reload latency = 20 ms */
     private static final int RELOAD_LATENCY = 20;
     /** AMHRA portal */
     private static final String AMHRA_URL = "https://amhra.oca.eu/";
+    /** User model doc link */
+    private static final String HELP_USER_MODEL_URL = "http://www.jmmc.fr/twiki/bin/view/Jmmc/Software/JmmcAspro2#User_defined_model";
 
     /* members */
     /** list of edited targets (clone) */
@@ -249,8 +248,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * Disable model animation
      */
     void disableAnimator() {
-        // disable model animation:
-        animator.unregister(this);
+        if (this.animatorPanel != null) {
+            // disable model animation:
+            this.animatorPanel.dispose();
+        }
     }
 
     /**
@@ -865,6 +866,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jFormattedTextFieldScaleY = new javax.swing.JFormattedTextField();
         jToggleButtonLinked = new javax.swing.JToggleButton();
         jButtonAmhra = new javax.swing.JButton();
+        jButtonUserModelHelp = new javax.swing.JButton();
         jPanelDescription = new javax.swing.JPanel();
         jScrollPaneModelDescription = new javax.swing.JScrollPane();
         jLabelModelDescrption = new javax.swing.JLabel();
@@ -1075,6 +1077,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jButtonOpenFile, gridBagConstraints);
@@ -1086,7 +1089,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jButtonImageInfo, gridBagConstraints);
 
@@ -1163,6 +1166,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jToggleButtonLinked, gridBagConstraints);
@@ -1177,7 +1181,23 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jButtonAmhra, gridBagConstraints);
+
+        jButtonUserModelHelp.setIcon(fr.jmmc.jmcs.gui.util.ResourceImage.HELP_ICON.icon());
+        jButtonUserModelHelp.setToolTipText("Open the Aspro2's user manual on User-defined models");
+        jButtonUserModelHelp.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonUserModelHelp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonUserModelHelpActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jButtonUserModelHelp, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1614,6 +1634,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         BrowserLauncher.openURL(AMHRA_URL);
     }//GEN-LAST:event_jButtonAmhraActionPerformed
 
+    private void jButtonUserModelHelpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUserModelHelpActionPerformed
+        BrowserLauncher.openURL(HELP_USER_MODEL_URL);
+    }//GEN-LAST:event_jButtonUserModelHelpActionPerformed
+
     private void handleLinkedState() {
         // TODO: if linked is OFF, then allow editing scaleY field
         this.jFormattedTextFieldScaleY.setEnabled(!this.jToggleButtonLinked.isSelected() && this.jFormattedTextFieldScaleX.isEnabled());
@@ -1631,6 +1655,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private javax.swing.JButton jButtonRemove;
     private javax.swing.JButton jButtonReset;
     private javax.swing.JButton jButtonUpdate;
+    private javax.swing.JButton jButtonUserModelHelp;
     private javax.swing.JComboBox jComboBoxModelType;
     private javax.swing.JFormattedTextField jFormattedTextFieldRotation;
     private javax.swing.JFormattedTextField jFormattedTextFieldScaleX;
