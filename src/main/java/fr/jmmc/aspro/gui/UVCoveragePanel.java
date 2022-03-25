@@ -202,8 +202,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private final static int DATASET_UV_RAW_OBS = 4;
     /** observation manager */
     private final static ObservationManager om = ObservationManager.getInstance();
-    /** user model animator singleton */
-    private final static UserModelAnimator animator = UserModelAnimator.getInstance();
     /** default timeline refresh period = 1 minutes */
     private static final int REFRESH_PERIOD = 60 * 1000;
     /* members */
@@ -1026,7 +1024,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             logger.debug("dispose: {}", ObjectUtils.getObjectInfo(this));
         }
         // disable model animation:
-        animator.unregister(this);
+        this.animatorPanel.dispose();
 
         // unregister this instance as a Preference Observer :
         this.myPreferences.deleteObserver(this);

@@ -29,7 +29,7 @@ public final class UserModelAnimator {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(UserModelAnimator.class.getName());
     /** singleton instance */
-    private static UserModelAnimator instance = new UserModelAnimator();
+    private static final UserModelAnimator instance = new UserModelAnimator();
     /** default image refresh period = 0.1 seconds */
     private static final int REFRESH_PERIOD = 100;
     /** debug mode for register/unregister actions */
@@ -105,7 +105,7 @@ public final class UserModelAnimator {
         UserModelAnimationContext oldContext = contextByListener.get(listener);
 
         if (oldContext != null) {
-            if (userModel.getFile().equals(oldContext.userModel.getFile()) && userModel.getChecksum() == oldContext.userModel.getChecksum()) {
+            if (isSame(userModel, oldContext.userModel)) {
                 // fast return = nothing to do.
                 return;
             }
@@ -143,6 +143,7 @@ public final class UserModelAnimator {
 
         if (DEBUG) {
             logger.info("register: contexts:\n{}", contexts);
+            logger.info("register: contextByListener:\n{}", contextByListener);
         }
     }
 
@@ -178,14 +179,16 @@ public final class UserModelAnimator {
     private void enableImageRefreshTimer(final boolean enable) {
         if (enable) {
             if (!this.timerImageRefresh.isRunning()) {
-                logger.debug("Starting timer: {}", this.timerImageRefresh);
-
+                if (DEBUG) {
+                    logger.info("Starting timer: {}", this.timerImageRefresh);
+                }
                 this.timerImageRefresh.start();
             }
         } else {
             if (this.timerImageRefresh.isRunning()) {
-                logger.debug("Stopping timer: {}", this.timerImageRefresh);
-
+                if (DEBUG) {
+                    logger.info("Stopping timer: {}", this.timerImageRefresh);
+                }
                 this.timerImageRefresh.stop();
             }
         }
@@ -198,6 +201,10 @@ public final class UserModelAnimator {
      */
     private String getUserModelKey(final UserModel userModel) {
         return userModel.getFile() + '#' + userModel.getChecksum();
+    }
+
+    private static boolean isSame(final UserModel userModel, final UserModel otherModel) {
+        return (userModel.getFile().equals(otherModel.getFile()) && userModel.getChecksum() == otherModel.getChecksum());
     }
 
     /**
@@ -221,6 +228,9 @@ public final class UserModelAnimator {
      * @param delay timer delay, in milliseconds,
      */
     public void setDelay(final int delay) {
+        if (DEBUG) {
+            logger.info("setDelay: {} ms", delay);
+        }
         this.timerImageRefresh.setDelay(delay);
     }
 
@@ -234,9 +244,9 @@ public final class UserModelAnimator {
         /** user model file */
         UserModel userModel;
         /** action listeners */
-        List<UserModelAnimatorListener> actionListeners = new ArrayList<UserModelAnimatorListener>(2); // only few listeners
+        final List<UserModelAnimatorListener> actionListeners = new ArrayList<UserModelAnimatorListener>(2); // only few listeners
         /** current image index */
-        int imageIndex = 1;
+        int imageIndex = 0;
 
         @Override
         public String toString() {

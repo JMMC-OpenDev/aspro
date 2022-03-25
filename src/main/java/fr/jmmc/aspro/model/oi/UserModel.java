@@ -313,6 +313,14 @@ public class UserModel
                 && areEquals(this.rotation, other.getRotation()));
     }
 
+    @Override
+    public String toString() {
+        return "UserModel@" + System.identityHashCode(this) + "{" + "name=" + name
+                + ", file=" + file + ", checksum=" + checksum + ", fileValid=" + fileValid
+                + ", scaleX=" + scaleX + ", scaleY=" + scaleY + ", rotation=" + rotation
+                + '}';
+    }
+
 //--simple--preserve
 
 }

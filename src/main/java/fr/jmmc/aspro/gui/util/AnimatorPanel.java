@@ -5,10 +5,9 @@ package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.gui.util.UserModelAnimator.UserModelAnimatorListener;
 import fr.jmmc.aspro.model.oi.UserModel;
+import fr.jmmc.jmcs.gui.component.Disposable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.slf4j.Logger;
@@ -18,18 +17,16 @@ import org.slf4j.LoggerFactory;
  * This simple panels interacts with the UserModelAnimator singleton to configure it at runtime
  * @author bourgesl
  */
-public final class AnimatorPanel extends javax.swing.JPanel implements ActionListener, ChangeListener {
+public final class AnimatorPanel extends javax.swing.JPanel implements UserModelAnimatorListener, ActionListener, ChangeListener, Disposable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1L;
     /** Class logger */
     private static final Logger _logger = LoggerFactory.getLogger(AnimatorPanel.class.getName());
-    /** milliseconds per tick unit */
-    private final static int TICK_UNIT_MS = 20;
-    /** double formatter for auto refresh period */
-    private final static NumberFormat _df1 = new DecimalFormat("0.0#");
     /** user model animator singleton */
-    private final static UserModelAnimator animator = UserModelAnimator.getInstance();
+    private final static UserModelAnimator ANIMATOR = UserModelAnimator.getInstance();
+    /** min image refresh period = 40 ms ie 25/s */
+    private static final int MIN_REFRESH_PERIOD = 40;
 
     /* members */
     /** monitored user model animator listener */
@@ -53,8 +50,15 @@ public final class AnimatorPanel extends javax.swing.JPanel implements ActionLis
         this.listener = listener;
 
         initComponents();
-
         postInit(enableAutoRefresh);
+    }
+
+    /**
+     * Free any resource or reference to this instance
+     */
+    @Override
+    public void dispose() {
+        enableAnimator(false);
     }
 
     /**
@@ -63,13 +67,12 @@ public final class AnimatorPanel extends javax.swing.JPanel implements ActionLis
      */
     private void postInit(final boolean enableAutoRefresh) {
         jToggleButtonAutoRefresh.setSelected(enableAutoRefresh);
+        updateAnimatorTooltip();
 
         // Refresh buttons listener :
         jToggleButtonAutoRefresh.addActionListener(this);
-        jSliderPeriod.addChangeListener(this);
-
-        // set initial slider value:
-        jSliderPeriod.setValue(animator.getDelay() / TICK_UNIT_MS);
+        jSliderImageIndex.addChangeListener(this);
+        jSliderImageIndex.setEnabled(false);
     }
 
     /** 
@@ -78,17 +81,18 @@ public final class AnimatorPanel extends javax.swing.JPanel implements ActionLis
      */
     @Override
     public void stateChanged(final ChangeEvent ce) {
-        final int milliseconds = TICK_UNIT_MS * jSliderPeriod.getValue();
-
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("slider changed to: {} ms", milliseconds);
+        if (jToggleButtonAutoRefresh.isSelected()) {
+            return;
         }
+        // Manual navigation:
+        if (currentUserModel != null) {
+            final int index = jSliderImageIndex.getValue();
 
-        // update text value (rounded to 0.1s):
-        jTextFieldPeriod.setText(_df1.format(0.001d * milliseconds) + " s");
-
-        // apply new delay to the timer
-        animator.setDelay(milliseconds);
+            if (_logger.isDebugEnabled()) {
+                _logger.debug("slider changed to: {}", index);
+            }
+            perform(currentUserModel.getFile(), index);
+        }
     }
 
     /**
@@ -98,13 +102,9 @@ public final class AnimatorPanel extends javax.swing.JPanel implements ActionLis
     @Override
     public void actionPerformed(final ActionEvent ae) {
         if (ae.getSource() == jToggleButtonAutoRefresh) {
-            final boolean autoRefresh = jToggleButtonAutoRefresh.isSelected();
-
-            // update user model in animator panel to enable/disable animator:
-            setUserModel(this.currentUserModel);
-
-            this.jSliderPeriod.setEnabled(autoRefresh);
-            this.jTextFieldPeriod.setEnabled(autoRefresh);
+            jSliderImageIndex.setEnabled(!jToggleButtonAutoRefresh.isSelected());
+            // enable/disable animator:
+            enableAnimator(jToggleButtonAutoRefresh.isSelected());
         }
     }
 
@@ -118,43 +118,30 @@ public final class AnimatorPanel extends javax.swing.JPanel implements ActionLis
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jSliderPeriod = new javax.swing.JSlider();
-        jTextFieldPeriod = new javax.swing.JTextField();
+        jSliderImageIndex = new javax.swing.JSlider();
         jToggleButtonAutoRefresh = new javax.swing.JToggleButton();
 
         setLayout(new java.awt.GridBagLayout());
 
-        jSliderPeriod.setMaximum(250);
-        jSliderPeriod.setMinimum(1);
-        jSliderPeriod.setToolTipText("auto refresh periodicity (200ms to 5s)");
-        jSliderPeriod.setValue(1);
-        jSliderPeriod.setPreferredSize(new java.awt.Dimension(70, 20));
+        jSliderImageIndex.setValue(0);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        add(jSliderImageIndex, gridBagConstraints);
+
+        jToggleButtonAutoRefresh.setText("Auto");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        add(jSliderPeriod, gridBagConstraints);
-
-        jTextFieldPeriod.setEditable(false);
-        jTextFieldPeriod.setColumns(4);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        add(jTextFieldPeriod, gridBagConstraints);
-
-        jToggleButtonAutoRefresh.setText("Animate");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         add(jToggleButtonAutoRefresh, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JSlider jSliderPeriod;
-    private javax.swing.JTextField jTextFieldPeriod;
+    private javax.swing.JSlider jSliderImageIndex;
     private javax.swing.JToggleButton jToggleButtonAutoRefresh;
     // End of variables declaration//GEN-END:variables
 
@@ -163,17 +150,68 @@ public final class AnimatorPanel extends javax.swing.JPanel implements ActionLis
      * @param userModel user model
      */
     public void setUserModel(final UserModel userModel) {
+        if (userModel != null) {
+            // avoid repeating refresh by listeners:
+            final int newMax = userModel.isModelDataReady() ? userModel.getModelDataList().size() - 1 : 0;
+
+            if (newMax != jSliderImageIndex.getMaximum()) {
+                jSliderImageIndex.setMinimum(0);
+                jSliderImageIndex.setMaximum(newMax);
+                jSliderImageIndex.setValue(0);
+            }
+            if (jSliderImageIndex.isEnabled() == jToggleButtonAutoRefresh.isSelected()) {
+                jSliderImageIndex.setEnabled(!jToggleButtonAutoRefresh.isSelected());
+            }
+        }
         this.currentUserModel = userModel;
 
-        if (this.currentUserModel != null && jToggleButtonAutoRefresh.isSelected()) {
-            animator.register(this.currentUserModel, this.listener);
+        enableAnimator(jToggleButtonAutoRefresh.isSelected());
+    }
+
+    private void enableAnimator(final boolean enabled) {
+        if (enabled && (currentUserModel != null) && currentUserModel.isModelDataReady()) {
+            if (!ANIMATOR.isRunning()) {
+                // adjust animation speed:
+                final int nbImages = currentUserModel.getModelDataList().size();
+
+                final int duration = (nbImages > 100) ? 10000 : 5000;
+                final int delay = Math.max(MIN_REFRESH_PERIOD, duration / nbImages);
+
+                if (_logger.isDebugEnabled()) {
+                    _logger.debug("enableAnimator: delay = {} ms", delay);
+                }
+                ANIMATOR.setDelay(delay);
+                updateAnimatorTooltip();
+            }
+            ANIMATOR.register(currentUserModel, this); // start at 0
         } else {
-            animator.unregister(this.listener);
+            ANIMATOR.unregister(this);
+        }
+    }
+
+    private void updateAnimatorTooltip() {
+        jToggleButtonAutoRefresh.setToolTipText(
+                "automatically cycle through image every " + ANIMATOR.getDelay() + " ms.");
+    }
+
+    /**
+     * Perform image refresh on the given user model and image index (always on [0; modelDataList.size - 1]
+     * @param userModelFile user model file to use
+     * @param imageIndex image index to display
+     */
+    @Override
+    public void perform(final String userModelFile, final int imageIndex) {
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("perform: {} [{}]",
+                    hasUserModel() ? currentUserModel.getFile() : null, imageIndex);
         }
 
-        // update fields:
-        // set slider value:
-        jSliderPeriod.setValue(animator.getDelay() / TICK_UNIT_MS);
+        if ((currentUserModel != null) && currentUserModel.getFile().equals(userModelFile)) {
+            jSliderImageIndex.setValue(imageIndex);
+
+            // delegate to real listener:
+            listener.perform(userModelFile, imageIndex);
+        }
     }
 
     /**
@@ -181,6 +219,13 @@ public final class AnimatorPanel extends javax.swing.JPanel implements ActionLis
      * @return true if the current user model is defined 
      */
     public boolean hasUserModel() {
-        return this.currentUserModel != null;
+        return currentUserModel != null;
     }
+
+    @Override
+    public String toString() {
+        return "AnimatorPanel{listener=" + listener + ", currentUserModel="
+                + ((currentUserModel != null) ? currentUserModel.getFile() : "") + '}';
+    }
+
 }
