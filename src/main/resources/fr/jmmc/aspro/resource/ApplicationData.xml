@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.03"/>
-    <compilation date="11/03/2022" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="22.04 beta 1"/>
+    <compilation date="28/03/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -228,6 +228,13 @@
     </menubar>
 
     <releasenotes>
+        <release version="22.04">
+            <pubDate>Mon, 28 Mar 2022 10:30:00 GMT</pubDate>
+            <prerelease version="22.04 beta 1">
+                <change type="FEATURE">Improved visualisation of FITS image cubes (user model) in the Target Editor to use both consistent flux range &amp; FoV</change>
+                <change type="FEATURE">Rewritten user model animator widget to let the slider navigate among images or 'Auto' to cycle among them automatically</change>
+            </prerelease>
+        </release>
         <release version="22.03">
             <pubDate>Fri, 11 Mar 2022 16:30:00 GMT</pubDate>
             <prerelease version="22.03 beta 12">
