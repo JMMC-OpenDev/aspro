@@ -56,6 +56,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -318,6 +319,24 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         resetAndChangeObservation(observation);
     }
 
+    public void handleConfigurationChanged() {
+        logger.debug("handleConfigurationChanged");
+
+        // Must cancel any pending task using the observation:
+        cancelAnyBackgroundTask();
+
+        final ObservationSetting observation = getMainObservation();
+
+        // fix observation if interferometer is missing:
+        defineDefaults(observation, null);
+
+        // fire a configuration changed event:
+        fireConfigurationChanged();
+
+        // fire an observation update event and force refresh:
+        this.fireObservationUpdate(true);
+    }
+
     /**
      * Load an observation from the given file
      * @param file file to load
@@ -368,7 +387,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             ObservationFileProcessor.onLoad(observation);
 
             // update defaults and resolve references:
-            defineDefaults(observation);
+            defineDefaults(observation, sb);
 
             // load user models (to prepare and validate):
             checkAndLoadFileReferences(file, observation, sb);
@@ -414,7 +433,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
      */
     public void resetAndChangeObservation(final ObservationSetting observation) throws IllegalStateException {
-        defineDefaults(observation);
+        defineDefaults(observation, null);
 
         setObservationFile(null);
 
@@ -519,6 +538,19 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     }
 
     /**
+     * This fires a configuration changed event to all registered listeners.
+     * Fired by handleConfigurationChanged() when the configuration changed and the observation updated
+     *
+     * Listeners : BasicObservationForm
+     */
+    private void fireConfigurationChanged() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("fireConfigurationChanged: {}", toString(getMainObservation()));
+        }
+        fireEvent(new ObservationEvent(ObservationEventType.CONFIG_CHANGED, getMainObservation()));
+    }
+
+    /**
      * This fires an observation load event to all registered listeners.
      * Fired by changeObservation() when an observation is loaded or reset
      *
@@ -528,7 +560,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (logger.isDebugEnabled()) {
             logger.debug("fireObservationLoaded: {}", toString(getMainObservation()));
         }
-
         fireEvent(new ObservationEvent(ObservationEventType.LOADED, getMainObservation()));
     }
 
@@ -550,7 +581,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             logger.debug("fireObservationTargetsChanged: {}", toString(observation));
             logger.debug("observation version: {}", observation.getVersion());
         }
-
         fireEvent(new ObservationEvent(ObservationEventType.TARGET_CHANGED, observation));
     }
 
@@ -680,7 +710,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (logger.isDebugEnabled()) {
             logger.debug("fireObservationRefresh: {}", toString(getObservationCollection()));
         }
-
         fireEvent(new ObservationEvent(ObservationEventType.REFRESH, getObservationCollection()));
     }
 
@@ -696,7 +725,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (logger.isDebugEnabled()) {
             logger.debug("fireObservationRefreshUV: {}", toString(getObservationCollection()));
         }
-
         fireEvent(new ObservationEvent(ObservationEventType.REFRESH_UV, getObservationCollection()));
     }
 
@@ -713,7 +741,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (logger.isDebugEnabled()) {
             logger.debug("fireObservabilityDone: {}", toString(obsCollection));
         }
-
         fireEvent(new ObservabilityEvent(obsCollection, obsDataList));
     }
 
@@ -726,8 +753,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param warningContainer warning container
      */
     public void fireWarningsReady(final WarningContainer warningContainer) {
-        logger.debug("fireWarningsReady: {}", warningContainer);
-
+        if (logger.isDebugEnabled()) {
+            logger.debug("fireWarningsReady: {}", warningContainer);
+        }
         fireEvent(new WarningContainerEvent(warningContainer));
     }
 
@@ -741,8 +769,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      */
     public void fireOIFitsDone(final OIFitsData oiFitsData) {
         // use observation for computations :
-        logger.debug("fireOIFitsDone: {}", oiFitsData);
-
+        if (logger.isDebugEnabled()) {
+            logger.debug("fireOIFitsDone: {}", oiFitsData);
+        }
         fireEvent(new OIFitsEvent(oiFitsData));
     }
 
@@ -957,21 +986,22 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * and refresh the internal InterferometerConfiguration reference
      * Used by BasicObservationForm.updateObservation()
      *
-     * @param name name of the interferometer configuration
+     * @param configurationName name of the interferometer configuration
      * @return true if the value changed
      */
-    public boolean setInterferometerConfigurationName(final String name) {
+    public boolean setInterferometerConfigurationName(final String configurationName) {
         final InterferometerConfigurationChoice interferometerChoice = getMainObservation().getInterferometerConfiguration();
 
-        final boolean changed = !name.equals(interferometerChoice.getName());
+        final boolean changed = !configurationName.equals(interferometerChoice.getName());
         if (changed) {
             if (logger.isTraceEnabled()) {
-                logger.trace("setInterferometerConfigurationName: {}", name);
+                logger.trace("setInterferometerConfigurationName: {}", configurationName);
             }
-            interferometerChoice.setName(name);
-            // consistent with changed flag:
-            interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfiguration(name));
+            interferometerChoice.setName(configurationName);
         }
+        // Update the configuration anyway:
+        interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfiguration(configurationName));
+
         return changed;
     }
 
@@ -1467,7 +1497,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         for (TargetRawObservation rawObs : getMainObservation().getTargetObservations()) {
             rawObs.prepare();
         }
-
         this.fireTargetChangedEvents();
     }
 
@@ -1864,10 +1893,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     /**
      * Define default values (empty child objects)
      * @param observation observation to modify
+     * @param sb buffer to append optional information messages (conf references)
      * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
      */
-    private void defineDefaults(final ObservationSetting observation) throws IllegalStateException {
-
+    private void defineDefaults(final ObservationSetting observation, final StringBuilder sb) throws IllegalStateException {
         boolean changeConfiguration = false;
         try {
             // First: update Configuration
@@ -1926,7 +1955,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
             // update references :
             // can throw IllegalStateException if an invalid reference was found :
-            updateObservation(observation);
+            updateObservation(observation, sb);
 
             // always define the default target groups:
             TargetUtils.createDefaultTargetGroups(observation.getOrCreateTargetUserInfos());
@@ -1943,31 +1972,40 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     /**
      * Update observation with resolved references  (interferometer / instrument / instrument configuration ...)
      * @param observation observation to use
+     * @param sb buffer to append optional information messages (conf references)
      * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
      */
-    private void updateObservation(final ObservationSetting observation) throws IllegalStateException {
+    private void updateObservation(final ObservationSetting observation, final StringBuilder sb) throws IllegalStateException {
+        boolean fixed = false;
+
         // update all resolved references used on post load :
         final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
 
-        String interferometerConfiguration = interferometerChoice.getName();
-        interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfiguration(interferometerConfiguration));
+        String configurationName = interferometerChoice.getName();
+        interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfiguration(configurationName));
 
         final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
         String instrumentAlias = instrumentChoice.getName();
 
         if (interferometerChoice.getInterferometerConfiguration() == null) {
-            logger.info("The interferometer configuration [{}] is not supported.", interferometerConfiguration);
+            final String invalid = configurationName;
+            logger.info("The interferometer configuration [{}] is not supported", invalid);
 
             // use the first interferometer configuration that has the instrument:
             interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfigurationWithInstrument(instrumentAlias));
 
             if (interferometerChoice.getInterferometerConfiguration() != null) {
-                interferometerConfiguration = interferometerChoice.getInterferometerConfiguration().getName();
-                interferometerChoice.setName(interferometerConfiguration);
+                fixed = true;
+                configurationName = interferometerChoice.getInterferometerConfiguration().getName();
+                interferometerChoice.setName(configurationName);
 
-                logger.info("A correct interferometer configuration is [{}]. Save your file to keep this modification", interferometerConfiguration);
+                logger.info("A correct interferometer configuration is [{}]", configurationName);
+                if (sb != null) {
+                    sb.append("The interferometer configuration [").append(invalid).append("] is not supported; ");
+                    sb.append("using [").append(configurationName).append(" instead.\n");
+                }
             } else {
-                throw new IllegalStateException("The interferometer configuration [" + interferometerConfiguration + "] is invalid"
+                throw new IllegalStateException("The interferometer configuration [" + configurationName + "] is not supported"
                         + " and none has the instrument [" + instrumentAlias + "] !");
             }
         }
@@ -1983,58 +2021,103 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             interferometerChoice.setFixedPops(popsFixed);
         }
 
-        instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(interferometerConfiguration, instrumentAlias));
+        instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(configurationName, instrumentAlias));
         FocalInstrumentConfiguration insConf = instrumentChoice.getInstrumentConfiguration();
 
         if (insConf == null) {
-            logger.info("The instrument [{}] is not supported.", instrumentAlias);
+            final String invalid = instrumentAlias;
+            logger.info("The instrument [{}] is not supported", invalid);
 
             // use the instrument configuration that has the instrument using altNames:
-            instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfigurationByAltNames(interferometerConfiguration, instrumentAlias));
+            instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfigurationByAltNames(configurationName, instrumentAlias));
             insConf = instrumentChoice.getInstrumentConfiguration();
 
             if (insConf != null) {
+                fixed = true;
                 instrumentAlias = insConf.getFocalInstrument().getName();
                 instrumentChoice.setName(instrumentAlias);
 
-                logger.info("A correct instrument is [{}]. Save your file to keep this modification", instrumentAlias);
+                logger.info("A correct instrument is [{}]", instrumentAlias);
+
+                if (sb != null) {
+                    sb.append("The instrument [").append(invalid).append("] is not supported; ");
+                    sb.append("using [").append(instrumentAlias).append(" instead.\n");
+                }
             } else {
-                throw new IllegalStateException("The instrument [" + instrumentAlias + "] is invalid !");
+                throw new IllegalStateException("The instrument [" + instrumentAlias + "] is not supported !");
             }
         }
 
         // first resolve / fix observation variants :
-        for (ObservationVariant obsVariant : observation.getVariants()) {
+        for (Iterator<ObservationVariant> it = observation.getVariants().iterator(); it.hasNext();) {
+            final ObservationVariant obsVariant = it.next();
             obsVariant.setStationList(ConfigurationManager.getInstrumentConfigurationStations(insConf, obsVariant.getStations()));
 
             // fix invalid stations :
             if (obsVariant.getStationList() == null) {
-                logger.info("The instrument configuration [{}] is incorrect, trying to match a possible configuration ...", obsVariant.getStations());
+                final String invalid = obsVariant.getStations();
+                logger.info("The instrument configuration [{}] is invalid", invalid);
+
+                fixed = true;
 
                 final String stationIds = ConfigurationManager.findInstrumentConfigurationStations(insConf, obsVariant.getStations());
 
                 if (stationIds == null) {
-                    throw new IllegalStateException("The instrument configuration [" + obsVariant.getStations() + "] is invalid !");
+                    logger.info("Removing an invalid instrument configuration [{}].", invalid);
+                    if (sb != null) {
+                        sb.append("Removing an invalid instrument configuration [").append(invalid).append("].\n");
+                    }
+                    it.remove();
+                } else {
+                    logger.info("A correct instrument configuration is [{}]", stationIds);
+                    if (sb != null) {
+                        sb.append("A correct instrument configuration is [").append(stationIds).append("].\n");
+                    }
+
+                    obsVariant.setStations(stationIds);
+                    obsVariant.setStationList(ConfigurationManager.getInstrumentConfigurationStations(insConf, stationIds));
                 }
-
-                logger.info("A correct instrument configuration is [{}]. Save your file to keep this modification", stationIds);
-
-                obsVariant.setStations(stationIds);
-                obsVariant.setStationList(ConfigurationManager.getInstrumentConfigurationStations(insConf, stationIds));
             }
         }
 
+        if (observation.getVariants().isEmpty()) {
+            fixed = true;
+            // create a new variant having the same configuration (stations only) :
+            final String defInstrumentConfiguration = cm.getInstrumentConfigurationNames(
+                    observation.getInterferometerConfiguration().getName(),
+                    insConf.getFocalInstrument().getName()).get(0);
+
+            logger.info("Using the default instrument configuration [{}]", defInstrumentConfiguration);
+            if (sb != null) {
+                sb.append("Using the default instrument configuration [").append(defInstrumentConfiguration).append("].\n");
+            }
+
+            final ObservationVariant obsVariant = new ObservationVariant();
+
+            // Note : stations can not be null :
+            obsVariant.setStations(defInstrumentConfiguration);
+            obsVariant.setStationList(ConfigurationManager.getInstrumentConfigurationStations(insConf, defInstrumentConfiguration));
+
+            // create a new collection :
+            observation.getVariants().add(obsVariant);
+        }
+
+        if ((sb != null) && fixed) {
+            sb.append("Save your observation file to keep changes.\n");
+        }
+
+        // TODO: check obs variant => default
         // then update the instrument configuration for model compatibility :
         final ObservationVariant obsVariant = observation.getVariants().get(0);
         instrumentChoice.setStations(obsVariant.getStations());
         instrumentChoice.setStationList(obsVariant.getStationList());
 
         // pops can be undefined :
-        instrumentChoice.setPopList(cm.parseInstrumentPoPs(interferometerConfiguration,
+        instrumentChoice.setPopList(cm.parseInstrumentPoPs(configurationName,
                 obsVariant.getStations(), instrumentChoice.getPops()));
 
         // instrument mode can be undefined :
-        instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(interferometerConfiguration, instrumentAlias, instrumentChoice.getInstrumentMode()));
+        instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(configurationName, instrumentAlias, instrumentChoice.getInstrumentMode()));
 
         if (logger.isTraceEnabled()) {
             logger.trace("updateObservation: {}", toString(observation));

@@ -20,12 +20,13 @@ public final class Configuration {
 
     /** Map : id, interferometer description (insertion order, reproductible) */
     private final Map<String, InterferometerDescription> interferometerDescriptions = new LinkedHashMap<String, InterferometerDescription>();
-    /** interferometer names */
-    private final Vector<String> interferometerNames = new Vector<String>();
     /** Map : id, interferometer configuration (insertion order, reproductible) */
     private final Map<String, InterferometerConfiguration> interferometerConfigurations = new LinkedHashMap<String, InterferometerConfiguration>();
+    /* cached state */
+    /** interferometer names */
+    private Vector<String> interferometerNames = null;
     /** Map: id, interferometer configuration names */
-    private final Map<String, Vector<String>> interferometerConfigurationNames = new HashMap<String, Vector<String>>();
+    private Map<String, Vector<String>> interferometerConfigurationNames = null;
 
     /**
      * Package visible constructor
@@ -39,16 +40,16 @@ public final class Configuration {
      */
     void clear() {
         interferometerDescriptions.clear();
-        interferometerNames.clear();
         interferometerConfigurations.clear();
-        interferometerConfigurationNames.clear();
+        interferometerNames = null;
+        interferometerConfigurationNames = null;
     }
 
     /**
      * Return the interferometer description map keyed by name
      * @return interferometer description map
      */
-    Map<String, InterferometerDescription> getInterferometerDescriptionMap() {
+    private Map<String, InterferometerDescription> getInterferometerDescriptionMap() {
         return interferometerDescriptions;
     }
 
@@ -62,23 +63,23 @@ public final class Configuration {
 
     /**
      * Return the interferometer description for the given name
-     * @param name interferometer name
+     * @param interferometerName interferometer name
      * @return interferometer description or null if not found
      */
-    public InterferometerDescription getInterferometerDescription(final String name) {
-        return getInterferometerDescriptionMap().get(name);
+    public InterferometerDescription getInterferometerDescription(final String interferometerName) {
+        return getInterferometerDescriptionMap().get(interferometerName);
     }
 
     /**
-     * @param name interferometer name
+     * @param interferometerName interferometer name
      * @return true if an interferometer description is present for the given name
      */
-    public boolean hasInterferometerDescription(final String name) {
-        return getInterferometerDescriptionMap().containsKey(name);
+    public boolean hasInterferometerDescription(final String interferometerName) {
+        return getInterferometerDescriptionMap().containsKey(interferometerName);
     }
 
     /**
-     * Add the interferometer description for the given name
+     * Add the interferometer description
      * @param id interferometer description
      */
     public void addInterferometerDescription(final InterferometerDescription id) {
@@ -93,11 +94,13 @@ public final class Configuration {
         Vector<String> names = interferometerNames;
 
         // lazily prepare list:
-        if (names.isEmpty()) {
+        if (names == null) {
+            names = new Vector<String>();
             // ordered:
             for (InterferometerDescription id : getInterferometerDescriptions()) {
                 names.add(id.getName());
             }
+            this.interferometerNames = names;
         }
         return names;
     }
@@ -106,7 +109,7 @@ public final class Configuration {
      * Return the interferometer configuration map keyed by name
      * @return interferometer configuration map
      */
-    Map<String, InterferometerConfiguration> getInterferometerConfigurationMap() {
+    private Map<String, InterferometerConfiguration> getInterferometerConfigurationMap() {
         return interferometerConfigurations;
     }
 
@@ -115,16 +118,33 @@ public final class Configuration {
      * @return interferometer configuration collection
      */
     public Collection<InterferometerConfiguration> getInterferometerConfigurations() {
-        return interferometerConfigurations.values();
+        return getInterferometerConfigurationMap().values();
     }
 
     /**
      * Return the interferometer configuration for the given name
-     * @param name interferometer configuration name
+     * @param configurationName interferometer configuration name
      * @return interferometer configuration or null if not found
      */
-    public InterferometerConfiguration getInterferometerConfiguration(final String name) {
-        return getInterferometerConfigurationMap().get(name);
+    public InterferometerConfiguration getInterferometerConfiguration(final String configurationName) {
+        return getInterferometerConfigurationMap().get(configurationName);
+    }
+
+    /**
+     * @param configurationName interferometer configuration name
+     * @return true if an interferometer configuration is present for the given name
+     */
+    public boolean hasInterferometerConfiguration(final String configurationName) {
+        return getInterferometerConfigurationMap().containsKey(configurationName);
+    }
+
+    /**
+     * Add the interferometer configuration
+     * @see ConfigurationManager#computeConfigurationName(fr.jmmc.aspro.model.oi.InterferometerConfiguration) 
+     * @param ic interferometer configuration
+     */
+    public void addInterferometerConfiguration(final InterferometerConfiguration ic) {
+        getInterferometerConfigurationMap().put(ic.getName(), ic);
     }
 
     /**
@@ -133,6 +153,11 @@ public final class Configuration {
      * @return list of interferometer configurations
      */
     public Vector<String> getInterferometerConfigurationNames(final String interferometerName) {
+        // lazy:
+        if (interferometerConfigurationNames == null) {
+            this.interferometerConfigurationNames = new HashMap<String, Vector<String>>();
+        }
+
         Vector<String> names = interferometerConfigurationNames.get(interferometerName);
 
         // lazily prepare map:
@@ -152,5 +177,13 @@ public final class Configuration {
             names = interferometerConfigurationNames.get(interferometerName);
         }
         return names;
+    }
+
+    @Override
+    public String toString() {
+        return "Configuration{"
+                + "\ndescriptions: " + interferometerDescriptions
+                + "\nconfigurations: " + interferometerConfigurations
+                + "\n}";
     }
 }

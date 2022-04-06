@@ -28,7 +28,6 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="version" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="interferometer" type="{http://www.w3.org/2001/XMLSchema}IDREF"/&gt;
  *         &lt;element name="switchyard" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
@@ -43,7 +42,6 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "InterferometerConfiguration", propOrder = {
-    "name",
     "version",
     "interferometer",
     "switchyard",
@@ -53,7 +51,6 @@ public class InterferometerConfiguration
     extends OIBase
 {
 
-    protected String name;
     protected String version;
     @XmlElement(required = true, type = Object.class)
     @XmlIDREF
@@ -65,30 +62,6 @@ public class InterferometerConfiguration
     protected SwitchYard switchyard;
     @XmlElement(name = "instrument")
     protected List<FocalInstrumentConfiguration> instruments;
-
-    /**
-     * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setName(String value) {
-        this.name = value;
-    }
 
     /**
      * Gets the value of the version property.
@@ -192,65 +165,86 @@ public class InterferometerConfiguration
     }
     
 //--simple--preserve
- /** minimum distance between 2 stations in meter */
-  @javax.xml.bind.annotation.XmlTransient
-  private double minBaseLine = 0d;
+    /** computed name (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private String name = null;
 
-  /**
-   * Return the minimum distance between 2 stations in meter
-   * @return minimum distance between 2 stations in meter
-   */
-  public final double getMinBaseLine() {
-    return minBaseLine;
-  }
-
-  /**
-   * Define the minimum distance between 2 stations in meter
-   * @param minBaseLine minimum distance between 2 stations in meter
-   */
-  public final void setMinBaseLine(final double minBaseLine) {
-    this.minBaseLine = minBaseLine;
-  }
-  /** maximum distance between 2 stations in meter */
-  @javax.xml.bind.annotation.XmlTransient
-  private double maxBaseLine = 0d;
-
-  /**
-   * Return the maximum distance between 2 stations in meter
-   * @return maximum distance between 2 stations in meter
-   */
-  public final double getMaxBaseLine() {
-    return maxBaseLine;
-  }
-
-  /**
-   * Define the maximum distance between 2 stations in meter
-   * @param maxBaseLine maximum distance between 2 stations in meter
-   */
-  public final void setMaxBaseLine(final double maxBaseLine) {
-    this.maxBaseLine = maxBaseLine;
-  }
-
-  /**
-   * Return a deep "copy" of this instance
-   * @return deep "copy" of this instance
-   */
-  @Override
-  public final Object clone() {
-    final InterferometerConfiguration copy = (InterferometerConfiguration) super.clone();
-
-    // Copy list of instrument configuration:
-    if (copy.instruments != null) {
-      copy.instruments = new ArrayList<FocalInstrumentConfiguration>(copy.instruments);
+    /**
+     * Return the computed name
+     * @return computed name
+     */
+    public final String getName() {
+        return name;
     }
 
-    return copy;
-  }
+    /**
+     * Define the computed name
+     * @param name computed name
+     */
+    public final void setName(final String name) {
+        this.name = name;
+    }
 
-  @Override
-  public final String toString() {
-    return "InterferometerConfiguration : " + ((this.name != null) ? this.name : "undefined");
-  }
+    /** minimum distance between 2 stations in meter (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private double minBaseLine = 0d;
+
+    /**
+     * Return the minimum distance between 2 stations in meter
+     * @return minimum distance between 2 stations in meter
+     */
+    public final double getMinBaseLine() {
+        return minBaseLine;
+    }
+
+    /**
+     * Define the minimum distance between 2 stations in meter
+     * @param minBaseLine minimum distance between 2 stations in meter
+     */
+    public final void setMinBaseLine(final double minBaseLine) {
+        this.minBaseLine = minBaseLine;
+    }
+
+    /** maximum distance between 2 stations in meter (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private double maxBaseLine = 0d;
+
+    /**
+     * Return the maximum distance between 2 stations in meter
+     * @return maximum distance between 2 stations in meter
+     */
+    public final double getMaxBaseLine() {
+        return maxBaseLine;
+    }
+
+    /**
+     * Define the maximum distance between 2 stations in meter
+     * @param maxBaseLine maximum distance between 2 stations in meter
+     */
+    public final void setMaxBaseLine(final double maxBaseLine) {
+        this.maxBaseLine = maxBaseLine;
+    }
+
+    /**
+     * Return a deep "copy" of this instance
+     * @return deep "copy" of this instance
+     */
+    @Override
+    public final Object clone() {
+        final InterferometerConfiguration copy = (InterferometerConfiguration) super.clone();
+
+        // Copy list of instrument configuration:
+        if (copy.instruments != null) {
+            copy.instruments = new ArrayList<FocalInstrumentConfiguration>(copy.instruments);
+        }
+
+        return copy;
+    }
+
+    @Override
+    public final String toString() {
+        return "InterferometerConfiguration : " + ((this.name != null) ? this.name : "undefined");
+    }
 
 //--simple--preserve
 

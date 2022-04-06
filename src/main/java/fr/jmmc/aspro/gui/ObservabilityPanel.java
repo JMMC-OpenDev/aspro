@@ -406,11 +406,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // change the Range axis (horizontal):
         this.xyPlot.setRangeAxis(new BoundedDateAxis(""));
 
-        // create new JMMC annotation (moving position):
-        this.aJMMC = AsproChartUtils.createJMMCAnnotation();
-
         // define sliding adapter :
-        this.slidingXYPlotAdapter = new SlidingXYPlotAdapter(this.chart, this.xyPlot, SlidingXYPlotAdapter.MAX_VIEW_ITEMS, this.aJMMC);
+        this.slidingXYPlotAdapter = new SlidingXYPlotAdapter(this.chart, this.xyPlot, SlidingXYPlotAdapter.MAX_VIEW_ITEMS);
 
         // add listener :
         this.chart.addProgressListener(this);
@@ -1974,9 +1971,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             } // loop on Observability data (multi conf)
         } // loop on targets (display targets or baseline limits)
 
+        // create new JMMC annotation (moving position):
+        this.aJMMC = AsproChartUtils.createJMMCAnnotation(chartData.isConfigurationChecksumValid());
+
         // update plot data :
         this.slidingXYPlotAdapter.setData(taskSeriesCollection, symbolList, colorList, annotations, targetList, labelList, soTargetList, fullTargetIndex,
-                !chartData.isDoBaseLineLimits() && chartData.getFirstObservation().getWhen().isNightRestriction());
+                !chartData.isDoBaseLineLimits() && chartData.getFirstObservation().getWhen().isNightRestriction(), this.aJMMC);
 
         // force a plot refresh:
         this.updateSliderProperties(true);

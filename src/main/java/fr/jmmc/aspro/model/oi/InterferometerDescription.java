@@ -484,6 +484,45 @@ public class InterferometerDescription
     }
     
 //--simple--preserve
+
+    /** file reference corresponding to this object (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private InterferometerFile fileRef = null;
+
+    /**
+    * @return file reference corresponding to this object (read only)
+    */
+    public InterferometerFile getFileRef() {
+        return fileRef;
+    }
+
+    /**
+    * Define the file reference corresponding to this object (read only)
+    * @param fileRef file reference corresponding to this object (read only)
+    */
+    public void setFileRef(final InterferometerFile fileRef) {
+        this.fileRef = fileRef;
+    }
+
+    /** flag indicating the checksum of the interferometer file is valid (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private boolean checksumValid = false;
+
+    /**
+     * Return the flag indicating the checksum of the interferometer file is valid (read only)
+     * @return true if valid; false otherwise
+     */
+    public boolean isChecksumValid() {
+        return checksumValid;
+    }
+
+    /**
+     * Define the flag indicating the checksum of the interferometer file is valid (read only)
+     * @param checksumValid true if valid; false otherwise
+     */
+    public void setChecksumValid(final boolean checksumValid) {
+        this.checksumValid = checksumValid;
+    }
     
     /** flag indicating the checksum of the interferometer file is valid (read only) */
     @javax.xml.bind.annotation.XmlTransient
@@ -506,30 +545,11 @@ public class InterferometerDescription
     public void setPosSph(LonLatAlt posSph) {
         this.posSph = posSph;
     }
-    
-    /** flag indicating the checksum of the interferometer file is valid (read only) */
-    @javax.xml.bind.annotation.XmlTransient
-    private boolean checksumValid = false;
-
-    /**
-     * Return the flag indicating the checksum of the interferometer file is valid (read only)
-     * @return true if valid; false otherwise
-     */
-    public boolean isChecksumValid() {
-        return checksumValid;
-    }
-
-    /**
-     * Define the flag indicating the checksum of the interferometer file is valid (read only)
-     * @param checksumValid true if valid; false otherwise
-     */
-    public void setChecksumValid(final boolean checksumValid) {
-        this.checksumValid = checksumValid;
-    }
 
     @Override
     public final String toString() {
-        return "InterferometerDescription [" + ((this.name != null) ? this.name : "undefined") + "]";
+        return "InterferometerDescription [" + ((this.name != null) ? this.name : "undefined") 
+                + "][" + fileRef + "]";
     }
 //--simple--preserve
 

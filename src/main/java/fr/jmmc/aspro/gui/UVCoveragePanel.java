@@ -879,10 +879,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // Adjust background settings :
         this.xyPlot.setBackgroundImageAlpha(1.0f);
 
-        // create new JMMC annotation (moving position):
-        this.aJMMC = AsproChartUtils.createJMMCAnnotation();
-        this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
-
         // add UV axes in meters:
         final BoundedNumberAxis uAxisMeter = new BoundedNumberAxis("U (m) - North");
         uAxisMeter.setAutoRangeIncludesZero(false);
@@ -2564,6 +2560,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // memorize chart data (used by export PDF and zoom handling) :
         setChartData(chartData);
 
+        this.xyPlot.getRenderer().removeAnnotations();
+        // create new JMMC annotation (moving position):
+        this.aJMMC = AsproChartUtils.createJMMCAnnotation(chartData.isConfigurationChecksumValid());
+        this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
+
         if (chartData.getTargetName() == null) {
             // Baseline limits case :
             resetPlot();
@@ -2573,7 +2574,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.lastZoomEvent = null;
 
             final ObservationSetting observation = chartData.getFirstObservation();
-            final ObservabilityData obsData = chartData.getFirstObsData();
             final UVMapData uvMapData = chartData.getUVMapData();
 
             // disable chart & plot notifications:

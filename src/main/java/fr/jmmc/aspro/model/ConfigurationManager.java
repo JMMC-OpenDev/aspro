@@ -5,7 +5,6 @@ package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.conf.AsproConf;
-import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.model.oi.AdaptiveOptics;
 import fr.jmmc.aspro.model.oi.AdaptiveOpticsSetup;
 import fr.jmmc.aspro.model.oi.AzEl;
@@ -42,6 +41,7 @@ import fr.jmmc.jmcs.gui.FeedbackReport;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.ResourceUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oitools.util.CombUtils;
@@ -52,6 +52,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -70,12 +71,18 @@ public final class ConfigurationManager extends BaseOIManager {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class.getName());
+    /** enable support for user configurations */
+    public static final boolean ENABLE_USER_CONFIG = (ApplicationDescription.isBetaVersion()
+            || "true".equalsIgnoreCase(System.getProperty("aspro.expertMode", "false")));
+
     /** debug configuration at startup */
     private static final boolean DEBUG_CONF = false;
     /** dump horizons at startup */
     private static final boolean DUMP_HORIZON = false;
-    /** Configurations file name */
-    private static final String CONF_FILE = "AsproOIConfigurations.xml";
+    /** Internal Configurations file name */
+    private static final String CONF_FILE_INTERNAL = "AsproOIConfigurations.xml";
+    /** User Configurations file path */
+    private static final String CONF_FILE_USER = FileUtils.getPlatformPreferencesPath() + "AsproOIConfigurations-user.xml";
     /** singleton pattern */
     private static volatile ConfigurationManager instance = null;
     /** empty vector */
@@ -86,10 +93,14 @@ public final class ConfigurationManager extends BaseOIManager {
     /* members */
     /** aspro conf description (version and release notes) */
     private ApplicationDescription asproConfDescription = null;
-    /** Initial Configuration read from configuration files */
+    /** Internal Configuration read from configuration files (jar) */
+    private final Configuration internalConfiguration = new Configuration();
+    /** User Configurations read from configuration files (file) */
+    private final UserConfigurations userConfigurations = new UserConfigurations();
+    /** Initial Configuration = Internal + User Configuration (merged) */
     private final Configuration initialConfiguration = new Configuration();
     /** Current Configuration (may be different from initial configuration): observation can override some elements */
-    private Configuration configuration = initialConfiguration;
+    private Configuration currentConfiguration = this.initialConfiguration;
     /** Previous Configuration (may be different from initial configuration): observation can override some elements */
     private Configuration previousConfiguration = null;
 
@@ -145,41 +156,48 @@ public final class ConfigurationManager extends BaseOIManager {
 
         logger.info("loading Aspro2 configuration '{}' ...", asproConfDescription.getProgramVersion());
 
-        initializeConfiguration(initialConfiguration);
+        // skip loading configuration for CLI processing:
+        if (Bootstrapper.isHeadless()) {
+            logger.info("initialize: skipped (headless)");
+            return;
+        }
+
+        initializeInternalConfiguration();
+        if (ENABLE_USER_CONFIG) {
+            initializeUserConfiguration();
+            // save if any change:
+            saveUserConfigurations();
+        }
+        mergeConfigurations();
     }
 
+    /*
+    ----- Internal configuration API -----
+     */
     /**
      * Initialize the given configuration :
-     * - load AsproOIConfigurations.xml to get configuration file paths
+     * - load AsproOIConfigurations.xml to get configuration file paths in the classpath
      * - load those files (InterferometerSetting)
-     * - update interferometer description and configuration maps
+     * - update interferometer description and configuration
      *
-     * @param configuration configuration holder
      * @throws IllegalStateException if the configuration files are not found or IO failure
      * @throws IllegalArgumentException if the load configuration failed
      */
-    private void initializeConfiguration(final Configuration configuration)
+    private void initializeInternalConfiguration()
             throws IllegalStateException, IllegalArgumentException {
 
-        // reset anyway:
-        configuration.clear();
-
-        // skip loading configuration for CLI processing:
-        if (Bootstrapper.isHeadless()) {
-            logger.info("initializeConfiguration: skipped (headless)");
-            return;
-        }
+        final Configuration configuration = getInternalConfiguration();
 
         boolean isConfValid = true;
 
         final long start = System.nanoTime();
 
-        final Configurations conf = (Configurations) loadObject(CONF_FILE);
+        final Configurations conf = (Configurations) loadConfigObject(CONF_FILE_INTERNAL);
 
         final String minVersion = conf.getMinVersion();
 
         // check configuration's mininimum version vs application's version:
-        logger.info("initializeConfiguration: minimum required version = {}", minVersion);
+        logger.info("initializeInternalConfiguration: minimum required version = {}", minVersion);
 
         final String appVersion = ApplicationDescription.getInstance().getProgramVersion();
 
@@ -193,38 +211,35 @@ public final class ConfigurationManager extends BaseOIManager {
                             + ApplicationDescription.getInstance().getLinkValue()));
         }
 
-        InterferometerSetting is;
-        for (InterferometerFile file : conf.getInterferometerFiles()) {
-            final String fileName = file.getFile();
+        // Load configuration files:
+        for (InterferometerFile fileRef : conf.getInterferometerFiles()) {
+            final String fileName = fileRef.getFile();
+            final long checksumConf = fileRef.getChecksum();
 
-            logger.info("initializeConfiguration: loading configuration file = {}", fileName);
+            logger.info("initializeInternalConfiguration: loading configuration file = {}", fileName);
 
-            is = (InterferometerSetting) loadObject(fileName);
+            final InterferometerSetting is = (InterferometerSetting) loadConfigObject(fileName);
+            is.getDescription().setFileRef(fileRef);
 
-            // test checksum:
-            final long checksumConf = file.getChecksum();
             // compute checksum on file stream:
             final long checksumFile = checksum(fileName);
 
+            // test checksum:
             final boolean isChecksumValid = (checksumFile == checksumConf);
 
             if (!isChecksumValid) {
-                logger.info("initializeConfiguration: checksum[{}] is invalid !", fileName);
+                logger.info("initializeInternalConfiguration: checksum[{}] is invalid !", fileName);
             }
-
-            is.setChecksumValid(isChecksumValid);
+            // update information:
+            fileRef.setChecksumFile(checksumFile);
+            is.getDescription().setChecksumValid(isChecksumValid);
 
             addInterferometerSetting(configuration, is);
 
             isConfValid &= isChecksumValid;
         }
 
-        logger.info("initializeConfiguration: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("descriptions: {}", configuration.getInterferometerDescriptions());
-            logger.debug("configurations: {}", configuration.getInterferometerConfigurations());
-        }
+        logger.info("initializeInternalConfiguration: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         // Warning:
         if (!isConfValid) {
@@ -237,14 +252,394 @@ public final class ConfigurationManager extends BaseOIManager {
                 }
             }
 
-            msg.append("\nUSE THIS CONFIGURATION AT YOUR OWN RISKS.");
+            msg.append("\nUSE THESE INTERFEROMETER CONFIGURATIONS AT YOUR OWN RISKS.");
 
             MessagePane.showWarning(msg.toString(), "Configuration modified");
+        }
 
-            AsproChartUtils.setWarningAnnotation(true);
+        logger.debug("initializeInternalConfiguration: internalConfiguration: {}", configuration);
+    }
+
+    private Configuration getInternalConfiguration() {
+        return this.internalConfiguration;
+    }
+
+    /*
+    ----- User configuration API -----
+     */
+    /**
+     * Initialize the given configuration :
+     * - load user files (InterferometerSetting)
+     *
+     * @throws IllegalStateException if the configuration files are not found or IO failure
+     * @throws IllegalArgumentException if the load configuration failed
+     */
+    private void initializeUserConfiguration()
+            throws IllegalStateException, IllegalArgumentException {
+
+        final File confFile = FileUtils.getFile(CONF_FILE_USER);
+
+        if (confFile != null) {
+            final long start = System.nanoTime();
+
+            Configurations conf = null;
+            try {
+                conf = (Configurations) loadConfigObject(confFile);
+            } catch (IOException ioe) {
+                logger.error("Load failure on {}", confFile, ioe);
+            } catch (RuntimeException re) {
+                logger.error("Load failure on {}", confFile, re);
+            }
+            if (conf == null) {
+                logger.info("initializeUserConfiguration: Unable to load user configurations: {} !", CONF_FILE_USER);
+                return;
+            }
+
+            // keep reference to save later:
+            getUserConfigurations().setConfigurations(conf);
+
+            final StringBuilder sb = new StringBuilder(128);
+
+            // Load configuration files:
+            for (InterferometerFile fileRef : conf.getInterferometerFiles()) {
+                loadUserConfiguration(fileRef, sb);
+            }
+
+            logger.info("initializeUserConfiguration: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+
+            if (sb.length() > 0) {
+                MessagePane.showMessage(sb.toString(), "User Configuration");
+            }
+
+            if (!conf.getInterferometerFiles().isEmpty()) {
+                final StringBuilder msg = new StringBuilder(128);
+                msg.append("Aspro2 user configuration files have been loaded for interferometers:\n");
+
+                for (InterferometerFile fileRef : conf.getInterferometerFiles()) {
+                    final boolean enabled = fileRef.isReallyEnabled();
+                    msg.append("[").append(enabled ? "X" : "-").append("] ");
+                    if (fileRef.isValid()) {
+                        msg.append("[").append(fileRef.getInterferometerName()).append("] ");
+                    }
+                    msg.append(new File(fileRef.getFile()).getName()).append('\n');
+                }
+
+                msg.append("\nUSE THESE INTERFEROMETER CONFIGURATIONS AT YOUR OWN RISKS.");
+
+                MessagePane.showMessage(msg.toString(), "Configuration modified");
+            }
+        }
+
+        logger.debug("initializeUserConfiguration: userConfigurations: {}", getUserConfigurations());
+    }
+
+    private UserConfigurations getUserConfigurations() {
+        return this.userConfigurations;
+    }
+
+    public List<InterferometerFile> getUserConfigurationFiles() {
+        final List<InterferometerFile> fileRefs = (ENABLE_USER_CONFIG) ? getUserConfigurations().getInterferometerFiles() : null;
+        if ((fileRefs == null) || fileRefs.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(fileRefs);
+    }
+
+    public boolean addUserConfiguration(final String filePath) {
+        if (ENABLE_USER_CONFIG) {
+            logger.debug("addUserConfiguration: {}", filePath);
+
+            InterferometerFile fileRef = getUserConfigurations().getInterferometerFile(filePath);
+            if (fileRef != null) {
+                return reloadUserConfiguration(filePath);
+            } else {
+                fileRef = new InterferometerFile();
+                fileRef.setFile(filePath);
+                fileRef.setEnabled(true);
+
+                // insert on top priority:
+                getUserConfigurations().getOrCreateConfigurations().getInterferometerFiles().add(fileRef);
+
+                final StringBuilder sb = new StringBuilder(128);
+
+                final boolean ok = loadUserConfiguration(fileRef, sb);
+
+                logger.debug("addUserConfiguration: userConfigurations: {}", getUserConfigurations());
+
+                // save if any change:
+                saveUserConfigurations();
+                mergeConfigurations();
+
+                if (sb.length() > 0) {
+                    MessagePane.showMessage(sb.toString(), "User Configuration");
+                }
+                return ok;
+            }
+        }
+        return false;
+    }
+
+    public boolean reloadUserConfiguration(final String filePath) {
+        if (ENABLE_USER_CONFIG) {
+            logger.debug("reloadUserConfiguration: {}", filePath);
+
+            final InterferometerFile fileRef = getUserConfigurations().getInterferometerFile(filePath);
+            if (fileRef != null) {
+                fileRef.setEnabled(true);
+
+                final StringBuilder sb = new StringBuilder(128);
+
+                final boolean ok = loadUserConfiguration(fileRef, sb);
+
+                logger.debug("reloadUserConfiguration: userConfigurations: {}", getUserConfigurations());
+
+                // save if any change:
+                saveUserConfigurations();
+                mergeConfigurations();
+
+                if (sb.length() > 0) {
+                    MessagePane.showMessage(sb.toString(), "User Configuration");
+                }
+                return ok;
+            }
+        }
+        return false;
+    }
+
+    public boolean removeUserConfiguration(final String filePath) {
+        if (ENABLE_USER_CONFIG) {
+            logger.debug("removeUserConfiguration: {}", filePath);
+
+            final InterferometerFile fileRef = getUserConfigurations().getInterferometerFile(filePath);
+            if (fileRef != null) {
+                final List<InterferometerFile> files = getUserConfigurations().getInterferometerFiles();
+                if (files != null) {
+                    getUserConfigurations().setChanged(true);
+
+                    boolean ok = files.remove(fileRef);
+
+                    ok |= getUserConfigurations().removeLoadedConfiguration(filePath);
+
+                    logger.debug("removeUserConfiguration: userConfigurations: {}", getUserConfigurations());
+
+                    // save if any change:
+                    saveUserConfigurations();
+                    mergeConfigurations();
+                    return ok;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean setUserConfigurationEnabled(final String filePath, boolean enabled) {
+        if (ENABLE_USER_CONFIG) {
+            logger.debug("setUserConfigurationEnabled: {} enabled: {}", filePath, enabled);
+
+            final InterferometerFile fileRef = getUserConfigurations().getInterferometerFile(filePath);
+            if (fileRef != null) {
+                if ((fileRef.isReallyEnabled() != enabled)
+                        && (!enabled || (enabled && fileRef.isValid()))) {
+
+                    getUserConfigurations().setChanged(true);
+                    fileRef.setEnabled(enabled);
+
+                    // disable other config:
+                    disableOtherUserConfigurations(fileRef);
+
+                    logger.debug("setUserConfigurationEnabled: userConfigurations: {}", getUserConfigurations());
+
+                    // save if any change:
+                    saveUserConfigurations();
+                    mergeConfigurations();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean loadUserConfiguration(final InterferometerFile fileRef, final StringBuilder sb) {
+        final String filePath = fileRef.getFile();
+        // indicate user config:
+        fileRef.setUserConfig(true);
+        fileRef.setInterferometerName(null);
+
+        boolean loaded = false;
+
+        final File isFile = FileUtils.getFile(filePath);
+        if (isFile == null) {
+            sb.append("Missing user config file [").append(filePath).append("].\n");
+        } else {
+            logger.info("loadUserConfiguration: loading configuration file = {}", isFile.getAbsolutePath());
+
+            try {
+                final Object loadedObject = loadConfigObject(isFile);
+
+                // ensure correct type:
+                if (loadedObject instanceof InterferometerSetting) {
+                    final InterferometerSetting is = (InterferometerSetting) loadedObject;
+                    is.getDescription().setFileRef(fileRef);
+
+                    // compute checksum on file stream:
+                    // final long checksumFile = checksum(fileName);
+                    // update information:
+                    // fileRef.setChecksumFile(checksumFile);
+                    is.getDescription().setChecksumValid(false);
+
+                    // get previously loaded configuration:
+                    Configuration configuration = getUserConfigurations().getLoadedConfiguration(filePath);
+
+                    if (configuration == null) {
+                        configuration = new Configuration();
+                    } else {
+                        configuration.clear();
+                    }
+
+                    addInterferometerSetting(configuration, is);
+
+                    // overwrite:
+                    getUserConfigurations().addLoadedConfiguration(filePath, configuration);
+                    getUserConfigurations().setChanged(true);
+
+                    // disable other config:
+                    disableOtherUserConfigurations(fileRef);
+
+                    loaded = true;
+                } else {
+                    logger.error("Invalid user config file [{}] type: {}", isFile,
+                            ((loadedObject != null) ? loadedObject.getClass() : null));
+                    sb.append("Invalid user config file [").append(filePath).append("].\n");
+                }
+            } catch (IOException ioe) {
+                logger.error("Load failure on {}", isFile, ioe);
+                sb.append("Loading user config file [").append(filePath).append("] failed:\n").append(ioe.getMessage()).append("\n\n");
+            } catch (RuntimeException re) {
+                logger.error("Load failure on {}", isFile, re);
+                sb.append("Loading user config file [").append(filePath).append("] failed:\n").append(re.getMessage()).append("\n\n");
+            }
+        }
+
+        if (!loaded) {
+            logger.info("loadUserConfiguration: missing or invalid configuration file = {}", filePath);
+            // set disabled:
+            fileRef.setEnabled(false);
+            // Remove previously loaded configuration anyway:
+            getUserConfigurations().removeLoadedConfiguration(filePath);
+            getUserConfigurations().setChanged(true);
+            return false;
+        }
+        return true;
+    }
+
+    private void disableOtherUserConfigurations(final InterferometerFile fileRef) {
+        if (fileRef.isReallyEnabled() && fileRef.isValid()) {
+            final String interferometerName = fileRef.getInterferometerName();
+
+            final List<InterferometerFile> files = getUserConfigurations().getInterferometerFiles();
+            if (files != null) {
+                for (InterferometerFile otherFileRef : files) {
+                    // only enabled and same interferometer name:
+                    if ((fileRef != otherFileRef)
+                            && otherFileRef.isReallyEnabled()
+                            && ObjectUtils.areEquals(interferometerName, otherFileRef.getInterferometerName())) {
+
+                        logger.debug("disableOtherUserConfigurations: disable {}", otherFileRef);
+
+                        otherFileRef.setEnabled(false);
+                    }
+                }
+            }
         }
     }
 
+    private void saveUserConfigurations() {
+        if (ENABLE_USER_CONFIG) {
+            if (getUserConfigurations().isChanged()) {
+                final Configurations conf = getUserConfigurations().getConfigurations();
+
+                final File confFile = new File(CONF_FILE_USER);
+                try {
+                    logger.info("Save user configurations to file: {}", confFile);
+
+                    saveObject(confFile, conf);
+
+                    // reset conf changed:
+                    conf.setChanged(false);
+
+                } catch (IOException ioe) {
+                    logger.error("Save failure on {}", confFile, ioe);
+                } catch (RuntimeException re) {
+                    logger.error("Save failure on {}", confFile, re);
+                }
+            }
+        }
+    }
+
+    private void mergeConfigurations() {
+        final Configuration configuration = getInitialConfiguration();
+
+        // reset anyway:
+        configuration.clear();
+
+        if (ENABLE_USER_CONFIG) {
+            // copy User configurations (prepared):
+            final List<InterferometerFile> files = getUserConfigurations().getInterferometerFiles();
+            if (files != null) {
+                for (InterferometerFile fileRef : files) {
+                    // only enabled:
+                    if (fileRef.isReallyEnabled()) {
+                        final Configuration userConfiguration = getUserConfigurations().getLoadedConfiguration(fileRef.getFile());
+                        // only valid:
+                        if (userConfiguration != null) {
+                            logger.debug("mergeConfigurations: adding user config: {}", fileRef);
+
+                            for (InterferometerDescription id : userConfiguration.getInterferometerDescriptions()) {
+                                configuration.addInterferometerDescription(id);
+                            }
+                            for (InterferometerConfiguration ic : userConfiguration.getInterferometerConfigurations()) {
+                                configuration.addInterferometerConfiguration(ic);
+                            }
+                        }
+                    }
+                }
+            }
+            logger.debug("mergeConfigurations: user: {}", configuration);
+        }
+
+        // copy missing Internal configurations (prepared):
+        for (InterferometerDescription id : getInternalConfiguration().getInterferometerDescriptions()) {
+            // only add configurations for missing interferometers (initial vs user config):
+            if (!configuration.hasInterferometerDescription(id.getName())) {
+                configuration.addInterferometerDescription(id);
+            }
+        }
+        for (InterferometerConfiguration ic : getInternalConfiguration().getInterferometerConfigurations()) {
+            final InterferometerDescription interferometer = ic.getInterferometer();
+            // only add configurations for the same interferometer (initial vs user config):
+            if (configuration.getInterferometerDescription(interferometer.getName()) == interferometer) {
+                configuration.addInterferometerConfiguration(ic);
+            }
+        }
+
+        logger.debug("mergeConfigurations: merged: {}", configuration);
+    }
+
+    /**
+     * Get Initial Configuration used to resolve ID/IDREF in observation files
+     * @return Initial Configuration
+     */
+    public Configuration getInitialConfiguration() {
+        return this.initialConfiguration;
+    }
+
+    private Configuration getCurrentConfiguration() {
+        return this.currentConfiguration;
+    }
+
+    /*
+    ----- Configuration preparation API -----
+     */
     /**
      * Computes checksum of the given file name loaded in the configuration path
      * @param fileName file name to load
@@ -268,16 +663,16 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
-     * Add a new interferometer setting in the cache
+     * Add a new interferometer setting in the given configuration
      * and compute transient information (long/lat and max uv coverage)
      * @param configuration configuration holder
      * @param is interferometer setting
      */
-    private static void addInterferometerSetting(final Configuration configuration, final InterferometerSetting is) {
+    private static void addInterferometerSetting(final Configuration configuration,
+                                                 final InterferometerSetting is) {
 
         // process the InterferometerDescription:
         final InterferometerDescription id = is.getDescription();
-        id.setChecksumValid(is.isChecksumValid());
 
         addInterferometerDescription(configuration, id);
 
@@ -290,7 +685,7 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
-     * Add a new interferometer description in the cache
+     * Add a new interferometer description in the given configuration
      * and compute transient information (long/lat and max uv coverage) ...
      * @param configuration configuration holder
      * @param id interferometer description
@@ -298,13 +693,18 @@ public final class ConfigurationManager extends BaseOIManager {
     private static void addInterferometerDescription(final Configuration configuration, final InterferometerDescription id) {
         final String name = id.getName();
 
+        // update file ref anyway:
+        if (id.getFileRef() != null) {
+            id.getFileRef().setInterferometerName(name);
+        }
+
         // check if the interferometer is unique (name) :
         if (configuration.hasInterferometerDescription(name)) {
             throw new IllegalStateException("The interferometer '" + name + "' is already present in loaded configurations !");
         }
 
         // TODO: handle properly spectral channels (rebinning):
-        // initialize and check instrument modes (spectral channels):
+        // initialize computed fields and check instrument modes (spectral channels):
         boolean dump = false;
         try {
             for (FocalInstrument instrument : id.getFocalInstruments()) {
@@ -331,22 +731,18 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
-     * Add a new interferometer configuration in the cache
+     * Add a new interferometer configuration in the given configuration
      * and compute transient information (max uv coverage) ...
      * @param configuration configuration holder
      * @param ic interferometer configuration belonging to the related interferometer description
      */
     private static void addInterferometerConfiguration(final Configuration configuration, final InterferometerConfiguration ic) {
-        final String name = getConfigurationName(ic);
+        final String configurationName = computeAndSetConfigurationName(ic);
 
         // check if the interferometer is unique (name) :
-        if (configuration.getInterferometerConfigurationMap().containsKey(name)) {
-            throw new IllegalStateException("The interferometer configuration '" + name + "' is already present in loaded configurations !");
+        if (configuration.hasInterferometerConfiguration(configurationName)) {
+            throw new IllegalStateException("The interferometer configuration '" + configurationName + "' is already present in loaded configurations !");
         }
-
-        configuration.getInterferometerConfigurationMap().put(name, ic);
-
-        computeBaselineUVWBounds(ic);
 
         if (ic.getInterferometer() == null) {
             throw new IllegalStateException("The interferometer configuration '" + ic.getName()
@@ -362,6 +758,11 @@ public final class ConfigurationManager extends BaseOIManager {
                         + "' is not associated with a switchyard (invalid identifier) [" + switchyards + "] !");
             }
         }
+
+        // initialize computed fields:
+        computeBaselineUVWBounds(ic);
+
+        configuration.addInterferometerConfiguration(ic);
     }
 
     /**
@@ -672,7 +1073,7 @@ public final class ConfigurationManager extends BaseOIManager {
      * @param ic configuration
      * @return name of the interferometer configuration
      */
-    private static String getConfigurationName(final InterferometerConfiguration ic) {
+    private static String computeAndSetConfigurationName(final InterferometerConfiguration ic) {
         // compute configuration name if missing :
         String name = ic.getName();
         if (name == null) {
@@ -693,38 +1094,43 @@ public final class ConfigurationManager extends BaseOIManager {
         return name;
     }
 
-    /* Configuration overriding */
+    /*
+    ----- Dynamic Configuration overriding API -----
+     */
     /**
      * Change the current configuration by merging the initial interferometer configuration with the given extended interferometer configuration
      * @param extendedConfiguration extended interferometer configuration
      */
     public void changeConfiguration(final InterferometerConfiguration extendedConfiguration) {
         // backup configuration:
-        this.previousConfiguration = configuration;
-        this.configuration = null; // for safety
+        this.previousConfiguration = getCurrentConfiguration();
+        this.currentConfiguration = null; // for safety
+
+        // use initial configuration as source:
+        final Configuration configuration = getInitialConfiguration();
 
         final Configuration newConfiguration;
 
         if (extendedConfiguration != null) {
             // compute extended interferometer configuration name:
-            final String confName = getConfigurationName(extendedConfiguration);
+            final String configurationName = computeAndSetConfigurationName(extendedConfiguration);
 
             // Configuration merge (clone + update parts)
             newConfiguration = new Configuration();
 
             // copy InterferometerDescriptions (prepared):
-            for (InterferometerDescription id : initialConfiguration.getInterferometerDescriptions()) {
+            for (InterferometerDescription id : configuration.getInterferometerDescriptions()) {
                 newConfiguration.addInterferometerDescription(id);
             }
 
             // process the InterferometerConfiguration list:
             boolean merged = false;
 
-            for (InterferometerConfiguration ic : initialConfiguration.getInterferometerConfigurations()) {
-                if (!merged && confName.equalsIgnoreCase(ic.getName())) {
+            for (InterferometerConfiguration ic : configuration.getInterferometerConfigurations()) {
+                if (!merged && configurationName.equalsIgnoreCase(ic.getName())) {
                     merged = true;
 
-                    logger.info("changeConfiguration: merge InterferometerConfiguration [{}]", confName);
+                    logger.info("changeConfiguration: merge InterferometerConfiguration [{}]", configurationName);
 
                     // note: do not modify extendedConfiguration as it belongs to ObservationSetting used when marshalling to XML.
                     // note: do not modify ic as it belongs to initial configuration.
@@ -733,25 +1139,36 @@ public final class ConfigurationManager extends BaseOIManager {
                     // add merged configuration:
                     addInterferometerConfiguration(newConfiguration, mergedConfiguration);
                 } else {
-                    newConfiguration.getInterferometerConfigurationMap().put(ic.getName(), ic);
+                    newConfiguration.addInterferometerConfiguration(ic);
                 }
             }
 
             if (!merged) {
-                logger.info("changeConfiguration: add InterferometerConfiguration [{}]", confName);
+                logger.info("changeConfiguration: add InterferometerConfiguration [{}]", configurationName);
 
                 // add configuration (clone not needed):
                 addInterferometerConfiguration(newConfiguration, extendedConfiguration);
             }
-
         } else {
-            // use only initial configuration:
-            newConfiguration = initialConfiguration;
-
+            newConfiguration = configuration;
             logger.info("changeConfiguration: use initial configuration");
         }
+        this.currentConfiguration = newConfiguration;
+    }
 
-        this.configuration = newConfiguration;
+    /**
+     * Validate the configuration change
+     * @param commit true to keep current configuration; false to use previous configuration
+     */
+    public void validateChangedConfiguration(final boolean commit) {
+        logger.debug("validateChangedConfiguration: commit = {}", commit);
+
+        if (!commit) {
+            // restore previous configuration:
+            this.currentConfiguration = this.previousConfiguration;
+        }
+        // reset previous configuration:
+        this.previousConfiguration = null;
     }
 
     /**
@@ -890,46 +1307,16 @@ public final class ConfigurationManager extends BaseOIManager {
         }
     }
 
-    /**
-     * Validate the configuration change
-     * @param commit true to keep current configuration; false to use previous configuration
+    /*
+    ----- InterferometerDescription API -----
      */
-    public void validateChangedConfiguration(final boolean commit) {
-        logger.debug("validateChangedConfiguration: commit = {}", commit);
-
-        if (!commit) {
-            // restore previous configuration:
-            this.configuration = this.previousConfiguration;
-        }
-        // reset previous configuration:
-        this.previousConfiguration = null;
-    }
-
-    /* Configuration */
-    /**
-     * Return the initial configuration (read only)
-     * @return initial configuration (read only)
-     */
-    Configuration getInitialConfiguration() {
-        return this.initialConfiguration;
-    }
-
-    /* InterferometerDescription */
-    /**
-     * Return the interferometer description map keyed by name
-     * @return interferometer description map
-     */
-    private Map<String, InterferometerDescription> getInterferometerDescriptions() {
-        return configuration.getInterferometerDescriptionMap();
-    }
-
     /**
      * Return the interferometer description for the given name
      * @param name interferometer name
      * @return interferometer description or null if not found
      */
     public InterferometerDescription getInterferometerDescription(final String name) {
-        return getInterferometerDescriptions().get(name);
+        return getCurrentConfiguration().getInterferometerDescription(name);
     }
 
     /**
@@ -937,7 +1324,7 @@ public final class ConfigurationManager extends BaseOIManager {
      * @return list of all interferometer names
      */
     public Vector<String> getInterferometerNames() {
-        return configuration.getInterferometerNames();
+        return getCurrentConfiguration().getInterferometerNames();
     }
 
     /**
@@ -946,7 +1333,7 @@ public final class ConfigurationManager extends BaseOIManager {
      * @return list of interferometer configurations
      */
     public Vector<String> getInterferometerConfigurationNames(final String interferometerName) {
-        final Vector<String> names = configuration.getInterferometerConfigurationNames(interferometerName);
+        final Vector<String> names = getCurrentConfiguration().getInterferometerConfigurationNames(interferometerName);
         return (names != null) ? names : EMPTY_VECTOR;
     }
 
@@ -1013,22 +1400,24 @@ public final class ConfigurationManager extends BaseOIManager {
         return null;
     }
 
-    /* InterferometerConfiguration */
+    /*
+    ----- InterferometerConfiguration API -----
+     */
     /**
      * Return the interferometer configuration collection
      * @return interferometer configuration collection
      */
     private Collection<InterferometerConfiguration> getInterferometerConfigurations() {
-        return configuration.getInterferometerConfigurations();
+        return getCurrentConfiguration().getInterferometerConfigurations();
     }
 
     /**
      * Return the interferometer configuration for the given name
-     * @param name name of the interferometer configuration
+     * @param configurationName name of the interferometer configuration
      * @return interferometer configuration or null if not found
      */
-    public InterferometerConfiguration getInterferometerConfiguration(final String name) {
-        return configuration.getInterferometerConfiguration(name);
+    public InterferometerConfiguration getInterferometerConfiguration(final String configurationName) {
+        return getCurrentConfiguration().getInterferometerConfiguration(configurationName);
     }
 
     /**

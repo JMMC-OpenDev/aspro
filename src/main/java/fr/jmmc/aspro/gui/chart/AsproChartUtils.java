@@ -26,17 +26,6 @@ import org.jfree.data.xy.IntervalXYDataset;
  */
 public final class AsproChartUtils {
 
-    /** flag to use the warning annotation or the normal JMMC annotation */
-    private static boolean warningAnnotation = false;
-
-    /**
-     * Define the flag to use the warning annotation or the normal JMMC annotation
-     * @param warningAnnotation flag to use the warning annotation or the normal JMMC annotation
-     */
-    public static void setWarningAnnotation(final boolean warningAnnotation) {
-        AsproChartUtils.warningAnnotation = warningAnnotation;
-    }
-
     /**
      * Forbidden constructor
      */
@@ -182,11 +171,12 @@ public final class AsproChartUtils {
     }
 
     /**
-     * Create a new JMMC annotation
+     * Create a new JMMC annotation depending on the given valid flag
+     * @param valid valid flag
      * @return new JMMC annotation
      */
-    public static XYTextAnnotation createJMMCAnnotation() {
-        if (warningAnnotation) {
+    public static XYTextAnnotation createJMMCAnnotation(final boolean valid) {
+        if (!valid) {
             final XYTextAnnotation annotation = ChartUtils.createJMMCAnnotation(AsproConstants.JMMC_WARNING_ANNOTATION);
             annotation.setPaint(Color.RED);
             return annotation;

@@ -1002,9 +1002,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             }
         });
 
-        // define interferometer names :
-        // TODO: make it more dynamic (no more constant) in 2022 (load dynamic config => event ?)
-        jComboBoxInterferometer.setModel(new DefaultComboBoxModel(cm.getInterferometerNames()));
+        // define interferometer names:
+        updateComboInterferometer();
 
         // reset status :
         resetStatus();
@@ -1061,6 +1060,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             }
             fireObservationUpdateEvent();
         }
+    }
+
+    /**
+     * Refresh the list of interferometer names : depends on the configuration changes
+     */
+    private void updateComboInterferometer() {
+        jComboBoxInterferometer.setModel(new DefaultComboBoxModel(cm.getInterferometerNames()));
     }
 
     /**
@@ -1502,6 +1508,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     private void resetFixedPops() {
+        lastStationsForPops = null;
         defStationsForPops.clear();
         popsStationLabels.clear();
         popsComboBoxes.clear();
@@ -1527,6 +1534,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             logger.debug("stationsForPops: {}", stationsForPops);
 
             if (!ObjectUtils.areEquals(stationsForPops, lastStationsForPops)) {
+                lastStationsForPops = new ArrayList<>(stationsForPops); // copy needed (defStationsForPops)
                 jPanelFixedPopsGen.removeAll();
 
                 for (final String name : stationsForPops) {
@@ -1539,7 +1547,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                         jPanelFixedPopsGen.add(comboBox);
                     }
                 }
-                lastStationsForPops = stationsForPops;
             }
         }
     }
@@ -1886,6 +1893,77 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     /**
+     * Update the UI widgets from the given observation when configuration changed
+     *
+     * @param observation observation
+     */
+    private void onConfigChanged(final ObservationSetting observation) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("onConfigChanged:\n{}", ObservationManager.toString(observation));
+        }
+        // disable the automatic update observation :
+        final boolean prevAutoUpdateObservation = setAutoUpdateObservation(false);
+        // disable the automatic selection check of the instrument configuration :
+        final boolean prevAutoCheckConfigurations = setAutoCheckConfigurations(false);
+        try {
+            // reset partially cached values :
+            currentInsConfiguration = null;
+            lastConfPopConfig = null;
+            lastInsConfCompatibleWithPopConfig = null;
+            lastInsConfKeyForBestPops = null;
+            popsCurrentMap = null;
+            popsFixed = null;
+            resetFixedPops();
+
+            // configuration changed so update interferometer names:
+            updateComboInterferometer();
+
+            // observation :
+            // update the interferometer and interferometer configuration :
+            final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
+
+            final InterferometerConfiguration ic = interferometerChoice.getInterferometerConfiguration();
+
+            if (ic != null) {
+                // update the selected interferometer :
+                jComboBoxInterferometer.setSelectedItem(ic.getInterferometer().getName());
+                // update the selected interferometer configuration :
+                jComboBoxInterferometerConfiguration.setSelectedItem(ic.getName());
+            }
+
+            final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
+
+            // update the selected instrument :
+            jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
+
+            // update the selected instrument configurations :
+            final List<ObservationVariant> obsVariants = observation.getVariants();
+            final int len = obsVariants.size();
+            final Object[] stationConfs = new Object[len];
+            for (int i = 0; i < len; i++) {
+                stationConfs[i] = obsVariants.get(i).getStations();
+            }
+
+            jListInstrumentConfigurations.clearSelection();
+            selectInstrumentConfigurations(stationConfs);
+
+            // update the selected pops (pops) :
+            updatePops(instrumentChoice.getPops(), false);
+
+            // restore Pops widgets
+            setFixedPopsComboBox(interferometerChoice.getFixedPops());
+
+        } finally {
+            // restore the automatic selection check of the instrument configuration :
+            setAutoCheckConfigurations(prevAutoCheckConfigurations);
+            // restore the automatic update observation :
+            setAutoUpdateObservation(prevAutoUpdateObservation);
+        }
+        // ensure one configuration is selected :
+        checkInstrumentConfigurationSelection();
+    }
+
+    /**
      * Update the UI widgets from the given loaded observation
      *
      * @param observation observation
@@ -1912,7 +1990,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             lastInsConfKeyForBestPops = null;
             popsCurrentMap = null;
             popsFixed = null;
-            lastStationsForPops = null;
             resetFixedPops();
 
             // use observation context to enable/disable POPS FIRST (event ordering issue):
@@ -2123,6 +2200,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             logger.debug("event [{}] process IN", event.getType());
         }
         switch (event.getType()) {
+            case CONFIG_CHANGED:
+                onConfigChanged(event.getObservation());
+                break;
             case LOADED:
                 onLoadObservation(event.getObservation());
                 break;

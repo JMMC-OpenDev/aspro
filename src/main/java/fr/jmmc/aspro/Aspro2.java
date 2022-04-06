@@ -6,6 +6,7 @@ package fr.jmmc.aspro;
 import fr.jmmc.aspro.gui.PreferencePanel;
 import fr.jmmc.aspro.gui.SettingPanel;
 import fr.jmmc.aspro.gui.action.AsproExportAction;
+import fr.jmmc.aspro.gui.action.ConfigurationEditorAction;
 import fr.jmmc.aspro.gui.action.ExportAllOBAction;
 import fr.jmmc.aspro.gui.action.ExportOBAction;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
@@ -368,8 +369,10 @@ public final class Aspro2 extends App {
         new ExportOIFitsAction();
 
         // Edit menu :
-        // target editor :
+        // Target editor :
         new TargetEditorAction();
+        // Configuration editor
+        new ConfigurationEditorAction();
         // update simbad:
         new TargetUpdateSimbadAction();
         // query observations:

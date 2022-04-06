@@ -8,6 +8,8 @@ package fr.jmmc.aspro.model.event;
  */
 public enum ObservationEventType {
 
+  /** the configuration changed */
+  CONFIG_CHANGED,
   /** the observation was loaded */
   LOADED,
   /** target list (target, models and calibrators) changed */

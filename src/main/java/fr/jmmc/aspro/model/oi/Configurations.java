@@ -102,5 +102,21 @@ public class Configurations
         }
         return this.interferometerFiles;
     }
+    
+//--simple--preserve
+
+    /** flag indicating modified configuration to be persisted (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private boolean changed = false;
+
+    public boolean isChanged() {
+        return changed;
+    }
+
+    public void setChanged(boolean changed) {
+        this.changed = changed;
+    }
+
+//--simple--preserve
 
 }

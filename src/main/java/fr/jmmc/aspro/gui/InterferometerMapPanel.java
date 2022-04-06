@@ -179,10 +179,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         renderer.setDefaultPositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.BOTTOM_RIGHT));
         renderer.setDefaultItemLabelsVisible(true);
 
-        // create new JMMC annotation (moving position):
-        this.aJMMC = AsproChartUtils.createJMMCAnnotation();
-        this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
-
         // add listener :
         this.chart.addProgressListener(this);
         this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
@@ -286,6 +282,11 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         this.chart.setNotify(false);
         this.xyPlot.setNotify(false);
         try {
+            this.xyPlot.getRenderer().removeAnnotations();
+            // create new JMMC annotation (moving position):
+            this.aJMMC = AsproChartUtils.createJMMCAnnotation(chartData.isConfigurationChecksumValid());
+            this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
+
             // title :
             ChartUtils.clearTextSubTitle(this.chart);
 

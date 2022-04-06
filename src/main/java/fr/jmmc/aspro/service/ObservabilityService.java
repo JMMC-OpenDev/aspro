@@ -2545,6 +2545,10 @@ public final class ObservabilityService {
             logger.debug("instrument: {}", this.instrument.getName());
         }
 
+        if ((this.interferometer.getFileRef() != null) && this.interferometer.getFileRef().isUserConfig()) {
+            addInformation("Using user configuration: " + this.interferometer.getFileRef().getFile());
+        }
+
         // check Pops present in interferometer:
         this.hasPops = !this.interferometer.getPops().isEmpty();
 

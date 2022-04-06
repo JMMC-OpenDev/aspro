@@ -114,14 +114,11 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
      * @param chart chart instance
      * @param plot xy plot
      * @param maxElements max items in the chart view
-     * @param aJMMC JMMC annotation instance to be added to renderer's annotations
      */
-    public SlidingXYPlotAdapter(final JFreeChart chart, final XYPlot plot, final int maxElements,
-                                final XYTextAnnotation aJMMC) {
+    public SlidingXYPlotAdapter(final JFreeChart chart, final XYPlot plot, final int maxElements) {
         this.chart = chart;
         this.xyPlot = plot;
         this.state.maxViewItems = maxElements;
-        this.aJMMC = aJMMC;
         this.renderer = (XYBarRenderer) plot.getRenderer();
         this.renderer.setDefaultToolTipGenerator(this);
     }
@@ -145,13 +142,15 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
      * @param soTargetList StarObservabilityData list for tooltip generation
      * @param fullTargetIndex complete target to 'virtual' position mapping
      * @param hasBackground true to indicate to change grid line colors; false otherwise
+     * @param aJMMC JMMC annotation instance to be added to renderer's annotations
      */
     public void setData(final TaskSeriesCollection collection, final List<String> symbols, final List<Color> colors,
                         final Map<Integer, List<XYAnnotation>> annotations,
                         final List<Target> targetList, final List<String> labels,
                         final List<StarObservabilityData> soTargetList,
                         final Map<String, Integer> fullTargetIndex,
-                        final boolean hasBackground) {
+                        final boolean hasBackground,
+                        final XYTextAnnotation aJMMC) {
         this.size = symbols.size();
         this.collection = collection;
         this.symbols = symbols;
@@ -162,6 +161,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         this.soTargetList = soTargetList;
         this.fullTargetIndex = fullTargetIndex;
         this.hasBackground = hasBackground;
+        this.aJMMC = aJMMC;
     }
 
     /**

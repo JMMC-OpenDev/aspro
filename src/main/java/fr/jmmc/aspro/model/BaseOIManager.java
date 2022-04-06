@@ -8,6 +8,7 @@ import fr.jmmc.jaxb.AsproConfigurationIDResolver;
 import fr.jmmc.jmcs.util.jaxb.XmlBindException;
 import fr.jmmc.jmcs.util.ResourceUtils;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import javax.xml.bind.JAXBException;
@@ -49,7 +50,7 @@ public abstract class BaseOIManager extends BaseXmlManager {
      * @throws IllegalArgumentException if the load operation failed
      * @throws XmlBindException if a JAXBException was caught while creating an unmarshaller
      */
-    protected final Object loadObject(final String uri)
+    protected final Object loadConfigObject(final String uri)
             throws IllegalStateException, IllegalArgumentException, XmlBindException {
 
         Object result = null;
@@ -57,7 +58,7 @@ public abstract class BaseOIManager extends BaseXmlManager {
             // use the class loader resource resolver
             final URL url = ResourceUtils.getResource(CONF_CLASSLOADER_PATH + uri);
 
-            logger.debug("BaseOIManager.loadObject: {}", url);
+            logger.debug("BaseOIManager.loadConfigObject: {}", url);
 
             // Note : use input stream to avoid JNLP offline bug with URL (Unknown host exception)
             result = createUnMarshaller().unmarshal(new BufferedInputStream(url.openStream()));
@@ -67,7 +68,30 @@ public abstract class BaseOIManager extends BaseXmlManager {
         } catch (JAXBException je) {
             throw new IllegalArgumentException("Load failure on " + uri, je);
         }
+        return result;
+    }
 
+    /**
+     * Protected load method used by ConfigurationManager.initialize to load the aspro configuration files
+     * @param file File to load
+     * @return unmarshalled object
+     *
+     * @throws IOException if an I/O exception occured
+     * @throws IllegalStateException if an unexpected exception occured
+     * @throws XmlBindException if a JAXBException was caught while creating an unmarshaller
+     */
+    protected final Object loadConfigObject(final File file)
+            throws IOException, IllegalStateException, XmlBindException {
+
+        Object result = null;
+        try {
+            logger.debug("BaseOIManager.loadConfigObject: {}", file);
+
+            result = createUnMarshaller().unmarshal(file);
+
+        } catch (JAXBException je) {
+            handleException("Load failure on " + file, je);
+        }
         return result;
     }
 

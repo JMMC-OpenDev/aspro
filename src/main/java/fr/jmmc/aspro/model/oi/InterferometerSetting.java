@@ -102,27 +102,5 @@ public class InterferometerSetting
         }
         return this.configurations;
     }
-    
-//--simple--preserve
-    /** flag indicating the checksum of the interferometer file is valid (read only) */
-    @javax.xml.bind.annotation.XmlTransient
-    private boolean checksumValid = false;
-
-    /**
-     * Return the flag indicating the checksum of the interferometer file is valid (read only)
-     * @return true if valid; false otherwise
-     */
-    public boolean isChecksumValid() {
-        return checksumValid;
-    }
-
-    /**
-     * Define the flag indicating the checksum of the interferometer file is valid (read only)
-     * @param checksumValid true if valid; false otherwise
-     */
-    public void setChecksumValid(final boolean checksumValid) {
-        this.checksumValid = checksumValid;
-    }
-//--simple--preserve
 
 }

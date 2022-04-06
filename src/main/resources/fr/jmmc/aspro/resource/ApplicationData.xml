@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.04 beta 1"/>
-    <compilation date="28/03/2022" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="22.04 beta 2"/>
+    <compilation date="06/04/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -191,7 +191,7 @@
                 <menu label="Find Previous" classpath="fr.jmmc.jmcs.gui.component.SearchPanel" action="_findPreviousAction" accelerator="shift G"/>
             </menu>
             <menu/>
-            <menu label="Target editor" classpath="fr.jmmc.aspro.gui.action.TargetEditorAction" action="targetEditor" accelerator="T"/>
+            <menu label="Target Editor" classpath="fr.jmmc.aspro.gui.action.TargetEditorAction" action="showEditor" accelerator="T"/>
             <menu/>
             <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction" action="updateSimbad"
                   description="update all targets with the latest information from the CDS Simbad service"/>
@@ -200,6 +200,9 @@
                   description="query raw observations (from JMMC ObsPortal) corresponding to the selected target"/>
             <menu label="Get Observations (All targets)" classpath="fr.jmmc.aspro.gui.action.QueryAllRawObservationsAction" action="query"
                   description="query raw observations (from JMMC ObsPortal) for all targets"/>
+            <menu/>
+            <menu label="Configuration Manager" classpath="fr.jmmc.aspro.gui.action.ConfigurationEditorAction" action="showEditor"
+                  description="manage your custom Configuration files"/>
         </menu>
 
         <menu label="Interop">
@@ -229,7 +232,11 @@
 
     <releasenotes>
         <release version="22.04">
-            <pubDate>Mon, 28 Mar 2022 10:30:00 GMT</pubDate>
+            <pubDate>Wed, 06 Apr 2022 18:00:00 GMT</pubDate>
+            <prerelease version="22.04 beta 2">
+                <change type="FEATURE">Added (advanced) user configuration support to dynamically load interferometer configuration files at startup
+                    and manage these files in the 'Configuration Manager' window (load, reload, remove, enable/disable)</change>
+            </prerelease>
             <prerelease version="22.04 beta 1">
                 <change type="FEATURE">Improved visualisation of FITS image cubes (user model) in the Target Editor to use both consistent flux range &amp; FoV</change>
                 <change type="FEATURE">Rewritten user model animator widget to let the slider navigate among images or 'Auto' to cycle among them automatically</change>

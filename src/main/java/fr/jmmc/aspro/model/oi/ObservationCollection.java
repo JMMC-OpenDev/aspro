@@ -150,137 +150,146 @@ public class ObservationCollection
     }
     
 //--simple--preserve
-  /**
-   * Public Constructor required by JAXB API
-   */
-  public ObservationCollection() {
-    super();
-  }
-
-  /**
-   * Public constructor which copies information from the given observation collection (by reference)
-   * @param obsCollection observation collection to copy
-   */
-  public ObservationCollection(final ObservationCollection obsCollection) {
-    // copy observation collection :
-    this.schemaVersion = obsCollection.getSchemaVersion();
-    this.name = obsCollection.getName();
-    this.description = obsCollection.getDescription();
-    this.observations = obsCollection.getObservations();
-    // transient :
-    this.version = obsCollection.getVersion();
-  }
-
-  /**
-   * Return the size of this observation collection
-   * @return number of observations
-   */
-  public final int size() {
-    return getObservations().size();
-  }
-
-  /**
-   * Return true if there is only 1 observation in this observation collection
-   * @return true if there is only 1 observation
-   */
-  public final boolean isSingle() {
-    return size() == 1;
-  }
-
-  /**
-   * Return the first observation
-   * @return first observation
-   */
-  public final ObservationSetting getFirstObservation() {
-    return getObservations().get(0);
-  }
-  /** observation version (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private fr.jmmc.aspro.model.ObservationVersion version = null;
-
-  /**
-   * Return the observation collection version
-   * @return observation collection version
-   */
-  public final fr.jmmc.aspro.model.ObservationVersion getVersion() {
-    return this.version;
-  }
-
-  /**
-   * Return the observation collection version
-   * @param version observation collection version
-   */
-  public final void setVersion(final fr.jmmc.aspro.model.ObservationVersion version) {
-    this.version = version;
-  }
-
-  @Override
-  public final String toString() {
-    return "ObservationCollection[" + ((this.name != null) ? this.name : "undefined") + "] (" + size() + ")";
-  }
-
-  /* utility methods */
-  /**
-   * Return the interferometer configuration
-   * @return interferometer configuration
-   */
-  public final String getInterferometerConfiguration() {
-    return getInterferometerConfiguration(false);
-  }
-
-  /**
-   * Return the interferometer configuration where characters different than alpha/numeric/+/- are replaced by '_'
-   * @param encode true to use encoding
-   * @return interferometer configuration
-   */
-  public final String getInterferometerConfiguration(final boolean encode) {
-    final String result = getFirstObservation().getInterferometerConfiguration().getName();
-    return (encode) ? fr.jmmc.jmcs.util.StringUtils.replaceNonAlphaNumericCharsByUnderscore(result) : result;
-  }
-
-  /**
-   * Return a string containing up to 3 configuration(s) separated with the given delimiter string
-   * or 'MULTI CONFIGURATION' where space characters are replaced by '-'
-   * @param separator delimiter string
-   * @return string containing up to 3 configuration(s) or 'MULTI CONFIGURATION'
-   */
-  public String getDisplayConfigurations(final String separator) {
-    return getDisplayConfigurations(separator, false);
-  }
-
-  /**
-   * Return a string containing up to 3 configuration(s) separated with the given delimiter string
-   * or 'MULTI CONFIGURATION' where space characters are replaced by '-'
-   * @param separator delimiter string
-   * @param encode true to use encoding
-   * @return string containing up to 3 configuration(s) or 'MULTI CONFIGURATION'
-   */
-  public final String getDisplayConfigurations(final String separator, final boolean encode) {
-    final int size = size();
-    final String result;
-    if (size <= 1) {
-      result = getFirstObservation().getInstrumentConfiguration().getStations();
-    } else if (size <= 3) {
-      final StringBuilder sb = new StringBuilder(32);
-      getAllConfigurations(sb, separator);
-      result = sb.toString();
-    } else {
-      result = fr.jmmc.aspro.AsproConstants.MULTI_CONF;
+    /**
+     * Public Constructor required by JAXB API
+     */
+    public ObservationCollection() {
+        super();
     }
-    return (encode) ? fr.jmmc.jmcs.util.StringUtils.replaceWhiteSpacesByMinusSign(result) : result;
-  }
 
-  /**
-   * Append to the given buffer a string containing all configurations separated with the given delimiter string
-   * @param sb buffer to append to
-   * @param separator delimiter string
-   */
-  public final void getAllConfigurations(final StringBuilder sb, final String separator) {
-    for (ObservationSetting observation : getObservations()) {
-      sb.append(observation.getInstrumentConfiguration().getStations()).append(separator);
+    /**
+     * Public constructor which copies information from the given observation collection (by reference)
+     * @param obsCollection observation collection to copy
+     */
+    public ObservationCollection(final ObservationCollection obsCollection) {
+        // copy observation collection :
+        this.schemaVersion = obsCollection.getSchemaVersion();
+        this.name = obsCollection.getName();
+        this.description = obsCollection.getDescription();
+        this.observations = obsCollection.getObservations();
+        // transient :
+        this.version = obsCollection.getVersion();
     }
-    sb.delete(sb.length() - separator.length(), sb.length());
-  }
+
+    /**
+     * Return the size of this observation collection
+     * @return number of observations
+     */
+    public final int size() {
+        return getObservations().size();
+    }
+
+    /**
+     * Return true if there is only 1 observation in this observation collection
+     * @return true if there is only 1 observation
+     */
+    public final boolean isSingle() {
+        return size() == 1;
+    }
+
+    /**
+     * Return the first observation
+     * @return first observation
+     */
+    public final ObservationSetting getFirstObservation() {
+        return getObservations().get(0);
+    }
+    
+    public final boolean isConfigurationChecksumValid() {
+        final InterferometerConfiguration ic = getFirstObservation().getInterferometerConfiguration().getInterferometerConfiguration();
+        if (ic != null) {
+            return ic.getInterferometer().isChecksumValid();
+        }
+        return false;
+    }
+
+    /** observation version (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private fr.jmmc.aspro.model.ObservationVersion version = null;
+
+    /**
+     * Return the observation collection version
+     * @return observation collection version
+     */
+    public final fr.jmmc.aspro.model.ObservationVersion getVersion() {
+        return this.version;
+    }
+
+    /**
+     * Return the observation collection version
+     * @param version observation collection version
+     */
+    public final void setVersion(final fr.jmmc.aspro.model.ObservationVersion version) {
+        this.version = version;
+    }
+
+    @Override
+    public final String toString() {
+        return "ObservationCollection[" + ((this.name != null) ? this.name : "undefined") + "] (" + size() + ")";
+    }
+
+    /* utility methods */
+    /**
+     * Return the interferometer configuration
+     * @return interferometer configuration
+     */
+    public final String getInterferometerConfiguration() {
+        return getInterferometerConfiguration(false);
+    }
+
+    /**
+     * Return the interferometer configuration where characters different than alpha/numeric/+/- are replaced by '_'
+     * @param encode true to use encoding
+     * @return interferometer configuration
+     */
+    public final String getInterferometerConfiguration(final boolean encode) {
+        final String result = getFirstObservation().getInterferometerConfiguration().getName();
+        return (encode) ? fr.jmmc.jmcs.util.StringUtils.replaceNonAlphaNumericCharsByUnderscore(result) : result;
+    }
+
+    /**
+     * Return a string containing up to 3 configuration(s) separated with the given delimiter string
+     * or 'MULTI CONFIGURATION' where space characters are replaced by '-'
+     * @param separator delimiter string
+     * @return string containing up to 3 configuration(s) or 'MULTI CONFIGURATION'
+     */
+    public String getDisplayConfigurations(final String separator) {
+        return getDisplayConfigurations(separator, false);
+    }
+
+    /**
+     * Return a string containing up to 3 configuration(s) separated with the given delimiter string
+     * or 'MULTI CONFIGURATION' where space characters are replaced by '-'
+     * @param separator delimiter string
+     * @param encode true to use encoding
+     * @return string containing up to 3 configuration(s) or 'MULTI CONFIGURATION'
+     */
+    public final String getDisplayConfigurations(final String separator, final boolean encode) {
+        final int size = size();
+        final String result;
+        if (size <= 1) {
+            result = getFirstObservation().getInstrumentConfiguration().getStations();
+        } else if (size <= 3) {
+            final StringBuilder sb = new StringBuilder(32);
+            getAllConfigurations(sb, separator);
+            result = sb.toString();
+        } else {
+            result = fr.jmmc.aspro.AsproConstants.MULTI_CONF;
+        }
+        return (encode) ? fr.jmmc.jmcs.util.StringUtils.replaceWhiteSpacesByMinusSign(result) : result;
+    }
+
+    /**
+     * Append to the given buffer a string containing all configurations separated with the given delimiter string
+     * @param sb buffer to append to
+     * @param separator delimiter string
+     */
+    public final void getAllConfigurations(final StringBuilder sb, final String separator) {
+        for (ObservationSetting observation : getObservations()) {
+            sb.append(observation.getInstrumentConfiguration().getStations()).append(separator);
+        }
+        sb.delete(sb.length() - separator.length(), sb.length());
+    }
 //--simple--preserve
 
 }
