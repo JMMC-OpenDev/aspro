@@ -82,7 +82,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     /** default reload latency = 20 ms */
     private static final int RELOAD_LATENCY = 20;
     /** AMHRA portal */
-    private static final String AMHRA_URL = "https://amhra.oca.eu/";
+    private static final String AMHRA_URL = "https://amhra.oca.eu/?referer=Aspro2"; 
+    /* AMHRA's matomo catches the click from Aspro2 using referer param */ 
     /** User model doc link */
     private static final String HELP_USER_MODEL_URL = "http://www.jmmc.fr/twiki/bin/view/Jmmc/Software/JmmcAspro2#User_defined_model";
 
