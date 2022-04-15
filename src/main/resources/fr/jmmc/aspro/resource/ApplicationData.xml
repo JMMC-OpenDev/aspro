@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.04 beta 2"/>
-    <compilation date="06/04/2022" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="22.04"/>
+    <compilation date="15/04/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -232,7 +232,7 @@
 
     <releasenotes>
         <release version="22.04">
-            <pubDate>Wed, 06 Apr 2022 18:00:00 GMT</pubDate>
+            <pubDate>Fri, 15 Apr 2022 17:00:00 GMT</pubDate>
             <prerelease version="22.04 beta 2">
                 <change type="FEATURE">Added (advanced) user configuration support to dynamically load interferometer configuration files at startup
                     and manage these files in the 'Configuration Manager' window (load, reload, remove, enable/disable)</change>
