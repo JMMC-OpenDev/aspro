@@ -6,6 +6,7 @@ This module contains the ASPRO2 java application developed by the JMMC technical
 
 
 See [ASPRO2](https://www.jmmc.fr/aspro)
+See [JMMC releases](https://www.jmmc.fr/releases/)
 See [JMMC OpenDev @ github](https://github.com/JMMC-OpenDev/)
 
 See [CI nightly builds](https://github.com/JMMC-OpenDev/jmmc-java-build/actions/workflows/build.yml)
