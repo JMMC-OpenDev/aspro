@@ -46,7 +46,7 @@ public final class RawObservationTableModel extends ColumnDescTableModel {
         TEMP("Temp (C)", Double.class),
         SEEING("Seeing (as)", Double.class),
         VALID("Valid", Integer.class),
-        EXP_TIME("Exp. time", Double.class),
+        EXP_TIME("Exp. time (s)", Double.class),
         TARGET_RA_HMS("RA (HMS)", String.class),
         TARGET_DEC_DMS("DEC (DMS)", String.class),
         DATE("Date (UTC)", String.class),
