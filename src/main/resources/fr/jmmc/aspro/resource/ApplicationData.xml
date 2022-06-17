@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.04"/>
-    <compilation date="15/04/2022" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="22.07 beta 1"/>
+    <compilation date="17/06/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -231,6 +231,12 @@
     </menubar>
 
     <releasenotes>
+        <release version="22.07">
+            <pubDate>Fri, 17 Jun 2022 16:00:00 GMT</pubDate>
+            <prerelease version="22.07 beta 1">
+                <change type="FEATURE">Improved target's tooltips to show LMN fluxes in jansky (according to user preferences)</change>
+            </prerelease>
+        </release>
         <release version="22.04">
             <pubDate>Fri, 15 Apr 2022 17:00:00 GMT</pubDate>
             <prerelease version="22.04 beta 2">
