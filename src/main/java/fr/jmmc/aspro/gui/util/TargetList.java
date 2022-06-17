@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetGroupMembers;
@@ -121,7 +122,9 @@ public final class TargetList extends JList {
     public static void getTooltipPart(final StringBuilder sb, final boolean full, final Target target,
                                       final TargetUserInformations targetUserInfos) {
 
-        target.toHtml(sb, full);
+        final boolean useJy = Preferences.getInstance().getPreferenceAsBoolean(Preferences.FLUX_EDITOR_JY);
+        
+        target.toHtml(sb, full, useJy);
 
         // Target user info:
         if (targetUserInfos != null) {

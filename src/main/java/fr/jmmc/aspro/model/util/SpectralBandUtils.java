@@ -58,4 +58,39 @@ public final class SpectralBandUtils {
         }
     }
 
+    /**
+     * Find the Band corresponding to the given SpectralBand
+     * @param band band to use
+     * @return Band or null
+     */
+    public static Band findBand(final SpectralBand band) {
+        switch (band) {
+            case B:
+                return Band.B;
+            case V:
+                return Band.V;
+            case G:
+                // note: SpectralBand.G is not available in Band !
+                return Band.V;
+            case R:
+                return Band.R;
+            case I:
+                return Band.I;
+            case J:
+                return Band.J;
+            case H:
+                return Band.H;
+            case K:
+                return Band.K;
+            case L:
+                return Band.L;
+            case M:
+                return Band.M;
+            case N:
+                return Band.N;
+            default:
+                return null;
+        }
+    }
+
 }

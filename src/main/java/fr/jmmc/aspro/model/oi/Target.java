@@ -913,7 +913,7 @@ public class Target
 //--simple--preserve
     /** empty Target instance */
     public static final Target EMPTY_TARGET = new Target();
-    
+
     /**
      * Fix coordinates RA and DEC (HMS / DMS formats)
      */
@@ -1005,7 +1005,7 @@ public class Target
         }
         return this.id;
     }
-    
+
     private final void setIdentifier() {
         setId(fr.jmmc.aspro.model.util.XmlIdUtils.convert(getName()));
     }
@@ -1072,8 +1072,9 @@ public class Target
      * Return an HTML representation of the target used by tooltips in the given string buffer
      * @param sb string buffer to fill
      * @param full flag to display full information
+     * @param useJy flag to convert mag into jansky (LMN)
      */
-    public final void toHtml(final StringBuilder sb, final boolean full) {
+    public final void toHtml(final StringBuilder sb, final boolean full, final boolean useJy) {
         sb.append("<b>Name: ").append(getName()).append("</b>");
         if (getRA() != null && getDEC() != null) {
             // note: generated targets for baseline limits do not have RA/DEC as string (useless):
@@ -1110,7 +1111,19 @@ public class Target
                     sb.append(" - ");
                 }
 
-                sb.append("<b>").append(b.value()).append("</b>: ").append(flux);
+                sb.append("<b>").append(b.value()).append("</b>: ");
+                if (useJy
+                        && b.ordinal() >= SpectralBand.L.ordinal()
+                        && b.ordinal() <= SpectralBand.N.ordinal()) {
+                    // convert to jy:
+                    final fr.jmmc.jmal.Band band = fr.jmmc.aspro.model.util.SpectralBandUtils.findBand(b);
+                    if (band != null) {
+                        // convert to Jansky:
+                        sb.append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(band.magToJy(flux))).append(" jy");
+                    }
+                } else {
+                    sb.append(fr.jmmc.jmcs.util.NumberUtils.trimTo3Digits(flux));
+                }
 
                 n++;
 
@@ -1226,7 +1239,7 @@ public class Target
         if (copy.configuration != null) {
             copy.configuration = (TargetConfiguration) copy.configuration.clone();
         }
-        
+
         if (copy.calibratorInfos != null) {
             copy.calibratorInfos = (CalibratorInformations) copy.calibratorInfos.clone();
         }
@@ -1489,7 +1502,7 @@ public class Target
             target.setSYSVEL(null);
             target.setVELTYP(null);
         }
-        
+
         if (source.getPMRA() != null && source.getPMDEC() != null) {
             target.setPMRA(null);
             target.setPMDEC(null);
@@ -1499,7 +1512,7 @@ public class Target
             target.setPARALLAX(null);
             target.setPARAERR(null);
         }
-        
+
         if (!isEmpty(source.getIDS())) {
             target.setIDS(null);
         }
@@ -1508,11 +1521,11 @@ public class Target
         }
         if (!isEmpty(source.getSPECTYP())) {
             target.setSPECTYP(null);
-        }        
-        
+        }
+
         merge(target, source);
     }
-    
+
     /**
      * Merge target information on the given target with information from the source target
      * @param target target to update
