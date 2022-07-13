@@ -11,7 +11,7 @@ import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.data.MimeType;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.action.WaitingTaskAction;
-import fr.jmmc.oiexplorer.core.util.OIDataListHelper;
+import fr.jmmc.oitools.model.OIDataListHelper;
 import fr.jmmc.oitools.model.OIData;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
