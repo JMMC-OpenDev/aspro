@@ -250,7 +250,7 @@ public class TargetInformation
         return (areEqualsStrict(this.targetRef, other.getTargetRef()) // just identifiers
                 && areEquals(this.description, other.getDescription())
                 && areEqualsStrict(getCalibrators(), other.getCalibrators()) // just identifiers, may create lists
-                && areEquals(TargetInformation.this.getGroupMembers(), other.getGroupMembers()) // may create lists
+                && areEquals(getGroupMembers(), other.getGroupMembers()) // may create lists
                 );
     }
 
