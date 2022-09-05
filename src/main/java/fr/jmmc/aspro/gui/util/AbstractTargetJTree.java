@@ -164,10 +164,10 @@ public class AbstractTargetJTree<E> extends GenericJTree<E> {
                 if (!targetNode.isLeaf()) {
                     final DefaultMutableTreeNode child = (DefaultMutableTreeNode) targetNode.getFirstChild();
 
-                    final TreePath path = new TreePath(child.getPath());
-                    this.scrollPathToVisible(path);
+                    final TreePath childPath = new TreePath(child.getPath());
+                    this.scrollPathToVisible(childPath);
 
-                    this.expandAll(path, true, true);
+                    this.expandAll(childPath, true, true);
                 }
                 return;
             }

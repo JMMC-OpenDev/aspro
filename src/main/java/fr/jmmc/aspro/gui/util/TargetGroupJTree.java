@@ -5,6 +5,9 @@ package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.jmcs.gui.component.GenericJTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 /**
  * This JTree contains Targets and their TargetGroups
@@ -21,6 +24,47 @@ public final class TargetGroupJTree extends AbstractTargetJTree<Object> {
      */
     public TargetGroupJTree(final TargetUserInformations targetUserInfos) {
         super(null, targetUserInfos);
+    }
+
+    /**
+     * Select the target node for the given target
+     * @param items items to select (Target or TargetGroup)
+     */
+    public void selectTargetPath(final Object... items) {
+        if (items != null && items.length != 0) {
+            DefaultMutableTreeNode node = this.findTreeNode(items[0]);
+
+            int i = 1;
+            while ((node != null) && (items.length > i) && (items[i] != null)) {
+                DefaultMutableTreeNode childNode = GenericJTree.findTreeNode(node, items[i]);
+
+                if (childNode != null) {
+                    node = childNode;
+                } else {
+                    _logger.debug("child node not found: {}", items[i]);
+                    break;
+                }
+                i++;
+            } // while
+
+            if (node != null) {
+                final TreePath path = new TreePath(node.getPath());
+                _logger.debug("select node: {}", path);
+
+                // Select the target node :
+                this.selectPath(path);
+
+                // expand target node if there is at least one child node :
+                if (!node.isLeaf()) {
+                    final DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getFirstChild();
+
+                    final TreePath childPath = new TreePath(child.getPath());
+                    this.scrollPathToVisible(childPath);
+
+                    this.expandAll(childPath, true, true);
+                }
+            }
+        }
     }
 
     /**
