@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.Preferences;
+import fr.jmmc.aspro.gui.action.GetStarAction;
 import fr.jmmc.aspro.gui.util.CalibratorInfoTableModel;
 import fr.jmmc.aspro.gui.util.TargetJTree;
 import fr.jmmc.aspro.gui.util.TargetList;
@@ -20,6 +21,7 @@ import fr.jmmc.aspro.model.util.TargetDEComparator;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.star.StarResolver;
+import static fr.jmmc.jmal.star.StarResolver.SIMBAD_MAIN_URL;
 import fr.jmmc.jmal.star.StarResolverListener;
 import fr.jmmc.jmal.star.StarResolverResult;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
@@ -77,13 +79,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(TargetForm.class.getName());
     /** Simbad URL (query by identifier) */
-    private static final String SIMBAD_QUERY_ID = "http://simbad.u-strasbg.fr/simbad/sim-id?Ident=";
+    private static final String SIMBAD_QUERY_ID = SIMBAD_MAIN_URL + "sim-id?Ident=";
     /** Vizier SED URL (query by identifier) */
     private static final String VIZIER_SED_QUERY_ID = "http://cdsportal.u-strasbg.fr/gadgets/ifr?url=http://cdsportal.unistra.fr/widgets/SED_plotter.xml&SED_plot_radius=1&SED_plot_object=";
-    /** GetStar URL (query by identifier) */
-    private static final String GETSTAR_QUERY_ID = "http://apps.jmmc.fr/~sclws/getstar/sclwsGetStarProxy.php?star=";
     /** Mag converter URL */
     private static final String MAG_CONV_ID = "http://irsa.ipac.caltech.edu/data/SPITZER/docs/dataanalysistools/tools/pet/magtojy/";
+    /** Search FTT (query by identifier) */
+    private static final String SEARCH_FTT_QUERY_ID = "http://searchftt.jmmc.fr/index.html?identifiers=";
 
     /* members */
     /** list of edited targets (clone) */
@@ -788,6 +790,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jButtonSimbad = new javax.swing.JButton();
         jButtonSEDViewer = new javax.swing.JButton();
         jButtonGetStar = new javax.swing.JButton();
+        jButtonSearchFTT = new javax.swing.JButton();
         jLabelRA = new javax.swing.JLabel();
         jFieldRA = new javax.swing.JTextField();
         jLabelDEC = new javax.swing.JLabel();
@@ -1103,6 +1106,16 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             }
         });
         jPanelTargetActions.add(jButtonGetStar);
+
+        jButtonSearchFTT.setText("SearchFTT");
+        jButtonSearchFTT.setToolTipText("Open JMMC SearchFTT web page for this target (finding off-axis fringe tracking targets)");
+        jButtonSearchFTT.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        jButtonSearchFTT.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSearchFTTActionPerformed(evt);
+            }
+        });
+        jPanelTargetActions.add(jButtonSearchFTT);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -1874,7 +1887,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
     private void jButtonSEDViewerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSEDViewerActionPerformed
         final String url = VIZIER_SED_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
-
         logger.debug("Vizier SED url = {}", url);
 
         BrowserLauncher.openURL(url);
@@ -1886,11 +1898,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }//GEN-LAST:event_jButtonSortDEActionPerformed
 
     private void jButtonGetStarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGetStarActionPerformed
-        final String url = GETSTAR_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
-
-        logger.debug("GetStar url = {}", url);
-
-        BrowserLauncher.openURL(url);
+        GetStarAction.openGetStarInBrowser(this.currentTarget.getName());
     }//GEN-LAST:event_jButtonGetStarActionPerformed
 
     private void jButtonMagConvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonMagConvActionPerformed
@@ -1911,6 +1919,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             starSearchField.setText(null);
         }
     }//GEN-LAST:event_updateSimbad
+
+    private void jButtonSearchFTTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSearchFTTActionPerformed
+        final String url = SEARCH_FTT_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
+        logger.debug("SearchFTT url = {}", url);
+
+        BrowserLauncher.openURL(url);
+    }//GEN-LAST:event_jButtonSearchFTTActionPerformed
 
     /**
      * Remove all occurences of the calibrator from the tree
@@ -2165,6 +2180,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JButton jButtonMagConv;
     private javax.swing.JButton jButtonRemoveCalibrator;
     private javax.swing.JButton jButtonSEDViewer;
+    private javax.swing.JButton jButtonSearchFTT;
     private javax.swing.JButton jButtonSimbad;
     private javax.swing.JButton jButtonSortDE;
     private javax.swing.JButton jButtonSortRA;

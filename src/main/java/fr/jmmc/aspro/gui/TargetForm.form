@@ -395,6 +395,18 @@
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonGetStarActionPerformed"/>
                   </Events>
                 </Component>
+                <Component class="javax.swing.JButton" name="jButtonSearchFTT">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="SearchFTT"/>
+                    <Property name="toolTipText" type="java.lang.String" value="Open JMMC SearchFTT web page for this target (finding off-axis fringe tracking targets)"/>
+                    <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+                      <Insets value="[2, 2, 2, 2]"/>
+                    </Property>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonSearchFTTActionPerformed"/>
+                  </Events>
+                </Component>
               </SubComponents>
               <LayoutCode>
                 <CodeStatement>
@@ -520,6 +532,22 @@
                       <ExpressionOrigin>
                         <ExpressionProvider type="ComponentRef">
                           <ComponentRef name="jButtonGetStar"/>
+                        </ExpressionProvider>
+                      </ExpressionOrigin>
+                    </CodeExpression>
+                  </Parameters>
+                </CodeStatement>
+                <CodeStatement>
+                  <CodeExpression id="6_jPanelTargetActions"/>
+                  <StatementProvider type="CodeMethod">
+                    <CodeMethod name="add" class="java.awt.Container" parameterTypes="java.awt.Component"/>
+                  </StatementProvider>
+                  <Parameters>
+                    <CodeExpression id="11_jButtonSearchFTT">
+                      <CodeVariable name="jButtonSearchFTT" type="8194" declaredType="javax.swing.JButton"/>
+                      <ExpressionOrigin>
+                        <ExpressionProvider type="ComponentRef">
+                          <ComponentRef name="jButtonSearchFTT"/>
                         </ExpressionProvider>
                       </ExpressionOrigin>
                     </CodeExpression>
