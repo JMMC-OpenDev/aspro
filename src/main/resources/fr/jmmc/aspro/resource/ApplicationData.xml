@@ -238,7 +238,8 @@
         <release version="22.07">
             <pubDate>Mon, 05 Sep 2022 16:00:00 GMT</pubDate>
             <prerelease version="22.07 beta 2">
-                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/6">Added the SearchFTT action in the 'Target editor' to open the JMMC SearchFTT web page to find off-axis fringe tracking targets (GRAVITY Wide)</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/1201">Added the SearchFTT action in the 'Target editor' to open the JMMC SearchFTT web page to find off-axis fringe tracking targets (GRAVITY Wide)</change>
+                <change type="BUGFIX" url="https://github.com/JMMC-OpenDev/aspro/issues/6">Fixed possible hang in the Target Editor / Groups due to asynchronous tree events</change>
             </prerelease>
             <prerelease version="22.07 beta 1">
                 <change type="FEATURE">Improved target's tooltips to show LMN fluxes in jansky (according to user preferences)</change>
