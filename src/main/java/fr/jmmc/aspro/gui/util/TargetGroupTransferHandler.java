@@ -8,7 +8,6 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.gui.component.StatusBar;
-import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -57,13 +56,12 @@ public final class TargetGroupTransferHandler extends TransferHandler {
         this.form = form;
     }
 
-    private void refreshForm() {
-        SwingUtils.invokeLaterEDT(new Runnable() {
-            @Override
-            public void run() {
-                form.refresh();
-            }
-        });
+    private void refreshForm(final Target selected) {
+        form.refresh(selected);
+    }
+
+    private void refreshForm(final Target selected, final TargetGroup group, final Target childTarget) {
+        form.refresh(selected, group, childTarget);
     }
 
     /**
@@ -202,6 +200,7 @@ public final class TargetGroupTransferHandler extends TransferHandler {
 
                         // Extract data :
                         final TargetGroupTransferable transfer = extractData(data);
+
                         if (transfer != null && hasGroup(transfer)) {
                             logger.debug("transfer: {}", transfer);
 
@@ -223,6 +222,13 @@ public final class TargetGroupTransferHandler extends TransferHandler {
 
                                         if (parentNode == tree.getRootNode()) {
                                             result = this.editTargetUserInfos.getOrCreateTargetInformation(destinationTarget).addTargetInGroupMembers(parentGroup, srcTarget);
+
+                                            if (result) {
+                                                // memorize values for later selection:
+                                                selectedSrcTarget = destinationTarget;
+                                                selectedGroup = parentGroup;
+                                                selectedChildTarget = srcTarget;
+                                            }
                                         } else {
                                             StatusBar.show("Invalid DnD: target [" + destinationTarget.getName() + "] is not a science target (SCI / CAL)");
                                         }
@@ -235,8 +241,6 @@ public final class TargetGroupTransferHandler extends TransferHandler {
                             // Check if action happens on the same tree:
                             if (result && !tree.getName().equals(transfer.getTreeId())) {
                                 result = false; // avoid move between trees
-                                // anyway:
-                                refreshForm();
                             }
                         }
                     } else if (userObject instanceof TargetGroup) {
@@ -246,6 +250,7 @@ public final class TargetGroupTransferHandler extends TransferHandler {
 
                         // Extract data :
                         final TargetGroupTransferable transfer = extractData(data);
+
                         if (transfer != null) {
                             logger.debug("transfer: {}", transfer);
 
@@ -267,6 +272,13 @@ public final class TargetGroupTransferHandler extends TransferHandler {
                                         if (!this.editTargetUserInfos.hasTargetInTargetGroup(destinationGroup, srcTarget)) {
                                             // add target into selected group:
                                             result = this.editTargetUserInfos.addTargetToTargetGroup(destinationGroup, srcTarget);
+
+                                            if (result) {
+                                                // memorize values for later selection:
+                                                selectedSrcTarget = srcTarget;
+                                                selectedGroup = destinationGroup;
+                                                selectedChildTarget = null;
+                                            }
                                         }
                                     }
                                 }
@@ -274,8 +286,6 @@ public final class TargetGroupTransferHandler extends TransferHandler {
                             // Check if action happens on the same tree:
                             if (result && !tree.getName().equals(transfer.getTreeId())) {
                                 result = false; // avoid move between trees
-                                // anyway:
-                                refreshForm();
                             }
                         }
                     } else {
@@ -287,6 +297,10 @@ public final class TargetGroupTransferHandler extends TransferHandler {
         }
         return result;
     }
+
+    private transient Target selectedSrcTarget = null;
+    private transient TargetGroup selectedGroup = null;
+    private transient Target selectedChildTarget = null;
 
     /**
      * Invoked after data has been exported.  This method should remove
@@ -302,12 +316,10 @@ public final class TargetGroupTransferHandler extends TransferHandler {
         if (data != null
                 && sourceComponent instanceof TargetGroupJTree) {
 
-            if (action == COPY) {
-                // anyway:
-                refreshForm();
-            } else if (action == MOVE) {
+            if (action == MOVE) {
                 // Extract data :
                 final TargetGroupTransferable transfer = extractData(data);
+
                 if (transfer != null && hasGroup(transfer)) {
                     logger.debug("exportDone : Transfered object: {}", transfer);
 
@@ -341,8 +353,19 @@ public final class TargetGroupTransferHandler extends TransferHandler {
                         }
                     }
                 }
+            }
+            // or (action == COPY) :
+
+            if (selectedSrcTarget != null) {
+                logger.debug("selectedSrcTarget:   {}", selectedSrcTarget);
+                logger.debug("selectedGroup:       {}", selectedGroup);
+                logger.debug("selectedChildTarget: {}", selectedChildTarget);
+
                 // anyway:
-                refreshForm();
+                refreshForm(selectedSrcTarget, selectedGroup, selectedChildTarget);
+            } else {
+                // anyway:
+                refreshForm(null);
             }
         }
     }

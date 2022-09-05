@@ -291,6 +291,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     public void dispose() {
         this.jTabbedPane.removeAll();
         this.targetModelForm.dispose();
+        this.targetGroupForm.dispose();
         // GC
         this.targetForm = null;
         this.targetModelForm = null;
