@@ -15,8 +15,10 @@ import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetGroupMembers;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.jmcs.gui.util.EDTDelayedEventHandler;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.ColorEncoder;
 import fr.jmmc.jmcs.util.StringUtils;
@@ -46,6 +48,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.DefaultFormatter;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author bourgesl
  */
-public class TargetGroupForm extends javax.swing.JPanel implements PropertyChangeListener, TreeSelectionListener {
+public class TargetGroupForm extends javax.swing.JPanel implements PropertyChangeListener, TreeSelectionListener, Disposable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -88,6 +91,10 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
     private boolean doAutoUpdateGroup = true;
     /** user group identifier generator */
     private final AtomicInteger ID_GEN = new AtomicInteger(1);
+    /** flag to use asynchronous event processing (tree value changed) using deferedHandler */
+    private boolean useAsync = true;
+    /** defered event handler (10ms delay) */
+    private transient final EDTDelayedEventHandler deferedHandler = new EDTDelayedEventHandler(10);
 
     /**
      * Creates new form TargetGroupForm (used by NetBeans editor only)
@@ -172,16 +179,58 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
         });
     }
 
-    public void refresh() {
-        refresh(true);
+    /**
+     * Free any resource or reference to this instance
+     */
+    @Override
+    public void dispose() {
+        // stop any timer:
+        this.deferedHandler.cancel();
     }
 
-    private void refresh(boolean force) {
-        final Target current = this.currentTarget; // backup
+    /**
+     * Refresh the trees and select the current current target/group (force = true) 
+     */
+    public void refresh() {
+        refresh(null);
+    }
+
+    /**
+     * Refresh the trees and select the given current target/group (force = true) 
+     * @param parentTarget any target
+     */
+    public void refresh(final Target parentTarget) {
+        refresh(true, parentTarget, null, null);
+    }
+
+    /**
+     * Refresh the trees and select again the given items or current target/group (force = true) 
+     * @param parentTarget science or main target
+     * @param group group used or null
+     * @param childTarget associated target or null
+     */
+    public void refresh(final Target parentTarget, final TargetGroup group, final Target childTarget) {
+        refresh(true, parentTarget, group, childTarget);
+    }
+
+    private void refresh(boolean force, final Target parentTarget, final TargetGroup group, final Target childTarget) {
+
+        final Target selectedTarget = (parentTarget != null) ? parentTarget : this.currentTarget; // backup
         if (force) {
             this.currentTarget = null; // reset to refresh target form
         }
-        generateTreesAndSelectTarget(current);
+        final TargetGroup selectedGroup = (group != null) ? group : this.currentGroup; // backup
+        final Target selectedChildTarget = (parentTarget != null && group != null) ? childTarget : null;
+
+        // cancel any pending event:
+        deferedHandler.cancel();
+
+        SwingUtils.invokeLaterEDT(new Runnable() {
+            @Override
+            public void run() {
+                generateTreesAndSelectPaths(selectedTarget, selectedGroup, selectedChildTarget);
+            }
+        });
     }
 
     /**
@@ -189,25 +238,34 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
      * @param targetName target name to select
      */
     void initialize(final String targetName) {
-        generateTreesAndSelectTarget(Target.getTarget(targetName, this.editTargets));
+        generateTreesAndSelectPaths(Target.getTarget(targetName, this.editTargets), null, null);
     }
 
-    private void generateTreesAndSelectTarget(final Target target) {
-        logger.debug("generateTreesAndSelectTarget: {}", target);
+    private void generateTreesAndSelectPaths(final Target parentTarget, final TargetGroup group, final Target childTarget) {
+        logger.debug("generateTreesAndSelectTarget: enter [{} - {} - {}]", parentTarget, group, childTarget);
 
-        final TargetGroup current = this.currentGroup; // backup
+        try {
+            useAsync = false;
+            generateTrees();
 
-        generateTrees();
-        selectTarget(target, null);
-        if (isNotNull(current)) {
-            SwingUtils.invokeLaterEDT(new Runnable() {
-                @Override
-                public void run() {
-                    selectGroup(current);
+            logger.debug("generateTreesAndSelectTarget: select: [{} - {} - {}]", parentTarget, group, childTarget);
+
+            if ((parentTarget != null) && isGroupNotEmpty(group)) {
+                if (childTarget != null) {
+                    getTreeTargets().selectTargetPath(parentTarget, group, childTarget);
+                    getTreeGroups().selectTargetPath(group, childTarget);
+                } else {
+                    getTreeTargets().selectTargetPath(parentTarget, group);
+                    getTreeGroups().selectTargetPath(group, parentTarget);
                 }
-            });
+            } else {
+                // only target:
+                selectTarget(parentTarget, null);
+            }
+        } finally {
+            useAsync = true;
         }
-
+        logger.debug("generateTreesAndSelectTarget: exit {}", parentTarget);
     }
 
     /* Tree related methods */
@@ -236,7 +294,8 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
         final DefaultMutableTreeNode rootNode = tree.getRootNode();
         rootNode.removeAllChildren();
 
-        final List<Target> calTargets = this.editTargetUserInfos.getCalibrators();
+        // copies to filter lists:
+        final List<Target> calTargets = new ArrayList<Target>(this.editTargetUserInfos.getCalibrators());
 
         final ArrayList<Target> sciTargets = new ArrayList<Target>(this.editTargets);
         sciTargets.removeAll(calTargets);
@@ -246,7 +305,10 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
             if (group.isCategoryOB()) {
                 TargetGroupMembers tgm = this.editTargetUserInfos.getGroupMembers(group);
                 if (tgm != null && !tgm.isEmpty()) {
+                    // science targets:
                     sciTargets.removeAll(tgm.getTargets());
+                    // calibrator targets:
+                    calTargets.removeAll(tgm.getTargets());
                 }
             }
         }
@@ -339,14 +401,6 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
     }
 
     /**
-     * Select the group for the given group
-     * @param group to select
-     */
-    void selectGroup(final TargetGroup group) {
-        getTreeGroups().selectTarget(group, false); // ignore missing
-    }
-
-    /**
      * Process the tree selection events
      * @param e tree selection event
      */
@@ -356,8 +410,12 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
         final DefaultMutableTreeNode currentNode = tree.getLastSelectedNode();
 
         if (currentNode != null) {
-            // Use invokeLater to selection change issues with editors :
-            SwingUtils.invokeLaterEDT(new Runnable() {
+            final boolean async = this.useAsync;
+            if (logger.isDebugEnabled()) {
+                logger.debug("valueChanged[{}](async = {}): {}", tree.getName(), async, currentNode.getUserObject());
+            }
+
+            final Runnable r = new Runnable() {
                 /**
                  * Update tree selection
                  */
@@ -377,8 +435,9 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
                         final Target target = (Target) userObject;
 
                         if (target != currentTarget) {
-                            logger.debug("tree[{}] selection: {}", tree.getName(), target);
-
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("tree[{}] selection: {}", tree.getName(), target);
+                            }
                             processTargetSelection(target);
 
                             // Finally update selection accross trees:
@@ -386,18 +445,30 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
                         }
 
                         processGroupSelection(TargetGroup.EMPTY_GROUP);
-
                     } else if (userObject instanceof TargetGroup) {
                         final TargetGroup group = (TargetGroup) userObject;
 
                         if (group != currentGroup) {
-                            logger.debug("tree[{}] selection: {}", tree.getName(), group);
-
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("tree[{}] selection: {}", tree.getName(), group);
+                            }
                             processGroupSelection(group);
                         }
                     }
+
+                    // expand target node if there is at least one child node :
+                    if (!currentNode.isLeaf()) {
+                        tree.expandAll(new TreePath(currentNode.getPath()), true, true);
+                    }
                 }
-            });
+            };
+
+            // Use invokeLater to selection change issues with editors:
+            if (async) {
+                this.deferedHandler.runLater(r);
+            } else {
+                r.run();
+            }
         }
     }
 
@@ -484,7 +555,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
             }
 
             // refresh trees:
-            refresh(false);
+            refresh(false, null, null, null);
         }
     }
 
@@ -556,7 +627,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
         // check if the automatic update flag is enabled :
-        if (this.doAutoUpdateGroup && isNotNull(this.currentGroup)) {
+        if (this.doAutoUpdateGroup && isGroupNotEmpty(this.currentGroup)) {
             boolean refresh = false;
 
             final JFormattedTextField field = (JFormattedTextField) evt.getSource();
@@ -592,7 +663,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
      */
     private void groupDescChanged() {
         // check if the automatic update flag is enabled :
-        if (this.doAutoUpdateGroup && isNotNull(this.currentGroup)) {
+        if (this.doAutoUpdateGroup && isGroupNotEmpty(this.currentGroup)) {
             final String text = this.jTextAreaGroupDesc.getText();
             logger.debug("desc: {}", text);
 
@@ -992,7 +1063,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
                             // remove target association:
                             this.editTargetUserInfos.getOrCreateTargetInformation(parentTarget).removeTargetInGroupMembers(parentGroup, target);
 
-                            refresh();
+                            refresh(parentTarget);
                         }
                     }
                 }
@@ -1182,7 +1253,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
         return (value1 == null && value2 != null) || (value1 != null && value2 == null) || (value1 != null && value2 != null && !value1.equals(value2));
     }
 
-    private boolean isNotNull(TargetGroup group) {
+    private boolean isGroupNotEmpty(final TargetGroup group) {
         return group != null && group != TargetGroup.EMPTY_GROUP;
     }
 }
