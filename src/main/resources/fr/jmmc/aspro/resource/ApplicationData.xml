@@ -195,6 +195,10 @@
             <menu/>
             <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction" action="updateSimbad"
                   description="update all targets with the latest information from the CDS Simbad service"/>
+            <!--
+            <menu label="Get all Stars" classpath="fr.jmmc.aspro.gui.action.GetStarAction" action="getAllStars"
+                  description="update all targets using the JMMC GetStar service"/>
+            -->
             <menu/>
             <menu label="Get Observations (Selected)" classpath="fr.jmmc.aspro.gui.action.QueryOneRawObservationsAction" action="query"
                   description="query raw observations (from JMMC ObsPortal) corresponding to the selected target"/>

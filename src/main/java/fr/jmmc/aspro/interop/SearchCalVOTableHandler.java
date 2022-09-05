@@ -58,7 +58,7 @@ public final class SearchCalVOTableHandler {
      * @throws IOException if an I/O exception occured
      * @throws IllegalArgumentException if the file is not an Observation
      */
-    static boolean processMessage(final String votable, final String searchCalVersion) throws IOException {
+    public static boolean processMessage(final String votable, final String searchCalVersion) throws IOException {
 
         // use an XSLT to transform the SearchCal votable document to an Aspro 2 Observation:
         final long start = System.nanoTime();

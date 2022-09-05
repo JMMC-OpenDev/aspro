@@ -11,6 +11,7 @@ import fr.jmmc.aspro.gui.action.ExportAllOBAction;
 import fr.jmmc.aspro.gui.action.ExportOBAction;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.gui.action.ExportVOTableAction;
+import fr.jmmc.aspro.gui.action.GetStarAction;
 import fr.jmmc.aspro.gui.action.ImportTargetsAction;
 import fr.jmmc.aspro.gui.action.ImportVOTableAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
@@ -375,6 +376,8 @@ public final class Aspro2 extends App {
         new ConfigurationEditorAction();
         // update simbad:
         new TargetUpdateSimbadAction();
+        // get star:
+        new GetStarAction();
         // query observations:
         new QueryOneRawObservationsAction();
         new QueryAllRawObservationsAction();
