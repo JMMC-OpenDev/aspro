@@ -17,14 +17,16 @@ public final class TargetEditContext {
     private final List<Target> editTargets;
     /** list of edited target user informations (clone) */
     private final TargetUserInformations editTargetUserInfos;
+    /** selected target */
+    private Target selectedTarget;
 
     /**
-    * Fake constructor (used to test swing interface in NetBeans)
-    */
+     * Fake constructor (used to test swing interface in NetBeans)
+     */
     public TargetEditContext() {
         this(new ArrayList<Target>(0), new TargetUserInformations());
     }
-    
+
     public TargetEditContext(final List<Target> targets, final TargetUserInformations targetUserInfos) {
         // Define shared data model to edit:
         this.editTargets = targets;
@@ -37,6 +39,14 @@ public final class TargetEditContext {
 
     public TargetUserInformations getTargetUserInfos() {
         return editTargetUserInfos;
+    }
+
+    public Target getSelectedTarget() {
+        return selectedTarget;
+    }
+
+    public void setSelectedTarget(final Target selectedTarget) {
+        this.selectedTarget = selectedTarget;
     }
 
 }

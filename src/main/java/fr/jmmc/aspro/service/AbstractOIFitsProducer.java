@@ -153,7 +153,7 @@ public abstract class AbstractOIFitsProducer {
             final UserModel userModel = (!useAnalyticalModel) ? target.getUserModel() : null;
 
             // Test if user model data is valid:
-            if (userModel != null && userModel.isModelDataReady()) {
+            if ((userModel != null) && userModel.isModelDataReady()) {
                 final List<UserModelData> modelDataList = target.getUserModel().getModelDataList();
 
                 final int nImages = modelDataList.size();
@@ -339,7 +339,7 @@ public abstract class AbstractOIFitsProducer {
             final UserModel userModel = (!useAnalyticalModel) ? target.getUserModel() : null;
 
             // Test if user model data is valid:
-            if (userModel != null && !userModel.isModelDataReady()) {
+            if ((userModel != null) && !userModel.isModelDataReady()) {
                 return false;
             }
 
@@ -357,7 +357,7 @@ public abstract class AbstractOIFitsProducer {
             double deltaLambda = waveBand / nSamples;
 
             // If Fits cube: use all images at least i.e. adjust frequencies and nSamples:
-            final double wlInc = (userModel != null && userModel.isModelDataReady()) ? userModel.getModelData(0).getWaveLengthIncrement() : Double.POSITIVE_INFINITY;
+            final double wlInc = ((userModel != null) && userModel.isModelDataReady()) ? userModel.getModelData(0).getWaveLengthIncrement() : Double.POSITIVE_INFINITY;
 
             // Sub channel width:
             if ((wlInc > 0.0) && (wlInc < deltaLambda)) {

@@ -82,8 +82,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     /** default reload latency = 20 ms */
     private static final int RELOAD_LATENCY = 20;
     /** AMHRA portal */
-    private static final String AMHRA_URL = "https://amhra.oca.eu/?referer=Aspro2"; 
-    /* AMHRA's matomo catches the click from Aspro2 using referer param */ 
+    private static final String AMHRA_URL = "https://amhra.oca.eu/?referer=Aspro2";
+    /* AMHRA's matomo catches the click from Aspro2 using referer param */
     /** User model doc link */
     private static final String HELP_USER_MODEL_URL = "http://www.jmmc.fr/twiki/bin/view/Jmmc/Software/JmmcAspro2#User_defined_model";
 
@@ -398,6 +398,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * @param target selected target
      */
     private void processTargetSelection(final Target target) {
+        // update user model references (hard/soft references) to reduce memory footprint:
+        Target.updateTargetUserModelReferences(this.editTargets, target);
+
         this.jButtonUpdate.setEnabled(false);
         this.jButtonRemove.setEnabled(false);
 
@@ -410,6 +413,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             this.jRadioButtonUserModel.setSelected(true);
         }
 
+        FitsImage fitsImage = null;
         boolean enableAnimator = false;
 
         // disable the automatic user model:
@@ -426,44 +430,49 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 this.jTextFieldFileReference.setText(userModel.getFile());
                 enableUserModelFields(true);
 
-                if (!isAnalytical && userModel.isModelDataReady()) {
-                    // update fits Image:
-                    if (this.fitsImagePanel == null) {
-                        // do not show id but options:
-                        this.fitsImagePanel = new FitsImagePanel(Preferences.getInstance(), false, true) {
-                            private static final long serialVersionUID = 1L;
+                if (!isAnalytical) {
+                    if (userModel.isModelDataReady()) {
+                        // update fits Image:
+                        if (this.fitsImagePanel == null) {
+                            // do not show id but options:
+                            this.fitsImagePanel = new FitsImagePanel(Preferences.getInstance(), false, true) {
+                                private static final long serialVersionUID = 1L;
 
-                            @Override
-                            protected void resetPlot() {
-                                try {
-                                    super.resetPlot();
-                                } finally {
-                                    disableAnimator();
+                                @Override
+                                protected void resetPlot() {
+                                    try {
+                                        super.resetPlot();
+                                    } finally {
+                                        disableAnimator();
+                                    }
                                 }
-                            }
-                        };
+                            };
+                        }
+
+                        final List<UserModelData> modelDataList = userModel.getModelDataList();
+
+                        // use first image:
+                        fitsImage = modelDataList.get(0).getFitsImage();
+
+                        // use only positive increments (no direction)
+                        this.jFormattedTextFieldScaleX.setValue(ALX.convertRadToMas(fitsImage.getIncCol()));
+                        this.jFormattedTextFieldScaleY.setValue(ALX.convertRadToMas(fitsImage.getIncRow()));
+                        this.jFormattedTextFieldRotation.setValue(fitsImage.getRotAngle());
+
+                        this.fitsImagePanel.setFitsImage(fitsImage);
+                        this.jPanelImage.add(this.fitsImagePanel);
+
+                        if (modelDataList.size() > 1) {
+                            enableAnimator = true;
+                            this.currentUserModel = userModel;
+                        }
+                    } else {
+                        if (userModel.isFileValid()) {
+                            // trigger reload user model:
+                            triggerReloadUserModel(true);
+                        }
                     }
-
-                    final List<UserModelData> modelDataList = userModel.getModelDataList();
-
-                    // use first image:
-                    final FitsImage fitsImage = modelDataList.get(0).getFitsImage();
-
-                    // use only positive increments (no direction)
-                    this.jFormattedTextFieldScaleX.setValue(ALX.convertRadToMas(fitsImage.getIncCol()));
-                    this.jFormattedTextFieldScaleY.setValue(ALX.convertRadToMas(fitsImage.getIncRow()));
-                    this.jFormattedTextFieldRotation.setValue(fitsImage.getRotAngle());
-
-                    this.fitsImagePanel.setFitsImage(fitsImage);
-
-                    if (modelDataList.size() > 1) {
-                        enableAnimator = true;
-                        this.currentUserModel = userModel;
-                    }
-
-                    this.jPanelImage.add(this.fitsImagePanel);
                 }
-
             } else {
                 this.jRadioButtonInvalid.setSelected(true);
                 this.jTextFieldFileReference.setText(null);
@@ -472,14 +481,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 this.jFormattedTextFieldRotation.setValue(null);
 
                 enableUserModelFields(false);
-
-                if (this.fitsImagePanel != null) {
-                    // reset the FitsImage panel:
-                    this.fitsImagePanel.setFitsImage(null);
-                }
-
-                // remove the FitsImage panel:
-                this.jPanelImage.removeAll();
             }
         } finally {
             // restore the automatic update observation :
@@ -488,6 +489,16 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             autoLockForm();
         }
 
+        if (fitsImage == null) {
+            if (this.fitsImagePanel != null) {
+                // reset the FitsImage panel:
+                this.fitsImagePanel.setFitsImage(null);
+            }
+            if (this.jPanelImage.getComponentCount() != 0) {
+                // remove the FitsImage panel:
+                this.jPanelImage.removeAll();
+            }
+        }
         // anyway enable or disable animator:
         if (enableAnimator) {
             if (this.animatorPanel == null) {
@@ -496,6 +507,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             }
         } else {
             this.currentUserModel = null;
+            disableAnimator();
         }
 
         // update user model in animator panel to enable/disable animator:
@@ -655,7 +667,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         if (doAutoUpdateUserModel && this.currentTarget != null) {
             final UserModel userModel = this.currentTarget.getUserModel();
 
-            if (userModel != null && userModel.isModelDataReady()) {
+            if ((userModel != null) && userModel.isModelDataReady()) {
                 boolean changed = false;
 
                 // use first image:
@@ -768,7 +780,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             this.jRadioButtonInvalid.setSelected(true);
         } else {
             try {
-                prepareAndValidateUserModel(userModel);
+                prepareAndValidateUserModel(userModel, true);
             } finally {
                 if (!userModel.isFileValid()) {
                     this.jRadioButtonInvalid.setSelected(true);
@@ -1336,8 +1348,14 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     ModelManager.getInstance().validateModels(target.getModels());
                 } else {
                     // validate user model:
-// TODO: it always validates the current target not the target from loop (editTargets):
-                    prepareUserModel();
+                    final UserModel userModel = target.getUserModel();
+
+                    if ((userModel != null) && userModel.isFileValid()) {
+                        // only check alive models to avoid reloading all user models:
+                        if (userModel.isModelDataReady()) {
+                            prepareAndValidateUserModel(userModel, false);
+                        }
+                    }
                 }
             } catch (IllegalArgumentException iae) {
                 // display an error message for the first error found :
@@ -1347,6 +1365,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 return false;
             }
         }
+        Target.monitorUserModelReferences(this.editTargets);
         return true;
     }
 
@@ -1616,7 +1635,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         }
 
         final UserModel userModel = this.currentTarget.getUserModel();
-        if (userModel != null && userModel.isModelDataReady()) {
+        if ((userModel != null) && userModel.isModelDataReady()) {
             // use first image:
             final FitsImage fitsImage = userModel.getModelData(0).getFitsImage();
 
@@ -1749,15 +1768,16 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     /**
      * Prepare and validate the given user model
      * @param userModel user model to use
+     * @param reload flag to force reloading model
      */
-    private static void prepareAndValidateUserModel(final UserModel userModel) {
+    private static void prepareAndValidateUserModel(final UserModel userModel, final boolean reload) {
         // see ObservationManager.checkAndLoadFileReferences()
         final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
         boolean valid = false;
         try {
             // throws exceptions if the given fits file or image is incorrect:
-            ObservationManager.validateOrPrepareUserModel(observation, userModel, true);
+            ObservationManager.validateOrPrepareUserModel(observation, userModel, reload);
 
             // update checksum before validation:
             if (userModel.isModelDataReady()) {

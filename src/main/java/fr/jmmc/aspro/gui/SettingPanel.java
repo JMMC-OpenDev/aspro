@@ -315,7 +315,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
 
             if (type == ObservationEventType.TARGET_CHANGED) {
                 // retrieve the selected target from its name:
-                final Target target = observation.getTarget(observation.getSelectedTargetName());
+                final Target target = observation.getSelectedTarget();
                 // force refresh content:
                 this.onTargetSelectionChange(target);
             }

@@ -33,6 +33,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     private static final long serialVersionUID = 1;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(TargetEditorDialog.class.getName());
+    /** dev GC flag */
+    private final static boolean SHOW_GC_BUTTON = false;
     /** Target Editor key to remember file dialog dimensions */
     private final static String TARGET_EDITOR_DIMENSION_KEY = "___ASPRO2_TARGET_EDITOR_DIMENSION";
     /** Tab Targets */
@@ -198,6 +200,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
                 refreshDialog();
             }
         });
+        
+        this.jButtonGC.setVisible(SHOW_GC_BUTTON);
     }
 
     /**
@@ -327,6 +331,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         jPanelButtons = new javax.swing.JPanel();
         jButtonCancel = new javax.swing.JButton();
         jButtonOK = new javax.swing.JButton();
+        jButtonGC = new javax.swing.JButton();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -358,6 +363,14 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         });
         jPanelButtons.add(jButtonOK);
 
+        jButtonGC.setText("[GC]");
+        jButtonGC.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonGCActionPerformed(evt);
+            }
+        });
+        jPanelButtons.add(jButtonGC);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -366,7 +379,6 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOKActionPerformed
-
         // delegate the validation to inner child panels :
         if (!this.targetModelForm.validateForm()) {
             return;
@@ -378,6 +390,11 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
             return;
         }
 
+        final Target target = getCurrentTarget();
+        if (target != null) {
+            this.targetEditCtx.setSelectedTarget(target);
+        }
+        
         // update the validation flag :
         this.result = true;
 
@@ -389,8 +406,15 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
         closeDialog();
 }//GEN-LAST:event_jButtonCancelActionPerformed
+
+    private void jButtonGCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGCActionPerformed
+        System.gc();
+        System.gc();
+    }//GEN-LAST:event_jButtonGCActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonCancel;
+    private javax.swing.JButton jButtonGC;
     private javax.swing.JButton jButtonOK;
     private javax.swing.JPanel jPanelButtons;
     private javax.swing.JTabbedPane jTabbedPane;

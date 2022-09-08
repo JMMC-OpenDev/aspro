@@ -502,6 +502,13 @@ public class ObservationSetting
     public final void setSelectedTargetName(final String selectedTargetName) {
         this.selectedTargetName = selectedTargetName;
     }
+    
+    /** 
+    * @return Target instance corresponding to the selected target name
+    */
+    public Target getSelectedTarget() {
+        return getTarget(getSelectedTargetName());
+    }
 
     @Override
     public final String toString() {

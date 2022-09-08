@@ -37,7 +37,7 @@ public final class QueryOneRawObservationsAction extends QueryRawObservationsAct
         final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
         // retrieve the selected target from its name:
-        final Target target = observation.getTarget(observation.getSelectedTargetName());
+        final Target target = observation.getSelectedTarget();
 
         if (target != null) {
             this.process(Arrays.asList(new Target[]{target}));

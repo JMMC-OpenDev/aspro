@@ -238,6 +238,7 @@ public final class OIFitsProcessor {
                 userModel.setChecksum(fitsImageHDU.getChecksum());
             }
             // Validate user model with the max frequency from the OIFITS file:
+            // may throw IllegalArgumentException
             UserModelService.validateModel(userModel, getMaxFreq(oiFitsFile));
 
             // anyway, update the valid flag:

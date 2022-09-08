@@ -148,7 +148,7 @@ public final class ImageSampMessageHandler extends SampMessageHandler {
                 final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
                 // retrieve the selected target from its name:
-                final Target target = observation.getTarget(observation.getSelectedTargetName());
+                final Target target = observation.getSelectedTarget();
 
                 if (target != null) {
                     logger.debug("target = {}", target);

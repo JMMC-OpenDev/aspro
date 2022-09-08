@@ -81,6 +81,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     public final static float TARGET_VERSION_MUST_UPDATE = 2019.07f;
     /** flag to log a stack trace in method fireEvent() to debug events */
     private final static boolean DEBUG_FIRE_EVENT = false;
+    /** max duration for soft references on user models (2 minutes) */
+    private final static long USER_MODEL_REF_MAX_DURATION = 120 * 1000;
     /** configuration manager */
     private static final ConfigurationManager cm = ConfigurationManager.getInstance();
     /** singleton pattern */
@@ -151,6 +153,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             if (sb.length() > 0) {
                 MessagePane.showMessage(sb.toString());
             }
+
+            // update user model if needed (memory):
+            validateSelectedTargetUserModel();
+
             logger.debug("ObservationManager.update: done.");
 
             // fire change events :
@@ -598,10 +604,63 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
         final String targetName = (target != null) ? target.getName() : null;
 
+        final ObservationSetting observation = getMainObservation();
+
         // store the selected target using its name (not instance):
-        getMainObservation().setSelectedTargetName(targetName);
+        observation.setSelectedTargetName(targetName);
+
+        // update user model if needed (memory):
+        validateSelectedTargetUserModel();
 
         fireEvent(new TargetSelectionEvent(target));
+    }
+
+    private void validateSelectedTargetUserModel() {
+        final ObservationSetting observation = getMainObservation();
+
+        // retrieve the selected target from its name:
+        final Target target = observation.getSelectedTarget();
+
+        // update user model references (hard/soft references) to reduce memory footprint:
+        Target.updateTargetUserModelReferences(observation.getTargets(), target);
+
+        if (target != null) {
+            // user model if defined:
+            final UserModel userModel = (!target.hasAnalyticalModel()) ? target.getUserModel() : null;
+
+            if ((userModel != null) && userModel.isFileValid()) {
+                // may reload or apodise the user model:
+                final StringBuilder sb = new StringBuilder(128);
+
+                boolean valid = false;
+                try {
+                    // throws exceptions if the given fits file or image is incorrect:
+                    validateOrPrepareUserModel(observation, userModel, false); // NO reload
+
+                    // model is valid:
+                    valid = true;
+
+                } catch (IllegalArgumentException iae) {
+                    logger.warn("Incorrect fits image in file [{}]", userModel.getFile(), iae);
+                    sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(iae.getMessage());
+                } catch (FitsException fe) {
+                    logger.error("FITS failure on file [{}]", userModel.getFile(), fe);
+                    sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(fe.getMessage());
+                } catch (IOException ioe) {
+                    logger.error("IO failure on file [{}]", userModel.getFile(), ioe);
+                    sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(ioe.getMessage());
+                } finally {
+                    if (!valid) {
+                        sb.append("\n\nThe target [").append(target.getName()).append("] has an invalid user model; this model is disabled.\n\n");
+                    }
+                    // anyway, update the valid flag:
+                    userModel.setFileValid(valid);
+                }
+                if (sb.length() > 0) {
+                    MessagePane.showMessage(sb.toString());
+                }
+            }
+        }
     }
 
     /**
@@ -615,7 +674,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         final ObservationSetting observation = getMainObservation();
 
         // retrieve the selected target from its name:
-        final Target target = observation.getTarget(observation.getSelectedTargetName());
+        final Target target = observation.getSelectedTarget();
 
         fireEvent(new TargetSelectionEvent(target), listener);
     }
@@ -646,6 +705,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (logger.isDebugEnabled()) {
             logger.debug("fireObservationUpdate: {}", toString(observation));
         }
+
+        // Free memory if needed:
+        Target.freeTargetUserModelReferences(observation.getTargets(), USER_MODEL_REF_MAX_DURATION);
 
         final UpdateObservationEvent event = new UpdateObservationEvent(observation);
 
@@ -1460,18 +1522,32 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param targetEditCtx target editor context
      */
     public void updateTargets(final TargetEditContext targetEditCtx) {
+        final ObservationSetting observation = getMainObservation();
 
-        final List<Target> targets = getTargets();
+        // update targets in-place:
+        final List<Target> targets = observation.getTargets();
         targets.clear();
         targets.addAll(targetEditCtx.getTargets());
 
-        getMainObservation().setTargetUserInfos(targetEditCtx.getTargetUserInfos());
+        observation.setTargetUserInfos(targetEditCtx.getTargetUserInfos());
 
         // check and update target references :
-        getMainObservation().checkReferences();
+        observation.checkReferences();
 
-        // fire change events :
-        this.fireTargetChangedEvents();
+        final Target target = targetEditCtx.getSelectedTarget();
+
+        if ((target != null) && !target.getName().equals(observation.getSelectedTargetName())) {
+            // fire change events :
+            this.fireTargetChangedEvents();
+
+            this.fireTargetSelectionChanged(target);
+        } else {
+            // update user model if needed (memory):
+            validateSelectedTargetUserModel();
+
+            // fire change events :
+            this.fireTargetChangedEvents();
+        }
     }
 
     /**
@@ -1708,19 +1784,24 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             checkTargetUserModel(obsFile, target, sb);
         }
 
+        // update user model references (hard/soft references) to reduce memory footprint:
+        Target.updateTargetUserModelReferences(observation.getTargets(), null);
+
         // Load only valid target user model files:
         for (Target target : observation.getTargets()) {
-            final UserModel userModel = target.getUserModel();
+            // user model if defined:
+            final UserModel userModel = (!target.hasAnalyticalModel()) ? target.getUserModel() : null;
 
-            if (userModel != null && userModel.isFileValid()) {
+            if ((userModel != null) && userModel.isFileValid()) {
                 // see TargetModelForm.prepareAndValidateUserModel()
                 boolean valid = false;
                 try {
                     // throws exceptions if the given fits file or image is incorrect:
-                    ObservationManager.validateOrPrepareUserModel(observation, userModel, true);
+                    validateOrPrepareUserModel(observation, userModel, true); // reload
 
                     // validate image against the given observation:
-                    ObservationManager.validateUserModel(observation, userModel);
+                    // may throw IllegalArgumentException
+                    validateUserModel(observation, userModel);
 
                     // model is valid:
                     valid = true;
@@ -1740,9 +1821,13 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                     }
                     // anyway, update the valid flag:
                     userModel.setFileValid(valid);
+
+                    // un-reference model (soft) to reduce memory footprint:
+                    userModel.setModelDataListHardReference(false);
                 }
             }
         }
+        Target.monitorUserModelReferences(observation.getTargets());
     }
 
     /**
@@ -1789,8 +1874,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     /**
      * Validate the given user model using the main observation to get the maximum UV frequency (rad-1) possible
      * @param userModel user model to validate
+     * @throws IllegalArgumentException if the file or the image is invalid !
      */
-    public void validateUserModel(final UserModel userModel) {
+    public void validateUserModel(final UserModel userModel) throws IllegalArgumentException {
         validateUserModel(getMainObservation(), userModel);
     }
 
@@ -1798,8 +1884,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * Validate the given user model using the given observation to get the maximum UV frequency (rad-1) possible
      * @param observation observation to get interferometer and instrument configurations
      * @param userModel user model to validate
+     * @throws IllegalArgumentException if the file or the image is invalid !
      */
-    public static void validateUserModel(final ObservationSetting observation, final UserModel userModel) {
+    public static void validateUserModel(final ObservationSetting observation, final UserModel userModel) throws IllegalArgumentException {
         UserModelService.validateModel(userModel, getUVMaxFreq(observation));
     }
 
@@ -1829,18 +1916,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         final double uvMaxFreq = maxBaseLines / lambdaMin;
 
         return uvMaxFreq;
-    }
-
-    /**
-     * Validate the given user model images using the given observation to perform apodisation if needed
-     * @param observation observation to get interferometer and instrument configurations
-     * @param userModel user model to validate
-     * @throws FitsException if any FITS error occured
-     * @throws IOException IO failure
-     * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
-     */
-    public static void validateOrPrepareUserModel(final ObservationSetting observation, final UserModel userModel) throws FitsException, IOException, IllegalArgumentException {
-        validateOrPrepareUserModel(observation, userModel, false);
     }
 
     /**
@@ -1883,6 +1958,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
                 // throws exceptions if the given fits file or image is incorrect:
                 UserModelService.prepareUserModel(userModel, diameter, lambdaMin);
+
+                Target.monitorUserModelReferences(observation.getTargets());
 
                 logger.debug("validateOrPrepareUserModel: model prepared.");
             }

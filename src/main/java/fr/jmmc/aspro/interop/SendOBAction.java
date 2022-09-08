@@ -58,7 +58,7 @@ public final class SendOBAction extends SampCapabilityAction {
         }
 
         // retrieve the selected target from its name:
-        final Target target = observation.getTarget(observation.getSelectedTargetName());
+        final Target target = observation.getSelectedTarget();
 
         if (target == null) {
             return null;

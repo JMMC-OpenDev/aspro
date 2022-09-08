@@ -2053,7 +2053,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                             // Inhibits thread interrupt:
                             InterruptableThread.setThreadMayInterruptIfRunning(false);
 
-                            ObservationManager.validateOrPrepareUserModel(getObservationCollection().getFirstObservation(), target.getUserModel());
+                            ObservationManager.validateOrPrepareUserModel(getObservationCollection().getFirstObservation(), target.getUserModel(), false);
 
                             final UserModelData modelData = userModel.getModelData(0);
                             if (modelData != null) {
@@ -2252,7 +2252,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             if (this.doModelImage) {
                 if (target != null && !target.hasAnalyticalModel()) {
                     final UserModel userModel = target.getUserModel();
-                    if (userModel != null && !userModel.isFileValid()) {
+                    if ((userModel != null) && !userModel.isFileValid()) {
                         mergedWarningContainer.addWarning("User model [" + userModel.getName() + "] is disabled");
                     } else {
                         // May be inaccurate for multiple configurations (use first only):

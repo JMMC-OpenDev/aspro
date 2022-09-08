@@ -1477,6 +1477,50 @@ public class Target
             }
         }
     }
+    
+    public static void updateTargetUserModelReferences(final java.util.List<Target> targets,
+                                                       final Target selectedTarget) {
+        for (Target t : targets) {
+            final UserModel userModel = t.getUserModel();
+
+            if ((userModel != null) && userModel.isFileValid()) {
+                // un-reference model (soft) to reduce memory footprint:
+                userModel.setModelDataListHardReference((t == selectedTarget) && !t.hasAnalyticalModel());
+            }
+        }
+        monitorUserModelReferences(targets);
+    }
+    
+    public static void freeTargetUserModelReferences(final java.util.List<Target> targets,
+                                                     final long maxDuration) {
+        for (Target t : targets) {
+            final UserModel userModel = t.getUserModel();
+
+            if ((userModel != null) && userModel.isFileValid()) {
+                // un-reference model (soft) if expired to reduce memory footprint:
+                userModel.pruneModelDataListReference(maxDuration);
+            }
+        }
+        monitorUserModelReferences(targets);
+    }
+    
+    public static void monitorUserModelReferences(final java.util.List<Target> targets) {
+        if (logger.isDebugEnabled()) {
+            int n = 0;
+            for (Target t : targets) {
+                final UserModel userModel = t.getUserModel();
+
+                if (userModel != null) {
+                    if (userModel.monitorUserModelReference(t.getId())) {
+                        n++;
+                    }
+                }
+            }
+            if (n != 0) {
+                logger.debug("Live User models: {}", n);
+            }
+        }
+    }
 
     /**
      * Format the given star name to become a valid target name (identifier)

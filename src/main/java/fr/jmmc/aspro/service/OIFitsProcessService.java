@@ -108,7 +108,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                 if (table.getOiWavelength() == oiWaveLength) {
                     this.oiData = table;
 
-                    if (this.hasModel && !target.isUseAnalyticalModel()) {
+                    if (this.hasModel && !target.hasAnalyticalModel()) {
                         // Check user model:
                         validateOrPrepareUserModel(oiData, target.getUserModel(),
                                 useFastMode, fastError, doApodization, diameter, lambdaMin

@@ -272,8 +272,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // user model if defined:
         final UserModel userModel = (!target.hasAnalyticalModel()) ? target.getUserModel() : null;
 
-        if (userModel != null && userModel.isFileValid()) {
+        if ((userModel != null) && userModel.isFileValid()) {
             // validate image against the given observation:
+            // may throw IllegalArgumentException
             ObservationManager.validateUserModel(observation, userModel);
 
             // prepare later image according to apodization
@@ -437,13 +438,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     }
 
     private void prepareUserModel(final ObservationSetting observation, final UserModel userModel) throws IllegalArgumentException {
-        if (userModel != null && userModel.isFileValid()) {
+        if ((userModel != null) && userModel.isFileValid()) {
             boolean valid = false;
             try {
                 // Inhibits thread interrupt:
                 InterruptableThread.setThreadMayInterruptIfRunning(false);
 
-                ObservationManager.validateOrPrepareUserModel(observation, userModel);
+                ObservationManager.validateOrPrepareUserModel(observation, userModel, false);
 
                 // model is valid:
                 valid = true;

@@ -158,4 +158,15 @@ public final class UserModelData extends OIBase {
     public String toString() {
         return "UserModelData:" + getFitsImage() + " - nData=" + getNData();
     }
+
+    public int getMemorySize() {
+        int len = 0;
+        if (fitsImage != null) {
+            len += fitsImage.getNbRows() * fitsImage.getNbCols() * 4;
+        }
+        if (data1D != null) {
+            len += data1D.length * 4;
+        }
+        return len;
+    }
 }

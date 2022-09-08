@@ -244,14 +244,14 @@ public class UserModel
 
     /** Cached list of prepared model data corresponding to the file reference (read only) */
     @javax.xml.bind.annotation.XmlTransient
-    private java.util.List<fr.jmmc.aspro.service.UserModelData> modelDataList = null;
+    private fr.jmmc.aspro.model.util.HeapReference<java.util.List<fr.jmmc.aspro.service.UserModelData>> modelDataListRef = null;
 
     /**
      * Return true if the Cached model data is not null nor empty
      * @return true if the Cached model data is not null nor empty
      */
     public boolean isModelDataReady() {
-        return !isEmpty(modelDataList);
+        return !isEmpty(getModelDataList());
     }
 
     /**
@@ -260,8 +260,11 @@ public class UserModel
      * @return Cached model data (read only)
      */
     public fr.jmmc.aspro.service.UserModelData getModelData(final int index) {
-        if (isModelDataReady() && index < modelDataList.size()) {
-            return modelDataList.get(index);
+        if (isModelDataReady()) {
+            final java.util.List<fr.jmmc.aspro.service.UserModelData> modelDataList = getModelDataList();
+            if (index < modelDataList.size()) {
+                return modelDataList.get(index);
+            }
         }
         return null;
     }
@@ -271,7 +274,19 @@ public class UserModel
      * @return Cached model data corresponding to the file reference (read only)
      */
     public java.util.List<fr.jmmc.aspro.service.UserModelData> getModelDataList() {
-        return modelDataList;
+        return getModelDataList(true);
+    }
+    /**
+     * Return the Cached model data corresponding to the file reference (read only)
+     * @param updateTimestamp true to update access timestamp; false to ignore 
+     * @return Cached model data corresponding to the file reference (read only)
+     */
+    private java.util.List<fr.jmmc.aspro.service.UserModelData> getModelDataList(final boolean updateTimestamp) {
+        return (getModelDataListRef() == null) ? null : getModelDataListRef().get(updateTimestamp);
+    }
+
+    private fr.jmmc.aspro.model.util.HeapReference<java.util.List<fr.jmmc.aspro.service.UserModelData>> getModelDataListRef() {
+        return modelDataListRef;
     }
 
     /**
@@ -279,7 +294,37 @@ public class UserModel
      * @param modelData Cached model data corresponding to the file reference (read only)
      */
     public void setModelDataList(final java.util.List<fr.jmmc.aspro.service.UserModelData> modelData) {
-        this.modelDataList = modelData;
+        this.modelDataListRef = (modelData == null) ? null
+                : new fr.jmmc.aspro.model.util.HeapReference<>(getFile(), modelData);
+    }
+
+    public void pruneModelDataListReference(final long maxDuration) {
+        if (getModelDataListRef() != null && !getModelDataListRef().isTimestampValid(maxDuration)) {
+            if (logger.isDebugEnabled()) {
+                monitorUserModelReference("[prune]");
+            }
+            setModelDataList(null);
+        }
+    }
+
+    public void setModelDataListHardReference(final boolean useHard) {
+        if (getModelDataListRef() != null) {
+            getModelDataListRef().setHardReference(useHard);
+        }
+    }
+
+    private void setModelDataListHardReference(final UserModel other) {
+        if (other.getModelDataListRef() != null && getModelDataListRef() != null) {
+            getModelDataListRef().setHardReference(other.isModelDataListHardReference());
+        }
+    }
+    
+    private boolean isModelDataListHardReference() {
+        return (getModelDataListRef() != null) ? getModelDataListRef().isHardReference() : false;
+    }
+    
+    private long getModelDataListReferenceTimestamp() {
+        return (getModelDataListRef() != null) ? getModelDataListRef().getTimestamp(): 0L;
     }
 
     /**
@@ -291,10 +336,12 @@ public class UserModel
         final UserModel copy = (UserModel) super.clone();
 
         // Note: modelData instances are shallow copies
-        if (copy.getModelDataList() != null) {
-            copy.setModelDataList(OIBase.copyList(copy.getModelDataList()));
+        final java.util.List<fr.jmmc.aspro.service.UserModelData> modelDataList = this.getModelDataList(false);
+        if (modelDataList != null) {
+            copy.setModelDataList(OIBase.copyList(modelDataList));
+            // fix hard reference as input:
+            copy.setModelDataListHardReference(this);
         }
-
         return copy;
     }
 
@@ -321,6 +368,33 @@ public class UserModel
                 + '}';
     }
 
+    public boolean monitorUserModelReference(final String targetId) {
+        if (isFileValid()) {
+            // do not update timestamp:
+            if (!isEmpty(getModelDataList(false))) {
+                logger.debug("Target[{}] user model ready: {} [{} bytes ({})] timestamp: {}", targetId, getFile(),
+                        getMemorySize(),
+                        isModelDataListHardReference() ? "hard" : "weak",
+                        new java.util.Date(getModelDataListReferenceTimestamp()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int getMemorySize() {
+        final java.util.List<fr.jmmc.aspro.service.UserModelData> modelDataList = getModelDataList(false);
+
+        if (modelDataList == null) {
+            return 0;
+        }
+        int total = 0;
+        for (fr.jmmc.aspro.service.UserModelData modelData : modelDataList) {
+            total += modelData.getMemorySize();
+        }
+        return total;
+    }
+    
 //--simple--preserve
 
 }
