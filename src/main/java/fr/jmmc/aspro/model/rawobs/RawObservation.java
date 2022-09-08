@@ -788,8 +788,15 @@ public class RawObservation
 
     public void setDist(final double dist) {
         this.dist = dist;
-    }    
-    
+    }
+
+    public final static java.util.List<String> DEDUP_COLS = java.util.Arrays.asList(
+            new String[]{"parentId", "programId", "interferometerName", "interferometerVersion",
+                         "stations", "pops", "channels",
+                         "instrumentName", "instrumentMode", "instrumentSubMode",
+                         "targetName"}
+    );
+
     /**
      * Prepare this observation ie compute and resolve internal references
      * @param logger logger to use
@@ -799,6 +806,21 @@ public class RawObservation
     public final void prepare(final org.slf4j.Logger logger,
                               final java.util.Map sharedContext,
                               final fr.jmmc.aspro.model.ConfigurationManager cm) {
+        
+        // reduce String instances:
+        /* skipped obsId = unique */
+        this.parentId = deduplicate(sharedContext, "parentId", this.parentId);
+        this.programId = deduplicate(sharedContext, "programId", this.programId);
+        this.interferometerName = deduplicate(sharedContext, "interferometerName", this.interferometerName);
+        this.interferometerVersion = deduplicate(sharedContext, "interferometerVersion", this.interferometerVersion);
+        this.stations = deduplicate(sharedContext, "stations", this.stations);
+        this.pops = deduplicate(sharedContext, "pops", this.pops);
+        this.channels = deduplicate(sharedContext, "channels", this.channels);
+        this.instrumentName = deduplicate(sharedContext, "instrumentName", this.instrumentName);
+        this.instrumentMode = deduplicate(sharedContext, "instrumentMode", this.instrumentMode);
+        this.instrumentSubMode = deduplicate(sharedContext, "instrumentSubMode", this.instrumentSubMode);
+        this.targetName = deduplicate(sharedContext, "targetName", this.targetName);
+        /* skipped projectedBaselines = unique */
 
         // Fix invalid optional fields:
         if ((getExpTau0() != null) && Double.isNaN(getExpTau0())) {
@@ -896,6 +918,29 @@ public class RawObservation
         }
 
         logger.debug("prepared: {}", this);
+    }
+    
+    private static String deduplicate(final java.util.Map sharedContext, final String column, final String value) {
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
+        java.util.Map<String, String> mapDistincts = getUniqueMap(sharedContext, column);
+        
+        final String prevValue = mapDistincts.get(value);
+        if (prevValue == null) {
+            mapDistincts.put(value, value);
+            return value;
+        }
+        return prevValue;
+    }
+    
+    public static java.util.Map<String, String> getUniqueMap(final java.util.Map sharedContext, final String column) {
+        java.util.Map<String, String> map = (java.util.Map<String, String>) sharedContext.get(column);
+        if (map == null) {
+            map = new java.util.HashMap<String, String>(32);
+            sharedContext.put(column, map);
+        }
+        return map;
     }
 
     private void validate(final org.slf4j.Logger logger) {

@@ -105,6 +105,14 @@ public final class RawObsManager extends BaseXmlManager {
                 computeTargetDistance(targetRef, rawObs);
             }
 
+            if (DUMP) {
+                // show distinct values:
+                for (String column : RawObservation.DEDUP_COLS) {
+                    Map<String, String> map = RawObservation.getUniqueMap(sharedContext, column);
+                    logger.info("[{}]: {}", column, map);
+                }
+            }
+
             // 2. Group observations as Observation Blocks (30mins):
             // 2.1: get only valid observations:
             final List<RawObservation> validObservations = new ArrayList<RawObservation>();
@@ -170,10 +178,12 @@ public final class RawObsManager extends BaseXmlManager {
 
                 if (DUMP) {
                     for (Observations g : obsGroups) {
-                        System.out.println("Group [" + g.getGroupId() + "] ---");
+                        logger.info("Group [{}] ---", g.getGroupId());
 
                         for (RawObservation o : g.getObservations()) {
-                            System.out.println("  " + o);
+                            if (o != null) {
+                                logger.info(o.toString());
+                            }
                         }
                     }
                 }
