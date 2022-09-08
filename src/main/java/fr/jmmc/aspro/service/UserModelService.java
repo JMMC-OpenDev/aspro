@@ -170,6 +170,8 @@ public final class UserModelService {
         // clear previously cached data:
         userModel.setModelDataList(null);
 
+        logger.info("loading user model: {}", userModel.getFile());
+        
         // throws FitsException or IOException or IllegalArgumentException if the image can not be read properly:
         // note: load only the first valid image HDU (image or cube):
         final FitsImageFile imgFitsFile = FitsImageUtils.load(userModel.getFile(), true);
@@ -237,7 +239,7 @@ public final class UserModelService {
         for (final UserModelData modelData : modelDataList) {
             prepareImageStep2(modelData);
 
-            logger.info("Prepared FitsImage: {}", modelData.getFitsImage());
+            logger.debug("Prepared FitsImage: {}", modelData.getFitsImage());
         }
 
         // update min/max range to be consistent accross the cube:
@@ -713,7 +715,7 @@ public final class UserModelService {
 
         final int lenData = endData - DATA_1D_POINT_SIZE;
 
-//    logger.info("from {} to {}", offset, len);
+        logger.debug("from {} to {}", from, end);
 
         /*
          * Performance:
@@ -893,17 +895,17 @@ public final class UserModelService {
             throw new IllegalArgumentException("Fits image [" + fitsImage.getFitsImageIdentifier() + "] has only negative data !");
         }
 
-        logger.info("Image size: {} x {}", nbRows, nbCols);
+        logger.debug("Image size: {} x {}", nbRows, nbCols);
 
         if (fitsImage.getDataMin() < 0.0) {
             final float threshold = 0.0f;
 
             final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, threshold, 0.0f);
-            logger.info("ImageLowerThresholdJob - threshold = {} (ignore negative values)", threshold);
+            logger.debug("ImageLowerThresholdJob - threshold = {} (ignore negative values)", threshold);
 
             thresholdJob.forkAndJoin();
 
-            logger.info("ImageLowerThresholdJob - updateCount: {}", thresholdJob.getUpdateCount());
+            logger.debug("ImageLowerThresholdJob - updateCount: {}", thresholdJob.getUpdateCount());
 
             // update boundaries excluding zero values:
             FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
@@ -924,7 +926,7 @@ public final class UserModelService {
 
         // TODO: keep initial total flux (before normalization) ?
         final double initialTotalFlux = fitsImage.getSum();
-        logger.info("Total flux: {}", initialTotalFlux);
+        logger.debug("Total flux: {}", initialTotalFlux);
 
         // 2 - Normalize data (total flux):
         if (!NumberUtils.equals(initialTotalFlux, 1.0, 1e-3)) {
@@ -944,7 +946,7 @@ public final class UserModelService {
 
         if (useFastMode) {
             final double error = Math.max(0.0, Math.min(fastError, 0.1)); // clamp error between [0% - 10%]
-            logger.info("Fast error: {} %", 100.0 * error);
+            logger.debug("Fast error: {} %", 100.0 * error);
 
             final int nData = fitsImage.getNData();
             final float[] data1D = sortData(fitsImage);
@@ -957,7 +959,7 @@ public final class UserModelService {
 
             if (thIdx != -1) {
                 final double thPixRatio = (100.0 * (nData - thIdx)) / nData;
-                logger.info("Ratio: {} % selected pixels", NumberUtils.trimTo3Digits(thPixRatio));
+                logger.debug("Ratio: {} % selected pixels", NumberUtils.trimTo3Digits(thPixRatio));
 
                 thresholdFlux = data1D[thIdx];
                 logger.debug("thresholdFlux: {}", thresholdFlux);
@@ -969,11 +971,11 @@ public final class UserModelService {
             if (thresholdFlux > 0.0f && fitsImage.getDataMin() < thresholdFlux) {
 
                 final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, thresholdFlux, 0.0f);
-                logger.info("ImageLowerThresholdJob - threshold: {}", thresholdFlux);
+                logger.debug("ImageLowerThresholdJob - threshold: {}", thresholdFlux);
 
                 thresholdJob.forkAndJoin();
 
-                logger.info("ImageLowerThresholdJob - updateCount: {}", thresholdJob.getUpdateCount());
+                logger.debug("ImageLowerThresholdJob - updateCount: {}", thresholdJob.getUpdateCount());
 
                 // update boundaries excluding zero values:
                 FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
@@ -985,7 +987,7 @@ public final class UserModelService {
         // 3 - Locate useful data values inside image:
         final ImageRegionThresholdJob regionJob = new ImageRegionThresholdJob(data, nbCols, nbRows, thresholdFlux);
 
-        logger.info("ImageRegionThresholdJob: thresholdFlux: {}", thresholdFlux);
+        logger.debug("ImageRegionThresholdJob: thresholdFlux: {}", thresholdFlux);
         regionJob.forkAndJoin();
 
         // 4 - Extract ROI:
@@ -997,8 +999,8 @@ public final class UserModelService {
         cols1 = regionJob.getColumnLowerIndex();
         cols2 = regionJob.getColumnUpperIndex();
 
-        logger.info("ImageRegionThresholdJob: row indexes: [{} - {}]", rows1, rows2);
-        logger.info("ImageRegionThresholdJob: col indexes: [{} - {}]", cols1, cols2);
+        logger.debug("ImageRegionThresholdJob: row indexes: [{} - {}]", rows1, rows2);
+        logger.debug("ImageRegionThresholdJob: col indexes: [{} - {}]", cols1, cols2);
 
         // end of step 1:
         modelData.setFitsImage(fitsImage);
@@ -1031,8 +1033,8 @@ public final class UserModelService {
             }
         }
 
-        logger.info("updateRoi: row indexes: [{} - {}]", rows1, rows2);
-        logger.info("updateRoi: col indexes: [{} - {}]", cols1, cols2);
+        logger.debug("updateRoi: row indexes: [{} - {}]", rows1, rows2);
+        logger.debug("updateRoi: col indexes: [{} - {}]", cols1, cols2);
 
         final UserModelData modelDataFirst = modelDataList.get(0);
         final int nbRows = modelDataFirst.getFitsImage().getNbRows();
@@ -1045,12 +1047,12 @@ public final class UserModelService {
         final float rowDistToCenter = Math.max(Math.abs(halfRows - rows1), Math.abs(halfRows - rows2));
         final float colDistToCenter = Math.max(Math.abs(halfCols - cols1), Math.abs(halfCols - cols2));
 
-        logger.info("updateRoi: rowDistToCenter: {}", rowDistToCenter);
-        logger.info("updateRoi: colDistToCenter: {}", colDistToCenter);
+        logger.debug("updateRoi: rowDistToCenter: {}", rowDistToCenter);
+        logger.debug("updateRoi: colDistToCenter: {}", colDistToCenter);
 
         // ensure minimum size to 2 pixels + proper rounding:
         final float distToCenter = Math.max(1f, Math.max(rowDistToCenter, colDistToCenter)) + 0.5f;
-        logger.info("updateRoi: distToCenter: {}", distToCenter);
+        logger.debug("updateRoi: distToCenter: {}", distToCenter);
 
         // range check ?
         rows1 = (int) Math.floor(halfRows - distToCenter);
@@ -1061,7 +1063,7 @@ public final class UserModelService {
             rows2++;
         }
 
-        logger.info("updateRoi: even row indexes: {} - {}", rows1, rows2);
+        logger.debug("updateRoi: even row indexes: {} - {}", rows1, rows2);
 
         // range check ?
         cols1 = (int) Math.floor(halfCols - distToCenter);
@@ -1072,10 +1074,13 @@ public final class UserModelService {
             cols2++;
         }
 
-        logger.info("updateRoi: even col indexes: {} - {}", cols1, cols2);
+        logger.debug("updateRoi: even col indexes: {} - {}", cols1, cols2);
+
+        final Rectangle rect = new Rectangle(rows1, cols1, rows2 - rows1, cols2 - cols1);
+        logger.info("updateRoi: {}", rect);
 
         for (final UserModelData modelData : modelDataList) {
-            modelData.setRoi(new Rectangle(rows1, cols1, rows2 - rows1, cols2 - cols1));
+            modelData.setRoi(rect);
         }
     }
 
@@ -1121,7 +1126,7 @@ public final class UserModelService {
             nbRows = fitsImage.getNbRows();
             nbCols = fitsImage.getNbCols();
 
-            logger.info("ROI size = {} x {}", nbRows, nbCols);
+            logger.debug("ROI size = {} x {}", nbRows, nbCols);
         }
 
         // 5 - Make sure the image is square i.e. padding (width = height = even number):
@@ -1142,7 +1147,7 @@ public final class UserModelService {
             nbRows = fitsImage.getNbRows();
             nbCols = fitsImage.getNbCols();
 
-            logger.info("Square size = {} x {}", nbRows, nbCols);
+            logger.debug("Square size = {} x {}", nbRows, nbCols);
         }
 
         // 6 - flip axes to have positive increments (left to right for the column axis and bottom to top for the row axis)
@@ -1154,7 +1159,7 @@ public final class UserModelService {
 
             flipJob.forkAndJoin();
 
-            logger.info("ImageFlipJob - flipY done");
+            logger.debug("ImageFlipJob - flipY done");
 
             fitsImage.setSignedIncRow(-incRow);
         }
@@ -1166,7 +1171,7 @@ public final class UserModelService {
 
             flipJob.forkAndJoin();
 
-            logger.info("ImageFlipJob - flipX done");
+            logger.debug("ImageFlipJob - flipX done");
 
             fitsImage.setSignedIncCol(-incCol);
         }
@@ -1266,7 +1271,7 @@ public final class UserModelService {
      */
     private static void prepareModelData(final FitsImage fitsImage, final UserModelData modelData, final float threshold) {
 
-        logger.info("prepareModelData: threshold: {}", threshold);
+        logger.debug("prepareModelData: threshold: {}", threshold);
 
         // note: square image (and even size):
         final int nbRows = fitsImage.getNbRows();
@@ -1276,11 +1281,11 @@ public final class UserModelService {
         final double dataMin = fitsImage.getDataMin();
         final double dataMax = fitsImage.getDataMax();
 
-        logger.info("prepareModelData: min: {} - max: {}", dataMin, dataMax);
+        logger.debug("prepareModelData: min: {} - max: {}", dataMin, dataMax);
 
         final int nPixels = nbRows * nbCols;
 
-        logger.info("prepareModelData: nData: {} / {}", nData, nPixels);
+        logger.debug("prepareModelData: nData: {} / {}", nData, nPixels);
 
         final double cosTheta;
         final double sinTheta;
@@ -1335,7 +1340,7 @@ public final class UserModelService {
             } // columns
         } // rows
 
-        logger.info("prepareModelData: used pixels = {} / {}", nUsedData / DATA_1D_POINT_SIZE, nPixels);
+        logger.info("prepareModelData: used pixels = {} / {}", (nUsedData / DATA_1D_POINT_SIZE), nPixels);
 
         // trim array size:
         if (nUsedData != data1D.length) {
@@ -1405,11 +1410,13 @@ public final class UserModelService {
         final boolean valid = (Double.isNaN(airyRadius) && Double.isNaN(modelData.getAiryRadius()))
                 || (airyRadius == modelData.getAiryRadius());
 
-        logger.debug("checkAiryRadius: lambda: {} - diameter: {}", lambda, diameter);
-        logger.info("checkAiryRadius[{}]: airy radius expected = {} - model = {}", valid,
-                FitsImage.getAngleAsString(airyRadius, df3),
-                FitsImage.getAngleAsString(modelData.getAiryRadius(), df3)
-        );
+        if (logger.isDebugEnabled()) {
+            logger.debug("checkAiryRadius: lambda: {} - diameter: {}", lambda, diameter);
+            logger.debug("checkAiryRadius[{}]: airy radius expected = {} - model = {}", valid,
+                    FitsImage.getAngleAsString(airyRadius, df3),
+                    FitsImage.getAngleAsString(modelData.getAiryRadius(), df3)
+            );
+        }
 
         return valid;
     }
@@ -1490,7 +1497,9 @@ public final class UserModelService {
 
             filterJob.forkAndJoin();
 
-            logger.info("apodize: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+            if (logger.isDebugEnabled()) {
+                logger.debug("apodize: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+            }
         }
         return airyRadius;
     }
