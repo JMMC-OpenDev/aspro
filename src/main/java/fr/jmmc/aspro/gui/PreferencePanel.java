@@ -267,6 +267,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 0.5;
         jPanelObservability.add(jPanelTimeRef, gridBagConstraints);
 
         jLabelCenterNight.setText("Center plot around night");
@@ -288,6 +290,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.4;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelObservability.add(jRadioButtonCenterNightYes, gridBagConstraints);
@@ -302,6 +305,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.4;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelObservability.add(jRadioButtonCenterNightNo, gridBagConstraints);
@@ -324,6 +328,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelObservability.add(jRadioButtonNightOnlyYes, gridBagConstraints);
 
@@ -337,6 +342,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelObservability.add(jRadioButtonNightOnlyNo, gridBagConstraints);
 
@@ -355,6 +361,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         jPanelObservability.add(jFieldMinElev, gridBagConstraints);
 
@@ -376,6 +383,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 4, 2);
         jPanelObservability.add(jComboBoxTwilight, gridBagConstraints);
@@ -404,6 +412,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 2);
         jPanelObservability.add(jComboBoxBestPopsAlgorithm, gridBagConstraints);
@@ -425,6 +434,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelObservability.add(jComboBoxBestPopsCriteriaSigma, gridBagConstraints);
@@ -446,6 +456,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 8;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelObservability.add(jComboBoxBestPopsCriteriaAverageWeight, gridBagConstraints);
@@ -460,7 +471,6 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.weightx = 0.4;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
         jPanelModelEditor.add(jLabelPositionStyle, gridBagConstraints);
 
@@ -472,7 +482,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelEditor.add(jRadioButtonXY, gridBagConstraints);
 
@@ -484,7 +495,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelEditor.add(jRadioButtonSepPosAngle, gridBagConstraints);
 
@@ -510,7 +522,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
         jPanelModelImage.add(jComboBoxLUT, gridBagConstraints);
@@ -532,6 +544,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
         jPanelModelImage.add(jComboBoxImageSize, gridBagConstraints);
@@ -553,6 +566,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
         jPanelModelImage.add(jComboBoxColorScale, gridBagConstraints);
@@ -562,7 +576,6 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelModelImage.add(jLabelImageNoise, gridBagConstraints);
 
@@ -576,7 +589,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
-        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jRadioButtonImageNoiseYes, gridBagConstraints);
 
@@ -590,7 +604,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
-        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jRadioButtonImageNoiseNo, gridBagConstraints);
 
@@ -611,6 +626,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
         jPanelModelImage.add(jComboBoxInterpolation, gridBagConstraints);
@@ -623,7 +639,6 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jLabelFastUserModel.setText("Fast mode (optimize image)");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelUserModel.add(jLabelFastUserModel, gridBagConstraints);
 
@@ -635,7 +650,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jRadioButtonFastUserModelYes, gridBagConstraints);
 
@@ -647,7 +663,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jRadioButtonFastUserModelNo, gridBagConstraints);
 
@@ -660,6 +677,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         jPanelUserModel.add(jComboBoxFastError, gridBagConstraints);
 
@@ -669,7 +687,6 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelUserModel.add(jLabelApodization, gridBagConstraints);
 
@@ -679,7 +696,6 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelUserModel.add(jLabelFastError, gridBagConstraints);
 
@@ -693,6 +709,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         jPanelUserModel.add(jRadioButtonApodizationYes, gridBagConstraints);
 
         buttonGroupApodization.add(jRadioButtonApodizationNo);
@@ -705,6 +722,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         jPanelUserModel.add(jRadioButtonApodizationNo, gridBagConstraints);
 
         jPanelLayout.add(jPanelUserModel);
@@ -714,7 +732,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
 
         jLabelSuperSampling.setText("<html>Supersampling model<br>in spectral channels</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelOIFits.add(jLabelSuperSampling, gridBagConstraints);
 
@@ -725,6 +743,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         jPanelOIFits.add(jComboBoxSuperSampling, gridBagConstraints);
 
@@ -732,8 +751,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelOIFits.add(jLabelAddNoise, gridBagConstraints);
 
@@ -747,7 +765,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelOIFits.add(jRadioButtonAddNoiseYes, gridBagConstraints);
 
@@ -761,7 +780,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelOIFits.add(jRadioButtonAddNoiseNo, gridBagConstraints);
 
@@ -772,6 +792,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         jPanelOIFits.add(jFieldSNRTh, gridBagConstraints);
 
@@ -780,7 +801,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelOIFits.add(jLabelSNRTh, gridBagConstraints);
 
@@ -793,7 +814,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelGui.add(jLabelGuiRestrictions, gridBagConstraints);
@@ -808,7 +829,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelGui.add(jRadioButtonBypassGuiRestrictionsYes, gridBagConstraints);
 
@@ -822,7 +844,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelGui.add(jRadioButtonBypassGuiRestrictionsNo, gridBagConstraints);
 
