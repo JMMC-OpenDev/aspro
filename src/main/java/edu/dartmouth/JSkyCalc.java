@@ -135,7 +135,7 @@ public final class JSkyCalc {
      * @param cal calendar date
      */
     public static void showJSkyCalc(final Site site, final String[] name, final String[] ra, final String[] dec,
-            final String selected, final XMLGregorianCalendar cal) {
+                                    final String selected, final XMLGregorianCalendar cal) {
 
         if (jSkyCalcWin == null) {
             ALLOW_QUIT = false;
@@ -233,7 +233,7 @@ class JSkyCalcWindow {
      } catch catch (Exception e) { System.out.println(e); }
      */
 
-    /* I also tried to add a MouseListener to this, but it was ignored because the
+ /* I also tried to add a MouseListener to this, but it was ignored because the
      SkyDisplay subclass pre-empts it.  Mouse events are always dispatched to the
      "deepest" component in the hierarchy.  */
     WhenWhere w;
@@ -375,12 +375,10 @@ class JSkyCalcWindow {
         };
 
         /* Put up site panel and grab the first site ... */
-
         siteframe = new SiteWindow();
 
 //      String [] initialsite = {"Kitt Peak [MDM Obs.]",  "7.44111",  "31.9533",
 //           "7.",  "0",  "Mountain",  "M",  "1925",  "700."};
-
         s = siteframe.firstSite();
         i = new InstantInTime(s.stdz, s.use_dst);
         w = new WhenWhere(i, s);
@@ -396,7 +394,7 @@ class JSkyCalcWindow {
 
         /* make up the separate subpanels */
 
-        /* ****************** DO NOT REMOVE THIS BANNER *********************************
+ /* ****************** DO NOT REMOVE THIS BANNER *********************************
          ******************************************************************************
 
          I am distributing this COPYRIGHTED code freely with the condition that this
@@ -412,8 +410,7 @@ class JSkyCalcWindow {
         /* ******************************************************************************
          ****************************************************************************** */
 
-        /* Panel for text I/O fields and their labels ... */
-
+ /* Panel for text I/O fields and their labels ... */
         JPanel textpanel = new JPanel();
         textpanel.setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
@@ -733,9 +730,7 @@ class JSkyCalcWindow {
         constraints.gridy = iy;
         textpanel.add(elevhorizfield, constraints);
 
-
         // Right-hand column of output ...
-
         iy = 0;
         constraints.gridx = 2;
         constraints.gridy = iy;
@@ -889,30 +884,25 @@ class JSkyCalcWindow {
 //      siteframe.setVisible(siteframevisible);
 
         /* A panel for planets, to be hidden */
-
         PlWin = new PlanetWindow();
         PlWin.setVisible(planetframevisible);
 
         /* A panel for the nightly almanac */
-
         Nightly = new NightlyAlmanac(o.w);
         NgWin = new NightlyWindow();
         NgWin.setVisible(nightlyframevisible);
 
         /* A panel for hourly airmass */
-
         HrWin = new HourlyWindow();
         HrWin.Update();
         HrWin.setVisible(hourlyframevisible);
 
         /* A panel for object lists */
-
         RASelectors = new String[1];
         RASelectors[0] = " "; // this needs to be initialized
         ObjSelWin = new AstrObjSelector(true);  // argument is "is_single"
 
         /* Sky display window .... */
-
         final int skywinxpix = 800;
         final int skywinypix = 700;
         SkyDisp = new SkyDisplay(skywinxpix, skywinypix);
@@ -922,7 +912,6 @@ class JSkyCalcWindow {
         SkyDisp.setVisible(skydisplayvisible);
 
         /* A panel for alternate coords (e.g. current RA and DEC, galactic etc.) */
-
         AltWin = new AltCoordWin();
         AltWin.setVisible(altcoowinvisible);
 
@@ -942,7 +931,6 @@ class JSkyCalcWindow {
         HelpWin.setVisible(helpwindowvisible);
 
         // control buttons go in a separate panel at the bottom ...
-
         JPanel controlbuttonpanel = new JPanel();
         controlbuttonpanel.setLayout(new FlowLayout());  // it's the default anyway
         Dimension controlbuttonpansize = new Dimension(540, 170);  // ugh
@@ -1047,7 +1035,6 @@ class JSkyCalcWindow {
 //         }
 //      });
 //      controlbuttonpan.add(UTLocalbutton);
-
         if (JSkyCalc.ALLOW_SITE_WINDOW) {
             JButton sitebutton = new JButton("Site\n Menu");
             sitebutton.addActionListener(new ActionListener() {
@@ -1200,7 +1187,6 @@ class JSkyCalcWindow {
         controlbuttonpanel.setBackground(panelcolor);
 
         /* action listeners for the text fields ... */
-
         objnamefield.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -1259,7 +1245,6 @@ class JSkyCalcWindow {
 
         // Actions on observatory parameters lead to a setToJD()
         // to parallel behavior of the site menu.
-
         obsnamefield.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 setToJD();
@@ -1327,7 +1312,6 @@ class JSkyCalcWindow {
         autoStep = new AutoStep("s");
 
         // hints = new littleHints();
-
         // LBO: use Swing pattern to size the window:
         frame.pack();
 
@@ -1355,7 +1339,6 @@ class JSkyCalcWindow {
         }
 
         // and repeat them back ...
-
         RAfield.setText(o.c.alpha.roundedRAString(2, " "));
         decfield.setText(o.c.delta.roundedDecString(1, " "));
         equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", o.c.equinox));
@@ -1373,7 +1356,6 @@ class JSkyCalcWindow {
 //      if(hourlyframevisible) {   // an expensive operation
 //         HrWin.Update();
 //      }
-
         if (nightlyframevisible) {
             if (!hourlyframevisible) {
                 Nightly.Update(o.w);
@@ -1531,7 +1513,7 @@ class JSkyCalcWindow {
     }
 
     Color MoonWarningColor(double altmoon,
-            double altitude, double altsun, double moonobj, double moonlight) {
+                           double altitude, double altsun, double moonobj, double moonlight) {
         if (altmoon < 0. || altitude < 0.) {
             return outputcolor;
         }
@@ -1951,7 +1933,7 @@ class JSkyCalcWindow {
             super("Seasonal Observability");
 
             headings = new String[]{"Moon", "Evening Date", "HA.eve", "airm.eve", "HA.ctr", "airm.ctr",
-                "HA.morn", "airm.morn", "hrs<3", "hrs<2", "hrs<1.5"};
+                                    "HA.morn", "airm.morn", "hrs<3", "hrs<2", "hrs<1.5"};
 
             JPanel container = new JPanel();
             // LBO: use BoxLayout instead of FlowLayout:
@@ -1979,7 +1961,6 @@ class JSkyCalcWindow {
             seasontable = new JTable(season.tabledata, headings);
 
             // complicated rigamarole to set column widths
-
             seasontable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             TableColumn col = seasontable.getColumnModel().getColumn(0);
             col.setPreferredWidth(40);  // pixels
@@ -2184,11 +2165,9 @@ class JSkyCalcWindow {
 
             // compute nightly almanac ; start with first whole hour before
             // sunset, end with first whole hour after sunrise.
-
             // Had a horrible time debugging this because all the WhenWhere
             // instances in Nightly were pointing at the same When!!
             // They do all point to the same Where, which is actually OK.
-
             Nightly.Update(otmp.w);
 
             jdtemp = Nightly.sunset.when.jd;
@@ -2205,7 +2184,6 @@ class JSkyCalcWindow {
              otmp.w.changeWhen((double) jdint + (double) endhr* Const.HOUR_IN_DAY);
              otmp.w.when.localDate.quickprint();
              System.out.printf("\n"); */
-
             i = starthr;
             j = 0;   // start with first row of table
             while (i <= endhr) {
@@ -2287,7 +2265,7 @@ class JSkyCalcWindow {
         JTextField[] phenfield;
         JLabel[] phenlabel;
         String[] labeltext = {"Sunset", "Twilight Ends", "LST Eve. Twi.", "Night Center", "Twilight Begins",
-            "LST Morn. Twi.", "Sunrise", "Moonrise", "Moonset"};
+                              "LST Morn. Twi.", "Sunrise", "Moonrise", "Moonset"};
 
         NightlyWindow() {
             super("Nightly Almanac");
@@ -2702,7 +2680,6 @@ class JSkyCalcWindow {
                 decfield.setText(objcel.delta.roundedDecString(1, " "));
                 equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", objcel.equinox));
 
-
             }
         }
     }
@@ -2853,7 +2830,6 @@ class JSkyCalcWindow {
 
             // read the site info character-by-character to preserve quoted values.
             // there's undoubtedly a better way, but this works well enough.
-
             try {
                 while ((st = br.readLine()) != null) {
                     // System.out.printf("read: %s\n",st);
@@ -3131,7 +3107,6 @@ class JSkyCalcWindow {
             } else {
                 planetproximfield.setBackground(Color.RED);
 
-
             }
         }
     }
@@ -3155,6 +3130,9 @@ class JSkyCalcWindow {
 
             try {
                 pane = new JEditorPane();
+                // Use default fonts (hi-dpi) if no font defined in html:
+                pane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+
                 pane.setEditorKit(new HTMLEditorKit());
                 // pane.read(fr,"HTMLDocument");
                 pane.read(is, "HTMLDocument");
@@ -3211,7 +3189,7 @@ class JSkyCalcWindow {
 
     class SkyDisplay extends JFrame
             implements MouseMotionListener,
-            KeyListener, MouseListener {
+                       KeyListener, MouseListener {
 
         double xpix, ypix, aspect;  // number of pixels in x and y directions, double
         double halfwidthy;          // sets the scale factor.
@@ -3343,7 +3321,6 @@ class JSkyCalcWindow {
              System.out.printf("halfwidthx %f halfwidthy %f\n",halfwidthx, halfwidthy);
              System.out.printf("pixperunit %f\n",pixperunit);
              */
-
             halfwidthxfull = halfwidthx;
             halfwidthyfull = halfwidthy;
             pixperunitfull = pixperunit;
@@ -3568,7 +3545,6 @@ class JSkyCalcWindow {
 
             // there's some attention given here to stacking these in the best order, since the
             // last thing painted scribbles over previous things.
-
             if (o.w.where.lat.value != currentlat) {
                 currentlat = o.w.where.lat.value;
                 makeHAgrid(currentlat);
@@ -3716,8 +3692,8 @@ class JSkyCalcWindow {
 
         double[] xytopix(double x, double y) {
             return new double[]{
-                        0.5 * xpix * (1. + (x - xmid) / halfwidthx),
-                        0.5 * ypix * (1. - (y - ymid) / halfwidthy)};
+                0.5 * xpix * (1. + (x - xmid) / halfwidthx),
+                0.5 * ypix * (1. - (y - ymid) / halfwidthy)};
         }
 
         double[] pixtoxy(int xpixel, int ypixel) {
@@ -3981,8 +3957,7 @@ class JSkyCalcWindow {
         double[] SkyProject(double hain, double decin, double coslat, double sinlat) {
 
             // This will be called many times so code it for speed!
-
-            double ha = hain* Const.RADIAN_IN_HRS;
+            double ha = hain * Const.RADIAN_IN_HRS;
             double dec = decin * Const.RADIAN_IN_DEG;
 
             double cosdec = FastMath.cos(dec);
@@ -4061,7 +4036,6 @@ class JSkyCalcWindow {
             }
 
             // rotate to appropriate position angle
-
             double pa = o.w.cusppa + Const.PI_OVER_2;   // cusppa already in rad.
             double[][] turnmoon = {{FastMath.cos(pa), FastMath.sin(pa)}, {-1. * FastMath.sin(pa), FastMath.cos(pa)}};
             for (j = 0; j < nseg; j++) {
@@ -4090,9 +4064,9 @@ class JSkyCalcWindow {
             double deccent = o.w.moon.topopos.delta.value;
 
             // double moonsize = 3.;
-
             for (i = 0; i < nseg; i++) {
-                ralimb[i] = o.w.sidereal - // Hereafter actually HA, not RA
+                ralimb[i] = o.w.sidereal
+                        - // Hereafter actually HA, not RA
                         (racent + limbxypr[0][i] * moonsize / rafac);
                 declimb[i] = deccent + limbxypr[1][i] * moonsize;
                 raterm[i] = o.w.sidereal
@@ -4125,9 +4099,7 @@ class JSkyCalcWindow {
 //             termpath.lineTo((float) xypix[0], (float) xypix[1]);
 //
 //          }
-
             // try rendering with quadratic curves
-
             double[] xy2 = {0., 0.};
             double[] xypix2 = {0., 0.};
 
@@ -4630,7 +4602,6 @@ class JSkyCalcWindow {
             }
 
             // Draw a vertical line at current time ...
-
             // System.out.printf("o.w.when.jd = %f, jdstart = %f, ",o.w.when.jd,jdstart);
             double hrs_since = xlo + (o.w.when.jd - jdstart) * 24.;
             // System.out.printf("hrs_since = %f\n",hrs_since);
@@ -4643,7 +4614,6 @@ class JSkyCalcWindow {
                 // g2.setStroke(defStroke);
                 g2.setPaint(Color.WHITE);
             }
-
 
             double yticklen = (xhi - xlo) / 120.;
             double yminortick;
@@ -4674,7 +4644,6 @@ class JSkyCalcWindow {
 
             // draw a separate vertical axis for moon altitude, off to the side.
             // scale is not the same as for the airmass axes.
-
             g2.setPaint(Color.YELLOW);
             span = xhi - xlo;
             double xmoonaxis = xhi + span * 0.04;
@@ -4726,8 +4695,8 @@ class JSkyCalcWindow {
 
         double[] xytopix(double x, double y) {
             return new double[]{
-                        xpix * (x - xlobord) / (xhibord - xlobord),
-                        ypix * (1. - (y - ylobord) / (yhibord - ylobord))};
+                xpix * (x - xlobord) / (xhibord - xlobord),
+                ypix * (1. - (y - ylobord) / (yhibord - ylobord))};
         }
 
 //       double [] pixtoxy(double pixx, double pixy) {
@@ -4791,7 +4760,6 @@ class JSkyCalcWindow {
                 jd += dt;
             }
 
-
             if (firstptfound) {  // label tracks near their ends ....
                 if (jd > jdend) {
                     puttext(g2, xpl - 0.5, oairm.airmass, objectname,
@@ -4806,7 +4774,6 @@ class JSkyCalcWindow {
             }
 
             // objects can come up a second time ...
-
             firstptfound = false;
             while (!firstptfound && jd < jdend) {
                 oairm.w.changeWhen(jd);
@@ -4872,7 +4839,6 @@ class JSkyCalcWindow {
             }
 
             // rotate to appropriate position angle
-
 //          double pa = w.cusppa + (Const.PI)/2. +
             //                    omoon.parallactic * Const.RADIAN_IN_DEG;
 //          double pa = w.cusppa -
@@ -4883,7 +4849,7 @@ class JSkyCalcWindow {
                 pa += Const.PI;  // flip in S.
             }
             double[][] turnmoon = {{FastMath.cos(pa), FastMath.sin(pa)},
-                {-1. * FastMath.sin(pa), FastMath.cos(pa)}};
+                                   {-1. * FastMath.sin(pa), FastMath.cos(pa)}};
             for (j = 0; j < nseg; j++) {
                 for (i = 0; i < 2; i++) {
                     limbxypr[i][j] = 0.;
