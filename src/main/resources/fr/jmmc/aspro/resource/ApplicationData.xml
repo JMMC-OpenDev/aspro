@@ -21,7 +21,7 @@
     <program name="Aspro2" version="22.09"/>
     <compilation date="09/09/2022" compiler="JDK 1.8.0"/>
 
-    <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
+    <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
     <jnlp>http://www.jmmc.fr/apps/public/Aspro2/Aspro2.jnlp</jnlp>
     <sampdescription>Prepare your interferometric observations with the VLTI or other interferometers</sampdescription>
@@ -69,6 +69,18 @@
                  description="Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
                  link="http://www.dartmouth.edu/~physics/labs/skycalc/flyer.html"
                  license="redistribution allowed including this acknowledgment 'Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College'" />
+
+        <!-- OIFitsExplorer dependencies -->
+
+        <package name="ColorCET - Perceptually Uniform Colour Maps"
+                 description="Peter Kovesi. Good Colour Maps: How to Design Them. arXiv:1509.03700 [cs.GR] 2015 (https://arxiv.org/abs/1509.03700)"
+                 link="https://colorcet.com/index.html"
+                 license="Creative Commons BY License (https://creativecommons.org/licenses/by/4.0/legalcode)" />
+
+        <package name="SCM 7 - Scientific colour maps 7.0.1"
+                 description="Crameri, Fabio. (2021). Scientific colour maps (7.0.1). Zenodo. https://doi.org/10.5281/zenodo.5501399"
+                 link="https://www.fabiocrameri.ch/colourmaps/"
+                 license="MIT License (https://opensource.org/licenses/MITCopyright)" />
 
         <!-- OITools dependencies -->
 
