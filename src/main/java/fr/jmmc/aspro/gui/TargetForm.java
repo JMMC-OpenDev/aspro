@@ -1067,7 +1067,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         flowLayout1.setAlignOnBaseline(true);
         jPanelTargetActions.setLayout(flowLayout1);
 
-        refreshButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/jmcs/resource/image/refresh.png"))); // NOI18N
+        refreshButton.setIcon(fr.jmmc.jmcs.gui.util.ResourceImage.REFRESH_ICON.icon());
         refreshButton.setToolTipText("Update Simbad information");
         refreshButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
         refreshButton.addActionListener(new java.awt.event.ActionListener() {

@@ -724,7 +724,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 default:
             }
         } else {
-            // PoP up to indicate OBX export is deprecated:
+            // pop-up to indicate OBX export is deprecated:
             DismissableMessagePane.show("Please consider using the a2p2 software instead"
                     + "\nas this export feature is deprecated and will be removed soon (Fall 2019)\n\nSee https://github.com/JMMC-OpenDev/a2p2",
                     Preferences.getInstance(), "DEPRECATED_OBX_WARNING");

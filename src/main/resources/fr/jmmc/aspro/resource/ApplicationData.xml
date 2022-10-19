@@ -123,7 +123,7 @@
 
         <package name="JTransforms"
                  description="JTransforms is the first, open source, multithreaded FFT library written in pure Java. Made by Dr Piotr Wendykier, Wolfram Research, Inc."
-                 link="http://sourceforge.net/projects/jtransforms/"
+                 link="https://github.com/wendykierp/JTransforms"
                  license="MPL/LGPL/GPL" />
         <!-- Mozilla Public License: http://www.mozilla.org/MPL/ -->
 

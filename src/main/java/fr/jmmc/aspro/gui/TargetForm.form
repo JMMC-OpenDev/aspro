@@ -347,8 +347,8 @@
               <SubComponents>
                 <Component class="javax.swing.JButton" name="refreshButton">
                   <Properties>
-                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/fr/jmmc/jmcs/resource/image/refresh.png"/>
+                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="fr.jmmc.jmcs.gui.util.ResourceImage.REFRESH_ICON.icon()" type="code"/>
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" value="Update Simbad information"/>
                     <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
