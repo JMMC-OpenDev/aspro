@@ -32,9 +32,8 @@
     </xsl:variable>
     <xsl:variable name="VOTABLE" select="exslt:node-set($votableWithoutNS)/VOTABLE"/>
     <xsl:variable name="TABLES" select="$VOTABLE/RESOURCE/TABLE"/>
-
-
-
+    <!-- optional table  for color mapping -->
+    <xsl:variable name="GROUP_COLOR_TABLE" select="$TABLES[FIELD/@name='GROUP_NAME' and FIELD/@name='GROUP_COLOR']"/>    
 
     <xsl:template match="/">
         <xsl:apply-templates select="$VOTABLE/RESOURCE" />
@@ -369,7 +368,17 @@
             </xsl:call-template>
         </xsl:variable>
 
-
+        <!-- from optional table -->
+        <xsl:variable name="GROUP_NAME_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="name">GROUP_NAME</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="GROUP_COLOR_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="name">GROUP_COLOR</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
 
 
         <!-- TODO: Handle also STC meta data as COOSYS is deprecated in VOTABLE 1.2 -->
@@ -801,6 +810,19 @@
                                             <xsl:with-param name="name" select="$GROUP_REF" />
                                         </xsl:call-template>
                                     </xsl:variable>
+                                    <xsl:variable name="GROUP_COLOR">                                        
+                                        <xsl:choose>
+                                            <xsl:when test="$GROUP_COLOR_TABLE//TR[TD[position()=$GROUP_NAME_index]=$GROUP_REF]/TD[position()=$GROUP_COLOR_index]">
+                                                <xsl:value-of select="$GROUP_COLOR_TABLE//TR[TD[position()=$GROUP_NAME_index]=$GROUP_REF]/TD[position()=$GROUP_COLOR_index]"/>
+                                            </xsl:when>
+                                            <xsl:otherwise>
+                                                <xsl:call-template name="getColor">
+                                                <xsl:with-param name="idx" select="$GROUP_POS" />
+                                                <xsl:with-param name="groupName" select="$GROUP_REF"/>
+                                                </xsl:call-template>
+                                            </xsl:otherwise>
+                                        </xsl:choose>                                                                                                                                                                                                                                                        
+                                     </xsl:variable>
 
                                     <group id="{$GROUP_ID}">
                                         <name>
@@ -809,13 +831,11 @@
                                         <!-- TODO use other values than USER for futur behaviour mapping -->
                                         <category>[USER]</category>
                                         <color>
-                                            <xsl:call-template name="getColor">
-                                                <xsl:with-param name="idx" select="$GROUP_POS" />
-                                            </xsl:call-template>
+                                            <xsl:value-of select="$GROUP_COLOR"/>
                                         </color>
                                     </group>
                                     <xsl:call-template name="log">
-                                        <xsl:with-param name="msg">Building targetUserInfos... group def of <xsl:value-of select="$GROUP_REF"/></xsl:with-param>
+                                        <xsl:with-param name="msg">Building targetUserInfos... group def of <xsl:value-of select="$GROUP_REF"/> : color = <xsl:value-of select="$GROUP_COLOR"/></xsl:with-param>
                                     </xsl:call-template>
                                 </xsl:for-each>
 
@@ -1273,7 +1293,7 @@
                 <xsl:when test="$unit">
                     <xsl:value-of select="generate-id($TABLES/FIELD[contains(@unit, $unit) and (contains(@ucd, $ucd11) or contains(@ucd, $ucd10))])" />
                 </xsl:when>
-                <xsl:when test="$name">
+                <xsl:when test="$name and ($ucd10 or $ucd11)">
                     <xsl:value-of select="generate-id($TABLES/FIELD[@name = $name and (@ucd = $ucd11 or @ucd = $ucd10)])" />
                 </xsl:when>
                 <xsl:otherwise>
@@ -1379,9 +1399,13 @@
         </tables>
     </xsl:variable>
 
+    <!-- try to get a color from optional userTable or return a color from our default color palette -->
     <xsl:template name="getColor">
-        <xsl:param name="idx" select="''" />
         <xsl:param name="table" select="'w3-colors-2021'" />
+        <xsl:param name="idx" select="''" />        
+        <xsl:param name="groupTable"/>
+        <xsl:param name="groupName"/>
+        
         <xsl:value-of select="exslt:node-set($colors)//colors[@id=$table]/color[@id = $idx mod count(../color) ]/@hex" />
     </xsl:template>
 
