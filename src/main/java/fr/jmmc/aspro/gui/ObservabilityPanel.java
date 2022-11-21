@@ -1466,10 +1466,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * @param orphanCalibrators set of orphan calibrators
      * @param targetUserInfos target user informations
      * @param targetObservations target observations
+     * @param rawObsFilterInsNames basic raw obs filter (names)
      * @param chartData chart data
      * @param min lower date of the plot
      * @param max upper date of the plot
      * @param doBaseLineLimits flag to plot baseline limits
+     * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
      */
     @SuppressWarnings("unchecked")
     private void updateChart(final List<Target> displayTargets,
@@ -1698,28 +1700,26 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 // configuration 'CONF + PoPs':
                                 legendLabel = chartData.getConfigurationLabels().get(c);
                             } else {
-                                if ((colorIndex == StarObservabilityData.TYPE_STAR) && isCalibrator) {
-                                    // use different color for calibrators :
-                                    colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
+                                if (colorByGroup && (group != null)) {
+                                    // Color by first group:
+                                    legendLabel = group.getName();
+                                    paint = group.getDecodedColor();
+                                } else {
+                                    if ((colorIndex == StarObservabilityData.TYPE_STAR) && isCalibrator) {
+                                        // use different color for calibrators :
+                                        colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
 
-                                    // display differently orphan calibrators:
-                                    if (orphanCalibrators.contains(target)) {
-                                        legendLabel = StarObservabilityData.LABEL_CALIBRATOR_ORPHAN;
-                                        paint = Color.ORANGE;
+                                        // display differently orphan calibrators:
+                                        if (orphanCalibrators.contains(target)) {
+                                            legendLabel = StarObservabilityData.LABEL_CALIBRATOR_ORPHAN;
+                                            paint = Color.ORANGE;
+                                        }
                                     }
                                 }
-
-                                // Not orphan calibrator case:
                                 if (paint == null) {
-                                    if (colorByGroup && (group != null)) {
-                                        // Color by first group:
-                                        legendLabel = group.getName();
-                                        paint = group.getDecodedColor();
-                                    } else {
-                                        // Main case: use original color index mapping:
-                                        // note : uses so.getInfo() to get baseline ...
-                                        legendLabel = so.getLegendLabel(colorIndex);
-                                    }
+                                    // Main case: use original color index mapping:
+                                    // note : uses so.getInfo() to get baseline ...
+                                    legendLabel = so.getLegendLabel(colorIndex);
                                 }
                             }
                         } else {
