@@ -373,7 +373,7 @@
                 <xsl:with-param name="name">dataproduct_category</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
-        
+
         <!-- from optional table -->
         <xsl:variable name="GROUP_NAME_index">
             <xsl:call-template name="getColumnIndex">
@@ -385,8 +385,8 @@
                 <xsl:with-param name="name">GROUP_COLOR</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
-        
-        
+
+
 
         <!-- TODO: Handle also STC meta data as COOSYS is deprecated in VOTABLE 1.2 -->
 
@@ -817,18 +817,17 @@
                                             <xsl:with-param name="name" select="$GROUP_REF" />
                                         </xsl:call-template>
                                     </xsl:variable>
-                                    <xsl:variable name="GROUP_COLOR">                                        
+                                    <xsl:variable name="GROUP_COLOR">
                                         <xsl:choose>
                                             <xsl:when test="$GROUP_COLOR_TABLE//TR[TD[position()=$GROUP_NAME_index]=$GROUP_REF]/TD[position()=$GROUP_COLOR_index]">
                                                 <xsl:value-of select="$GROUP_COLOR_TABLE//TR[TD[position()=$GROUP_NAME_index]=$GROUP_REF]/TD[position()=$GROUP_COLOR_index]"/>
                                             </xsl:when>
                                             <xsl:otherwise>
                                                 <xsl:call-template name="getColor">
-                                                <xsl:with-param name="idx" select="$GROUP_POS" />
-                                                <xsl:with-param name="groupName" select="$GROUP_REF"/>
+                                                    <xsl:with-param name="idx" select="$GROUP_POS" />
                                                 </xsl:call-template>
                                             </xsl:otherwise>
-                                        </xsl:choose>                                                                                                                                                                                                                                                        
+                                        </xsl:choose>
                                      </xsl:variable>
 
                                     <group id="{$GROUP_ID}">
@@ -931,31 +930,31 @@
                                     </xsl:if>
                                     <!-- </xsl:if> -->
                                 </xsl:for-each>
-                                
-                                
+
+
                                 <!-- Handle orphan calibrators -->
                                 <xsl:if test="$DATAPRODUCT_CATEGORY_index > 0">
                                     <xsl:for-each select="./TABLE/DATA/TABLEDATA/TR">
                                         <xsl:variable name="NAME" select="./TD[$NAME_index != '' and position()=$NAME_index]/text()"/>
                                         <xsl:variable name="DATAPRODUCT_CATEGORY" select="./TD[position()=$DATAPRODUCT_CATEGORY_index]/text()"/>
-                                        <xsl:if test="$NAME != '' and $DATAPRODUCT_CATEGORY='CALIB'">                        
+                                        <xsl:if test="$NAME != '' and $DATAPRODUCT_CATEGORY='CALIB'">
                                             <!-- DO UNIQUE -->
                                             <xsl:if test="not(./preceding-sibling::TR/TD[position()=$NAME_index]=$NAME)">
                                                 <xsl:variable name="TARGET_ID">
                                                     <xsl:call-template name="getTargetId">
                                                         <xsl:with-param name="name" select="$NAME" />
                                                     </xsl:call-template>
-                                                </xsl:variable>                        
+                                                </xsl:variable>
                                                 <xsl:call-template name="log">
                                                     <xsl:with-param name="msg">(ORPHAN) CAL_NAME: <xsl:value-of select="$TARGET_ID"/></xsl:with-param>
-                                                </xsl:call-template>                                                
+                                                </xsl:call-template>
                                                 <xsl:value-of select="$TARGET_ID"/>
                                                 <xsl:value-of select="' '"/>
                                             </xsl:if>
                                         </xsl:if>
                                     </xsl:for-each>
                                 </xsl:if>
-                                                                                                
+
                                 <xsl:call-template name="log">
                                     <xsl:with-param name="msg">Building targetUserInfos... calibrators done</xsl:with-param>
                                 </xsl:call-template>
@@ -1034,7 +1033,7 @@
                         <!--
                               <xsl:message>SCI_TARGET_NAME_index: <xsl:value-of select="$SCI_TARGET_NAME_index"/></xsl:message>
                               <xsl:message>CAL_TARGET_NAME_index: <xsl:value-of select="$CAL_TARGET_NAME_index"/></xsl:message>
-                        -->                                                
+                        -->
                         <xsl:variable name="CAL_TABLE" select="./TABLE[1]"/>
 
                         <!-- generate the list of target (id only) from all science and calibrator targets -->
@@ -1106,7 +1105,7 @@
                                         <xsl:value-of select="$CAL_ID"/>
                                         <xsl:value-of select="' '"/>
                                     </xsl:if>
-                                </xsl:for-each>                                
+                                </xsl:for-each>
                             </calibrators>
 
                             <!-- list of calibrators per science target -->
@@ -1433,10 +1432,7 @@
     <!-- try to get a color from optional userTable or return a color from our default color palette -->
     <xsl:template name="getColor">
         <xsl:param name="table" select="'w3-colors-2021'" />
-        <xsl:param name="idx" select="''" />        
-        <xsl:param name="groupTable"/>
-        <xsl:param name="groupName"/>
-        
+        <xsl:param name="idx" select="''" />
         <xsl:value-of select="exslt:node-set($colors)//colors[@id=$table]/color[@id = $idx mod count(../color) ]/@hex" />
     </xsl:template>
 
