@@ -33,7 +33,7 @@
     <xsl:variable name="VOTABLE" select="exslt:node-set($votableWithoutNS)/VOTABLE"/>
     <xsl:variable name="TABLES" select="$VOTABLE/RESOURCE/TABLE"/>
     <!-- optional table  for color mapping -->
-    <xsl:variable name="GROUP_COLOR_TABLE" select="$TABLES[FIELD/@name='GROUP_NAME' and FIELD/@name='GROUP_COLOR']"/>    
+    <xsl:variable name="GROUP_COLOR_TABLE" select="$TABLES[FIELD/@name='GROUP_NAME' and FIELD/@name='GROUP_COLOR']"/>
 
     <xsl:template match="/">
         <xsl:apply-templates select="$VOTABLE/RESOURCE" />
@@ -368,6 +368,12 @@
             </xsl:call-template>
         </xsl:variable>
 
+        <xsl:variable name="DATAPRODUCT_CATEGORY_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="name">dataproduct_category</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        
         <!-- from optional table -->
         <xsl:variable name="GROUP_NAME_index">
             <xsl:call-template name="getColumnIndex">
@@ -379,7 +385,8 @@
                 <xsl:with-param name="name">GROUP_COLOR</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
-
+        
+        
 
         <!-- TODO: Handle also STC meta data as COOSYS is deprecated in VOTABLE 1.2 -->
 
@@ -924,7 +931,31 @@
                                     </xsl:if>
                                     <!-- </xsl:if> -->
                                 </xsl:for-each>
-
+                                
+                                
+                                <!-- Handle orphan calibrators -->
+                                <xsl:if test="$DATAPRODUCT_CATEGORY_index > 0">
+                                    <xsl:for-each select="./TABLE/DATA/TABLEDATA/TR">
+                                        <xsl:variable name="NAME" select="./TD[$NAME_index != '' and position()=$NAME_index]/text()"/>
+                                        <xsl:variable name="DATAPRODUCT_CATEGORY" select="./TD[position()=$DATAPRODUCT_CATEGORY_index]/text()"/>
+                                        <xsl:if test="$NAME != '' and $DATAPRODUCT_CATEGORY='CALIB'">                        
+                                            <!-- DO UNIQUE -->
+                                            <xsl:if test="not(./preceding-sibling::TR/TD[position()=$NAME_index]=$NAME)">
+                                                <xsl:variable name="TARGET_ID">
+                                                    <xsl:call-template name="getTargetId">
+                                                        <xsl:with-param name="name" select="$NAME" />
+                                                    </xsl:call-template>
+                                                </xsl:variable>                        
+                                                <xsl:call-template name="log">
+                                                    <xsl:with-param name="msg">(ORPHAN) CAL_NAME: <xsl:value-of select="$TARGET_ID"/></xsl:with-param>
+                                                </xsl:call-template>                                                
+                                                <xsl:value-of select="$TARGET_ID"/>
+                                                <xsl:value-of select="' '"/>
+                                            </xsl:if>
+                                        </xsl:if>
+                                    </xsl:for-each>
+                                </xsl:if>
+                                                                                                
                                 <xsl:call-template name="log">
                                     <xsl:with-param name="msg">Building targetUserInfos... calibrators done</xsl:with-param>
                                 </xsl:call-template>
@@ -1003,7 +1034,7 @@
                         <!--
                               <xsl:message>SCI_TARGET_NAME_index: <xsl:value-of select="$SCI_TARGET_NAME_index"/></xsl:message>
                               <xsl:message>CAL_TARGET_NAME_index: <xsl:value-of select="$CAL_TARGET_NAME_index"/></xsl:message>
-                        -->
+                        -->                                                
                         <xsl:variable name="CAL_TABLE" select="./TABLE[1]"/>
 
                         <!-- generate the list of target (id only) from all science and calibrator targets -->
@@ -1075,7 +1106,7 @@
                                         <xsl:value-of select="$CAL_ID"/>
                                         <xsl:value-of select="' '"/>
                                     </xsl:if>
-                                </xsl:for-each>
+                                </xsl:for-each>                                
                             </calibrators>
 
                             <!-- list of calibrators per science target -->
