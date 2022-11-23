@@ -6,6 +6,7 @@ package fr.jmmc.aspro.ob;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.OBManager;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.ob.ExtraInformations;
 import fr.jmmc.aspro.model.ob.InstrumentConfiguration;
 import fr.jmmc.aspro.model.ob.InterferometerConfiguration;
 import fr.jmmc.aspro.model.ob.OBItem;
@@ -18,11 +19,16 @@ import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
+import fr.jmmc.aspro.model.oi.BaseValue;
+import fr.jmmc.aspro.model.oi.BooleanValue;
+import fr.jmmc.aspro.model.oi.CalibratorInformations;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.FringeTracker;
+import fr.jmmc.aspro.model.oi.NumberValue;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.SpectralBand;
+import fr.jmmc.aspro.model.oi.StringValue;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetGroup;
@@ -442,8 +448,53 @@ public class ExportOBXml {
         if (target.getFLUXN() != null) {
             t.setFLUXNJY(NumberUtils.trimTo3Digits(Band.N.magToJy(target.getFLUXN())));
         }
+        
+        // Copy calInfo into extraInfos
+        final CalibratorInformations calInfos = target.getCalibratorInfos();
+        final ExtraInformations extraInfos = new ExtraInformations();
+        
+        for (BaseValue oiValue : calInfos.getFields()) {            
+            extraInfos.getFields().add(getOBValue(oiValue));
+        }
+        
+        for (BaseValue oiValue : calInfos.getParameters()) {            
+            extraInfos.getParameters().add(getOBValue(oiValue));
+        }
+                
+        t.setEXTRAINFORMATIONS(extraInfos);
+        
+       
 
         return t;
+    }
+    
+    private static fr.jmmc.aspro.model.ob.BaseValue getOBValue ( BaseValue oiValue){
+        
+        if (oiValue instanceof BooleanValue){
+                fr.jmmc.aspro.model.ob.BooleanValue b = new fr.jmmc.aspro.model.ob.BooleanValue();                
+                b.setValue(oiValue.getBoolean()); 
+                b.setName(oiValue.getName());
+                b.setUnit(oiValue.getUnit());
+                return b;
+        }
+        
+        if (oiValue instanceof NumberValue){                
+                fr.jmmc.aspro.model.ob.NumberValue n = new fr.jmmc.aspro.model.ob.NumberValue();                
+                n.setValue(oiValue.getNumber()); 
+                n.setName(oiValue.getName());
+                n.setUnit(oiValue.getUnit());
+                return n;
+        }
+        
+        if (oiValue instanceof StringValue){
+                fr.jmmc.aspro.model.ob.StringValue s = new fr.jmmc.aspro.model.ob.StringValue();
+                s.setValue(oiValue.getString());
+                s.setName(oiValue.getName());
+                s.setUnit(oiValue.getUnit());
+                return s;
+        }        
+        
+        return null;
     }
 
     private static void processHARanges(final List<String> haIntervals, final List<Range> obsRangesHA) {
