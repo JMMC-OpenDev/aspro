@@ -50,6 +50,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="FLUX_M_JY" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_N_JY" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="DIAMETER" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="EXTRA_INFORMATIONS" type="{http://www.jmmc.fr/aspro-ob/0.1}ExtraInformations" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -87,7 +88,8 @@ import fr.jmmc.aspro.model.OIBase;
     "fluxljy",
     "fluxmjy",
     "fluxnjy",
-    "diameter"
+    "diameter",
+    "extrainformations"
 })
 public class Target
     extends OIBase
@@ -149,6 +151,8 @@ public class Target
     protected Double fluxnjy;
     @XmlElement(name = "DIAMETER")
     protected Double diameter;
+    @XmlElement(name = "EXTRA_INFORMATIONS")
+    protected ExtraInformations extrainformations;
 
     /**
      * Gets the value of the name property.
@@ -812,6 +816,30 @@ public class Target
      */
     public void setDIAMETER(Double value) {
         this.diameter = value;
+    }
+
+    /**
+     * Gets the value of the extrainformations property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link ExtraInformations }
+     *     
+     */
+    public ExtraInformations getEXTRAINFORMATIONS() {
+        return extrainformations;
+    }
+
+    /**
+     * Sets the value of the extrainformations property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link ExtraInformations }
+     *     
+     */
+    public void setEXTRAINFORMATIONS(ExtraInformations value) {
+        this.extrainformations = value;
     }
 
 }

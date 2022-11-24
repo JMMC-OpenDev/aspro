@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.12 beta 1"/>
-    <compilation date="21/11/2022" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="22.12 beta 2"/>
+    <compilation date="24/11/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -248,10 +248,11 @@
 
     <releasenotes>
         <release version="22.12">
-            <pubDate>Mon, 21 Nov 2022 14:00:00 GMT</pubDate>
-            <prerelease version="22.12 beta 1">
+            <pubDate>Thu, 24 Nov 2022 14:00:00 GMT</pubDate>
+            <prerelease version="22.12 beta 2">
                 <change type="FEATURE">Improved observability plot to use the color of the first target group for calibrators too</change>
-            </prerelease>
+            <prerelease version="22.12 beta 1">
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/26">Add target extra informations in OBXML export.</change>                             </prerelease>
         </release>
         <release version="22.09">
             <pubDate>Fri, 09 Sep 2022 14:00:00 GMT</pubDate>

@@ -93,4 +93,44 @@ public class ObjectFactory {
         return new Target();
     }
 
+    /**
+     * Create an instance of {@link ExtraInformations }
+     * 
+     */
+    public ExtraInformations createExtraInformations() {
+        return new ExtraInformations();
+    }
+
+    /**
+     * Create an instance of {@link BaseValue }
+     * 
+     */
+    public BaseValue createBaseValue() {
+        return new BaseValue();
+    }
+
+    /**
+     * Create an instance of {@link BooleanValue }
+     * 
+     */
+    public BooleanValue createBooleanValue() {
+        return new BooleanValue();
+    }
+
+    /**
+     * Create an instance of {@link NumberValue }
+     * 
+     */
+    public NumberValue createNumberValue() {
+        return new NumberValue();
+    }
+
+    /**
+     * Create an instance of {@link StringValue }
+     * 
+     */
+    public StringValue createStringValue() {
+        return new StringValue();
+    }
+
 }

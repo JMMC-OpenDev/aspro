@@ -641,15 +641,118 @@
             <xsd:element name="DIAMETER" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Optional angular diameter for calibration targets expressed in milliarcseconds
+                        Optional angular diameter for calibration targets expressed in milliarcseconds 
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            
+            <!-- extra information -->
+            <xsd:element name="EXTRA_INFORMATIONS" type="ExtraInformations" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Optional information
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            
+            
         </xsd:sequence>
     </xsd:complexType>
 
 
 
+    <!-- ExtraInformations -->
+    <xsd:complexType name="ExtraInformations">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the optional informations.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+
+            <!-- parameters -->
+            <xsd:element name="parameter" type="BaseValue" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Parameter
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- fields -->
+            <xsd:element name="field" type="BaseValue" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Field
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <!--
+      Base value type.
+    -->
+    <xsd:complexType name="BaseValue">
+        <xsd:annotation>
+            <xsd:documentation>
+                A generic value type
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="unit" type="xsd:string" />
+    </xsd:complexType>
+
+
+<!--
+      Boolean value type.
+    -->
+    <xsd:complexType name="BooleanValue">
+        <xsd:annotation>
+            <xsd:documentation>
+                A boolean value
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseValue">
+                <xsd:attribute name="value" type="xsd:boolean" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      Number value type.
+    -->
+    <xsd:complexType name="NumberValue">
+        <xsd:annotation>
+            <xsd:documentation>
+                A number value
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseValue">
+                <xsd:attribute name="value" type="xsd:double" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      String value type.
+    -->
+    <xsd:complexType name="StringValue">
+        <xsd:annotation>
+            <xsd:documentation>
+                A string value
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseValue">
+                <xsd:attribute name="value" type="xsd:string" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
 
     <!-- ObservationType -->
     <xsd:simpleType name="ObservationType">
