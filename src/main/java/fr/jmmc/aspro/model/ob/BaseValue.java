@@ -1,12 +1,12 @@
 
 package fr.jmmc.aspro.model.ob;
 
-import fr.jmmc.aspro.model.OIBase;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
+import fr.jmmc.aspro.model.OIBase;
 
 
 /**
@@ -95,7 +95,7 @@ public class BaseValue
         this.unit = value;
     }
     
-    //--simple--preserve
+//--simple--preserve
 
     @Override
     protected boolean areEquals(final OIBase o) {
