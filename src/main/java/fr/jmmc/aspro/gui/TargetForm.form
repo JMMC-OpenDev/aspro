@@ -174,8 +174,8 @@
         </Component>
         <Component class="javax.swing.JButton" name="jButtonDeleteTarget">
           <Properties>
-            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/fr/jmmc/aspro/gui/icons/delete.png"/>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="ImageUtils.loadResourceIcon(&quot;fr/jmmc/aspro/gui/icons/delete.png&quot;)" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="delete the selected target"/>
             <Property name="focusable" type="boolean" value="false"/>

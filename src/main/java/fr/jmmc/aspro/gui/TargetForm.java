@@ -31,6 +31,7 @@ import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.service.BrowserLauncher;
+import fr.jmmc.jmcs.util.ImageUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.UrlUtils;
@@ -938,7 +939,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelActions.add(jButtonAfter, gridBagConstraints);
 
-        jButtonDeleteTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
+        jButtonDeleteTarget.setIcon(ImageUtils.loadResourceIcon("fr/jmmc/aspro/gui/icons/delete.png"));
         jButtonDeleteTarget.setToolTipText("delete the selected target");
         jButtonDeleteTarget.setFocusable(false);
         jButtonDeleteTarget.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1979,7 +1980,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             }
 
             // check and update target references :
-            ObservationSetting.checkReferences(this.editTargets, this.editTargetUserInfos, null);
+            ObservationSetting.checkReferences(this.editTargets, null, this.editTargetUserInfos, null);
 
             // remove the cached target information:
             this.mapIDTargetInformations.remove(target.getIdentifier());

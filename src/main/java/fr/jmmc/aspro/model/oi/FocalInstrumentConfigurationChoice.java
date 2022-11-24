@@ -262,6 +262,14 @@ public class FocalInstrumentConfigurationChoice
   public final void setPopList(final java.util.List<Pop> popList) {
     this.popList = popList;
   }
+  
+  /**
+  * Check the list of PoPs and return true if best Pops algorithm (auto) is needed
+  * @return true if best Pops algorithm (auto) is needed
+  */
+  public final boolean isPopsAuto() {
+      return (this.popList == null) || (this.popList.size() != this.stationList.size()) || this.popList.contains(null);
+  }
 
   /** resolved reference to the instrument mode (read only) */
   @javax.xml.bind.annotation.XmlTransient

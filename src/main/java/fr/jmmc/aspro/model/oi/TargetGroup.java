@@ -186,11 +186,13 @@ public class TargetGroup
     
 //--simple--preserve
     public final static String CATEGORY_OB = "[OB]";
+    public final static String CATEGORY_SEL = "[SELECTION]";
     public final static String CATEGORY_USER = "[USER]";
 
     public final static String GROUP_AO = "JMMC_AO";
     public final static String GROUP_FT = "JMMC_FT";
     public final static String GROUP_GUIDE = "JMMC_GUIDE";
+    public final static String GROUP_SELECTED = "JMMC_SELECTED";
 
     /** empty TargetGroup instance */
     public static final TargetGroup EMPTY_GROUP = new TargetGroup();
@@ -266,8 +268,20 @@ public class TargetGroup
         setIdentifier();
     }
 
+    public final boolean isCategoryInternal() {
+        return isCategoryOB() || isCategorySEL();
+    }
+
     public final boolean isCategoryOB() {
         return CATEGORY_OB.equals(getCategory());
+    }
+
+    public final boolean isCategorySEL() {
+        return CATEGORY_SEL.equals(getCategory());
+    }
+
+    public final boolean isCategoryUSER() {
+        return CATEGORY_USER.equals(getCategory());
     }
 
     /** decoded color */

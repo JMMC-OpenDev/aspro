@@ -316,8 +316,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
             if (type == ObservationEventType.TARGET_CHANGED) {
                 // retrieve the selected target from its name:
                 final Target target = observation.getSelectedTarget();
-                // force refresh content:
-                this.onTargetSelectionChange(target);
+                // force refresh raw obs content:
+                this.onTargetSelectionChanged(target);
             }
 
             // Observability panel :
@@ -386,7 +386,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
             }
         } else if (type == ObservationEventType.TARGET_SELECTION_CHANGED
                 && event instanceof TargetSelectionEvent) {
-            this.onTargetSelectionChange(((TargetSelectionEvent) event).getTarget());
+            this.onTargetSelectionChanged(((TargetSelectionEvent) event).getTarget());
         } else if (type == ObservationEventType.OIFITS_DONE
                 && event instanceof OIFitsEvent
                 && ((OIFitsEvent) event).getOIFitsData() != null) {
@@ -488,15 +488,15 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     // --- RawObs panel handling ---
     private void resetRawObsPanel() {
         rawObsPanel.resetFilters();
-        onTargetSelectionChange(null);
+        onTargetSelectionChanged(null);
     }
 
     /**
      * Update the selected target for the given observation
      * @param target selected target
      */
-    private void onTargetSelectionChange(final Target target) {
-        logger.debug("onTargetSelectionChange : {}", target);
+    private void onTargetSelectionChanged(final Target target) {
+        logger.debug("onTargetSelectionChanged : {}", target);
 
         List<RawObservation> rawObsList = null;
 

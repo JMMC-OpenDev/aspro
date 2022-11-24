@@ -514,9 +514,10 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                 }
             }
 
-            // add JMMC annotation (moving position):
-            this.renderer.addAnnotation(this.aJMMC, Layer.BACKGROUND);
-
+            if (this.aJMMC != null) {
+                // add JMMC annotation (moving position):
+                this.renderer.addAnnotation(this.aJMMC, Layer.BACKGROUND);
+            }
             // tick color :
             this.xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
             this.xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);

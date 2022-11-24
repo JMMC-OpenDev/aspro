@@ -504,40 +504,75 @@ public final class ObservabilityService {
 
     /**
      * Find the observability ranges for the complete list of targets
-     * @param targets target list
+     * @param targets target list (read-only)
      */
     private void findObservability(final List<Target> targets) {
-        // display baseline, (beams), (pops), DL as information:
-        final StringBuffer sb = getBuffer();
-        sb.append("Baseline: ");
-        for (Beam b : this.beams) {
-            sb.append(b.getStation().getName()).append(' ');
-        }
-        if (!this.interferometer.getChannels().isEmpty() && this.switchyard != null) {
-            sb.append("- Beams: ");
+        {
+            // display baseline, (beams), (pops), DL as information:
+            final StringBuffer sb = getBuffer();
+            sb.append("Baseline: ");
             for (Beam b : this.beams) {
-                sb.append(b.getChannel().getName()).append(' ');
+                sb.append(b.getStation().getName()).append(' ');
             }
+            if (!this.interferometer.getChannels().isEmpty() && this.switchyard != null) {
+                sb.append("- Beams: ");
+                for (Beam b : this.beams) {
+                    sb.append(b.getChannel().getName()).append(' ');
+                }
+            }
+            if (this.hasPops && (this.popCombinations.size() == 1)) {
+                // user defined Pop combination:
+                sb.append("- PoPs: ").append(this.popCombinations.get(0).getIdentifier()).append(' ');
+            }
+            sb.append("- Delaylines: ");
+            for (Beam b : this.beams) {
+                sb.append(b.getDelayLine().getName()).append(' ');
+            }
+            addInformation(sb.toString());
         }
-        if (this.hasPops && (this.popCombinations.size() == 1)) {
-            // user defined Pop combination:
-            sb.append("- PoPs: ").append(this.popCombinations.get(0).getIdentifier()).append(' ');
-        }
-        sb.append("- Delaylines: ");
-        for (Beam b : this.beams) {
-            sb.append(b.getDelayLine().getName()).append(' ');
-        }
-        addInformation(sb.toString());
 
         if (this.hasPops) {
             // PoPs : Compatible Mode if no user defined Pop Combination :
             if (targets.size() > 1 && this.popCombinations.size() > 1) {
-                // Objective : find the pop combination that maximize the observability of the complete list of target
+
+                // Selected mode:
+                final boolean useSelected = observation.getInterferometerConfiguration().isBestPopsModeSelected();
+                if (isLogDebug) {
+                    logger.debug("bestPopsMode Selected: {}", useSelected);
+                }
 
                 // Start the Best Pops algorithm :
                 final long start = System.nanoTime();
 
-                final PopCombination bestPopCombination = findCompatiblePoPs(targets);
+                List<Target> targetsUsedForCompatiblePops = null;
+                if (useSelected) {
+                    final List<Target> selectedTargets = this.observation.getSelectedTargets();
+                    if (isLogDebug) {
+                        logger.debug("selected targets: {}", selectedTargets);
+                    }
+
+                    // should include calibrators & ancillary targets too ?
+                    if (!selectedTargets.isEmpty()) {
+                        targetsUsedForCompatiblePops = selectedTargets;
+
+                        final StringBuffer sb = getBuffer();
+                        sb.append("Best Pops mode: SELECTED targets [");
+                        for (Target t : selectedTargets) {
+                            sb.append(t.getName()).append(", ");
+                        }
+                        sb.setLength(sb.length() - 2);
+                        sb.append(']');
+                        addInformation(sb.toString());
+                    }
+                }
+                if (targetsUsedForCompatiblePops == null) {
+                    addInformation("Best Pops mode: ALL targets");
+                    // consider all targets:
+                    targetsUsedForCompatiblePops = targets;
+                }
+
+                // Objective : find the pop combination that maximize the observability of the complete list of target
+                final PopCombination bestPopCombination = findCompatiblePoPs(targetsUsedForCompatiblePops);
 
                 // fast interrupt:
                 checkInterrupted();
@@ -551,7 +586,6 @@ public final class ObservabilityService {
                     this.popCombinations.clear();
 
                     this.bpObsCtx.setPopCombs(new PopCombination[0]);
-
                 } else {
                     this.data.setUsedPops(bestPopCombination);
 
@@ -584,7 +618,7 @@ public final class ObservabilityService {
 
     /**
      * Find the best Pop combination for the given list of targets
-     * @param targets list of targets
+     * @param targets list of targets (read-only)
      * @return best Pop combination or null if none exists
      */
     @SuppressWarnings("unchecked")
@@ -2901,18 +2935,21 @@ public final class ObservabilityService {
 
         final List<PopCombination> popCombs;
 
-        // Get chosen PoPs :
+        // Get chosen PoPs:
+        // note: null means Any pop, so use combinations:
         final List<Pop> userPoPs = this.observation.getInstrumentConfiguration().getPopList();
-
-        final Map<String, Pop> popsFixed = this.observation.getInterferometerConfiguration().getFixedPops();
 
         if (isLogDebug) {
             logger.debug("preparePopCombinations: userPoPs  = {}", userPoPs);
-            logger.debug("preparePopCombinations: popsFixed = {}", popsFixed);
         }
 
-        // note: null means Any pop, so use combinations:
-        if ((userPoPs == null) || (userPoPs.size() != nBeams) || userPoPs.contains(null)) {
+        if (this.observation.getInstrumentConfiguration().isPopsAuto()) {
+            final Map<String, Pop> popsFixed = this.observation.getInterferometerConfiguration().getFixedPops();
+
+            if (isLogDebug) {
+                logger.debug("preparePopCombinations: popsFixed = {}", popsFixed);
+            }
+            
             // Compute key:
             final StringBuilder sb = new StringBuilder(16);
             sb.append(this.interferometer.getName()).append('_').append(nBeams);

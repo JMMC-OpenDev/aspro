@@ -4,6 +4,7 @@ package fr.jmmc.aspro.model.oi;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -25,6 +26,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="minElevation" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *         &lt;element name="allPops" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="bestPopsMode" type="{http://www.jmmc.fr/aspro-oi/0.1}BestPopsMode" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -37,7 +39,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "InterferometerConfigurationChoice", propOrder = {
     "name",
     "minElevation",
-    "allPops"
+    "allPops",
+    "bestPopsMode"
 })
 public class InterferometerConfigurationChoice
     extends OIBase
@@ -47,6 +50,8 @@ public class InterferometerConfigurationChoice
     protected String name;
     protected double minElevation;
     protected String allPops;
+    
+    protected BestPopsMode bestPopsMode;
 
     /**
      * Gets the value of the name property.
@@ -111,6 +116,30 @@ public class InterferometerConfigurationChoice
     public void setAllPops(String value) {
         this.allPops = value;
     }
+
+    /**
+     * Gets the value of the bestPopsMode property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link BestPopsMode }
+     *     
+     */
+    public BestPopsMode getBestPopsMode() {
+        return bestPopsMode;
+    }
+
+    /**
+     * Sets the value of the bestPopsMode property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link BestPopsMode }
+     *     
+     */
+    public void setBestPopsMode(BestPopsMode value) {
+        this.bestPopsMode = value;
+    }
     
 //--simple--preserve
     /** resolved reference to the interferometer configuration (read only) */
@@ -153,6 +182,20 @@ public class InterferometerConfigurationChoice
         this.popsFixed = popMapping;
     }
 
+    /**
+    * @return bestPopsMode or ALL if undefined
+    */
+    public BestPopsMode getBestPopsModeOrDefault() {
+        return (bestPopsMode != null) ? bestPopsMode : BestPopsMode.ALL;
+    }
+    
+    /**
+    * @return true if bestPopsMode == BestPopsMode.SELECTED
+    */
+    public boolean isBestPopsModeSelected() {
+        return (bestPopsMode != null) && (bestPopsMode == BestPopsMode.SELECTED);
+    }
+
     @Override
     protected boolean areEquals(final OIBase o) {
         if (!super.areEquals(o)) {
@@ -161,7 +204,8 @@ public class InterferometerConfigurationChoice
         final InterferometerConfigurationChoice other = (InterferometerConfigurationChoice) o;
         return (areEquals(this.name, other.getName())
                 && areEquals(this.minElevation, other.getMinElevation())
-                && areEquals(this.allPops, other.getAllPops()));
+                && areEquals(this.allPops, other.getAllPops())
+                && areEquals(this.getBestPopsModeOrDefault(), other.getBestPopsModeOrDefault()));
     }
 
 //--simple--preserve

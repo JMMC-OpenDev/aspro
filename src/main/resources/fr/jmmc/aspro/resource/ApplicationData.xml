@@ -250,6 +250,7 @@
         <release version="22.12">
             <pubDate>Thu, 24 Nov 2022 14:00:00 GMT</pubDate>
             <prerelease version="22.12 beta 2">
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/28">Improved best PoPs algorithm to consider ALL or SELECTED targets according to the added combo box in the main setting panel</change>
                 <change type="FEATURE">Improved observability plot to use the color of the first target group for calibrators too</change>
             </prerelease>
             <prerelease version="22.12 beta 1">

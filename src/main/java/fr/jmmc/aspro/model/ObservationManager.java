@@ -18,6 +18,7 @@ import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.BaseValue;
+import fr.jmmc.aspro.model.oi.BestPopsMode;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
@@ -466,6 +467,13 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
         // finally: set the initial state of the main observation (after GUI updates => potentially modified) 
         this.defineInitialObservation();
+
+        final Target target = getMainObservation().getSelectedTarget();
+
+        if (target != null) {
+            // fire target selection event:
+            this.fireTargetSelectionChanged(target);
+        }
     }
 
     /**
@@ -591,6 +599,29 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     }
 
     /**
+     * Return true if observation's selected targets are different than the given list of targets
+     * (only identifiers are compared)
+     * @param newSelectedTargets list of targets to compare with
+     * @return true if observation's selected targets are different; false otherwise
+     */
+    public boolean isSelectedTargetsChanged(final List<Target> newSelectedTargets) {
+        // note: target.equals() means same identifier:
+        return !newSelectedTargets.equals(getMainObservation().getSelectedTargets());
+    }
+
+    /**
+     * This fires a target selection changed event to the given listener.
+     *
+     * Listeners : UVCoveragePanel
+     *
+     * @param listener which listener to call
+     */
+    public void fireTargetSelectionChanged(final ObservationListener listener) {
+        // retrieve the selected target:
+        fireEvent(new TargetSelectionEvent(getMainObservation().getSelectedTarget()), listener);
+    }
+
+    /**
      * This fires a target selection changed event to all registered listeners.
      * Fired by [BasicObservationForm].fireTargetSelectionChangeEvent()
      * when the selected target changed
@@ -600,19 +631,58 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param target selected target (may be null)
      */
     public void fireTargetSelectionChanged(final Target target) {
-        logger.debug("fireTargetSelectionChange: {}", target);
-
-        final String targetName = (target != null) ? target.getName() : null;
+        logger.debug("fireTargetSelectionChanged: {}", target);
 
         final ObservationSetting observation = getMainObservation();
 
-        // store the selected target using its name (not instance):
-        observation.setSelectedTargetName(targetName);
+        // update selected targets:
+        final List<Target> selectedTargets = observation.getSelectedTargets();
+        selectedTargets.clear();
+        if (target != null) {
+            selectedTargets.add(target);
+        }
+        postFireTargetSelectionChanged();
+    }
+
+    /**
+     * This fires a target selection changed event to all registered listeners.
+     * Fired by [BasicObservationForm].fireTargetSelectionChangeEvent()
+     * when the selected target changed
+     *
+     * Listeners : UVCoveragePanel
+     *
+     * @param targets selected targets (may be null)
+     */
+    public void fireTargetSelectionChanged(final List<Target> targets) {
+        logger.debug("fireTargetSelectionChanged: {}", targets);
+
+        final ObservationSetting observation = getMainObservation();
+
+        // update selected targets:
+        final List<Target> selectedTargets = observation.getSelectedTargets();
+        selectedTargets.clear();
+        if (!CollectionUtils.isEmpty(targets)) {
+            selectedTargets.addAll(targets);
+        }
+        postFireTargetSelectionChanged();
+    }
+
+    private void postFireTargetSelectionChanged() {
+        final ObservationSetting observation = getMainObservation();
+        
+        logger.debug("postFireTargetSelectionChanged: selectedTargets = {}", observation.getSelectedTargets());
 
         // update user model if needed (memory):
         validateSelectedTargetUserModel();
 
-        fireEvent(new TargetSelectionEvent(target));
+        fireEvent(new TargetSelectionEvent(observation.getSelectedTarget()));
+
+        // do update (observability) if PoPs enabled, (Auto) and bestPopsMode = 'SELECTED':
+        if (observation.getInterferometerConfiguration().isBestPopsModeSelected()
+                && observation.getInstrumentConfiguration().isPopsAuto()) {
+            // fire observation update event :
+            fireObservationUpdate(true);
+        }
     }
 
     private void validateSelectedTargetUserModel() {
@@ -661,22 +731,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 }
             }
         }
-    }
-
-    /**
-     * This fires a target selection changed event to the given listener.
-     *
-     * Listeners : UVCoveragePanel
-     *
-     * @param listener which listener to call
-     */
-    public void fireTargetSelectionChanged(final ObservationListener listener) {
-        final ObservationSetting observation = getMainObservation();
-
-        // retrieve the selected target from its name:
-        final Target target = observation.getSelectedTarget();
-
-        fireEvent(new TargetSelectionEvent(target), listener);
     }
 
     /**
@@ -1085,6 +1139,26 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             }
             interferometerChoice.setFixedPops(popsFixedCopy);
             interferometerChoice.setAllPops(PopsUtils.toString(popsFixed));
+        }
+        return changed;
+    }
+
+    /**
+     * Set the Best Pops mode
+     * Used by BasicObservationForm.updateObservation()
+
+     * @param popsMode popsMode to use
+     * @return true if the value changed
+     */
+    public boolean setInterferometerPopsMode(final BestPopsMode popsMode) {
+        final InterferometerConfigurationChoice interferometerChoice = getMainObservation().getInterferometerConfiguration();
+
+        final boolean changed = isChanged(interferometerChoice.getBestPopsModeOrDefault(), popsMode);
+        if (changed) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("setInterferometerPopsMode: {}", popsMode);
+            }
+            interferometerChoice.setBestPopsMode(popsMode);
         }
         return changed;
     }
@@ -1536,7 +1610,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
         final Target target = targetEditCtx.getSelectedTarget();
 
-        if ((target != null) && !target.getName().equals(observation.getSelectedTargetName())) {
+        // note: target.equals() means same identifier:
+        if ((target != null) && !target.equals(observation.getSelectedTarget())) {
             // fire change events :
             this.fireTargetChangedEvents();
 

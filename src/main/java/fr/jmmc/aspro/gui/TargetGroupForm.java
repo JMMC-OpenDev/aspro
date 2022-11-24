@@ -595,7 +595,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
                 this.jFieldGroupColor.setBackground(decodeColor()); // not automatic (disabled)
 
                 // disable if EMPTY or OB group:
-                final boolean enabled = (group != TargetGroup.EMPTY_GROUP && !group.isCategoryOB());
+                final boolean enabled = ((group != TargetGroup.EMPTY_GROUP) && !group.isCategoryInternal());
 
                 this.jFieldGroupName.setEnabled(enabled);
                 this.jTextAreaGroupDesc.setEnabled(enabled);

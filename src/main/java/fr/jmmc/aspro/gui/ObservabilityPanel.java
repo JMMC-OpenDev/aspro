@@ -1056,9 +1056,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // disable the automatic refresh :
         final boolean prevAutoRefresh = this.setAutoRefresh(false);
         try {
-            // show all groups except OB:
+            // show all groups except OB/SEL:
             this.userGroupList = new ArrayList<TargetGroup>(observation.getOrCreateTargetUserInfos().getDisplayGroups());
             TargetGroup.filterGroups(this.userGroupList, TargetGroup.CATEGORY_OB);
+            TargetGroup.filterGroups(this.userGroupList, TargetGroup.CATEGORY_SEL);
+
             this.checkBoxListGroups.setModel(new GenericListModel<TargetGroup>(this.userGroupList));
             // none selected means disabled filter
 
@@ -2473,10 +2475,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         if (event.getType() == ChartProgressEvent.DRAWING_STARTED) {
             // Perform custom operations before chart rendering:
-            // move JMMC annotation:
-            this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
-            this.aJMMC.setY(this.xyPlot.getRangeAxis().getUpperBound()); // upper bound instead of other plots
-
+            if (this.aJMMC != null) {
+                // move JMMC annotation:
+                this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
+                this.aJMMC.setY(this.xyPlot.getRangeAxis().getUpperBound()); // upper bound instead of other plots
+            }
             if (isTimelineEnabled()) {
                 final double xMin = this.xyPlot.getRangeAxis().getLowerBound();
                 final double xMax = this.xyPlot.getRangeAxis().getUpperBound();

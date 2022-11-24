@@ -173,6 +173,7 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
             case REFRESH_UV:
                 setData(prepareObsTargetList(event.getObservationCollection()));
                 break;
+                // TODO: use observaebilityDone event to get obsData too ?
             default:
         }
         if (logger.isDebugEnabled()) {

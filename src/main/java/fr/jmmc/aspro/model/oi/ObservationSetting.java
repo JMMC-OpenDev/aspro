@@ -6,7 +6,10 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlIDREF;
+import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -33,6 +36,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="interferometerConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}InterferometerConfigurationChoice"/&gt;
  *         &lt;element name="instrumentConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentConfigurationChoice"/&gt;
  *         &lt;element name="target" type="{http://www.jmmc.fr/aspro-oi/0.1}Target" maxOccurs="unbounded"/&gt;
+ *         &lt;element name="selectedTargets" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/&gt;
  *         &lt;element name="targetUserInfos" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetUserInformations" minOccurs="0"/&gt;
  *         &lt;element name="targetObservations" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetRawObservation" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="variant" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationVariant" maxOccurs="unbounded" minOccurs="0"/&gt;
@@ -56,6 +60,7 @@ import fr.jmmc.aspro.model.OIBase;
     "interferometerConfiguration",
     "instrumentConfiguration",
     "targets",
+    "selectedTargets",
     "targetUserInfos",
     "targetObservations",
     "variants",
@@ -79,7 +84,12 @@ public class ObservationSetting
     @XmlElement(required = true)
     protected FocalInstrumentConfigurationChoice instrumentConfiguration;
     @XmlElement(name = "target", required = true)
-    protected List<Target> targets;
+    protected List<fr.jmmc.aspro.model.oi.Target> targets;
+    @XmlList
+    @XmlElement(type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREFS")
+    protected List<Target> selectedTargets;
     protected TargetUserInformations targetUserInfos;
     protected List<TargetRawObservation> targetObservations;
     @XmlElement(name = "variant")
@@ -257,15 +267,44 @@ public class ObservationSetting
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Target }
+     * {@link fr.jmmc.aspro.model.oi.Target }
      * 
      * 
      */
-    public List<Target> getTargets() {
+    public List<fr.jmmc.aspro.model.oi.Target> getTargets() {
         if (targets == null) {
-            targets = new ArrayList<Target>();
+            targets = new ArrayList<fr.jmmc.aspro.model.oi.Target>();
         }
         return this.targets;
+    }
+
+    /**
+     * Gets the value of the selectedTargets property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the selectedTargets property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getSelectedTargets().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Object }
+     * 
+     * 
+     */
+    public List<Target> getSelectedTargets() {
+        if (selectedTargets == null) {
+            selectedTargets = new ArrayList<Target>();
+        }
+        return this.selectedTargets;
     }
 
     /**
@@ -483,31 +522,15 @@ public class ObservationSetting
         return this.version;
     }
 
-    /** selected target name (read only) */
-    @javax.xml.bind.annotation.XmlTransient
-    String selectedTargetName = null;
-
-    /**
-     * Return the selected target name
-     * @return selected target name
-     */
-    public final String getSelectedTargetName() {
-        return this.selectedTargetName;
-    }
-
-    /**
-     * Define the selected target name
-     * @param selectedTargetName selected target name (may be null)
-     */
-    public final void setSelectedTargetName(final String selectedTargetName) {
-        this.selectedTargetName = selectedTargetName;
-    }
-    
     /** 
-    * @return Target instance corresponding to the selected target name
-    */
+     * @return Target instance corresponding to the first selected target or null
+     */
     public Target getSelectedTarget() {
-        return getTarget(getSelectedTargetName());
+        if (!isEmpty(selectedTargets)) {
+            // ensure consistency by resolving reference:
+            return getTargetById(selectedTargets.get(0).getIdentifier());
+        }
+        return null;
     }
 
     @Override
@@ -546,7 +569,9 @@ public class ObservationSetting
         if (copy.targets != null) {
             copy.targets = OIBase.copyList(copy.targets);
         }
-
+        if (copy.selectedTargets != null) {
+            copy.selectedTargets = OIBase.copyList(copy.selectedTargets);
+        }
         // Do not copy target user infos (only used by target editor)
         return copy;
     }
@@ -614,6 +639,7 @@ public class ObservationSetting
                 && areEquals(this.interferometerConfiguration, other.getInterferometerConfiguration())
                 && areEquals(this.instrumentConfiguration, other.getInstrumentConfiguration())
                 && areEquals(this.getTargets(), other.getTargets()) // may create lists
+                && areEquals(this.getSelectedTargets(), other.getSelectedTargets()) // may create lists
                 && areEquals(this.targetUserInfos, other.getTargetUserInfos())
                 && areEquals(this.getVariants(), other.getVariants())); // may create lists
     }
@@ -628,7 +654,7 @@ public class ObservationSetting
             target.checkValues();
         }
 
-        checkReferences(getTargets(), this.targetUserInfos, this.targetObservations);
+        checkReferences(getTargets(), this.selectedTargets, this.targetUserInfos, this.targetObservations);
 
         // check target user infos :
         if (this.targetUserInfos != null && this.targetUserInfos.isEmpty()) {
@@ -645,21 +671,34 @@ public class ObservationSetting
     /**
      * Check this object for bad reference(s) and removes them if needed.
      * @param targets list of targets
+     * @param selectedTargets list of selected targets
      * @param targetUserInfos target user infos
      * @param targetObservations target raw observations
      */
     public static void checkReferences(final List<Target> targets,
+                                       final List<Target> selectedTargets,
                                        final TargetUserInformations targetUserInfos,
                                        final List<TargetRawObservation> targetObservations) {
         java.util.Map<String, Target> mapIDTargets = null;
 
-        // check target user infos :
+        // check selected targets:
+        if (selectedTargets != null) {
+            logger.debug("checkReferences = {}", selectedTargets);
+
+            if (mapIDTargets == null) {
+                // create the Map<ID, Target> index for targets:
+                mapIDTargets = Target.createTargetIndex(targets);
+            }
+            Target.updateTargetReferences(selectedTargets, mapIDTargets);
+        }
+        // check target user infos:
         if (targetUserInfos != null) {
             logger.debug("checkReferences = {}", targetUserInfos);
 
-            // create the Map<ID, Target> index for targets:
-            mapIDTargets = Target.createTargetIndex(targets);
-
+            if (mapIDTargets == null) {
+                // create the Map<ID, Target> index for targets:
+                mapIDTargets = Target.createTargetIndex(targets);
+            }
             targetUserInfos.updateTargetReferences(mapIDTargets);
         }
         // check target's raw observations:
@@ -670,7 +709,6 @@ public class ObservationSetting
                 // create the Map<ID, Target> index for targets:
                 mapIDTargets = Target.createTargetIndex(targets);
             }
-
             TargetRawObservation.updateTargetReferences(targetObservations, mapIDTargets);
         }
     }

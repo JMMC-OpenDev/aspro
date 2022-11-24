@@ -529,7 +529,7 @@ public class TargetUserInformations
     }
 
     public boolean removeGroup(final TargetGroup group) {
-        if (group != null && !group.isCategoryOB()) {
+        if (group != null && !group.isCategoryInternal()) {
             // check if used ?
             TargetGroupMembers tgm = getGroupMembers(group);
             if (tgm == null || tgm.isEmpty()) {

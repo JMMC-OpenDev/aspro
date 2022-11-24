@@ -283,7 +283,19 @@
                 </xsd:annotation>
             </xsd:element>
 
-            <!-- TODO : add searchCal information (UD diameters) in Target or TargetUserInformations type -->
+            <!-- TODO: later replace with TargetGroup[Selected targets] -->
+            <xsd:element name="selectedTargets" type="xsd:IDREFS" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The list of selected targets
+                    </xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:property>
+                            <jaxb:baseType name="Target" />
+                        </jaxb:property>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:element>
 
             <xsd:element name="targetUserInfos" type="TargetUserInformations" minOccurs="0">
                 <xsd:annotation>
@@ -344,7 +356,6 @@
             <xsd:element name="operation" type="xsd:string">
                 <xsd:annotation>
                     <xsd:documentation>
-                        TODO: Use enumeration
                         The parameter 'operation' indicates what operation to do among :
                         - NEW (new observation)
                         - ADD (default: add targets only)
@@ -527,6 +538,14 @@
                     <xsd:documentation>
                         The mapping of PoPs associated to all stations using the format "SS:a ..."
                         where SS is the station name and a the PoPs index.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="bestPopsMode" type="BestPopsMode" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Selected BestPopsMode (ALL by default)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -3172,6 +3191,37 @@
                     <xsd:documentation>'higher' (&gt;) operator</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+
+
+    <!-- BestPopsMode -->
+    <xsd:simpleType name="BestPopsMode">
+        <xsd:annotation>
+            <xsd:documentation>
+                Possible values for the BestPopsMode: ALL (default), SELECTED
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="ALL">
+                <xsd:annotation>
+                    <xsd:documentation>ALL targets</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="SELECTED">
+                <xsd:annotation>
+                    <xsd:documentation>SELECTED targets</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <!--
+            <xsd:enumeration value="GROUPS">
+                <xsd:annotation>
+                    <xsd:documentation>targets belonging to the selected GROUPS</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            -->
         </xsd:restriction>
     </xsd:simpleType>
 

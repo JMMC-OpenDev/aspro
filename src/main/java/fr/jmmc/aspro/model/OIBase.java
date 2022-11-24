@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
-import fr.jmmc.jmcs.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlTransient;
@@ -145,8 +144,8 @@ public class OIBase implements Cloneable {
             return true;
         }
         // check null and empty list:
-        final boolean e1 = CollectionUtils.isEmpty(l1);
-        final boolean e2 = CollectionUtils.isEmpty(l2);
+        final boolean e1 = isEmpty(l1);
+        final boolean e2 = isEmpty(l2);
         if (e1 && e2) {
             return true;
         }
@@ -183,8 +182,8 @@ public class OIBase implements Cloneable {
             return true;
         }
         // check null and empty list:
-        final boolean e1 = CollectionUtils.isEmpty(l1);
-        final boolean e2 = CollectionUtils.isEmpty(l2);
+        final boolean e1 = isEmpty(l1);
+        final boolean e2 = isEmpty(l2);
         if (e1 && e2) {
             return true;
         }

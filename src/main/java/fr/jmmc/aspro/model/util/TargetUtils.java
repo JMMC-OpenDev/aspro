@@ -231,6 +231,15 @@ public final class TargetUtils {
                     "#5BAFD6"
             ));
         }
+        if (false && targetUserInfos.getGroupById(TargetGroup.GROUP_SELECTED) == null) {
+            targetUserInfos.addGroup(new TargetGroup(
+                    TargetGroup.GROUP_SELECTED,
+                    "Selected Targets",
+                    TargetGroup.CATEGORY_SEL,
+                    "Dynamic group indicating targets selected in ASPRO2",
+                    "#8781FF"
+            ));
+        }
 
         // TODO: add more predefined groups:
         // backup
