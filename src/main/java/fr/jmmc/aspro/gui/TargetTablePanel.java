@@ -8,10 +8,9 @@ import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
-import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.model.util.TargetObservation;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.gui.component.BasicTableColumnMovedListener;
 import fr.jmmc.jmcs.gui.component.BasicTableSorter;
@@ -26,6 +25,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -39,77 +39,76 @@ import org.slf4j.LoggerFactory;
  *
  * @author bourgesl
  */
-public final class ObservationTablePanel extends javax.swing.JPanel implements BasicTableColumnMovedListener, ObservationListener {
+public final class TargetTablePanel extends javax.swing.JPanel implements BasicTableColumnMovedListener, ObservationListener {
 
     private static final long serialVersionUID = 1L;
     /** Class logger */
-    private static final Logger logger = LoggerFactory.getLogger(ObservationTablePanel.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(TargetTablePanel.class.getName());
 
     /** Table key to remember dialog dimensions */
-    private final static String TABLE_EDITOR_DIMENSION_KEY = "___ASPRO2_OBS_TABLE_EDITOR_DIMENSION";
+    private final static String TABLE_EDITOR_DIMENSION_KEY = "___ASPRO2_TARGET_TABLE_EDITOR_DIMENSION";
 
     /* members */
-    private List<TargetObservation> obsTargetList = null;
-    private final ObservationTableModel obsModel;
-    private final BasicTableSorter obsTableSorter;
+    private List<Target> targetList = null;
+    private TargetUserInformations targetUserInfos = null;
+
+    private final TargetTableModel targetModel;
+    private final BasicTableSorter targetTableSorter;
 
     /** Creates new form ObservationTablePanel */
-    public ObservationTablePanel() {
-        this.obsModel = new ObservationTableModel();
+    public TargetTablePanel() {
+        this.targetModel = new TargetTableModel();
 
         initComponents();
 
         // Configure table sorting
-        obsTableSorter = new BasicTableSorter(obsModel, jTableObs.getTableHeader());
+        targetTableSorter = new BasicTableSorter(targetModel, jTableTarget.getTableHeader());
 
         // Process the listeners last to first, so register before jtable, not after:
-        obsTableSorter.addTableModelListener(new TableModelListener() {
+        targetTableSorter.addTableModelListener(new TableModelListener() {
 
             @Override
             public void tableChanged(final TableModelEvent e) {
                 // If the table structure has changed, reapply the custom renderer/editor on columns + auto-fit
-                if ((e.getSource() != obsTableSorter)
+                if ((e.getSource() != targetTableSorter)
                         || (e.getFirstRow() == TableModelEvent.HEADER_ROW)) {
 
-                    AutofitTableColumns.autoResizeTable(jTableObs, false, true);
+                    AutofitTableColumns.autoResizeTable(jTableTarget, true, true);
                 }
             }
         });
-        obsTableSorter.setTableHeaderChangeListener(this);
+        targetTableSorter.setTableHeaderChangeListener(this);
 
-        jTableObs.setModel(obsTableSorter);
+        jTableTarget.setModel(targetTableSorter);
 
         // Fix row height:
-        SwingUtils.adjustRowHeight(jTableObs);
+        SwingUtils.adjustRowHeight(jTableTarget);
 
         // Use enhanced cell renderer/editor:
-        final EnhancedTableCellRenderer rdr = new EnhancedTableCellRenderer(obsTableSorter);
-        final EnhancedTableCellEditor editor = new EnhancedTableCellEditor(obsTableSorter);
+        final EnhancedTableCellRenderer rdr = new EnhancedTableCellRenderer(targetTableSorter);
+        final EnhancedTableCellEditor editor = new EnhancedTableCellEditor(targetTableSorter);
 
         // match all types:
-        jTableObs.setDefaultRenderer(String.class, rdr);
-        jTableObs.setDefaultEditor(String.class, editor);
-        jTableObs.setDefaultRenderer(Number.class, rdr);
-        jTableObs.setDefaultEditor(Number.class, editor);
+        jTableTarget.setDefaultRenderer(String.class, rdr);
+        jTableTarget.setDefaultEditor(String.class, editor);
+        jTableTarget.setDefaultRenderer(Number.class, rdr);
+        jTableTarget.setDefaultEditor(Number.class, editor);
 
         // load user preference for columns:
-        final List<String> prefVisibleColumnNames = Preferences.getInstance().getObsTableVisibleColumns();
-        obsTableSorter.setVisibleColumnNames(
-                !prefVisibleColumnNames.isEmpty() ? prefVisibleColumnNames : obsModel.getColumnNames()
-        );
+        final List<String> prefVisibleColumnNames = Collections.emptyList(); //Preferences.getInstance().getObsTableVisibleColumns();
+        targetTableSorter.setVisibleColumnNames(!prefVisibleColumnNames.isEmpty() ? prefVisibleColumnNames : targetModel.getColumnNames());
 
         // Decorate scrollpane corner:
         final JButton cornerButton = new JButton();
         cornerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final List<String> prevVisibleColumns = obsTableSorter.getVisibleColumnNames();
+                final List<String> prevVisibleColumns = targetTableSorter.getVisibleColumnNames();
 
                 // show the table editor dialog to select displayed columns:
                 final List<String> newVisibleColumns = new ArrayList<>();
-                TableEditorPanel.showEditor(
-                        obsModel.getColumnNames(), prevVisibleColumns, // initial columns 
-                        obsModel.getColumnNames(), obsModel.getColumnNames(), // default columns (button reset)
+                TableEditorPanel.showEditor(targetModel.getColumnNames(), prevVisibleColumns, // initial columns 
+                        targetModel.getColumnNames(), targetModel.getColumnNames(), // default columns (button reset)
                         new ArrayList<>(0), newVisibleColumns, // resulting columns
                         TABLE_EDITOR_DIMENSION_KEY
                 );
@@ -137,13 +136,13 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
     private void setVisibleColumnNames(final List<String> visibleColumnNames) {
         logger.debug("setVisibleColumnNames: {}", visibleColumnNames);
 
-        obsTableSorter.setVisibleColumnNames(visibleColumnNames);
+        targetTableSorter.setVisibleColumnNames(visibleColumnNames);
         // save preference after resultSetTableSorter updated:
         updateVisibleColumnsPreferences();
     }
 
     private void updateVisibleColumnsPreferences() {
-        final List<String> visibleColumnNames = obsTableSorter.getVisibleColumnNames();
+        final List<String> visibleColumnNames = targetTableSorter.getVisibleColumnNames();
         logger.debug("updateVisibleColumnsPreferences: {}", visibleColumnNames);
         Preferences.getInstance().setObsTableVisibleColumns(visibleColumnNames);
     }
@@ -156,16 +155,13 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
      */
     @Override
     public void onProcess(final ObservationEvent event) {
-
         if (logger.isDebugEnabled()) {
             logger.debug("event [{}] process IN", event.getType());
         }
         switch (event.getType()) {
-            case REFRESH:
-            case REFRESH_UV:
-                setData(prepareObsTargetList(event.getObservationCollection()));
+            case TARGET_CHANGED:
+                setData(event.getObservation());
                 break;
-            // TODO: use observaebilityDone event to get obsData too ?
             default:
         }
         if (logger.isDebugEnabled()) {
@@ -173,25 +169,26 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
         }
     }
 
-    public ObservationTablePanel setData(final List<TargetObservation> obsTargetList) {
-        this.obsTargetList = obsTargetList;
+    public TargetTablePanel setData(final ObservationSetting observation) {
+        this.targetList = observation.getTargets();
+        this.targetUserInfos = observation.getOrCreateTargetUserInfos();
         filterData();
         return this;
     }
 
     public void resetFilters() {
-
+        // TODO
     }
 
     private void filterData() {
-        List<TargetObservation> filtered = null;
+        List<Target> filtered = null;
 
-        if (obsTargetList != null) {
-            // TODO: filter observations (and targets)
+        if (targetList != null) {
+            // TODO: filter targets
             // no filter:
-            filtered = obsTargetList;
+            filtered = targetList;
         }
-        obsModel.setData(filtered);
+        targetModel.setData(filtered, this.targetUserInfos);
     }
 
     /** This method is called from within the constructor to
@@ -208,7 +205,7 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
         jLabelFilterBy = new javax.swing.JLabel();
         jPanelHeaderFiller = new javax.swing.JPanel();
         jScrollPaneTable = new javax.swing.JScrollPane();
-        jTableObs = new javax.swing.JTable();
+        jTableTarget = new javax.swing.JTable();
 
         setName("Form"); // NOI18N
         setLayout(new java.awt.BorderLayout());
@@ -237,11 +234,11 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
         jScrollPaneTable.setPreferredSize(new java.awt.Dimension(100, 100));
         jScrollPaneTable.setViewportView(null);
 
-        jTableObs.setModel(obsModel);
-        jTableObs.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        jTableObs.setMinimumSize(new java.awt.Dimension(50, 50));
-        jTableObs.setName("jTableObs"); // NOI18N
-        jScrollPaneTable.setViewportView(jTableObs);
+        jTableTarget.setModel(targetModel);
+        jTableTarget.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        jTableTarget.setMinimumSize(new java.awt.Dimension(50, 50));
+        jTableTarget.setName("jTableTarget"); // NOI18N
+        jScrollPaneTable.setViewportView(jTableTarget);
 
         add(jScrollPaneTable, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
@@ -252,18 +249,18 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
     private javax.swing.JPanel jPanelHeader;
     private javax.swing.JPanel jPanelHeaderFiller;
     private javax.swing.JScrollPane jScrollPaneTable;
-    private javax.swing.JTable jTableObs;
+    private javax.swing.JTable jTableTarget;
     // End of variables declaration//GEN-END:variables
 
     // --- TEST ---
     private static void showFrameData(final int frameCloseOperation, final String title,
-                                      final List<TargetObservation> obsTargetList) {
+                                      final ObservationSetting observation) {
         final JFrame frame = new JFrame(title);
         frame.setDefaultCloseOperation(frameCloseOperation);
 
         frame.setMinimumSize(new Dimension(800, 800)); // test
 
-        frame.add(new ObservationTablePanel().setData(obsTargetList));
+        frame.add(new TargetTablePanel().setData(observation));
         frame.pack();
         frame.setVisible(true);
     }
@@ -284,40 +281,13 @@ public final class ObservationTablePanel extends javax.swing.JPanel implements B
                     ObservationManager.getInstance().load(file);
                     final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
-                    showFrameData(JFrame.EXIT_ON_CLOSE, "Observations", prepareObsTargetList(observation));
+                    showFrameData(JFrame.EXIT_ON_CLOSE, "Observations", observation);
 
                 } catch (IOException ioe) {
                     logger.error("IO exception occured:", ioe);
                 }
             }
         });
-    }
-
-    private static List<TargetObservation> prepareObsTargetList(final ObservationSetting observation) {
-        if (observation == null) {
-            return null;
-        }
-        // Mimic ObservationManager.getInstance().getObservationCollection():
-        final List<TargetObservation> obsTargetList = new ArrayList<TargetObservation>();
-        //for (ObservationSetting observation : obs collection)
-        for (Target target : observation.getDisplayTargets()) {
-            obsTargetList.add(new TargetObservation(observation, target));
-        }
-        return obsTargetList;
-    }
-
-    private static List<TargetObservation> prepareObsTargetList(final ObservationCollection obsCollection) {
-        if (obsCollection == null) {
-            return null;
-        }
-        // Mimic ObservationManager.getInstance().getObservationCollection():
-        final List<TargetObservation> obsTargetList = new ArrayList<TargetObservation>();
-        for (ObservationSetting observation : obsCollection.getObservations()) {
-            for (Target target : observation.getDisplayTargets()) {
-                obsTargetList.add(new TargetObservation(observation, target));
-            }
-        }
-        return obsTargetList;
     }
 
 }

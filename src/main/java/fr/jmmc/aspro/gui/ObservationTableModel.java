@@ -9,8 +9,9 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.rawobs.ObservationType;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.util.TargetObservation;
+import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.jmcs.model.ColumnDesc;
-import fr.jmmc.jmcs.model.ColumnDescTableModel;
+import fr.jmmc.jmcs.model.ColumnDescURLTableModel;
 import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Laurent BOURGES
  */
-public final class ObservationTableModel extends ColumnDescTableModel {
+public final class ObservationTableModel extends ColumnDescURLTableModel {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -103,11 +104,22 @@ public final class ObservationTableModel extends ColumnDescTableModel {
         fireTableDataChanged();
     }
 
+    @Override
     public boolean hasURL(final int column) {
+        if (column == ColumnDef.TARGET_NAME.ordinal()) {
+            return true;
+        }
         return false;
     }
 
+    @Override
     public String getURL(final int column, final int row) {
+        final String id = (String) getValueAt(row, column);
+        if (id != null) {
+            if (column == ColumnDef.TARGET_NAME.ordinal()) {
+                return TargetUtils.getSimbadURL(id);
+            }
+        }
         return null;
     }
 
@@ -211,38 +223,4 @@ public final class ObservationTableModel extends ColumnDescTableModel {
         return null;
     }
 
-    /**
-     * Returns true if the cell at
-     * <code>rowIndex</code> and
-     * <code>columnIndex</code>
-     * is editable. Otherwise,
-     * <code>setValueAt</code> on the cell will not
-     * change the value of that cell.
-     *
-     * @param	rowIndex	the row whose value to be queried
-     * @param	columnIndex	the column whose value to be queried
-     * @return	true if the cell is editable
-     * @see #setValueAt
-     */
-    @Override
-    public boolean isCellEditable(final int rowIndex, final int columnIndex) {
-        return hasURL(columnIndex);
-    }
-
-    /**
-     * Sets the value in the cell at
-     * <code>columnIndex</code> and
-     * <code>rowIndex</code> to
-     * <code>aValue</code>.
-     *
-     * @param	aValue	the new value
-     * @param	rowIndex	the row whose value is to be changed
-     * @param	columnIndex the column whose value is to be changed
-     * @see #getValueAt
-     * @see #isCellEditable
-     */
-    @Override
-    public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
-        // no-op
-    }
 }

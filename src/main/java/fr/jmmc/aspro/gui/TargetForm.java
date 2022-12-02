@@ -19,9 +19,9 @@ import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.TargetDEComparator;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
+import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.star.StarResolver;
-import static fr.jmmc.jmal.star.StarResolver.SIMBAD_MAIN_URL;
 import fr.jmmc.jmal.star.StarResolverListener;
 import fr.jmmc.jmal.star.StarResolverResult;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
@@ -79,8 +79,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private static final long serialVersionUID = 1;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(TargetForm.class.getName());
-    /** Simbad URL (query by identifier) */
-    private static final String SIMBAD_QUERY_ID = SIMBAD_MAIN_URL + "sim-id?Ident=";
     /** Vizier SED URL (query by identifier) */
     private static final String VIZIER_SED_QUERY_ID = "http://cdsportal.u-strasbg.fr/gadgets/ifr?url=http://cdsportal.unistra.fr/widgets/SED_plotter.xml&SED_plot_radius=1&SED_plot_object=";
     /** Mag converter URL */
@@ -1644,11 +1642,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }// </editor-fold>//GEN-END:initComponents
 
   private void jButtonSimbadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSimbadActionPerformed
-      final String url = SIMBAD_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
-
-      logger.debug("Simbad url = {}", url);
-
-      BrowserLauncher.openURL(url);
+      TargetUtils.openSimbad(this.currentTarget.getName());
   }//GEN-LAST:event_jButtonSimbadActionPerformed
 
     private void jButtonDeleteTargetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteTargetActionPerformed

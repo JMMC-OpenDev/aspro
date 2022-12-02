@@ -10,8 +10,11 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.CoordUtils;
 import fr.jmmc.jmal.star.Star;
+import static fr.jmmc.jmal.star.StarResolver.SIMBAD_MAIN_URL;
+import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
+import fr.jmmc.jmcs.util.UrlUtils;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +27,8 @@ public final class TargetUtils {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(TargetUtils.class.getName());
+    /** Simbad URL (query by identifier) */
+    public static final String SIMBAD_QUERY_ID = SIMBAD_MAIN_URL + "sim-id?Ident=";
 
     /** distance in degrees to consider same targets = 5 arcsecs */
     public final static double SAME_TARGET_DISTANCE = 5d * fr.jmmc.jmal.ALX.ARCSEC_IN_DEGREES;
@@ -36,6 +41,22 @@ public final class TargetUtils {
      */
     private TargetUtils() {
         // no-op
+    }
+
+    public static String getSimbadURL(final String id) {
+        if (!StringUtils.isEmpty(id)) {
+            return SIMBAD_QUERY_ID + UrlUtils.encode(id);
+        }
+        return null;
+    }
+
+    public static void openSimbad(final String id) {
+        final String url = getSimbadURL(id);
+        if (url != null) {
+            logger.debug("Simbad url = {}", url);
+
+            BrowserLauncher.openURL(url);
+        }
     }
 
     /**

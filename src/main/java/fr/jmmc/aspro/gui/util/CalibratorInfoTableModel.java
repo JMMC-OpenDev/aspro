@@ -236,19 +236,6 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
     }
 
     /**
-     * Returns false
-     *
-     * @param	rowIndex	the row whose value to be queried
-     * @param	columnIndex	the column whose value to be queried
-     * @return	true if the cell is editable
-     * @see #setValueAt
-     */
-    @Override
-    public boolean isCellEditable(final int rowIndex, final int columnIndex) {
-        return false;
-    }
-
-    /**
      * Returns the number of rows in the model. A
      * <code>JTable</code> uses this method to determine how many rows it
      * should display.  This method should be quick, as it
@@ -290,6 +277,19 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
         }
 
         return null;
+    }
+
+    /**
+     * Returns false
+     *
+     * @param	rowIndex	the row whose value to be queried
+     * @param	columnIndex	the column whose value to be queried
+     * @return	true if the cell is editable
+     * @see #setValueAt
+     */
+    @Override
+    public boolean isCellEditable(final int rowIndex, final int columnIndex) {
+        return false;
     }
 
     /**

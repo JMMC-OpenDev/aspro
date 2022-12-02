@@ -57,6 +57,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     public static final String TAB_OBS_DESC = "Notebook";
     /** name of the tab pane corresponding to the observation panel */
     public static final String TAB_OBS_PLAN = "Obs plan";
+    /** name of the tab pane corresponding to the target panel */
+    public static final String TAB_TARGETS = "Targets";
     /** name of the tab pane corresponding to the interferometer map */
     public static final String TAB_INTERFEROMETER_MAP = "Map";
     /** name of the tab pane corresponding to the observability panel */
@@ -222,8 +224,6 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         // create the observation description form:
         final ObservationDescriptionForm obsDescForm = new ObservationDescriptionForm();
         obsDescForm.setName("obsDescForm");
-
-        // add the map panel :
         this.jTabbedPane.addTab(TAB_OBS_DESC, obsDescForm);
 
         // register the observation form as an observation listener :
@@ -233,19 +233,23 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
             // create the observation table:
             final ObservationTablePanel obsTablePanel = new ObservationTablePanel();
             obsTablePanel.setName("obsTablePanel");
-
-            // add the map panel :
             this.jTabbedPane.addTab(TAB_OBS_PLAN, obsTablePanel);
 
             // register the observation form as an observation listener :
             ObservationManager.getInstance().register(obsTablePanel);
         }
 
+        // create the target table:
+        final TargetTablePanel targetTablePanel = new TargetTablePanel();
+        targetTablePanel.setName("targetTablePanel");
+        this.jTabbedPane.addTab(TAB_TARGETS, targetTablePanel);
+
+        // register the observation form as an observation listener :
+        ObservationManager.getInstance().register(targetTablePanel);
+
         // create the map panel :
         final InterferometerMapPanel mapPanel = new InterferometerMapPanel();
         mapPanel.setName("mapPanel");
-
-        // add the map panel :
         this.jTabbedPane.addTab(TAB_INTERFEROMETER_MAP, mapPanel);
 
         // register the map panel as an observation listener before the observation form (listener 2) :
