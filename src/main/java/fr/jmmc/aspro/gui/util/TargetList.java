@@ -140,13 +140,13 @@ public final class TargetList extends JList {
                         startGroups = false;
                         sb.append("<hr><b>Groups</b>:");
                     }
-                    sb.append("&nbsp;<span style=\"color:")
+                    sb.append("<span style=\"color:")
                             .append(ColorEncoder.encode(group.getOverDecodedColor()))
                             .append(";background:")
                             .append(ColorEncoder.encode(group.getDecodedColor()))
                             .append("\">&nbsp;")
                             .append(group.getName())
-                            .append("&nbsp;</span>");
+                            .append("&nbsp;</span>&nbsp;");
                     if (++n == 4) {
                         sb.append("<br>");
                         n = 0;
