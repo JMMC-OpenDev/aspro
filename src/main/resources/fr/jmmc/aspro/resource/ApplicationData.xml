@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.12 beta 3"/>
+    <program name="Aspro2" version="22.12 beta 4"/>
     <compilation date="02/12/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -248,7 +248,11 @@
 
     <releasenotes>
         <release version="22.12">
-            <pubDate>Fri, 02 Dec 2022 17:00:00 GMT</pubDate>
+            <pubDate>Fri, 08 Dec 2022 17:00:00 GMT</pubDate>
+            <prerelease version="22.12 beta 4">
+                <!-- table enhancements -->
+                <!-- fix OBXML export NPE -->
+            </prerelease>
             <prerelease version="22.12 beta 3">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/26">Added new Targets table: show all properties (sortable)</change>
             </prerelease>
