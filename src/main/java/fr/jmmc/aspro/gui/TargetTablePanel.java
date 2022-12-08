@@ -73,7 +73,7 @@ public final class TargetTablePanel extends javax.swing.JPanel implements BasicT
                 if ((e.getSource() != targetTableSorter)
                         || (e.getFirstRow() == TableModelEvent.HEADER_ROW)) {
 
-                    AutofitTableColumns.autoResizeTable(jTableTarget, true, true);
+                    AutofitTableColumns.autoResizeTable(jTableTarget);
                 }
             }
         });
@@ -189,6 +189,10 @@ public final class TargetTablePanel extends javax.swing.JPanel implements BasicT
             filtered = targetList;
         }
         targetModel.setData(filtered, this.targetUserInfos);
+
+        // force to display all (new ones):
+        // TODO: preserve user defined selection of columns!
+        setVisibleColumnNames(targetModel.getColumnNames());
     }
 
     /** This method is called from within the constructor to

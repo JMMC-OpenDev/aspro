@@ -5,6 +5,8 @@ package fr.jmmc.aspro.gui;
 
 import static fr.jmmc.aspro.model.OIBase.isEmpty;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.BaseValue;
+import fr.jmmc.aspro.model.oi.CalibratorInformations;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetGroupMembers;
@@ -17,7 +19,9 @@ import fr.jmmc.jmcs.model.ColumnDescURLTableModel;
 import fr.jmmc.jmcs.util.ColorEncoder;
 import java.io.StringWriter;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +36,13 @@ public final class TargetTableModel extends ColumnDescURLTableModel {
     private static final long serialVersionUID = 1;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(TargetTableModel.class.getName());
+
+    /** source value = Target (1) */
+    public static final int SOURCE_TARGET = 1;
+    /** source value = ExtraInformations parameters (2) */
+    public static final int SOURCE_EXTRA_PARAMS = 2;
+    /** source value = ExtraInformations fields (3) */
+    public static final int SOURCE_EXTRA_FIELDS = 3;
 
     /** Column definition enum */
     private enum ColumnDef {
@@ -93,8 +104,8 @@ public final class TargetTableModel extends ColumnDescURLTableModel {
         /* members */
         private final ColumnDesc columnDesc;
 
-        private ColumnDef(String label, Class<?> dataClass) {
-            this.columnDesc = new ColumnDesc(name(), dataClass, ColumnDesc.SOURCE_UNDEFINED, label);
+        private ColumnDef(final String label, final Class<?> dataClass) {
+            this.columnDesc = new ColumnDesc(name(), dataClass, SOURCE_TARGET, label);
         }
 
         public ColumnDesc getColumnDesc() {
@@ -115,10 +126,6 @@ public final class TargetTableModel extends ColumnDescURLTableModel {
      */
     public TargetTableModel() {
         super();
-        // define fixed columns:
-        for (ColumnDef c : ColumnDef.values()) {
-            listColumnDesc.add(c.getColumnDesc());
-        }
     }
 
     /**
@@ -133,8 +140,78 @@ public final class TargetTableModel extends ColumnDescURLTableModel {
         this._targetList = (targets != null) ? targets : EMPTY;
         this._targetUserInfos = targetUserInfos;
 
-        // fire the table data changed event :
+        // Fusion of columns:
+        listColumnDesc.clear();
+
+        // 1. we create a set of columns, uniques by getName()
+        final Set<String> columnDescNames = new HashSet<>(64);
+
+        // 1. define fixed columns:
+        for (ColumnDef c : ColumnDef.values()) {
+            final String name = c.getColumnDesc().getName();
+
+            if (!columnDescNames.contains(name)) {
+                columnDescNames.add(name);
+                listColumnDesc.add(c.getColumnDesc());
+            }
+        }
+
+        if (targets != null) {
+            // 2. we add extraInformations columns to the list of columns:
+            final java.util.HashSet<String> usedNames = new java.util.HashSet<String>(64);
+
+            // add all parameters:
+            for (Target target : targets) {
+                final CalibratorInformations calInfos = target.getCalibratorInfos();
+                if (calInfos != null) {
+                    for (final BaseValue value : calInfos.getParameters()) {
+                        if (!usedNames.contains(value.getName())) {
+                            usedNames.add(value.getName());
+                            addColumnDef(value, SOURCE_EXTRA_PARAMS);
+                        }
+                    }
+                }
+            }
+
+            // Secondly add all fields :
+            usedNames.clear();
+
+            // add all parameters:
+            for (Target target : targets) {
+                final CalibratorInformations calInfos = target.getCalibratorInfos();
+                if (calInfos != null) {
+                    for (final BaseValue value : calInfos.getFields()) {
+                        if (!usedNames.contains(value.getName())) {
+                            usedNames.add(value.getName());
+                            addColumnDef(value, SOURCE_EXTRA_FIELDS);
+                        }
+                    }
+                }
+            }
+
+        }
+        logger.info("setData: listColumnDesc: {}", listColumnDesc);
+
+        // notify changes
+        fireTableStructureChanged();
         fireTableDataChanged();
+    }
+
+    private void addColumnDef(final BaseValue value, final int source) {
+        final Class<?> dataClass;
+
+        switch (value.getClass().getSimpleName()) {
+            case "BooleanValue":
+                dataClass = Boolean.class;
+                break;
+            case "NumberValue":
+                dataClass = Double.class;
+                break;
+            case "StringValue":
+            default:
+                dataClass = String.class;
+        }
+        listColumnDesc.add(new ColumnDesc(value.getName(), dataClass, source));
     }
 
     @Override
@@ -195,9 +272,29 @@ public final class TargetTableModel extends ColumnDescURLTableModel {
     public Object getValueAt(final int rowIndex, final int columnIndex) {
         final Target target = getTargetAt(rowIndex);
         final TargetUserInformations targetUserInfos = this._targetUserInfos;
+        final CalibratorInformations calInfos = target.getCalibratorInfos();
 
         final ColumnDesc columnDesc = getColumnDesc(columnIndex);
 
+        switch (columnDesc.getSource()) {
+            case SOURCE_TARGET:
+                return getTargetValue(columnDesc, target, targetUserInfos);
+            case SOURCE_EXTRA_PARAMS:
+                if (calInfos != null) {
+                    return getExtraValue(columnDesc, calInfos.getParameter(columnDesc.getName()));
+                }
+                break;
+            case SOURCE_EXTRA_FIELDS:
+                if (calInfos != null) {
+                    return getExtraValue(columnDesc, calInfos.getField(columnDesc.getName()));
+                }
+                break;
+            default:
+        }
+        return null;
+    }
+
+    private Object getTargetValue(final ColumnDesc columnDesc, final Target target, final TargetUserInformations targetUserInfos) {
         switch (ColumnDef.valueOf(columnDesc.getName())) {
             case ID:
                 return target.getIdentifier();
@@ -294,6 +391,21 @@ public final class TargetTableModel extends ColumnDescURLTableModel {
         return null;
     }
 
+    private Object getExtraValue(final ColumnDesc columnDesc, final BaseValue value) {
+        if (value != null) {
+            switch (columnDesc.getDataClass().getSimpleName()) {
+                case "Boolean":
+                    return value.getBoolean();
+                case "Double":
+                    return value.getNumber();
+                case "String":
+                default:
+                    return value.getString();
+            }
+        }
+        return null;
+    }
+
     /** Create a 4K buffer for models */
     private final static StringWriter SW = new StringWriter(4096); // 4K buffer
 
@@ -332,13 +444,13 @@ public final class TargetTableModel extends ColumnDescURLTableModel {
                     startGroups = false;
                     sb.append("<html>");
                 }
-                sb.append("&nbsp;<span style=\"color:")
+                sb.append("<span style=\"color:")
                         .append(ColorEncoder.encode(group.getOverDecodedColor()))
                         .append(";background:")
                         .append(ColorEncoder.encode(group.getDecodedColor()))
                         .append("\">&nbsp;")
                         .append(group.getName())
-                        .append("&nbsp;</span>");
+                        .append("&nbsp;</span>&nbsp;");
             }
         }
         return (startGroups) ? null : sb.append("</html>").toString();
