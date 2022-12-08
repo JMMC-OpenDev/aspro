@@ -115,9 +115,9 @@ public class ExportOBXml {
      * @throws IOException if an I/O exception occured while writing the observing block
      */
     public static void process(final File file,
-                               final ObservationSetting observation,
-                               final ObservabilityService os,
-                               final Target target) throws IOException {
+            final ObservationSetting observation,
+            final ObservabilityService os,
+            final Target target) throws IOException {
 
         if (logger.isDebugEnabled()) {
             logger.debug("process target {} to file: ", target.getName(), file);
@@ -143,9 +143,9 @@ public class ExportOBXml {
      * @throws IOException if an I/O exception occurred while writing the observing block
      */
     private static void fill(final ObservingBlockDefinition obd,
-                             final ObservationSetting observation,
-                             final ObservabilityService os,
-                             final Target target) throws IllegalStateException, IOException {
+            final ObservationSetting observation,
+            final ObservabilityService os,
+            final Target target) throws IllegalStateException, IOException {
 
         final TargetConfiguration targetConf = target.getConfiguration();
 
@@ -197,7 +197,7 @@ public class ExportOBXml {
     }
 
     private static InterferometerConfiguration getInterferometerConfiguration(final ObservationSetting observation,
-                                                                              final TargetConfiguration targetConf) {
+            final TargetConfiguration targetConf) {
 
         final InterferometerConfiguration intConf = new InterferometerConfiguration();
 
@@ -241,7 +241,7 @@ public class ExportOBXml {
     }
 
     private static InstrumentConfiguration getInstrumentConfiguration(final ObservationSetting observation,
-                                                                      final TargetConfiguration targetConf) {
+            final TargetConfiguration targetConf) {
 
         final InstrumentConfiguration insConf = new InstrumentConfiguration();
 
@@ -294,8 +294,8 @@ public class ExportOBXml {
     }
 
     private static ObservationConfiguration getObservationConfiguration(final ObservationSetting observation,
-                                                                        final ObservabilityService os,
-                                                                        final Target target) {
+            final ObservabilityService os,
+            final Target target) {
 
         final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
         final boolean isCalibrator = (targetUserInfos != null && targetUserInfos.isCalibrator(target));
@@ -448,52 +448,49 @@ public class ExportOBXml {
         if (target.getFLUXN() != null) {
             t.setFLUXNJY(NumberUtils.trimTo3Digits(Band.N.magToJy(target.getFLUXN())));
         }
-        
-        // Copy calInfo into extraInfos
+
+        // Copy calInfo into extraInfos if not null
         final CalibratorInformations calInfos = target.getCalibratorInfos();
-        final ExtraInformations extraInfos = new ExtraInformations();
-        
-        for (BaseValue oiValue : calInfos.getFields()) {            
-            extraInfos.getFields().add(getOBValue(oiValue));
+        if (calInfos != null) {
+            final ExtraInformations extraInfos = new ExtraInformations();
+            for (BaseValue oiValue : calInfos.getFields()) {
+                extraInfos.getFields().add(getOBValue(oiValue));
+            }
+            for (BaseValue oiValue : calInfos.getParameters()) {
+                extraInfos.getParameters().add(getOBValue(oiValue));
+            }
+            t.setEXTRAINFORMATIONS(extraInfos);
         }
-        
-        for (BaseValue oiValue : calInfos.getParameters()) {            
-            extraInfos.getParameters().add(getOBValue(oiValue));
-        }
-                
-        t.setEXTRAINFORMATIONS(extraInfos);
-        
-       
 
         return t;
     }
-    
-    private static fr.jmmc.aspro.model.ob.BaseValue getOBValue ( BaseValue oiValue){
-        
-        if (oiValue instanceof BooleanValue){
-                fr.jmmc.aspro.model.ob.BooleanValue b = new fr.jmmc.aspro.model.ob.BooleanValue();                
-                b.setValue(oiValue.getBoolean()); 
-                b.setName(oiValue.getName());
-                b.setUnit(oiValue.getUnit());
-                return b;
+
+    private static fr.jmmc.aspro.model.ob.BaseValue getOBValue(BaseValue oiValue) {
+
+        if (oiValue instanceof BooleanValue) {
+            fr.jmmc.aspro.model.ob.BooleanValue b = new fr.jmmc.aspro.model.ob.BooleanValue();
+            b.setValue(oiValue.getBoolean());
+            b.setName(oiValue.getName());
+            b.setUnit(oiValue.getUnit());
+            return b;
         }
-        
-        if (oiValue instanceof NumberValue){                
-                fr.jmmc.aspro.model.ob.NumberValue n = new fr.jmmc.aspro.model.ob.NumberValue();                
-                n.setValue(oiValue.getNumber()); 
-                n.setName(oiValue.getName());
-                n.setUnit(oiValue.getUnit());
-                return n;
+
+        if (oiValue instanceof NumberValue) {
+            fr.jmmc.aspro.model.ob.NumberValue n = new fr.jmmc.aspro.model.ob.NumberValue();
+            n.setValue(oiValue.getNumber());
+            n.setName(oiValue.getName());
+            n.setUnit(oiValue.getUnit());
+            return n;
         }
-        
-        if (oiValue instanceof StringValue){
-                fr.jmmc.aspro.model.ob.StringValue s = new fr.jmmc.aspro.model.ob.StringValue();
-                s.setValue(oiValue.getString());
-                s.setName(oiValue.getName());
-                s.setUnit(oiValue.getUnit());
-                return s;
-        }        
-        
+
+        if (oiValue instanceof StringValue) {
+            fr.jmmc.aspro.model.ob.StringValue s = new fr.jmmc.aspro.model.ob.StringValue();
+            s.setValue(oiValue.getString());
+            s.setName(oiValue.getName());
+            s.setUnit(oiValue.getUnit());
+            return s;
+        }
+
         return null;
     }
 
@@ -618,8 +615,8 @@ public class ExportOBXml {
      * @return standard file name
      */
     private static String generateFileName(final ObservationSetting observation, final String targetName,
-                                           final String prefix, final String suffix,
-                                           final String extension) {
+            final String prefix, final String suffix,
+            final String extension) {
 
         final StringBuilder sb = new StringBuilder(32);
         if (prefix != null) {
