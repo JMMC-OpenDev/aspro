@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.12 beta 4"/>
-    <compilation date="02/12/2022" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="22.12 beta 5"/>
+    <compilation date="14/12/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -178,12 +178,7 @@
             <menu label="Export to OIFits file" classpath="fr.jmmc.aspro.gui.action.ExportOIFitsAction" action="exportOIFits" accelerator="F"
                   description="Export your simulated data to one OIFits file"/>
             <menu/> <!-- menu separator -->
-            <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="B"
-                  description="Export your observation of the selected target to an Observing block"/>
-            <menu label="Export targets to Observing Blocks" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOB"
-                  description="Export your complete observation to Observing blocks"/>
-            <menu/> <!-- menu separator -->
-            <menu label="Export to an Observing Block (XML)" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOBXML"
+            <menu label="Export to an Observing Block (XML)" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOBXML" accelerator="B"
                   description="Export your observation of the selected target to an Observing block XML file"/>
             <!--
                 <menu label="Export targets to Observing Blocks (XML)" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOBXML"
@@ -249,6 +244,9 @@
     <releasenotes>
         <release version="22.12">
             <pubDate>Fri, 08 Dec 2022 17:00:00 GMT</pubDate>
+            <prerelease version="22.12 beta 4">
+                <change type="CHANGE" url="https://github.com/JMMC-OpenDev/aspro/issues/29">Deprecates ExportOB actions. Please use a2p2 for a better interoperability with ESO/P2.</change>
+            </prerelease>
             <prerelease version="22.12 beta 4">
                 <!-- table enhancements -->
                 <!-- fix OBXML export NPE -->
