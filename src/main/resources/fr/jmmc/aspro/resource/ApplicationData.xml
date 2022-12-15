@@ -19,7 +19,7 @@
     </company>
 
     <program name="Aspro2" version="22.12 beta 5"/>
-    <compilation date="14/12/2022" compiler="JDK 1.8.0"/>
+    <compilation date="15/12/2022" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -243,9 +243,10 @@
 
     <releasenotes>
         <release version="22.12">
-            <pubDate>Fri, 08 Dec 2022 17:00:00 GMT</pubDate>
-            <prerelease version="22.12 beta 4">
-                <change type="CHANGE" url="https://github.com/JMMC-OpenDev/aspro/issues/29">Deprecates ExportOB actions. Please use a2p2 for a better interoperability with ESO/P2.</change>
+            <pubDate>Thu, 15 Dec 2022 10:00:00 GMT</pubDate>
+            <prerelease version="22.12 beta 5">
+                <change type="CHANGE" url="https://github.com/JMMC-OpenDev/aspro/issues/30">Change default value for the Observability checkbox Scroll view (was true): everything is shown</change>
+                <change type="CHANGE" url="https://github.com/JMMC-OpenDev/aspro/issues/29">Deprecates ExportOB actions. Please use a2p2 for a better interoperability with ESO/P2</change>
             </prerelease>
             <prerelease version="22.12 beta 4">
                 <!-- table enhancements -->

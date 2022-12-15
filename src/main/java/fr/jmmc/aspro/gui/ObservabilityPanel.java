@@ -23,7 +23,6 @@ import fr.jmmc.aspro.gui.util.ObservabilityFilter;
 import fr.jmmc.aspro.gui.util.TargetGroupRenderer;
 import fr.jmmc.aspro.model.ObservationCollectionObsData;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.event.ObservationEvent;
@@ -64,6 +63,7 @@ import fr.jmmc.oiexplorer.core.gui.chart.BoundedDateAxis;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
 import fr.jmmc.oiexplorer.core.gui.chart.dataset.SharedSeriesAttributes;
+import fr.jmmc.oitools.model.range.Range;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -286,7 +286,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     /** default value for the checkbox Show related */
     private static final boolean DEFAULT_DO_SHOW_RELATED = true;
     /** default value for the checkbox Scroll view */
-    private static final boolean DEFAULT_DO_SCROLL_VIEW = true;
+    private static final boolean DEFAULT_DO_SCROLL_VIEW = false;
 
     /* members */
     /** preference singleton */
