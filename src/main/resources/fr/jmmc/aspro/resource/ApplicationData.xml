@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="22.12"/>
-    <compilation date="15/12/2022" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="23.03 beta 1"/>
+    <compilation date="01/03/2023" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -242,11 +242,18 @@
     </menubar>
 
     <releasenotes>
+        <release version="23.03">
+            <pubDate>Thu, 15 Dec 2022 10:00:00 GMT</pubDate>
+            <prerelease version="23.03 beta 1">
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/33">Added double-path support for VLTI delay lines (Extended baselines with AT4 on J6 station)</change>
+                <change type="CHANGE" url="https://github.com/JMMC-OpenDev/aspro/issues/30">Changed the default value for the UV Coverage's Model image to SQUARE (visibility)</change>
+                </prerelease>
+        </release>
         <release version="22.12">
             <pubDate>Thu, 15 Dec 2022 10:00:00 GMT</pubDate>
             <prerelease version="22.12 beta 5">
-                <change type="CHANGE" url="https://github.com/JMMC-OpenDev/aspro/issues/30">Change default value for the Observability checkbox Scroll view (was true): everything is shown</change>
-                <change type="CHANGE" url="https://github.com/JMMC-OpenDev/aspro/issues/29">Deprecates ExportOB actions. Please use a2p2 for a better interoperability with ESO/P2</change>
+                <change type="CHANGE" url="https://github.com/JMMC-OpenDev/aspro/issues/30">Changed the default value for the Observability checkbox 'Scroll view' to false: all observations are displayed</change>
+                <change type="CHANGE" url="https://github.com/JMMC-OpenDev/aspro/issues/29">Deprecated ExportOB actions: please use the JMMC a2p2 tool for a better interoperability with ESO/P2</change>
             </prerelease>
             <prerelease version="22.12 beta 4">
                 <!-- table enhancements -->
