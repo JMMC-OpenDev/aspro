@@ -610,7 +610,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jPanelLeft.add(jSeparator2, gridBagConstraints);
 
         jCheckBoxModelImage.setSelected(true);
-        jCheckBoxModelImage.setText("<html>Underplot a model image</html>");
+        jCheckBoxModelImage.setText("<html>Show the model image</html>");
+        jCheckBoxModelImage.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxModelImageActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 26;
@@ -618,10 +623,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         jPanelLeft.add(jCheckBoxModelImage, gridBagConstraints);
 
-        jLabelImageMode.setText("Plot what ...");
+        jLabelImageMode.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jLabelImageMode.setText("axis:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 27;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
         jPanelLeft.add(jLabelImageMode, gridBagConstraints);
 
         jComboBoxImageMode.setModel(new DefaultComboBoxModel(ImageMode.values()));
@@ -693,6 +701,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         add(jSplitPane, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jCheckBoxModelImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxModelImageActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jCheckBoxModelImageActionPerformed
 
     /**
      * Export Observing Block(s) (OB)
@@ -1543,7 +1555,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // reset to defaults :
             this.jCheckBoxPlotUVSupport.setSelected(true);
             this.jCheckBoxModelImage.setSelected(true);
-            this.jComboBoxImageMode.setSelectedItem(ImageMode.AMP);
+            this.jComboBoxImageMode.setSelectedItem(ImageMode.SQUARE);
 
             // reset cached data :
             setObservabilityData(null);
