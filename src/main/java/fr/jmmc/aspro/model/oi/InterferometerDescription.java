@@ -36,6 +36,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="telescope" type="{http://www.jmmc.fr/aspro-oi/0.1}Telescope" maxOccurs="unbounded"/&gt;
  *         &lt;element name="station" type="{http://www.jmmc.fr/aspro-oi/0.1}Station" maxOccurs="unbounded"/&gt;
  *         &lt;element name="channel" type="{http://www.jmmc.fr/aspro-oi/0.1}Channel" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="delayLineMode" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLineMode" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="delayLine" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLine" maxOccurs="unbounded"/&gt;
  *         &lt;element name="delayLineRestriction" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLineRestriction" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="switchyard" type="{http://www.jmmc.fr/aspro-oi/0.1}SwitchYard" maxOccurs="unbounded" minOccurs="0"/&gt;
@@ -60,6 +61,7 @@ import fr.jmmc.aspro.model.OIBase;
     "telescopes",
     "stations",
     "channels",
+    "delayLineModes",
     "delayLines",
     "delayLineRestrictions",
     "switchyards",
@@ -89,6 +91,8 @@ public class InterferometerDescription
     protected List<Station> stations;
     @XmlElement(name = "channel")
     protected List<Channel> channels;
+    @XmlElement(name = "delayLineMode")
+    protected List<DelayLineMode> delayLineModes;
     @XmlElement(name = "delayLine", required = true)
     protected List<DelayLine> delayLines;
     @XmlElement(name = "delayLineRestriction")
@@ -307,6 +311,35 @@ public class InterferometerDescription
             channels = new ArrayList<Channel>();
         }
         return this.channels;
+    }
+
+    /**
+     * Gets the value of the delayLineModes property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the delayLineModes property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getDelayLineModes().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link DelayLineMode }
+     * 
+     * 
+     */
+    public List<DelayLineMode> getDelayLineModes() {
+        if (delayLineModes == null) {
+            delayLineModes = new ArrayList<DelayLineMode>();
+        }
+        return this.delayLineModes;
     }
 
     /**

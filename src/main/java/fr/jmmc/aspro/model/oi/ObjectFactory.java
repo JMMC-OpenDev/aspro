@@ -350,11 +350,27 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link DelayLineMode }
+     * 
+     */
+    public DelayLineMode createDelayLineMode() {
+        return new DelayLineMode();
+    }
+
+    /**
      * Create an instance of {@link DelayLine }
      * 
      */
     public DelayLine createDelayLine() {
         return new DelayLine();
+    }
+
+    /**
+     * Create an instance of {@link DelayLineModeSetup }
+     * 
+     */
+    public DelayLineModeSetup createDelayLineModeSetup() {
+        return new DelayLineModeSetup();
     }
 
     /**

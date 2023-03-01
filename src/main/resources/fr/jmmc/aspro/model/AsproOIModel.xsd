@@ -1506,6 +1506,18 @@
                     </xsd:appinfo>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="delayLineMode" type="xsd:IDREF" minOccurs="0">
+                 <xsd:annotation>
+                <xsd:documentation>
+                    The delay line mode used for this configuration
+                </xsd:documentation>
+                <xsd:appinfo>
+                    <jaxb:property>
+                        <jaxb:baseType name="DelayLineMode" />
+                    </jaxb:property>
+                </xsd:appinfo>
+            </xsd:annotation>
+            </xsd:element>
             <xsd:element name="pops" type="xsd:IDREFS" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -1600,6 +1612,14 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         The list of channels for this interferometer (optional)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <xsd:element name="delayLineMode" type="DelayLineMode" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The optional delay line mode controlling the maximum throw (VLTI double-pass mode)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2183,6 +2203,34 @@
 
 
 
+    <!-- DelayLineMode -->
+    <xsd:complexType name="DelayLineMode">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes a delay line mode controlling the maximum throw
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:ID">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Delay line mode identifier ('DBL_PASS' ...)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="description" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Short description related to this delay line mode
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
     <!-- DelayLine -->
     <xsd:complexType name="DelayLine">
         <xsd:annotation>
@@ -2218,7 +2266,47 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="setup" type="DelayLineModeSetup" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Specific setup(s) associated to the delay line mode
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
         </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <!-- DelayLineModeSetup -->
+    <xsd:complexType name="DelayLineModeSetup">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the specific delay line setup associated to a delay line mode
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="maximumThrow" type="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Maximum throw in m (optical round drip i.e. 2 times the delay line position)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="mode" use="required" type="xsd:IDREF">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The delay line mode associated to this delay line setup
+                </xsd:documentation>
+                <xsd:appinfo>
+                    <jaxb:property>
+                        <jaxb:baseType name="DelayLineMode" />
+                    </jaxb:property>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
     </xsd:complexType>
 
 
@@ -2644,7 +2732,7 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         The alternative names for this instrument used to resolve former names (optional)
-                         (MIRC_5T for MIRC ...)
+                        (MIRC_5T for MIRC ...)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>

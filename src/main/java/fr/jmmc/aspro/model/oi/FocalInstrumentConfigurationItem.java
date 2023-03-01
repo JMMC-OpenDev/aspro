@@ -32,6 +32,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}IDREFS"/&gt;
  *         &lt;element name="channels" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/&gt;
  *         &lt;element name="delayLines" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/&gt;
+ *         &lt;element name="delayLineMode" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="pops" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
@@ -48,6 +49,7 @@ import fr.jmmc.aspro.model.OIBase;
     "stations",
     "channels",
     "delayLines",
+    "delayLineMode",
     "pops"
 })
 public class FocalInstrumentConfigurationItem
@@ -71,6 +73,10 @@ public class FocalInstrumentConfigurationItem
     @XmlIDREF
     @XmlSchemaType(name = "IDREFS")
     protected List<DelayLine> delayLines;
+    @XmlElement(type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREF")
+    protected DelayLineMode delayLineMode;
     @XmlList
     @XmlElement(type = Object.class)
     @XmlIDREF
@@ -210,6 +216,30 @@ public class FocalInstrumentConfigurationItem
             delayLines = new ArrayList<DelayLine>();
         }
         return this.delayLines;
+    }
+
+    /**
+     * Gets the value of the delayLineMode property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Object }
+     *     
+     */
+    public DelayLineMode getDelayLineMode() {
+        return delayLineMode;
+    }
+
+    /**
+     * Sets the value of the delayLineMode property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Object }
+     *     
+     */
+    public void setDelayLineMode(DelayLineMode value) {
+        this.delayLineMode = value;
     }
 
     /**

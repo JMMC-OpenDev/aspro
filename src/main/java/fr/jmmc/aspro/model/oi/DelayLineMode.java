@@ -14,15 +14,15 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *                 This type describes a delay line constraint of the interferometer
+ *                 This type describes a delay line mode controlling the maximum throw
  *             
  * 
- * <p>Java class for DelayLineRestriction complex type.
+ * <p>Java class for DelayLineMode complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="DelayLineRestriction"&gt;
+ * &lt;complexType name="DelayLineMode"&gt;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
@@ -37,11 +37,11 @@ import fr.jmmc.aspro.model.OIBase;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "DelayLineRestriction", propOrder = {
+@XmlType(name = "DelayLineMode", propOrder = {
     "name",
     "description"
 })
-public class DelayLineRestriction
+public class DelayLineMode
     extends OIBase
 {
 
@@ -110,7 +110,7 @@ public class DelayLineRestriction
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final DelayLineRestriction other = (DelayLineRestriction) obj;
+        final DelayLineMode other = (DelayLineMode) obj;
         return !((this.name == null) ? (other.name != null) : !this.name.equals(other.name));
     }
 
@@ -123,7 +123,7 @@ public class DelayLineRestriction
 
     @Override
     public final String toString() {
-        return "DelayLineRestriction : " + ((this.name != null) ? this.name : "undefined");
+        return "DelayLineMode : " + ((this.name != null) ? this.name : "undefined");
     }
 //--simple--preserve
 

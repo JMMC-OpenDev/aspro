@@ -166,7 +166,7 @@ public class SpectralSetup
     @Override
     public String toString() {
         return "SpectralSetup[" + getColumns()
-                + ((data != null) ? ("\ndata:\n" + java.util.Arrays.toString(data)) : "")
+                + ((data != null) ? ("\ndata:\n" + java.util.Arrays.toString(data)) : "(no-data)")
                 + "]";
     }
 
@@ -175,16 +175,20 @@ public class SpectralSetup
      * @param logger logger to use
      * @throws IllegalStateException if the configuration is severly invalid !
      */
-    public void init(final org.slf4j.Logger logger) throws IllegalStateException {
+    public void init(final org.slf4j.Logger logger, final String name) throws IllegalStateException {
         final List<SpectralSetupColumn> cols = getColumns();
         if (cols.isEmpty()) {
-            throw new IllegalStateException("Missing columns !");
+            throw new IllegalStateException("[" + name + "] Missing columns !");
         }
+        
         // check matrix size is "compatible" with column lengths:
         final int nCols = cols.size();
         final int dataLength = getDataLength();
+
+        logger.info("[" + name + "] Invalid data length [" + dataLength + "] for " + nCols + " columns !\n" + toString());
+
         if ((dataLength == 0) || (dataLength % nCols != 0)) {
-            throw new IllegalStateException("Invalid data length [" + dataLength + "] for " + nCols + " columns !");
+            throw new IllegalStateException("[" + name + "] Invalid data length [" + dataLength + "] for " + nCols + " columns !\n" + toString());
         }
         // Split 1D array into columns:
         final int nRows = dataLength / nCols;
@@ -202,7 +206,7 @@ public class SpectralSetup
         for (int j = 0; j < nCols; j++) {
             final SpectralSetupColumn column = cols.get(j);
             if (column.getQuantity() == null) {
-                throw new IllegalStateException("Invalid quantity for column[" + j + "]!");
+                throw new IllegalStateException("[" + name + "] Invalid quantity for column[" + j + "]!");
             }
             /*            
             System.out.println("getColumns["+j+"]: "+cols.get(j));
@@ -217,13 +221,13 @@ public class SpectralSetup
         SpectralSetupColumn col;
         col = getColumn(SpectralSetupQuantity.LAMBDA);
         if (col == null) {
-            throw new IllegalStateException("Missing column LAMBDA !");
+            throw new IllegalStateException("[" + name + "] Missing column LAMBDA !");
         } else {
             convertMeterToMicroMeter(col.getValues());
         }
         col = getColumn(SpectralSetupQuantity.DELTA_LAMBDA);
         if (col == null) {
-            throw new IllegalStateException("Missing column DELTA_LAMBDA !");
+            throw new IllegalStateException("[" + name + "] Missing column DELTA_LAMBDA !");
         } else {
             convertMeterToMicroMeter(col.getValues());
         }
@@ -283,7 +287,7 @@ public class SpectralSetup
         }
         return col;
     }
-    
+
     /**
      * Return the column of the given quantity and optionally matching the given telescope
      * @param quantity quantity to look up

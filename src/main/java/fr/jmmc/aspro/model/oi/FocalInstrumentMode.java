@@ -576,7 +576,7 @@ public class FocalInstrumentMode
         // setup is tested at higher level !
         // dit and ditMin are optional.
         if (this.table != null) {
-            this.table.init(logger);
+            this.table.init(logger, name);
 
             final double[] lambda = this.table.getColumn(SpectralSetupQuantity.LAMBDA).getValues();
             final double[] delta_lambda = this.table.getColumn(SpectralSetupQuantity.DELTA_LAMBDA).getValues();

@@ -727,9 +727,11 @@ public class ObservationSetting
     public void clearCacheTargets() {
         this.cachedDisplayTargets = null;
         this.cachedOrphanCalibrators = null;
+
         if (getTargetUserInfos() != null) {
             getTargetUserInfos().clearCacheGroups();
         }
+        clearCacheFilteredTargets();
     }
 
     /**
@@ -742,7 +744,7 @@ public class ObservationSetting
         if (this.cachedDisplayTargets != null) {
             return this.cachedDisplayTargets;
         }
-        computeDisplayTargets();
+        computeDisplayTargets(false);
 
         return this.cachedDisplayTargets;
     }
@@ -755,9 +757,47 @@ public class ObservationSetting
         if (this.cachedOrphanCalibrators != null) {
             return this.cachedOrphanCalibrators;
         }
-        computeDisplayTargets();
+        computeDisplayTargets(false);
 
         return this.cachedOrphanCalibrators;
+    }
+
+    @javax.xml.bind.annotation.XmlTransient
+    private List<Target> filteredTargets = null;
+
+    public List<Target> getFilteredTargets() {
+        return filteredTargets;
+    }
+
+    public void setFilteredTargets(final List<Target> filteredTargets) {
+        this.filteredTargets = filteredTargets;
+        clearCacheFilteredTargets();
+    }
+
+    /** computed displayable list of targets (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private List<Target> cachedFilteredDisplayTargets = null;
+
+    /**
+     * Clear any cached value related to targets
+     */
+    public void clearCacheFilteredTargets() {
+        this.cachedFilteredDisplayTargets = null;
+    }
+
+    /**
+     * Return the displayable list of targets containing
+     * - science targets followed by their calibrators
+     * - calibrator orphans
+     * @return displayable list of targets
+     */
+    public List<Target> getFilteredDisplayTargets() {
+        if (this.cachedFilteredDisplayTargets != null) {
+            return this.cachedFilteredDisplayTargets;
+        }
+        computeDisplayTargets(true);
+
+        return this.cachedFilteredDisplayTargets;
     }
 
     /**
@@ -765,21 +805,22 @@ public class ObservationSetting
      * - science targets followed by their calibrators
      * - calibrator orphans
      * And the set of orphan calibrators
+     * @param filtered
      */
-    private void computeDisplayTargets() {
-        final List<Target> innerTargets = getTargets();
+    private void computeDisplayTargets(final boolean filtered) {
+        final List<Target> innerTargets = (filtered) ? getFilteredTargets() : getTargets();
 
         final List<Target> displayTargets;
         final java.util.Set<Target> orphans;
 
-        if (innerTargets.isEmpty()) {
+        if ((innerTargets == null) || innerTargets.isEmpty()) {
             displayTargets = java.util.Collections.emptyList();
-            orphans = java.util.Collections.emptySet();
+            orphans = (filtered) ? null : java.util.Collections.emptySet();
         } else {
             final int len = innerTargets.size();
-
+            
             displayTargets = new ArrayList<Target>(len);
-            orphans = new java.util.HashSet<Target>(4);
+            orphans = (filtered) ? null : new java.util.HashSet<Target>(4);
 
             // map of used calibrators :
             final java.util.Map<Target, Target> usedCalibrators = new java.util.IdentityHashMap<Target, Target>(8);
@@ -788,7 +829,6 @@ public class ObservationSetting
             final TargetUserInformations localTargetUserInfos = getTargetUserInfos();
 
             for (Target target : innerTargets) {
-
                 if (localTargetUserInfos == null) {
                     // no calibrator defined, all targets are science targets :
                     displayTargets.add(target);
@@ -801,12 +841,14 @@ public class ObservationSetting
                         // calibrator targets :
                         displayTargets.add(calibrator);
 
-                        usedCalibrators.put(calibrator, calibrator);
+                        if (orphans != null) {
+                            usedCalibrators.put(calibrator, calibrator);
+                        }
                     }
                 }
             }
 
-            if (localTargetUserInfos != null) {
+            if ((orphans != null) && (localTargetUserInfos != null)) {
                 // add calibrator orphans i.e. not associated to a target :
                 for (Target calibrator : localTargetUserInfos.getCalibrators()) {
                     if (!usedCalibrators.containsKey(calibrator)) {
@@ -817,9 +859,15 @@ public class ObservationSetting
             }
         }
 
-        // cache the computed collections :
-        this.cachedDisplayTargets = displayTargets;
-        this.cachedOrphanCalibrators = orphans;
+        // cache the computed collections:
+        if (filtered) {
+            this.cachedFilteredDisplayTargets = displayTargets;
+        } else {
+            this.cachedDisplayTargets = displayTargets;
+        }
+        if (orphans != null) {
+            this.cachedOrphanCalibrators = orphans;
+        }
     }
 
     /**
