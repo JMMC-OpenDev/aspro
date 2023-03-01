@@ -1602,6 +1602,24 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
+     * Return the instrument configuration item for the given interferometer configuration, instrument name and instrument configuration
+     * @param configurationName name of the interferometer configuration
+     * @param instrumentAlias name or alias of the instrument
+     * @param instrumentConfigurationName name of the instrument configuration
+     * @return list of instrument channels or null if undefined
+     */
+    public FocalInstrumentConfigurationItem getInstrumentConfiguration(final String configurationName, final String instrumentAlias, final String instrumentConfigurationName) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
+        if (ic != null) {
+            final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
+            if (c != null) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Return the list of stations for the given interferometer configuration, instrument name and instrument configuration
      * @param insConf instrument configuration
      * @param instrumentConfigurationName name of the instrument configuration
@@ -1652,12 +1670,9 @@ public final class ConfigurationManager extends BaseOIManager {
      * @return list of instrument channels or null if undefined
      */
     public List<Channel> getInstrumentConfigurationChannels(final String configurationName, final String instrumentAlias, final String instrumentConfigurationName) {
-        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
-        if (ic != null) {
-            final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
-            if (c != null) {
-                return c.getChannels();
-            }
+        final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(configurationName, instrumentAlias, instrumentConfigurationName);
+        if (c != null) {
+            return c.getChannels();
         }
         return null;
     }
@@ -1670,12 +1685,9 @@ public final class ConfigurationManager extends BaseOIManager {
      * @return list of delay lines or null if undefined
      */
     public List<DelayLine> getInstrumentConfigurationDelayLines(final String configurationName, final String instrumentAlias, final String instrumentConfigurationName) {
-        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
-        if (ic != null) {
-            final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
-            if (c != null) {
-                return c.getDelayLines();
-            }
+        final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(configurationName, instrumentAlias, instrumentConfigurationName);
+        if (c != null) {
+            return c.getDelayLines();
         }
         return null;
     }
@@ -1688,12 +1700,9 @@ public final class ConfigurationManager extends BaseOIManager {
      * @return list of PoPs or null if undefined
      */
     public List<Pop> getInstrumentConfigurationPoPs(final String configurationName, final String instrumentAlias, final String instrumentConfigurationName) {
-        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentAlias);
-        if (ic != null) {
-            final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
-            if (c != null) {
-                return c.getPops();
-            }
+        final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(configurationName, instrumentAlias, instrumentConfigurationName);
+        if (c != null) {
+            return c.getPops();
         }
         return null;
     }

@@ -33,11 +33,13 @@ import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.ChannelLink;
 import fr.jmmc.aspro.model.oi.DelayLine;
+import fr.jmmc.aspro.model.oi.DelayLineMode;
 import fr.jmmc.aspro.model.oi.DelayLineRestriction;
 import fr.jmmc.aspro.model.oi.DelayLineRestrictionThrow;
 import fr.jmmc.aspro.model.oi.FluxCondition;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.MoonPointingRestriction;
@@ -195,6 +197,8 @@ public final class ObservabilityService {
     private boolean hasWindRestriction = false;
     /** flag to indicate that delay lines may have custom maximum throw in switchyard (ie per station ~ VLTI VCM limits) */
     private boolean hasSwitchyardDelayLineMaxThrow = false;
+    /** optional delay line mode (double-pass) */
+    private DelayLineMode modeDL = null;
     /** beam list */
     private List<Beam> beams = null;
     /** base line list */
@@ -527,6 +531,9 @@ public final class ObservabilityService {
             sb.append("- Delaylines: ");
             for (Beam b : this.beams) {
                 sb.append(b.getDelayLine().getName()).append(' ');
+            }
+            if (this.modeDL != null) {
+                sb.append('(').append(this.modeDL.getDescription()).append(')');
             }
             addInformation(sb.toString());
         }
@@ -2650,40 +2657,52 @@ public final class ObservabilityService {
 
         final int nBeams = stations.size();
 
-        // find the optional channels associated to the stations in the instrument configuration :
-        // CHARA : predefined channel per station for a specific base line :
-        final List<Channel> relatedChannels = ConfigurationManager.getInstance().getInstrumentConfigurationChannels(
+        // get the the instrument configuration :
+        final FocalInstrumentConfigurationItem insConf = ConfigurationManager.getInstance().getInstrumentConfiguration(
                 this.observation.getInterferometerConfiguration().getName(),
                 this.observation.getInstrumentConfiguration().getName(),
                 this.observation.getInstrumentConfiguration().getStations());
+
+        if (isLogDebug) {
+            logger.debug("insConf: {}", insConf);
+        }
+
+        // find the optional channels associated to the stations in the instrument configuration :
+        // CHARA/VLTI : predefined channel per station for a specific base line :
+        final List<Channel> relatedChannels = (insConf != null) ? insConf.getChannels() : null;
 
         if (isLogDebug) {
             logger.debug("relatedChannels: {}", relatedChannels);
         }
 
-        final int nRelChannels = relatedChannels.size();
-        final boolean useRelatedChannels = nRelChannels > 0;
+        final int nRelChannels = (relatedChannels != null) ? relatedChannels.size() : 0;
+        final boolean useRelatedChannels = (nRelChannels > 0);
 
-        if (useRelatedChannels && nBeams != nRelChannels) {
+        if (useRelatedChannels && (nBeams != nRelChannels)) {
             throw new IllegalStateException("The number of associated channels does not match the station list : " + stations + " <> " + relatedChannels);
         }
 
         // find the optional delay lines associated to the stations in the instrument configuration :
-        // VLTI : predefined delay line per station for a specific base line :
-        final List<DelayLine> relatedDLs = ConfigurationManager.getInstance().getInstrumentConfigurationDelayLines(
-                this.observation.getInterferometerConfiguration().getName(),
-                this.observation.getInstrumentConfiguration().getName(),
-                this.observation.getInstrumentConfiguration().getStations());
+        // CHARA/VLTI : predefined delay line per station for a specific base line :
+        final List<DelayLine> relatedDLs = (insConf != null) ? insConf.getDelayLines() : null;
 
         if (isLogDebug) {
             logger.debug("relatedDelayLines: {}", relatedDLs);
         }
 
-        final int nRelDLs = relatedDLs.size();
-        final boolean useRelatedDLs = nRelDLs > 0;
+        final int nRelDLs = (relatedDLs != null) ? relatedDLs.size() : 0;
+        final boolean useRelatedDLs = (nRelDLs > 0);
 
-        if (useRelatedDLs && nBeams != nRelDLs) {
+        if (useRelatedDLs && (nBeams != nRelDLs)) {
             throw new IllegalStateException("The number of associated delay lines does not match the station list : " + stations + " <> " + relatedDLs);
+        }
+        
+        // find the optional delay line mode in the instrument configuration :
+        // VLTI : specific throw for double-pass mode :
+        this.modeDL = (insConf != null) ? insConf.getDelayLineMode() : null;
+
+        if (isLogDebug) {
+            logger.debug("modeDL: {}", modeDL);
         }
 
         this.beams = new ArrayList<Beam>(nBeams);
@@ -2702,7 +2721,7 @@ public final class ObservabilityService {
             Beam beam = new Beam(station);
 
             // predefined Channel (CHARA) :
-            if (useRelatedChannels && i < nRelChannels) {
+            if (useRelatedChannels && (i < nRelChannels)) {
                 selectedChannel = relatedChannels.get(i);
                 // check that given channel is not already used by another beam:
                 if (!channelSet.contains(selectedChannel)) {
@@ -2949,7 +2968,7 @@ public final class ObservabilityService {
             if (isLogDebug) {
                 logger.debug("preparePopCombinations: popsFixed = {}", popsFixed);
             }
-            
+
             // Compute key:
             final StringBuilder sb = new StringBuilder(16);
             sb.append(this.interferometer.getName()).append('_').append(nBeams);
@@ -3234,8 +3253,8 @@ public final class ObservabilityService {
                 opd = b1.getOpticalPathLength() - b2.getOpticalPathLength();
 
                 // 1 DL per telescope: DLs may be not equivalent (different throw):
-                wMin = opd - b2.getDelayLine().getMaximumThrow();
-                wMax = opd + b1.getDelayLine().getMaximumThrow();
+                wMin = opd - b2.getDelayLine().getMaximumThrow(this.modeDL);
+                wMax = opd + b1.getDelayLine().getMaximumThrow(this.modeDL);
 
                 // the W range contains the W limits 
                 this.wRanges.add(new Range(wMin, wMax));
