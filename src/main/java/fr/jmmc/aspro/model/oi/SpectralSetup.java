@@ -173,6 +173,7 @@ public class SpectralSetup
     /**
      * Initialize and check this instance
      * @param logger logger to use
+     * @param name instrument mode name (identifier)
      * @throws IllegalStateException if the configuration is severly invalid !
      */
     public void init(final org.slf4j.Logger logger, final String name) throws IllegalStateException {
@@ -184,8 +185,6 @@ public class SpectralSetup
         // check matrix size is "compatible" with column lengths:
         final int nCols = cols.size();
         final int dataLength = getDataLength();
-
-        logger.info("[" + name + "] Invalid data length [" + dataLength + "] for " + nCols + " columns !\n" + toString());
 
         if ((dataLength == 0) || (dataLength % nCols != 0)) {
             throw new IllegalStateException("[" + name + "] Invalid data length [" + dataLength + "] for " + nCols + " columns !\n" + toString());
