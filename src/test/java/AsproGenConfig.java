@@ -1811,6 +1811,8 @@ ARRAYZ  =   -2642728.201444249
         switch (selected) {
             case VLTI:
                 VLTIPosition();
+                
+                // station positions computed in ./tools/vlti_stations.py
 
                 // March 2014 (vcm limit to 2.5)
 /*                
