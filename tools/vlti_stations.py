@@ -28,6 +28,7 @@ layout = {
 'G2':( 31.9950, -24.0030),
 'H0':( 64.0150, -48.0070),
 'I1':( 72.0010, -87.9970),
+'I2':( 80.0,    -24.0000),
 'J1':( 88.0160, -71.9920),
 'J2':( 88.0160, -96.0050),
 'J3':( 88.0160,   7.9960),
@@ -80,7 +81,7 @@ for sta in sorted(layout):
    z = zAT
    if sta.startswith("U"): z = 13.044 # m (from OI_ARRAY)
 
-   #print "(P,Q,Z): ",p, " : ",q, " : ", z
+   # print "(P,Q,Z): ",p, " : ",q, " : ", z
 
    e =  cosPsi * p + sinPsi * q
    n = -sinPsi * p + cosPsi * q
@@ -103,15 +104,15 @@ for sta in sorted(layout):
    print("      </relativePosition>")
    print("</station>")
 
-   if (0):
+   if (1):
            # convert to geocentric:
            xc = xh
            yc = yh
            zc = zh
 
            # fix geocentric lat
-        #   xc =  cosDLat * xc + sinDLat * zc
-        #   zc = -sinDLat * xc + cosDLat * zc
+           xc =  cosDLat * xc + sinDLat * zc
+           zc = -sinDLat * xc + cosDLat * zc
 
            print "GC lat:",sta, " ",xc, " ",yc," ",zc
 
