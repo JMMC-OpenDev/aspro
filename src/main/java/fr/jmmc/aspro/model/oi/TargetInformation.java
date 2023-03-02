@@ -258,44 +258,57 @@ public class TargetInformation
                                                  final java.util.Map<String, Target> mapIDTargets,
                                                  final java.util.Map<String, TargetGroup> mapIDGroups,
                                                  final java.util.Map<String, Target> mapIDCalibrators,
-                                                 final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers) {
+                                                 final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers,
+                                                 final java.util.Set<String> usedIds) {
 
-        TargetInformation targetInfo;
-        Target target, newTarget;
+        final String info = "info";
+        
+        // 1 - remove duplicated identifiers:
+        usedIds.clear();
 
         for (final java.util.ListIterator<TargetInformation> it = targetInfos.listIterator(); it.hasNext();) {
-            targetInfo = it.next();
-
-            target = targetInfo.getTargetRef();
+            final TargetInformation targetInfo = it.next();
+            final Target target = targetInfo.getTargetRef();
 
             if (target == null) {
                 logger.debug("Removing invalid target reference.");
                 it.remove();
             } else {
-                newTarget = mapIDTargets.get(target.getIdentifier());
-                if (newTarget != null) {
-                    if (newTarget != target) {
-                        targetInfo.setTargetRef(newTarget);
-                    }
+                final String id = target.getIdentifier();
 
-                    targetInfo.updateTargetReferences(mapIDCalibrators);
-
-                    targetInfo.updateGroupReferences(mapIDTargets, mapIDGroups, mapIDGroupMembers);
-
-                    // remove if empty :
-                    if (targetInfo.isEmpty()) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Removing empty target information: {}", target.getIdentifier());
-                        }
-                        it.remove();
-                    }
-
+                if (usedIds.contains(id)) {
+                    logger.info("Removing duplicated target reference [{}] ({})", id, info);
+                    it.remove();
                 } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Removing missing target reference: {}", target.getIdentifier());
-                    }
+                    usedIds.add(id);
+                }
+            }
+        }
+        usedIds.clear();
+
+        // 2 - fix remaining references:
+        for (final java.util.ListIterator<TargetInformation> it = targetInfos.listIterator(); it.hasNext();) {
+            final TargetInformation targetInfo = it.next();
+            final Target target = targetInfo.getTargetRef();
+            final String id = target.getIdentifier();
+
+            final Target newTarget = mapIDTargets.get(id);
+            if (newTarget != null) {
+                if (newTarget != target) {
+                    targetInfo.setTargetRef(newTarget);
+                }
+
+                targetInfo.updateTargetReferences(mapIDCalibrators, usedIds);
+                targetInfo.updateGroupReferences(mapIDTargets, mapIDGroups, mapIDGroupMembers, usedIds);
+
+                // remove if empty :
+                if (targetInfo.isEmpty()) {
+                    logger.debug("Removing empty target information [{}] ({})", id, info);
                     it.remove();
                 }
+            } else {
+                logger.debug("Removing missing target reference [{}] ({})", id, info);
+                it.remove();
             }
         }
     }
@@ -305,8 +318,10 @@ public class TargetInformation
      * Check bad references and update target references 
      * and check if referenced calibrators are present in the given mapIDCalibrators
      * @param mapIDCalibrators Map<ID, Target> index
+     * @param usedIds temporary Set<ID>
      */
-    protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDCalibrators) {
+    protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDCalibrators,
+                                                final java.util.Set<String> usedIds) {
         // note : targetRef is already updated in TargetUserInformations
 
         if (this.description != null) {
@@ -317,7 +332,7 @@ public class TargetInformation
         }
 
         if (this.calibrators != null) {
-            Target.updateTargetReferences(this.calibrators, mapIDCalibrators);
+            Target.updateTargetReferences(this.calibrators, mapIDCalibrators, usedIds, "calibrators");
 
             if (this.calibrators.isEmpty()) {
                 this.calibrators = null;
@@ -330,13 +345,15 @@ public class TargetInformation
      * @param mapIDGroups Map<ID, TargetGroup> index
      * @param mapIDTargets Map<ID, Target> index
      * @param mapIDGroupMembers Map<ID TargetGroup, Map<ID, Target> > index (optional)
+     * @param usedIds temporary Set<ID>
      */
     protected final void updateGroupReferences(final java.util.Map<String, Target> mapIDTargets,
                                                final java.util.Map<String, TargetGroup> mapIDGroups,
-                                               final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers) {
+                                               final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers,
+                                               final java.util.Set<String> usedIds) {
         if (this.groupMembers != null) {
             // fix group ref & target refs in group members:
-            TargetGroupMembers.updateGroupReferences(this.groupMembers, mapIDTargets, mapIDGroups, mapIDGroupMembers);
+            TargetGroupMembers.updateGroupReferences(this.groupMembers, mapIDTargets, mapIDGroups, mapIDGroupMembers, usedIds, "tgm");
             
             if (this.groupMembers.isEmpty()) {
                 this.groupMembers = null;

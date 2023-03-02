@@ -649,12 +649,12 @@ public class ObservationSetting
      * For now it checks target ID/IDREF consistency (targetUserInformations...)
      */
     public void checkReferences() {
+        checkReferences(getTargets(), this.selectedTargets, this.targetUserInfos, this.targetObservations);
+
         // check targets:
         for (Target target : getTargets()) {
             target.checkValues();
         }
-
-        checkReferences(getTargets(), this.selectedTargets, this.targetUserInfos, this.targetObservations);
 
         // check target user infos :
         if (this.targetUserInfos != null && this.targetUserInfos.isEmpty()) {
@@ -679,7 +679,9 @@ public class ObservationSetting
                                        final List<Target> selectedTargets,
                                        final TargetUserInformations targetUserInfos,
                                        final List<TargetRawObservation> targetObservations) {
+        
         java.util.Map<String, Target> mapIDTargets = null;
+        final java.util.Set<String> usedIds = new java.util.HashSet<String>(16);
 
         // check selected targets:
         if (selectedTargets != null) {
@@ -689,7 +691,7 @@ public class ObservationSetting
                 // create the Map<ID, Target> index for targets:
                 mapIDTargets = Target.createTargetIndex(targets);
             }
-            Target.updateTargetReferences(selectedTargets, mapIDTargets);
+            Target.updateTargetReferences(selectedTargets, mapIDTargets, usedIds, "obs");
         }
         // check target user infos:
         if (targetUserInfos != null) {
@@ -699,7 +701,7 @@ public class ObservationSetting
                 // create the Map<ID, Target> index for targets:
                 mapIDTargets = Target.createTargetIndex(targets);
             }
-            targetUserInfos.updateTargetReferences(mapIDTargets);
+            targetUserInfos.updateTargetReferences(mapIDTargets, usedIds);
         }
         // check target's raw observations:
         if (targetObservations != null) {
@@ -709,7 +711,7 @@ public class ObservationSetting
                 // create the Map<ID, Target> index for targets:
                 mapIDTargets = Target.createTargetIndex(targets);
             }
-            TargetRawObservation.updateTargetReferences(targetObservations, mapIDTargets);
+            TargetRawObservation.updateTargetReferences(targetObservations, mapIDTargets, usedIds);
         }
     }
 

@@ -157,10 +157,18 @@ public class TargetGroupMembers
         }
         final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers
                                                                    = new java.util.HashMap<String, java.util.Map<String, Target>>(groupMembers.size());
-
-        for (TargetGroupMembers tgm : groupMembers) {
-            // create the Map<ID, Target> index for members:
-            mapIDGroupMembers.put(tgm.getGroupRef().getIdentifier(), Target.createTargetIndex(tgm.targets));
+       
+        for (final java.util.ListIterator<TargetGroupMembers> it = groupMembers.listIterator(); it.hasNext();) {
+            final TargetGroupMembers tgm = it.next();
+            final String id = tgm.getGroupRef().getIdentifier();
+            
+            if (mapIDGroupMembers.containsKey(id)) {
+                logger.info("Removing duplicated group member reference [{}] = [{}]", id, tgm);
+                it.remove();
+            } else {
+                // create the Map<ID, Target> index for members:
+                mapIDGroupMembers.put(id, Target.createTargetIndex(tgm.targets));
+            }
         }
         return mapIDGroupMembers;
     }
@@ -168,45 +176,60 @@ public class TargetGroupMembers
     protected static void updateGroupReferences(final List<TargetGroupMembers> groupMembers,
                                                 final java.util.Map<String, Target> mapIDTargets,
                                                 final java.util.Map<String, TargetGroup> mapIDGroups,
-                                                final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers) {
+                                                final java.util.Map<String, java.util.Map<String, Target>> mapIDGroupMembers,
+                                                final java.util.Set<String> usedIds,
+                                                final String info) {
 
-        java.util.Map<String, Target> index;
-        TargetGroup group, newGroup;
+        // 1 - remove duplicated identifiers:
+        usedIds.clear();
 
         for (final java.util.ListIterator<TargetGroupMembers> it = groupMembers.listIterator(); it.hasNext();) {
-            TargetGroupMembers tgm = it.next();
-
-            group = tgm.getGroupRef();
-
+            final TargetGroupMembers tgm = it.next();
+            final TargetGroup group = tgm.getGroupRef();
+           
             if (group == null) {
                 logger.debug("Removing invalid group reference.");
                 it.remove();
             } else {
-                newGroup = mapIDGroups.get(group.getIdentifier());
-                if (newGroup != null) {
-                    if (newGroup != group) {
-                        tgm.setGroupRef(newGroup);
-                    }
+                final String id = group.getIdentifier();
 
-                    // consider only target references corresponding to the group members or all target references:
-                    index = (mapIDGroupMembers != null) ? mapIDGroupMembers.get(group.getIdentifier()) : mapIDTargets;
-
-                    tgm.updateTargetReferences(index);
-
-                    // remove if empty :
-                    if (tgm.isEmpty()) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Removing empty group member: {}", group.getIdentifier());
-                        }
-                        it.remove();
-                    }
-
+                if (usedIds.contains(id)) {
+                    logger.info("Removing duplicated group reference [{}] ({})", id, info);
+                    it.remove();
                 } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Removing missing group reference: {}", group.getIdentifier());
-                    }
+                    usedIds.add(id);
+                }
+            }
+        }
+        usedIds.clear();
+
+        // 2 - fix remaining references:
+        java.util.Map<String, Target> index;
+
+        for (final java.util.ListIterator<TargetGroupMembers> it = groupMembers.listIterator(); it.hasNext();) {
+            final TargetGroupMembers tgm = it.next();
+            final TargetGroup group = tgm.getGroupRef();
+            final String id = group.getIdentifier();
+
+            final TargetGroup newGroup = mapIDGroups.get(id);
+            if (newGroup != null) {
+                if (newGroup != group) {
+                    tgm.setGroupRef(newGroup);
+                }
+
+                // consider only target references corresponding to the group members or all target references:
+                index = (mapIDGroupMembers != null) ? mapIDGroupMembers.get(id) : mapIDTargets;
+
+                tgm.updateTargetReferences(index, usedIds);
+
+                // remove if empty :
+                if (tgm.isEmpty()) {
+                    logger.debug("Removing empty group member [{}] ({})", id, info);
                     it.remove();
                 }
+            } else {
+                logger.debug("Removing missing group reference [{}] ({})", id, info);
+                it.remove();
             }
         }
     }
@@ -214,12 +237,14 @@ public class TargetGroupMembers
     /**
      * Check bad references and update target references in this instance using the given Map<ID, Target> index
      * @param mapIDTargets Map<ID, Target> index
+     * @param usedIds temporary Set<ID>
      */
-    private final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
+    private final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets,
+                                              final java.util.Set<String> usedIds) {
         // note : groupRef is already updated in updateGroupReferences()
 
         if (this.targets != null) {
-            Target.updateTargetReferences(this.targets, mapIDTargets);
+            Target.updateTargetReferences(this.targets, mapIDTargets, usedIds, "tgm");
 
             if (this.targets.isEmpty()) {
                 this.targets = null;

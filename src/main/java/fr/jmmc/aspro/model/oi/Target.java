@@ -1449,29 +1449,54 @@ public class Target
             return java.util.Collections.emptyMap();
         }
         final java.util.Map<String, Target> mapIDTargets = new java.util.HashMap<String, Target>(targets.size());
-        for (Target target : targets) {
-            mapIDTargets.put(target.getIdentifier(), target);
+        
+        for (final java.util.ListIterator<Target> it = targets.listIterator(); it.hasNext();) {
+            final Target target = it.next();
+            final String id = target.getIdentifier();
+            
+            if (mapIDTargets.containsKey(id)) {
+                logger.info("Removing duplicated target reference [{}] = [{}]", id, target);
+                it.remove();
+            } else {
+                mapIDTargets.put(id, target);
+            }            
         }
         return mapIDTargets;
     }
 
     protected static void updateTargetReferences(final java.util.List<Target> targets,
-                                                 final java.util.Map<String, Target> mapIDTargets) {
+                                                 final java.util.Map<String, Target> mapIDTargets,
+                                                 final java.util.Set<String> usedIds,
+                                                 final String info) {
         if (targets != null) {
-            Target target, newTarget;
-
+            // 1 - remove duplicated identifiers:
+            usedIds.clear();
+            
             for (final java.util.ListIterator<Target> it = targets.listIterator(); it.hasNext();) {
-                target = it.next();
+                final Target target = it.next();
+                final String id = target.getIdentifier();
 
-                newTarget = (mapIDTargets != null) ? mapIDTargets.get(target.getIdentifier()) : null;
+                if (usedIds.contains(id)) {
+                    logger.info("Removing duplicated target reference [{}] ({})", id, info);
+                    it.remove();
+                } else {
+                    usedIds.add(id);
+                }
+            }
+            usedIds.clear();
+            
+            // 2 - fix remaining references:
+            for (final java.util.ListIterator<Target> it = targets.listIterator(); it.hasNext();) {
+                final Target target = it.next();
+                final String id = target.getIdentifier();
+
+                final Target newTarget = (mapIDTargets != null) ? mapIDTargets.get(id) : null;
                 if (newTarget != null) {
                     if (newTarget != target) {
                         it.set(newTarget);
                     }
                 } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Removing missing target reference: {}", target.getIdentifier());
-                    }
+                    logger.debug("Removing missing target reference [{}] ({})", id, info);
                     it.remove();
                 }
             }

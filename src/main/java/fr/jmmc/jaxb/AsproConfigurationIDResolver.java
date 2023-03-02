@@ -68,8 +68,7 @@ public final class AsproConfigurationIDResolver extends IDResolver {
     private void addDocumentReference(final String id, final Object reference) {
         Object prev = getDocumentReference(id);
         if (prev != null) {
-            logger.warn("addDocumentReference('{}') conflict: new = {} previous = {}",
-                    id, reference, prev);
+            logger.debug("addDocumentReference('{}') conflict with previous = {}", id, prev);
         }
         // Anyway overwrite the reference:
         documentReferences.put(id, reference);

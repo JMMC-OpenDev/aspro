@@ -180,41 +180,55 @@ public class TargetRawObservation
      * Check bad references and update target references in this instance using the given Map<ID, Target> index
      * @param targetObservations list to process
      * @param mapIDTargets Map<ID, Target> index
+     * @param usedIds temporary Set<ID>
      */
     protected static final void updateTargetReferences(final List<TargetRawObservation> targetObservations,
-                                                       final java.util.Map<String, Target> mapIDTargets) {
+                                                       final java.util.Map<String, Target> mapIDTargets,
+                                                       final java.util.Set<String> usedIds) {
 
-        Target target, newTarget;
+        // 1 - remove duplicated identifiers:
+        usedIds.clear();
 
         for (final java.util.ListIterator<TargetRawObservation> it = targetObservations.listIterator(); it.hasNext();) {
             final TargetRawObservation targetRawObs = it.next();
-
-            target = targetRawObs.getTargetRef();
+            final Target target = targetRawObs.getTargetRef();
 
             if (target == null) {
                 logger.debug("Removing invalid target reference.");
                 it.remove();
             } else {
-                newTarget = mapIDTargets.get(target.getIdentifier());
-                if (newTarget != null) {
-                    if (newTarget != target) {
-                        targetRawObs.setTargetRef(newTarget);
-                    }
+                final String id = target.getIdentifier();
 
-                    // remove if empty :
-                    if (targetRawObs.getObservations().isEmpty()) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Removing empty target raw obs: {}", target.getIdentifier());
-                        }
-                        it.remove();
-                    }
-
+                if (usedIds.contains(id)) {
+                    logger.info("Removing duplicated target reference [{}] (raw obs)", id);
+                    it.remove();
                 } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Removing missing target reference: {}", target.getIdentifier());
-                    }
+                    usedIds.add(id);
+                }
+            }
+        }
+        usedIds.clear();
+
+        // 2 - fix remaining references:
+        for (final java.util.ListIterator<TargetRawObservation> it = targetObservations.listIterator(); it.hasNext();) {
+            final TargetRawObservation targetRawObs = it.next();
+            final Target target = targetRawObs.getTargetRef();
+            final String id = target.getIdentifier();
+
+            final Target newTarget = mapIDTargets.get(id);
+            if (newTarget != null) {
+                if (newTarget != target) {
+                    targetRawObs.setTargetRef(newTarget);
+                }
+
+                // remove if empty :
+                if (targetRawObs.getObservations().isEmpty()) {
+                    logger.debug("Removing empty target raw obs [{}]", id);
                     it.remove();
                 }
+            } else {
+                logger.debug("Removing missing target reference [{}]", id);
+                it.remove();
             }
         }
     }

@@ -400,12 +400,22 @@ public class TargetUserInformations
      * @param mapIDTargets Map<ID, Target> index
      */
     protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
+        updateTargetReferences(mapIDTargets, new java.util.HashSet<String>(16));
+    }
+    
+    /**
+     * Check bad references and update target references in this instance using the given Map<ID, Target> index
+     * @param mapIDTargets Map<ID, Target> index
+     * @param usedIds temporary Set<ID>
+     */
+    protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets,
+                                                final java.util.Set<String> usedIds) {
         // create the Map<ID, TargetGroup> index for groups:
         final java.util.Map<String, TargetGroup> mapIDGroups = TargetGroup.createTargetGroupIndex(getGroups());
 
         if (this.groupMembers != null) {
             // Fix group ref & target refs in group members:
-            TargetGroupMembers.updateGroupReferences(this.groupMembers, mapIDTargets, mapIDGroups, null);
+            TargetGroupMembers.updateGroupReferences(this.groupMembers, mapIDTargets, mapIDGroups, null, usedIds, "info");
 
             if (this.groupMembers.isEmpty()) {
                 this.groupMembers = null;
@@ -414,7 +424,7 @@ public class TargetUserInformations
 
         if (this.calibrators != null) {
             // Fix target refs in calibrators:
-            Target.updateTargetReferences(this.calibrators, mapIDTargets);
+            Target.updateTargetReferences(this.calibrators, mapIDTargets, usedIds, "calibrators");
 
             if (this.calibrators.isEmpty()) {
                 this.calibrators = null;
@@ -430,7 +440,7 @@ public class TargetUserInformations
                                                                        = TargetGroupMembers.createGroupMemberIndex(this.groupMembers);
 
             // Fix target refs in calibrators & group members:
-            TargetInformation.updateTargetReferences(this.targetInfos, mapIDTargets, mapIDGroups, mapIDCalibrators, mapIDGroupMembers);
+            TargetInformation.updateTargetReferences(this.targetInfos, mapIDTargets, mapIDGroups, mapIDCalibrators, mapIDGroupMembers, usedIds);
 
             if (this.targetInfos.isEmpty()) {
                 this.targetInfos = null;

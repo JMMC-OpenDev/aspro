@@ -448,8 +448,17 @@ public class TargetGroup
     static java.util.Map<String, TargetGroup> createTargetGroupIndex(final java.util.List<TargetGroup> groups) {
         // create the Map<ID, Target> index :
         final java.util.Map<String, TargetGroup> mapIDGroups = new java.util.HashMap<String, TargetGroup>(groups.size());
-        for (TargetGroup group : groups) {
-            mapIDGroups.put(group.getIdentifier(), group);
+                
+        for (final java.util.ListIterator<TargetGroup> it = groups.listIterator(); it.hasNext();) {
+            final TargetGroup group = it.next();
+            final String id = group.getIdentifier();
+                        
+            if (mapIDGroups.containsKey(id)) {
+                logger.info("Removing duplicated group reference [{}] = [{}]", id, group);
+                it.remove();
+            } else {
+                mapIDGroups.put(id, group);
+            }            
         }
         return mapIDGroups;
     }
