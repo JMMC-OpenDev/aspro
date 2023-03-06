@@ -243,9 +243,9 @@
 
     <releasenotes>
         <release version="23.03">
-            <pubDate>Mon, 06 Dec 2022 18:00:00 GMT</pubDate>
+            <pubDate>Mon, 06 Mar 2023 18:00:00 GMT</pubDate>
             <prerelease version="23.03 beta 2">
-                <change type="FEATURE">Update CHARA and VLTI configuration</change>
+                <change type="FEATURE">Update CHARA and VLTI configurations</change>
             </prerelease>
             <prerelease version="23.03 beta 1">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/33">Added double-path support for VLTI delay lines (Extended baselines with AT4 on J6 station)</change>
