@@ -294,7 +294,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
             sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
             sb.append(chartData.getDisplayConfigurations(" / "));
 
-            ChartUtils.addSubtitle(this.chart, sb.toString());
+            ChartUtils.addTitle(this.chart, sb.toString());
 
             // computed data are valid :
             updateChart(chartData);

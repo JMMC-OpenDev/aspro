@@ -55,8 +55,11 @@ public final class AsproChartUtils {
         xyPlot.getDomainAxis().setVisible(false);
         xyPlot.getRangeAxis().setVisible(false);
 
+        // set axis colors :
+        ChartUtils.defineAxisDefaults(xyPlot);
+
         // Adjust outline :
-        xyPlot.setOutlineStroke(ChartUtils.DEFAULT_STROKE);
+        xyPlot.setOutlineStroke(ChartUtils.MEDIUM_STROKE);
 
         final XYBarRenderer xyBarRenderer = (XYBarRenderer) xyPlot.getRenderer();
         xyBarRenderer.setUseYInterval(true);

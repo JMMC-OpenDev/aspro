@@ -894,14 +894,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // add UV axes in meters:
         final BoundedNumberAxis uAxisMeter = new BoundedNumberAxis("U (m) - North");
         uAxisMeter.setAutoRangeIncludesZero(false);
-        uAxisMeter.setTickLabelFont(ChartUtils.DEFAULT_TITLE_FONT);
-        uAxisMeter.setTickMarkPaint(Color.BLACK);
+        ChartUtils.defineAxisDefaults(uAxisMeter);
         this.xyPlot.setDomainAxis(1, uAxisMeter);
 
         final BoundedNumberAxis vAxisMeter = new BoundedNumberAxis("V (m) - East");
         vAxisMeter.setAutoRangeIncludesZero(false);
-        vAxisMeter.setTickLabelFont(ChartUtils.DEFAULT_TITLE_FONT);
-        vAxisMeter.setTickMarkPaint(Color.BLACK);
+        ChartUtils.defineAxisDefaults(vAxisMeter);
         this.xyPlot.setRangeAxis(1, vAxisMeter);
 
         // add listener :
@@ -2599,7 +2597,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
                 sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
                 sb.append(chartData.getDisplayConfigurations(" / "));
-                ChartUtils.addSubtitle(this.chart, sb.toString());
+                ChartUtils.addTitle(this.chart, sb.toString());
 
                 sb.setLength(0);
 
@@ -3024,9 +3022,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 mapLegend = new PaintLogScaleLegend(new ColorModelPaintScale(min, max, colorModel, colorScale), uvMapAxis);
             }
 
-            uvMapAxis.setTickLabelFont(ChartUtils.DEFAULT_FONT);
-            uvMapAxis.setAxisLinePaint(Color.BLACK);
-            uvMapAxis.setTickMarkPaint(Color.BLACK);
+            ChartUtils.defineAxisDefaults(uvMapAxis);
 
             mapLegend.setPosition(RectangleEdge.LEFT);
             mapLegend.setStripWidth(15d);

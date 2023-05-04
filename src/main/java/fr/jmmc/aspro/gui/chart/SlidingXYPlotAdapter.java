@@ -12,6 +12,7 @@ import fr.jmmc.aspro.model.rawobs.RawObservation;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
+import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.EnhancedXYBarRenderer;
 import java.awt.Color;
 import java.awt.GradientPaint;
@@ -518,9 +519,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                 // add JMMC annotation (moving position):
                 this.renderer.addAnnotation(this.aJMMC, Layer.BACKGROUND);
             }
-            // tick color :
-            this.xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
-            this.xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
+            // set axis colors :
+            ChartUtils.defineAxisDefaults(this.xyPlot);
 
             // update theme at end :
             org.jfree.chart.ChartUtils.applyCurrentTheme(this.chart);
