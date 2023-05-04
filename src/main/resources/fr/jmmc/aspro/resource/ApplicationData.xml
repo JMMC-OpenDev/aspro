@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="23.03"/>
-    <compilation date="06/03/2023" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="23.05 beta 1"/>
+    <compilation date="04/05/2023" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -242,6 +242,13 @@
     </menubar>
 
     <releasenotes>
+        <release version="23.05">
+            <pubDate>Thu, 04 May 2023 16:00:00 GMT</pubDate>
+            <prerelease version="23.05 beta 1">
+                <change type="FEATURE">OIFitsExplorer: improved 'UV coverage' plot to be displayed as a squared plot</change>
+                <change type="BUGFIX">Enhanced plot settings for high-dpi screens</change>
+            </prerelease>
+        </release>
         <release version="23.03">
             <pubDate>Mon, 06 Mar 2023 20:00:00 GMT</pubDate>
             <prerelease version="23.03 beta 2">
