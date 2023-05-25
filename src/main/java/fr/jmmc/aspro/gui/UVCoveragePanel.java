@@ -3024,16 +3024,21 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             ChartUtils.defineAxisDefaults(uvMapAxis);
 
-            mapLegend.setPosition(RectangleEdge.LEFT);
-            mapLegend.setStripWidth(15d);
-            mapLegend.setStripOutlinePaint(Color.BLACK);
-            mapLegend.setStripOutlineVisible(true);
-            mapLegend.setSubdivisionCount(colorModel.getMapSize());
-            mapLegend.setAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
-            mapLegend.setFrame(new BlockBorder(Color.BLACK));
-            mapLegend.setMargin(1d, 1d, 1d, 1d);
-            mapLegend.setPadding(10d, 10d, 10d, 10d);
+            String label;
+            switch (uvMapData.getImageMode()) {
+                default:
+                case SQUARE:
+                    label = "VIS2";
+                    break;
+                case AMP:
+                    label = "VIS_AMP";
+                    break;
+                case PHASE:
+                    label = "VIS_PHI (deg)";
+            }
+            uvMapAxis.setLabel(label);
 
+            ChartUtils.adjustLegend(mapLegend, colorModel.getMapSize(), RectangleEdge.LEFT);
             this.chart.addSubtitle(mapLegend);
 
             updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax(), colorScale);
