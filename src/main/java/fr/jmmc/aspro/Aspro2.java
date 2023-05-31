@@ -403,7 +403,8 @@ public final class Aspro2 extends App {
         new SendOBAction();
 
         // Help menu:
-        new ShowReleaseNotesAction("showConf", "Aspro2 Configuration " + ConfigurationManager.getInstance().getConfDescription().getProgramVersion(), ConfigurationManager.getInstance().getConfDescription());
+        final ConfigurationManager cm = ConfigurationManager.getInstance();
+        new ShowReleaseNotesAction("showConf", "Aspro2 Configuration " + cm.getConfDescription().getProgramVersion(), cm.getConfDescription());
     }
 
     /**
