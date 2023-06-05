@@ -610,12 +610,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jPanelLeft.add(jSeparator2, gridBagConstraints);
 
         jCheckBoxModelImage.setSelected(true);
-        jCheckBoxModelImage.setText("<html>Show the model image</html>");
-        jCheckBoxModelImage.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBoxModelImageActionPerformed(evt);
-            }
-        });
+        jCheckBoxModelImage.setText("<html>Show the model</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 26;
@@ -701,10 +696,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         add(jSplitPane, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jCheckBoxModelImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxModelImageActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jCheckBoxModelImageActionPerformed
 
     /**
      * Export Observing Block(s) (OB)
@@ -1372,19 +1363,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     }
 
     /**
-     * If the current target has no model defined, then disable model options widgets
-     */
-    private void changeStateForModelImageWidgets() {
-        final Target target = getSelectedTarget();
-        if (target != null) {
-            final boolean hasModel = target.hasModel();
-
-            this.jCheckBoxModelImage.setEnabled(hasModel);
-            this.jComboBoxImageMode.setEnabled(hasModel);
-        }
-    }
-
-    /**
      * Process any comboBox change event (target, instrument mode, image mode ...).
      * Refresh the dependent combo boxes and update the observation according to the form state
      * @param e action event
@@ -1589,8 +1567,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             updateTargetConfiguration();
             updateTargetHA();
-            changeStateForModelImageWidgets();
-
         } finally {
             // restore the automatic refresh :
             this.setAutoRefresh(prevAutoRefresh);
