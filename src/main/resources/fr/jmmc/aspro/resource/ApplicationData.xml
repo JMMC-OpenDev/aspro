@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="23.06 beta 2"/>
-    <compilation date="31/05/2023" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="23.06 beta 3"/>
+    <compilation date="07/06/2023" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -243,7 +243,10 @@
 
     <releasenotes>
         <release version="23.06">
-            <pubDate>Wed, 31 May 2023 12:00:00 GMT</pubDate>
+            <pubDate>Wed, 07 Jun 2023 16:00:00 GMT</pubDate>
+            <prerelease version="23.06 beta 3">
+                <change type="FEATURE">Improved Target Model editor to simplify the User model interface and added more contextual information (max pixel size &amp; Telescope Fov)</change>
+            </prerelease>
             <prerelease version="23.06 beta 2">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1313">Fixed OIFits table browser when OIData table arrays have wrong dimensions (&lt; 1)</change>
                 <change type="FEATURE">Improved scaling of exported plots as image/pdf with hi-dpi settings</change>
