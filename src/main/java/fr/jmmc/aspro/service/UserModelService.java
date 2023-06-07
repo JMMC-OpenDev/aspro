@@ -171,7 +171,7 @@ public final class UserModelService {
         userModel.setModelDataList(null);
 
         logger.info("loading user model: {}", userModel.getFile());
-        
+
         // throws FitsException or IOException or IllegalArgumentException if the image can not be read properly:
         // note: load only the first valid image HDU (image or cube):
         final FitsImageFile imgFitsFile = FitsImageUtils.load(userModel.getFile(), true);
@@ -311,29 +311,33 @@ public final class UserModelService {
             throw new IllegalArgumentException("Undefined pixel increments (rad) !");
         }
 
-        // TODO: support different axis increments on row and column axes ?
+        // Note: different X/Y axis increments are not supported:
         if (!NumberUtils.equals(fitsImage.getIncCol(), fitsImage.getIncRow(), INC_EPSILON_RAD)) {
             throw new IllegalArgumentException("Fits image increments along row and column axes must be equals !");
         }
         if (uvMaxFreq > 0.0) {
             final double increment = fitsImage.getIncRow();
-            final double maxFreq = getMaxFreq(fitsImage);
+            final double maxIncrement = getMaxIncrement(uvMaxFreq);
 
-            if (maxFreq < uvMaxFreq) {
-                final double minIncrement = (maxFreq / uvMaxFreq) * increment;
+            if (increment > maxIncrement) {
+                final double maxFreq = getMaxFreq(fitsImage);
 
                 throw new IllegalArgumentException("Fits image [" + fitsImage.getFitsImageIdentifier()
                         + "] must have smaller pixel increments [expected "
-                        + FitsImage.getAngleAsString(minIncrement, df3) + " < "
-                        + FitsImage.getAngleAsString(increment, df3) + "] to have a maximum frequency [expected "
-                        + df.format(uvMaxFreq) + " rad-1 > " + df.format(maxFreq) + " rad-1 ] !");
+                        + FitsImage.getAngleAsString(increment, df3) + " < "
+                        + FitsImage.getAngleAsString(maxIncrement, df3) + "] to have a maximum frequency [expected "
+                        + df.format(maxFreq) + " rad-1 > " + df.format(uvMaxFreq) + " rad-1 ] !");
             }
         }
     }
 
     public static double getMaxFreq(final FitsImage fitsImage) {
         final double increment = fitsImage.getIncRow();
-        return 1.0 / (2.0 * increment);
+        return 1.0 / (2.0 * increment); // nyquist => factor 2
+    }
+
+    public static double getMaxIncrement(final double uvMaxFreq) {
+        return 1.0 / (2.0 * uvMaxFreq); // = lambda_min / 2 Bmax
     }
 
     /**
@@ -1422,15 +1426,10 @@ public final class UserModelService {
     }
 
     private static double getAiryRadius(final FitsImage fitsImage, final double diameter, final double lambda) {
-        if (Double.isNaN(diameter) || (diameter <= 0.0) || Double.isNaN(lambda) || (lambda <= 0.0)) {
+        final double airyRadius = getAiryRadius(diameter, lambda);
+        if (Double.isNaN(airyRadius)) {
             return Double.NaN;
         }
-
-        // see https://en.wikipedia.org/wiki/Airy_disk
-        // airy disk: zero  at 1.22 lambda / diameter
-        // 2021.08.02: false according to Michel tallon:
-        // final double airyRadius = 1.22d * lambda / diameter;
-        final double airyRadius = 1.0289939700094716812373007996939122676849365234375 * lambda / diameter;
 
         // check airy radius vs image Fov:
         final double imageRadius = 0.5 * fitsImage.getOrigMaxAngle();
@@ -1443,7 +1442,7 @@ public final class UserModelService {
             final double fwhm = 0.42d * lambda / diameter;
 
             // min(gaussian weight) on image boundaries:
-            final double weight = FastMath.exp(-1.0 / (2.0 * fwhm * fwhm) * (imageRadius * imageRadius));
+            final double weight = FastMath.exp(-(imageRadius * imageRadius) / (2.0 * fwhm * fwhm));
 
             logger.debug("weight[{}] = {}", NumberUtils.trimTo3Digits(imageRadius / airyRadius), weight);
         }
@@ -1455,6 +1454,18 @@ public final class UserModelService {
         }
 
         return airyRadius;
+    }
+    
+    public static double getAiryRadius(final double diameter, final double lambda) {
+         if (Double.isNaN(diameter) || (diameter <= 0.0) || Double.isNaN(lambda) || (lambda <= 0.0)) {
+            return Double.NaN;
+        }
+
+        // see https://en.wikipedia.org/wiki/Airy_disk
+        // airy disk: zero  at 1.22 lambda / diameter
+        // 2021.08.02: false according to Michel tallon:
+        // final double airyRadius = 1.22d * lambda / diameter;
+        return 1.0289939700094716812373007996939122676849365234375 * lambda / diameter;
     }
 
     /**

@@ -215,8 +215,7 @@ public final class OIFitsProcessor {
             // define optional Transforms:
             if (!Double.isNaN(scale)) {
                 final double inc = ALX.convertMasToRad(scale);
-                userModel.setScaleX(inc);
-                userModel.setScaleY(inc);
+                userModel.setScale(inc);
             }
             if (!Double.isNaN(rotate)) {
                 userModel.setRotation(rotate);

@@ -3,18 +3,25 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.AnimatorPanel;
 import fr.jmmc.aspro.gui.util.ModelJTree;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
 import fr.jmmc.aspro.gui.util.UserModelAnimator.UserModelAnimatorListener;
+import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
+import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.service.UserModelData;
+import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel;
@@ -79,8 +86,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private static final Logger logger = LoggerFactory.getLogger(TargetModelForm.class.getName());
     /** OIFits MimeType */
     private final static MimeType mimeType = MimeType.FITS_IMAGE;
-    /** default reload latency = 20 ms */
-    private static final int RELOAD_LATENCY = 20;
+    /** default reload latency = 100 ms */
+    private static final int RELOAD_LATENCY = 100;
     /** AMHRA portal */
     private static final String AMHRA_URL = "https://amhra.oca.eu/?referer=Aspro2";
     /* AMHRA's matomo catches the click from Aspro2 using referer param */
@@ -191,7 +198,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         // user-defined scale / rotation:
         this.jFormattedTextFieldScaleX.addPropertyChangeListener("value", this);
-        this.jFormattedTextFieldScaleY.addPropertyChangeListener("value", this);
         this.jFormattedTextFieldRotation.addPropertyChangeListener("value", this);
 
         // disable column reordering :
@@ -199,8 +205,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         // Fix row height:
         SwingUtils.adjustRowHeight(jTableModelParameters);
-
-        handleLinkedState();
     }
 
     /**
@@ -208,6 +212,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * @param targetName target name to select
      */
     void initialize(final String targetName) {
+        prepareObservationInfo();
         this.generateTree();
         this.selectTarget(Target.getTarget(targetName, this.editTargets));
 
@@ -456,7 +461,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
                         // use only positive increments (no direction)
                         this.jFormattedTextFieldScaleX.setValue(ALX.convertRadToMas(fitsImage.getIncCol()));
-                        this.jFormattedTextFieldScaleY.setValue(ALX.convertRadToMas(fitsImage.getIncRow()));
                         this.jFormattedTextFieldRotation.setValue(fitsImage.getRotAngle());
 
                         this.fitsImagePanel.setFitsImage(fitsImage);
@@ -477,7 +481,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 this.jRadioButtonInvalid.setSelected(true);
                 this.jTextFieldFileReference.setText(null);
                 this.jFormattedTextFieldScaleX.setValue(null);
-                this.jFormattedTextFieldScaleY.setValue(null);
                 this.jFormattedTextFieldRotation.setValue(null);
 
                 enableUserModelFields(false);
@@ -542,7 +545,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         // User model:
         this.jRadioButtonInvalid.setSelected(true);
         this.jTextFieldFileReference.setText(null);
-        this.jButtonImageInfo.setEnabled(false);
 
         // Analytical models:
         // update text field name :
@@ -572,9 +574,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     }
 
     private void enableUserModelFields(boolean enabled) {
-        this.jButtonImageInfo.setEnabled(enabled);
         this.jFormattedTextFieldScaleX.setEnabled(enabled);
-        handleLinkedState();
         this.jFormattedTextFieldRotation.setEnabled(enabled);
         this.jButtonReset.setEnabled(enabled);
     }
@@ -678,7 +678,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     if (val == null) {
                         if (userModel.getScaleX() != null) {
                             changed = true;
-                            userModel.setScaleX(null);
+                            userModel.setScale(null);
                         }
                     } else {
                         final double inc = ALX.convertMasToRad(val.doubleValue());
@@ -691,49 +691,15 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                         if (!NumberUtils.equals(fitsImage.getIncCol(), inc, MAS_EPSILON)) {
                             changed = true;
                             if (NumberUtils.equals(fitsImage.getOrigIncCol(), inc, MAS_EPSILON)) {
-                                userModel.setScaleX(null);
+                                userModel.setScale(null);
                             } else {
-                                userModel.setScaleX(inc);
+                                userModel.setScale(inc);
                             }
                         }
                     }
                     if (logger.isDebugEnabled()) {
                         logger.debug("scaleX: {}", userModel.getScaleX());
                     }
-
-                    // Handle linked state:
-                    if (this.jToggleButtonLinked.isSelected()) {
-                        this.jFormattedTextFieldScaleY.setValue(this.jFormattedTextFieldScaleX.getValue());
-                    }
-
-                } else if (e.getSource() == this.jFormattedTextFieldScaleY) {
-                    final Number val = (Number) this.jFormattedTextFieldScaleY.getValue();
-                    if (val == null) {
-                        if (userModel.getScaleY() != null) {
-                            changed = true;
-                            userModel.setScaleY(null);
-                        }
-                    } else {
-                        final double inc = ALX.convertMasToRad(val.doubleValue());
-                        // check increment:
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("IncRow: {}", fitsImage.getIncRow());
-                            logger.debug("inc: {}", inc);
-                        }
-
-                        if (!NumberUtils.equals(fitsImage.getIncRow(), inc, MAS_EPSILON)) {
-                            changed = true;
-                            if (NumberUtils.equals(fitsImage.getOrigIncRow(), inc, MAS_EPSILON)) {
-                                userModel.setScaleY(null);
-                            } else {
-                                userModel.setScaleY(inc);
-                            }
-                        }
-                    }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("scaleY: {}", userModel.getScaleY());
-                    }
-
                 } else if (e.getSource() == this.jFormattedTextFieldRotation) {
                     Number val = (Number) this.jFormattedTextFieldRotation.getValue();
                     if (val == null) {
@@ -870,16 +836,14 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jLabelFile = new javax.swing.JLabel();
         jTextFieldFileReference = new javax.swing.JTextField();
         jButtonOpenFile = new javax.swing.JButton();
-        jButtonImageInfo = new javax.swing.JButton();
         jLabelScale = new javax.swing.JLabel();
         jFormattedTextFieldScaleX = new javax.swing.JFormattedTextField();
         jLabelRotation = new javax.swing.JLabel();
         jFormattedTextFieldRotation = new javax.swing.JFormattedTextField();
         jButtonReset = new javax.swing.JButton();
-        jFormattedTextFieldScaleY = new javax.swing.JFormattedTextField();
-        jToggleButtonLinked = new javax.swing.JToggleButton();
         jButtonAmhra = new javax.swing.JButton();
         jButtonUserModelHelp = new javax.swing.JButton();
+        jLabelObsInfo = new javax.swing.JLabel();
         jPanelDescription = new javax.swing.JPanel();
         jScrollPaneModelDescription = new javax.swing.JScrollPane();
         jLabelModelDescrption = new javax.swing.JLabel();
@@ -1047,7 +1011,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jRadioButtonValid, gridBagConstraints);
 
@@ -1056,7 +1020,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.weightx = 0.6;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jRadioButtonInvalid, gridBagConstraints);
 
@@ -1090,24 +1054,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jButtonOpenFile, gridBagConstraints);
 
-        jButtonImageInfo.setText("Info");
-        jButtonImageInfo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonImageInfoActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelUserModel.add(jButtonImageInfo, gridBagConstraints);
-
-        jLabelScale.setText("Scale");
-        jLabelScale.setToolTipText("image increments in mas");
+        jLabelScale.setText("Pixel size (mas)");
+        jLabelScale.setToolTipText("pixel increment in mas");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -1120,13 +1072,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jFormattedTextFieldScaleX, gridBagConstraints);
 
-        jLabelRotation.setText("Rotation");
-        jLabelRotation.setToolTipText("image rotation in degrees");
+        jLabelRotation.setText("Rotation (deg)");
+        jLabelRotation.setToolTipText("rotation angle toward North in degrees");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -1136,53 +1087,28 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         jFormattedTextFieldRotation.setColumns(10);
         jFormattedTextFieldRotation.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
+        jFormattedTextFieldRotation.setToolTipText("");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 0, 2);
         jPanelUserModel.add(jFormattedTextFieldRotation, gridBagConstraints);
 
         jButtonReset.setText("reset");
+        jButtonReset.setToolTipText("reset pixel size & rotation to their original values");
         jButtonReset.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonResetActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelUserModel.add(jButtonReset, gridBagConstraints);
-
-        jFormattedTextFieldScaleY.setColumns(10);
-        jFormattedTextFieldScaleY.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00##E0"))));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelUserModel.add(jFormattedTextFieldScaleY, gridBagConstraints);
-
-        jToggleButtonLinked.setSelected(true);
-        jToggleButtonLinked.setText("linked");
-        jToggleButtonLinked.setEnabled(false);
-        jToggleButtonLinked.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        jToggleButtonLinked.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jToggleButtonLinkedActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelUserModel.add(jToggleButtonLinked, gridBagConstraints);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 0, 2);
+        jPanelUserModel.add(jButtonReset, gridBagConstraints);
 
         jButtonAmhra.setText("AMHRA");
         jButtonAmhra.setToolTipText("Open the AMHRA web portal to get a model image");
@@ -1193,8 +1119,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jButtonAmhra, gridBagConstraints);
@@ -1208,9 +1133,19 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jButtonUserModelHelp, gridBagConstraints);
+
+        jLabelObsInfo.setText("OBS INFO");
+        jLabelObsInfo.setToolTipText("pixel increment in mas");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanelUserModel.add(jLabelObsInfo, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1565,8 +1500,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         userModel.setName(userModelFile.getName());
 
         // reset Transforms:
-        userModel.setScaleX(null);
-        userModel.setScaleY(null);
+        userModel.setScale(null);
         userModel.setRotation(null);
 
         // trigger reload user model:
@@ -1602,32 +1536,13 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           userModel.setName(file.getName());
 
           // reset Transforms:
-          userModel.setScaleX(null);
-          userModel.setScaleY(null);
+          userModel.setScale(null);
           userModel.setRotation(null);
 
           // trigger reload user model:
           triggerReloadUserModel(true);
       }
   }//GEN-LAST:event_jButtonOpenFileActionPerformed
-
-    private void jButtonImageInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonImageInfoActionPerformed
-        if (this.currentTarget == null) {
-            return;
-        }
-
-        final UserModel userModel = this.currentTarget.getOrCreateUserModel();
-
-        if (userModel.isModelDataReady()) {
-            // note: only possible with one Fits image or one Fits cube (single HDU):
-            final FitsImageHDU fitsImageHDU = userModel.getModelData(0).getFitsImageHDU();
-
-            final String hduHeader = "ImageHDU#" + fitsImageHDU.getExtNb() + " has "
-                    + fitsImageHDU.getImageCount() + " images.\n\n" + fitsImageHDU.getHeaderAsString("\n");
-
-            MessagePane.showMessage(hduHeader);
-        }
-    }//GEN-LAST:event_jButtonImageInfoActionPerformed
 
     private void jButtonResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonResetActionPerformed
         if (this.currentTarget == null) {
@@ -1641,14 +1556,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
             // use only positive increments (no direction)
             this.jFormattedTextFieldScaleX.setValue(ALX.convertRadToMas(fitsImage.getOrigIncCol()));
-            this.jFormattedTextFieldScaleY.setValue(ALX.convertRadToMas(fitsImage.getOrigIncRow()));
             this.jFormattedTextFieldRotation.setValue(fitsImage.getOrigRotAngle());
         }
     }//GEN-LAST:event_jButtonResetActionPerformed
-
-    private void jToggleButtonLinkedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonLinkedActionPerformed
-        handleLinkedState();
-    }//GEN-LAST:event_jToggleButtonLinkedActionPerformed
 
     private void jButtonAmhraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAmhraActionPerformed
         BrowserLauncher.openURL(AMHRA_URL);
@@ -1658,18 +1568,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         BrowserLauncher.openURL(HELP_USER_MODEL_URL);
     }//GEN-LAST:event_jButtonUserModelHelpActionPerformed
 
-    private void handleLinkedState() {
-        // TODO: if linked is OFF, then allow editing scaleY field
-        this.jFormattedTextFieldScaleY.setEnabled(!this.jToggleButtonLinked.isSelected() && this.jFormattedTextFieldScaleX.isEnabled());
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupEditMode;
     private javax.swing.ButtonGroup buttonGroupModelMode;
     private javax.swing.ButtonGroup buttonGroupUserModelValid;
     private javax.swing.JButton jButtonAdd;
     private javax.swing.JButton jButtonAmhra;
-    private javax.swing.JButton jButtonImageInfo;
     private javax.swing.JButton jButtonNormalizeFluxes;
     private javax.swing.JButton jButtonOpenFile;
     private javax.swing.JButton jButtonRemove;
@@ -1679,11 +1583,11 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private javax.swing.JComboBox jComboBoxModelType;
     private javax.swing.JFormattedTextField jFormattedTextFieldRotation;
     private javax.swing.JFormattedTextField jFormattedTextFieldScaleX;
-    private javax.swing.JFormattedTextField jFormattedTextFieldScaleY;
     private javax.swing.JLabel jLabelFile;
     private javax.swing.JLabel jLabelMode;
     private javax.swing.JLabel jLabelModelDescrption;
     private javax.swing.JLabel jLabelName;
+    private javax.swing.JLabel jLabelObsInfo;
     private javax.swing.JLabel jLabelOffsetEditMode;
     private javax.swing.JLabel jLabelRotation;
     private javax.swing.JLabel jLabelScale;
@@ -1708,7 +1612,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private javax.swing.JTable jTableModelParameters;
     private javax.swing.JTextField jTextFieldFileReference;
     private javax.swing.JTextField jTextFieldName;
-    private javax.swing.JToggleButton jToggleButtonLinked;
     private javax.swing.JTree jTreeModels;
     // End of variables declaration//GEN-END:variables
 
@@ -1766,6 +1669,75 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     }
 
     /**
+     * Prepare the labels to dispplay observation setup used to determine max pixel size ( ~ lambda_min / 2 Bmax) 
+     * and telescope Fov (airy radius ~ lambda / Diameter)
+     */
+    private void prepareObservationInfo() {
+        final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+
+        final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
+
+        if (instrumentChoice != null) {
+            final FocalInstrumentConfiguration insConf = instrumentChoice.getInstrumentConfiguration();
+
+            if (insConf != null) {
+                final double maxBaseLines = ConfigurationManager.getInstrumentConfigurationMaxBaseline(insConf,
+                        instrumentChoice.getStations());
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("instrument configuration: {}; baseline max = {}", instrumentChoice.getStations(), maxBaseLines);
+                }
+
+                final double lambdaMin;
+
+                if (true) {
+                    // use lower wavelength of all instrument modes:
+                    lambdaMin = AsproConstants.MICRO_METER * insConf.getFocalInstrument().getWaveLengthMin();
+                } else {
+                    // use lower wavelength of the current instrument mode:
+                    final FocalInstrumentMode instrumentMode = instrumentChoice.getFocalInstrumentMode();
+                    // In case of invalid instrument mode, use 1.0 microns instead:
+                    lambdaMin = (instrumentMode != null) ? AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin() : 1.0;
+                }
+
+                // Adjust the user uv Max = max base line / minimum wave length
+                // note : use the minimum wave length of the instrument to
+                // - make all uv segment visible
+                // - avoid too much model computations (when the instrument mode changes)
+                final double uvMaxFreq = maxBaseLines / lambdaMin;
+
+                final double maxIncrement = UserModelService.getMaxIncrement(uvMaxFreq);
+                logger.debug("maxIncrement: {}", maxIncrement);
+
+                final String insName = insConf.getFocalInstrument().getName();
+                final String insModeName = instrumentChoice.getInstrumentMode();
+
+                double diameter = Double.NaN;
+                double airyRadius = Double.NaN;
+
+                // Apodization: get Telescope diameter and instrument wavelength:
+                final List<Station> stations = instrumentChoice.getStationList();
+                if (stations != null) {
+                    // All telescopes in a configuration have the same diameter:
+                    diameter = stations.get(0).getTelescope().getDiameter();
+                    airyRadius = UserModelService.getAiryRadius(diameter, lambdaMin);
+                }
+
+                jLabelObsInfo.setText("<html>Max pixel size: " + NumberUtils.trimTo3Digits(ALX.convertRadToMas(maxIncrement))
+                        + " mas<br>Telescope FOV: "
+                        + NumberUtils.trimTo1Digits(ALX.convertRadToMas(2.0 * airyRadius)) + " mas</html>");
+
+                jLabelObsInfo.setToolTipText("<html><b>Configuration:</b> " + instrumentChoice.getStations()
+                        + "<br><b>Instrument:</b> " + insName
+                        + "<br><b>Ins. mode:</b> " + insModeName
+                        + "<br><b>Tel. diameter:</b> " + NumberUtils.trimTo3Digits(diameter) + " (m)"
+                        + "<br><b>Min. Wavelength:</b> " + NumberUtils.trimTo3Digits(1e6 * lambdaMin) + " (µm)"
+                );
+            }
+        }
+    }
+
+    /**
      * Prepare and validate the given user model
      * @param userModel user model to use
      * @param reload flag to force reloading model
@@ -1773,6 +1745,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private static void prepareAndValidateUserModel(final UserModel userModel, final boolean reload) {
         // see ObservationManager.checkAndLoadFileReferences()
         final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+
+        final StringBuilder sb = new StringBuilder(128);
 
         boolean valid = false;
         try {
@@ -1794,14 +1768,23 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             valid = true;
 
         } catch (IllegalArgumentException iae) {
-            MessagePane.showErrorMessage("Could not use FITS image in file: " + userModel.getFile(), iae);
+            logger.warn("Incorrect fits image in file [{}]", userModel.getFile(), iae);
+            sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(iae.getMessage());
         } catch (FitsException fe) {
-            MessagePane.showErrorMessage("Could not read file: " + userModel.getFile(), fe);
+            logger.error("FITS failure on file [{}]", userModel.getFile(), fe);
+            sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(fe.getMessage());
         } catch (IOException ioe) {
-            MessagePane.showErrorMessage("Could not read file: " + userModel.getFile(), ioe);
+            logger.error("IO failure on file [{}]", userModel.getFile(), ioe);
+            sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(ioe.getMessage());
         } finally {
+            if (!valid) {
+                sb.append("\n\nThis model is disabled as it can not be used to compute fourier transforms with the current setup.\n\n");
+            }
             // anyway, update the valid flag:
             userModel.setFileValid(valid);
+        }
+        if (sb.length() > 0) {
+            MessagePane.showMessage(sb.toString());
         }
     }
 

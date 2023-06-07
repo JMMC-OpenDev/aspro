@@ -222,6 +222,16 @@ public class UserModel
     }
     
 //--simple--preserve
+
+    /**
+     * Set scale to X/Y
+     * @param value scale
+     */
+    public void setScale(final Double value) {
+        setScaleX(value);
+        setScaleY(value);
+    }    
+    
     /** flag indicating that the file reference is valid (readable) */
     @javax.xml.bind.annotation.XmlTransient
     private boolean fileValid = false;
