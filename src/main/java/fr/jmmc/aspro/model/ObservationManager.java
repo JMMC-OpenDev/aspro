@@ -721,7 +721,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                     sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(ioe.getMessage());
                 } finally {
                     if (!valid) {
-                        sb.append("\n\nThe target [").append(target.getName()).append("] has an invalid user model; this model is disabled.\n\n");
+                        sb.append("\n\nThe target [").append(target.getName()).append("] has an invalid user model.");
+                        sb.append("\nThis model is disabled as it can not be used to compute fourier transforms with the current setup.\n\n");
                     }
                     // anyway, update the valid flag:
                     userModel.setFileValid(valid);
@@ -1509,14 +1510,14 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
         if (insMode == null) {
             // use the first instrument mode of the instrument:
-            final Vector<String> instrumentModes = ConfigurationManager.getInstance().getInstrumentModes(
+            final Vector<String> instrumentModes = cm.getInstrumentModes(
                     observation.getInterferometerConfiguration().getName(),
                     observation.getInstrumentConfiguration().getName());
 
             if (instrumentModes.isEmpty()) {
                 throw new IllegalStateException("The instrumentMode is empty !");
             }
-            insMode = ConfigurationManager.getInstance().getInstrumentMode(
+            insMode = cm.getInstrumentMode(
                     observation.getInterferometerConfiguration().getName(),
                     observation.getInstrumentConfiguration().getName(),
                     instrumentModes.get(0));
@@ -1610,8 +1611,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
         final Target target = targetEditCtx.getSelectedTarget();
 
-        // note: target.equals() means same identifier:
-        if ((target != null) && !target.equals(observation.getSelectedTarget())) {
+        if (target != null) {
             // fire change events :
             this.fireTargetChangedEvents();
 
@@ -1892,7 +1892,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                     sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(ioe.getMessage());
                 } finally {
                     if (!valid) {
-                        sb.append("\n\nThe target [").append(target.getName()).append("] has an invalid user model; this model is disabled.\n\n");
+                        sb.append("\n\nThe target [").append(target.getName()).append("] has an invalid user model.");
+                        sb.append("\nThis model is disabled as it can not be used to compute fourier transforms with the current setup.\n\n");
                     }
                     // anyway, update the valid flag:
                     userModel.setFileValid(valid);
@@ -1939,7 +1940,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             }
 
             if (!valid) {
-                sb.append("\nThe target [").append(target.getName()).append("] has an invalid user model; this model is disabled.\n\n");
+                sb.append("\nThe target [").append(target.getName()).append("] has an invalid user model.");
+                sb.append("\nThis model is disabled as it can not be used to compute fourier transforms with the current setup.\n\n");
             }
             // anyway, update the valid flag:
             userModel.setFileValid(valid);
@@ -1970,7 +1972,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param observation observation to get interferometer and instrument configurations
      * @return maximum UV frequency (rad-1)
      */
-    private static double getUVMaxFreq(final ObservationSetting observation) {
+    public static double getUVMaxFreq(final ObservationSetting observation) {
         final FocalInstrumentConfiguration insConf = observation.getInstrumentConfiguration().getInstrumentConfiguration();
 
         final double maxBaseLines = ConfigurationManager.getInstrumentConfigurationMaxBaseline(insConf,
