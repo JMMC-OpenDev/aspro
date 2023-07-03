@@ -498,7 +498,7 @@ public final class UVCoverageService {
             logger.debug("target: {}", this.target);
         }
 
-        // Get lower wavelength for the selected instrument:
+        // use lower wavelength of all instrument modes:
         final double instrumentMinWaveLength = AsproConstants.MICRO_METER
                 * this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
 
@@ -560,17 +560,14 @@ public final class UVCoverageService {
         // - avoid to much model computations (when the instrument mode changes)
         this.uvMaxFreq /= instrumentMinWaveLength;
 
-        // Define precisely the maxUV for maxBaselines:
-        final FocalInstrumentConfiguration insConf = observation.getInstrumentConfiguration().getInstrumentConfiguration();
-
-        final double maxBaseLines = ConfigurationManager.getInstrumentConfigurationMaxBaseline(insConf,
-                observation.getInstrumentConfiguration().getStations());
-
         if (logger.isDebugEnabled()) {
+            // Define precisely the maxUV for maxBaselines:
+            final FocalInstrumentConfiguration insConf = observation.getInstrumentConfiguration().getInstrumentConfiguration();
+
+            final double maxBaseLines = ConfigurationManager.getInstrumentConfigurationMaxBaseline(insConf,
+                    observation.getInstrumentConfiguration().getStations());
+
             logger.debug("instrument configuration: {}; baseline max = {}", observation.getInstrumentConfiguration().getStations(), maxBaseLines);
-        }
-
-        if (logger.isDebugEnabled()) {
             logger.debug("uvMaxFreq: {}", this.uvMaxFreq);
         }
     }
@@ -689,7 +686,7 @@ public final class UVCoverageService {
 
             // Get wavelength range for the selected instrument mode :
             final Range wlRange = new Range();
-            instrumentMode.getEffectiveWavelengthRange(lambda, useWavelengthRangeRestriction, effBand, wlRange);            
+            instrumentMode.getEffectiveWavelengthRange(lambda, useWavelengthRangeRestriction, effBand, wlRange);
             final double lambdaMin = AsproConstants.MICRO_METER * wlRange.getMin();
             final double lambdaMax = AsproConstants.MICRO_METER * wlRange.getMax();
 

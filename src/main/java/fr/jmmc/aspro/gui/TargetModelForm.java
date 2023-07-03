@@ -113,6 +113,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private boolean doAutoUpdateUserModel = true;
     /** User model reload Swing timer */
     private final Timer timerUserModelReload;
+    /** current airyRadius in mas used to check model apodisation and parameters */
+    private double airyRadius = Double.NaN;
 
     /**
      * Creates new form TargetModelForm (used by NetBeans editor only)
@@ -829,6 +831,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jTextFieldName = new javax.swing.JTextField();
         jLabelType = new javax.swing.JLabel();
         jComboBoxModelType = new javax.swing.JComboBox();
+        jLabelModelObsInfo = new javax.swing.JLabel();
         jPanelUserModel = new javax.swing.JPanel();
         jLabelValid = new javax.swing.JLabel();
         jRadioButtonValid = new javax.swing.JRadioButton();
@@ -843,7 +846,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jButtonReset = new javax.swing.JButton();
         jButtonAmhra = new javax.swing.JButton();
         jButtonUserModelHelp = new javax.swing.JButton();
-        jLabelObsInfo = new javax.swing.JLabel();
+        jLabelUserModelObsInfo = new javax.swing.JLabel();
         jPanelDescription = new javax.swing.JPanel();
         jScrollPaneModelDescription = new javax.swing.JScrollPane();
         jLabelModelDescrption = new javax.swing.JLabel();
@@ -921,7 +924,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         jPanelModelAnalytic.add(jButtonAdd, gridBagConstraints);
 
         jButtonRemove.setText("Remove");
@@ -933,7 +936,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelAnalytic.add(jButtonRemove, gridBagConstraints);
@@ -947,7 +950,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelAnalytic.add(jButtonUpdate, gridBagConstraints);
@@ -955,35 +958,45 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jLabelName.setText("Name");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelAnalytic.add(jLabelName, gridBagConstraints);
 
-        jTextFieldName.setColumns(10);
         jTextFieldName.setEditable(false);
+        jTextFieldName.setColumns(10);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelAnalytic.add(jTextFieldName, gridBagConstraints);
 
-        jLabelType.setText("model type");
+        jLabelType.setText("Model type");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelAnalytic.add(jLabelType, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelAnalytic.add(jComboBoxModelType, gridBagConstraints);
+
+        jLabelModelObsInfo.setText("OBS INFO");
+        jLabelModelObsInfo.setToolTipText("pixel increment in mas");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelAnalytic.add(jLabelModelObsInfo, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1138,14 +1151,14 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jButtonUserModelHelp, gridBagConstraints);
 
-        jLabelObsInfo.setText("OBS INFO");
-        jLabelObsInfo.setToolTipText("pixel increment in mas");
+        jLabelUserModelObsInfo.setText("OBS INFO");
+        jLabelUserModelObsInfo.setToolTipText("pixel increment in mas");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        jPanelUserModel.add(jLabelObsInfo, gridBagConstraints);
+        jPanelUserModel.add(jLabelUserModelObsInfo, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1275,12 +1288,25 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * @return true only if the data are valid
      */
     boolean validateForm() {
+        StringBuilder report = null;
         // Validate models :
         for (Target target : this.editTargets) {
             try {
                 if (target.hasAnalyticalModel()) {
                     // validate only analytical models for target using them:
-                    ModelManager.getInstance().validateModels(target.getModels());
+                    final List<Model> models = target.getModels();
+                    ModelManager.getInstance().validateModels(models);
+
+                    // convert max distance (= 20% fov) in mas:
+                    final double maxDist = UserModelService.getAiryRadiusThreshold(airyRadius);
+
+                    if (!ModelManager.getInstance().checkModels(models, maxDist)) {
+                        if (report == null) {
+                            report = new StringBuilder(128);
+                        }
+                        report.append("The model extension on target '").append(target.getName())
+                                .append("' is potentially partly outside the telescope field of view.\n");
+                    }
                 } else {
                     // validate user model:
                     final UserModel userModel = target.getUserModel();
@@ -1294,11 +1320,17 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 }
             } catch (IllegalArgumentException iae) {
                 // display an error message for the first error found :
-                MessagePane.showErrorMessage(iae.getMessage(), "Error on target " + target.getName());
+                MessagePane.showErrorMessage(iae.getMessage(), "Model error on target " + target.getName());
 
                 // stop and continue editing the form :
                 return false;
             }
+        }
+
+        if (report != null) {
+            // Display warning messages:
+            MessagePane.showMessage(report.toString(), "Model validation");
+            // do not block form
         }
         Target.monitorUserModelReferences(this.editTargets);
         return true;
@@ -1586,12 +1618,13 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private javax.swing.JLabel jLabelFile;
     private javax.swing.JLabel jLabelMode;
     private javax.swing.JLabel jLabelModelDescrption;
+    private javax.swing.JLabel jLabelModelObsInfo;
     private javax.swing.JLabel jLabelName;
-    private javax.swing.JLabel jLabelObsInfo;
     private javax.swing.JLabel jLabelOffsetEditMode;
     private javax.swing.JLabel jLabelRotation;
     private javax.swing.JLabel jLabelScale;
     private javax.swing.JLabel jLabelType;
+    private javax.swing.JLabel jLabelUserModelObsInfo;
     private javax.swing.JLabel jLabelValid;
     private javax.swing.JPanel jPanelDescription;
     private javax.swing.JPanel jPanelImage;
@@ -1673,6 +1706,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * and telescope Fov (airy radius ~ lambda / Diameter)
      */
     private void prepareObservationInfo() {
+        // reset anyway:
+        airyRadius = Double.NaN;
+
         final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
         final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
@@ -1688,17 +1724,11 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     logger.debug("instrument configuration: {}; baseline max = {}", instrumentChoice.getStations(), maxBaseLines);
                 }
 
-                final double lambdaMin;
-
-                if (true) {
-                    // use lower wavelength of all instrument modes:
-                    lambdaMin = AsproConstants.MICRO_METER * insConf.getFocalInstrument().getWaveLengthMin();
-                } else {
-                    // use lower wavelength of the current instrument mode:
-                    final FocalInstrumentMode instrumentMode = instrumentChoice.getFocalInstrumentMode();
-                    // In case of invalid instrument mode, use 1.0 microns instead:
-                    lambdaMin = (instrumentMode != null) ? AsproConstants.MICRO_METER * instrumentMode.getWaveLengthMin() : 1.0;
-                }
+                // use lower wavelength of the current instrument mode:
+                final FocalInstrumentMode instrumentMode = instrumentChoice.getFocalInstrumentMode();
+                // In case of invalid instrument mode, use lower wavelength of all instrument modes:
+                final double lambdaMin = AsproConstants.MICRO_METER * ((instrumentMode != null) ? instrumentMode.getWaveLengthMin()
+                        : insConf.getFocalInstrument().getWaveLengthMin());
 
                 // Adjust the user uv Max = max base line / minimum wave length
                 // note : use the minimum wave length of the instrument to
@@ -1713,26 +1743,28 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 final String insModeName = instrumentChoice.getInstrumentMode();
 
                 double diameter = Double.NaN;
-                double airyRadius = Double.NaN;
 
-                // Apodization: get Telescope diameter and instrument wavelength:
+                // FOV: get Telescope diameter and instrument wavelength:
                 final List<Station> stations = instrumentChoice.getStationList();
                 if (stations != null) {
                     // All telescopes in a configuration have the same diameter:
                     diameter = stations.get(0).getTelescope().getDiameter();
-                    airyRadius = UserModelService.getAiryRadius(diameter, lambdaMin);
+                    // telescope FOV = airy disk FWHM:
+                    airyRadius = ALX.convertRadToMas(UserModelService.getAiryRadius(diameter, lambdaMin)); // mas
                 }
 
-                jLabelObsInfo.setText("<html>Max pixel size: " + NumberUtils.trimTo3Digits(ALX.convertRadToMas(maxIncrement))
-                        + " mas<br>Telescope FOV: "
-                        + NumberUtils.trimTo1Digits(ALX.convertRadToMas(2.0 * airyRadius)) + " mas</html>");
+                jLabelModelObsInfo.setText("Telescope FOV: " + NumberUtils.trimTo1Digits(airyRadius) + " mas");
 
-                jLabelObsInfo.setToolTipText("<html><b>Configuration:</b> " + instrumentChoice.getStations()
-                        + "<br><b>Instrument:</b> " + insName
-                        + "<br><b>Ins. mode:</b> " + insModeName
+                jLabelUserModelObsInfo.setText("<html>Max pixel size: " + NumberUtils.trimTo3Digits(ALX.convertRadToMas(maxIncrement))
+                        + " mas<br>Telescope FOV: " + NumberUtils.trimTo1Digits(airyRadius) + " mas</html>");
+
+                final String tooltip = "<html><b>Configuration:</b> " + instrumentChoice.getStations()
+                        + "<br><b>Instrument:</b> " + insName + "<br><b>Ins. mode:</b> " + insModeName
                         + "<br><b>Tel. diameter:</b> " + NumberUtils.trimTo3Digits(diameter) + " (m)"
-                        + "<br><b>Min. Wavelength:</b> " + NumberUtils.trimTo3Digits(1e6 * lambdaMin) + " (µm)"
-                );
+                        + "<br><b>Min. Wavelength:</b> " + NumberUtils.trimTo3Digits(lambdaMin / AsproConstants.MICRO_METER) + " (µm)</html>";
+
+                jLabelModelObsInfo.setToolTipText(tooltip);
+                jLabelUserModelObsInfo.setToolTipText(tooltip);
             }
         }
     }

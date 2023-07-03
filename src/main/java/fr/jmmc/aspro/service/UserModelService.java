@@ -1438,34 +1438,56 @@ public final class UserModelService {
             logger.debug("getAiryRadius: airy radius  = {}", FitsImage.getAngleAsString(airyRadius, df3));
             logger.debug("getAiryRadius: image radius = {}", FitsImage.getAngleAsString(imageRadius, df3));
 
-            // check weight (see apodize method)
-            final double fwhm = 0.42d * lambda / diameter;
+            // check weight (see apodize method):
+            final double sigma = getGaussianStddev(airyRadius);
 
             // min(gaussian weight) on image boundaries:
-            final double weight = FastMath.exp(-(imageRadius * imageRadius) / (2.0 * fwhm * fwhm));
+            // see ImageGaussianFilterJob weights:
+            final double weight = FastMath.exp(-(imageRadius * imageRadius) / (2.0 * sigma * sigma));
 
             logger.debug("weight[{}] = {}", NumberUtils.trimTo3Digits(imageRadius / airyRadius), weight);
         }
 
-        // if ratio (image radius / airy radius) > 15% then gaussian weight (equiv airy) becomes below 0.9 at image boundaries
-        if (imageRadius < 0.15 * airyRadius) {
+        // if ratio (image radius / airy radius) > 20% then gaussian weight becomes below 0.9 at image boundaries
+        // weight[(imageRadius / airyRadius) = 0.2] = 0.8950250709279723
+        if (imageRadius < getAiryRadiusThreshold(airyRadius)) {
             // skip apodization:
             return Double.NaN;
         }
 
         return airyRadius;
     }
-    
+
+    public static double getAiryRadiusThreshold(final double airyRadius) {
+        return 0.2 * airyRadius;
+    }
+
+    /**
+     * Get the airy disk FHWM ~ (lambda / diameter) i.e smaller than radius = zero at 1.22 (lambda / diameter)
+     * @param diameter
+     * @param lambda
+     * @return airy disk FHWM
+     */
     public static double getAiryRadius(final double diameter, final double lambda) {
-         if (Double.isNaN(diameter) || (diameter <= 0.0) || Double.isNaN(lambda) || (lambda <= 0.0)) {
+        if (Double.isNaN(diameter) || (diameter <= 0.0) || Double.isNaN(lambda) || (lambda <= 0.0)) {
             return Double.NaN;
         }
-
         // see https://en.wikipedia.org/wiki/Airy_disk
-        // airy disk: zero  at 1.22 lambda / diameter
-        // 2021.08.02: false according to Michel tallon:
-        // final double airyRadius = 1.22d * lambda / diameter;
-        return 1.0289939700094716812373007996939122676849365234375 * lambda / diameter;
+        // note: airy disk 1st zero at 1.22 x lambda / diameter
+        // use the airy disk FWHM instead:
+        return 1.0289939700094716812373007996939122676849365234375 * lambda / diameter; // ~ lambda / diameter
+    }
+
+    /** constant 1 / 2.35 ~ 0.42 */
+    private static final double FWHM_TO_STDDEV = 1.0 / (2.0 * Math.sqrt(2.0 * Math.log(2.0)));
+
+    /**
+     * Return the gaussian stddev equivalent to the given FWHM
+     * @param fwhm gaussian FHWM
+     * @return gaussian stddev 
+     */
+    public static double getGaussianStddev(final double fwhm) {
+        return fwhm * FWHM_TO_STDDEV;
     }
 
     /**
@@ -1485,15 +1507,14 @@ public final class UserModelService {
             // Start the computations :
             final long start = System.nanoTime();
 
-            // equivalent gaussian profile: sigma = 0.42 lambda / diameter
-            final double fwhm = 0.42d * lambda / diameter;
-
             logger.info("apodize: airy radius = {}", FitsImage.getAngleAsString(airyRadius, df3));
+
+            // equivalent gaussian profile:
+            final double sigma = getGaussianStddev(airyRadius);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("apodize: lambda: {} - diameter: {}", lambda, diameter);
-                logger.debug("apodize: airy FOV  = {}", FitsImage.getAngleAsString(2.0 * airyRadius, df3));
-                logger.debug("apodize: fwhm      = {}", fwhm);
+                logger.debug("apodize: sigma       = {}", sigma);
             }
 
             final int nbRows = fitsImage.getNbRows();
@@ -1503,7 +1524,7 @@ public final class UserModelService {
                     fitsImage.getData(), nbCols, nbRows,
                     UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol()),
                     UserModelService.computeSpatialCoords(nbRows, fitsImage.getSignedIncRow()),
-                    fwhm
+                    sigma
             );
 
             filterJob.forkAndJoin();
@@ -1515,4 +1536,31 @@ public final class UserModelService {
         return airyRadius;
     }
 
+    public static void main(String[] unused) {
+        final double diameter = 1.8;
+        final double lambda = 1.5E-6;
+//        final double lambda = 3.5E-6;
+//        final double lambda = 10.5E-6;
+
+        final double airyRadius = getAiryRadius(diameter, lambda);
+
+        logger.info("airy radius  = {}", FitsImage.getAngleAsString(airyRadius, df3));
+        logger.info("airy FOV     = {}", FitsImage.getAngleAsString(2.0 * airyRadius, df3));
+
+        // equivalent gaussian profile:
+        final double sigma = getGaussianStddev(airyRadius);
+
+        logger.info("sigma        = {}", FitsImage.getAngleAsString(sigma, df3));
+
+        // min(gaussian weight) on image boundaries:
+        for (double r = 0.0; r <= 1.3 * airyRadius; r += airyRadius * 0.05) {
+            final double imageRadius = r;
+
+            // see ImageGaussianFilterJob weights:
+            final double weight = FastMath.exp(-(imageRadius * imageRadius) / (2.0 * sigma * sigma));
+
+            logger.info("weight[{} <=> {}] = {}",
+                    NumberUtils.trimTo3Digits(imageRadius / airyRadius), FitsImage.getAngleAsString(imageRadius, df3), weight);
+        }
+    }
 }

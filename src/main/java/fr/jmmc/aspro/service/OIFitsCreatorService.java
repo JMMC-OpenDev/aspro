@@ -11,6 +11,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.observability.TargetPointInfo;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
@@ -35,6 +36,7 @@ import static fr.jmmc.jmcs.util.StatUtils.SAMPLING_FACTOR_VARIANCE;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.MutableComplex;
+import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmcs.gui.task.InterruptableThread;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
@@ -261,7 +263,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                     + ((isAmber || this.instrumentVisPhiDiff) ? "Differential" : "Absolute") + " VisPhi");
         }
 
-        final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+        final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
+        if (instrumentChoice == null) {
+            throw new IllegalStateException("The instrumentChoice is empty !");
+        }
+        final FocalInstrumentMode insMode = instrumentChoice.getFocalInstrumentMode();
         if (insMode == null) {
             throw new IllegalStateException("The instrumentMode is empty !");
         }
@@ -269,17 +275,48 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         prepareInstrumentMode(warningContainer);
 
-        // user model if defined:
-        final UserModel userModel = (!target.hasAnalyticalModel()) ? target.getUserModel() : null;
+        if (target.hasAnalyticalModel()) {
+            // check model against telescope fov:
 
-        if ((userModel != null) && userModel.isFileValid()) {
-            // validate image against the given observation:
-            // may throw IllegalArgumentException
-            ObservationManager.validateUserModel(observation, userModel);
+            final List<Station> stations = instrumentChoice.getStationList();
+            if (stations != null) {
+                // All telescopes in a configuration have the same diameter:
+                final double diameter = stations.get(0).getTelescope().getDiameter();
 
-            // prepare later image according to apodization
-            this.cObservation = observation;
-            this.cUserModel = userModel;
+                // use lower wavelength:
+                final double lambdaMin = this.waveLengths[0];
+                // telescope FOV = airy disk FWHM:
+                final double airyRadius = ALX.convertRadToMas(UserModelService.getAiryRadius(diameter, lambdaMin)); // mas
+
+                // convert max distance (= 20% fov) in mas:
+                final double maxDist = UserModelService.getAiryRadiusThreshold(airyRadius);
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("diameter:   {}", diameter);
+                    logger.debug("lambdaMin:  {}", lambdaMin);
+                    logger.debug("airyRadius: {}", airyRadius);
+                    logger.debug("maxDist:    {}", maxDist);
+                }
+
+                if (!ModelManager.getInstance().checkModels(target.getModels(), maxDist)) {
+                    addWarning(warningContainer, "The model extension on target '" + target.getName()
+                            + "' is potentially partly outside the telescope FOV ("
+                            + NumberUtils.trimTo1Digits(airyRadius) + " mas) !");
+                }
+            }
+        } else {
+            // user model if defined:
+            final UserModel userModel = target.getUserModel();
+
+            if ((userModel != null) && userModel.isFileValid()) {
+                // validate image against the given observation:
+                // may throw IllegalArgumentException
+                ObservationManager.validateUserModel(observation, userModel);
+
+                // prepare later image according to apodization
+                this.cObservation = observation;
+                this.cUserModel = userModel;
+            }
         }
     }
 
@@ -312,7 +349,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 logger.debug("lambdaMax: {}", lambdaMax);
                 logger.debug("nChannels: {}", nWaveLengths);
             }
-            // TODO: handle variable bandwdith:
+            // TODO: handle variable bandwidth:
             waveBand = (lambdaMax - lambdaMin) / nWaveLengths;
             this.waveLengths = computeWaveLengths(lambdaMin, waveBand, nWaveLengths);
             this.waveBands = new double[nWaveLengths];
@@ -376,7 +413,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         break;
                     }
                 }
-                logger.debug("idx : {} - {}", firstIdx, lastIdx);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("idx : {} - {}", firstIdx, lastIdx);
+                }
 
                 // handle special case where range is not found (hole in LM band at 4.2-4.5):
                 if (firstIdx == -1 || lastIdx == -1) {
@@ -1613,14 +1652,18 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                          */
                         // 1.1 corresponds to SNR(V2) < 0.1
                         if (Math.abs(s_v2_mean / v2Th) > 1.1) {
-                            logger.debug("Incompatible sampled distribution for normal law, detected OIVis2 : ratio(mean) = {} SNR= {}",
-                                    (s_v2_mean / v2Th), (v2Th / v2ThErr));
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Incompatible sampled distribution for normal law, detected OIVis2 : ratio(mean) = {} SNR= {}",
+                                        (s_v2_mean / v2Th), (v2Th / v2ThErr));
+                            }
                             doFlag = true;
                         }
                         // 1.1 corresponds to SNR(V2) < 0.8
                         if (Math.abs(s_v2_err / v2ThErr) > 1.1) {
-                            logger.debug("Incompatible sampled distribution for normal law, detected OIVis2 : ratio(stddev) = {} SNR= {}",
-                                    (s_v2_err / v2ThErr), (v2Th / v2ThErr));
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Incompatible sampled distribution for normal law, detected OIVis2 : ratio(stddev) = {} SNR= {}",
+                                        (s_v2_err / v2ThErr), (v2Th / v2ThErr));
+                            }
                             doFlag = true;
                         }
 
@@ -1961,9 +2004,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 if (logger.isDebugEnabled()) {
                     logger.debug("vis baseline: {}", Arrays.toString(visStaIndexes[vp + pos]));
                     logger.debug("T3  baseline: {}", Arrays.toString(triplet.getBaselineIndexes()[2]));
-                }
 
-                if (logger.isDebugEnabled()) {
                     logger.debug("UV 13    = ({}, {})", visUCoords[vp + pos], visVCoords[vp + pos]);
                     logger.debug("UV 12+23 = ({}, {})", (u12 + u23), (v12 + v23));
                 }
@@ -2151,8 +2192,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                              */
                             // 0.95 / 1.05 corresponds to low SNR(T3) ~ 0.5 and more strict than V2
                             if (Math.abs(s_t3amp_mean / t3ampTh) > 1.05 || Math.abs(s_t3amp_mean / t3ampTh) < 0.95) {
-                                logger.debug("Incompatible sampled distribution for normal law, detected OIT3 : ratio(mean) = {} SNR= {}",
-                                        (s_t3amp_mean / t3ampTh), (s_t3amp_mean / s_t3amp_err));
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("Incompatible sampled distribution for normal law, detected OIT3 : ratio(mean) = {} SNR= {}",
+                                            (s_t3amp_mean / t3ampTh), (s_t3amp_mean / s_t3amp_err));
+                                }
                                 doFlag = true;
                             }
 
