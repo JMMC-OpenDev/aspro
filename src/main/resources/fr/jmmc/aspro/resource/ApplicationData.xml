@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="23.06"/>
-    <compilation date="07/06/2023" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="23.07 beta 1"/>
+    <compilation date="06/07/2023" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -242,6 +242,14 @@
     </menubar>
 
     <releasenotes>
+        <release version="23.07">
+            <pubDate>Thu, 06 Jul 2023 10:00:00 GMT</pubDate>
+            <prerelease version="23.07 beta 1">
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/34">Improved Target Model editor and OIFits simulator to check analytical models
+                    if any (distance) parameter value exceeds 20% of the Telescope Fov and report the warning:
+                    'The model extension on target ... is potentially partly outside the telescope FOV'</change>
+            </prerelease>
+        </release>
         <release version="23.06">
             <pubDate>Wed, 07 June 2023 21:00:00 GMT</pubDate>
             <prerelease version="23.06 beta 3">
