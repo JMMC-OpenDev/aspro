@@ -245,6 +245,7 @@
         <release version="23.07">
             <pubDate>Thu, 06 Jul 2023 10:00:00 GMT</pubDate>
             <prerelease version="23.07 beta 1">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1332">Fixed user model support for RADMC3D FITS cubes using unit = hertz (CUNIT3)</change>
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/34">Improved Target Model editor and OIFits simulator to check analytical models
                     if any (distance) parameter value exceeds 20% of the Telescope Fov and report the warning:
                     'The model extension on target ... is potentially partly outside the telescope FOV'</change>
