@@ -78,7 +78,7 @@ public final class UserModelData extends OIBase {
      * @return wavelength increment along the wavelength axis (meter per pixel)
      */
     public double getWaveLengthIncrement() {
-        return fitsImage.getIncWL();
+        return fitsImage.hasIncWL() ? getWaveLengthRange().getLength() : Double.NaN;
     }
 
     /**

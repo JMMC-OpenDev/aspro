@@ -61,6 +61,8 @@ public interface AsproConstants {
             }));
     /** default super sampling = 3 */
     public final static Integer DEFAULT_SUPER_SAMPLING = NumberUtils.valueOf(3);
+    /** max super sampling = 75 */
+    public final static Integer MAX_SUPER_SAMPLING = NumberUtils.valueOf(75);
     /** supersampling choices */
     public final static Vector<Integer> SUPER_SAMPLING = new Vector<Integer>(Arrays.asList(
             new Integer[]{
@@ -69,7 +71,8 @@ public interface AsproConstants {
                 NumberUtils.valueOf(5),
                 NumberUtils.valueOf(9),
                 NumberUtils.valueOf(15),
-                NumberUtils.valueOf(25)
+                NumberUtils.valueOf(25),
+                MAX_SUPER_SAMPLING
             }));
     /** default fast user mode error */
     public final static Double DEFAULT_FAST_ERROR = Double.valueOf(1.0);

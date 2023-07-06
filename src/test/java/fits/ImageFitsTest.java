@@ -273,7 +273,9 @@ public class ImageFitsTest {
         }
 
         if (true) {
-            final File directory = new File(userHome + "/ASPRO2/fits/tests/");
+            // final File directory = new File(userHome + "/ASPRO2/fits/tests/");            
+            final File directory = new File(userHome + "/ASPRO2/fits/cube/");
+            
             if (directory.exists() && directory.isDirectory()) {
 
                 // display fits image:

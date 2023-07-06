@@ -192,11 +192,11 @@ public abstract class AbstractOIFitsProducer {
                     } else {
                         // Fits cube:
                         final double wlLast = modelDataLast.getWaveLength();
-                        final double wlInc = modelDataFirst.getWaveLengthIncrement(); // constant in Fits cube
+                        final double wlIncMin = modelDataFirst.getWaveLengthIncrement(); // not constant in Fits cube (hertz)
 
                         addInformation(warningContainer, "User model [" + userModel.getName() + "]: " + nImages + " images "
                                 + '[' + convertWL(wlFirst) + " - " + convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER + "] "
-                                + "(increment: " + convertWL(wlInc) + " " + SpecialChars.UNIT_MICRO_METER + ')');
+                                + "(increment: " + convertWL(wlIncMin) + " " + SpecialChars.UNIT_MICRO_METER + ')');
 
                         // check image wavelengths are overlapping the instrument range:
                         if (modelDataFirst.getWaveLengthRange().getMin() > lambdaMax) {
@@ -349,20 +349,24 @@ public abstract class AbstractOIFitsProducer {
             // note: disable super sampling in high resolution:
             // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
             // TODO: determine correctly deltaLambda (object size (FOV) and Bmax/lambda) ie when super sampling is surely necessary
-            int nSamples = (nChannels > 100 || this.mathMode == MathMode.QUICK) ? 1 : this.supersampling;
+            int nSamples = ((nChannels > 100) || (this.mathMode == MathMode.QUICK)) ? 1 : this.supersampling;
 
-            // TODO: fix resampling
             final double waveBand = StatUtils.mean(this.waveBands);
 
-            double deltaLambda = waveBand / nSamples;
+            final double deltaLambda = waveBand / nSamples;
 
-            // If Fits cube: use all images at least i.e. adjust frequencies and nSamples:
-            final double wlInc = ((userModel != null) && userModel.isModelDataReady()) ? userModel.getModelData(0).getWaveLengthIncrement() : Double.POSITIVE_INFINITY;
+            // If Fits cube: try using all images at least i.e. adjust nSamples then frequencies:
+            final double wlIncMin = ((userModel != null) && userModel.isModelDataReady()) ? userModel.getModelData(0).getWaveLengthIncrement() : Double.NaN;
 
             // Sub channel width:
-            if ((wlInc > 0.0) && (wlInc < deltaLambda)) {
+            if (!Double.isNaN(wlIncMin) && (wlIncMin < deltaLambda)) {
                 // adjust nSamples to have deltaLambda < wlInc:
-                nSamples = (int) Math.ceil((nSamples * waveBand) / wlInc);
+                nSamples = (int) Math.ceil(waveBand / wlIncMin);
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("computeModelVisibilities: adjusted nSamples = {} (wlIncMin = {})", nSamples, wlIncMin);
+                }
+                nSamples = Math.min(nSamples, AsproConstants.MAX_SUPER_SAMPLING);
             }
 
             // Prefer odd number of sub channels:
