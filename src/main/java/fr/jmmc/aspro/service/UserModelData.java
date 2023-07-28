@@ -18,18 +18,19 @@ public final class UserModelData extends OIBase {
     /* members */
     /** FFT ready fits image */
     private FitsImage fitsImage = null;
-    /** threahold flux */
+    /** threshold flux (temporary) */
     private float thresholdFlux = 0f;
-    /** image ROI */
+    /** image ROI (temporary) */
     private Rectangle roi = null;
     /** wavelength range of the fits image (fits cube) */
     private Range wavelengthRange = null;
     /** 
-     * Flattened data points (1D) stored with col and row: [data col row] 
+     * Flattened data points (1D) stored with col and row: [data xfreq yfreq] 
      * spatial coordinates along the column and row axis (rad)
      */
     private float[] data1D = null;
-
+    /** totalFlux flux (before normalization) */
+    private double totalFlux = Double.NaN;
     /** airy radius (apodization) */
     private double airyRadius = Double.NaN;
 
@@ -46,6 +47,30 @@ public final class UserModelData extends OIBase {
      */
     public FitsImage getFitsImage() {
         return fitsImage;
+    }
+
+    /**
+     * Define the FFT ready fits image
+     * @param fitsImage FFT ready fits image
+     */
+    public void setFitsImage(final FitsImage fitsImage) {
+        this.fitsImage = fitsImage;
+    }
+
+    /**
+     * Return the totalFlux flux (before normalization)
+     * @return totalFlux flux (before normalization)
+     */
+    public double getTotalFlux() {
+        return totalFlux;
+    }
+
+    /**
+     * Define the totalFlux flux (before normalization)
+     * @param total totalFlux flux (before normalization)
+     */
+    public void setTotalFlux(final double total) {
+        this.totalFlux = total;
     }
 
     public float getThresholdFlux() {
@@ -101,14 +126,6 @@ public final class UserModelData extends OIBase {
     }
 
     /**
-     * Define the FFT ready fits image
-     * @param fitsImage FFT ready fits image
-     */
-    public void setFitsImage(final FitsImage fitsImage) {
-        this.fitsImage = fitsImage;
-    }
-
-    /**
      * Define model data
      * @param data1D flattened data points (1D)
      * @return this instance
@@ -124,12 +141,12 @@ public final class UserModelData extends OIBase {
      * @return number of data1D elements
      */
     public int getNData() {
-        return this.data1D.length;
+        return (this.data1D != null) ? this.data1D.length : 0;
     }
 
     /**
-     * Return the flattened data points (1D) [data col row]
-     * @return flattened data points (1D) [data col row]
+     * Return the flattened data points (1D) [data xfreq yfreq] 
+     * @return flattened data points (1D) [data xfreq yfreq] 
      */
     public float[] getData1D() {
         return data1D;
@@ -156,17 +173,19 @@ public final class UserModelData extends OIBase {
      */
     @Override
     public String toString() {
-        return "UserModelData:" + getFitsImage() + " - nData=" + getNData();
+        return "UserModelData{ " + getFitsImage() + " nData: " + getNData()
+                + " airyRadius: " + getAiryRadius() + " totalFlux: " + getTotalFlux()
+                + " wl: " + getWaveLength() + " range: " + getWaveLengthRange() + '}';
     }
 
     public int getMemorySize() {
         int len = 0;
         if (fitsImage != null) {
-            len += fitsImage.getNbRows() * fitsImage.getNbCols() * 4;
+            len += fitsImage.getNbRows() * fitsImage.getNbCols();
         }
         if (data1D != null) {
-            len += data1D.length * 4;
+            len += data1D.length;
         }
-        return len;
+        return len * 4;
     }
 }

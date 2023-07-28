@@ -7,6 +7,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.TimeRef;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
+import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.jmal.image.ColorModels;
@@ -68,6 +69,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         this.jComboBoxBestPopsCriteriaAverageWeight.setModel(new DefaultComboBoxModel(Criteria.values()));
 
         this.jComboBoxFastError.setModel(new DefaultComboBoxModel(AsproConstants.FAST_ERROR));
+
+        this.jComboBoxMathMode.setModel(new DefaultComboBoxModel(MathMode.values()));
         this.jComboBoxSuperSampling.setModel(new DefaultComboBoxModel(AsproConstants.SUPER_SAMPLING));
 
         // Custom renderer for LUT:
@@ -124,7 +127,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
                 }
             }
         });
-        
+
         final Dimension dim = new Dimension(500, 500);
         setMinimumSize(dim);
         addComponentListener(new ComponentResizeAdapter(dim));
@@ -159,6 +162,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         buttonGroupImageNoise = new javax.swing.ButtonGroup();
         buttonGroupGuiRestrictions = new javax.swing.ButtonGroup();
         buttonGroupApodization = new javax.swing.ButtonGroup();
+        buttonGroupCubeInterpolation = new javax.swing.ButtonGroup();
+        buttonGroupCubeExtrapolation = new javax.swing.ButtonGroup();
         jScrollPane = new javax.swing.JScrollPane();
         jPanelLayout = new javax.swing.JPanel();
         jPanelObservability = new javax.swing.JPanel();
@@ -210,6 +215,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jRadioButtonApodizationYes = new javax.swing.JRadioButton();
         jRadioButtonApodizationNo = new javax.swing.JRadioButton();
         jPanelOIFits = new javax.swing.JPanel();
+        jLabelMathMode = new javax.swing.JLabel();
+        jComboBoxMathMode = new javax.swing.JComboBox();
         jLabelSuperSampling = new javax.swing.JLabel();
         jComboBoxSuperSampling = new javax.swing.JComboBox();
         jLabelAddNoise = new javax.swing.JLabel();
@@ -217,6 +224,12 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jRadioButtonAddNoiseNo = new javax.swing.JRadioButton();
         jFieldSNRTh = new javax.swing.JFormattedTextField();
         jLabelSNRTh = new javax.swing.JLabel();
+        jLabelCubeInterpolation = new javax.swing.JLabel();
+        jRadioButtonCubeInterpolationYes = new javax.swing.JRadioButton();
+        jRadioButtonCubeInterpolationNo = new javax.swing.JRadioButton();
+        jLabelCubeExtrapolation = new javax.swing.JLabel();
+        jRadioButtonCubeExtrapolationYes = new javax.swing.JRadioButton();
+        jRadioButtonCubeExtrapolationNo = new javax.swing.JRadioButton();
         jPanelGui = new javax.swing.JPanel();
         jLabelGuiRestrictions = new javax.swing.JLabel();
         jRadioButtonBypassGuiRestrictionsYes = new javax.swing.JRadioButton();
@@ -718,18 +731,46 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jPanelOIFits.setBorder(javax.swing.BorderFactory.createTitledBorder("OIFits data"));
         jPanelOIFits.setLayout(new java.awt.GridBagLayout());
 
+        jLabelMathMode.setText("Math mode");
+        jLabelMathMode.setToolTipText("Use QUICK to have fastest preview (low accuracy), FAST for fast but good accuracy & standard to get highest accuracy (slow)");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelOIFits.add(jLabelMathMode, gridBagConstraints);
+
+        jComboBoxMathMode.setName("jComboBoxMathMode"); // NOI18N
+        jComboBoxMathMode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxMathModeActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
+        jPanelOIFits.add(jComboBoxMathMode, gridBagConstraints);
+
         jLabelSuperSampling.setText("<html>Supersampling model<br>in spectral channels</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelOIFits.add(jLabelSuperSampling, gridBagConstraints);
 
+        jComboBoxSuperSampling.setName("jComboBoxSuperSampling"); // NOI18N
         jComboBoxSuperSampling.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBoxSuperSamplingActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
@@ -738,7 +779,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jLabelAddNoise.setText("Add error noise to data");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelOIFits.add(jLabelAddNoise, gridBagConstraints);
@@ -752,7 +793,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelOIFits.add(jRadioButtonAddNoiseYes, gridBagConstraints);
@@ -766,18 +807,19 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelOIFits.add(jRadioButtonAddNoiseNo, gridBagConstraints);
 
         jFieldSNRTh.setColumns(5);
         jFieldSNRTh.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.0"))));
-        jFieldSNRTh.setName("jFieldMinElev"); // NOI18N
+        jFieldSNRTh.setName("jFieldSNRTh"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         jPanelOIFits.add(jFieldSNRTh, gridBagConstraints);
@@ -790,6 +832,80 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelOIFits.add(jLabelSNRTh, gridBagConstraints);
+
+        jLabelCubeInterpolation.setText("Fits cube Interpolation");
+        jLabelCubeInterpolation.setToolTipText("Enable linear interpolation between FITS cube images");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelOIFits.add(jLabelCubeInterpolation, gridBagConstraints);
+
+        buttonGroupCubeInterpolation.add(jRadioButtonCubeInterpolationYes);
+        jRadioButtonCubeInterpolationYes.setText("yes");
+        jRadioButtonCubeInterpolationYes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonCubeInterpolationActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelOIFits.add(jRadioButtonCubeInterpolationYes, gridBagConstraints);
+
+        buttonGroupCubeInterpolation.add(jRadioButtonCubeInterpolationNo);
+        jRadioButtonCubeInterpolationNo.setText("no");
+        jRadioButtonCubeInterpolationNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonCubeInterpolationActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelOIFits.add(jRadioButtonCubeInterpolationNo, gridBagConstraints);
+
+        jLabelCubeExtrapolation.setText("Fits cube Extrapolation");
+        jLabelCubeExtrapolation.setToolTipText("Enable computing spectral channels out of the FITS cube wavelength range");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelOIFits.add(jLabelCubeExtrapolation, gridBagConstraints);
+
+        buttonGroupCubeExtrapolation.add(jRadioButtonCubeExtrapolationYes);
+        jRadioButtonCubeExtrapolationYes.setText("yes");
+        jRadioButtonCubeExtrapolationYes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonCubeExtrapolationActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelOIFits.add(jRadioButtonCubeExtrapolationYes, gridBagConstraints);
+
+        buttonGroupCubeExtrapolation.add(jRadioButtonCubeExtrapolationNo);
+        jRadioButtonCubeExtrapolationNo.setText("no");
+        jRadioButtonCubeExtrapolationNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonCubeExtrapolationActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelOIFits.add(jRadioButtonCubeExtrapolationNo, gridBagConstraints);
 
         jPanelLayout.add(jPanelOIFits);
 
@@ -1071,10 +1187,39 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         }
     }//GEN-LAST:event_jRadioButtonApodizationActionPerformed
 
+    private void jComboBoxMathModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxMathModeActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.OIFITS_MATH_MODE, this.jComboBoxMathMode.getSelectedItem().toString());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxMathModeActionPerformed
+
+    private void jRadioButtonCubeInterpolationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonCubeInterpolationActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.OIFITS_CUBE_INTERPOLATION, Boolean.valueOf(this.jRadioButtonCubeInterpolationYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonCubeInterpolationActionPerformed
+
+    private void jRadioButtonCubeExtrapolationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonCubeExtrapolationActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.OIFITS_CUBE_EXTRAPOLATION, Boolean.valueOf(this.jRadioButtonCubeExtrapolationYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonCubeExtrapolationActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupAddNoise;
     private javax.swing.ButtonGroup buttonGroupApodization;
+    private javax.swing.ButtonGroup buttonGroupCubeExtrapolation;
+    private javax.swing.ButtonGroup buttonGroupCubeInterpolation;
     private javax.swing.ButtonGroup buttonGroupFastUserModel;
     private javax.swing.ButtonGroup buttonGroupGuiRestrictions;
     private javax.swing.ButtonGroup buttonGroupImageNoise;
@@ -1091,6 +1236,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JComboBox jComboBoxImageSize;
     private javax.swing.JComboBox jComboBoxInterpolation;
     private javax.swing.JComboBox jComboBoxLUT;
+    private javax.swing.JComboBox jComboBoxMathMode;
     private javax.swing.JComboBox jComboBoxSuperSampling;
     private javax.swing.JComboBox jComboBoxTwilight;
     private javax.swing.JFormattedTextField jFieldMinElev;
@@ -1102,6 +1248,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JLabel jLabelBestPopsCriteriaSigma;
     private javax.swing.JLabel jLabelCenterNight;
     private javax.swing.JLabel jLabelColorScale;
+    private javax.swing.JLabel jLabelCubeExtrapolation;
+    private javax.swing.JLabel jLabelCubeInterpolation;
     private javax.swing.JLabel jLabelFastError;
     private javax.swing.JLabel jLabelFastUserModel;
     private javax.swing.JLabel jLabelGuiRestrictions;
@@ -1109,6 +1257,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JLabel jLabelImageSize;
     private javax.swing.JLabel jLabelInterpolation;
     private javax.swing.JLabel jLabelLutTable;
+    private javax.swing.JLabel jLabelMathMode;
     private javax.swing.JLabel jLabelMinElev;
     private javax.swing.JLabel jLabelNightOnly;
     private javax.swing.JLabel jLabelPositionStyle;
@@ -1133,6 +1282,10 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JRadioButton jRadioButtonBypassGuiRestrictionsYes;
     private javax.swing.JRadioButton jRadioButtonCenterNightNo;
     private javax.swing.JRadioButton jRadioButtonCenterNightYes;
+    private javax.swing.JRadioButton jRadioButtonCubeExtrapolationNo;
+    private javax.swing.JRadioButton jRadioButtonCubeExtrapolationYes;
+    private javax.swing.JRadioButton jRadioButtonCubeInterpolationNo;
+    private javax.swing.JRadioButton jRadioButtonCubeInterpolationYes;
     private javax.swing.JRadioButton jRadioButtonFastUserModelNo;
     private javax.swing.JRadioButton jRadioButtonFastUserModelYes;
     private javax.swing.JRadioButton jRadioButtonImageNoiseNo;
@@ -1215,13 +1368,22 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         this.jRadioButtonApodizationNo.setSelected(!useApodization);
 
         // OIFits:
+        this.jComboBoxMathMode.setSelectedItem(this.myPreferences.getOIFitsMathMode());
         this.jComboBoxSuperSampling.setSelectedItem(this.myPreferences.getPreferenceAsInt(Preferences.OIFITS_SUPER_SAMPLING));
 
         final boolean preferAddNoise = this.myPreferences.getPreferenceAsBoolean(Preferences.OIFITS_ADD_NOISE);
         this.jRadioButtonAddNoiseYes.setSelected(preferAddNoise);
         this.jRadioButtonAddNoiseNo.setSelected(!preferAddNoise);
-        
+
         this.jFieldSNRTh.setValue(this.myPreferences.getPreferenceAsDouble(Preferences.OIFITS_SNR_THRESHOLD));
+
+        final boolean preferFitsCubeInterpolation = this.myPreferences.getPreferenceAsBoolean(Preferences.OIFITS_CUBE_INTERPOLATION);
+        this.jRadioButtonCubeInterpolationYes.setSelected(preferFitsCubeInterpolation);
+        this.jRadioButtonCubeInterpolationNo.setSelected(!preferFitsCubeInterpolation);
+
+        final boolean preferFitsCubeExtrapolation = this.myPreferences.getPreferenceAsBoolean(Preferences.OIFITS_CUBE_EXTRAPOLATION);
+        this.jRadioButtonCubeExtrapolationYes.setSelected(preferFitsCubeExtrapolation);
+        this.jRadioButtonCubeExtrapolationNo.setSelected(!preferFitsCubeExtrapolation);
 
         // Gui settings:
         // Inverse logical:

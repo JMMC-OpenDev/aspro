@@ -8,6 +8,7 @@ import fr.jmmc.aspro.model.WarningMessage;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.service.OIFitsProcessService;
+import fr.jmmc.aspro.service.OIFitsProducerOptions;
 import fr.jmmc.aspro.service.UserModelData;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
@@ -139,10 +140,8 @@ public final class OIFitsProcessor {
     private final boolean useFastMode;
     /** fast mode error in percents */
     private final double fastError;
-    /** OIFits supersampling */
-    private final int supersampling;
-    /** OIFits MathMode */
-    private final MathMode mathMode;
+    /** OIFits options */
+    private final OIFitsProducerOptions options;
     /** apodization flag: true to perform image apodization; false to disable */
     private final boolean doApodization;
     /** optional telescope diameter (meters) used by image apodization (m) */
@@ -177,12 +176,13 @@ public final class OIFitsProcessor {
         this.outputFile = (outputFile != null) ? outputFile : (inputFile + "-processed.fits");
         this.useFastMode = useFastMode;
         this.fastError = 0.01 * fastError; // as percents
-        this.supersampling = supersampling;
-        this.mathMode = mathMode;
         this.doApodization = doApodization;
         this.diameter = diameter;
         this.scale = scale;
         this.rotate = rotate;
+
+        // TODO: provide new CLI opts for fits cube inter/extra polation:
+        this.options = new OIFitsProducerOptions(true, false, supersampling, mathMode, 3.0); // snrThreshold = 3
 
         logSeparator();
         logger.info("OIFitsProcessor arguments:");
@@ -205,9 +205,8 @@ public final class OIFitsProcessor {
             // load OIFITS:
             final OIFitsFile oiFitsFile = OIFitsLoader.loadOIFits(inputFile);
             logger.info("OIFits: {}", oiFitsFile);
-            
-            // Handle analytical model:
 
+            // Handle analytical model:
             // load and prepare images:
             final UserModel userModel = new UserModel();
             userModel.setFile(modelFile);
@@ -250,7 +249,7 @@ public final class OIFitsProcessor {
             target.setUseAnalyticalModel(Boolean.FALSE);
 
             final OIFitsProcessService service = new OIFitsProcessService(target, oiFitsFile,
-                    useFastMode, fastError, supersampling, mathMode, doApodization, diameter);
+                    useFastMode, fastError, options, doApodization, diameter);
 
             if (service.processOIFits(warningContainer)) {
                 logger.info("Writing {}", outputFile);

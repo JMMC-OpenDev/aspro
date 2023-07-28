@@ -146,22 +146,8 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
         final OIFitsCreatorService current = getFirstUVData().getOiFitsCreator();
         final OIFitsCreatorService other = uvDataCollection.getFirstUVData().getOiFitsCreator();
 
-        if (current != null && other != null) {
-            if (current.getSupersampling() != other.getSupersampling()) {
-                return false;
-            }
-            if (current.getMathMode() != other.getMathMode()) {
-                return false;
-            }
-            if (current.isDoNoise() != other.isDoNoise()) {
-                return false;
-            }
-            if (current.isUseCalibrationBias() != other.isUseCalibrationBias()) {
-                return false;
-            }
-            if (current.getSnrThreshold() != other.getSnrThreshold()) {
-                return false;
-            }
+        if ((current != null) && (other != null) && !current.isSameOptions(other)) {
+            return false;
         }
         return true;
     }

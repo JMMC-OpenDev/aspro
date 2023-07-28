@@ -247,6 +247,13 @@ public final class UserModelService {
 
         logger.info("prepareUserModel: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("prepareUserModel: modelDataList:");
+
+            for (final UserModelData modelData : modelDataList) {
+                logger.debug("{}", modelData);
+            }
+        }
         // update cached data if no exception occured:
         userModel.setModelDataList(modelDataList);
     }
@@ -681,11 +688,12 @@ public final class UserModelService {
      * @param vis complex visibility array
      * @param from index of the first wavelength to compute
      * @param end index of the last wavelength to compute (exclusive)
+     * @param weights scaling weights applied to complex visiblity (re/im)
      * @param mathMode Math mode to use to compute trigonometric functions
      */
     public static void computeModel(final float[] data1D, final int fromData, final int endData,
                                     final double[] ufreq, final double[] vfreq, final MutableComplex[] vis, final int from, final int end,
-                                    final MathMode mathMode) {
+                                    final double[] weights, final MathMode mathMode) {
 
         if (data1D != null && ufreq != null && vfreq != null && vis != null) {
 
@@ -694,7 +702,7 @@ public final class UserModelService {
             }
 
             // compute complex visiblities using exact fourier transform (slow):
-            compute1D(data1D, fromData, endData, ufreq, vfreq, vis, from, end, mathMode);
+            compute1D(data1D, fromData, endData, ufreq, vfreq, vis, from, end, weights, mathMode);
         }
     }
 
@@ -703,128 +711,77 @@ public final class UserModelService {
      * @param data1D user model data as 1D array
      * @param fromData index of the first data to process
      * @param endData index of the last data to process (exclusive)
-     * @param ufreq U frequencies in rad-1 x 2 PI
-     * @param vfreq V frequencies in rad-1 x 2 PI
+     * @param ufreq U frequencies in rad-1
+     * @param vfreq V frequencies in rad-1
      * @param vis complex visibility array
      * @param from index of the first wavelength to compute
      * @param end index of the last wavelength to compute (exclusive)
+     * @param weights scaling weights applied to complex visiblity (re/im)
      * @param mathMode Math mode to use to compute trigonometric functions
      */
     private static void compute1D(final float[] data1D, final int fromData, final int endData,
                                   final double[] ufreq, final double[] vfreq, final MutableComplex[] vis, final int from, final int end,
-                                  final MathMode mathMode) {
+                                  final double[] weights, final MathMode mathMode) {
 
         /** Get the current thread to check if the computation is interrupted */
         final Thread currentThread = Thread.currentThread();
 
-        final int lenData = endData - DATA_1D_POINT_SIZE;
+        final int len = DATA_1D_POINT_SIZE;
+        final int lenData = endData;
 
         logger.debug("from {} to {}", from, end);
 
-        /*
-         * Performance:
-         * - QUICK:
-         Timer [chunk[600000] - ms] [6]	{num = 6 :	min = 2197.30994,	avg = 2320.72833,	max = 2758.09333,	acc = 13924.37}
-         Timer [chunk[450000] - ms] [6]	{num = 6 :	min = 2163.82152,	avg = 2187.24396,	max = 2250.24739,	acc = 13123.46377}
-         Timer [chunk[337500] - ms] [6]	{num = 6 :	min = 2149.31863,	avg = 2198.63036,	max = 2327.58621,	acc = 13191.7822}
-         Timer [chunk[253125] - ms] [6]	{num = 6 :	min = 2170.0252,	avg = 2179.62133,	max = 2207.19855,	acc = 13077.72801}
-         Timer [chunk[189843] - ms] [6]	{num = 6 :	min = 2163.19821,	avg = 2183.49676,	max = 2264.70316,	acc = 13100.98056}
-         Timer [chunk[142382] - ms] [6]	{num = 6 :	min = 2152.85887,	avg = 2187.79126,	max = 2248.17353,	acc = 13126.74756}
-         Timer [chunk[106786] - ms] [6]	{num = 6 :	min = 2153.87358,	avg = 2167.66898,	max = 2193.36412,	acc = 13006.01392}
-         Timer [chunk[80089] - ms] [6]	{num = 6 :	min = 2144.14673,	avg = 2161.44585,	max = 2180.06556,	acc = 12968.67514}
-         Timer [chunk[60066] - ms] [6]	{num = 6 :	min = 2154.52333,	avg = 2169.33297,	max = 2206.79534,	acc = 13015.99783}
-         Timer [chunk[45049] - ms] [6]	{num = 6 :	min = 2140.7008,	avg = 2146.16914,	max = 2150.53099,	acc = 12877.01488}
-         Timer [chunk[33786] - ms] [6]	{num = 6 :	min = 2148.31889,	avg = 2195.75968,	max = 2297.56219,	acc = 13174.55808}
-         Timer [chunk[25339] - ms] [6]	{num = 6 :	min = 2135.89435,	avg = 2169.17585,	max = 2243.99312,	acc = 13015.05512}
-         Timer [chunk[19004] - ms] [6]	{num = 6 :	min = 2132.60587,	avg = 2157.38175,	max = 2243.52941,	acc = 12944.29052}
-         Timer [chunk[14253] - ms] [6]	{num = 6 :	min = 2134.62622,	avg = 2155.90243,	max = 2204.15121,	acc = 12935.41462}
-         Timer [chunk[10689] - ms] [6]	{num = 6 :	min = 2133.48513,	avg = 2148.59266,	max = 2170.79936,	acc = 12891.556}
-         Timer [chunk[8016] - ms] [6]	{num = 6 :	min = 2132.62025,	avg = 2161.33295,	max = 2205.75479,	acc = 12967.99775}
-         Timer [chunk[6012] - ms] [6]	{num = 6 :	min = 2130.40955,	avg = 2139.03898,	max = 2151.91463,	acc = 12834.23392}
-         Timer [chunk[4509] - ms] [6]	{num = 6 :	min = 2131.51534,	avg = 2163.09447,	max = 2247.2551,	acc = 12978.56683}
-         * 
-         * - FAST:
-         * 
-         Timer [chunk[600000] - ms] [6]	{num = 6 :	min = 6057.139,	avg = 6293.27596,	max = 6642.10127,	acc = 37759.65577}
-         Timer [chunk[450000] - ms] [6]	{num = 6 :	min = 6016.35241,	avg = 6147.07046,	max = 6523.63,	acc = 36882.42277}
-         Timer [chunk[337500] - ms] [6]	{num = 6 :	min = 6022.16359,	avg = 6065.2004,	max = 6104.91548,	acc = 36391.20241}
-         Timer [chunk[253125] - ms] [6]	{num = 6 :	min = 6019.71289,	avg = 6031.6292,	max = 6046.49311,	acc = 36189.77521}
-         Timer [chunk[189843] - ms] [6]	{num = 6 :	min = 6022.26495,	avg = 6055.0051,	max = 6112.85134,	acc = 36330.03065}
-         Timer [chunk[142382] - ms] [6]	{num = 6 :	min = 6012.305,	avg = 6026.99833,	max = 6054.79236,	acc = 36161.98998}
-         Timer [chunk[106786] - ms] [6]	{num = 6 :	min = 5999.2643,	avg = 6091.08765,	max = 6275.80363,	acc = 36546.52591}
-         Timer [chunk[80089] - ms] [6]	{num = 6 :	min = 5975.87674,	avg = 5997.58693,	max = 6020.7726,	acc = 35985.52163}
-         Timer [chunk[60066] - ms] [6]	{num = 6 :	min = 5997.09171,	avg = 6117.68266,	max = 6541.92285,	acc = 36706.09601}
-         Timer [chunk[45049] - ms] [6]	{num = 6 :	min = 5976.74927,	avg = 6043.52729,	max = 6108.33167,	acc = 36261.16378}
-         Timer [chunk[33786] - ms] [6]	{num = 6 :	min = 5986.14369,	avg = 6040.79816,	max = 6138.52005,	acc = 36244.78897}
-         Timer [chunk[25339] - ms] [6]	{num = 6 :	min = 5985.55532,	avg = 6001.17616,	max = 6016.55492,	acc = 36007.057}
-         Timer [chunk[19004] - ms] [6]	{num = 6 :	min = 5970.343,	avg = 5984.99634,	max = 6024.19756,	acc = 35909.97805}
-         Timer [chunk[14253] - ms] [6]	{num = 6 :	min = 5969.17255,	avg = 6041.71992,	max = 6222.17572,	acc = 36250.31957}
-         Timer [chunk[10689] - ms] [6]	{num = 6 :	min = 5967.60576,	avg = 6018.68233,	max = 6109.34226,	acc = 36112.09402}
-         Timer [chunk[8016] - ms] [6]	{num = 6 :	min = 5962.58387,	avg = 6002.71542,	max = 6066.26941,	acc = 36016.29257}
-         Timer [chunk[6012] - ms] [6]	{num = 6 :	min = 5954.25996,	avg = 5961.66638,	max = 5980.68242,	acc = 35769.9983}
-         Timer [chunk[4509] - ms] [6]	{num = 6 :	min = 5954.44538,	avg = 6009.70111,	max = 6144.77561,	acc = 36058.20671}     * 
-         * - DEFAULT (JDK):
-         [SwingWorker-pool-1] fr.jmmc.aspro.service.OIFitsCreatorService - computeModelVisibilities: duration = 44020.670999999995 ms.
-         */
-        double kwCol, kwRow, re, im, flux, z;
-
-        if (mathMode == MathMode.QUICK) {
+        if (mathMode == MathMode.FAST) {
+            final DoubleWrapper[] dw = localDoubleWrappers.get();
+            final DoubleWrapper cw = dw[0];
 
             // iterate on ufreq / vfreq / vis by wavelength:
             for (int i = from, j; i < end; i++) {
-                // divide by model image frequency ?
-                kwCol = TWO_PI * ufreq[i];
-                kwRow = TWO_PI * vfreq[i];
+                final double kwCol = TWO_PI * ufreq[i];
+                final double kwRow = TWO_PI * vfreq[i];
 
                 // reset:
-                re = 0.0;
-                im = 0.0;
+                double re = 0.0;
+                double im = 0.0;
 
-                // iterate on data points:
-                for (j = fromData; j <= lenData; j += DATA_1D_POINT_SIZE) {
-                    flux = data1D[j];
-                    z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
+                // iterate on data points [data xfreq yfreq]:
+                for (j = fromData; j < lenData; j += len) {
+                    final double flux = data1D[j];
+                    final double z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
 
-                    re += flux * FastMath.cosQuick(z);
-                    im -= flux * FastMath.sinQuick(z);
-
+                    im -= flux * FastMath.sinAndCos(z, cw); // cw holds cosine
+                    re += flux * cw.value;
                 } // data1D
 
                 // update complex instance (mutable):
-                vis[i].add(re, im);
+                vis[i].add(weights[i] * re, weights[i] * im);
 
                 // fast interrupt :
                 if (currentThread.isInterrupted()) {
                     return;
                 }
             } // vis
-        } else if (mathMode == MathMode.FAST) {
-
-            final DoubleWrapper[] dw = localDoubleWrappers.get();
-            final DoubleWrapper cw = dw[0];
-
+        } else if (mathMode == MathMode.QUICK) {
             // iterate on ufreq / vfreq / vis by wavelength:
             for (int i = from, j; i < end; i++) {
-                // divide by model image frequency ?
-                kwCol = TWO_PI * ufreq[i];
-                kwRow = TWO_PI * vfreq[i];
+                final double kwCol = TWO_PI * ufreq[i];
+                final double kwRow = TWO_PI * vfreq[i];
 
                 // reset:
-                re = 0.0;
-                im = 0.0;
+                double re = 0.0;
+                double im = 0.0;
 
-                // iterate on data points:
-                for (j = fromData; j <= lenData; j += DATA_1D_POINT_SIZE) {
-                    flux = data1D[j];
-                    z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
+                // iterate on data points [data xfreq yfreq]:
+                for (j = fromData; j < lenData; j += len) {
+                    final double flux = data1D[j];
+                    final double z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
 
-                    im -= flux * FastMath.sinAndCos(z, cw); // cw holds cosine
-                    re += flux * cw.value;
-
+                    re += flux * FastMath.cosQuick(z);
+                    im -= flux * FastMath.sinQuick(z);
                 } // data1D
 
                 // update complex instance (mutable):
-                vis[i].add(re, im);
+                vis[i].add(weights[i] * re, weights[i] * im);
 
                 // fast interrupt :
                 if (currentThread.isInterrupted()) {
@@ -832,33 +789,27 @@ public final class UserModelService {
                 }
             } // vis
         } else {
-
             // iterate on ufreq / vfreq / vis by wavelength:
             for (int i = from, j; i < end; i++) {
-                // divide by model image frequency ?
-                kwCol = TWO_PI * ufreq[i];
-                kwRow = TWO_PI * vfreq[i];
+                final double kwCol = TWO_PI * ufreq[i];
+                final double kwRow = TWO_PI * vfreq[i];
 
                 // reset:
-                re = 0.0;
-                im = 0.0;
+                double re = 0.0;
+                double im = 0.0;
 
-                // iterate on data points:
-                for (j = fromData; j <= lenData; j += DATA_1D_POINT_SIZE) {
-                    flux = data1D[j];
-                    z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
+                // iterate on data points [data xfreq yfreq]:
+                for (j = fromData; j < lenData; j += len) {
+                    final double z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
+                    final double flux = data1D[j];
 
-                    // Test without cos/sin:
-                    // re += flux * z;
-                    // im += flux * z;
                     // use Math (not StrictMath):
                     re += flux * Math.cos(z);
                     im -= flux * Math.sin(z);
-
                 } // data1D
 
                 // update complex instance (mutable):
-                vis[i].add(re, im);
+                vis[i].add(weights[i] * re, weights[i] * im);
 
                 // fast interrupt :
                 if (currentThread.isInterrupted()) {
@@ -928,13 +879,13 @@ public final class UserModelService {
             }
         }
 
-        // TODO: keep initial total flux (before normalization) ?
-        final double initialTotalFlux = fitsImage.getSum();
-        logger.debug("Total flux: {}", initialTotalFlux);
+        // keep initial total flux after apodisation (before normalization):
+        final double totalFlux = fitsImage.getSum();
+        logger.debug("Total flux: {}", totalFlux);
 
         // 2 - Normalize data (total flux):
-        if (!NumberUtils.equals(initialTotalFlux, 1.0, 1e-3)) {
-            final double normFactor = 1.0 / initialTotalFlux;
+        if (!NumberUtils.equals(totalFlux, 1.0, 1e-3)) {
+            final double normFactor = 1.0 / totalFlux;
 
             final ImageNormalizeJob normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
             logger.debug("ImageNormalizeJob - factor: {}", normFactor);
@@ -1008,6 +959,7 @@ public final class UserModelService {
 
         // end of step 1:
         modelData.setFitsImage(fitsImage);
+        modelData.setTotalFlux(totalFlux);
         modelData.setThresholdFlux(thresholdFlux);
         modelData.setRoi(new Rectangle(rows1, cols1, rows2 - rows1, cols2 - cols1));
     }
@@ -1184,7 +1136,7 @@ public final class UserModelService {
         modelData.setFitsImage(fitsImage);
 
         // 7 - prepare model data to compute direct Fourier transform:
-        prepareModelData(fitsImage, modelData, modelData.getThresholdFlux());
+        prepareModelData(fitsImage, modelData);
     }
 
     /**
@@ -1254,7 +1206,7 @@ public final class UserModelService {
                 return array;
             }
         }
-        return new float[length * 11 / 10]; // 10% more
+        return new float[(length * 12) / 10]; // 20% more
     }
 
     private static void putArray(final float[] array) {
@@ -1271,10 +1223,10 @@ public final class UserModelService {
      *
      * @param fitsImage user model as FitsImage
      * @param modelData prepared model data for direct Fourier transform
-     * @param threshold low threshold (ignore too small values)
      */
-    private static void prepareModelData(final FitsImage fitsImage, final UserModelData modelData, final float threshold) {
+    private static void prepareModelData(final FitsImage fitsImage, final UserModelData modelData) {
 
+        final float threshold = modelData.getThresholdFlux();
         logger.debug("prepareModelData: threshold: {}", threshold);
 
         // note: square image (and even size):
@@ -1491,18 +1443,18 @@ public final class UserModelService {
     }
 
     /**
-     * Performs image apodization ie multiply image by the telescope airy disk (gaussian profile in fact)
+     * Performs image apodization ie multiply image by the telescope airy disk (gaussian profile in fact) if necessary
      * @param fitsImage image to transform (in-place)
      * @param diameter telescope diameter in meters
      * @param lambdaMin minimum wavelength in meters (used only for gray images)
+     * @return airy disk FHWM if apodisation performed; NaN otherwise
      */
     private static double apodize(final FitsImage fitsImage, final double diameter, final double lambdaMin) {
         final double lambda = !Double.isNaN(fitsImage.getWaveLength()) ? fitsImage.getWaveLength() : lambdaMin;
 
+        // check if apodization is necessary according to the image FOV vs radius:
         final double airyRadius = getAiryRadius(fitsImage, diameter, lambda);
-
-        // check if apodization is necessary according to the image FOV >> radius
-        // e.g. airyRadius is NaN:
+        // e.g. airyRadius is not NaN:
         if (!Double.isNaN(airyRadius)) {
             // Start the computations :
             final long start = System.nanoTime();

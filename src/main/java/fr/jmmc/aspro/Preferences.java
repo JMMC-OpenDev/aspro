@@ -61,6 +61,10 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
     public final static String OIFITS_SUPER_SAMPLING = "oifits.supersampling";
     /** Preference : SNR Threshold (V2) to flag out low SNR values */
     public final static String OIFITS_SNR_THRESHOLD = "oifits.snr.threshold";
+    /** Preference : Enable interpolation in OIFits cube images (lerp) */
+    public final static String OIFITS_CUBE_INTERPOLATION = "oifits.cube.interpolation";
+    /** Preference : Enable extrapolation on OIFits cubes (out of wavelength range) */
+    public final static String OIFITS_CUBE_EXTRAPOLATION = "oifits.cube.extrapolation";
     /** Preference : edit fluxes using Jansky */
     public final static String FLUX_EDITOR_JY = "flux.edit.jy";
     /** prefix for Obs table columns */
@@ -152,6 +156,9 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
         setDefaultPreference(OIFITS_SUPER_SAMPLING, AsproConstants.DEFAULT_SUPER_SAMPLING);
         setDefaultPreference(OIFITS_MATH_MODE, MathMode.FAST.toString());
         setDefaultPreference(OIFITS_SNR_THRESHOLD, AsproConstants.DEFAULT_SNR_THRESHOLD);
+
+        setDefaultPreference(OIFITS_CUBE_INTERPOLATION, Boolean.TRUE);
+        setDefaultPreference(OIFITS_CUBE_EXTRAPOLATION, Boolean.FALSE);
 
         setDefaultPreference(FLUX_EDITOR_JY, Boolean.TRUE);
 

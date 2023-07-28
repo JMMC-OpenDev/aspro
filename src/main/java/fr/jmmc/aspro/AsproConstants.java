@@ -45,7 +45,7 @@ public interface AsproConstants {
     /** default value for checkbox Night Limit = true */
     public static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
     /** default image size */
-    public final static Integer DEFAULT_IMAGE_SIZE = NumberUtils.valueOf(512);
+    public final static Integer DEFAULT_IMAGE_SIZE = NumberUtils.valueOf(1024);
     /** image size choices */
     public final static Vector<Integer> IMAGE_SIZES = new Vector<Integer>(Arrays.asList(
             new Integer[]{
@@ -53,22 +53,23 @@ public interface AsproConstants {
                 NumberUtils.valueOf(128),
                 NumberUtils.valueOf(256),
                 NumberUtils.valueOf(384),
-                DEFAULT_IMAGE_SIZE,
+                NumberUtils.valueOf(512),
                 NumberUtils.valueOf(768),
-                NumberUtils.valueOf(1024),
+                DEFAULT_IMAGE_SIZE,
                 NumberUtils.valueOf(1536),
-                NumberUtils.valueOf(2048)
+                NumberUtils.valueOf(2048),
+                NumberUtils.valueOf(4096)
             }));
     /** default super sampling = 3 */
-    public final static Integer DEFAULT_SUPER_SAMPLING = NumberUtils.valueOf(3);
-    /** max super sampling = 75 */
-    public final static Integer MAX_SUPER_SAMPLING = NumberUtils.valueOf(75);
+    public final static Integer DEFAULT_SUPER_SAMPLING = NumberUtils.valueOf(5);
+    /** max super sampling = 49 */
+    public final static Integer MAX_SUPER_SAMPLING = NumberUtils.valueOf(49);
     /** supersampling choices */
     public final static Vector<Integer> SUPER_SAMPLING = new Vector<Integer>(Arrays.asList(
             new Integer[]{
                 NumberUtils.valueOf(1),
+                NumberUtils.valueOf(3),
                 DEFAULT_SUPER_SAMPLING,
-                NumberUtils.valueOf(5),
                 NumberUtils.valueOf(9),
                 NumberUtils.valueOf(15),
                 NumberUtils.valueOf(25),
@@ -89,7 +90,7 @@ public interface AsproConstants {
                 Double.valueOf(2.0),
                 Double.valueOf(5.0)
             }));
-    /** default SNR threshold = 3 */
+    /** default SNR threshold on V2 = 3 */
     public final static Double DEFAULT_SNR_THRESHOLD = Double.valueOf(3.0);
 
     /** no value for combo boxes */

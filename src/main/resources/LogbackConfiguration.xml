@@ -73,6 +73,9 @@
 
     <logger name="fr.jmmc.aspro.service.NoiseService" level="DEBUG"/>
 
+    <logger name="fr.jmmc.aspro.service.OIFitsCreatorService" level="DEBUG"/>
+    <logger name="fr.jmmc.aspro.service.AbstractOIFitsProducer" level="DEBUG"/>
+
     <logger name="fr.jmmc.aspro.gui.action.QueryRawObservationsAction" level="INFO"/>
     -->
 

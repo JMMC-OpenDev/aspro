@@ -27,7 +27,6 @@ import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import static fr.jmmc.aspro.service.OIFitsAMBERService.amdlibAbacusErrPhi;
-import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmcs.util.StatUtils.ComplexDistribution;
 import static fr.jmmc.jmcs.util.StatUtils.N_SAMPLES;
@@ -81,8 +80,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private final static boolean DEBUG_SNR = false;
     /** enable DEBUG_LOW_SNR mode (disabled for debugging / ETC tests) */
     private final static boolean FIX_LOW_SNR = true;
-    /** ignore SNR check: enabled for debugging / ETC tests */
-    private final static boolean IGNORE_SNR_THRESHOLD = false;
 
     /* reused observability data */
     /** beam list */
@@ -110,6 +107,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
     /** selected instrument mode */
     private FocalInstrumentMode instrumentMode = null;
+    /** total number of channels of the instrument mode (no restriction) */
+    private int nInsModeWaveLengths = 0;
     /** flag indicating if the target model wavelengths are compatible with the instrument mode */
     private boolean isModelWLValid = true;
     /** true to use calibration bias; false to compute only theoretical (optional systematic) error */
@@ -153,9 +152,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
      * @param baseLines base line list
      * @param useCalibrationBias true to use calibration bias; false to compute only theoretical (optional systematic) error
      * @param doDataNoise flag to add gaussian noise to OIFits data
-     * @param supersampling OIFits supersampling preference
-     * @param mathMode OIFits MathMode preference
-     * @param snrThreshold SNR threshold to flag values
+     * @param options OIFits options
      * @param targetPointInfos target information for each uv point couples
      * @param targetUVObservability list of UV coordinates per baseline
      * @param sc sky calc instance
@@ -167,15 +164,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                    final List<BaseLine> baseLines,
                                    final boolean useCalibrationBias,
                                    final boolean doDataNoise,
-                                   final int supersampling,
-                                   final MathMode mathMode,
-                                   final double snrThreshold,
+                                   final OIFitsProducerOptions options,
                                    final TargetPointInfo[] targetPointInfos,
                                    final List<UVRangeBaseLineData> targetUVObservability,
                                    final AstroSkyCalc sc,
                                    final WarningContainer warningContainer) throws IllegalArgumentException {
 
-        super(target, supersampling, mathMode, (IGNORE_SNR_THRESHOLD ? 0.0 : snrThreshold));
+        super(target, options);
 
         this.beams = beams;
         this.nBeams = this.beams.size();
@@ -357,6 +352,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         }
 
         int nWaveLengths = this.waveLengths.length;
+        this.nInsModeWaveLengths = nWaveLengths;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("instrumentMode channels: {}", nInsModeWaveLengths);
+        }
 
         // Filter wavelength range (restriction):
         {
@@ -474,6 +474,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 logger.debug("insNameKeyword: {}", insNameKeyword);
             }
         }
+    }
+
+    @Override
+    protected boolean enableSuperSampling() {
+        // note: disable super sampling in high resolution:
+        return (nInsModeWaveLengths <= SUPER_SAMPLING_THRESHOLD);
     }
 
     private void prepareUserModel(final ObservationSetting observation, final UserModel userModel) throws IllegalArgumentException {
@@ -1779,6 +1785,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         }
 
         if (DEBUG_SNR) {
+            final double snrThreshold = options.snrThreshold;
+
             final double[][] snrWL = new double[3][nWaveLengths];
 
             // SNR stats per channel:
@@ -2363,11 +2371,15 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         }
     }
 
-    /**
-     * Return true to use calibration bias; false to compute only theoretical (optional systematic) error
-     * @return true to use calibration bias; false to compute only theoretical (optional systematic) error
-     */
-    public boolean isUseCalibrationBias() {
-        return useCalibrationBias;
+    @Override
+    public boolean isSameOptions(final AbstractOIFitsProducer o) {
+        final OIFitsCreatorService other = (OIFitsCreatorService) o;
+        if (!super.isSameOptions(other)) {
+            return false;
+        }
+        if (useCalibrationBias != other.useCalibrationBias) {
+            return false;
+        }
+        return true;
     }
 }

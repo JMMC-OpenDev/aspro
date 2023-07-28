@@ -56,19 +56,17 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
      * @param oifitsFile oifits to process
      * @param useFastMode true to ignore useless data (faster); false to have highest precision
      * @param fastError fast mode threshold in percents
-     * @param supersampling OIFits supersampling preference
-     * @param mathMode OIFits MathMode preference
+     * @param options OIFits options
      * @param doApodization true to perform image apodization; false to disable
      * @param diameter default telescope diameter (meters) used by image apodization (m)
      */
     public OIFitsProcessService(final Target target,
                                 final OIFitsFile oifitsFile,
                                 final boolean useFastMode, final double fastError,
-                                final int supersampling,
-                                final UserModelService.MathMode mathMode,
+                                final OIFitsProducerOptions options,
                                 final boolean doApodization, final double diameter) {
 
-        super(target, supersampling, mathMode, 3.0); // snrThreshold = 3
+        super(target, options);
 
         this.oiFitsFile = oifitsFile;
 
@@ -101,7 +99,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
             if (!prepare(oiWaveLength, warningContainer)) {
                 return false;
             }
-            
+
             final double lambdaMin = StatUtils.min(this.waveLengths);
 
             for (OIData table : this.oiFitsFile.getOiDataList()) {

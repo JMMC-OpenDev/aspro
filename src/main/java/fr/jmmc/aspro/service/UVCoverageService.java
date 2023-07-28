@@ -22,7 +22,6 @@ import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
-import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.aspro.util.TestUtils;
 import java.util.ArrayList;
@@ -69,12 +68,8 @@ public final class UVCoverageService {
     private final boolean useInstrumentBias;
     /** flag to add gaussian noise to OIFits data */
     private final boolean doDataNoise;
-    /** OIFits supersampling preference */
-    private final int supersamplingOIFits;
-    /** OIFits MathMode preference */
-    private final MathMode mathModeOIFits;
-    /** OIFits SNR threshold preference */
-    private final double snrThresholdOIFits;
+    /** OIFits options */
+    private final OIFitsProducerOptions options;
     /** cosinus wrapper used by FastMath.sinAndCos() */
     private final DoubleWrapper cw = new DoubleWrapper();
     /* internal */
@@ -118,13 +113,11 @@ public final class UVCoverageService {
      * @param doUVSupport flag to compute the UV support
      * @param useInstrumentBias true to use instrument bias; false to compute only theoretical error
      * @param doDataNoise enable data noise
-     * @param supersamplingOIFits OIFits supersampling preference
-     * @param mathModeOIFits OIFits MathMode preference
-     * @param snrThresholdOIFits OIFits SNR threshold preference
+     * @param options OIFits options
      */
     public UVCoverageService(final ObservationSetting observation, final ObservabilityData obsData, final String targetName,
                              final double uvMax, final boolean doUVSupport, final boolean useInstrumentBias, final boolean doDataNoise,
-                             final int supersamplingOIFits, final MathMode mathModeOIFits, final double snrThresholdOIFits) {
+                             final OIFitsProducerOptions options) {
 
         this.observation = observation;
         this.obsData = obsData;
@@ -133,9 +126,7 @@ public final class UVCoverageService {
         this.doUVSupport = doUVSupport;
         this.useInstrumentBias = useInstrumentBias;
         this.doDataNoise = doDataNoise;
-        this.supersamplingOIFits = supersamplingOIFits;
-        this.mathModeOIFits = mathModeOIFits;
-        this.snrThresholdOIFits = snrThresholdOIFits;
+        this.options = options;
 
         // create the uv coverage data corresponding to the observation version :
         this.data = new UVCoverageData(observation.getVersion());
@@ -593,7 +584,7 @@ public final class UVCoverageService {
                     final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
                             this.beams, this.baseLines,
                             this.useInstrumentBias, this.doDataNoise,
-                            this.supersamplingOIFits, this.mathModeOIFits, this.snrThresholdOIFits,
+                            this.options,
                             this.data.getTargetPointInfos(), this.data.getTargetUVObservability(),
                             this.sc, this.data.getWarningContainer());
 

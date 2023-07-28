@@ -52,10 +52,10 @@ import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.ob.ExportOBMode;
 import fr.jmmc.aspro.service.NoiseService;
 import fr.jmmc.aspro.service.OIFitsCreatorService;
+import fr.jmmc.aspro.service.OIFitsProducerOptions;
 import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.aspro.service.UserModelData;
 import fr.jmmc.aspro.service.UserModelService;
-import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
@@ -140,11 +140,9 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import net.jafama.FastMath;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.labels.XYToolTipGenerator;
@@ -1850,10 +1848,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             final boolean doImageNoise = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_NOISE);
 
             // Use OIFits preferences:
-            final int supersamplingOIFits = this.myPreferences.getPreferenceAsInt(Preferences.OIFITS_SUPER_SAMPLING);
-            final MathMode mathModeOIFits = this.myPreferences.getOIFitsMathMode();
-            // use 1/2 to make SNR(VIS) < TH and not SNR(VIS2) < TH ( SNR(VIS2) = SNR(VIS) / 2 )
-            final double snrThresholdOIFits = this.myPreferences.getPreferenceAsDouble(Preferences.OIFITS_SNR_THRESHOLD) / 2.0;
+            final OIFitsProducerOptions options = new OIFitsProducerOptions(
+                    this.myPreferences.getPreferenceAsBoolean(Preferences.OIFITS_CUBE_INTERPOLATION),
+                    this.myPreferences.getPreferenceAsBoolean(Preferences.OIFITS_CUBE_EXTRAPOLATION),
+                    this.myPreferences.getPreferenceAsInt(Preferences.OIFITS_SUPER_SAMPLING),
+                    this.myPreferences.getOIFitsMathMode(),
+                    this.myPreferences.getPreferenceAsDouble(Preferences.OIFITS_SNR_THRESHOLD)
+            );
 
             // update the status bar :
             StatusBar.show(MSG_COMPUTING_COVERAGE);
@@ -1866,7 +1867,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             new UVCoverageSwingWorker(this, obsCollection, this.getObservabilityData(), targetName, uvMax,
                     doUVSupport, doOIFits, useInstrumentBias, doDataNoise,
                     doModelImage, imageMode, imageSize, colorModel, colorScale, doImageNoise,
-                    this.imageIndex, supersamplingOIFits, mathModeOIFits, snrThresholdOIFits, currentUVMapData
+                    this.imageIndex, options, currentUVMapData
             ).executeTask();
 
         } // observability data check
@@ -1910,12 +1911,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         private final UVMapData currentUVMapData;
         /** image index used (user model only) */
         private final int imageIndex;
-        /** OIFits supersampling preference */
-        private final int supersamplingOIFits;
-        /** OIFits MathMode preference */
-        private final UserModelService.MathMode mathModeOIFits;
-        /** OIFits SNR threshold preference */
-        private final double snrThresholdOIFits;
+        /** OIFits options */
+        private final OIFitsProducerOptions options;
 
         /**
          * Hidden constructor
@@ -1936,10 +1933,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param colorScale color scaling method
          * @param doImageNoise enable image noise
          * @param imageIndex image index used (user model only)
-         * @param supersamplingOIFits OIFits supersampling preference
-         * @param mathModeOIFits OIFits MathMode preference
+         * @param options OIFits options
          * @param currentUVMapData previously computed UV Map Data
-         * @param snrThresholdOIFits OIFits SNR threshold preference
          */
         private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationCollection obsCollection,
                                       final List<ObservabilityData> obsDataList, final String targetName,
@@ -1947,8 +1942,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                       final boolean useInstrumentBias, final boolean doDataNoise,
                                       final boolean doModelImage, final ImageMode imageMode, final int imageSize,
                                       final IndexColorModel colorModel, final ColorScale colorScale, final boolean doImageNoise,
-                                      final int imageIndex, final int supersamplingOIFits, final UserModelService.MathMode mathModeOIFits,
-                                      final double snrThresholdOIFits, final UVMapData currentUVMapData) {
+                                      final int imageIndex, final OIFitsProducerOptions options,
+                                      final UVMapData currentUVMapData) {
 
             // get current observation version :
             super(AsproTaskRegistry.TASK_UV_COVERAGE, obsCollection);
@@ -1967,9 +1962,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.colorScale = colorScale;
             this.doImageNoise = doImageNoise;
             this.imageIndex = imageIndex;
-            this.supersamplingOIFits = supersamplingOIFits;
-            this.mathModeOIFits = mathModeOIFits;
-            this.snrThresholdOIFits = snrThresholdOIFits;
+            this.options = options;
             this.currentUVMapData = currentUVMapData;
         }
 
@@ -1998,8 +1991,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // compute the uv coverage data :
                 uvDataList.add(
                         new UVCoverageService(observation, obsData, targetName, this.uvMax, this.doUVSupport,
-                                this.useInstrumentBias, this.doDataNoise, this.supersamplingOIFits, this.mathModeOIFits,
-                                this.snrThresholdOIFits).compute()
+                                this.useInstrumentBias, this.doDataNoise, this.options).compute()
                 );
 
                 // fast interrupt :
