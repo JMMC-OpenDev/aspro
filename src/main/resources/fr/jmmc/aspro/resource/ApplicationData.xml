@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="23.07 beta 2"/>
-    <compilation date="28/07/2023" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="23.09 beta 3"/>
+    <compilation date="04/09/2023" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -242,14 +242,19 @@
     </menubar>
 
     <releasenotes>
-        <release version="23.07">
-            <pubDate>Fri, 28 Jul 2023 16:00:00 GMT</pubDate>
-            <prerelease version="23.07 beta 2">
+        <release version="23.09">
+            <pubDate>Mon, 04 Sep 2023 16:00:00 GMT</pubDate>
+            <prerelease version="23.09 beta 3">
+                <change type="FEATURE">Improved noise modeling to correct the object flux with the flux given by user-defined models (FITS cube)</change>
+                <change type="FEATURE">Improved Telescope FOV information (range + corresponding wavelengths) in the Target editor</change>
+                <change type="FEATURE">Fixed MATISSE spatial filter parameters (apodization)</change>
+            </prerelease>
+            <prerelease version="23.09 beta 2">
                 <change type="FEATURE">Added new preferences to enable or disable Fits cube interpolation (true by default) or extrapolation (false by default) for performance reasons</change>
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/1179">Implemented wavelength interpolation and extrapolation of user-defined models (FITS cube)</change>
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1336">Fixed compression support for the PNG encoder (java 8)</change>
             </prerelease>
-            <prerelease version="23.07 beta 1">
+            <prerelease version="23.09 beta 1">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1332">Fixed user model support for RADMC3D FITS cubes using unit = hertz (CUNIT3)</change>
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/34">Improved Target Model editor and OIFits simulator to check analytical models
                     if any (distance) parameter value exceeds 20% of the Telescope Fov and report the warning:
