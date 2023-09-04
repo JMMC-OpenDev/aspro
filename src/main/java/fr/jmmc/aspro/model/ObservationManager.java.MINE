@@ -163,7 +163,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             logger.debug("ObservationManager.update: done.");
 
             // fire change events :
-            this.fireTargetChangedEvents();
+            this.fireTargetsChangedEvents();
         }
     }
 
@@ -601,6 +601,23 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     }
 
     /**
+     * This fires an observation filtered targets change event to all registered listeners.
+     * Fired by fireTargetChangedEvents() when an observation is loaded or reset or the target list was modified
+     *
+     * Listeners : SettingPanel / BasicObservationForm
+     */
+    private void fireObservationFilteredTargetsChanged() {
+        final ObservationSetting observation = getMainObservation();
+
+        // Do not increment target and main versions
+        if (logger.isDebugEnabled()) {
+            logger.debug("fireObservationFilteredTargetsChanged: {}", toString(observation));
+            logger.debug("observation version: {}", observation.getVersion());
+        }
+        fireEvent(new ObservationEvent(ObservationEventType.TARGET_FILTERED_CHANGED, observation));
+    }
+
+    /**
      * Return true if observation's selected targets are different than the given list of targets
      * (only identifiers are compared)
      * @param newSelectedTargets list of targets to compare with
@@ -671,7 +688,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     private void postFireTargetSelectionChanged() {
         final ObservationSetting observation = getMainObservation();
-
         logger.debug("postFireTargetSelectionChanged: selectedTargets = {}", observation.getSelectedTargets());
 
         // update user model if needed (memory):
@@ -1421,7 +1437,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             getMainObservation().checkReferences();
 
             // fire change events :
-            this.fireTargetChangedEvents();
+            this.fireTargetsChangedEvents();
         }
     }
 
@@ -1444,7 +1460,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 getMainObservation().checkReferences();
 
                 // fire change events :
-                this.fireTargetChangedEvents();
+                this.fireTargetsChangedEvents();
             }
         }
     }
@@ -1489,7 +1505,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 getMainObservation().checkReferences();
 
                 // fire change events :
-                this.fireTargetChangedEvents();
+                this.fireTargetsChangedEvents();
             }
         }
     }
@@ -1608,6 +1624,12 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
         observation.setTargetUserInfos(targetEditCtx.getTargetUserInfos());
 
+        if (false) {
+            // reset filtered targets:
+            // TODO: really needed ?
+            observation.setFilteredTargets(targets);
+        }
+
         // check and update target references :
         observation.checkReferences();
 
@@ -1615,7 +1637,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
         if (target != null) {
             // fire change events :
-            this.fireTargetChangedEvents();
+            this.fireTargetsChangedEvents();
 
             this.fireTargetSelectionChanged(target);
         } else {
@@ -1623,14 +1645,14 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             validateSelectedTargetUserModel();
 
             // fire change events :
-            this.fireTargetChangedEvents();
+            this.fireTargetsChangedEvents();
         }
     }
 
     /**
      * This fires a target change and an observation change event to all registered listeners.
      */
-    public void fireTargetChangedEvents() {
+    public void fireTargetsChangedEvents() {
         // force clear display target cache :
         getMainObservation().clearCacheTargets();
 
@@ -1650,7 +1672,42 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         for (TargetRawObservation rawObs : getMainObservation().getTargetObservations()) {
             rawObs.prepare();
         }
-        this.fireTargetChangedEvents();
+        this.fireTargetsChangedEvents();
+    }
+
+    public List<Target> getFilteredTargets() {
+        return getMainObservation().getFilteredTargets();
+    }
+
+    public void setFilteredTargets(final List<Target> filteredTargets) {
+        final ObservationSetting observation = getMainObservation();
+        if (observation != null) {
+            // update selected targets:
+            final List<Target> obsFilteredTargets = observation.getFilteredTargets();
+
+            // ensure lists are not the same:
+            if (obsFilteredTargets != filteredTargets) {
+                logger.debug("obsFilteredTargets: {}", obsFilteredTargets);
+                logger.debug("filteredTargets: {}", filteredTargets);
+
+                if (!filteredTargets.equals(obsFilteredTargets)) {
+                    observation.setFilteredTargets(filteredTargets);
+                    logger.info("setFilteredTargets: {}", filteredTargets);
+
+                    fireFilteredTargetsChangedEvents();
+                }
+            }
+        }
+    }
+
+    /**
+     * This fires a target change and an observation change event to all registered listeners.
+     */
+    public void fireFilteredTargetsChangedEvents() {
+        // force clear display target cache :
+        getMainObservation().clearCacheFilteredTargets();
+        // fire an observation filtered targets change event :
+        this.fireObservationFilteredTargetsChanged();
     }
 
     // --- TARGET CONFIGURATION --------------------------------------------------

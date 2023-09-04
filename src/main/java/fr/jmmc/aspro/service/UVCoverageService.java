@@ -668,6 +668,7 @@ public final class UVCoverageService {
 
                     // TODO: handle FT modes properly: GroupTrack is hard coded !
                     // disable wavelength restrictions if FT enabled (basic GRA4MAT support, TODO: refine wavelength ranges for GRA4MAT)
+                    // but wrong if FT is disabled by noise service:
                     useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith("GroupTrack") && (instrumentMode.getFtWaveLengthBandRef() == null));
                     if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
                         effBand = instrumentMode.getFtWaveLengthBandRef();

@@ -32,7 +32,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/&gt;
  *         &lt;element name="mode" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="instrumentVisibility" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
- *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
+ *         &lt;element name="magLimit" type="{http://www.jmmc.fr/aspro-oi/0.1}AtmQualValue" maxOccurs="unbounded"/&gt;
  *         &lt;element name="maxIntegration" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
@@ -48,7 +48,7 @@ import fr.jmmc.aspro.model.OIBase;
     "band",
     "modes",
     "instrumentVisibility",
-    "magLimit",
+    "magLimits",
     "maxIntegration"
 })
 public class FringeTracker
@@ -66,7 +66,8 @@ public class FringeTracker
     @XmlElement(name = "mode")
     protected List<String> modes;
     protected double instrumentVisibility;
-    protected double magLimit;
+    @XmlElement(name = "magLimit", required = true)
+    protected List<AtmQualValue> magLimits;
     protected double maxIntegration;
 
     /**
@@ -163,19 +164,32 @@ public class FringeTracker
     }
 
     /**
-     * Gets the value of the magLimit property.
+     * Gets the value of the magLimits property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the magLimits property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getMagLimits().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link AtmQualValue }
+     * 
      * 
      */
-    public double getMagLimit() {
-        return magLimit;
-    }
-
-    /**
-     * Sets the value of the magLimit property.
-     * 
-     */
-    public void setMagLimit(double value) {
-        this.magLimit = value;
+    public List<AtmQualValue> getMagLimits() {
+        if (magLimits == null) {
+            magLimits = new ArrayList<AtmQualValue>();
+        }
+        return this.magLimits;
     }
 
     /**
@@ -199,6 +213,15 @@ public class FringeTracker
     public final String toString() {
         return "FringeTracker [" + ((this.name != null) ? this.name : "undefined") + "]";
     }
+    
+    public double getMagLimit(final AtmosphereQuality atmQual) {
+        for (AtmQualValue val : getMagLimits()) {
+            if (val.match(atmQual)) {
+                return val.getValue(); // first, so take care of ordering values
+            }
+        }
+        return Double.NaN;
+    }    
 //--simple--preserve
 
 }

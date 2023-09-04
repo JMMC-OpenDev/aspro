@@ -36,6 +36,9 @@ public final class OIFitsProducerOptions {
         this.snrThreshold = (IGNORE_SNR_THRESHOLD) ? 0.0 : snrThreshold / 2.0;
     }
 
+    /**
+     * @return string representation
+     */
     @Override
     public String toString() {
         return "OIFitsProducerOptions{"
@@ -46,6 +49,11 @@ public final class OIFitsProducerOptions {
                 + ", snrThreshold=" + snrThreshold + '}';
     }
 
+    /**
+     *
+     * @param other another OIFits producer options
+     * @return true if the OIFITS producer options are the same; false otherwise
+     */
     public boolean equals(final OIFitsProducerOptions other) {
         if (userModelCubeInterpolation != other.userModelCubeInterpolation) {
             return false;
@@ -59,9 +67,6 @@ public final class OIFitsProducerOptions {
         if (mathMode != other.mathMode) {
             return false;
         }
-        if (snrThreshold != other.snrThreshold) {
-            return false;
-        }
-        return true;
+        return snrThreshold == other.snrThreshold;
     }
 }

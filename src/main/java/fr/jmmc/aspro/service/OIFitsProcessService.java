@@ -16,6 +16,7 @@ import fr.jmmc.oitools.model.DataModel;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIData;
 import fr.jmmc.oitools.model.OIFitsFile;
+import fr.jmmc.oitools.model.OIFlux;
 import fr.jmmc.oitools.model.OIT3;
 import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIVis2;
@@ -92,7 +93,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         for (OIWavelength oiWaveLength : this.oiFitsFile.getOiWavelengths()) {
             final String insName = oiWaveLength.getInsName();
 
-            logger.info("processing insName: {}", insName);
+            logger.info("processing OIWavelength.INSNAME: {}", insName);
 
             // Prepare with OI_WAVELENGTH:
             // note: may adjust wavelengths:
@@ -101,6 +102,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
             }
 
             final double lambdaMin = StatUtils.min(this.waveLengths);
+            final double lambdaMax = StatUtils.max(this.waveLengths);
 
             for (OIData table : this.oiFitsFile.getOiDataList()) {
                 if (table.getOiWavelength() == oiWaveLength) {
@@ -109,7 +111,8 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                     if (this.hasModel && !target.hasAnalyticalModel()) {
                         // Check user model:
                         validateOrPrepareUserModel(oiData, target.getUserModel(),
-                                useFastMode, fastError, doApodization, diameter, lambdaMin
+                                useFastMode, fastError,
+                                doApodization, diameter, lambdaMin, lambdaMax
                         );
                     }
 
@@ -132,7 +135,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
     private static void validateOrPrepareUserModel(final OIData oiData, final UserModel userModel,
                                                    final boolean useFastMode, final double fastError,
                                                    final boolean doApodization, final double defDiameter,
-                                                   final double lambdaMin) throws IllegalArgumentException {
+                                                   final double lambdaMin, final double lambdaMax) throws IllegalArgumentException {
 
         // Apodization: get Telescope diameter and instrument wavelength:
         double diameter = Double.NaN;
@@ -181,11 +184,13 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
             }
         }
 
+        final ApodizationParameters params = new ApodizationParameters(diameter, lambdaMin, lambdaMax);
+
         // IF needed reload (or process again apodization + image preparation...)
-        if (!UserModelService.checkAiryRadius(userModel, diameter, lambdaMin)) {
+        if (!UserModelService.checkAiryRadius(userModel, params)) {
             try {
                 // throws exceptions if the given fits file or image is incorrect:
-                UserModelService.prepareUserModel(userModel, useFastMode, fastError, doApodization, diameter, lambdaMin);
+                UserModelService.prepareUserModel(userModel, useFastMode, fastError, doApodization, params);
             } catch (FitsException fe) {
                 throw new RuntimeException("Could not read file: " + userModel.getFile(), fe);
             } catch (IOException ioe) {
@@ -328,7 +333,9 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                 uCoords[k + 2] = u1Coords[i] + u2Coords[i];
                 vCoords[k + 2] = v1Coords[i] + v2Coords[i];
             }
-
+        } else if (this.oiData instanceof OIFlux) {
+            // ignore:
+            return null;
         } else {
             logger.info("computeSpatialFreqTable: Unsupported table: {}", oiData);
             return null;

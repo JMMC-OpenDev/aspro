@@ -134,22 +134,21 @@ public final class UserModelService {
      * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
      */
     public static void prepareUserModel(final UserModel userModel, final boolean useFastMode, final double fastError) throws FitsException, IOException, IllegalArgumentException {
-        prepareUserModel(userModel, useFastMode, fastError, false, Double.NaN, Double.NaN);
+        prepareUserModel(userModel, useFastMode, fastError, false, new ApodizationParameters());
     }
 
     /**
      * Load the given user model file and prepare ONLY the first image for FFT processing and direct Fourier transform
      * @param userModel user model to load and prepare
-     * @param diameter telescope diameter in meters (apodization)
-     * @param lambdaMin minimum wavelength in meters (used only for gray images) (apodization)
+     * @param params apodization parameters
      * @throws FitsException if any FITS error occured
      * @throws IOException IO failure
      * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
      */
-    public static void prepareUserModel(final UserModel userModel, final double diameter, final double lambdaMin) throws FitsException, IOException, IllegalArgumentException {
+    public static void prepareUserModel(final UserModel userModel, final ApodizationParameters params) throws FitsException, IOException, IllegalArgumentException {
         prepareUserModel(userModel,
                 Preferences.getInstance().isFastUserModel(), Preferences.getInstance().getFastError(),
-                Preferences.getInstance().isDoUserModelApodization(), diameter, lambdaMin
+                Preferences.getInstance().isDoUserModelApodization(), params
         );
     }
 
@@ -159,14 +158,13 @@ public final class UserModelService {
      * @param useFastMode true to ignore useless data (faster); false to have highest precision
      * @param fastError fast mode threshold in percents
      * @param doApodise true to perform image apodization
-     * @param diameter telescope diameter in meters (apodization)
-     * @param lambdaMin minimum wavelength in meters (used only for gray images) (apodization)
+     * @param params apodization parameters
      * @throws FitsException if any FITS error occured
      * @throws IOException IO failure
      * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
      */
     public static void prepareUserModel(final UserModel userModel, final boolean useFastMode, final double fastError,
-                                        final boolean doApodise, final double diameter, final double lambdaMin) throws FitsException, IOException, IllegalArgumentException {
+                                        final boolean doApodise, final ApodizationParameters params) throws FitsException, IOException, IllegalArgumentException {
         // clear previously cached data:
         userModel.setModelDataList(null);
 
@@ -210,7 +208,7 @@ public final class UserModelService {
 
                 // note: fits image instance can be modified by image preparation:
                 // can throw IllegalArgumentException if image has invalid keyword(s) / data:
-                prepareImageStep1(fitsImage, modelData, useFastMode, fastError, doApodise, diameter, lambdaMin);
+                prepareImageStep1(fitsImage, modelData, useFastMode, fastError, doApodise, params);
 
                 logger.debug("Prepared FitsImage: {}", fitsImage);
 
@@ -827,13 +825,12 @@ public final class UserModelService {
      * @param useFastMode true to ignore useless data (faster); false to have highest precision
      * @param fastError fast mode threshold in percents
      * @param doApodise true to perform image apodization
-     * @param diameter telescope diameter in meters (apodization)
-     * @param lambdaMin minimum wavelength in meters (used only for gray images) (apodization)
+     * @param params apodization parameters
      * @throws IllegalArgumentException if image has invalid keyword(s) / data
      */
     public static void prepareImageStep1(final FitsImage fitsImage, final UserModelData modelData,
                                          final boolean useFastMode, final double fastError,
-                                         final boolean doApodise, final double diameter, final double lambdaMin) throws IllegalArgumentException {
+                                         final boolean doApodise, final ApodizationParameters params) throws IllegalArgumentException {
 
         if (!fitsImage.isDataRangeDefined()) {
             // update boundaries excluding zero values:
@@ -868,7 +865,7 @@ public final class UserModelService {
 
         if (doApodise) {
             // Perform image apodization
-            final double airyRadius = apodize(fitsImage, diameter, lambdaMin);
+            final double airyRadius = apodize(fitsImage, params);
 
             // Store radius:
             modelData.setAiryRadius(airyRadius);
@@ -1350,24 +1347,20 @@ public final class UserModelService {
         return -1;
     }
 
-    public static boolean checkAiryRadius(final UserModel userModel, final double diameter, final double lambdaMin) {
+    public static boolean checkAiryRadius(final UserModel userModel, final ApodizationParameters params) {
         if (!userModel.isModelDataReady()) {
             return false;
         }
         final UserModelData modelData = userModel.getModelData(0);
-
         final FitsImage fitsImage = modelData.getFitsImage();
 
-        // check real lambda ie airy radius of the first image: 
-        final double lambda = (!Double.isNaN(fitsImage.getWaveLength())) ? fitsImage.getWaveLength() : lambdaMin;
-
-        final double airyRadius = getAiryRadius(fitsImage, diameter, lambda);
+        final double airyRadius = getAiryRadius(fitsImage, params);
 
         final boolean valid = (Double.isNaN(airyRadius) && Double.isNaN(modelData.getAiryRadius()))
                 || (airyRadius == modelData.getAiryRadius());
 
         if (logger.isDebugEnabled()) {
-            logger.debug("checkAiryRadius: lambda: {} - diameter: {}", lambda, diameter);
+            logger.debug("checkAiryRadius: lambda: {} - diameter: {}", params.lambda, params.diameter);
             logger.debug("checkAiryRadius[{}]: airy radius expected = {} - model = {}", valid,
                     FitsImage.getAngleAsString(airyRadius, df3),
                     FitsImage.getAngleAsString(modelData.getAiryRadius(), df3)
@@ -1377,8 +1370,20 @@ public final class UserModelService {
         return valid;
     }
 
-    private static double getAiryRadius(final FitsImage fitsImage, final double diameter, final double lambda) {
-        final double airyRadius = getAiryRadius(diameter, lambda);
+    private static double getAiryRadius(final FitsImage fitsImage, final ApodizationParameters params) {
+        // check real lambda ie airy radius of the given image: 
+        double lambda = !Double.isNaN(fitsImage.getWaveLength()) ? fitsImage.getWaveLength() : params.lambdaMin;
+
+        // ensure lambda is within the instrument (or mode) range:
+        if (lambda < params.lambdaMin) {
+            lambda = params.lambdaMin;
+        }
+        if (lambda > params.lambdaMax) {
+            lambda = params.lambdaMax;
+        }
+        params.lambda = lambda;
+
+        final double airyRadius = getAiryRadius(params);
         if (Double.isNaN(airyRadius)) {
             return Double.NaN;
         }
@@ -1410,24 +1415,37 @@ public final class UserModelService {
         return airyRadius;
     }
 
+    /**
+     * Get threshold (percents) on the airy radius
+     * @param airyRadius
+     * @return threshold (percents) on the airy radius
+     */
     public static double getAiryRadiusThreshold(final double airyRadius) {
         return 0.2 * airyRadius;
     }
 
     /**
-     * Get the airy disk FHWM ~ (lambda / diameter) i.e smaller than radius = zero at 1.22 (lambda / diameter)
-     * @param diameter
-     * @param lambda
+     * Get the airy disk FHWM ~ (lambdaMin / diameter) i.e smaller than radius = zero at 1.22 (lambdaMin / diameter)
+     * @param params apodization parameters
      * @return airy disk FHWM
      */
-    public static double getAiryRadius(final double diameter, final double lambda) {
-        if (Double.isNaN(diameter) || (diameter <= 0.0) || Double.isNaN(lambda) || (lambda <= 0.0)) {
+    public static double getAiryRadius(final ApodizationParameters params) {
+        if (Double.isNaN(params.diameter) || (params.diameter <= 0.0)
+                || Double.isNaN(params.lambda) || (params.lambda <= 0.0)) {
             return Double.NaN;
         }
+        final double wavelength = (!Double.isNaN(params.lambdaRef) && (params.lambdaRef > 0.0)) ? params.lambdaRef : params.lambda;
+        if (wavelength != params.lambda) {
+            params.lambda = wavelength; // report value
+        }
+
+        final double factor = (!Double.isNaN(params.scalingFactor) && (params.scalingFactor > 0.0))
+                ? params.scalingFactor : 1.0289939700094716812373007996939122676849365234375;
+
         // see https://en.wikipedia.org/wiki/Airy_disk
-        // note: airy disk 1st zero at 1.22 x lambda / diameter
-        // use the airy disk FWHM instead:
-        return 1.0289939700094716812373007996939122676849365234375 * lambda / diameter; // ~ lambda / diameter
+        // note: airy disk 1st zero at 1.22 x lambdaMin / diameter
+        // use the airy disk FWHM instead (~ 1.0 * lambdaMin / diameter):
+        return factor * wavelength / params.diameter;
     }
 
     /** constant 1 / 2.35 ~ 0.42 */
@@ -1445,15 +1463,12 @@ public final class UserModelService {
     /**
      * Performs image apodization ie multiply image by the telescope airy disk (gaussian profile in fact) if necessary
      * @param fitsImage image to transform (in-place)
-     * @param diameter telescope diameter in meters
-     * @param lambdaMin minimum wavelength in meters (used only for gray images)
+     * @param params apodization parameters
      * @return airy disk FHWM if apodisation performed; NaN otherwise
      */
-    private static double apodize(final FitsImage fitsImage, final double diameter, final double lambdaMin) {
-        final double lambda = !Double.isNaN(fitsImage.getWaveLength()) ? fitsImage.getWaveLength() : lambdaMin;
-
+    private static double apodize(final FitsImage fitsImage, final ApodizationParameters params) {
         // check if apodization is necessary according to the image FOV vs radius:
-        final double airyRadius = getAiryRadius(fitsImage, diameter, lambda);
+        final double airyRadius = getAiryRadius(fitsImage, params);
         // e.g. airyRadius is not NaN:
         if (!Double.isNaN(airyRadius)) {
             // Start the computations :
@@ -1465,7 +1480,7 @@ public final class UserModelService {
             final double sigma = getGaussianStddev(airyRadius);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("apodize: lambda: {} - diameter: {}", lambda, diameter);
+                logger.debug("apodize: lambda: {} - diameter: {}", params.lambda, params.diameter);
                 logger.debug("apodize: sigma       = {}", sigma);
             }
 
@@ -1488,16 +1503,24 @@ public final class UserModelService {
         return airyRadius;
     }
 
+    /**
+     * test
+     * @param unused 
+     */
     public static void main(String[] unused) {
         final double diameter = 1.8;
-        final double lambda = 1.5E-6;
-//        final double lambda = 3.5E-6;
-//        final double lambda = 10.5E-6;
 
-        final double airyRadius = getAiryRadius(diameter, lambda);
+        final double lambdaMin = 1.5E-6;
+//        final double lambdaMin = 3.5E-6;
+//        final double lambdaMin = 10.5E-6;
+
+        final double lambdaMax = 5E-6;
+
+        final ApodizationParameters params = new ApodizationParameters(diameter, lambdaMin, lambdaMax);
+
+        final double airyRadius = getAiryRadius(params);
 
         logger.info("airy radius  = {}", FitsImage.getAngleAsString(airyRadius, df3));
-        logger.info("airy FOV     = {}", FitsImage.getAngleAsString(2.0 * airyRadius, df3));
 
         // equivalent gaussian profile:
         final double sigma = getGaussianStddev(airyRadius);

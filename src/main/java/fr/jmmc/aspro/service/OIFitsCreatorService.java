@@ -109,10 +109,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private FocalInstrumentMode instrumentMode = null;
     /** total number of channels of the instrument mode (no restriction) */
     private int nInsModeWaveLengths = 0;
+    /** flag indicating wavelength restrictions */
+    private boolean useWavelengthRangeRestriction = false;
     /** flag indicating if the target model wavelengths are compatible with the instrument mode */
     private boolean isModelWLValid = true;
     /** true to use calibration bias; false to compute only theoretical (optional systematic) error */
-    private final boolean useCalibrationBias;
+    protected final boolean useCalibrationBias;
     /** true to use instrument or calibration bias; false to compute only theoretical error */
     private final boolean useBias;
     /** true to use random bias; false to disable random sampling, only adjust error */
@@ -200,13 +202,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             // observation {target}
             // parameter: warningContainer
             final NoiseService ns = new NoiseService(observation, target, targetPointInfos, useCalibrationBias, warningContainer,
-                    this.waveLengths, this.waveBands);
+                    this.waveLengths, this.waveBands, useWavelengthRangeRestriction);
 
-            // do not generate errors for the DEMO interferometer
             if (ns.isValid()) {
                 this.noiseService = ns;
                 doBias = ns.isUseBias();
                 doRandomCalBias = ns.isUseRandomCalBias();
+
+                // note: if FT disabled, wavelength restrictions are not applied (chicken-egg issue) !
             }
         }
         // do noise :
@@ -280,8 +283,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                 // use lower wavelength:
                 final double lambdaMin = this.waveLengths[0];
+
                 // telescope FOV = airy disk FWHM:
-                final double airyRadius = ALX.convertRadToMas(UserModelService.getAiryRadius(diameter, lambdaMin)); // mas
+                final ApodizationParameters params = new ApodizationParameters(diameter, lambdaMin, Double.NaN, instrument);
+                
+                final double airyRadius = ALX.convertRadToMas(UserModelService.getAiryRadius(params)); // mas
 
                 // convert max distance (= 20% fov) in mas:
                 final double maxDist = UserModelService.getAiryRadiusThreshold(airyRadius);
@@ -363,7 +369,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             // use target's wavelength ref instead of default value:
             double lambda = instrumentMode.getEffWaveLengthRef();
 
-            boolean useWavelengthRangeRestriction = instrumentMode.isWavelengthRangeRestriction();
+            this.useWavelengthRangeRestriction = instrumentMode.isWavelengthRangeRestriction();
             double effBand = instrumentMode.getEffWaveLengthBandRef();
 
             if (target != null) {
@@ -378,7 +384,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                     // TODO: handle FT modes properly: GroupTrack is hard coded !
                     // disable wavelength restrictions if FT enabled (basic GRA4MAT support, TODO: refine wavelength ranges for GRA4MAT)
-                    useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith("GroupTrack") && (instrumentMode.getFtWaveLengthBandRef() == null));
+                    this.useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith("GroupTrack") && (instrumentMode.getFtWaveLengthBandRef() == null));
                     if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
                         effBand = instrumentMode.getFtWaveLengthBandRef();
                     }
@@ -392,6 +398,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             final double lambdaMax = AsproConstants.MICRO_METER * wlRange.getMax();
 
             if (logger.isDebugEnabled()) {
+                logger.debug("useWavelengthRangeRestriction: {}", useWavelengthRangeRestriction);
                 logger.debug("lambdaMin: {}", lambdaMin);
                 logger.debug("lambdaMax: {}", lambdaMax);
             }
@@ -2371,15 +2378,16 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         }
     }
 
+    /**
+     * @param other another OIFits producer
+     * @return true if the OIFITS producer options are the same; false otherwise
+     */
     @Override
     public boolean isSameOptions(final AbstractOIFitsProducer o) {
         final OIFitsCreatorService other = (OIFitsCreatorService) o;
         if (!super.isSameOptions(other)) {
             return false;
         }
-        if (useCalibrationBias != other.useCalibrationBias) {
-            return false;
-        }
-        return true;
+        return useCalibrationBias == other.useCalibrationBias;
     }
 }

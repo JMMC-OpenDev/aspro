@@ -12,6 +12,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.util.UserModelDataComparator;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
+import fr.jmmc.jmal.Band;
 import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmcs.util.StatUtils.ComplexDistribution;
 import fr.jmmc.jmal.complex.ImmutableComplex;
@@ -26,6 +27,7 @@ import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import static fr.jmmc.jmcs.util.StatUtils.N_SAMPLES;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.oitools.model.OIFitsFile;
+import fr.jmmc.oitools.model.range.Range;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,8 +95,6 @@ public abstract class AbstractOIFitsProducer {
     /** flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid */
     protected boolean doNoise = false;
     /* complex visibility fields */
-    /** internal computed fits cube fluxes [waveLength] */
-    protected double[] modelFlux = null;
     /** internal computed complex visibility [row][waveLength] */
     protected Complex[][] visComplex = null;
     /** internal complex visibility error [row][waveLength] for amplitudes with photometry */
@@ -331,531 +332,288 @@ public abstract class AbstractOIFitsProducer {
      * @return true if complex visibilities are computed; false otherwise
      */
     protected final boolean computeModelVisibilities() {
-        boolean computed = false;
+        if (!this.hasModel) {
+            return false;
+        }
 
-        if (this.hasModel) {
-            /** Get the current thread to check if the computation is interrupted */
-            final Thread currentThread = Thread.currentThread();
+        /** Get the current thread to check if the computation is interrupted */
+        final Thread currentThread = Thread.currentThread();
 
-            final long start = System.nanoTime();
+        final long start = System.nanoTime();
 
-            // Effective number of spectral channels on the detector:
-            final int nChannels = this.waveLengths.length;
+        final boolean useAnalyticalModel = this.target.hasAnalyticalModel();
 
-            final boolean useAnalyticalModel = this.target.hasAnalyticalModel();
+        // user model if defined:
+        final UserModel userModel = (!useAnalyticalModel) ? target.getUserModel() : null;
 
-            // user model if defined:
-            final UserModel userModel = (!useAnalyticalModel) ? target.getUserModel() : null;
+        // Test if user model data is valid:
+        if ((userModel != null) && !userModel.isModelDataReady()) {
+            return false;
+        }
 
-            // Test if user model data is valid:
-            if ((userModel != null) && !userModel.isModelDataReady()) {
-                return false;
-            }
+        // Determine nSamples per spectral channel:
+        // number of samples per spectral channel (1, 5, 9 ...) use the preference (SuperSampling)
+        // should be an even number to keep wavelengths centered on each sub channels:
+        // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
+        // TODO: determine correctly deltaLambda (object size (FOV) and Bmax/lambda) ie when super sampling is surely necessary
+        int nSamples = (!enableSuperSampling() || (options.mathMode == MathMode.QUICK)) ? 1 : options.supersampling;
 
-            // Determine nSamples per spectral channel:
-            // number of samples per spectral channel (1, 5, 9 ...) use the preference (SuperSampling)
-            // should be an even number to keep wavelengths centered on each sub channels:
-            // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
-            // TODO: determine correctly deltaLambda (object size (FOV) and Bmax/lambda) ie when super sampling is surely necessary
-            int nSamples = (!enableSuperSampling() || (options.mathMode == MathMode.QUICK)) ? 1 : options.supersampling;
+        if (logger.isDebugEnabled()) {
+            logger.debug("computeModelVisibilities: initial nSamples = {}", nSamples);
+        }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("computeModelVisibilities: initial nSamples = {}", nSamples);
-            }
+        final double waveBand = StatUtils.mean(this.waveBands);
 
-            final double waveBand = StatUtils.mean(this.waveBands);
+        final double deltaLambda = waveBand / nSamples;
 
-            final double deltaLambda = waveBand / nSamples;
+        // If Fits cube: try using all images at least i.e. adjust nSamples then frequencies:
+        final double wlIncMin = ((userModel != null) && userModel.isModelDataReady()) ? userModel.getModelData(0).getWaveLengthIncrement() : Double.NaN;
 
-            // If Fits cube: try using all images at least i.e. adjust nSamples then frequencies:
-            final double wlIncMin = ((userModel != null) && userModel.isModelDataReady()) ? userModel.getModelData(0).getWaveLengthIncrement() : Double.NaN;
-
-            // Sub channel width:
-            if (!Double.isNaN(wlIncMin) && (wlIncMin < deltaLambda)) {
-                // adjust nSamples to have deltaLambda < wlInc:
-                nSamples = (int) Math.ceil(waveBand / wlIncMin);
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug("computeModelVisibilities: adjusted nSamples = {} (wlIncMin = {})", nSamples, wlIncMin);
-                }
-                nSamples = Math.min(nSamples, AsproConstants.MAX_SUPER_SAMPLING);
-            }
-
-            // Prefer odd number of sub channels:
-            if (nSamples % 2 == 0) {
-                nSamples++;
-            }
+        // Sub channel width:
+        if (!Double.isNaN(wlIncMin) && (wlIncMin < deltaLambda)) {
+            // adjust nSamples to have deltaLambda < wlInc:
+            nSamples = (int) Math.ceil(waveBand / wlIncMin);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("computeModelVisibilities: adjusted nSamples = {}", nSamples);
+                logger.debug("computeModelVisibilities: adjusted nSamples = {} (wlIncMin = {})", nSamples, wlIncMin);
             }
+            nSamples = Math.min(nSamples, AsproConstants.MAX_SUPER_SAMPLING);
+        }
 
-            // note: integration must be adjusted to use wavelengths in each spectral channel !
-            // Only part of instrument spectral channels can be used (see prepare step):
-            final double[] sampleWaveLengths = (nSamples > 1) ? resampleWaveLengths(this.waveLengths, this.waveBands, nSamples) : this.waveLengths;
+        // Prefer odd number of sub channels:
+        if (nSamples % 2 == 0) {
+            nSamples++;
+        }
 
-            // local vars:
-            final int nWLen = sampleWaveLengths.length;
+        if (logger.isDebugEnabled()) {
+            logger.debug("computeModelVisibilities: adjusted nSamples = {}", nSamples);
+        }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("computeModelVisibilities: nWLen = {} - nChannels = {}", nWLen, nChannels);
-            }
+        // note: integration must be adjusted to use wavelengths in each spectral channel !
+        // Only part of instrument spectral channels can be used (see prepare step):
+        final double[] sampleWaveLengths = (nSamples > 1) ? resampleWaveLengths(this.waveLengths, this.waveBands, nSamples) : this.waveLengths;
 
-            // fast interrupt :
-            if (currentThread.isInterrupted()) {
-                return false;
-            }
+        // Effective number of spectral channels on the detector:
+        final int nChannels = this.waveLengths.length;
 
-            // Compute spatial frequencies:
-            final UVFreqTable freqTable = computeSpatialFreqTable(sampleWaveLengths);
-            if (freqTable == null) {
-                return false;
-            }
+        // local vars:
+        final int nWLen = sampleWaveLengths.length;
 
-            final double[][] ufreq = freqTable.ufreq;
-            final double[][] vfreq = freqTable.vfreq;
+        if (logger.isDebugEnabled()) {
+            logger.debug("computeModelVisibilities: nWLen = {} - nChannels = {}", nWLen, nChannels);
+        }
 
-            // index of the observation point (HA):
-            final int[] ptIdx = freqTable.ptIdx;
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+            return false;
+        }
 
-            final int nBl = freqTable.nBl;
-            final int nRows = freqTable.nRows;
-            final int nDataPoints = nRows * nWLen;
+        // Compute spatial frequencies:
+        final UVFreqTable freqTable = computeSpatialFreqTable(sampleWaveLengths);
+        if (freqTable == null) {
+            return false;
+        }
 
-            logger.info("computeModelVisibilities: {} data points [{} rows - {} spectral channels - {} samples]({}) - please wait ...",
-                    nDataPoints, nRows, nChannels, nSamples, options.mathMode);
+        final double[][] ufreq = freqTable.ufreq;
+        final double[][] vfreq = freqTable.vfreq;
 
-            // Allocate data array for complex visibility and error :
-            final MutableComplex[][] cmVis = new MutableComplex[nRows][];
+        // index of the observation point (HA):
+        final int[] ptIdx = freqTable.ptIdx;
 
-            // Iterate on rows :
+        final int nBl = freqTable.nBl;
+        final int nRows = freqTable.nRows;
+        final int nDataPoints = nRows * nWLen;
+
+        logger.info("computeModelVisibilities: {} data points [{} rows - {} spectral channels - {} samples]({}) - please wait ...",
+                nDataPoints, nRows, nChannels, nSamples, options.mathMode);
+
+        // Allocate data array for complex visibility and error :
+        final MutableComplex[][] cmVis = new MutableComplex[nRows][];
+
+        // Iterate on rows :
+        for (int k = 0; k < nRows; k++) {
+            cmVis[k] = createArray(nWLen + 4); // cache line padding (Complex = 2 double = 16 bytes) so 4 complex = complete cache line
+        }
+
+        final NoiseService ns = this.noiseService;
+
+        /* (W) instrument band */
+        Band[] insBands = null;
+
+        // Initialize flux array:
+        final double[] mFluxes = new double[nWLen];
+
+        // Flux per used instrument band:
+        final Map<Band, Double> bandFluxes = new LinkedHashMap<>(4);
+
+        // Compute complex visibility using the target model:
+        if (useAnalyticalModel) {
+            // Clone models and normalize fluxes :
+            final List<Model> normModels = ModelManager.normalizeModels(this.target.getModels());
+
+            // Analytical models: no parallelization:
+            final ModelManager modelManager = ModelManager.getInstance();
+
+            // model computation context
+            final ModelComputeContext context = modelManager.prepareModels(normModels, nWLen);
+
+            // Iterate on rows:
             for (int k = 0; k < nRows; k++) {
-                cmVis[k] = createArray(nWLen + 4); // cache line padding (Complex = 2 double = 16 bytes) so 4 complex = complete cache line
-            }
 
-            // Initialize flux array:
-            final double[] mFluxes = new double[nWLen];
+                // Compute complex visibility using the target model:
+                copyArray(modelManager.computeModels((ModelFunctionComputeContext) context, ufreq[k], vfreq[k]), cmVis[k]);
 
-            // Compute complex visibility using the target model:
-            if (useAnalyticalModel) {
-                // Clone models and normalize fluxes :
-                final List<Model> normModels = ModelManager.normalizeModels(this.target.getModels());
-
-                // Analytical models: no parallelization:
-                final ModelManager modelManager = ModelManager.getInstance();
-
-                // model computation context
-                final ModelComputeContext context = modelManager.prepareModels(normModels, nWLen);
-
-                // Iterate on rows:
-                for (int k = 0; k < nRows; k++) {
-
-                    // Compute complex visibility using the target model:
-                    copyArray(modelManager.computeModels((ModelFunctionComputeContext) context, ufreq[k], vfreq[k]), cmVis[k]);
-
-                    if (currentThread.isInterrupted()) {
-                        // fast interrupt :
-                        return false;
-                    }
-                } // rows
-
-                // update flux vs wavelengths:
-                Arrays.fill(mFluxes, 1.0); // already normalized
-
-            } else {
-                // TODO: compare directFT vs FFT + interpolation
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug("computeModelVisibilities: MathMode = {}.", options.mathMode);
-                }
-
-                // Initialize interpolation weights:
-                final double[] weightsL = new double[nWLen];
-                final double[] weightsR = new double[nWLen];
-
-                // define mapping between spectral channels and model images:
-                final List<UserModelData> modelDataList = target.getUserModel().getModelDataList();
-
-                // determine which images to use according to wavelength range:
-                final List<UserModelComputePart> modelParts = mapUserModel(modelDataList, sampleWaveLengths,
-                        weightsL, weightsR, mFluxes, options.userModelCubeInterpolation);
-
-                if (modelParts == null) {
-                    // invalid wavelength range:
+                if (currentThread.isInterrupted()) {
+                    // fast interrupt :
                     return false;
                 }
+            } // rows
 
-                if (logger.isDebugEnabled()) {
-                    for (UserModelComputePart modelPart : modelParts) {
-                        logger.debug("modelPart: {}", modelPart);
-                        logger.debug("waveLength min: {}", sampleWaveLengths[modelPart.fromWL]);
-                        logger.debug("waveLength max: {}", sampleWaveLengths[modelPart.endWL - 1]);
-                    }
-                }
+            // update flux vs wavelengths:
+            Arrays.fill(mFluxes, 1.0); // already normalized
 
-                // enable parallel jobs if many points using user model:
-                final int nTh = (!JOB_EXECUTOR.isWorkerThread() && (nDataPoints > JOB_THRESHOLD_USER_MODELS)) ? JOB_EXECUTOR.getMaxParallelJob() : 1;
+        } else {
+            // TODO: compare directFT vs FFT + interpolation
 
-                // Prepare thread context variables:
-                final int[][] nTaskThreads = (SHOW_COMPUTE_STATS) ? new int[nTh][16] : null; // cache line padding
+            if (logger.isDebugEnabled()) {
+                logger.debug("computeModelVisibilities: MathMode = {}.", options.mathMode);
+            }
 
-                // adjust largest chunk size:
-                final int maxPixelsPerChunk = 85000; // to ensure chunk less than 1 Mb (and fit in CPU caches)
+            if (ns != null) {
+                // get used instrument bands:
+                insBands = ns.getInstrumentBands();
 
-                // computation tasks = 1 job per row and chunk (work stealing):
-                final List<Runnable> jobList = new ArrayList<Runnable>(nRows * 2 * modelParts.size()); // 2 chunks by default
+                // Initialize used bands to get their flux from the user model:
+                final Set<Band> usedInsBands = ns.getDistinctInstrumentBands();
 
-                // Iterate on wavelength ranges i.e. UserModelComputePart:
-                for (UserModelComputePart modelPart : modelParts) {
-
-                    // use image corresponding to the model part:
-                    final UserModelData modelData = modelPart.modelData;
-
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("computeModelVisibilities: model part: {}", modelPart);
-                    }
-
-                    // process wavelengths:
-                    final int from = modelPart.fromWL;
-                    final int end = modelPart.endWL;
-
-                    // use left / right flag to select appropriate weights:
-                    final double[] weights = (modelPart.left) ? weightsL : weightsR;
-
-                    // This will change for each image in the Fits cube:
-                    final int n1D = modelData.getNData();
-                    // flattened data points (1D) [data xfreq yfreq]:
-                    final float[] data1D = modelData.getData1D();
-
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("computeModelVisibilities: {} bytes for image arrays", 4 * n1D); // (float) array
-                    }
-
-                    // Ensure 1 chunk per thread ?
-                    int chunk = maxPixelsPerChunk * UserModelService.DATA_1D_POINT_SIZE;
-
-                    final int nChunks = 1 + (n1D / chunk);
-
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("computeModelVisibilities: {} chunks", nChunks);
-                    }
-
-                    // note: chunk must a multiple of 3: see UserModelService.DATA_1D_POINT_SIZE
-                    chunk = UserModelService.DATA_1D_POINT_SIZE * ((n1D / nChunks) / UserModelService.DATA_1D_POINT_SIZE);
-
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("computeModelVisibilities: {} bytes for chunk", (chunk > n1D) ? 4 * n1D : 4 * chunk);// (float) array
-                        logger.debug("computeModelVisibilities: chunk = {}", chunk);
-                    }
-
-                    final int[] fromThreads = new int[nChunks];
-                    final int[] endThreads = new int[nChunks];
-
-                    for (int c = 0; c < nChunks; c++) {
-                        fromThreads[c] = c * chunk;
-                        endThreads[c] = fromThreads[c] + chunk;
-                    }
-                    endThreads[nChunks - 1] = n1D;
-
-                    if (logger.isDebugEnabled()) {
-                        for (int c = 0; c < nChunks; c++) {
-                            logger.debug("chunk[" + c + "]: range = [" + fromThreads[c] + " - " + endThreads[c] + "[");
-                        }
-                    }
-
-                    // create tasks:
-                    for (int c = 0; c < nChunks; c++) {
-                        // Image chunks:
-                        final int fromData = fromThreads[c];
-                        final int endData = endThreads[c];
-
-                        for (int k = 0; k < nRows; k++) {
-                            // rows index to be processed by this task:
-                            final int rowIndex = k;
-                            final double[] ufreqRow = ufreq[rowIndex];
-                            final double[] vfreqRow = vfreq[rowIndex];
-                            final MutableComplex[] cmVisRow = cmVis[rowIndex];
-
-                            jobList.add(new Runnable() {
-                                /**
-                                 * Called by the ParallelJobExecutor to perform task computation
-                                 */
-                                @Override
-                                public void run() {
-                                    // Compute complex visibility using the target model:
-                                    UserModelService.computeModel(data1D, fromData, endData, ufreqRow, vfreqRow, cmVisRow, from, end, weights, options.mathMode);
-
-                                    if (SHOW_COMPUTE_STATS) {
-                                        // Get thread index to get appropriate thread vars:
-                                        final int threadIndex = ParallelJobExecutor.currentThreadIndex(nTh);
-                                        nTaskThreads[threadIndex][0]++;
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    // fast interrupt :
-                    if (currentThread.isInterrupted()) {
-                        return false;
-                    }
-                }
-
-                final int nJobs = jobList.size();
-
-                // note: have jobs a multiple of nTh to maximize parallelism !
-                logger.debug("computeModelVisibilities: {} jobs", nJobs);
-
-                final Runnable[] jobs = jobList.toArray(new Runnable[nJobs]);
-
-                // execute jobs in parallel or using current thread if only one job (throws InterruptedJobException if interrupted):
-                JOB_EXECUTOR.forkAndJoin("OIFitsCreatorService.computeModelVisibilities", jobs);
-
-                if (SHOW_COMPUTE_STATS) {
-                    for (int t = 0; t < nTh; t++) {
-                        logger.info("Thread[{}] done: {} processed jobs", t, nTaskThreads[t][0]);
-                    }
+                for (Band b : usedInsBands) {
+                    bandFluxes.put(b, 0.0);
                 }
             }
 
-            if (currentThread.isInterrupted()) {
-                // fast interrupt :
+            // Initialize interpolation weights:
+            final double[] weightsL = new double[nWLen];
+            final double[] weightsR = new double[nWLen];
+
+            // define mapping between spectral channels and model images:
+            final List<UserModelData> modelDataList = target.getUserModel().getModelDataList();
+
+            // determine which images to use according to wavelength range:
+            final List<UserModelComputePart> modelParts = mapUserModel(modelDataList, sampleWaveLengths,
+                    weightsL, weightsR, mFluxes, bandFluxes, options.userModelCubeInterpolation);
+
+            if (modelParts == null) {
+                // invalid wavelength range:
                 return false;
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("mFluxes:  {}", Arrays.toString(mFluxes));
-            }
-
-            // Sampling integration on spectral channels:
-            // use integration of several samples
-            final ImmutableComplex[][] cVis = new ImmutableComplex[nRows][nChannels];
-
-            // integrate modelFlux [nChannels]:
-            final double[] modelFluxes;
-
-            // Super sampling ?
-            if (sampleWaveLengths == this.waveLengths) {
-                // Simple copy array:
-                modelFluxes = mFluxes;
-                // Iterate on rows :
-                for (int k = 0; k < nRows; k++) {
-                    // Simply convert array:
-                    cVis[k] = convertArray(cmVis[k], nChannels);
-                }
-            } else {
-                modelFluxes = new double[nChannels];
-
-                // Prepare mapping of sampled channels (inclusive indices):
-                final int[] fromWL = new int[nChannels];
-                final int[] endWL = new int[nChannels];
-
-                for (int l = 0; l < nChannels; l++) {
-                    // Note: sometimes sub channels may overlap channel limits
-                    final double halfBand = 0.5d * this.waveBands[l];
-
-                    fromWL[l] = -1;
-                    endWL[l] = -1;
-
-                    for (int i = 0; i < nWLen; i++) {
-                        // note: wavelength array can be unordered:
-                        if (Math.abs(this.waveLengths[l] - sampleWaveLengths[i]) <= halfBand) {
-                            // within range:
-                            // identify part [fromWL - endWL]
-                            if (fromWL[l] == -1) {
-                                fromWL[l] = i;
-                                endWL[l] = i;
-                            } else {
-                                endWL[l] = i;
-                            }
-                        } else {
-                            // channel range already identified:
-                            if (endWL[l] != -1) {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                // normalize fluxes in channels:
-                final double[] normFactorWL = new double[nChannels];
-
-                for (int i, l = 0; l < nChannels; l++) {
-                    int nFlux = 0;
-                    double totalFlux = 0.0;
-
-                    for (i = fromWL[l]; i <= endWL[l]; i++) {
-                        nFlux++;
-                        totalFlux += mFluxes[i];
-                    }
-
-                    // update flux vs channels:
-                    modelFluxes[l] = totalFlux / nFlux;
-
-                    // normalize:
-                    normFactorWL[l] = 1.0 / totalFlux;
-                }
-
-                final MutableComplex integrator = new MutableComplex();
-
-                // Iterate on rows :
-                for (int i, k = 0, l; k < nRows; k++) {
-                    final MutableComplex[] cmVisRow = cmVis[k];
-                    final ImmutableComplex[] cVisRow = cVis[k];
-
-                    // Iterate on spectral channels:
-                    for (l = 0; l < nChannels; l++) {
-                        // reset
-                        integrator.updateComplex(0d, 0d);
-
-                        for (i = fromWL[l]; i <= endWL[l]; i++) {
-                            final MutableComplex vis = cmVisRow[i];
-                            // scale by flux in channel:
-                            integrator.add(mFluxes[i] * vis.getReal(), mFluxes[i] * vis.getImaginary());
-                        }
-                        // normalize by total flux:
-                        integrator.multiply(normFactorWL[l]);
-
-                        cVisRow[l] = new ImmutableComplex(integrator); // immutable for safety
-                    }
+                for (UserModelComputePart modelPart : modelParts) {
+                    logger.debug("modelPart: {}", modelPart);
+                    logger.debug("waveLength min: {}", sampleWaveLengths[modelPart.fromWL]);
+                    logger.debug("waveLength max: {}", sampleWaveLengths[modelPart.endWL - 1]);
                 }
             }
 
-            // fast interrupt :
-            if (currentThread.isInterrupted()) {
-                return false;
-            }
+            // enable parallel jobs if many points using user model:
+            final int nTh = (!JOB_EXECUTOR.isWorkerThread() && (nDataPoints > JOB_THRESHOLD_USER_MODELS)) ? JOB_EXECUTOR.getMaxParallelJob() : 1;
 
-            // TODO: use FITS cube flux(channel) to adjust object flux along channels:
-            this.modelFlux = modelFluxes;
+            // Prepare thread context variables:
+            final int[][] nTaskThreads = (SHOW_COMPUTE_STATS) ? new int[nTh][16] : null; // cache line padding
 
-            final double snrThreshold = options.snrThreshold;
+            // adjust largest chunk size:
+            final int maxPixelsPerChunk = 85000; // to ensure chunk less than 1 Mb (and fit in CPU caches)
 
-            // Compute complex visibility errors:
-            final NoiseService ns = this.noiseService;
-            final StatUtils stat;
+            // computation tasks = 1 job per row and chunk (work stealing):
+            final List<Runnable> jobList = new ArrayList<Runnable>(nRows * 2 * modelParts.size()); // 2 chunks by default
 
-            if (ns == null) {
-                stat = null;
-            } else {
-                stat = StatUtils.getInstance();
-                // prepare enough distributions for all baselines:
-                stat.prepare(nBl);
-            }
+            // Iterate on wavelength ranges i.e. UserModelComputePart:
+            for (UserModelComputePart modelPart : modelParts) {
 
-            final double[][] cVisAmpError = new double[nRows][nChannels];
-            final double[][] cVisPhiError = new double[nRows][nChannels];
+                // use image corresponding to the model part:
+                final UserModelData modelData = modelPart.modelData;
 
-            final double[][] cNbPhotPhoto = new double[nRows][nChannels];
-            final double[][] cErrPhotPhoto = new double[nRows][nChannels];
-            final double[][] cSqCorrFlux = new double[nRows][nChannels];
-            final double[][] cErrSqCorrFlux = new double[nRows][nChannels];
+                if (logger.isDebugEnabled()) {
+                    logger.debug("computeModelVisibilities: model part: {}", modelPart);
+                }
 
-            final boolean[][] cVisAmpSNRFlag = new boolean[nRows][nChannels];
-            final boolean[][] cVisPhiSNRFlag = new boolean[nRows][nChannels];
+                // process wavelengths:
+                final int from = modelPart.fromWL;
+                final int end = modelPart.endWL;
 
-            final ComplexDistribution[] cVisRndDist = new ComplexDistribution[nRows];
+                // use left / right flag to select appropriate weights:
+                final double[] weights = (modelPart.left) ? weightsL : weightsR;
 
-            // use the same sample index per ha point (as distributions are different instances)
-            // to ensure T3 sample is correlated with C12, C23, C13 samples:
-            final int[][] cVisRndIdx = new int[nRows][];
+                // This will change for each image in the Fits cube:
+                final int n1D = modelData.getNData();
+                // flattened data points (1D) [data xfreq yfreq]:
+                final float[] data1D = modelData.getData1D();
 
-            int pt, prevPt = -1;
+                if (logger.isDebugEnabled()) {
+                    logger.debug("computeModelVisibilities: {} bytes for image arrays", 4 * n1D); // (float) array
+                }
 
-            // Iterate on rows :
-            for (int k = 0, l; k < nRows; k++) {
-                final double[] cVisAmpErrorRow = cVisAmpError[k];
-                final double[] cVisPhiErrorRow = cVisPhiError[k];
+                // Ensure 1 chunk per thread ?
+                int chunk = maxPixelsPerChunk * UserModelService.DATA_1D_POINT_SIZE;
 
-                final double[] nbPhotPhotoRow = cNbPhotPhoto[k];
-                final double[] errPhotPhotoRow = cErrPhotPhoto[k];
-                final double[] sqCorrFluxRow = cSqCorrFlux[k];
-                final double[] errSqCorrFluxRow = cErrSqCorrFlux[k];
+                final int nChunks = 1 + (n1D / chunk);
 
-                final boolean[] cVisAmpSNRFlagRow = cVisAmpSNRFlag[k];
-                final boolean[] cVisPhiSNRFlagRow = cVisPhiSNRFlag[k];
+                if (logger.isDebugEnabled()) {
+                    logger.debug("computeModelVisibilities: {} chunks", nChunks);
+                }
 
-                if ((ns == null) || (stat == null)) {
-                    Arrays.fill(cVisAmpErrorRow, Double.NaN);
-                    Arrays.fill(cVisPhiErrorRow, Double.NaN);
+                // note: chunk must a multiple of 3: see UserModelService.DATA_1D_POINT_SIZE
+                chunk = UserModelService.DATA_1D_POINT_SIZE * ((n1D / nChunks) / UserModelService.DATA_1D_POINT_SIZE);
 
-                    Arrays.fill(nbPhotPhotoRow, Double.NaN);
-                    Arrays.fill(errPhotPhotoRow, Double.NaN);
-                    Arrays.fill(sqCorrFluxRow, Double.NaN);
-                    Arrays.fill(errSqCorrFluxRow, Double.NaN);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("computeModelVisibilities: {} bytes for chunk", (chunk > n1D) ? 4 * n1D : 4 * chunk);// (float) array
+                    logger.debug("computeModelVisibilities: chunk = {}", chunk);
+                }
 
-                    Arrays.fill(cVisAmpSNRFlagRow, true);
-                    Arrays.fill(cVisPhiSNRFlagRow, true);
-                } else {
-                    final ImmutableComplex[] cVisRow = cVis[k];
-                    // select a different complex distribution per row:
-                    cVisRndDist[k] = stat.get();
-                    pt = ptIdx[k];
+                final int[] fromThreads = new int[nChunks];
+                final int[] endThreads = new int[nChunks];
 
-                    double visAmp;
-                    // Iterate on spectral channels:
-                    for (l = 0; l < nChannels; l++) {
-                        visAmp = cVisRow[l].abs();
+                for (int c = 0; c < nChunks; c++) {
+                    fromThreads[c] = c * chunk;
+                    endThreads[c] = fromThreads[c] + chunk;
+                }
+                endThreads[nChunks - 1] = n1D;
 
-                        // complex visibility error for phases (no photometry):
-                        // note: call this method first as it modifies internally other vectors:
-                        cVisPhiErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, false);
-
-                        // complex visibility error for amplitudes (with photometry):
-                        cVisAmpErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, true);
-
-                        // extra Vis2 columns (photo + square correlated fluxes):
-                        nbPhotPhotoRow[l] = ns.getNbPhotPhoto(pt, l);
-                        errPhotPhotoRow[l] = ns.getErrorPhotPhoto(pt, l);
-                        sqCorrFluxRow[l] = ns.getSqCorrFlux(pt, l);
-                        errSqCorrFluxRow[l] = ns.getErrorSqCorrFlux(pt, l);
-
-                        // check SNR(V) for amplitudes:
-                        final double snrVisAmp = visAmp / cVisAmpErrorRow[l];
-
-                        if (snrVisAmp < snrThreshold) {
-                            cVisAmpSNRFlagRow[l] = true;
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Low SNR[{}] (amp): {} < {}", this.waveLengths[l], snrVisAmp, snrThreshold);
-                            }
-                        }
-
-                        // check SNR(V) for phases:
-                        final double snrVisPhi = visAmp / cVisPhiErrorRow[l];
-
-                        if (snrVisPhi < snrThreshold) {
-                            cVisPhiSNRFlagRow[l] = true;
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Low SNR[{}] (phi): {} < {}", this.waveLengths[l], snrVisPhi, snrThreshold);
-                            }
-                        }
-
-                        // TODO: make SNR(V2) stats per channel to add warning if no channel is below 3 !
+                if (logger.isDebugEnabled()) {
+                    for (int c = 0; c < nChunks; c++) {
+                        logger.debug("chunk[" + c + "]: range = [" + fromThreads[c] + " - " + endThreads[c] + "[");
                     }
+                }
 
-                    if (DEBUG) {
-                        final int iRef = ns.getIndexRefChannel();
-                        visAmp = cVisRow[iRef].abs();
+                // create tasks:
+                for (int c = 0; c < nChunks; c++) {
+                    // Image chunks:
+                    final int fromData = fromThreads[c];
+                    final int endData = endThreads[c];
 
-                        logger.info("cVisAmpErrorRow(mid) = {} % (SNR = {}) (SNR V2 = {})",
-                                100.0 * (cVisAmpErrorRow[iRef] / visAmp), (visAmp / cVisAmpErrorRow[iRef]), (visAmp / cVisAmpErrorRow[iRef]) / 2.0);
-                        logger.info("cVisPhiErrorRow(mid) = {} % (SNR = {})",
-                                100.0 * (cVisPhiErrorRow[iRef] / visAmp), (visAmp / cVisPhiErrorRow[iRef]));
-                    }
+                    for (int k = 0; k < nRows; k++) {
+                        // rows index to be processed by this task:
+                        final int rowIndex = k;
+                        final double[] ufreqRow = ufreq[rowIndex];
+                        final double[] vfreqRow = vfreq[rowIndex];
+                        final MutableComplex[] cmVisRow = cmVis[rowIndex];
 
-                    if (pt != prevPt) {
-                        prevPt = pt;
+                        jobList.add(new Runnable() {
+                            /**
+                             * Called by the ParallelJobExecutor to perform task computation
+                             */
+                            @Override
+                            public void run() {
+                                // Compute complex visibility using the target model:
+                                UserModelService.computeModel(data1D, fromData, endData, ufreqRow, vfreqRow, cmVisRow, from, end, weights, options.mathMode);
 
-                        if (this.doNoise) {
-                            final int[] cVisRndIdxRow = cVisRndIdx[k] = new int[nChannels];
-                            for (l = 0; l < nChannels; l++) {
-                                // Choose the jth sample (uniform probability):
-                                cVisRndIdxRow[l] = getNextRandomSampleIndex();
+                                if (SHOW_COMPUTE_STATS) {
+                                    // Get thread index to get appropriate thread vars:
+                                    final int threadIndex = ParallelJobExecutor.currentThreadIndex(nTh);
+                                    nTaskThreads[threadIndex][0]++;
+                                }
                             }
-                        }
-                    } else {
-                        // use same random indexes:
-                        cVisRndIdx[k] = cVisRndIdx[k - 1];
+                        });
                     }
                 }
 
@@ -865,30 +623,292 @@ public abstract class AbstractOIFitsProducer {
                 }
             }
 
-            computed = true;
-            this.visComplex = cVis;
-            this.visAmpError = cVisAmpError;
-            this.visPhiError = cVisPhiError;
+            final int nJobs = jobList.size();
 
-            this.nbPhotPhoto = cNbPhotPhoto;
-            this.errPhotPhoto = cErrPhotPhoto;
-            this.sqCorrFlux = cSqCorrFlux;
-            this.errSqCorrFlux = cErrSqCorrFlux;
+            // note: have jobs a multiple of nTh to maximize parallelism !
+            logger.debug("computeModelVisibilities: {} jobs", nJobs);
 
-            this.visAmpSNRFlag = cVisAmpSNRFlag;
-            this.visPhiSNRFlag = cVisPhiSNRFlag;
+            final Runnable[] jobs = jobList.toArray(new Runnable[nJobs]);
 
-            this.visRndDist = cVisRndDist;
-            this.visRndIdx = cVisRndIdx;
+            // execute jobs in parallel or using current thread if only one job (throws InterruptedJobException if interrupted):
+            JOB_EXECUTOR.forkAndJoin("OIFitsCreatorService.computeModelVisibilities", jobs);
+
+            if (SHOW_COMPUTE_STATS) {
+                for (int t = 0; t < nTh; t++) {
+                    logger.info("Thread[{}] done: {} processed jobs", t, nTaskThreads[t][0]);
+                }
+            }
+        }
+
+        if (currentThread.isInterrupted()) {
+            // fast interrupt :
+            return false;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("mFluxes:  {}", Arrays.toString(mFluxes));
+        }
+
+        // Sampling integration on spectral channels:
+        // use integration of several samples
+        final ImmutableComplex[][] cVis = new ImmutableComplex[nRows][nChannels];
+
+        // integrate modelFlux [nChannels]:
+        final double[] modelFluxes;
+
+        // Super sampling ?
+        if (sampleWaveLengths == this.waveLengths) {
+            // Simple copy array:
+            modelFluxes = mFluxes;
+            // Iterate on rows :
+            for (int k = 0; k < nRows; k++) {
+                // Simply convert array:
+                cVis[k] = convertArray(cmVis[k], nChannels);
+            }
+        } else {
+            modelFluxes = new double[nChannels];
+
+            // Prepare mapping of sampled channels (inclusive indices):
+            final int[] fromWL = new int[nChannels];
+            final int[] endWL = new int[nChannels];
+
+            for (int l = 0; l < nChannels; l++) {
+                // Note: sometimes sub channels may overlap channel limits
+                final double halfBand = 0.5d * this.waveBands[l];
+
+                fromWL[l] = -1;
+                endWL[l] = -1;
+
+                for (int i = 0; i < nWLen; i++) {
+                    // note: wavelength array can be unordered:
+                    if (Math.abs(this.waveLengths[l] - sampleWaveLengths[i]) <= halfBand) {
+                        // within range:
+                        // identify part [fromWL - endWL]
+                        if (fromWL[l] == -1) {
+                            fromWL[l] = i;
+                            endWL[l] = i;
+                        } else {
+                            endWL[l] = i;
+                        }
+                    } else {
+                        // channel range already identified:
+                        if (endWL[l] != -1) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // normalize fluxes in channels:
+            final double[] normFactorWL = new double[nChannels];
+
+            for (int i, l = 0; l < nChannels; l++) {
+                int nFlux = 0;
+                double totalFlux = 0.0;
+
+                for (i = fromWL[l]; i <= endWL[l]; i++) {
+                    nFlux++;
+                    totalFlux += mFluxes[i];
+                }
+
+                // update flux vs channels:
+                modelFluxes[l] = totalFlux / nFlux;
+
+                // normalize:
+                normFactorWL[l] = 1.0 / totalFlux;
+            }
+
+            final MutableComplex integrator = new MutableComplex();
+
+            // Iterate on rows :
+            for (int i, k = 0, l; k < nRows; k++) {
+                final MutableComplex[] cmVisRow = cmVis[k];
+                final ImmutableComplex[] cVisRow = cVis[k];
+
+                // Iterate on spectral channels:
+                for (l = 0; l < nChannels; l++) {
+                    // reset
+                    integrator.updateComplex(0d, 0d);
+
+                    for (i = fromWL[l]; i <= endWL[l]; i++) {
+                        final MutableComplex vis = cmVisRow[i];
+                        // scale by flux in channel:
+                        integrator.add(mFluxes[i] * vis.getReal(), mFluxes[i] * vis.getImaginary());
+                    }
+                    // normalize by total flux:
+                    integrator.multiply(normFactorWL[l]);
+
+                    cVisRow[l] = new ImmutableComplex(integrator); // immutable for safety
+                }
+            }
+        }
+
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+            return false;
+        }
+
+        // Compute complex visibility errors:
+        final StatUtils stat;
+
+        if (ns == null) {
+            stat = null;
+        } else {
+            // prepare final parameters:
+            ns.prepareParameters(insBands, modelFluxes, bandFluxes);
+
+            stat = StatUtils.getInstance();
+            // prepare enough distributions for all baselines:
+            stat.prepare(nBl);
+        }
+
+        final double snrThreshold = options.snrThreshold;
+
+        final double[][] cVisAmpError = new double[nRows][nChannels];
+        final double[][] cVisPhiError = new double[nRows][nChannels];
+
+        final double[][] cNbPhotPhoto = new double[nRows][nChannels];
+        final double[][] cErrPhotPhoto = new double[nRows][nChannels];
+        final double[][] cSqCorrFlux = new double[nRows][nChannels];
+        final double[][] cErrSqCorrFlux = new double[nRows][nChannels];
+
+        final boolean[][] cVisAmpSNRFlag = new boolean[nRows][nChannels];
+        final boolean[][] cVisPhiSNRFlag = new boolean[nRows][nChannels];
+
+        final ComplexDistribution[] cVisRndDist = new ComplexDistribution[nRows];
+
+        // use the same sample index per ha point (as distributions are different instances)
+        // to ensure T3 sample is correlated with C12, C23, C13 samples:
+        final int[][] cVisRndIdx = new int[nRows][];
+
+        int pt, prevPt = -1;
+
+        // Iterate on rows :
+        for (int k = 0, l; k < nRows; k++) {
+            final double[] cVisAmpErrorRow = cVisAmpError[k];
+            final double[] cVisPhiErrorRow = cVisPhiError[k];
+
+            final double[] nbPhotPhotoRow = cNbPhotPhoto[k];
+            final double[] errPhotPhotoRow = cErrPhotPhoto[k];
+            final double[] sqCorrFluxRow = cSqCorrFlux[k];
+            final double[] errSqCorrFluxRow = cErrSqCorrFlux[k];
+
+            final boolean[] cVisAmpSNRFlagRow = cVisAmpSNRFlag[k];
+            final boolean[] cVisPhiSNRFlagRow = cVisPhiSNRFlag[k];
+
+            if ((ns == null) || (stat == null)) {
+                Arrays.fill(cVisAmpErrorRow, Double.NaN);
+                Arrays.fill(cVisPhiErrorRow, Double.NaN);
+
+                Arrays.fill(nbPhotPhotoRow, Double.NaN);
+                Arrays.fill(errPhotPhotoRow, Double.NaN);
+                Arrays.fill(sqCorrFluxRow, Double.NaN);
+                Arrays.fill(errSqCorrFluxRow, Double.NaN);
+
+                Arrays.fill(cVisAmpSNRFlagRow, true);
+                Arrays.fill(cVisPhiSNRFlagRow, true);
+            } else {
+                final ImmutableComplex[] cVisRow = cVis[k];
+                // select a different complex distribution per row:
+                cVisRndDist[k] = stat.get();
+                pt = ptIdx[k];
+
+                double visAmp;
+                // Iterate on spectral channels:
+                for (l = 0; l < nChannels; l++) {
+                    visAmp = cVisRow[l].abs();
+
+                    // complex visibility error for phases (no photometry):
+                    // note: call this method first as it modifies internally other vectors:
+                    cVisPhiErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, false);
+
+                    // complex visibility error for amplitudes (with photometry):
+                    cVisAmpErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, true);
+
+                    // extra Vis2 columns (photo + square correlated fluxes):
+                    nbPhotPhotoRow[l] = ns.getNbPhotPhoto(pt, l);
+                    errPhotPhotoRow[l] = ns.getErrorPhotPhoto(pt, l);
+                    sqCorrFluxRow[l] = ns.getSqCorrFlux(pt, l);
+                    errSqCorrFluxRow[l] = ns.getErrorSqCorrFlux(pt, l);
+
+                    // check SNR(V) for amplitudes:
+                    final double snrVisAmp = visAmp / cVisAmpErrorRow[l];
+
+                    if (snrVisAmp < snrThreshold) {
+                        cVisAmpSNRFlagRow[l] = true;
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Low SNR[{}] (amp): {} < {}", this.waveLengths[l], snrVisAmp, snrThreshold);
+                        }
+                    }
+
+                    // check SNR(V) for phases:
+                    final double snrVisPhi = visAmp / cVisPhiErrorRow[l];
+
+                    if (snrVisPhi < snrThreshold) {
+                        cVisPhiSNRFlagRow[l] = true;
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Low SNR[{}] (phi): {} < {}", this.waveLengths[l], snrVisPhi, snrThreshold);
+                        }
+                    }
+
+                    // TODO: make SNR(V2) stats per channel to add warning if no channel is below 3 !
+                }
+
+                if (DEBUG) {
+                    final int iRef = ns.getIndexRefChannel();
+                    visAmp = cVisRow[iRef].abs();
+
+                    logger.info("cVisAmpErrorRow(mid) = {} % (SNR = {}) (SNR V2 = {})",
+                            100.0 * (cVisAmpErrorRow[iRef] / visAmp), (visAmp / cVisAmpErrorRow[iRef]), (visAmp / cVisAmpErrorRow[iRef]) / 2.0);
+                    logger.info("cVisPhiErrorRow(mid) = {} % (SNR = {})",
+                            100.0 * (cVisPhiErrorRow[iRef] / visAmp), (visAmp / cVisPhiErrorRow[iRef]));
+                }
+
+                if (pt != prevPt) {
+                    prevPt = pt;
+
+                    if (this.doNoise) {
+                        final int[] cVisRndIdxRow = cVisRndIdx[k] = new int[nChannels];
+                        for (l = 0; l < nChannels; l++) {
+                            // Choose the jth sample (uniform probability):
+                            cVisRndIdxRow[l] = getNextRandomSampleIndex();
+                        }
+                    }
+                } else {
+                    // use same random indexes:
+                    cVisRndIdx[k] = cVisRndIdx[k - 1];
+                }
+            }
 
             // fast interrupt :
             if (currentThread.isInterrupted()) {
                 return false;
             }
-
-            logger.info("computeModelVisibilities: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
-        return computed;
+
+        this.visComplex = cVis;
+        this.visAmpError = cVisAmpError;
+        this.visPhiError = cVisPhiError;
+
+        this.nbPhotPhoto = cNbPhotPhoto;
+        this.errPhotPhoto = cErrPhotPhoto;
+        this.sqCorrFlux = cSqCorrFlux;
+        this.errSqCorrFlux = cErrSqCorrFlux;
+
+        this.visAmpSNRFlag = cVisAmpSNRFlag;
+        this.visPhiSNRFlag = cVisPhiSNRFlag;
+
+        this.visRndDist = cVisRndDist;
+        this.visRndIdx = cVisRndIdx;
+
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+            return false;
+        }
+
+        logger.info("computeModelVisibilities: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+
+        return true;
     }
 
     protected abstract UVFreqTable computeSpatialFreqTable(final double[] sampleWaveLengths);
@@ -897,14 +917,15 @@ public abstract class AbstractOIFitsProducer {
         return this.random.nextInt(N_SAMPLES);
     }
 
+    /**
+     * @param other another OIFits producer
+     * @return true if the OIFITS producer options are the same; false otherwise
+     */
     public boolean isSameOptions(final AbstractOIFitsProducer other) {
         if (!options.equals(other.getOptions())) {
             return false;
         }
-        if (doNoise != other.doNoise) {
-            return false;
-        }
-        return true;
+        return doNoise == other.doNoise;
     }
 
     /**
@@ -977,9 +998,10 @@ public abstract class AbstractOIFitsProducer {
      * Map user model images on the instrumental spectral channels
      * @param modelDataList user model images
      * @param sampleWaveLengths sampled instrument spectral channels
-     * @param weightsL interpolation weights on the left side
-     * @param weightsR interpolation weights on the right side
-     * @param mFluxes flux array
+     * @param weightsL computed interpolation weights on the left side
+     * @param weightsR computed interpolation weights on the right side
+     * @param mFluxes computed flux array from user model (cube)
+     * @param bandFluxes computed flux over used bands (cube)
      * @param useInterpolation flag to enable image lerp
      * @return UserModelComputePart list
      */
@@ -988,6 +1010,7 @@ public abstract class AbstractOIFitsProducer {
                                                              final double[] weightsL,
                                                              final double[] weightsR,
                                                              final double[] mFluxes,
+                                                             final Map<Band, Double> bandFluxes,
                                                              final boolean useInterpolation) {
 
         final int nImages = modelDataList.size();
@@ -1020,14 +1043,33 @@ public abstract class AbstractOIFitsProducer {
 
             // update flux vs wavelengths:
             Arrays.fill(mFluxes, 1.0); // already normalized
+
+            // Ignore flux correction:
+            bandFluxes.clear();
         } else {
             // Process wavelength ranges:
-            final int last = nImages - 1;
-
-            // Ensure model list is sorted:
+            // Ensure model list is sorted by ascending wavelength:
             // note: following indices refers to this sorted list, not modelDataList:
             final ArrayList<UserModelData> sortedModelData = new ArrayList<>(modelDataList);
             Collections.sort(sortedModelData, UserModelDataComparator.getInstance());
+
+            final UserModelInterpolator modelLerp = new UserModelInterpolator(sortedModelData);
+
+            // 0 - compute total flux per used band:
+            if (logger.isDebugEnabled()) {
+                logger.debug("used insBands: {}", bandFluxes.keySet());
+            }
+
+            for (Map.Entry<Band, Double> e : bandFluxes.entrySet()) {
+                final Band b = e.getKey();
+
+                final Range wavelengthRange = new Range(
+                        b.getLambdaLower() * AsproConstants.MICRO_METER,
+                        b.getLambdaUpper() * AsproConstants.MICRO_METER);
+
+                e.setValue(computeMeanFlux(wavelengthRange, modelLerp));
+            }
+            logger.debug("bandFluxes: {}", bandFluxes);
 
             // 1 - identify model left / right => weights on left / right sides:
             final int[] idxL = new int[nWLen];
@@ -1043,11 +1085,11 @@ public abstract class AbstractOIFitsProducer {
             for (int i = 0; i < nWLen; i++) {
                 final double wavelength = sampleWaveLengths[i];
 
-                final int idx = findUserModel(wavelength, sortedModelData);
-
-                final UserModelData modelData = sortedModelData.get(idx);
-
                 if (!useInterpolation) {
+                    final int idx = findUserModel(wavelength, sortedModelData);
+
+                    final UserModelData modelData = sortedModelData.get(idx);
+
                     // only use left side:
                     idxL[i] = idx;
                     weightsL[i] = 1.0;
@@ -1055,106 +1097,26 @@ public abstract class AbstractOIFitsProducer {
                     // update flux vs wavelengths:
                     mFluxes[i] = modelData.getTotalFlux();
                 } else {
-                    final double modelWavelength = modelData.getWaveLength();
+                    // initialize interpolator:
+                    modelLerp.interpolate(wavelength);
 
-                    // delta > 0 if model on left side (lower); < 0 on right side (higher)
-                    final double delta = wavelength - modelWavelength;
+                    idxL[i] = modelLerp.left;
+                    idxR[i] = modelLerp.right;
+
+                    // update flux vs wavelengths:
+                    mFluxes[i] = modelLerp.totalFlux;
+
+                    // weights on visibility ie normalization by F(k): 
+                    // w(A) = alpha * F(A) / F(k) and w(B) = (1 - alpha) * F(B) / F(k)
+                    // implicit total flux > 0:
+                    weightsL[i] = modelLerp.alpha * modelLerp.totalFluxLeft / modelLerp.totalFlux;
+                    weightsR[i] = modelLerp.oneMinusAlpha * modelLerp.totalFluxRight / modelLerp.totalFlux;
 
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Model[{} = {}] for WL[{} = {} delta: {}", idx, modelWavelength, i, wavelength, delta);
-                    }
-
-                    int left = -1;
-                    int right = -1;
-
-                    if (delta > 0) {
-                        left = idx;
-                        if (left < last) {
-                            right = idx + 1;
-                        }
-                    } else {
-                        right = idx;
-                        if (right > 0) {
-                            left = idx - 1;
-                        }
-                    }
-
-                    final double modelWavelengthLeft;
-                    final double modelWavelengthRight;
-                    final double modelTotalFluxLeft;
-                    final double modelTotalFluxRight;
-
-                    if (left != -1) {
-                        final UserModelData modelDataLeft = sortedModelData.get(left);
-                        modelWavelengthLeft = modelDataLeft.getWaveLength();
-                        modelTotalFluxLeft = modelDataLeft.getTotalFlux();
-                        final double deltaLeft = wavelength - modelWavelengthLeft;
-
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Left  Model[{} = {}] delta: {}", left, modelWavelengthLeft, deltaLeft);
-                        }
-                    } else {
-                        modelWavelengthLeft = Double.NaN;
-                        modelTotalFluxLeft = Double.NaN;
-                        logger.debug("Left  Model: undefined");
-                    }
-                    if (right != -1) {
-                        final UserModelData modelDataRight = sortedModelData.get(right);
-                        modelWavelengthRight = modelDataRight.getWaveLength();
-                        modelTotalFluxRight = modelDataRight.getTotalFlux();
-                        final double deltaRight = wavelength - modelWavelengthRight;
-
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Right Model[{} = {}] delta: {}", right, modelWavelengthRight, deltaRight);
-                        }
-                    } else {
-                        modelWavelengthRight = Double.NaN;
-                        modelTotalFluxRight = Double.NaN;
-                        logger.debug("Right Model: undefined");
-                    }
-
-                    idxL[i] = left;
-                    idxR[i] = right;
-
-                    if ((left != -1) && (right != -1)) {
-                        // compute linear weights:
-
-                        // alpha = (lambda(B) - lambda(k)) / (lambda(B) - lambda(A))
-                        final double alpha = (modelWavelengthRight - wavelength) / (modelWavelengthRight - modelWavelengthLeft);
-                        final double oneMinusAlpha = 1.0 - alpha;
-
-                        // consider flux ratios are linear ie modelTotalFlux given in linear units (scaling do not matter):
-                        // F(k) = alpha * F(A) + (1 - alpha) * F(B)
-                        final double totalFlux = alpha * modelTotalFluxLeft + oneMinusAlpha * modelTotalFluxRight;
-
-                        // update flux vs wavelengths:
-                        mFluxes[i] = totalFlux;
-
-                        // weights on visibility ie normalization by F(k): 
-                        // w(A) = alpha * F(A) / F(k) and w(B) = (1 - alpha) * F(B) / F(k)
-                        // implicit total flux > 0:
-                        weightsL[i] = alpha * modelTotalFluxLeft / totalFlux;
-                        weightsR[i] = oneMinusAlpha * modelTotalFluxRight / totalFlux;
-
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("TotalFlux:  left = {} right = {} interp = {}", modelTotalFluxLeft, modelTotalFluxRight, totalFlux);
-                            logger.debug("alpha     = {}", alpha);
-                            logger.debug("weights: left = {} right = {}", weightsL[i], weightsR[i]);
-                        }
-                    } else {
-                        // missing left or right image:
-                        if (left != -1) {
-                            weightsL[i] = 1.0;
-
-                            // update flux vs wavelengths:
-                            mFluxes[i] = modelTotalFluxLeft;
-                        }
-                        if (right != -1) {
-                            weightsR[i] = 1.0;
-
-                            // update flux vs wavelengths:
-                            mFluxes[i] = modelTotalFluxRight;
-                        }
+                        logger.debug("TotalFlux:  left = {} right = {} interp = {}",
+                                modelLerp.totalFluxLeft, modelLerp.totalFluxRight, modelLerp.totalFlux);
+                        logger.debug("alpha     = {}", modelLerp.alpha);
+                        logger.debug("weights: left = {} right = {}", weightsL[i], weightsR[i]);
                     }
                 }
             }
@@ -1214,6 +1176,93 @@ public abstract class AbstractOIFitsProducer {
             }
         }
         return modelParts;
+    }
+
+    private static double computeMeanFlux(final Range wavelengthRange,
+                                          final UserModelInterpolator modelLerp) {
+
+        final double wlA = wavelengthRange.getMin();
+        final double wlB = wavelengthRange.getMax();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("computeMeanFlux[{} - {}]", wlA, wlB);
+        }
+
+        final Map<Double, Double> samples = new TreeMap<>();
+
+        // left side: A
+        modelLerp.interpolate(wlA);
+
+        // Insert left interpolated point:
+        samples.put(wlA, modelLerp.totalFlux);
+
+        final int idxA = modelLerp.right;
+
+        if ((idxA != -1) && (wavelengthRange.contains(modelLerp.wavelengthRight))) {
+            samples.put(modelLerp.wavelengthRight, modelLerp.totalFluxRight);
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Model[{} = {}] for WL[{}]: {}", idxA, modelLerp.wavelengthRight, wlA, modelLerp.totalFluxRight);
+        }
+
+        // right side: B
+        modelLerp.interpolate(wlB);
+
+        // Insert right interpolated point:
+        samples.put(wlB, modelLerp.totalFlux);
+
+        final int idxB = modelLerp.left;
+
+        if ((idxB != -1) && (wavelengthRange.contains(modelLerp.wavelengthLeft))) {
+            samples.put(modelLerp.wavelengthLeft, modelLerp.totalFluxLeft);
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Model[{} = {}] for WL[{}]: {}", idxB, modelLerp.wavelengthLeft, wlB, modelLerp.totalFluxLeft);
+        }
+
+        // Middle part:
+        for (int idx = idxA + 1; idx < idxB; idx++) {
+            final UserModelData modelData = modelLerp.sortedModelData.get(idx);
+            final double wavelength = modelData.getWaveLength();
+
+            if (wavelengthRange.contains(wavelength)) {
+                samples.put(wavelength, modelData.getTotalFlux());
+            }
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("samples: {}", samples);
+        }
+
+        // Trapezoid integration:
+        final int len = samples.size();
+
+        final double[] x = new double[len];
+        final double[] f = new double[len];
+
+        int n = 0;
+        for (Map.Entry<Double, Double> e : samples.entrySet()) {
+            x[n] = e.getKey();
+            f[n] = e.getValue();
+            n++;
+        }
+
+        // Trapezoid integration:
+        double totalFlux = 0.0;
+
+        for (int i = 0, end = len - 1; i < end; i++) {
+            totalFlux += (x[i + 1] - x[i]) * (f[i + 1] + f[i]);
+        }
+        totalFlux /= 2.0; // trapezoid
+
+        final double meanFlux = totalFlux / (wlB - wlA);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("totalFlux: {} - meanFlux: {}", totalFlux, meanFlux);
+        }
+        return meanFlux;
     }
 
     /**
@@ -1699,6 +1748,125 @@ public abstract class AbstractOIFitsProducer {
         public String toString() {
             return "UserModelComputePart[" + fromWL + " - " + endWL + "]"
                     + "[" + (left ? "LEFT" : "RIGHT") + "]: " + modelData;
+        }
+    }
+
+    protected final static class UserModelInterpolator {
+
+        // inputs
+        final ArrayList<UserModelData> sortedModelData;
+        // state:
+        int left = -1;
+        int right = -1;
+        double wavelengthLeft;
+        double wavelengthRight;
+        double totalFluxLeft;
+        double totalFluxRight;
+        // linear interpolation weights:
+        double alpha;
+        double oneMinusAlpha;
+        // interpolated flux:
+        double totalFlux;
+
+        protected UserModelInterpolator(final ArrayList<UserModelData> sortedModelData) {
+            this.sortedModelData = sortedModelData;
+            reset();
+        }
+
+        private void reset() {
+            left = -1;
+            right = -1;
+            wavelengthLeft = Double.NaN;
+            wavelengthRight = Double.NaN;
+            totalFluxLeft = 0.0;
+            totalFluxRight = 0.0;
+            alpha = 0.0;
+            oneMinusAlpha = 0.0;
+            totalFlux = 0.0;
+        }
+
+        public void interpolate(final double wavelength) {
+            reset();
+
+            final int idx = findUserModel(wavelength, sortedModelData);
+
+            final UserModelData modelData = sortedModelData.get(idx);
+
+            final double modelWavelength = modelData.getWaveLength();
+
+            // delta > 0 if model on left side (lower); < 0 on right side (higher)
+            final double delta = wavelength - modelWavelength;
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Model[{} = {}] for WL[{}] delta: {}", idx, modelWavelength, wavelength, delta);
+            }
+
+            left = -1;
+            right = -1;
+
+            if (delta > 0) {
+                left = idx;
+                if (left < sortedModelData.size() - 1) {
+                    right = idx + 1;
+                }
+            } else {
+                right = idx;
+                if (right > 0) {
+                    left = idx - 1;
+                }
+            }
+
+            if (left != -1) {
+                final UserModelData modelDataLeft = sortedModelData.get(left);
+                wavelengthLeft = modelDataLeft.getWaveLength();
+                totalFluxLeft = modelDataLeft.getTotalFlux();
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Left  Model[{} = {}]", left, wavelengthLeft);
+                }
+            } else {
+                wavelengthLeft = Double.NaN;
+                totalFluxLeft = 0.0;
+                logger.debug("Left  Model: undefined");
+            }
+            if (right != -1) {
+                final UserModelData modelDataRight = sortedModelData.get(right);
+                wavelengthRight = modelDataRight.getWaveLength();
+                totalFluxRight = modelDataRight.getTotalFlux();
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Right Model[{} = {}]", right, wavelengthRight);
+                }
+            } else {
+                wavelengthRight = Double.NaN;
+                totalFluxRight = 0.0;
+                logger.debug("Right Model: undefined");
+            }
+
+            if ((left != -1) && (right != -1)) {
+                // alpha = (lambda(B) - lambda(k)) / (lambda(B) - lambda(A))
+                alpha = (wavelengthRight - wavelength) / (wavelengthRight - wavelengthLeft);
+                oneMinusAlpha = 1.0 - alpha;
+            } else {
+                // missing left or right image:
+                if (left != -1) {
+                    alpha = 1.0;
+                    oneMinusAlpha = 0.0;
+                }
+                if (right != -1) {
+                    alpha = 0.0;
+                    oneMinusAlpha = 1.0;
+                }
+            }
+
+            // consider flux ratios are linear ie modelTotalFlux given in linear units (scaling do not matter):
+            // F(k) = alpha * F(A) + (1 - alpha) * F(B)
+            totalFlux = alpha * totalFluxLeft + oneMinusAlpha * totalFluxRight;
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("TotalFlux:  left = {} right = {} interp = {}", totalFluxLeft, totalFluxRight, totalFlux);
+                logger.debug("alpha     = {}", alpha);
+            }
         }
     }
 }

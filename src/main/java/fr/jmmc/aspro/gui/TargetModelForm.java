@@ -12,6 +12,7 @@ import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
 import fr.jmmc.aspro.gui.util.UserModelAnimator.UserModelAnimatorListener;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
@@ -20,6 +21,7 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
+import fr.jmmc.aspro.service.ApodizationParameters;
 import fr.jmmc.aspro.service.UserModelData;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.ALX;
@@ -1724,11 +1726,15 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     logger.debug("instrument configuration: {}; baseline max = {}", instrumentChoice.getStations(), maxBaseLines);
                 }
 
+                final FocalInstrument instrument = insConf.getFocalInstrument();
+
                 // use lower wavelength of the current instrument mode:
                 final FocalInstrumentMode instrumentMode = instrumentChoice.getFocalInstrumentMode();
-                // In case of invalid instrument mode, use lower wavelength of all instrument modes:
+                // In case of invalid instrument mode, use lower/upper wavelength of all instrument modes:
                 final double lambdaMin = AsproConstants.MICRO_METER * ((instrumentMode != null) ? instrumentMode.getWaveLengthMin()
-                        : insConf.getFocalInstrument().getWaveLengthMin());
+                        : instrument.getWaveLengthMin());
+                final double lambdaMax = AsproConstants.MICRO_METER * ((instrumentMode != null) ? instrumentMode.getWaveLengthMax()
+                        : instrument.getWaveLengthMax());
 
                 // Adjust the user uv Max = max base line / minimum wave length
                 // note : use the minimum wave length of the instrument to
@@ -1739,10 +1745,14 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 final double maxIncrement = UserModelService.getMaxIncrement(uvMaxFreq);
                 logger.debug("maxIncrement: {}", maxIncrement);
 
-                final String insName = insConf.getFocalInstrument().getName();
+                final String insName = instrument.getName();
                 final String insModeName = instrumentChoice.getInstrumentMode();
 
                 double diameter = Double.NaN;
+                double airyRadiusLambda = Double.NaN;
+                double airyRadiusMax = Double.NaN;
+                double airyRadiusLambdaMax = Double.NaN;
+                boolean airyRadiusVar = false;
 
                 // FOV: get Telescope diameter and instrument wavelength:
                 final List<Station> stations = instrumentChoice.getStationList();
@@ -1750,18 +1760,34 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                     // All telescopes in a configuration have the same diameter:
                     diameter = stations.get(0).getTelescope().getDiameter();
                     // telescope FOV = airy disk FWHM:
-                    airyRadius = ALX.convertRadToMas(UserModelService.getAiryRadius(diameter, lambdaMin)); // mas
+                    final ApodizationParameters params = new ApodizationParameters(diameter, lambdaMin, lambdaMax, instrument);
+
+                    params.lambda = lambdaMin;
+                    airyRadius = ALX.convertRadToMas(UserModelService.getAiryRadius(params)); // mas
+                    airyRadiusLambda = params.lambda;
+
+                    params.lambda = lambdaMax;
+                    airyRadiusMax = ALX.convertRadToMas(UserModelService.getAiryRadius(params)); // mas
+                    airyRadiusLambdaMax = params.lambda;
+
+                    airyRadiusVar = (airyRadiusMax != airyRadius);
                 }
 
-                jLabelModelObsInfo.setText("Telescope FOV: " + NumberUtils.trimTo1Digits(airyRadius) + " mas");
+                jLabelModelObsInfo.setText("Telescope FOV: " + NumberUtils.trimTo1Digits(airyRadius)
+                        + (airyRadiusVar ? (" - " + NumberUtils.trimTo1Digits(airyRadiusMax)) : "") + " mas");
 
                 jLabelUserModelObsInfo.setText("<html>Max pixel size: " + NumberUtils.trimTo3Digits(ALX.convertRadToMas(maxIncrement))
-                        + " mas<br>Telescope FOV: " + NumberUtils.trimTo1Digits(airyRadius) + " mas</html>");
+                        + " mas<br>Telescope FOV: " + NumberUtils.trimTo1Digits(airyRadius)
+                        + (airyRadiusVar ? (" - " + NumberUtils.trimTo1Digits(airyRadiusMax)) : "") + " mas</html>");
 
                 final String tooltip = "<html><b>Configuration:</b> " + instrumentChoice.getStations()
                         + "<br><b>Instrument:</b> " + insName + "<br><b>Ins. mode:</b> " + insModeName
                         + "<br><b>Tel. diameter:</b> " + NumberUtils.trimTo3Digits(diameter) + " (m)"
-                        + "<br><b>Min. Wavelength:</b> " + NumberUtils.trimTo3Digits(lambdaMin / AsproConstants.MICRO_METER) + " (µm)</html>";
+                        + (airyRadiusVar
+                                ? "<br><b>Min. Wavelength:</b> " + NumberUtils.trimTo3Digits(airyRadiusLambda / AsproConstants.MICRO_METER) + " (µm)"
+                                + "<br><b>Max. Wavelength:</b> " + NumberUtils.trimTo3Digits(airyRadiusLambdaMax / AsproConstants.MICRO_METER) + " (µm)"
+                                : "<br><b>Wavelength:</b> " + NumberUtils.trimTo3Digits(airyRadiusLambda / AsproConstants.MICRO_METER) + " (µm)")
+                        + "</html>";
 
                 jLabelModelObsInfo.setToolTipText(tooltip);
                 jLabelUserModelObsInfo.setToolTipText(tooltip);

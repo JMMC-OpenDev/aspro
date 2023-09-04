@@ -438,6 +438,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link SpatialFilter }
+     * 
+     */
+    public SpatialFilter createSpatialFilter() {
+        return new SpatialFilter();
+    }
+
+    /**
      * Create an instance of {@link FocalInstrumentMode }
      * 
      */
@@ -499,6 +507,14 @@ public class ObjectFactory {
      */
     public AzEl createAzEl() {
         return new AzEl();
+    }
+
+    /**
+     * Create an instance of {@link AtmQualValue }
+     * 
+     */
+    public AtmQualValue createAtmQualValue() {
+        return new AtmQualValue();
     }
 
 }

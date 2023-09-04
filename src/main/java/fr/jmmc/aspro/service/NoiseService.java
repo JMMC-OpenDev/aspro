@@ -32,6 +32,7 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.model.util.TargetUtils;
+import static fr.jmmc.aspro.service.AbstractOIFitsProducer.convertWL;
 import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.VisNoiseService;
@@ -43,7 +44,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +76,9 @@ public final class NoiseService implements VisNoiseService {
 
     /** dump strehl values */
     private final static boolean DO_DUMP_STREHL = false;
+
+    /** test fluxes without strehl nor atmospheric transmission */
+    private final static boolean DO_TEST_NO_ATM = false;
 
     /** maximum error on Vis to avoid excessively large errors */
     private final static double MAX_ERR_V = 10.0;
@@ -129,6 +136,8 @@ public final class NoiseService implements VisNoiseService {
     /* varying values (spectrally dependent) */
     /** (W) instrument band */
     private Band[] insBand;
+    /** distinct instrument bands */
+    private Set<Band> usedInsBands = null;
 
     /** fraction of flux going into the interferometric channel */
     private double fracFluxInInterferometry = Double.NaN;
@@ -244,6 +253,12 @@ public final class NoiseService implements VisNoiseService {
     /** (W) number of thermal photons per telescope in each photometric channel */
     private double[] nbPhotThermPhoto = null;
 
+    static {
+        if (DO_TEST_NO_ATM) {
+            logger.warn("NoiseService: TEST_NO_ATM enabled !");
+        }
+    }
+
     /**
      * Protected constructor
      * @param observation observation settings used (read-only copy of the modifiable observation)
@@ -253,6 +268,7 @@ public final class NoiseService implements VisNoiseService {
      * @param warningContainer container for warning messages
      * @param waveLengths concrete wavelength values (spectral channel central value) in meters
      * @param waveBands concrete spectral channel bandwidths in meters
+     * @param useWavelengthRangeRestriction use wavelength restrictions
      */
     protected NoiseService(final ObservationSetting observation,
                            final Target target,
@@ -260,7 +276,8 @@ public final class NoiseService implements VisNoiseService {
                            final boolean useCalibrationBias,
                            final WarningContainer warningContainer,
                            final double[] waveLengths,
-                           final double[] waveBands) {
+                           final double[] waveBands,
+                           final boolean useWavelengthRangeRestriction) {
 
         this.useCalibrationBias = USE_BIAS && useCalibrationBias;
         this.warningContainer = warningContainer;
@@ -300,11 +317,12 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("waveLengths                   : {}", Arrays.toString(waveLengths));
             logger.debug("waveBands[iRefChannel]        : {}", waveBands[iRefChannel]);
             logger.debug("waveBands                     : {}", Arrays.toString(waveBands));
+            logger.debug("useWavelengthRangeRestriction : {}", useWavelengthRangeRestriction);
         }
 
         // extract parameters in observation and configuration :
         prepareInterferometer(observation, target);
-        prepareInstrument(observation);
+        prepareInstrument(observation, useWavelengthRangeRestriction);
         prepareFringeTracker(observation, target);
         prepareTarget(observation, target);
         initParameters();
@@ -379,8 +397,9 @@ public final class NoiseService implements VisNoiseService {
     /**
      * Prepare instrument and mode parameters
      * @param observation observation settings
+     * @param useWavelengthRangeRestriction use wavelength restrictions
      */
-    private void prepareInstrument(final ObservationSetting observation) {
+    private void prepareInstrument(final ObservationSetting observation, final boolean useWavelengthRangeRestriction) {
 
         if (observation.getInstrumentConfiguration().getAcquisitionTime() != null) {
             this.totalObsTime = observation.getInstrumentConfiguration().getAcquisitionTime().doubleValue();
@@ -606,7 +625,7 @@ public final class NoiseService implements VisNoiseService {
         final double lambdaMax = this.waveLengths[nSpectralChannels - 1];
 
         // TODO: fix message if FT enabled (no restriction ...)
-        if (insMode.isWavelengthRangeRestriction()) {
+        if (useWavelengthRangeRestriction) {
             addWarning("Detector can not be read completely within 1 DIT: the wavelength range is restricted to "
                     + df.format(insMode.getWaveLengthBandRef()) + " " + SpecialChars.UNIT_MICRO_METER);
         }
@@ -727,6 +746,9 @@ public final class NoiseService implements VisNoiseService {
      * @param target target to use
      */
     private void prepareFringeTracker(final ObservationSetting observation, final Target target) {
+        // AtmosphereQuality is known:
+        final AtmosphereQuality atmQual = observation.getWhen().getAtmosphereQuality();
+
         final TargetConfiguration targetConf = target.getConfiguration();
 
         if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
@@ -741,7 +763,10 @@ public final class NoiseService implements VisNoiseService {
                 // TODO: handle FT modes properly: GroupTrack is hard coded !
                 this.fringeTrackingMode = (ftMode != null && !ftMode.startsWith("GroupTrack"));
                 this.fringeTrackerInstrumentalVisibility = ft.getInstrumentVisibility();
-                this.fringeTrackerLimit = ft.getMagLimit();
+
+                // Get the magnitude limit according to the atmosphere quality:
+                this.fringeTrackerLimit = ft.getMagLimit(atmQual);
+
                 this.fringeTrackerMaxDit = ft.getMaxIntegration();
                 this.fringeTrackerMaxFrameTime = this.fringeTrackerMaxDit;
                 this.ftBand = ft.getBand();
@@ -757,6 +782,7 @@ public final class NoiseService implements VisNoiseService {
         }
 
         if (logger.isDebugEnabled()) {
+            logger.debug("atmQual                       : {}", atmQual);
             logger.debug("fringeTrackerPresent          : {}", fringeTrackerPresent);
         }
         if (fringeTrackerPresent) {
@@ -798,11 +824,16 @@ public final class NoiseService implements VisNoiseService {
         this.insBand = new Band[nSpectralChannels];
         this.objectMag = new double[nSpectralChannels];
 
+        // Distinct used bands specific to the instrument:
+        this.usedInsBands = new LinkedHashSet<>(4);
+
         // For science target only:
-        final HashSet<SpectralBand> missingMags = new HashSet<SpectralBand>();
+        final HashSet<SpectralBand> missingMags = new HashSet<SpectralBand>(4);
 
         if (bandMin == bandMax) {
             // same band
+            usedInsBands.add(bandMin);
+
             Arrays.fill(insBand, bandMin);
 
             /** instrument band corresponding to target mags */
@@ -829,6 +860,8 @@ public final class NoiseService implements VisNoiseService {
 
             for (int i = 0; i < nWLen; i++) {
                 final Band band = findBand(instrumentName, waveLengths[i] / AsproConstants.MICRO_METER); // microns
+                usedInsBands.add(band);
+
                 insBand[i] = band;
 
                 /** instrument band corresponding to target mags */
@@ -853,6 +886,8 @@ public final class NoiseService implements VisNoiseService {
                 }
             }
         }
+
+        logger.debug("usedBands                     : {}", usedInsBands);
 
         if (this.prepareVisRelBias) {
             // ObjectMag in spectral channels is known:
@@ -1118,7 +1153,7 @@ public final class NoiseService implements VisNoiseService {
                 // Per second:
                 nbPhot = (telSurface * quantumEfficiency) * transmission[i] * fluxSrcPerChannel[i];
 
-                if (strehlPerChannel != null) {
+                if ((strehlPerChannel != null) && !DO_TEST_NO_ATM) {
                     nbPhot *= strehlPerChannel[n][i];
                 }
 
@@ -1220,7 +1255,15 @@ public final class NoiseService implements VisNoiseService {
                     addInformation("Observation can take advantage of FT (Group track). DIT set to: " + formatTime(obsDit));
                 }
             } else {
-                addWarning("Observation can not use FT (magnitude limit or saturation). DIT set to: " + formatTime(obsDit));
+                // invalid FT setup
+                this.invalidParameters = true;
+
+                if (fringeTrackerMag > fringeTrackerLimit) {
+                    addWarning("Observation can not use FT (" + ftBand + " magnitude limit = " + fringeTrackerLimit + "). "
+                            + "DIT set to: " + formatTime(obsDit));
+                } else if (nbFrameToSaturation <= 1) {
+                    addWarning("Observation can not use FT (saturation). DIT set to: " + formatTime(obsDit));
+                }
 
                 if (logger.isDebugEnabled()) {
                     logger.debug("vinst[iRefChannel]              : {}", vinst[iRefChannel]);
@@ -1270,6 +1313,8 @@ public final class NoiseService implements VisNoiseService {
             }
         }
 
+        // note: params are finalized later in prepareParameters()
+        // (at runtime when model flux is known)
         this.params = new NoiseWParams[nObs];
 
         for (int n = 0; n < nObs; n++) {
@@ -1293,9 +1338,79 @@ public final class NoiseService implements VisNoiseService {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("elevation                     : {}", targetPointInfos[n].getElevation());
                 logger.debug("nbTotalPhot[iRefChannel]      : {}", nbTotalPhot[n][iRefChannel]);
                 logger.debug("nbTotalPhot                   : {}", Arrays.toString(nbTotalPhot[n]));
+                logger.debug("nbPhotonInI[iRefChannel]      : {}", nbPhotInterf[iRefChannel]);
+                logger.debug("nbPhotonInI                   : {}", Arrays.toString(nbPhotInterf));
+                logger.debug("nbPhotonInP[iRefChannel]      : {}", nbPhotPhoto[iRefChannel]);
+                logger.debug("nbPhotonInP                   : {}", Arrays.toString(nbPhotPhoto));
+            }
+        }
+    }
+
+    /**
+     * Prepare final parameters at runtime
+     * @param insBands instrumental band per channel
+     * @param modelFlux user model's flux per channel (interpolated)
+     * @param bandFluxes user model's mean flux per band
+     */
+    public void prepareParameters(final Band[] insBands, final double[] modelFlux, final Map<Band, Double> bandFluxes) {
+        // fast return if invalid configuration :
+        if (invalidParameters) {
+            return;
+        }
+        if ((insBands == null) || bandFluxes.isEmpty()) {
+            return;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("modelFlux: {}", Arrays.toString(modelFlux));
+        }
+
+        final int nObs = nPoints;
+        final int nWLen = nSpectralChannels;
+
+        // Compute correction weights per wavelength:
+        final double[] weights = new double[nWLen];
+
+        // Iterate on spectral channels:
+        for (int l = 0; l < nWLen; l++) {
+            final Band band = insBands[l];
+
+            final Double totalFluxBand = bandFluxes.get(band);
+            if (totalFluxBand != null) {
+                weights[l] = modelFlux[l] / totalFluxBand;
+            } else {
+                weights[l] = 1.0;
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("modelFlux[{} - {}] = {} - weight: {}", convertWL(waveLengths[l]), band, modelFlux[l], weights[l]);
+            }
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("weights: {}", Arrays.toString(weights));
+        }
+
+        // Adjust nbPhot (nbPhotInterf & nbPhotPhoto) with flux weights:
+        for (int n = 0; n < nObs; n++) {
+            final NoiseWParams param = this.params[n];
+
+            final double[] nbPhotInterf = param.nbPhotInterf;
+            final double[] nbPhotPhoto = param.nbPhotPhoto;
+
+            for (int l = 0; l < nWLen; l++) {
+                // corrected total number of photons using the model fluxes:
+
+                // number of photons in the interferometric channel (per telescope):
+                nbPhotInterf[l] *= weights[l];
+                // number of photons in each photometric channel (photometric flux):
+                nbPhotPhoto[l] *= weights[l];
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("prepareParameters:");
                 logger.debug("nbPhotonInI[iRefChannel]      : {}", nbPhotInterf[iRefChannel]);
                 logger.debug("nbPhotonInI                   : {}", Arrays.toString(nbPhotInterf));
                 logger.debug("nbPhotonInP[iRefChannel]      : {}", nbPhotPhoto[iRefChannel]);
@@ -1376,7 +1491,11 @@ public final class NoiseService implements VisNoiseService {
             }
 
             // nb of photons m^-2.s^-1 for the target object:
-            fluxSrcPerChannel[i] = atmTrans[i] * fsrc * waveBands[i];
+            fluxSrcPerChannel[i] = fsrc * waveBands[i];
+
+            if (!DO_TEST_NO_ATM) {
+                fluxSrcPerChannel[i] *= atmTrans[i];
+            }
         }
         if (logger.isDebugEnabled()) {
             logger.debug("fluxSrcPerChannel[iRefChannel]: {}", fluxSrcPerChannel[iRefChannel]);
@@ -1400,6 +1519,14 @@ public final class NoiseService implements VisNoiseService {
 
     public int getIndexMidPoint() {
         return iMidPoint;
+    }
+
+    public Band[] getInstrumentBands() {
+        return this.insBand;
+    }
+
+    public Set<Band> getDistinctInstrumentBands() {
+        return this.usedInsBands;
     }
 
     /**
@@ -1911,7 +2038,7 @@ public final class NoiseService implements VisNoiseService {
      * @return corresponding band
      * @throws IllegalArgumentException if no band found
      */
-    public static Band findBand(final String instrumentName, final double waveLength) throws IllegalArgumentException {
+    private static Band findBand(final String instrumentName, final double waveLength) throws IllegalArgumentException {
         // MATISSE: use specific bands:
         if (AsproConstants.MATCHER_MATISSE.match(instrumentName)) {
             // L <= 4.2

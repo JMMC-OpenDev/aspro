@@ -2780,6 +2780,16 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <!-- spatialFilter -->
+            <xsd:element name="spatialFilter" type="SpatialFilter" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        This (optional) spatial filter to define its specific scaling factor or reference wavelength (MATISSE)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+
             <!-- fringe tracker -->
             <xsd:element name="fringeTracker" type="xsd:IDREF" minOccurs="0">
                 <xsd:annotation>
@@ -2819,6 +2829,35 @@
                 </xsd:annotation>
             </xsd:element>
 
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <!-- SpatialFilter -->
+    <xsd:complexType name="SpatialFilter">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the spatial filter of the focal instrument, typically a telescope aperture + fiber injection
+                whose airy radius FWHM ~ 1.023 lambda / diameter
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="scalingFactor" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The (optional) scaling factor proportional to (lambda / diameter)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="waveLengthRef" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The (optional) reference wave length of the spatial filter (fixed pinhole like MATISSE)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -3057,7 +3096,7 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="magLimit" type="xsd:double">
+            <xsd:element name="magLimit" type="AtmQualValue" minOccurs="1" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
                         The usage limit (mag) (FINITO = 12)
@@ -3563,5 +3602,30 @@
     <xsd:simpleType name="ValueList">
         <xsd:list itemType="xsd:double"/>
     </xsd:simpleType>
+
+    <!-- AtmValue -->
+    <xsd:complexType name="AtmQualValue">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes a value corresponding to the (optional) atmosphere quality
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The value
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:attribute name="atmosphereQuality" type="AtmosphereQuality">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Define the required atmosphere quality / seeing (used by noise modelling)
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
 
 </xsd:schema>

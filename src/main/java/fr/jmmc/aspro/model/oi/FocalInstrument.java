@@ -38,6 +38,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="oiVisAmpDiff" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="oiVisPhiDiff" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="oiVis2Extra" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
+ *         &lt;element name="spatialFilter" type="{http://www.jmmc.fr/aspro-oi/0.1}SpatialFilter" minOccurs="0"/&gt;
  *         &lt;element name="fringeTracker" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/&gt;
  *         &lt;element name="fringeTrackerRequired" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="setup" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentSetup" maxOccurs="unbounded"/&gt;
@@ -61,6 +62,7 @@ import fr.jmmc.aspro.model.OIBase;
     "oiVisAmpDiff",
     "oiVisPhiDiff",
     "oiVis2Extra",
+    "spatialFilter",
     "fringeTracker",
     "fringeTrackerRequired",
     "setups",
@@ -87,6 +89,7 @@ public class FocalInstrument
     protected Boolean oiVisAmpDiff;
     protected Boolean oiVisPhiDiff;
     protected Boolean oiVis2Extra;
+    protected SpatialFilter spatialFilter;
     @XmlElement(type = Object.class)
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
@@ -316,6 +319,30 @@ public class FocalInstrument
      */
     public void setOiVis2Extra(Boolean value) {
         this.oiVis2Extra = value;
+    }
+
+    /**
+     * Gets the value of the spatialFilter property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link SpatialFilter }
+     *     
+     */
+    public SpatialFilter getSpatialFilter() {
+        return spatialFilter;
+    }
+
+    /**
+     * Sets the value of the spatialFilter property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link SpatialFilter }
+     *     
+     */
+    public void setSpatialFilter(SpatialFilter value) {
+        this.spatialFilter = value;
     }
 
     /**
