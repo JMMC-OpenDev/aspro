@@ -14,7 +14,9 @@ public final class OIFitsProducerOptions {
     /** ignore SNR check: enabled for debugging / ETC tests */
     private final static boolean IGNORE_SNR_THRESHOLD = false;
 
+    /** enable interpolation in FITS cube */
     public final boolean userModelCubeInterpolation;
+    /** enable extrapolation in FITS cube */
     public final boolean userModelCubeExtrapolation;
     /** OIFits supersampling */
     public final int supersampling;
@@ -23,6 +25,14 @@ public final class OIFitsProducerOptions {
     /** SNR threshold on VIS to flag values with low SNR */
     public final double snrThreshold;
 
+    /**
+     * Constructor
+     * @param userModelCubeInterpolation enable interpolation in FITS cube
+     * @param userModelCubeExtrapolation enable extrapolation in FITS cube
+     * @param supersampling OIFits supersampling
+     * @param mathMode OIFits MathMode
+     * @param snrThreshold SNR threshold on VIS to flag values with low SNR
+     */
     public OIFitsProducerOptions(boolean userModelCubeInterpolation,
                                  boolean userModelCubeExtrapolation,
                                  int supersampling, MathMode mathMode,
@@ -67,6 +77,6 @@ public final class OIFitsProducerOptions {
         if (mathMode != other.mathMode) {
             return false;
         }
-        return snrThreshold == other.snrThreshold;
+        return (snrThreshold == other.snrThreshold);
     }
 }

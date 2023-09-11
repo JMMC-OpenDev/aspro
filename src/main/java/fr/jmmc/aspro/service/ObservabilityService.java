@@ -198,7 +198,7 @@ public final class ObservabilityService {
     /** flag to indicate that delay lines may have custom maximum throw in switchyard (ie per station ~ VLTI VCM limits) */
     private boolean hasSwitchyardDelayLineMaxThrow = false;
     /** optional delay line mode (double-pass) */
-    private DelayLineMode modeDL = null;
+    private DelayLineMode delayLineMode = null;
     /** beam list */
     private List<Beam> beams = null;
     /** base line list */
@@ -532,8 +532,8 @@ public final class ObservabilityService {
             for (Beam b : this.beams) {
                 sb.append(b.getDelayLine().getName()).append(' ');
             }
-            if (this.modeDL != null) {
-                sb.append('(').append(this.modeDL.getDescription()).append(')');
+            if (this.delayLineMode != null) {
+                sb.append('(').append(this.delayLineMode.getDescription()).append(')');
             }
             addInformation(sb.toString());
         }
@@ -2696,13 +2696,13 @@ public final class ObservabilityService {
         if (useRelatedDLs && (nBeams != nRelDLs)) {
             throw new IllegalStateException("The number of associated delay lines does not match the station list : " + stations + " <> " + relatedDLs);
         }
-        
+
         // find the optional delay line mode in the instrument configuration :
         // VLTI : specific throw for double-pass mode :
-        this.modeDL = (insConf != null) ? insConf.getDelayLineMode() : null;
+        this.delayLineMode = (insConf != null) ? insConf.getDelayLineMode() : null;
 
         if (isLogDebug) {
-            logger.debug("modeDL: {}", modeDL);
+            logger.debug("delayLineMode: {}", delayLineMode);
         }
 
         this.beams = new ArrayList<Beam>(nBeams);
@@ -2717,8 +2717,12 @@ public final class ObservabilityService {
 
         // Beams are defined in the same ordering than stations :
         for (int i = 0; i < nBeams; i++) {
-            Station station = stations.get(i);
-            Beam beam = new Beam(station);
+            final Station station = stations.get(i);
+            final Beam beam = new Beam(station);
+
+            if (this.delayLineMode != null) {
+                beam.setDelayLineMode(delayLineMode); // all beams have the same mode
+            }
 
             // predefined Channel (CHARA) :
             if (useRelatedChannels && (i < nRelChannels)) {
@@ -3253,8 +3257,8 @@ public final class ObservabilityService {
                 opd = b1.getOpticalPathLength() - b2.getOpticalPathLength();
 
                 // 1 DL per telescope: DLs may be not equivalent (different throw):
-                wMin = opd - b2.getDelayLine().getMaximumThrow(this.modeDL);
-                wMax = opd + b1.getDelayLine().getMaximumThrow(this.modeDL);
+                wMin = opd - b2.getDelayLine().getMaximumThrow(this.delayLineMode);
+                wMax = opd + b1.getDelayLine().getMaximumThrow(this.delayLineMode);
 
                 // the W range contains the W limits 
                 this.wRanges.add(new Range(wMin, wMax));

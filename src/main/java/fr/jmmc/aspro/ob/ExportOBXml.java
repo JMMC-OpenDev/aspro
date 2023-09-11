@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.ob;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.OBManager;
 import fr.jmmc.aspro.model.ObservationManager;
@@ -280,7 +281,7 @@ public class ExportOBXml {
                 final FringeTracker ft = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getFringeTracker();;
                 if (ft != null) {
                     // TODO: handle FT modes properly: GroupTrack is hard coded !
-                    if (!ftMode.startsWith("GroupTrack")) {
+                    if (!ftMode.startsWith(AsproConstants.FT_GROUP_TRACK)) {
                         dit = ft.getMaxIntegration();
                     }
                 }
