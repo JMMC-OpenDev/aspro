@@ -14,7 +14,7 @@
     </interferometerConfiguration>
     <instrumentConfiguration>
         <name>MATISSE_N</name>
-        <stations>D0 G2 J3 K0</stations>
+        <stations>K0 G2 D0 J3</stations>
         <pops></pops>
         <instrumentMode>HIGH_SENS_N_LOW</instrumentMode>
         <samplingPeriod>60.0</samplingPeriod>
@@ -62,9 +62,9 @@ FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
             <HAMin>0.0</HAMin>
             <HAMax>1.0</HAMax>
             <aoSetup>NAOMI_BRIGHT</aoSetup>
-            <fringeTrackerMode>FringeTrack GRA4MAT</fringeTrackerMode>
         </configuration>
     </target>
+    <selectedTargets>TEST</selectedTargets>
     <targetUserInfos>
         <group id="JMMC_AO">
             <name>AO Star</name>
@@ -86,6 +86,6 @@ FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
         </group>
     </targetUserInfos>
     <variant>
-        <stations>D0 G2 J3 K0</stations>
+        <stations>K0 G2 D0 J3</stations>
     </variant>
 </a:observationSetting>

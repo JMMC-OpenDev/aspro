@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<a:observationSetting xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <schemaVersion>2018.04</schemaVersion>
     <targetVersion>2019.08</targetVersion>
     <name>default</name>
@@ -14,7 +14,7 @@
     </interferometerConfiguration>
     <instrumentConfiguration>
         <name>MATISSE_N</name>
-        <stations>D0 G2 J3 K0</stations>
+        <stations>K0 G2 D0 J3</stations>
         <pops></pops>
         <instrumentMode>HIGH_SENS_N_LOW</instrumentMode>
         <samplingPeriod>60.0</samplingPeriod>
@@ -63,6 +63,7 @@ FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
             <aoSetup>NAOMI_BRIGHT</aoSetup>
         </configuration>
     </target>
+    <selectedTargets>TEST</selectedTargets>
     <targetUserInfos>
         <group id="JMMC_AO">
             <name>AO Star</name>
@@ -84,6 +85,6 @@ FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
         </group>
     </targetUserInfos>
     <variant>
-        <stations>D0 G2 J3 K0</stations>
+        <stations>K0 G2 D0 J3</stations>
     </variant>
 </a:observationSetting>
