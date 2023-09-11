@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="23.09 beta 3"/>
-    <compilation date="04/09/2023" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="23.09 beta 4"/>
+    <compilation date="11/09/2023" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -243,15 +243,18 @@
 
     <releasenotes>
         <release version="23.09">
-            <pubDate>Mon, 04 Sep 2023 16:00:00 GMT</pubDate>
+            <pubDate>Mon, 11 Sep 2023 14:00:00 GMT</pubDate>
+            <prerelease version="23.09 beta 4">
+                <change type="FEATURE">Improved OIFITS generator to fill OI_FLUX tables with photon counts corresponding to the object flux</change>
+            </prerelease>
             <prerelease version="23.09 beta 3">
-                <change type="FEATURE">Improved noise modeling to correct the object flux with the flux given by user-defined models (FITS cube)</change>
+                <change type="FEATURE">Improved noise modeling to correct the object flux (mag/jy) with the total flux values given by user-defined models (FITS cube)</change>
                 <change type="FEATURE">Improved Telescope FOV information (range + corresponding wavelengths) in the Target editor</change>
                 <change type="FEATURE">Fixed MATISSE spatial filter parameters (apodization)</change>
             </prerelease>
             <prerelease version="23.09 beta 2">
                 <change type="FEATURE">Added new preferences to enable or disable Fits cube interpolation (true by default) or extrapolation (false by default) for performance reasons</change>
-                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/1179">Implemented wavelength interpolation and extrapolation of user-defined models (FITS cube)</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/1179">Implemented both wavelength interpolation and extrapolation of user-defined models (FITS cube)</change>
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1336">Fixed compression support for the PNG encoder (java 8)</change>
             </prerelease>
             <prerelease version="23.09 beta 1">
