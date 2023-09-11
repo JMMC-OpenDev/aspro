@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="23.09 beta 4"/>
+    <program name="Aspro2" version="23.09"/>
     <compilation date="11/09/2023" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -243,9 +243,9 @@
 
     <releasenotes>
         <release version="23.09">
-            <pubDate>Mon, 11 Sep 2023 14:00:00 GMT</pubDate>
+            <pubDate>Mon, 11 Sep 2023 16:00:00 GMT</pubDate>
             <prerelease version="23.09 beta 4">
-                <change type="FEATURE">Improved OIFITS generator to fill OI_FLUX tables with photon counts corresponding to the object flux</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/1215">Improved OIFITS generator to fill OI_FLUX tables with photon counts corresponding to the object flux</change>
             </prerelease>
             <prerelease version="23.09 beta 3">
                 <change type="FEATURE">Improved noise modeling to correct the object flux (mag/jy) with the total flux values given by user-defined models (FITS cube)</change>
