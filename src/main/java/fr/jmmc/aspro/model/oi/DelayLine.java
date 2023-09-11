@@ -198,7 +198,7 @@ public class DelayLine
                 }
             }
         }
-        return maximumThrow;
+        return getMaximumThrow();
     }
 
 //--simple--preserve

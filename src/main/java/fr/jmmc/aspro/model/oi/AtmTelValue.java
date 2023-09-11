@@ -4,6 +4,8 @@ package fr.jmmc.aspro.model.oi;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlIDREF;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 import fr.jmmc.aspro.model.OIBase;
@@ -11,22 +13,23 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *                 This type describes a value corresponding to the (optional) atmosphere quality
+ *                 This type describes a value associated to (optional) atmosphere quality and telescope tuple
  *             
  * 
  * 
  *                         The value
  *                     
  * 
- * <p>Java class for AtmQualValue complex type.
+ * <p>Java class for AtmTelValue complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="AtmQualValue"&gt;
+ * &lt;complexType name="AtmTelValue"&gt;
  *   &lt;simpleContent&gt;
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;double"&gt;
  *       &lt;attribute name="atmosphereQuality" type="{http://www.jmmc.fr/aspro-oi/0.1}AtmosphereQuality" /&gt;
+ *       &lt;attribute name="telescope" type="{http://www.w3.org/2001/XMLSchema}IDREF" /&gt;
  *     &lt;/extension&gt;
  *   &lt;/simpleContent&gt;
  * &lt;/complexType&gt;
@@ -35,10 +38,10 @@ import fr.jmmc.aspro.model.OIBase;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "AtmQualValue", propOrder = {
+@XmlType(name = "AtmTelValue", propOrder = {
     "value"
 })
-public class AtmQualValue
+public class AtmTelValue
     extends OIBase
 {
 
@@ -46,6 +49,10 @@ public class AtmQualValue
     protected double value;
     @XmlAttribute(name = "atmosphereQuality")
     protected AtmosphereQuality atmosphereQuality;
+    @XmlAttribute(name = "telescope")
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREF")
+    protected Telescope telescope;
 
     /**
      * Gets the value of the value property.
@@ -86,19 +93,45 @@ public class AtmQualValue
     public void setAtmosphereQuality(AtmosphereQuality value) {
         this.atmosphereQuality = value;
     }
-    
+
+    /**
+     * Gets the value of the telescope property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Object }
+     *     
+     */
+    public Telescope getTelescope() {
+        return telescope;
+    }
+
+    /**
+     * Sets the value of the telescope property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Object }
+     *     
+     */
+    public void setTelescope(Telescope value) {
+        this.telescope = value;
+    }
+
 //--simple--preserve
     @Override
     public String toString() {
-        return "AtmQualValue{atmosphereQuality=" + atmosphereQuality + "value=" + value + '}';
+        return "AtmTelValue{" + "value=" + value + ", atmosphereQuality=" + atmosphereQuality + ", telescope=" + telescope + '}';
     }
 
-    boolean match(final AtmosphereQuality atmQual) {
+    boolean match(final AtmosphereQuality atmQual, final Telescope tel) {
         if ((this.atmosphereQuality != null) && (this.atmosphereQuality != atmQual)) {
+            return false;
+        }
+        if ((this.telescope != null) && (this.telescope != tel)) {
             return false;
         }
         return true;
     }
 //--simple--preserve
-
 }

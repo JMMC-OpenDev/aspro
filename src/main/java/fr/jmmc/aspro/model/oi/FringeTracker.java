@@ -32,7 +32,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/&gt;
  *         &lt;element name="mode" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="instrumentVisibility" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
- *         &lt;element name="magLimit" type="{http://www.jmmc.fr/aspro-oi/0.1}AtmQualValue" maxOccurs="unbounded"/&gt;
+ *         &lt;element name="magLimit" type="{http://www.jmmc.fr/aspro-oi/0.1}AtmTelValue" maxOccurs="unbounded"/&gt;
  *         &lt;element name="maxIntegration" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
@@ -67,7 +67,7 @@ public class FringeTracker
     protected List<String> modes;
     protected double instrumentVisibility;
     @XmlElement(name = "magLimit", required = true)
-    protected List<AtmQualValue> magLimits;
+    protected List<AtmTelValue> magLimits;
     protected double maxIntegration;
 
     /**
@@ -181,13 +181,13 @@ public class FringeTracker
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link AtmQualValue }
+     * {@link AtmTelValue }
      * 
      * 
      */
-    public List<AtmQualValue> getMagLimits() {
+    public List<AtmTelValue> getMagLimits() {
         if (magLimits == null) {
-            magLimits = new ArrayList<AtmQualValue>();
+            magLimits = new ArrayList<AtmTelValue>();
         }
         return this.magLimits;
     }
@@ -214,9 +214,14 @@ public class FringeTracker
         return "FringeTracker [" + ((this.name != null) ? this.name : "undefined") + "]";
     }
     
-    public double getMagLimit(final AtmosphereQuality atmQual) {
-        for (AtmQualValue val : getMagLimits()) {
-            if (val.match(atmQual)) {
+    /**
+    * @param atmQual optional atmosphere quality
+    * @param tel optional telescope
+    * @return magnitude limit associated to the given atmosphere quality and telescope (or default)
+    */
+    public double getMagLimit(final AtmosphereQuality atmQual, final Telescope tel) {
+        for (AtmTelValue val : getMagLimits()) {
+            if (val.match(atmQual, tel)) {
                 return val.getValue(); // first, so take care of ordering values
             }
         }

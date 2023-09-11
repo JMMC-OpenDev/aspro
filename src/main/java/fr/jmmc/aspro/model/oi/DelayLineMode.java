@@ -28,6 +28,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="transmission" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -39,7 +40,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DelayLineMode", propOrder = {
     "name",
-    "description"
+    "description",
+    "transmission"
 })
 public class DelayLineMode
     extends OIBase
@@ -52,6 +54,7 @@ public class DelayLineMode
     protected String name;
     @XmlElement(required = true)
     protected String description;
+    protected Double transmission;
 
     /**
      * Gets the value of the name property.
@@ -100,8 +103,36 @@ public class DelayLineMode
     public void setDescription(String value) {
         this.description = value;
     }
+
+    /**
+     * Gets the value of the transmission property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getTransmission() {
+        return transmission;
+    }
+
+    /**
+     * Sets the value of the transmission property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setTransmission(Double value) {
+        this.transmission = value;
+    }
     
 //--simple--preserve
+    public double getTransmissionOrDefault() {
+        return (transmission != null) ? transmission.doubleValue() : 1.0;
+    }
+
     @Override
     public final boolean equals(final Object obj) {
         if (obj == null) {

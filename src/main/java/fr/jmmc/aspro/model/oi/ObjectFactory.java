@@ -478,6 +478,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link AtmTelValue }
+     * 
+     */
+    public AtmTelValue createAtmTelValue() {
+        return new AtmTelValue();
+    }
+
+    /**
      * Create an instance of {@link Parameter }
      * 
      */
@@ -507,14 +515,6 @@ public class ObjectFactory {
      */
     public AzEl createAzEl() {
         return new AzEl();
-    }
-
-    /**
-     * Create an instance of {@link AtmQualValue }
-     * 
-     */
-    public AtmQualValue createAtmQualValue() {
-        return new AtmQualValue();
     }
 
 }

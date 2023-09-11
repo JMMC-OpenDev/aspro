@@ -129,6 +129,9 @@ public interface AsproConstants {
     /** VLTI MATISSE matcher */
     public final static InstrumentNameMatcher MATCHER_MATISSE = new InstrumentNameMatcher(INS_MATISSE, true);
 
+    /** FT GroupTrack */
+    public static final String FT_GROUP_TRACK = "GroupTrack";
+
     /** JMMC legal notice on plots */
     public static final String JMMC_ANNOTATION = "Made by ASPRO 2/JMMC ";
     /** JMMC legal notice on plots */

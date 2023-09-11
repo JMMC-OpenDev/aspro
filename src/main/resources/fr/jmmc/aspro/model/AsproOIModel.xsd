@@ -2214,7 +2214,7 @@
             <xsd:element name="name" type="xsd:ID">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Delay line mode identifier ('DBL_PASS' ...)
+                        Delay line mode identifier ('DBL_PATH' ...)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2222,6 +2222,13 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         Short description related to this delay line mode
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="transmission" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The (optional) transmission (70% flux only for double-path at VLTI)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -3096,7 +3103,7 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="magLimit" type="AtmQualValue" minOccurs="1" maxOccurs="unbounded">
+            <xsd:element name="magLimit" type="AtmTelValue" minOccurs="1" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
                         The usage limit (mag) (FINITO = 12)
@@ -3112,6 +3119,44 @@
             </xsd:element>
 
         </xsd:sequence>
+    </xsd:complexType>
+
+
+    <!-- AtmTelValue -->
+    <xsd:complexType name="AtmTelValue">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes a value associated to (optional) atmosphere quality and telescope tuple
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The value
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:attribute name="atmosphereQuality" type="AtmosphereQuality">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Define the required atmosphere quality / seeing (used by noise modelling)
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="telescope" type="xsd:IDREF">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Optional Telescope Reference (criteria)
+                        </xsd:documentation>
+                        <xsd:appinfo>
+                            <jaxb:property>
+                                <jaxb:baseType name="Telescope" />
+                            </jaxb:property>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:simpleContent>
     </xsd:complexType>
 
 
@@ -3602,30 +3647,5 @@
     <xsd:simpleType name="ValueList">
         <xsd:list itemType="xsd:double"/>
     </xsd:simpleType>
-
-    <!-- AtmValue -->
-    <xsd:complexType name="AtmQualValue">
-        <xsd:annotation>
-            <xsd:documentation>
-                This type describes a value corresponding to the (optional) atmosphere quality
-            </xsd:documentation>
-        </xsd:annotation>
-        <xsd:simpleContent>
-            <xsd:extension base="xsd:double">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The value
-                    </xsd:documentation>
-                </xsd:annotation>
-                <xsd:attribute name="atmosphereQuality" type="AtmosphereQuality">
-                    <xsd:annotation>
-                        <xsd:documentation>
-                            Define the required atmosphere quality / seeing (used by noise modelling)
-                        </xsd:documentation>
-                    </xsd:annotation>
-                </xsd:attribute>
-            </xsd:extension>
-        </xsd:simpleContent>
-    </xsd:complexType>
 
 </xsd:schema>

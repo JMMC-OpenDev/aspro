@@ -5,6 +5,7 @@ package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.DelayLine;
+import fr.jmmc.aspro.model.oi.DelayLineMode;
 import fr.jmmc.aspro.model.oi.DelayLineRestrictionThrow;
 import fr.jmmc.aspro.model.oi.Station;
 import java.util.List;
@@ -21,6 +22,8 @@ public final class Beam {
     private Channel channel;
     /** channel */
     private DelayLine delayLine;
+    /** optional delay line mode (double-pass) */
+    private DelayLineMode delayLineMode = null;
     /** fixed optical length (m) from the interferometer switchyard */
     private double opticalPathLength = 0d;
     /** optional delay line throws due to delay line restrictions */
@@ -74,6 +77,14 @@ public final class Beam {
         this.delayLine = delayLine;
     }
 
+    public DelayLineMode getDelayLineMode() {
+        return delayLineMode;
+    }
+
+    public void setDelayLineMode(final DelayLineMode delayLineMode) {
+        this.delayLineMode = delayLineMode;
+    }
+
     /**
      * Return the fixed optical path length (m)
      * @return fixed optical path length
@@ -112,7 +123,7 @@ public final class Beam {
      */
     @Override
     public String toString() {
-        return "Beam: " + this.station + " - " + this.channel + " - " + this.delayLine + " - OPL= " + this.opticalPathLength
-                + " - delayLineThrows = " + this.delayLineThrows;
+        return "Beam: " + this.station + " - " + this.channel + " - " + this.delayLine + " (" + this.delayLineMode
+                + ") OPL= " + this.opticalPathLength + " - delayLineThrows = " + this.delayLineThrows;
     }
 }
