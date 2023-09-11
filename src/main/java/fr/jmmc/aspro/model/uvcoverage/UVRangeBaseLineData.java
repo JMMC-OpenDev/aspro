@@ -27,7 +27,6 @@ public final class UVRangeBaseLineData extends UVBaseLineData {
     /**
      * Constructor
      * @param bl base line
-     * @param nPoints number of valid U/V values
      * @param u U coords (m)
      * @param v V coords (m)
      * @param uWMin u coordinates for the minimal wavelength (m)
