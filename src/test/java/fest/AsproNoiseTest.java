@@ -73,7 +73,8 @@ public final class AsproNoiseTest extends JmcsFestSwingJUnitTestCase {
             // do add noise:
             Preferences.getInstance().setPreference(Preferences.OIFITS_ADD_NOISE, Boolean.TRUE);
 
-            CommonPreferences.getInstance().setPreference(CommonPreferences.SHOW_STARTUP_SPLASHSCREEN, false);
+            CommonPreferences.getInstance().setPreference(CommonPreferences.SHOW_STARTUP_SPLASHSCREEN, Boolean.FALSE);
+            CommonPreferences.getInstance().setPreference(CommonPreferences.FILECHOOSER_NATIVE, Boolean.FALSE);
         } catch (PreferencesException pe) {
             logger.error("setPreference failed", pe);
         }

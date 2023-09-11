@@ -104,7 +104,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         try {
             Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_SIZE, NumberUtils.valueOf(1024));
 
-            CommonPreferences.getInstance().setPreference(CommonPreferences.SHOW_STARTUP_SPLASHSCREEN, false);
+            CommonPreferences.getInstance().setPreference(CommonPreferences.SHOW_STARTUP_SPLASHSCREEN, Boolean.FALSE);
+            CommonPreferences.getInstance().setPreference(CommonPreferences.FILECHOOSER_NATIVE, Boolean.FALSE);
         } catch (PreferencesException pe) {
             logger.error("setPreference failed", pe);
         }

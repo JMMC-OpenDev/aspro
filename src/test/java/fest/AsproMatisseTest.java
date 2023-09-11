@@ -23,7 +23,7 @@ import org.fest.swing.fixture.JComboBoxFixture;
 import org.fest.swing.fixture.JPanelFixture;
 import org.fest.swing.fixture.JTabbedPaneFixture;
 import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
+import org.junit.FixMethodOrder; 
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -68,7 +68,8 @@ public final class AsproMatisseTest extends JmcsFestSwingJUnitTestCase {
             // do not add noise:
             Preferences.getInstance().setPreference(Preferences.OIFITS_ADD_NOISE, Boolean.FALSE);
 
-            CommonPreferences.getInstance().setPreference(CommonPreferences.SHOW_STARTUP_SPLASHSCREEN, false);
+            CommonPreferences.getInstance().setPreference(CommonPreferences.SHOW_STARTUP_SPLASHSCREEN, Boolean.FALSE);
+            CommonPreferences.getInstance().setPreference(CommonPreferences.FILECHOOSER_NATIVE, Boolean.FALSE);
         } catch (PreferencesException pe) {
             logger.error("setPreference failed", pe);
         }
