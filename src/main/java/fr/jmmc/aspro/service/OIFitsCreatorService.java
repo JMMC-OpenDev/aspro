@@ -10,6 +10,7 @@ import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.observability.TargetPointInfo;
+import fr.jmmc.aspro.model.oi.DelayLineMode;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
@@ -40,11 +41,14 @@ import fr.jmmc.jmcs.gui.task.InterruptableThread;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oitools.OIFitsConstants;
+import fr.jmmc.oitools.meta.ColumnMeta;
+import fr.jmmc.oitools.meta.CustomUnits;
 import fr.jmmc.oitools.meta.OIFitsStandard;
 import fr.jmmc.oitools.model.DataModel;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsChecker;
 import fr.jmmc.oitools.model.OIFitsFile;
+import fr.jmmc.oitools.model.OIFlux;
 import fr.jmmc.oitools.model.OIT3;
 import fr.jmmc.oitools.model.OITarget;
 import fr.jmmc.oitools.model.OIVis;
@@ -201,8 +205,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             // note: NoiseService parameter dependencies:
             // observation {target}
             // parameter: warningContainer
-            final NoiseService ns = new NoiseService(observation, target, targetPointInfos, useCalibrationBias, warningContainer,
-                    this.waveLengths, this.waveBands, useWavelengthRangeRestriction);
+
+            final DelayLineMode delayLineMode = this.beams.get(0).getDelayLineMode(); // all beams have the same mode
+
+            final NoiseService ns = new NoiseService(observation, delayLineMode, target, targetPointInfos,
+                    useCalibrationBias, warningContainer, this.waveLengths, this.waveBands, useWavelengthRangeRestriction);
 
             if (ns.isValid()) {
                 this.noiseService = ns;
@@ -286,7 +293,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                 // telescope FOV = airy disk FWHM:
                 final ApodizationParameters params = new ApodizationParameters(diameter, lambdaMin, Double.NaN, instrument);
-                
+
                 final double airyRadius = ALX.convertRadToMas(UserModelService.getAiryRadius(params)); // mas
 
                 // convert max distance (= 20% fov) in mas:
@@ -384,7 +391,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                     // TODO: handle FT modes properly: GroupTrack is hard coded !
                     // disable wavelength restrictions if FT enabled (basic GRA4MAT support, TODO: refine wavelength ranges for GRA4MAT)
-                    this.useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith("GroupTrack") && (instrumentMode.getFtWaveLengthBandRef() == null));
+                    this.useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith(AsproConstants.FT_GROUP_TRACK)
+                            && (instrumentMode.getFtWaveLengthBandRef() == null));
                     if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
                         effBand = instrumentMode.getFtWaveLengthBandRef();
                     }
@@ -569,7 +577,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             return null;
         }
 
-        // OI_VIS :
+        // OI_VIS first:
         this.createOIVis();
 
         // fast interrupt :
@@ -587,6 +595,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         // OI_T3 :
         this.createOIT3();
+
+        // fast interrupt :
+        if (Thread.currentThread().isInterrupted()) {
+            return null;
+        }
+
+        // OI_FLUX :
+        this.createOIFlux();
 
         // fast interrupt :
         if (Thread.currentThread().isInterrupted()) {
@@ -804,6 +820,165 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             }
         }
         return freqTable;
+    }
+
+    /**
+     * Create the OI_FLUX table using internal computed visComplex data
+     */
+    private void createOIFlux() {
+        final long start = System.nanoTime();
+
+        /** Get the current thread to check if the computation is interrupted */
+        final Thread currentThread = Thread.currentThread();
+
+        // Get OI_VIS table :
+        final OIVis vis = this.oiFitsFile.getOiVis()[0];
+        final int nWaveLengths = this.waveLengths.length;
+
+        // Create OI_FLUX table :
+        final OIFlux flux = new OIFlux(this.oiFitsFile, this.insNameKeyword, this.nObsPoints * this.nBeams);
+        flux.setArrName(this.arrNameKeyword);
+        flux.setDateObs(vis.getDateObs());
+
+        // no fov
+        // OIFITS 2 keyword for Uncalibrated flux (photons):
+        flux.setCalStat(OIFitsConstants.KEYWORD_CALSTAT_U);
+
+        // Set flux unit:
+        flux.setColumnUnit(OIFitsConstants.COLUMN_FLUXDATA, CustomUnits.UNIT_PHOTONS);
+        flux.setColumnUnit(OIFitsConstants.COLUMN_FLUXERR, CustomUnits.UNIT_PHOTONS);
+
+        // remove optional Column CORRINDX_FLUXDATA:
+        final ColumnMeta corrIdxMeta = flux.getColumnMeta(OIFitsConstants.COLUMN_CORRINDX_FLUXDATA);
+        flux.removeColumn(corrIdxMeta);
+
+        // Get target information for each UV point:
+        final TargetPointInfo[] obsPointInfos = this.targetPointInfos;
+
+        final Calendar calObs;
+        // TODO: fix synchronization issue on AstroSkyCalc:
+        synchronized (this.sc) {
+            // Compute UTC start date of the first point :
+            calObs = this.sc.toCalendar(obsPointInfos[0].getJd(), false);
+
+            final String dateObs = calendarToString(calObs);
+            vis.setDateObs(dateObs);
+        }
+
+        // Columns :
+        final short[] targetIds = flux.getTargetId();
+        final double[] mjds = flux.getMJD();
+        final double[] intTimes = flux.getIntTime();
+
+        final double[][] fluxData = flux.getFluxData();
+        final double[][] fluxErr = flux.getFluxErr();
+
+        final short[][] staIndexes = flux.getStaIndex();
+        final boolean[][] flags = flux.getFlag();
+
+        final NoiseService ns = this.noiseService;
+        final StatUtils stat = StatUtils.getInstance();
+
+        final double[][] beamRndDists = new double[nBeams][];
+
+        if (doNoise) {
+            for (int n = 0; n < nBeams; n++) {
+                // select a different complex distribution per row:
+                beamRndDists[n] = stat.get().getSamples()[0];
+            }
+        }
+
+        // vars:
+        double jd, mjd;
+        boolean doFlag;
+
+        // Iterate on observable UV points :
+        for (int i = 0, j, k, l, n; i < nObsPoints; i++) {
+
+            // jd at the observed uv point:
+            jd = obsPointInfos[i].getJd();
+
+            // modified julian day :
+            mjd = AstroSkyCalc.mjd(jd);
+
+            // map beams on baselines as data are valid for all telescope
+            j = nBaseLines * i + 0;
+
+            // get values based on baselines:
+            final double[] objPhot = nbPhotObjPhoto[j];
+            final double[] phot = nbPhotPhoto[j];
+            final double[] errPhot = errPhotPhoto[j];
+            final boolean[] photFlags = photSNRFlag[j];
+
+            // Iterate on beams :
+            for (n = 0; n < nBeams; n++) {
+                final Beam beam = this.beams.get(n);
+                k = nBeams * i + n;
+
+                // target id
+                targetIds[k] = TARGET_ID;
+
+                // modified julian day :
+                mjds[k] = mjd;
+
+                // integration time (s) :
+                intTimes[k] = integrationTime;
+
+                // if target has a model, then complex visibility are computed :
+                if (!hasModel || (ns == null)) {
+                    // Invalid => NaN value :
+
+                    // Iterate on wave lengths :
+                    for (l = 0; l < nWaveLengths; l++) {
+                        fluxData[k][l] = Double.NaN;
+                        fluxErr[k][l] = Double.NaN;
+
+                        // mark this value as invalid :
+                        flags[k][l] = true;
+                    }
+
+                } else {
+                    // Iterate on wave lengths :
+                    for (l = 0; l < nWaveLengths; l++) {
+                        doFlag = photFlags[l];
+
+                        // Set values:
+                        fluxData[k][l] = objPhot[l];
+                        fluxErr[k][l] = (objPhot[l] / phot[l]) * errPhot[l]; // scaling
+
+                        // add error on flux data (normal distribution):
+                        if (this.doNoise) {
+                            final int nSample = getNextRandomSampleIndex();
+                            // just add gaussian noise (variance addition):
+                            fluxData[k][l] += fluxErr[k][l] * beamRndDists[n][nSample];
+                        }
+
+                        // mark this value as valid only if observables are not NaN, error is valid and SNR is OK:
+                        if (!doFlag && (Double.isNaN(fluxData[k][l]) || Double.isNaN(fluxErr[k][l]))) {
+                            doFlag = true;
+                        }
+                        flags[k][l] = doFlag;
+                    }
+
+                    // station index :
+                    staIndexes[k][0] = beamMapping.get(beam).shortValue();
+
+                    // increment j:
+                    j++;
+
+                    // fast interrupt :
+                    if (currentThread.isInterrupted()) {
+                        return;
+                    }
+                }
+            } // beams
+        } // HA
+
+        this.oiFitsFile.addOiTable(flux);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("createOIFlux: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        }
     }
 
     /**
@@ -2379,7 +2554,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     }
 
     /**
-     * @param other another OIFits producer
+     * @param o another OIFits producer
      * @return true if the OIFITS producer options are the same; false otherwise
      */
     @Override

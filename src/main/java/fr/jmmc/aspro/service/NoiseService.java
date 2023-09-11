@@ -20,6 +20,7 @@ import fr.jmmc.aspro.model.oi.AdaptiveOpticsSetup;
 import fr.jmmc.aspro.model.oi.BiasType;
 import fr.jmmc.aspro.model.oi.BiasUnit;
 import fr.jmmc.aspro.model.oi.BiasValue;
+import fr.jmmc.aspro.model.oi.DelayLineMode;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.FocalInstrumentSetup;
 import fr.jmmc.aspro.model.oi.ObservationSequence;
@@ -77,9 +78,6 @@ public final class NoiseService implements VisNoiseService {
     /** dump strehl values */
     private final static boolean DO_DUMP_STREHL = false;
 
-    /** test fluxes without strehl nor atmospheric transmission */
-    private final static boolean DO_TEST_NO_ATM = false;
-
     /** maximum error on Vis to avoid excessively large errors */
     private final static double MAX_ERR_V = 10.0;
     /** maximum error on Vis2 to avoid excessively large errors */
@@ -99,6 +97,8 @@ public final class NoiseService implements VisNoiseService {
     private double telDiam = Double.NaN;
     /** Number of telescopes interfering as double */
     private double nbTel = Double.NaN;
+    /** optional delayLine transmission (loss) */
+    private double delayLineTransmission = 1.0;
 
     /* adaptive optics parameters */
     /** seeing (arc sec) */
@@ -253,15 +253,10 @@ public final class NoiseService implements VisNoiseService {
     /** (W) number of thermal photons per telescope in each photometric channel */
     private double[] nbPhotThermPhoto = null;
 
-    static {
-        if (DO_TEST_NO_ATM) {
-            logger.warn("NoiseService: TEST_NO_ATM enabled !");
-        }
-    }
-
     /**
      * Protected constructor
      * @param observation observation settings used (read-only copy of the modifiable observation)
+     * @param delayLineMode(optional) delayLine mode in use
      * @param target target to use
      * @param targetPointInfos target information for each uv point couples
      * @param useCalibrationBias true to use calibration bias; false to compute only theoretical (optional systematic) error
@@ -271,6 +266,7 @@ public final class NoiseService implements VisNoiseService {
      * @param useWavelengthRangeRestriction use wavelength restrictions
      */
     protected NoiseService(final ObservationSetting observation,
+                           final DelayLineMode delayLineMode,
                            final Target target,
                            final TargetPointInfo[] targetPointInfos,
                            final boolean useCalibrationBias,
@@ -310,6 +306,9 @@ public final class NoiseService implements VisNoiseService {
         this.nPoints = this.targetPointInfos.length;
         this.iMidPoint = this.nPoints / 2;
 
+        // Get the delayline transmission (double-path loss):
+        this.delayLineTransmission = (delayLineMode != null) ? delayLineMode.getTransmissionOrDefault() : 1.0;
+
         if (logger.isDebugEnabled()) {
             logger.debug("spectralChannels              : {}", nSpectralChannels);
             logger.debug("iRefChannel                   : {}", iRefChannel);
@@ -318,6 +317,7 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("waveBands[iRefChannel]        : {}", waveBands[iRefChannel]);
             logger.debug("waveBands                     : {}", Arrays.toString(waveBands));
             logger.debug("useWavelengthRangeRestriction : {}", useWavelengthRangeRestriction);
+            logger.debug("delayLineTransmission         : {}", delayLineTransmission);
         }
 
         // extract parameters in observation and configuration :
@@ -761,11 +761,11 @@ public final class NoiseService implements VisNoiseService {
                 final String ftMode = targetConf.getFringeTrackerMode();
                 this.fringeTrackerPresent = true;
                 // TODO: handle FT modes properly: GroupTrack is hard coded !
-                this.fringeTrackingMode = (ftMode != null && !ftMode.startsWith("GroupTrack"));
+                this.fringeTrackingMode = (ftMode != null && !ftMode.startsWith(AsproConstants.FT_GROUP_TRACK));
                 this.fringeTrackerInstrumentalVisibility = ft.getInstrumentVisibility();
 
-                // Get the magnitude limit according to the atmosphere quality:
-                this.fringeTrackerLimit = ft.getMagLimit(atmQual);
+                // Get the magnitude limit according to the atmosphere quality and telescope:
+                this.fringeTrackerLimit = ft.getMagLimit(atmQual, this.telescope);
 
                 this.fringeTrackerMaxDit = ft.getMaxIntegration();
                 this.fringeTrackerMaxFrameTime = this.fringeTrackerMaxDit;
@@ -1138,7 +1138,10 @@ public final class NoiseService implements VisNoiseService {
         // Target flux per spectral channel per second per m^2:
         final double[] fluxSrcPerChannel = computeTargetFlux();
 
+        final double[] atmTrans = computeAtmosphereTransmission();
+
         // total number of science photons per spectral channel per second per telescope:
+        final double[][] nbTotalObjPhot = new double[nObs][nWLen];
         final double[][] nbTotalPhot = new double[nObs][nWLen];
 
         final double telSurface = Math.PI * FastMath.pow2(0.5 * telDiam);
@@ -1151,12 +1154,15 @@ public final class NoiseService implements VisNoiseService {
 
             for (int i = 0; i < nWLen; i++) {
                 // Per second:
-                nbPhot = (telSurface * quantumEfficiency) * transmission[i] * fluxSrcPerChannel[i];
+                nbPhot = telSurface * fluxSrcPerChannel[i];
+                nbTotalObjPhot[n][i] = nbPhot;
 
-                if ((strehlPerChannel != null) && !DO_TEST_NO_ATM) {
+                nbPhot *= (quantumEfficiency * delayLineTransmission) * transmission[i];
+                nbPhot *= atmTrans[i];
+
+                if (strehlPerChannel != null) {
                     nbPhot *= strehlPerChannel[n][i];
                 }
-
                 nbTotalPhot[n][i] = nbPhot;
 
                 if (nbTotalPhotTherm != null) {
@@ -1323,13 +1329,15 @@ public final class NoiseService implements VisNoiseService {
             final NoiseWParams param = new NoiseWParams(nWLen);
             this.params[n] = param;
 
+            final double[] nbPhotObjPhoto = param.nbPhotObjPhoto;
             final double[] nbPhotInterf = param.nbPhotInterf;
             final double[] nbPhotPhoto = param.nbPhotPhoto;
 
             for (int i = 0; i < nWLen; i++) {
                 // corrected total number of photons using the final observation dit per telescope:
-                nbTotalPhot[n][i] *= obsDit;
-                nbPhot = nbTotalPhot[n][i];
+                nbPhotObjPhoto[i] = obsDit * nbTotalObjPhot[n][i];
+
+                nbPhot = obsDit * nbTotalPhot[n][i];
 
                 // number of photons in the interferometric channel (per telescope):
                 nbPhotInterf[i] = nbPhot * fracFluxInInterferometry;
@@ -1344,6 +1352,7 @@ public final class NoiseService implements VisNoiseService {
                 logger.debug("nbPhotonInI                   : {}", Arrays.toString(nbPhotInterf));
                 logger.debug("nbPhotonInP[iRefChannel]      : {}", nbPhotPhoto[iRefChannel]);
                 logger.debug("nbPhotonInP                   : {}", Arrays.toString(nbPhotPhoto));
+                logger.debug("nbPhotObjPhoto                 : {}", Arrays.toString(nbPhotObjPhoto));
             }
         }
     }
@@ -1359,65 +1368,68 @@ public final class NoiseService implements VisNoiseService {
         if (invalidParameters) {
             return;
         }
-        if ((insBands == null) || bandFluxes.isEmpty()) {
-            return;
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("modelFlux: {}", Arrays.toString(modelFlux));
-        }
-
         final int nObs = nPoints;
         final int nWLen = nSpectralChannels;
 
-        // Compute correction weights per wavelength:
-        final double[] weights = new double[nWLen];
-
-        // Iterate on spectral channels:
-        for (int l = 0; l < nWLen; l++) {
-            final Band band = insBands[l];
-
-            final Double totalFluxBand = bandFluxes.get(band);
-            if (totalFluxBand != null) {
-                weights[l] = modelFlux[l] / totalFluxBand;
-            } else {
-                weights[l] = 1.0;
-            }
-
+        if ((insBands != null) && !bandFluxes.isEmpty()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("modelFlux[{} - {}] = {} - weight: {}", convertWL(waveLengths[l]), band, modelFlux[l], weights[l]);
+                logger.debug("modelFlux: {}", Arrays.toString(modelFlux));
             }
-        }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("weights: {}", Arrays.toString(weights));
-        }
+            // Compute correction weights per wavelength:
+            final double[] weights = new double[nWLen];
 
-        // Adjust nbPhot (nbPhotInterf & nbPhotPhoto) with flux weights:
-        for (int n = 0; n < nObs; n++) {
-            final NoiseWParams param = this.params[n];
-
-            final double[] nbPhotInterf = param.nbPhotInterf;
-            final double[] nbPhotPhoto = param.nbPhotPhoto;
-
+            // Iterate on spectral channels:
             for (int l = 0; l < nWLen; l++) {
-                // corrected total number of photons using the model fluxes:
+                final Band band = insBands[l];
 
-                // number of photons in the interferometric channel (per telescope):
-                nbPhotInterf[l] *= weights[l];
-                // number of photons in each photometric channel (photometric flux):
-                nbPhotPhoto[l] *= weights[l];
+                final Double totalFluxBand = bandFluxes.get(band);
+                if (totalFluxBand != null) {
+                    weights[l] = modelFlux[l] / totalFluxBand;
+                } else {
+                    weights[l] = 1.0;
+                }
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("modelFlux[{} - {}] = {} - weight: {}", convertWL(waveLengths[l]), band, modelFlux[l], weights[l]);
+                }
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("prepareParameters:");
-                logger.debug("nbPhotonInI[iRefChannel]      : {}", nbPhotInterf[iRefChannel]);
-                logger.debug("nbPhotonInI                   : {}", Arrays.toString(nbPhotInterf));
-                logger.debug("nbPhotonInP[iRefChannel]      : {}", nbPhotPhoto[iRefChannel]);
-                logger.debug("nbPhotonInP                   : {}", Arrays.toString(nbPhotPhoto));
+                logger.debug("weights: {}", Arrays.toString(weights));
             }
 
-            // Prepare numeric constants for fast error computation:
+            // Adjust nbPhot (nbPhotInterf & nbPhotPhoto) with flux weights:
+            for (int n = 0; n < nObs; n++) {
+                final NoiseWParams param = this.params[n];
+
+                final double[] nbPhotObjPhoto = param.nbPhotObjPhoto;
+                final double[] nbPhotInterf = param.nbPhotInterf;
+                final double[] nbPhotPhoto = param.nbPhotPhoto;
+
+                for (int l = 0; l < nWLen; l++) {
+                    // corrected total number of photons using the model fluxes:
+                    nbPhotObjPhoto[l] *= weights[l];
+
+                    // number of photons in the interferometric channel (per telescope):
+                    nbPhotInterf[l] *= weights[l];
+                    // number of photons in each photometric channel (photometric flux):
+                    nbPhotPhoto[l] *= weights[l];
+                }
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("prepareParameters:");
+                    logger.debug("nbPhotonInI[iRefChannel]      : {}", nbPhotInterf[iRefChannel]);
+                    logger.debug("nbPhotonInI                   : {}", Arrays.toString(nbPhotInterf));
+                    logger.debug("nbPhotonInP[iRefChannel]      : {}", nbPhotPhoto[iRefChannel]);
+                    logger.debug("nbPhotonInP                   : {}", Arrays.toString(nbPhotPhoto));
+                    logger.debug("nbPhotObjPhoto                 : {}", Arrays.toString(nbPhotObjPhoto));
+                }
+            }
+        }
+
+        // Finally prepare numeric constants for fast error computations:
+        for (int n = 0; n < nObs; n++) {
             prepareVis2Error(n);
             prepareT3PhiError(n);
         }
@@ -1452,23 +1464,6 @@ public final class NoiseService implements VisNoiseService {
     }
 
     double[] computeTargetFlux() {
-
-        final double[] atmTrans = AtmosphereSpectrumService.getInstance().getTransmission(this.waveLengths, this.waveBands);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("atmTrans[iRefChannel]         : {}", atmTrans[iRefChannel]);
-            logger.debug("atmTrans                      : {}", Arrays.toString(atmTrans));
-        }
-
-        if (DO_DUMP_ATM_TRANS) {
-            System.out.println("AtmTransmission[" + instrumentName + "] [" + this.waveLengths[0] + " - "
-                    + this.waveLengths[this.waveLengths.length - 1] + "]:");
-            System.out.println("channel\twaveLength\tatm_trans");
-            for (int i = 0; i < waveLengths.length; i++) {
-                System.out.println(i + "\t" + waveLengths[i] + "\t" + atmTrans[i]);
-            }
-        }
-
         final int nWLen = nSpectralChannels;
         // nb photons per surface and per second:
         final double[] fluxSrcPerChannel = new double[nWLen];
@@ -1492,17 +1487,31 @@ public final class NoiseService implements VisNoiseService {
 
             // nb of photons m^-2.s^-1 for the target object:
             fluxSrcPerChannel[i] = fsrc * waveBands[i];
-
-            if (!DO_TEST_NO_ATM) {
-                fluxSrcPerChannel[i] *= atmTrans[i];
-            }
         }
         if (logger.isDebugEnabled()) {
             logger.debug("fluxSrcPerChannel[iRefChannel]: {}", fluxSrcPerChannel[iRefChannel]);
             logger.debug("fluxSrcPerChannel             : {}", Arrays.toString(fluxSrcPerChannel));
         }
-
         return fluxSrcPerChannel;
+    }
+
+    double[] computeAtmosphereTransmission() {
+        final double[] atmTrans = AtmosphereSpectrumService.getInstance().getTransmission(this.waveLengths, this.waveBands);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("atmTrans[iRefChannel]         : {}", atmTrans[iRefChannel]);
+            logger.debug("atmTrans                      : {}", Arrays.toString(atmTrans));
+        }
+
+        if (DO_DUMP_ATM_TRANS) {
+            System.out.println("AtmTransmission[" + instrumentName + "] [" + this.waveLengths[0] + " - "
+                    + this.waveLengths[this.waveLengths.length - 1] + "]:");
+            System.out.println("channel\twaveLength\tatm_trans");
+            for (int i = 0; i < waveLengths.length; i++) {
+                System.out.println(i + "\t" + waveLengths[i] + "\t" + atmTrans[i]);
+            }
+        }
+        return atmTrans;
     }
 
     public boolean isUseBias() {
@@ -1543,6 +1552,20 @@ public final class NoiseService implements VisNoiseService {
         }
         // correlated flux (include instrumental visibility loss) (1T):
         return this.params[iPoint].nbPhotInterf[iChannel] * vinst[iChannel];
+    }
+
+    /**
+     * Return the number of object photons in each photometric channel (photometric flux)
+     *
+     * @param iPoint index of the observable point
+     * @param iChannel index of the channel
+     * @return number of photons in each photometric channel
+     */
+    public double getNbPhotObjPhoto(final int iPoint, final int iChannel) {
+        if (check(iPoint, iChannel)) {
+            return Double.NaN;
+        }
+        return this.params[iPoint].nbPhotObjPhoto[iChannel];
     }
 
     /**
@@ -2109,6 +2132,8 @@ public final class NoiseService implements VisNoiseService {
     static class NoiseWParams {
 
         /* varying values (spectrally dependent) */
+        /** (W) number of object photons in each photometric channel (photometric flux) */
+        final double[] nbPhotObjPhoto;
         /** (W) number of photons in interferometer channel per telescope */
         final double[] nbPhotInterf;
         /** (W) number of photons in each photometric channel (photometric flux) */
@@ -2143,6 +2168,7 @@ public final class NoiseService implements VisNoiseService {
         final double[] t3detCoef2;
 
         NoiseWParams(final int nWLen) {
+            this.nbPhotObjPhoto = init(nWLen);
             this.nbPhotInterf = init(nWLen);
             this.nbPhotPhoto = init(nWLen);
             this.errPhotPhoto = init(nWLen);

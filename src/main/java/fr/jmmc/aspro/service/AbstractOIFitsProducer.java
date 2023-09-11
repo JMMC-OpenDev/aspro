@@ -102,6 +102,8 @@ public abstract class AbstractOIFitsProducer {
     /** internal complex visibility error [row][waveLength] for phases without photometry */
     protected double[][] visPhiError = null;
 
+    /** number of object photons in each photometric channel (photometric flux) [row][waveLength] */
+    protected double[][] nbPhotObjPhoto = null;
     /** number of photons in each photometric channel (photometric flux) [row][waveLength] */
     protected double[][] nbPhotPhoto = null;
     /** error on the number of photons in each photometric channel (photometric flux) [row][waveLength] */
@@ -111,6 +113,8 @@ public abstract class AbstractOIFitsProducer {
     /** error on squared correlated flux [row][waveLength] */
     protected double[][] errSqCorrFlux = null;
 
+    /** internal SNR flag on photometry [row][waveLength] */
+    protected boolean[][] photSNRFlag = null;
     /** internal complex visibility SNR flag on amplitudes [row][waveLength] */
     protected boolean[][] visAmpSNRFlag = null;
     /** internal complex visibility SNR flag on phases [row][waveLength] */
@@ -767,11 +771,13 @@ public abstract class AbstractOIFitsProducer {
         final double[][] cVisAmpError = new double[nRows][nChannels];
         final double[][] cVisPhiError = new double[nRows][nChannels];
 
+        final double[][] cNbPhotObjPhoto = new double[nRows][nChannels];
         final double[][] cNbPhotPhoto = new double[nRows][nChannels];
         final double[][] cErrPhotPhoto = new double[nRows][nChannels];
         final double[][] cSqCorrFlux = new double[nRows][nChannels];
         final double[][] cErrSqCorrFlux = new double[nRows][nChannels];
 
+        final boolean[][] cPhotSNRFlag = new boolean[nRows][nChannels];
         final boolean[][] cVisAmpSNRFlag = new boolean[nRows][nChannels];
         final boolean[][] cVisPhiSNRFlag = new boolean[nRows][nChannels];
 
@@ -788,11 +794,13 @@ public abstract class AbstractOIFitsProducer {
             final double[] cVisAmpErrorRow = cVisAmpError[k];
             final double[] cVisPhiErrorRow = cVisPhiError[k];
 
+            final double[] nbPhotObjPhotoRow = cNbPhotObjPhoto[k];
             final double[] nbPhotPhotoRow = cNbPhotPhoto[k];
             final double[] errPhotPhotoRow = cErrPhotPhoto[k];
             final double[] sqCorrFluxRow = cSqCorrFlux[k];
             final double[] errSqCorrFluxRow = cErrSqCorrFlux[k];
 
+            final boolean[] cPhotSNRFlagRow = cPhotSNRFlag[k];
             final boolean[] cVisAmpSNRFlagRow = cVisAmpSNRFlag[k];
             final boolean[] cVisPhiSNRFlagRow = cVisPhiSNRFlag[k];
 
@@ -800,11 +808,13 @@ public abstract class AbstractOIFitsProducer {
                 Arrays.fill(cVisAmpErrorRow, Double.NaN);
                 Arrays.fill(cVisPhiErrorRow, Double.NaN);
 
+                Arrays.fill(nbPhotObjPhotoRow, Double.NaN);
                 Arrays.fill(nbPhotPhotoRow, Double.NaN);
                 Arrays.fill(errPhotPhotoRow, Double.NaN);
                 Arrays.fill(sqCorrFluxRow, Double.NaN);
                 Arrays.fill(errSqCorrFluxRow, Double.NaN);
 
+                Arrays.fill(cPhotSNRFlagRow, true);
                 Arrays.fill(cVisAmpSNRFlagRow, true);
                 Arrays.fill(cVisPhiSNRFlagRow, true);
             } else {
@@ -813,10 +823,9 @@ public abstract class AbstractOIFitsProducer {
                 cVisRndDist[k] = stat.get();
                 pt = ptIdx[k];
 
-                double visAmp;
                 // Iterate on spectral channels:
                 for (l = 0; l < nChannels; l++) {
-                    visAmp = cVisRow[l].abs();
+                    final double visAmp = cVisRow[l].abs();
 
                     // complex visibility error for phases (no photometry):
                     // note: call this method first as it modifies internally other vectors:
@@ -825,11 +834,36 @@ public abstract class AbstractOIFitsProducer {
                     // complex visibility error for amplitudes (with photometry):
                     cVisAmpErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, true);
 
+                    // object flux:
+                    nbPhotObjPhotoRow[l] = ns.getNbPhotObjPhoto(pt, l);
+
                     // extra Vis2 columns (photo + square correlated fluxes):
                     nbPhotPhotoRow[l] = ns.getNbPhotPhoto(pt, l);
                     errPhotPhotoRow[l] = ns.getErrorPhotPhoto(pt, l);
                     sqCorrFluxRow[l] = ns.getSqCorrFlux(pt, l);
                     errSqCorrFluxRow[l] = ns.getErrorSqCorrFlux(pt, l);
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("waveLength: {}", this.waveLengths[l]);
+                        logger.debug("VisAmp    : ({}, {})", visAmp, cVisAmpErrorRow[l]);
+                        logger.debug("VisPhi    : ({}, {})", visAmp, cVisPhiErrorRow[l]);
+                        logger.debug("nbPhotObjPhoto : {}", nbPhotObjPhotoRow[l]);
+                        logger.debug("nbPhotPhoto  : {}", nbPhotPhotoRow[l]);
+                        logger.debug("errPhotPhoto : {}", errPhotPhotoRow[l]);
+                        logger.debug("sqCorrFlux   : {}", sqCorrFluxRow[l]);
+                        logger.debug("errSqCorrFlux: {}", errSqCorrFluxRow[l]);
+                    }
+
+                    // check SNR(V) for flux:
+                    // 0.25 to mimic snrThreshold = 2 threshold (v2):
+                    final double snrPhoto = 0.25 * nbPhotPhotoRow[l] / errPhotPhotoRow[l];
+
+                    if (snrPhoto < snrThreshold) {
+                        cPhotSNRFlagRow[l] = true;
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Low SNR[{}] (phot): {} < {}", this.waveLengths[l], snrPhoto, snrThreshold);
+                        }
+                    }
 
                     // check SNR(V) for amplitudes:
                     final double snrVisAmp = visAmp / cVisAmpErrorRow[l];
@@ -856,7 +890,7 @@ public abstract class AbstractOIFitsProducer {
 
                 if (DEBUG) {
                     final int iRef = ns.getIndexRefChannel();
-                    visAmp = cVisRow[iRef].abs();
+                    final double visAmp = cVisRow[iRef].abs();
 
                     logger.info("cVisAmpErrorRow(mid) = {} % (SNR = {}) (SNR V2 = {})",
                             100.0 * (cVisAmpErrorRow[iRef] / visAmp), (visAmp / cVisAmpErrorRow[iRef]), (visAmp / cVisAmpErrorRow[iRef]) / 2.0);
@@ -890,11 +924,13 @@ public abstract class AbstractOIFitsProducer {
         this.visAmpError = cVisAmpError;
         this.visPhiError = cVisPhiError;
 
+        this.nbPhotObjPhoto = cNbPhotObjPhoto;
         this.nbPhotPhoto = cNbPhotPhoto;
         this.errPhotPhoto = cErrPhotPhoto;
         this.sqCorrFlux = cSqCorrFlux;
         this.errSqCorrFlux = cErrSqCorrFlux;
 
+        this.photSNRFlag = cPhotSNRFlag;
         this.visAmpSNRFlag = cVisAmpSNRFlag;
         this.visPhiSNRFlag = cVisPhiSNRFlag;
 
@@ -925,7 +961,7 @@ public abstract class AbstractOIFitsProducer {
         if (!options.equals(other.getOptions())) {
             return false;
         }
-        return doNoise == other.doNoise;
+        return (doNoise == other.doNoise);
     }
 
     /**
@@ -1109,12 +1145,12 @@ public abstract class AbstractOIFitsProducer {
                     // weights on visibility ie normalization by F(k): 
                     // w(A) = alpha * F(A) / F(k) and w(B) = (1 - alpha) * F(B) / F(k)
                     // implicit total flux > 0:
-                    weightsL[i] = modelLerp.alpha * modelLerp.totalFluxLeft / modelLerp.totalFlux;
-                    weightsR[i] = modelLerp.oneMinusAlpha * modelLerp.totalFluxRight / modelLerp.totalFlux;
+                    weightsL[i] = modelLerp.alpha * modelLerp.totalFluxLeft / mFluxes[i];
+                    weightsR[i] = modelLerp.oneMinusAlpha * modelLerp.totalFluxRight / mFluxes[i];
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("TotalFlux:  left = {} right = {} interp = {}",
-                                modelLerp.totalFluxLeft, modelLerp.totalFluxRight, modelLerp.totalFlux);
+                                modelLerp.totalFluxLeft, modelLerp.totalFluxRight, mFluxes[i]);
                         logger.debug("alpha     = {}", modelLerp.alpha);
                         logger.debug("weights: left = {} right = {}", weightsL[i], weightsR[i]);
                     }
