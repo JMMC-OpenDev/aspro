@@ -195,6 +195,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         final JPanelFixture panel = window.panel("observabilityPanel");
 
+        // enable scroll view (needed for scroller below):
+        panel.checkBox("jCheckBoxScrollView").check();
         // enable detailed plot :
         panel.checkBox("jCheckBoxDetailedOutput").check();
 
@@ -213,6 +215,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         // disable detailed plot :
         panel.checkBox("jCheckBoxDetailedOutput").uncheck();
+        // disable scroll view :
+        panel.checkBox("jCheckBoxScrollView").uncheck();
 
         // disable wind restriction:
         GuiActionRunner.execute(new GuiTask() {
@@ -832,6 +836,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         final JPanelFixture panel = window.panel("observabilityPanel");
 
+        // enable scroll view (needed for scroller below):
+        panel.checkBox("jCheckBoxScrollView").check();
         // enable detailed plot :
         panel.checkBox("jCheckBoxDetailedOutput").check();
 
@@ -845,6 +851,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         // disable detailed plot :
         panel.checkBox("jCheckBoxDetailedOutput").uncheck();
+        // disable scroll view :
+        panel.checkBox("jCheckBoxScrollView").uncheck();
 
         // waits for computation to finish :
         AsproTestUtils.checkRunningTasks();
