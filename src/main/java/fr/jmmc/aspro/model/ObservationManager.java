@@ -1156,7 +1156,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     public boolean setInterferometerPopsMode(final BestPopsMode popsMode) {
         final InterferometerConfigurationChoice interferometerChoice = getMainObservation().getInterferometerConfiguration();
 
-        final boolean changed = isChanged(interferometerChoice.getBestPopsModeOrDefault(), popsMode);
+        final BestPopsMode popsModeOrDefault = (popsMode != null) ? popsMode : BestPopsMode.ALL;
+
+        final boolean changed = isChanged(interferometerChoice.getBestPopsModeOrDefault(), popsModeOrDefault);
         if (changed) {
             if (logger.isTraceEnabled()) {
                 logger.trace("setInterferometerPopsMode: {}", popsMode);
@@ -1676,8 +1678,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (targetConf == null) {
             return false;
         }
-        // haMin can be null :
-        final boolean changed = isChanged(haMin, targetConf.getHAMin());
+        // targetConf HAMin can be null :
+        final Double haMinOrDefault = (targetConf.getHAMin() != null) ? targetConf.getHAMin() : AsproConstants.HA_MIN;
+
+        final boolean changed = isChanged(haMin, haMinOrDefault);
         if (changed) {
             if (logger.isTraceEnabled()) {
                 logger.trace("setTargetHAMin: {}", haMin);
@@ -1700,8 +1704,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (targetConf == null) {
             return false;
         }
-        // haMax can be null :
-        final boolean changed = isChanged(haMax, targetConf.getHAMax());
+        // targetConf HAMax can be null :
+        final Double haMaxOrDefault = (targetConf.getHAMax() != null) ? targetConf.getHAMax() : AsproConstants.HA_MAX;
+
+        final boolean changed = isChanged(haMax, haMaxOrDefault);
         if (changed) {
             if (logger.isTraceEnabled()) {
                 logger.trace("setTargetHAMax: {}", haMax);
