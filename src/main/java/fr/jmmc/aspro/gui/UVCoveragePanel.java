@@ -1571,6 +1571,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // restore the automatic update observation :
             this.setAutoUpdateObservation(prevAutoUpdateObservation);
         }
+
+        // Do update observation as target's configuration may have changed:
+        // to ensure consistent AO setup and FT mode:
+        fireObservationUpdateEvent();
+
+        // anyway refresh plot later if no changes:
         refreshPlot();
     }
 
