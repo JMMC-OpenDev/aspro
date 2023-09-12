@@ -185,7 +185,9 @@ public class TargetConfiguration
         final TargetConfiguration other = (TargetConfiguration)o;
         return (areEquals(this.haMin, other.getHAMin())
                 && areEquals(this.haMax, other.getHAMax())
-                && areEquals(this.fringeTrackerMode, other.getFringeTrackerMode()));
+                && areEquals(this.aoSetup, other.getAoSetup())
+                && areEquals(this.fringeTrackerMode, other.getFringeTrackerMode())
+                && areEquals(this.instrumentWaveLengthRef, other.getInstrumentWaveLengthRef()));
     }
     
 //--simple--preserve
