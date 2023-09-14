@@ -382,19 +382,21 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             if (target != null) {
                 final TargetConfiguration targetConf = target.getConfiguration();
 
-                if (targetConf != null && targetConf.getInstrumentWaveLengthRef() != null) {
+                if ((targetConf != null) && (targetConf.getInstrumentWaveLengthRef() != null)) {
                     lambda = targetConf.getInstrumentWaveLengthRef();
                 }
 
-                if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
+                if ((targetConf != null) && (targetConf.getFringeTrackerMode() != null)) {
                     final String ftMode = targetConf.getFringeTrackerMode();
 
                     // TODO: handle FT modes properly: GroupTrack is hard coded !
                     // disable wavelength restrictions if FT enabled (basic GRA4MAT support, TODO: refine wavelength ranges for GRA4MAT)
-                    this.useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith(AsproConstants.FT_GROUP_TRACK)
-                            && (instrumentMode.getFtWaveLengthBandRef() == null));
-                    if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
-                        effBand = instrumentMode.getFtWaveLengthBandRef();
+                    if (useWavelengthRangeRestriction) {
+                        this.useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith(AsproConstants.FT_GROUP_TRACK)
+                                && (instrumentMode.getFtWaveLengthBandRef() == null));
+                        if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
+                            effBand = instrumentMode.getFtWaveLengthBandRef();
+                        }
                     }
                 }
             }

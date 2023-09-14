@@ -349,7 +349,7 @@ public final class NoiseService implements VisNoiseService {
 
         final TargetConfiguration targetConf = target.getConfiguration();
 
-        if (targetConf != null && targetConf.getAoSetup() != null) {
+        if ((targetConf != null) && (targetConf.getAoSetup() != null)) {
             this.aoSetup = telescope.findAOSetup(targetConf.getAoSetup());
             if (this.aoSetup == null) {
                 // TODO: support multi-config VLTI UT and AT confs:
@@ -627,7 +627,7 @@ public final class NoiseService implements VisNoiseService {
         // TODO: fix message if FT enabled (no restriction ...)
         if (useWavelengthRangeRestriction) {
             addWarning("Detector can not be read completely within 1 DIT: the wavelength range is restricted to "
-                    + df.format(insMode.getWaveLengthBandRef()) + " " + SpecialChars.UNIT_MICRO_METER);
+                    + df.format(insMode.getEffWaveLengthBandRef()) + " " + SpecialChars.UNIT_MICRO_METER);
         }
 
         final SpectralSetup table = insMode.getTable();
@@ -751,7 +751,7 @@ public final class NoiseService implements VisNoiseService {
 
         final TargetConfiguration targetConf = target.getConfiguration();
 
-        if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
+        if ((targetConf != null) && (targetConf.getFringeTrackerMode() != null)) {
             final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
             final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();

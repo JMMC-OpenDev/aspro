@@ -507,19 +507,21 @@ public final class UVCoverageService {
         if (target != null) {
             final TargetConfiguration targetConf = target.getConfiguration();
 
-            if (targetConf != null && targetConf.getInstrumentWaveLengthRef() != null) {
+            if ((targetConf != null) && (targetConf.getInstrumentWaveLengthRef() != null)) {
                 lambda = targetConf.getInstrumentWaveLengthRef();
             }
 
-            if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
+            if ((targetConf != null) && (targetConf.getFringeTrackerMode() != null)) {
                 final String ftMode = targetConf.getFringeTrackerMode();
 
                 // TODO: handle FT modes properly: GroupTrack is hard coded !
                 // disable wavelength restrictions if FT enabled (basic GRA4MAT support, TODO: refine wavelength ranges for GRA4MAT)
-                useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith(AsproConstants.FT_GROUP_TRACK)
-                        && (instrumentMode.getFtWaveLengthBandRef() == null));
-                if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
-                    effBand = instrumentMode.getFtWaveLengthBandRef();
+                if (useWavelengthRangeRestriction) {
+                    useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith(AsproConstants.FT_GROUP_TRACK)
+                            && (instrumentMode.getFtWaveLengthBandRef() == null));
+                    if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
+                        effBand = instrumentMode.getFtWaveLengthBandRef();
+                    }
                 }
             }
         }
@@ -595,6 +597,8 @@ public final class UVCoverageService {
                     // get noise service to compute noise on model image (if enabled):
                     this.data.setNoiseService(oiFitsCreator.getNoiseService());
                 } catch (IllegalArgumentException iae) {
+                    // note: it can catch jdk exceptions too:
+                    logger.debug("OIFitsCreatorService failure: ", iae);
                     addWarning(iae.getMessage());
                 }
             }
@@ -660,20 +664,22 @@ public final class UVCoverageService {
             if (target != null) {
                 final TargetConfiguration targetConf = target.getConfiguration();
 
-                if (targetConf != null && targetConf.getInstrumentWaveLengthRef() != null) {
+                if ((targetConf != null) && (targetConf.getInstrumentWaveLengthRef() != null)) {
                     lambda = targetConf.getInstrumentWaveLengthRef();
                 }
 
-                if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
+                if ((targetConf != null) && (targetConf.getFringeTrackerMode() != null)) {
                     final String ftMode = targetConf.getFringeTrackerMode();
 
                     // TODO: handle FT modes properly: GroupTrack is hard coded !
                     // disable wavelength restrictions if FT enabled (basic GRA4MAT support, TODO: refine wavelength ranges for GRA4MAT)
                     // but wrong if FT is disabled by noise service:
-                    useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith(AsproConstants.FT_GROUP_TRACK)
-                            && (instrumentMode.getFtWaveLengthBandRef() == null));
-                    if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
-                        effBand = instrumentMode.getFtWaveLengthBandRef();
+                    if (useWavelengthRangeRestriction) {
+                        useWavelengthRangeRestriction = !((ftMode != null) && !ftMode.startsWith(AsproConstants.FT_GROUP_TRACK)
+                                && (instrumentMode.getFtWaveLengthBandRef() == null));
+                        if (useWavelengthRangeRestriction && (instrumentMode.getFtWaveLengthBandRef() != null)) {
+                            effBand = instrumentMode.getFtWaveLengthBandRef();
+                        }
                     }
                 }
             }
