@@ -2085,7 +2085,7 @@ public final class NoiseService implements VisNoiseService {
             case V:
             case R:
             case I:
-                // always use V for VEGA:
+                // always use V for VEGA / SPICA:
                 return Band.V;
             case Q:
                 // avoid 'band Q not supported'

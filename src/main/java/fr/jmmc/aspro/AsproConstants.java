@@ -115,7 +115,7 @@ public interface AsproConstants {
     /** CHARA VEGA (2T/3T) */
     public static final String INS_VEGA = "VEGA_";
     /** CHARA SPICA (6T) */
-    public static final String INS_SPICA = "SPICA_";
+    public static final String INS_SPICA = "SPICA";
     /** instrument (obsportal) choices */
     public final static Vector<String> INS_OBS_LIST = new Vector<String>(Arrays.asList(
             new String[]{
