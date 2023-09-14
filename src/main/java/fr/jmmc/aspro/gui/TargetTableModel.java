@@ -190,7 +190,7 @@ public final class TargetTableModel extends ColumnDescURLTableModel {
             }
 
         }
-        logger.info("setData: listColumnDesc: {}", listColumnDesc);
+        logger.debug("setData: listColumnDesc: {}", listColumnDesc);
 
         // notify changes
         fireTableStructureChanged();
