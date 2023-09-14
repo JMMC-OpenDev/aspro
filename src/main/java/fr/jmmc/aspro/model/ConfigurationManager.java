@@ -201,8 +201,8 @@ public final class ConfigurationManager extends BaseOIManager {
 
         final String appVersion = ApplicationDescription.getInstance().getProgramVersion();
 
-        final float min = ApplicationDescription.parseVersion(minVersion);
-        final float current = ApplicationDescription.parseVersion(appVersion);
+        final double min = ApplicationDescription.parseVersion(minVersion);
+        final double current = ApplicationDescription.parseVersion(appVersion);
 
         if (min > current) {
             FeedbackReport.openDialog(true,
