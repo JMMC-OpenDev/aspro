@@ -5,14 +5,16 @@ This module contains the ASPRO2 java application developed by the JMMC technical
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 
-See [ASPRO2](https://www.jmmc.fr/aspro)
-See [JMMC releases](https://www.jmmc.fr/releases/)
-See [JMMC OpenDev @ github](https://github.com/JMMC-OpenDev/)
+- See [ASPRO2](https://www.jmmc.fr/aspro)
+- See [JMMC releases](https://www.jmmc.fr/releases/)
+- See [JMMC OpenDev @ github](https://github.com/JMMC-OpenDev/)
 
-See [CI nightly builds](https://github.com/JMMC-OpenDev/jmmc-java-build/actions/workflows/build.yml)
+- See [CI nightly builds](https://github.com/JMMC-OpenDev/jmmc-java-build/actions/workflows/build.yml)
 
 
 ## Documentation
+
+The ASPRO2 User Manual is available at: [aspro-doc.md](https://github.com/JMMC-OpenDev/aspro-doc/blob/main/aspro-doc.md).
 
 This module contains the source code of the JMMC ASPRO2 Graphical interface.
 See the `pom.xml` file to get all dependencies, including other JMMC OpenDev modules:
