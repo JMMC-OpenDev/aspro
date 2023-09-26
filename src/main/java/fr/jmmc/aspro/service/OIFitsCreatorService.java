@@ -961,17 +961,17 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         }
                         flags[k][l] = doFlag;
                     }
+                }
 
-                    // station index :
-                    staIndexes[k][0] = beamMapping.get(beam).shortValue();
+                // station index :
+                staIndexes[k][0] = beamMapping.get(beam).shortValue();
 
-                    // increment j:
-                    j++;
+                // increment j:
+                j++;
 
-                    // fast interrupt :
-                    if (currentThread.isInterrupted()) {
-                        return;
-                    }
+                // fast interrupt :
+                if (currentThread.isInterrupted()) {
+                    return;
                 }
             } // beams
         } // HA
