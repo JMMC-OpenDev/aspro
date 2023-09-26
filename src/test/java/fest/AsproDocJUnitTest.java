@@ -65,7 +65,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     private final static String FAKE_EMAIL = "FAKE_EMAIL";
     private static String CURRENT_EMAIL = "";
     
-    private static final int M_TOP = 14; /* font scale = 1.0 */
+    /** robot take screenshot (top offset for gnome3) */
+    private static final int M_TOP = 28; // 28 (breeze), 14 (gnome3) at font scale = 1.0 */
 
     private static void defineEmailPref(final String email) {
         try {
@@ -263,11 +264,14 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // Capture observability plot :
         getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
+
         try {
             enableTooltips(true);
 
             // move the mouse on the first observability interval (top right corner):
-            robot().moveMouse(window.component(), 380, 440); // TODO: check position
+            robot().moveMouse(window.component(), 380, 425 + M_TOP); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
@@ -320,6 +324,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // Capture UV Coverage plot :
         getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
 
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
+
         final BufferedImage image = takeScreenshotOf(window);
         saveImage(image, "Aspro2-screen.png");
 
@@ -342,7 +349,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             enableTooltips(true);
 
             // move the mouse on one uv measurement:
-            robot().moveMouse(window.component(), 690, 610); // TODO: check position
+            robot().moveMouse(window.component(), 690, 590 + M_TOP); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
@@ -746,7 +753,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             enableTooltips(true);
 
             // move the mouse on Status Warning:
-            robot().moveMouse(window.component(), 760, 250); // TODO: check position
+            robot().moveMouse(window.component(), 760, 230 + M_TOP); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
@@ -791,7 +798,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
             // move the mouse on plot:
-            robot().moveMouse(window.component(), 760, 540); // TODO: check position
+            robot().moveMouse(window.component(), 760, 525 + M_TOP); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
@@ -802,7 +809,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
 
             // move the mouse on plot:
-            robot().moveMouse(window.component(), 760, 500); // TODO: check position
+            robot().moveMouse(window.component(), 760, 485 + M_TOP); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
