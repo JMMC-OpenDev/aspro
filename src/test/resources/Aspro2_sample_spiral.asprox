@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <schemaVersion>2018.04</schemaVersion>
-    <targetVersion>2019.09</targetVersion>
+    <targetVersion>2023.09</targetVersion>
     <name>default</name>
     <when>
-        <date>2015-10-28</date>
+        <date>2023-10-28</date>
         <nightRestriction>true</nightRestriction>
-        <atmosphereQuality>Excellent</atmosphereQuality>
+        <atmosphereQuality>Good</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 96</name>
+        <name>VLTI Period 112</name>
         <minElevation>30.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
-        <name>AMBER</name>
-        <stations>B2 D0 C1</stations>
+        <name>GRAVITY</name>
+        <stations>A0 B2 D0 C1</stations>
         <pops></pops>
-        <instrumentMode>Low_JHK</instrumentMode>
+        <instrumentMode>LOW-COMBINED</instrumentMode>
         <samplingPeriod>60.0</samplingPeriod>
-        <acquisitionTime>300.0</acquisitionTime>
+        <acquisitionTime>600.0</acquisitionTime>
     </instrumentConfiguration>
     <target id="HIP1234">
         <name>HIP1234</name>
@@ -38,33 +38,32 @@
         <FLUX_G>7.2025</FLUX_G>
         <FLUX_J>6.416</FLUX_J>
         <FLUX_H>6.22</FLUX_H>
-        <FLUX_K>6.163</FLUX_K>
         <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_disk1" type="elong_disk">
             <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter,
-elong_ratio, major_axis_pos_angle)
+                elong_ratio, major_axis_pos_angle)
 
-Returns the Fourier transform, at spatial frequencies (UFREQ,VFREQ)
-given in 1/rad, of a normalized ellipse centered at coordinates (X,Y) (milliarcsecond)
-with a ratio ELONG_RATIO between the major diameter and the minor one MINOR_AXIS_DIAMETER,
-turned from the positive vertical semi-axis (i.e. North direction) with angle
-MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis
-(i.e. East direction). (the elongation is along the major_axis)
+                Returns the Fourier transform, at spatial frequencies (UFREQ,VFREQ)
+                given in 1/rad, of a normalized ellipse centered at coordinates (X,Y) (milliarcsecond)
+                with a ratio ELONG_RATIO between the major diameter and the minor one MINOR_AXIS_DIAMETER,
+                turned from the positive vertical semi-axis (i.e. North direction) with angle
+                MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis
+                (i.e. East direction). (the elongation is along the major_axis)
 
-|North
-|               For avoiding degenerescence, the domain of variation
-|---&gt;East       of MAJOR_AXIS_POS_ANGLE is 180 degrees,
-|               for ex. from 0 to 180 degrees.
+                |North
+                |               For avoiding degenerescence, the domain of variation
+                |---&gt;East       of MAJOR_AXIS_POS_ANGLE is 180 degrees,
+                |               for ex. from 0 to 180 degrees.
 
-ELONG_RATIO = major_axis / minor_axis
+                ELONG_RATIO = major_axis / minor_axis
 
-FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
-The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO
-is smaller than 1.
+                FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
+                The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO
+                is smaller than 1.
 
-UFREQ and VFREQ must be conformable. The returned array is always
-complex and with dimensions dimsof(UFREQ,VFREQ).
-</desc>
+                UFREQ and VFREQ must be conformable. The returned array is always
+                complex and with dimensions dimsof(UFREQ,VFREQ).
+            </desc>
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
                 <hasFixedValue>false</hasFixedValue>
@@ -101,7 +100,8 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         <configuration>
             <HAMin>-12.0</HAMin>
             <HAMax>12.0</HAMax>
-            <aoSetup>STRAP</aoSetup>
+            <aoSetup>NAOMI_BRIGHT</aoSetup>
+            <fringeTrackerMode>FringeTrack GRAVITY</fringeTrackerMode>
         </configuration>
     </target>
     <target id="ETA_TAU">
@@ -156,15 +156,17 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
             <name>HighMass.fits.gz</name>
             <file>/home/bourgesl/dev/aspro/src/test/resources/HighMass.fits.gz</file>
             <checksum>2869938388</checksum>
-            <scaleX>2.42406840554768E-10</scaleX>
-            <scaleY>2.42406840554768E-10</scaleY>
+            <scaleX>9.696273622190718E-11</scaleX>
+            <scaleY>9.696273622190718E-11</scaleY>
         </userModel>
         <configuration>
             <HAMin>-4.0</HAMin>
             <HAMax>4.0</HAMax>
-            <aoSetup>STRAP</aoSetup>
+            <aoSetup>NAOMI_BRIGHT</aoSetup>
+            <fringeTrackerMode>FringeTrack GRAVITY</fringeTrackerMode>
         </configuration>
     </target>
+    <selectedTargets>HD_1234</selectedTargets>
     <targetUserInfos>
         <group id="JMMC_AO">
             <name>AO Star</name>
@@ -186,6 +188,6 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
         </group>
     </targetUserInfos>
     <variant>
-        <stations>B2 D0 C1</stations>
+        <stations>A0 B2 D0 C1</stations>
     </variant>
 </a:observationSetting>

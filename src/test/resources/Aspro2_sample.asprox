@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <schemaVersion>2018.04</schemaVersion>
-    <targetVersion>2019.09</targetVersion>
+    <targetVersion>2023.09</targetVersion>
     <name>default</name>
     <when>
-        <date>2015-10-28</date>
+        <date>2023-10-28</date>
         <nightRestriction>true</nightRestriction>
         <atmosphereQuality>Good</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 96</name>
+        <name>VLTI Period 112</name>
         <minElevation>30.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
-        <name>AMBER</name>
-        <stations>K0 G2 D0</stations>
+        <name>GRAVITY</name>
+        <stations>K0 G2 D0 J3</stations>
         <pops></pops>
-        <instrumentMode>Low_JHK</instrumentMode>
+        <instrumentMode>LOW-COMBINED</instrumentMode>
         <samplingPeriod>60.0</samplingPeriod>
-        <acquisitionTime>300.0</acquisitionTime>
+        <acquisitionTime>600.0</acquisitionTime>
     </instrumentConfiguration>
     <target id="HIP1234">
         <name>HIP1234</name>
@@ -100,7 +100,8 @@
         <configuration>
             <HAMin>-12.0</HAMin>
             <HAMax>12.0</HAMax>
-            <aoSetup>STRAP</aoSetup>
+            <aoSetup>NAOMI_BRIGHT</aoSetup>
+            <fringeTrackerMode>FringeTrack GRAVITY</fringeTrackerMode>
         </configuration>
     </target>
     <target id="ETA_TAU">
@@ -202,9 +203,11 @@
         <configuration>
             <HAMin>-4.0</HAMin>
             <HAMax>4.0</HAMax>
-            <aoSetup>STRAP</aoSetup>
+            <aoSetup>NAOMI_BRIGHT</aoSetup>
+            <fringeTrackerMode>FringeTrack GRAVITY</fringeTrackerMode>
         </configuration>
     </target>
+    <selectedTargets>HD_1234</selectedTargets>
     <targetUserInfos>
         <group id="JMMC_AO">
             <name>AO Star</name>
@@ -226,6 +229,6 @@
         </group>
     </targetUserInfos>
     <variant>
-        <stations>K0 G2 D0</stations>
+        <stations>K0 G2 D0 J3</stations>
     </variant>
 </a:observationSetting>

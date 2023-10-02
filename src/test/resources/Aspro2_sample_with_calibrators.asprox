@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<a:observationSetting xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<a:observationSetting xmlns:a="http://www.jmmc.fr/aspro-oi/0.1" xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <schemaVersion>2018.04</schemaVersion>
-    <targetVersion>2022.03</targetVersion>
+    <targetVersion>2023.09</targetVersion>
     <name>default</name>
     <when>
-        <date>2015-10-28</date>
+        <date>2023-10-28</date>
         <nightRestriction>true</nightRestriction>
-        <atmosphereQuality>Average</atmosphereQuality>
+        <atmosphereQuality>Good</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 106</name>
+        <name>VLTI Period 112</name>
         <minElevation>30.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
@@ -22,49 +22,48 @@
     </instrumentConfiguration>
     <target id="HIP1234">
         <name>HIP1234</name>
-        <RA>00:15:21.5506003728</RA>
-        <DEC>+28:35:13.831766304</DEC>
+        <RA>00:15:21.5509030652</RA>
+        <DEC>+28:35:13.846943724</DEC>
         <EQUINOX>2000.0</EQUINOX>
         <SYSVEL>16.2</SYSVEL>
-        <PMRA>54.331</PMRA>
-        <PMDEC>-85.416</PMDEC>
-        <PARALLAX>13.8466</PARALLAX>
-        <PARA_ERR>0.3515</PARA_ERR>
-        <IDS>Gaia EDR3 2859970279471313664,TIC 437749749,AG+28 25,AGKR 186,BD+27 25,GSC 01736-00683,HD 1094,HIC 1234,HIP 1234,PPM 89559,SAO 73846,TD1 103,TYC 1736-683-1,YZ 28 84,uvby98 100001094,2MASS J00152153+2835139,Gaia DR1 2859970275176107648,GEN# +1.00001094,Gaia DR2 2859970279471313664</IDS>
+        <PMRA>54.045</PMRA>
+        <PMDEC>-86.431</PMDEC>
+        <PARALLAX>14.0538</PARALLAX>
+        <PARA_ERR>0.2289</PARA_ERR>
+        <IDS>AG+28 25,AGKR 186,BD+27 25,GSC 01736-00683,HD 1094,HIC 1234,HIP 1234,PPM 89559,SAO 73846,TD1 103,TYC 1736-683-1,YZ 28 84,uvby98 100001094,2MASS J00152153+2835139,Gaia DR1 2859970275176107648,GEN# +1.00001094,Gaia DR2 2859970279471313664</IDS>
         <OBJTYP>*,PM*,IR,UV</OBJTYP>
         <SPECTYP>F5</SPECTYP>
         <FLUX_B>7.77</FLUX_B>
         <FLUX_V>7.347</FLUX_V>
         <FLUX_G>7.2025</FLUX_G>
         <FLUX_J>6.416</FLUX_J>
-        <FLUX_H>6.0</FLUX_H>
-        <FLUX_K>6.163</FLUX_K>
+        <FLUX_H>6.22</FLUX_H>
         <useAnalyticalModel>true</useAnalyticalModel>
         <tm:model name="elong_disk1" type="elong_disk">
-            <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter, 
-elong_ratio, major_axis_pos_angle) 
+            <desc>lpb_elong_disk(ufreq, vfreq, flux_weight, x, y, minor_axis_diameter,
+                elong_ratio, major_axis_pos_angle)
 
-Returns the Fourier transform, at spatial frequencies (UFREQ,VFREQ) 
-given in 1/rad, of a normalized ellipse centered at coordinates (X,Y) (milliarcsecond) 
-with a ratio ELONG_RATIO between the major diameter and the minor one MINOR_AXIS_DIAMETER, 
-turned from the positive vertical semi-axis (i.e. North direction) with angle 
-MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis 
-(i.e. East direction). (the elongation is along the major_axis) 
+                Returns the Fourier transform, at spatial frequencies (UFREQ,VFREQ)
+                given in 1/rad, of a normalized ellipse centered at coordinates (X,Y) (milliarcsecond)
+                with a ratio ELONG_RATIO between the major diameter and the minor one MINOR_AXIS_DIAMETER,
+                turned from the positive vertical semi-axis (i.e. North direction) with angle
+                MAJOR_AXIS_POS_ANGLE, in degrees, towards to the positive horizontal semi-axis
+                (i.e. East direction). (the elongation is along the major_axis)
 
-|North 
-|               For avoiding degenerescence, the domain of variation 
-|---&gt;East       of MAJOR_AXIS_POS_ANGLE is 180 degrees, 
-|               for ex. from 0 to 180 degrees. 
+                |North
+                |               For avoiding degenerescence, the domain of variation
+                |---&gt;East       of MAJOR_AXIS_POS_ANGLE is 180 degrees,
+                |               for ex. from 0 to 180 degrees.
 
-ELONG_RATIO = major_axis / minor_axis 
+                ELONG_RATIO = major_axis / minor_axis
 
-FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1. 
-The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO 
-is smaller than 1. 
+                FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
+                The function returns an error if MINOR_AXIS_DIAMETER is negative or if ELONG_RATIO
+                is smaller than 1.
 
-UFREQ and VFREQ must be conformable. The returned array is always 
-complex and with dimensions dimsof(UFREQ,VFREQ). 
-</desc>
+                UFREQ and VFREQ must be conformable. The returned array is always
+                complex and with dimensions dimsof(UFREQ,VFREQ).
+            </desc>
             <tm:parameter name="flux_weight1" type="flux_weight">
                 <value>1.0</value>
                 <hasFixedValue>false</hasFixedValue>
@@ -177,6 +176,8 @@ smaller than 1.</desc>
         <configuration>
             <HAMin>-4.0</HAMin>
             <HAMax>4.0</HAMax>
+            <aoSetup>NAOMI_BRIGHT</aoSetup>
+            <fringeTrackerMode>FringeTrack GRAVITY</fringeTrackerMode>
         </configuration>
     </target>
     <target id="ETA_TAU">
@@ -1393,6 +1394,7 @@ smaller than 1.</desc>
             <field xsi:type="a:BooleanValue" value="false" name="deletedFlag"/>
         </calibratorInfos>
     </target>
+    <selectedTargets>HIP1234</selectedTargets>
     <targetUserInfos>
         <calibrators>HD_1583 HD_112 HD_2315 HD_1996 HIP_1079 HD_224895 HD_2839 HD_5164</calibrators>
         <group id="JMMC_AO">
