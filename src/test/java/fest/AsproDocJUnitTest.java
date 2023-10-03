@@ -209,11 +209,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // Capture observability plot of detailed plot :
         saveScreenshot(getMainTabbedPane(), "Aspro2-wind-obs-det.png");
 
-        panel.scrollBar("scroller").scrollTo(8); // see ETA TAU (moon) [0 to 14]
-
-        // Capture observability plot of detailed plot :
-        saveScreenshot(getMainTabbedPane(), "Aspro2-moon-obs-det.png");
-
         // disable detailed plot :
         panel.checkBox("jCheckBoxDetailedOutput").uncheck();
         // disable scroll view :
@@ -349,7 +344,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             enableTooltips(true);
 
             // move the mouse on one uv measurement:
-            robot().moveMouse(window.component(), 690, 590 + M_TOP); // TODO: check position
+            robot().moveMouse(window.component(), 690, 580 + M_TOP); // TODO: check position
 
             // let tooltip appear:
             pauseMedium();
@@ -371,6 +366,11 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     @Test
     @GUITest
     public void m007_shouldShowVis2Plot() {
+
+        window.list("jListTargets").selectItem("HIP1234");
+
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
 
         // Capture OIFits viewer plot :
         showPlotTab(SettingPanel.TAB_OIFITS_VIEWER, "Aspro2-vis2-noErr.png");
@@ -688,6 +688,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
             // Capture UV Coverage plot :
             showPlotTab(SettingPanel.TAB_UV_COVERAGE, "Aspro2-UserModel-uv.png");
+
+            // reset zoom:
+            panel.textBox("jFieldUVMax").setText("139");
 
         } catch (PreferencesException pe) {
             logger.error("setPreference failed", pe);

@@ -207,7 +207,7 @@
             <fringeTrackerMode>FringeTrack GRAVITY</fringeTrackerMode>
         </configuration>
     </target>
-    <selectedTargets>HD_1234</selectedTargets>
+    <selectedTargets>HIP1234</selectedTargets>
     <targetUserInfos>
         <group id="JMMC_AO">
             <name>AO Star</name>
