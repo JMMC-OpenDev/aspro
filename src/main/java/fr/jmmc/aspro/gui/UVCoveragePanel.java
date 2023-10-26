@@ -1996,6 +1996,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 // compute the uv coverage data :
                 uvDataList.add(
+                        // should skip FT / AO targets as Science targets ?
                         new UVCoverageService(observation, obsData, targetName, this.uvMax, this.doUVSupport,
                                 this.useInstrumentBias, this.doDataNoise, this.options).compute()
                 );
@@ -2211,6 +2212,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // ObservabilityService warnings:
                 mergedWarningContainer.addWarnings(uvDataCollection.getFirstObsData().getWarningContainer());
                 // UVCoverageService warnings:
+                if (uvDataFirst.getFtUVCoverageData() != null) {
+                    mergedWarningContainer.addWarnings(uvDataFirst.getFtUVCoverageData().getWarningContainer());
+                }
                 mergedWarningContainer.addWarnings(uvDataFirst.getWarningContainer());
 
             } else {
@@ -2228,6 +2232,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 // UVCoverageService warnings:
                 for (UVCoverageData uvData : uvDataList) {
+                    if (uvData.getFtUVCoverageData() != null) {
+                        mergedWarningContainer.addWarnings(uvData.getFtUVCoverageData().getWarningContainer());
+                    }
                     mergedWarningContainer.addWarnings(uvData.getWarningContainer());
                 }
             }
@@ -2406,29 +2413,39 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             final List<OIFitsCreatorService> oiFitsCreatorList = new ArrayList<OIFitsCreatorService>(uvDataCollection.size());
 
-            OIFitsCreatorService oiFitsCreator;
-
             for (UVCoverageData uvData : uvDataCollection.getUVDataList()) {
-                oiFitsCreator = uvData.getOiFitsCreator();
+                final UVCoverageData ftUVCoverageData = uvData.getFtUVCoverageData();
+                if (ftUVCoverageData != null) {
+                    final OIFitsCreatorService oiFitsCreator = ftUVCoverageData.getOiFitsCreator();
 
-                // check if OIFits data available:
+                    // check if OIFits creator available:
+                    if (oiFitsCreator != null) {
+                        oiFitsCreatorList.add(oiFitsCreator);
+                    }
+                }
+
+                final OIFitsCreatorService oiFitsCreator = uvData.getOiFitsCreator();
+
+                // check if OIFits creator available:
                 if (oiFitsCreator != null) {
                     oiFitsCreatorList.add(oiFitsCreator);
                 }
             }
 
-            if (oiFitsCreatorList.size() > 0) {
+            if (!oiFitsCreatorList.isEmpty()) {
                 computing = true;
 
                 // update the status bar :
                 StatusBar.show(MSG_COMPUTING_OIFITS);
 
+                /* get selected target name */
+                final String targetName = getSelectedTargetName();
+
                 // Create OIFits task worker :
                 // Cancel other tasks and execute this new task :
-                new OIFitsSwingWorker(uvDataCollection, oiFitsCreatorList).executeTask();
+                new OIFitsSwingWorker(targetName, uvDataCollection, oiFitsCreatorList).executeTask();
             }
         }
-
         return computing;
     }
 
@@ -3561,6 +3578,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private final static class OIFitsSwingWorker extends TaskSwingWorker<List<OIFitsFile>> {
 
         /* members */
+        /** target name */
+        private final String targetName;
+
         /** uv coverage data collection */
         private final ObservationCollectionUVData uvDataCollection;
         /** list of oiFitsCreator services to execute */
@@ -3572,8 +3592,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param uvDataCollection uv coverage data collection
          * @param oiFitsCreatorList list of oiFitsCreator services to execute
          */
-        private OIFitsSwingWorker(final ObservationCollectionUVData uvDataCollection, final List<OIFitsCreatorService> oiFitsCreatorList) {
+        private OIFitsSwingWorker(final String targetName,
+                                  final ObservationCollectionUVData uvDataCollection,
+                                  final List<OIFitsCreatorService> oiFitsCreatorList) {
             super(AsproTaskRegistry.TASK_OIFITS);
+            this.targetName = targetName;
             this.uvDataCollection = uvDataCollection;
             this.oiFitsCreatorList = oiFitsCreatorList;
         }
@@ -3632,7 +3655,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // update the OIFits structure in the current observation :
             om.setOIFitsData(
-                    new OIFitsData(oiFitsList, this.uvDataCollection.getWarningContainer())
+                    new OIFitsData(targetName, oiFitsList, this.uvDataCollection.getWarningContainer())
             );
 
             // update the status bar:

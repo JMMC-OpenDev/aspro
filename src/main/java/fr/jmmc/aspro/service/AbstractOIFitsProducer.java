@@ -10,6 +10,7 @@ import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.UserModel;
+import fr.jmmc.aspro.model.util.TargetRole;
 import fr.jmmc.aspro.model.util.UserModelDataComparator;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.jmal.Band;
@@ -26,6 +27,7 @@ import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import static fr.jmmc.jmcs.util.StatUtils.N_SAMPLES;
 import fr.jmmc.jmal.complex.Complex;
+import fr.jmmc.jmcs.util.WelfordVariance;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.range.Range;
 import java.util.ArrayList;
@@ -53,8 +55,6 @@ public abstract class AbstractOIFitsProducer {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(AbstractOIFitsProducer.class.getName());
 
-    /** enable DEBUG mode */
-    public final static boolean DEBUG = false;
     /** use sampled mean(sample) instead of theoretical value */
     protected final static boolean DO_USE_SAMPLED_MEAN = false;
     /** enable interpolation in image cubes */
@@ -69,11 +69,15 @@ public abstract class AbstractOIFitsProducer {
     protected static final ParallelJobExecutor JOB_EXECUTOR = ParallelJobExecutor.getInstance();
     /** supersampling threshold (number of channels) */
     protected final static int SUPER_SAMPLING_THRESHOLD = 100;
+    /** 2 x PI */
+    protected static final double TWO_PI = 2d * Math.PI;
 
     /* members */
  /* input */
     /** selected target */
     protected final Target target;
+    /** flag indicating the role of this service (SCI or FT) */
+    protected final TargetRole targetRole;
     /** OIFits options */
     protected final OIFitsProducerOptions options;
 
@@ -82,6 +86,10 @@ public abstract class AbstractOIFitsProducer {
     protected OIFitsFile oiFitsFile = null;
 
     /* internal */
+    /** instrument name (null before prepare call) */
+    protected String instrumentName = null;
+    /** base line list */
+    protected List<BaseLine> baseLines = null;
     /** target has model (analytical or user model) */
     protected final boolean hasModel;
     /** wavelengths */
@@ -95,51 +103,33 @@ public abstract class AbstractOIFitsProducer {
     /** flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid */
     protected boolean doNoise = false;
     /* complex visibility fields */
-    /** internal computed complex visibility [row][waveLength] */
-    protected Complex[][] visComplex = null;
-    /** internal complex visibility error [row][waveLength] for amplitudes with photometry */
-    protected double[][] visAmpError = null;
-    /** internal complex visibility error [row][waveLength] for phases without photometry */
-    protected double[][] visPhiError = null;
+    protected UVFreqTable freqTable = null;
+    /** internal computed complex visibility and error data [row][waveLength] */
+    protected VisDataTable dataTable = null;
 
-    /** number of object photons in each photometric channel (photometric flux) [row][waveLength] */
-    protected double[][] nbPhotObjPhoto = null;
-    /** number of photons in each photometric channel (photometric flux) [row][waveLength] */
-    protected double[][] nbPhotPhoto = null;
-    /** error on the number of photons in each photometric channel (photometric flux) [row][waveLength] */
-    protected double[][] errPhotPhoto = null;
-    /** squared correlated flux [row][waveLength] */
-    protected double[][] sqCorrFlux = null;
-    /** error on squared correlated flux [row][waveLength] */
-    protected double[][] errSqCorrFlux = null;
-
-    /** internal SNR flag on photometry [row][waveLength] */
-    protected boolean[][] photSNRFlag = null;
-    /** internal complex visibility SNR flag on amplitudes [row][waveLength] */
-    protected boolean[][] visAmpSNRFlag = null;
-    /** internal complex visibility SNR flag on phases [row][waveLength] */
-    protected boolean[][] visPhiSNRFlag = null;
-
-    /** internal complex distribution [row] */
-    protected ComplexDistribution[] visRndDist = null;
-    /** internal random index [row][waveLength] */
-    protected int[][] visRndIdx = null;
+    /** (optional) FT OIFits creator */
+    private final AbstractOIFitsProducer ftOiFitsCreator;
 
     /**
      * Protected constructor
      * @param target target to process
+     * @param targetRole target role of this observation
      * @param options OIFits options
+     * @param ftOiFitsCreator optional FT OIFits creator
      */
-    protected AbstractOIFitsProducer(final Target target,
-                                     final OIFitsProducerOptions options) {
+    protected AbstractOIFitsProducer(final Target target, final TargetRole targetRole, final OIFitsProducerOptions options,
+                                     final AbstractOIFitsProducer ftOiFitsCreator) {
 
         this.target = target;
+        this.targetRole = targetRole;
 
         // use target model:
         this.hasModel = target.hasModel();
 
         // OIFits options:
         this.options = options;
+
+        this.ftOiFitsCreator = ftOiFitsCreator;
 
         logger.debug("options: {}", options);
     }
@@ -413,7 +403,7 @@ public abstract class AbstractOIFitsProducer {
         }
 
         // Compute spatial frequencies:
-        final UVFreqTable freqTable = computeSpatialFreqTable(sampleWaveLengths);
+        this.freqTable = computeSpatialFreqTable(sampleWaveLengths);
         if (freqTable == null) {
             return false;
         }
@@ -421,15 +411,11 @@ public abstract class AbstractOIFitsProducer {
         final double[][] ufreq = freqTable.ufreq;
         final double[][] vfreq = freqTable.vfreq;
 
-        // index of the observation point (HA):
-        final int[] ptIdx = freqTable.ptIdx;
-
-        final int nBl = freqTable.nBl;
         final int nRows = freqTable.nRows;
         final int nDataPoints = nRows * nWLen;
 
-        logger.info("computeModelVisibilities: {} data points [{} rows - {} spectral channels - {} samples]({}) - please wait ...",
-                nDataPoints, nRows, nChannels, nSamples, options.mathMode);
+        logger.info("computeModelVisibilities(): {} data points [{} rows - {} spectral channels - {} samples]({}) - please wait ...",
+                instrumentName, nDataPoints, nRows, nChannels, nSamples, options.mathMode);
 
         // Allocate data array for complex visibility and error :
         final MutableComplex[][] cmVis = new MutableComplex[nRows][];
@@ -653,9 +639,13 @@ public abstract class AbstractOIFitsProducer {
             logger.debug("mFluxes:  {}", Arrays.toString(mFluxes));
         }
 
-        // Sampling integration on spectral channels:
-        // use integration of several samples
-        final ImmutableComplex[][] cVis = new ImmutableComplex[nRows][nChannels];
+        // Sample integration on spectral channels:
+        this.dataTable = new VisDataTable(nRows, nChannels);
+
+        // integration of several samples:
+        final Complex[][] visComplex = dataTable.visComplex;
+
+        final WelfordVariance visAmpStats = new WelfordVariance();
 
         // integrate modelFlux [nChannels]:
         final double[] modelFluxes;
@@ -667,7 +657,14 @@ public abstract class AbstractOIFitsProducer {
             // Iterate on rows :
             for (int k = 0; k < nRows; k++) {
                 // Simply convert array:
-                cVis[k] = convertArray(cmVis[k], nChannels);
+                final MutableComplex[] cmVisRow = cmVis[k];
+                final Complex[] visComplexRow = visComplex[k];
+
+                for (int l = 0; l < nChannels; l++) {
+                    visComplexRow[l] = new ImmutableComplex(cmVisRow[l]); // immutable for safety
+                    // update stats:
+                    visAmpStats.add(visComplexRow[l].abs());
+                }
             }
         } else {
             modelFluxes = new double[nChannels];
@@ -727,7 +724,7 @@ public abstract class AbstractOIFitsProducer {
             // Iterate on rows :
             for (int i, k = 0, l; k < nRows; k++) {
                 final MutableComplex[] cmVisRow = cmVis[k];
-                final ImmutableComplex[] cVisRow = cVis[k];
+                final Complex[] visComplexRow = visComplex[k];
 
                 // Iterate on spectral channels:
                 for (l = 0; l < nChannels; l++) {
@@ -742,7 +739,9 @@ public abstract class AbstractOIFitsProducer {
                     // normalize by total flux:
                     integrator.multiply(normFactorWL[l]);
 
-                    cVisRow[l] = new ImmutableComplex(integrator); // immutable for safety
+                    visComplexRow[l] = new ImmutableComplex(integrator); // immutable for safety
+                    // update stats:
+                    visAmpStats.add(visComplexRow[l].abs());
                 }
             }
         }
@@ -752,61 +751,161 @@ public abstract class AbstractOIFitsProducer {
             return false;
         }
 
+        if (visAmpStats.isSet()) {
+            logger.info("VisAmp stats (all data points): {}", visAmpStats);
+        }
+
+        // Compute complex visibility errors:
+        double dit = Double.NaN;
+
+        if ((ns != null) && (targetRole == TargetRole.FT) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
+            // TODO: Get allowed dit values according to saturation ?
+            // TODO: check detector saturation !
+            final double[] dits = new double[]{1, 3, 10}; // TODO: GET from configuration !
+            final double[] sigmaOpdMean = new double[dits.length];
+
+            int minIdx = -1;
+            double minSigmaOpdMean = Double.MAX_VALUE;
+
+            for (int i = 0; i < dits.length; i++) {
+                logger.debug("Testing DIT: {} ms", dits[i]);
+
+                // TODO: check saturation ?
+                sigmaOpdMean[i] = computeVisibilityErrors(dits[i] * 1e-3, insBands, modelFluxes, bandFluxes);
+
+                // fast interrupt :
+                if (currentThread.isInterrupted()) {
+                    return false;
+                }
+                if (sigmaOpdMean[i] < minSigmaOpdMean) {
+                    minIdx = i;
+                    minSigmaOpdMean = sigmaOpdMean[i];
+                }
+            }
+
+            logger.info("dits (ms):        {}", Arrays.toString(dits));
+            logger.info("sigmaOpdMean (m): {}", Arrays.toString(sigmaOpdMean));
+
+            final double bestDit = dits[minIdx];
+            logger.info("Using best DIT: {} ms", bestDit);
+            logger.info("minSigmaOpdMean: {} nm", minSigmaOpdMean * 1e9);
+
+            // Compute again to initialize the noise service with selected DIT:
+            computeVisibilityErrors(bestDit * 1e-3, insBands, modelFluxes, bandFluxes);
+        } else {
+            computeVisibilityErrors(dit, insBands, modelFluxes, bandFluxes);
+        }
+
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+            return false;
+        }
+
+        logger.info("computeModelVisibilities: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        return true;
+    }
+
+    private double computeVisibilityErrors(final double dit, final Band[] insBands, final double[] modelFluxes, final Map<Band, Double> bandFluxes) {
+
+        /** Get the current thread to check if the computation is interrupted */
+        final Thread currentThread = Thread.currentThread();
+
+        // index of the observation point (HA):
+        final int[] ptIdx = freqTable.ptIdx;
+
+        final int nBl = freqTable.nBl;
+        final int nRows = freqTable.nRows;
+
+        // Effective number of spectral channels on the detector:
+        final int nChannels = this.waveLengths.length;
+
+        final NoiseService ns = this.noiseService;
+
         // Compute complex visibility errors:
         final StatUtils stat;
+
+        // ft sigmaOpd per row:
+        double[] sigmaOpdFT = null;
 
         if (ns == null) {
             stat = null;
         } else {
-            // prepare final parameters:
-            ns.prepareParameters(insBands, modelFluxes, bandFluxes);
+            if ((ftOiFitsCreator != null) && (ftOiFitsCreator.dataTable != null)) {
+                // Get already computed sigmaOpd for FT:
+                sigmaOpdFT = ftOiFitsCreator.dataTable.sigmaOpd;
+
+                if (sigmaOpdFT == null) {
+                    logger.error("Invalid FT observation (sigmaOpd = null)");
+                } else if (sigmaOpdFT.length != nRows) {
+                    logger.error("Invalid FT observation: bad dimensions (sigmaOpd vs rows): ({} vs {})", sigmaOpdFT.length, nRows);
+                    sigmaOpdFT = null;
+                }
+                // TODO: add warning or set error as invalid !
+            }
+
+            if (!Double.isNaN(dit)) {
+                // use given DIT:
+                ns.initDetectorParameters(dit);
+            }
+
+            // prepare final parameters (after initDetectorParameters):
+            ns.prepareParameters(insBands, modelFluxes, bandFluxes); // could be used to make DIT varying (later) ?
 
             stat = StatUtils.getInstance();
             // prepare enough distributions for all baselines:
             stat.prepare(nBl);
         }
 
+        final int iMid = (ns != null) ? ns.getIndexMidPoint() : -1;
+        final int iRef = (ns != null) ? ns.getIndexRefChannel() : -1;
+
         final double snrThreshold = options.snrThreshold;
 
-        final double[][] cVisAmpError = new double[nRows][nChannels];
-        final double[][] cVisPhiError = new double[nRows][nChannels];
+        final Complex[][] visComplex = dataTable.visComplex;
+        final double[][] visAmpError = dataTable.visAmpError;
+        final double[][] visPhiError = dataTable.visPhiError;
 
-        final double[][] cNbPhotObjPhoto = new double[nRows][nChannels];
-        final double[][] cNbPhotPhoto = new double[nRows][nChannels];
-        final double[][] cErrPhotPhoto = new double[nRows][nChannels];
-        final double[][] cSqCorrFlux = new double[nRows][nChannels];
-        final double[][] cErrSqCorrFlux = new double[nRows][nChannels];
+        final double[][] nbPhotObjPhoto = dataTable.nbPhotObjPhoto;
+        final double[][] nbPhotPhoto = dataTable.nbPhotPhoto;
+        final double[][] errPhotPhoto = dataTable.errPhotPhoto;
+        final double[][] sqCorrFlux = dataTable.sqCorrFlux;
+        final double[][] errSqCorrFlux = dataTable.errSqCorrFlux;
 
-        final boolean[][] cPhotSNRFlag = new boolean[nRows][nChannels];
-        final boolean[][] cVisAmpSNRFlag = new boolean[nRows][nChannels];
-        final boolean[][] cVisPhiSNRFlag = new boolean[nRows][nChannels];
+        final boolean[][] photSNRFlag = dataTable.photSNRFlag;
+        final boolean[][] visAmpSNRFlag = dataTable.visAmpSNRFlag;
+        final boolean[][] visPhiSNRFlag = dataTable.visPhiSNRFlag;
 
-        final ComplexDistribution[] cVisRndDist = new ComplexDistribution[nRows];
+        final ComplexDistribution[] visRndDist = dataTable.visRndDist;
 
         // use the same sample index per ha point (as distributions are different instances)
         // to ensure T3 sample is correlated with C12, C23, C13 samples:
-        final int[][] cVisRndIdx = new int[nRows][];
+        final int[][] visRndIdx = dataTable.visRndIdx;
+
+        // stats:
+        final WelfordVariance snrVisAmpStats = new WelfordVariance();
+        final WelfordVariance visLossStats = (sigmaOpdFT != null) ? new WelfordVariance() : null;
+        final WelfordVariance visLossMidStats = (sigmaOpdFT != null) ? new WelfordVariance() : null;
 
         int pt, prevPt = -1;
 
         // Iterate on rows :
         for (int k = 0, l; k < nRows; k++) {
-            final double[] cVisAmpErrorRow = cVisAmpError[k];
-            final double[] cVisPhiErrorRow = cVisPhiError[k];
+            final double[] visAmpErrorRow = visAmpError[k];
+            final double[] visPhiErrorRow = visPhiError[k];
 
-            final double[] nbPhotObjPhotoRow = cNbPhotObjPhoto[k];
-            final double[] nbPhotPhotoRow = cNbPhotPhoto[k];
-            final double[] errPhotPhotoRow = cErrPhotPhoto[k];
-            final double[] sqCorrFluxRow = cSqCorrFlux[k];
-            final double[] errSqCorrFluxRow = cErrSqCorrFlux[k];
+            final double[] nbPhotObjPhotoRow = nbPhotObjPhoto[k];
+            final double[] nbPhotPhotoRow = nbPhotPhoto[k];
+            final double[] errPhotPhotoRow = errPhotPhoto[k];
+            final double[] sqCorrFluxRow = sqCorrFlux[k];
+            final double[] errSqCorrFluxRow = errSqCorrFlux[k];
 
-            final boolean[] cPhotSNRFlagRow = cPhotSNRFlag[k];
-            final boolean[] cVisAmpSNRFlagRow = cVisAmpSNRFlag[k];
-            final boolean[] cVisPhiSNRFlagRow = cVisPhiSNRFlag[k];
+            final boolean[] photSNRFlagRow = photSNRFlag[k];
+            final boolean[] visAmpSNRFlagRow = visAmpSNRFlag[k];
+            final boolean[] visPhiSNRFlagRow = visPhiSNRFlag[k];
 
             if ((ns == null) || (stat == null)) {
-                Arrays.fill(cVisAmpErrorRow, Double.NaN);
-                Arrays.fill(cVisPhiErrorRow, Double.NaN);
+                Arrays.fill(visAmpErrorRow, Double.NaN);
+                Arrays.fill(visPhiErrorRow, Double.NaN);
 
                 Arrays.fill(nbPhotObjPhotoRow, Double.NaN);
                 Arrays.fill(nbPhotPhotoRow, Double.NaN);
@@ -814,25 +913,53 @@ public abstract class AbstractOIFitsProducer {
                 Arrays.fill(sqCorrFluxRow, Double.NaN);
                 Arrays.fill(errSqCorrFluxRow, Double.NaN);
 
-                Arrays.fill(cPhotSNRFlagRow, true);
-                Arrays.fill(cVisAmpSNRFlagRow, true);
-                Arrays.fill(cVisPhiSNRFlagRow, true);
+                Arrays.fill(photSNRFlagRow, true);
+                Arrays.fill(visAmpSNRFlagRow, true);
+                Arrays.fill(visPhiSNRFlagRow, true);
             } else {
-                final ImmutableComplex[] cVisRow = cVis[k];
+                final Complex[] visComplexRow = visComplex[k];
                 // select a different complex distribution per row:
-                cVisRndDist[k] = stat.get();
+                visRndDist[k] = stat.get();
                 pt = ptIdx[k];
 
                 // Iterate on spectral channels:
                 for (l = 0; l < nChannels; l++) {
-                    final double visAmp = cVisRow[l].abs();
+                    final double visAmp = visComplexRow[l].abs();
+                    double visScale = 1.0;
+
+                    // Handle FT residuals (sigmaOpd):
+                    if (sigmaOpdFT != null) {
+                        // per row (ie per obs point and baseline):
+                        final double sigma_phi = (sigmaOpdFT[k] * TWO_PI) / waveLengths[l];
+
+                        // combined visibility loss:
+                        // TODO: add off-axis tracking loss:
+                        visScale = Math.exp(-sigma_phi * sigma_phi / 2.0);
+
+                        if (!Double.isFinite(visScale)) {
+                            visScale = 0.0;
+                        }
+                        // keep stats at ref wavelength:
+                        if (l == iRef) {
+                            visLossStats.add(visScale);
+                            if (pt == iMid) {
+                                visLossMidStats.add(visScale);
+                            }
+                        }
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("sigma_opd:   {} m", sigmaOpdFT[k]);
+                            logger.debug("waveLengths: {} m", waveLengths[l]);
+                            logger.debug("sigma_phi:   {} deg", Math.toDegrees(sigma_phi));
+                            logger.debug("visScale:    {}", visScale);
+                        }
+                    }
 
                     // complex visibility error for phases (no photometry):
                     // note: call this method first as it modifies internally other vectors:
-                    cVisPhiErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, false);
+                    visPhiErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, visScale, false);
 
                     // complex visibility error for amplitudes (with photometry):
-                    cVisAmpErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, true);
+                    visAmpErrorRow[l] = ns.computeVisComplexErrorValue(pt, l, visAmp, visScale, true);
 
                     // object flux:
                     nbPhotObjPhotoRow[l] = ns.getNbPhotObjPhoto(pt, l);
@@ -840,13 +967,15 @@ public abstract class AbstractOIFitsProducer {
                     // extra Vis2 columns (photo + square correlated fluxes):
                     nbPhotPhotoRow[l] = ns.getNbPhotPhoto(pt, l);
                     errPhotPhotoRow[l] = ns.getErrorPhotPhoto(pt, l);
+                    // note: following columns corresponds to last computeVisComplexErrorValue(true) call
+                    // for amplitudes (with photometry):
                     sqCorrFluxRow[l] = ns.getSqCorrFlux(pt, l);
                     errSqCorrFluxRow[l] = ns.getErrorSqCorrFlux(pt, l);
 
                     if (logger.isDebugEnabled()) {
-                        logger.debug("waveLength: {}", this.waveLengths[l]);
-                        logger.debug("VisAmp    : ({}, {})", visAmp, cVisAmpErrorRow[l]);
-                        logger.debug("VisPhi    : ({}, {})", visAmp, cVisPhiErrorRow[l]);
+                        logger.debug("waveLength:    {}", this.waveLengths[l]);
+                        logger.debug("VisAmp       : ({}, {})", visAmp, visAmpErrorRow[l]);
+                        logger.debug("VisPhi       : ({}, {})", visAmp, visPhiErrorRow[l]);
                         logger.debug("nbPhotObjPhoto : {}", nbPhotObjPhotoRow[l]);
                         logger.debug("nbPhotPhoto  : {}", nbPhotPhotoRow[l]);
                         logger.debug("errPhotPhoto : {}", errPhotPhotoRow[l]);
@@ -859,27 +988,28 @@ public abstract class AbstractOIFitsProducer {
                     final double snrPhoto = 0.25 * nbPhotPhotoRow[l] / errPhotPhotoRow[l];
 
                     if (snrPhoto < snrThreshold) {
-                        cPhotSNRFlagRow[l] = true;
+                        photSNRFlagRow[l] = true;
                         if (logger.isDebugEnabled()) {
                             logger.debug("Low SNR[{}] (phot): {} < {}", this.waveLengths[l], snrPhoto, snrThreshold);
                         }
                     }
 
                     // check SNR(V) for amplitudes:
-                    final double snrVisAmp = visAmp / cVisAmpErrorRow[l];
+                    final double snrVisAmp = visAmp / visAmpErrorRow[l];
+                    snrVisAmpStats.add(snrVisAmp);
 
                     if (snrVisAmp < snrThreshold) {
-                        cVisAmpSNRFlagRow[l] = true;
+                        visAmpSNRFlagRow[l] = true;
                         if (logger.isDebugEnabled()) {
                             logger.debug("Low SNR[{}] (amp): {} < {}", this.waveLengths[l], snrVisAmp, snrThreshold);
                         }
                     }
 
                     // check SNR(V) for phases:
-                    final double snrVisPhi = visAmp / cVisPhiErrorRow[l];
+                    final double snrVisPhi = visAmp / visPhiErrorRow[l];
 
                     if (snrVisPhi < snrThreshold) {
-                        cVisPhiSNRFlagRow[l] = true;
+                        visPhiSNRFlagRow[l] = true;
                         if (logger.isDebugEnabled()) {
                             logger.debug("Low SNR[{}] (phi): {} < {}", this.waveLengths[l], snrVisPhi, snrThreshold);
                         }
@@ -888,21 +1018,20 @@ public abstract class AbstractOIFitsProducer {
                     // TODO: make SNR(V2) stats per channel to add warning if no channel is below 3 !
                 }
 
-                if (DEBUG) {
-                    final int iRef = ns.getIndexRefChannel();
-                    final double visAmp = cVisRow[iRef].abs();
+                if (NoiseService.DEBUG) {
+                    final double visAmp = visComplexRow[iRef].abs();
 
                     logger.info("cVisAmpErrorRow(mid) = {} % (SNR = {}) (SNR V2 = {})",
-                            100.0 * (cVisAmpErrorRow[iRef] / visAmp), (visAmp / cVisAmpErrorRow[iRef]), (visAmp / cVisAmpErrorRow[iRef]) / 2.0);
+                            100.0 * (visAmpErrorRow[iRef] / visAmp), (visAmp / visAmpErrorRow[iRef]), (visAmp / visAmpErrorRow[iRef]) / 2.0);
                     logger.info("cVisPhiErrorRow(mid) = {} % (SNR = {})",
-                            100.0 * (cVisPhiErrorRow[iRef] / visAmp), (visAmp / cVisPhiErrorRow[iRef]));
+                            100.0 * (visPhiErrorRow[iRef] / visAmp), (visAmp / visPhiErrorRow[iRef]));
                 }
 
                 if (pt != prevPt) {
                     prevPt = pt;
 
                     if (this.doNoise) {
-                        final int[] cVisRndIdxRow = cVisRndIdx[k] = new int[nChannels];
+                        final int[] cVisRndIdxRow = visRndIdx[k] = new int[nChannels];
                         for (l = 0; l < nChannels; l++) {
                             // Choose the jth sample (uniform probability):
                             cVisRndIdxRow[l] = getNextRandomSampleIndex();
@@ -910,41 +1039,188 @@ public abstract class AbstractOIFitsProducer {
                     }
                 } else {
                     // use same random indexes:
-                    cVisRndIdx[k] = cVisRndIdx[k - 1];
+                    visRndIdx[k] = visRndIdx[k - 1];
                 }
             }
 
             // fast interrupt :
             if (currentThread.isInterrupted()) {
-                return false;
+                return 0.0;
             }
-        }
-
-        this.visComplex = cVis;
-        this.visAmpError = cVisAmpError;
-        this.visPhiError = cVisPhiError;
-
-        this.nbPhotObjPhoto = cNbPhotObjPhoto;
-        this.nbPhotPhoto = cNbPhotPhoto;
-        this.errPhotPhoto = cErrPhotPhoto;
-        this.sqCorrFlux = cSqCorrFlux;
-        this.errSqCorrFlux = cErrSqCorrFlux;
-
-        this.photSNRFlag = cPhotSNRFlag;
-        this.visAmpSNRFlag = cVisAmpSNRFlag;
-        this.visPhiSNRFlag = cVisPhiSNRFlag;
-
-        this.visRndDist = cVisRndDist;
-        this.visRndIdx = cVisRndIdx;
+        } // rows
 
         // fast interrupt :
         if (currentThread.isInterrupted()) {
-            return false;
+            return 0.0;
         }
 
-        logger.info("computeModelVisibilities: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        if (snrVisAmpStats.isSet()) {
+            logger.info("SNR(V) stats (all data points):  {}", snrVisAmpStats);
+        }
+        if (ns != null) {
+            if ((visLossStats != null) && visLossStats.isSet()) {
+                logger.info("Vis loss (ref data points):     {}", visLossStats);
+            }
+            if (visLossMidStats != null) {
+                if (visLossMidStats.isSet()) {
+                    logger.debug("Vis loss (mid/ref data points): {}", visLossMidStats);
+                }
+                // set VisScale (mean) to generate noisy images (later):
+                ns.setVisScaleMeanForMidRefPoint(visLossMidStats.mean());
+            }
+        }
 
-        return true;
+        double sigmaOpdMean = 0.0;
+
+        // Post-process SNR_FT to compute sigmaOpd:
+        if ((ns != null) && (targetRole == TargetRole.FT) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
+
+            // TODO: put in configuration VLTI telescope (UT/AT ?)
+            /*
+            Lacour 2019: https://www.aanda.org/articles/aa/abs/2019/04/aa34981-18/aa34981-18.html
+            The median fringe-tracking residuals are 150 nm on the ATs and 250 nm on the UTs.
+
+            // 200 nm residual vibration in GRAVITY+ simulator for UTs:
+             */
+            final double sigma_vib = ((ns.getTelDiam() > 2.0) ? 200 : 150) * 1e-9; // nm
+
+            final double seeing = ns.getSeeing();
+            final double t0 = ns.getT0(); // in ms
+            final double ftDit = ns.getObsUsedDit() * 1000.0; // in ms
+
+            // use SQRT(NDIT) to determine SNR for 1 DIT
+            final double invSqrtNDIT = ns.getTotFrameCorrection();
+
+            final double lambdaFT = this.waveLengths[iRef]; // center of K band
+            final double nbWaveFT = lambdaFT / TWO_PI;
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("computeErrors() for {}", this.instrumentName);
+                logger.debug("sigma_vib: {} nm", sigma_vib);
+                logger.debug("seeing:    {} as", seeing);
+                logger.debug("t0:        {} ms", t0);
+                logger.debug("ftDit:     {} ms", ftDit);
+                logger.debug("lambdaFT:  {} m", lambdaFT);
+                logger.debug("SQRT(NDIT): {}", 1.0 / invSqrtNDIT);
+            }
+
+            // compute sigmaOpd(FT) for later use by the SCIENCE observation:
+            final double[] sigmaOpd = dataTable.getSigmaOpd();
+
+            final WelfordVariance snrFTStats = new WelfordVariance();
+            final WelfordVariance sigmaOpdStats = new WelfordVariance();
+
+            // Iterate on rows :
+            // (baselines) x nObsPoints
+            for (int i, j, k = 0, l; k < nRows; k++) {
+                pt = i = ptIdx[k]; // obs point
+                j = k % nBl;
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Row: {} - Obs point: {} - Baseline({}): {}", k, i, j, baseLines.get(j));
+                }
+
+                final Complex[] visComplexRow = visComplex[k];
+                final double[] visAmpErrorRow = visAmpError[k];
+
+                double sum_weight_mean = 0.0;
+                double sum_weight = 0.0;
+
+                double sum_weight_mean_g = 0.0;
+                double sum_weight_g = 0.0;
+
+                // Iterate on spectral channels (FT):
+                for (l = 0; l < nChannels; l++) {
+                    final double visAmp = visComplexRow[l].abs();
+
+                    // retrieve SNR(V) for 1 DIT only:
+                    final double snrVisAmp = (visAmp / visAmpErrorRow[l]) * invSqrtNDIT;
+
+                    final double nbPhotInterf = ns.getNbPhotInterf(pt, l);
+
+                    // SNR(V) = 2 SNR(V2):
+                    final double sigma_phi = 1.0 / snrVisAmp;
+                    double weight = Math.pow(nbPhotInterf, 2.0);
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("waveLength: {}", this.waveLengths[l]);
+                        logger.debug("VisAmp:     {} VisAmpErr={}", visAmp, visAmpErrorRow[l]);
+                        logger.debug("SNR(V):     {}", snrVisAmp);
+                        logger.debug("sigma_phi:  {} rad", sigma_phi);
+                        logger.debug("weight:     {}", weight);
+                    }
+
+                    sum_weight_mean += Math.pow(sigma_phi * weight, 2.0);
+                    sum_weight += Math.pow(weight, 2.0);
+
+                    if (NoiseService.DO_DEBUG_GRAVITY) {
+                        final double N = nbPhotInterf / 4.0;
+
+                        weight = Math.pow(N, 2.0);
+
+                        logger.debug("weight_g: {}", weight);
+
+                        sum_weight_mean_g += Math.pow(sigma_phi * weight, 2.0);
+                        sum_weight_g += weight;
+                    }
+                }
+
+                final double snrFT = Math.sqrt(sum_weight / sum_weight_mean);
+                snrFTStats.add(snrFT);
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("snrFT[{} - {}]:   {}", i, j, snrFT);
+                }
+
+                if (NoiseService.DO_DEBUG_GRAVITY) {
+                    final double snrFT_g = sum_weight_g / Math.sqrt(sum_weight_mean_g);
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("snrFT_g: {}", snrFT_g);
+                        logger.debug("ratio(snrFT_g / snrFT): {}", snrFT_g / snrFT);
+                    }
+                }
+
+                // TODO: adjust SNR(FT) on redundant baselines ie max(SNR(AB), min(SNR(AC), SNR(BC))) ?
+                // TODO: need baseline and station info
+                // Compute sigmaOpd:
+                final double varOpdLow = Math.pow(ftDit / (2.6 * t0), (5.0 / 3.0)) * Math.pow(nbWaveFT, 2.0) + Math.pow(sigma_vib, 2.0);
+                final double varOpdHigh = Math.pow((4.0 * nbWaveFT) / snrFT, 2.0);
+
+                sigmaOpd[k] = Math.sqrt(varOpdHigh + varOpdLow);
+                sigmaOpdStats.add(sigmaOpd[k]);
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("sigma_opd_lo(FT): {} nm", 1e9 * Math.sqrt(varOpdLow));
+                    logger.debug("sigma_opd_hi(FT): {} nm", 1e9 * Math.sqrt(varOpdHigh));
+                    logger.debug("sigma_opd   (FT): {} nm", 1e9 * sigmaOpd[k]);
+                }
+
+                // fast interrupt :
+                if (currentThread.isInterrupted()) {
+                    return 0.0;
+                }
+            } // rows
+
+            // fast interrupt :
+            if (currentThread.isInterrupted()) {
+                return 0.0;
+            }
+
+            logger.info("ftDit: {} ms", ftDit);
+
+            // Make stats per point (all baselines):
+            if (snrFTStats.isSet()) {
+                logger.info("snrFT stats :       {}", snrFTStats);
+            }
+            if (sigmaOpdStats.isSet()) {
+                logger.info("sigmaOpd stats (m): {}", sigmaOpdStats); // depends on DIT(FT)
+            }
+
+            // overall mean sigmaOpd(FT):
+            sigmaOpdMean = sigmaOpdStats.mean();
+        }
+        return sigmaOpdMean;
     }
 
     protected abstract UVFreqTable computeSpatialFreqTable(final double[] sampleWaveLengths);
@@ -1339,24 +1615,6 @@ public abstract class AbstractOIFitsProducer {
     }
 
     /**
-     * Convert mutable complex array to immutable complex array for safety reasons
-     * @param array mutable complex array
-     * @param length array length
-     * @return immutable complex array
-     */
-    protected static ImmutableComplex[] convertArray(final MutableComplex[] array, final int length) {
-        if (array == null) {
-            return null;
-        }
-        final ImmutableComplex[] result = new ImmutableComplex[length];
-
-        for (int i = length - 1; i >= 0; i--) {
-            result[i] = new ImmutableComplex(array[i]); // immutable complex for safety
-        }
-        return result;
-    }
-
-    /**
      * Copy mutable complex array
      * @param array mutable complex array
      * @param dest mutable complex array
@@ -1572,7 +1830,7 @@ public abstract class AbstractOIFitsProducer {
 
     /**
      * Return the given wavelength rounded in microns
-     * @param wl wavelength to toShort
+     * @param wl wavelength to convert
      * @return given wavelength rounded in microns
      */
     protected static double convertWL(final double wl) {
@@ -1616,6 +1874,79 @@ public abstract class AbstractOIFitsProducer {
             this.ufreq = new double[nRows][nWLen];
             this.vfreq = new double[nRows][nWLen];
             this.ptIdx = new int[nRows];
+        }
+    }
+
+    protected final static class VisDataTable {
+
+        /* varying values (spectrally dependent) */
+        /** internal computed complex visibility [row][waveLength] */
+        final Complex[][] visComplex;
+        /** internal complex visibility error [row][waveLength] for amplitudes with photometry */
+        final double[][] visAmpError;
+        /** internal complex visibility error [row][waveLength] for phases without photometry */
+        final double[][] visPhiError;
+
+        /** number of object photons in each photometric channel (photometric flux) [row][waveLength] */
+        final double[][] nbPhotObjPhoto;
+        /** number of photons in each photometric channel (photometric flux) [row][waveLength] */
+        final double[][] nbPhotPhoto;
+        /** error on the number of photons in each photometric channel (photometric flux) [row][waveLength] */
+        final double[][] errPhotPhoto;
+        /** squared correlated flux [row][waveLength] */
+        final double[][] sqCorrFlux;
+        /** error on squared correlated flux [row][waveLength] */
+        final double[][] errSqCorrFlux;
+
+        /** internal SNR flag on photometry [row][waveLength] */
+        final boolean[][] photSNRFlag;
+        /** internal complex visibility SNR flag on amplitudes [row][waveLength] */
+        final boolean[][] visAmpSNRFlag;
+        /** internal complex visibility SNR flag on phases [row][waveLength] */
+        final boolean[][] visPhiSNRFlag;
+
+        /** internal complex distribution [row] */
+        final ComplexDistribution[] visRndDist;
+        /** internal random index [row][waveLength] */
+        final int[][] visRndIdx;
+
+        /* (optional) sigmaOpd per row for FT observation */
+        double[] sigmaOpd;
+
+        protected VisDataTable(final int nRows, final int nWLen) {
+            this.visComplex = new Complex[nRows][nWLen];
+            this.visAmpError = init(nRows, nWLen);
+            this.visPhiError = init(nRows, nWLen);
+
+            this.nbPhotObjPhoto = init(nRows, nWLen);
+            this.nbPhotPhoto = init(nRows, nWLen);
+            this.errPhotPhoto = init(nRows, nWLen);
+            this.sqCorrFlux = init(nRows, nWLen);
+            this.errSqCorrFlux = init(nRows, nWLen);
+
+            this.photSNRFlag = new boolean[nRows][nWLen];
+            this.visAmpSNRFlag = new boolean[nRows][nWLen];
+            this.visPhiSNRFlag = new boolean[nRows][nWLen];
+
+            this.visRndDist = new ComplexDistribution[nRows];
+            this.visRndIdx = new int[nRows][];
+
+            this.sigmaOpd = null;
+        }
+
+        protected double[] getSigmaOpd() {
+            if (sigmaOpd == null) {
+                sigmaOpd = new double[visComplex.length];
+            }
+            return sigmaOpd;
+        }
+
+        static double[][] init(final int nRows, final int nWLen) {
+            final double[][] array = new double[nRows][nWLen];
+            for (int i = 0; i < nRows; i++) {
+                Arrays.fill(array[i], Double.NaN);
+            }
+            return array;
         }
     }
 

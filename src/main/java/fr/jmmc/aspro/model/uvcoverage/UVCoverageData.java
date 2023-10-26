@@ -42,6 +42,9 @@ public final class UVCoverageData {
     /** OIFitsCreatorService ready to compute later OIFits: TODO : move elsewhere / another task worker */
     private OIFitsCreatorService oiFitsCreator = null;
 
+    /** child UVCoverageData for FT target (other instrument) */
+    private UVCoverageData ftUVCoverageData = null;
+
     /**
      * Public Constructor
      * @param version observation version
@@ -226,4 +229,14 @@ public final class UVCoverageData {
     public void setOiFitsCreator(final OIFitsCreatorService oiFitsCreator) {
         this.oiFitsCreator = oiFitsCreator;
     }
+
+    public UVCoverageData getFtUVCoverageData() {
+        return ftUVCoverageData;
+    }
+
+    public void setFtUVCoverageData(UVCoverageData ftUVCoverageData) {
+        this.ftUVCoverageData = ftUVCoverageData;
+    }
+    
+    
 }

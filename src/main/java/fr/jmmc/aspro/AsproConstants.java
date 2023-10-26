@@ -116,6 +116,14 @@ public interface AsproConstants {
     public static final String INS_VEGA = "VEGA_";
     /** CHARA SPICA (6T) */
     public static final String INS_SPICA = "SPICA";
+
+    /** VLTI GRAVITY_FT (FT only) */
+    public static final String INS_GRAVITY_FT = "GRAVITY_FT";
+    /** VLTI GRAVITY_FT LOW */
+    public static final String INSMODE_GRAVITY_FT = "LOW";
+    /** FringeTrackerMode pattern for GRAVITY_FT */
+    public static final String FTMODE_GRAVITY_FT = "FringeTrack GRA";
+
     /** instrument (obsportal) choices */
     public final static Vector<String> INS_OBS_LIST = new Vector<String>(Arrays.asList(
             new String[]{

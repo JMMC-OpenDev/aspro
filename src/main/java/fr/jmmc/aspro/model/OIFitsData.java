@@ -19,6 +19,8 @@ public final class OIFitsData {
     /** empty OIFits List indicating that the user did not accept the warning confirmation dialog */
     public final static List<OIFitsFile> IGNORE_OIFITS_LIST = Collections.emptyList();
 
+    /** target to use */
+    private final String targetName;
     /** computed OIFits structures */
     private final List<OIFitsFile> oiFitsList;
     /** warning container corresponding to the computed OIFits structures */
@@ -29,9 +31,16 @@ public final class OIFitsData {
      * @param oiFitsList OIFits structures
      * @param warningContainer warning container including the OIFits generation
      */
-    public OIFitsData(final List<OIFitsFile> oiFitsList, final WarningContainer warningContainer) {
+    public OIFitsData(final String targetName,
+                      final List<OIFitsFile> oiFitsList,
+                      final WarningContainer warningContainer) {
+        this.targetName = targetName;
         this.oiFitsList = oiFitsList;
         this.oiFitsWarningContainer = warningContainer;
+    }
+
+    public String getTargetName() {
+        return targetName;
     }
 
     /**

@@ -271,17 +271,27 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
             }
             // get current subset definition (copy):
             final SubsetDefinition subsetCopy = ocm.getCurrentSubsetDefinition();
-            // Extract the single target from any OIFitsFile:
-            final String target = oiFitsList.get(0).getOiTarget().getTarget()[0];
 
-            subsetCopy.getFilter().setTargetUID(target);
-            // use all data files (default):
-            // subset.getTables().clear();
+            // display all targets:
+            if (false) {
+                // ensure having 1 empty filter:
+                subsetCopy.getFilter().setTargetUID(null);
+            } else {
+                final String targetName = oiFitsData.getTargetName();
+                /*
+                // Extract the single target from any OIFitsFile:
+                final String target = oiFitsList.get(0).getOiTarget().getTarget()[0];
+                 */
+                subsetCopy.getFilter().setTargetUID(targetName);
+                // use all data files (default):
+                // subset.getTables().clear();
+            }
 
             // fire subset changed event (generates OIFitsSubset and then plot asynchronously):
             ocm.updateSubsetDefinition(this, subsetCopy);
 
             // hack current plot definition to force color mapping in multi conf:
+            // TODO: get all conf to decide if really multi-config ?
             if (oiFitsList.size() > 1) {
                 final PlotDefinition plotDefCopy = ocm.getCurrentPlotDefinition();
 

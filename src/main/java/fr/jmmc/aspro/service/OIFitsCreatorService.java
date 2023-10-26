@@ -26,6 +26,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.oi.UserModel;
+import fr.jmmc.aspro.model.util.TargetRole;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import static fr.jmmc.aspro.service.OIFitsAMBERService.amdlibAbacusErrPhi;
 import fr.jmmc.jmcs.util.StatUtils;
@@ -90,8 +91,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     private final List<Beam> beams;
     /** number of beams */
     private final int nBeams;
-    /** base line list */
-    private final List<BaseLine> baseLines;
     /** number of baselines */
     private final int nBaseLines;
     /** sky calc instance */
@@ -118,15 +117,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     /** flag indicating if the target model wavelengths are compatible with the instrument mode */
     private boolean isModelWLValid = true;
     /** true to use calibration bias; false to compute only theoretical (optional systematic) error */
-    protected final boolean useCalibrationBias;
+    private final boolean useCalibrationBias;
     /** true to use instrument or calibration bias; false to compute only theoretical error */
     private final boolean useBias;
     /** true to use random bias; false to disable random sampling, only adjust error */
     private final boolean useRandomCalBias;
     /** interferometer description */
     private InterferometerDescription interferometer = null;
-    /** instrument name */
-    private String instrumentName = null;
     /** arrname keyword value (interferometer name) */
     private String arrNameKeyword = null;
     /** insname keyword value (instrument_LAMBDA1-LAMBDA2-Nch) */
@@ -153,7 +150,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
     /**
      * Protected constructor
      * @param observation observation settings
-     * @param target target to process
+     * @param targetMapping target mappings
+     * @param targetRole target role of this observation
      * @param beams beam list
      * @param baseLines base line list
      * @param useCalibrationBias true to use calibration bias; false to compute only theoretical (optional systematic) error
@@ -163,9 +161,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
      * @param targetUVObservability list of UV coordinates per baseline
      * @param sc sky calc instance
      * @param warningContainer container for warning messages
+     * @param ftOiFitsCreator optional FT OIFits creator
      */
     protected OIFitsCreatorService(final ObservationSetting observation,
-                                   final Target target,
+                                   final Map<TargetRole, Target> targetMapping,
+                                   final TargetRole targetRole,
                                    final List<Beam> beams,
                                    final List<BaseLine> baseLines,
                                    final boolean useCalibrationBias,
@@ -174,9 +174,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                    final TargetPointInfo[] targetPointInfos,
                                    final List<UVRangeBaseLineData> targetUVObservability,
                                    final AstroSkyCalc sc,
-                                   final WarningContainer warningContainer) throws IllegalArgumentException {
+                                   final WarningContainer warningContainer,
+                                   final OIFitsCreatorService ftOiFitsCreator) throws IllegalArgumentException {
 
-        super(target, options);
+        super(targetMapping.get(targetRole), targetRole, options, ftOiFitsCreator);
 
         this.beams = beams;
         this.nBeams = this.beams.size();
@@ -208,7 +209,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
             final DelayLineMode delayLineMode = this.beams.get(0).getDelayLineMode(); // all beams have the same mode
 
-            final NoiseService ns = new NoiseService(observation, delayLineMode, target, targetPointInfos,
+            final NoiseService ns = new NoiseService(observation, delayLineMode, targetMapping, targetRole, targetPointInfos,
                     useCalibrationBias, warningContainer, this.waveLengths, this.waveBands, useWavelengthRangeRestriction);
 
             if (ns.isValid()) {
@@ -379,7 +380,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             this.useWavelengthRangeRestriction = instrumentMode.isWavelengthRangeRestriction();
             double effBand = instrumentMode.getEffWaveLengthBandRef();
 
-            if (target != null) {
+            if ((targetRole == TargetRole.SCI) && (target != null)) {
                 final TargetConfiguration targetConf = target.getConfiguration();
 
                 if ((targetConf != null) && (targetConf.getInstrumentWaveLengthRef() != null)) {
@@ -532,6 +533,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
      * @return OIFits structure
      */
     public OIFitsFile createOIFits() throws IllegalArgumentException {
+        if (!this.hasModel) {
+            return null;
+        }
         if (!this.isModelWLValid) {
             // invalid user model against instrumental spectral configuration:
             return null;
@@ -611,8 +615,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             return null;
         }
 
-        // free computed complex visibilities :
-        this.visComplex = null;
+        if (!AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
+            // free computed complex visibility data (GC):
+            this.dataTable = null;
+        }
 
         // remove the OI_VIS table for instruments that do not produce such results (PIONIER):
         if (this.instrumentName.startsWith(AsproConstants.INS_PIONIER)) {
@@ -779,14 +785,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         final int nRows = nObs * nBl;
 
-        final UVFreqTable freqTable = new UVFreqTable(nBl, nRows, nWLen);
+        final UVFreqTable table = new UVFreqTable(nBl, nRows, nWLen);
 
         // Allocate data array for spatial frequencies:
-        final double[][] ufreq = freqTable.ufreq;
-        final double[][] vfreq = freqTable.vfreq;
+        final double[][] ufreq = table.ufreq;
+        final double[][] vfreq = table.vfreq;
 
         // index of the observation point (HA):
-        final int[] ptIdx = freqTable.ptIdx;
+        final int[] ptIdx = table.ptIdx;
 
         // new block to limit variable scope:
         // Inverse wavelength:
@@ -797,7 +803,6 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         // Iterate on baselines :
         for (int i, j = 0, k, l; j < nBl; j++) {
-
             final UVRangeBaseLineData uvBL = this.targetUVObservability.get(j);
 
             // Iterate on observable UV points :
@@ -821,7 +826,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 }
             }
         }
-        return freqTable;
+        return table;
     }
 
     /**
@@ -877,6 +882,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         final short[][] staIndexes = flux.getStaIndex();
         final boolean[][] flags = flux.getFlag();
+
+        final double[][] nbPhotObjPhoto = dataTable.nbPhotObjPhoto;
+        final double[][] nbPhotPhoto = dataTable.nbPhotPhoto;
+        final double[][] errPhotPhoto = dataTable.errPhotPhoto;
+        final boolean[][] photSNRFlag = dataTable.photSNRFlag;
 
         final NoiseService ns = this.noiseService;
         final StatUtils stat = StatUtils.getInstance();
@@ -1050,6 +1060,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final short[][] staIndexes = vis.getStaIndex();
         final boolean[][] flags = vis.getFlag();
 
+        final Complex[][] visComplex = dataTable.visComplex;
+        final double[][] visAmpError = dataTable.visAmpError;
+        final double[][] visPhiError = dataTable.visPhiError;
+        final boolean[][] visAmpSNRFlag = dataTable.visAmpSNRFlag;
+        final boolean[][] visPhiSNRFlag = dataTable.visPhiSNRFlag;
+        final ComplexDistribution[] visRndDist = dataTable.visRndDist;
+        final int[][] visRndIdx = dataTable.visRndIdx;
+
         final int nWaveLengths = this.waveLengths.length;
 
         final NoiseService ns = this.noiseService;
@@ -1169,7 +1187,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         distIm = visRndDist[k].getSamples()[1];
 
                         // Get proper index:
-                        visRndIdxRow = this.visRndIdx[k];
+                        visRndIdxRow = visRndIdx[k];
                     }
 
                     if (!isAmber && doVisDiff) {
@@ -1200,8 +1218,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 visErr[k][l][1] = Float.NaN;
                             } else {
                                 // pure complex visibility data :
-                                visRe = this.visComplex[k][l].getReal();
-                                visIm = this.visComplex[k][l].getImaginary();
+                                visRe = visComplex[k][l].getReal();
+                                visIm = visComplex[k][l].getImaginary();
 
                                 // TODO: may use an asymetric distribution (visAmpError, visPhiError) rotated by phi
                                 // complex visibility error for phases : visErrRe = visErrIm = visAmpErr or Complex.NaN :
@@ -1467,7 +1485,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
                                     /* Complex visibility is a Normal distribution, 
                                      * no test needed on normality ? because vis diff ? */
-                                    if (DEBUG) {
+                                    if (NoiseService.DEBUG) {
                                         logger.info("Sampling[" + N_SAMPLES + "] snr=" + (s_vamp_mean / s_vamp_err) + " AMP "
                                                 + " avg= " + s_vamp_mean + " vamp= " + vamp + " ratio: " + (s_vamp_mean / vamp)
                                                 + " stddev= " + s_vamp_err + " errAmp= " + visAmpError[k][l] + " ratio: " + (s_vamp_err / visAmpError[k][l])
@@ -1487,7 +1505,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                         vamp = vamp_samples[nSample];
                                         vphi = vphi_samples[nSample];
 
-                                        if (DEBUG) {
+                                        if (NoiseService.DEBUG) {
                                             // chi2 = sum ( (x - x_th) / err ) ^2
                                             chi2_nb++;
                                             diff = (vamp - vampTh) / s_vamp_err;
@@ -1593,7 +1611,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         if (hasModel) {
             /* Compute visAmp / visPhi as amber does */
             if (isAmber && (ns != null)) {
-                OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, this.visAmpError, nWaveLengths, this.visRndDist);
+                OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, visAmpError, nWaveLengths, visRndDist);
                 // TODO: generate noisy samples and biases
             } else if (!isAmber && doVisAmpDiff) {
                 double vamp_sum;
@@ -1670,6 +1688,16 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         final boolean[][] flags = vis2.getFlag();
 
+        final Complex[][] visComplex = dataTable.visComplex;
+        final double[][] visAmpError = dataTable.visAmpError;
+        final double[][] nbPhotPhoto = dataTable.nbPhotPhoto;
+        final double[][] errPhotPhoto = dataTable.errPhotPhoto;
+        final double[][] sqCorrFlux = dataTable.sqCorrFlux;
+        final double[][] errSqCorrFlux = dataTable.errSqCorrFlux;
+        final boolean[][] visAmpSNRFlag = dataTable.visAmpSNRFlag;
+        final ComplexDistribution[] visRndDist = dataTable.visRndDist;
+        final int[][] visRndIdx = dataTable.visRndIdx;
+
         final double[][] snrData = (DEBUG_SNR) ? new double[nWaveLengths][nRows] : null;
 
         final NoiseService ns = this.noiseService;
@@ -1737,14 +1765,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                     distIm = visRndDist[k].getSamples()[1];
 
                     // Get proper index:
-                    visRndIdxRow = this.visRndIdx[k];
+                    visRndIdxRow = visRndIdx[k];
                 }
 
                 // Iterate on wave lengths :
                 for (l = 0; l < nWaveLengths; l++) {
                     // pure complex visibility data :
-                    visRe = this.visComplex[k][l].getReal();
-                    visIm = this.visComplex[k][l].getImaginary();
+                    visRe = visComplex[k][l].getReal();
+                    visIm = visComplex[k][l].getImaginary();
 
                     // pure square visibility :
                     v2Th = visRe * visRe + visIm * visIm;
@@ -1857,7 +1885,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                             doFlag = true;
                         }
 
-                        if (DEBUG) {
+                        if (NoiseService.DEBUG) {
                             logger.info("Sampling[" + N_SAMPLES + "] SNR=" + (v2Th / v2ThErr) + " snr=" + (s_v2_mean / s_v2_err) + " V2"
                                     + " (err(re,im)= " + errCVis + ")"
                                     + " avg= " + s_v2_mean + " V2= " + v2Th + " ratio: " + (s_v2_mean / v2Th)
@@ -1869,7 +1897,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                             // Use the corresponding sample:
                             v2 = v2_samples[visRndIdxRow[l]];
 
-                            if (DEBUG) {
+                            if (NoiseService.DEBUG) {
                                 // chi2 = sum ( (v2 - v2_th) / err ) ^2
                                 chi2_nb++;
                                 diff = (v2 - v2Th) / s_v2_err;
@@ -2078,6 +2106,12 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
 
         final boolean[][] flags = t3.getFlag();
 
+        final Complex[][] visComplex = dataTable.visComplex;
+        final double[][] visPhiError = dataTable.visPhiError;
+        final boolean[][] visPhiSNRFlag = dataTable.visPhiSNRFlag;
+        final ComplexDistribution[] visRndDist = dataTable.visRndDist;
+        final int[][] visRndIdx = dataTable.visRndIdx;
+
         final NoiseService ns = this.noiseService;
 
         // The following code use some hypothesis on the OI_VIS table as defined in createOIVis()
@@ -2167,10 +2201,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 // use complex visibility error for phases (closure phase is not affected by photometry)
                 // TODO: may compute t3amp based on complex visibility error for amplitudes (like VISAMP) (less important)
                 // pure complex visibility data :
-                visData12 = (this.hasModel) ? this.visComplex[vp + pos] : null;
-                visErr12 = (this.hasModel) ? this.visPhiError[vp + pos] : null;
-                dist12 = this.visRndDist[vp + pos];
-                visSNRFlag12 = this.visPhiSNRFlag[vp + pos];
+                visData12 = (this.hasModel) ? visComplex[vp + pos] : null;
+                visErr12 = (this.hasModel) ? visPhiError[vp + pos] : null;
+                dist12 = visRndDist[vp + pos];
+                visSNRFlag12 = visPhiSNRFlag[vp + pos];
                 u12 = visUCoords[vp + pos];
                 v12 = visVCoords[vp + pos];
 
@@ -2183,10 +2217,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 }
 
                 // pure complex visibility data :
-                visData23 = (this.hasModel) ? this.visComplex[vp + pos] : null;
-                visErr23 = (this.hasModel) ? this.visPhiError[vp + pos] : null;
-                dist23 = this.visRndDist[vp + pos];
-                visSNRFlag23 = this.visPhiSNRFlag[vp + pos];
+                visData23 = (this.hasModel) ? visComplex[vp + pos] : null;
+                visErr23 = (this.hasModel) ? visPhiError[vp + pos] : null;
+                dist23 = visRndDist[vp + pos];
+                visSNRFlag23 = visPhiSNRFlag[vp + pos];
                 u23 = visUCoords[vp + pos];
                 v23 = visVCoords[vp + pos];
 
@@ -2202,14 +2236,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 }
 
                 // pure complex visibility data :
-                visData13 = (this.hasModel) ? this.visComplex[vp + pos] : null;
-                visErr13 = (this.hasModel) ? this.visPhiError[vp + pos] : null;
-                dist13 = this.visRndDist[vp + pos];
-                visSNRFlag13 = this.visPhiSNRFlag[vp + pos];
+                visData13 = (this.hasModel) ? visComplex[vp + pos] : null;
+                visErr13 = (this.hasModel) ? visPhiError[vp + pos] : null;
+                dist13 = visRndDist[vp + pos];
+                visSNRFlag13 = visPhiSNRFlag[vp + pos];
 
                 // Get proper index:
                 // note: visRndIdx[12] = visRndIdx[23] = visRndIdx[13] by construction
-                visRndIdxRow = this.visRndIdx[vp + pos];
+                visRndIdxRow = visRndIdx[vp + pos];
 
                 // if target has models, then complex visibility are computed :
                 if (!this.hasModel) {
@@ -2391,7 +2425,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 doFlag = true;
                             }
 
-                            if (DEBUG) {
+                            if (NoiseService.DEBUG) {
                                 // phase closure error (rad) :
                                 errPhi = ns.computeT3PhiError(i, l, cvis12.abs(), cvis23.abs(), cvis13.abs()); // abs(c13) = abs(c31)
 
@@ -2418,7 +2452,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                 t3amp = t3amp_samples[nSample];
                                 t3phi = t3phi_samples[nSample];
 
-                                if (DEBUG) {
+                                if (NoiseService.DEBUG) {
                                     // chi2 = sum ( (x - x_th) / err ) ^2
                                     chi2_nb++;
                                     diff = (t3amp - t3ampTh) / s_t3amp_err;

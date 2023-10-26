@@ -226,17 +226,14 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         newObsCollection.setName("internal");
         newObsCollection.setVersion(new ObservationVersion(observation.getVersion()));
 
-        ObservationSetting newObservation;
-        FocalInstrumentConfigurationChoice instrumentChoice;
-
         // Process variants to generate correct observations (clones) :
         for (ObservationVariant obsVariant : observation.getVariants()) {
 
             // clone observation to ensure consistency (Swing can modify observation while the worker thread is running) :
-            newObservation = (ObservationSetting) observation.clone();
+            final ObservationSetting newObservation = (ObservationSetting) observation.clone();
 
             // apply changes coming from each variant :
-            instrumentChoice = newObservation.getInstrumentConfiguration();
+            final FocalInstrumentConfigurationChoice instrumentChoice = newObservation.getInstrumentConfiguration();
 
             // update the instrument configuration :
             instrumentChoice.setStations(obsVariant.getStations());
@@ -287,6 +284,28 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
         // Now that a file has been loaded or saved:
         RecentFilesManager.addFile(file);
+    }
+
+    /**
+     * TODO
+     */
+    public ObservationSetting cloneObservationWithInstrument(final ObservationSetting observation,
+                                                             final String instrumentAlias,
+                                                             final String mode) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("cloneObservationWithInstrument: {}", toString(observation));
+        }
+        // clone observation to ensure consistency (Swing can modify observation while the worker thread is running) :
+        final ObservationSetting newObservation = (ObservationSetting) observation.clone();
+
+        // update the instrument:
+        setInstrumentConfigurationName(newObservation, instrumentAlias);
+        setInstrumentMode(newObservation, mode);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("cloneObservationWithInstrument : newObservation: {}", toString(newObservation));
+        }
+        return newObservation;
     }
 
     // --- MAIN FUNCTIONS --------------------------------------------------------
@@ -1178,7 +1197,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @return true if the value changed
      */
     public boolean setInstrumentConfigurationName(final String instrumentAlias) {
-        final ObservationSetting observation = getMainObservation();
+        return setInstrumentConfigurationName(getMainObservation(), instrumentAlias);
+    }
+
+    private boolean setInstrumentConfigurationName(final ObservationSetting observation, final String instrumentAlias) {
         final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
 
         // get the real instrument name (not alias):
@@ -1292,7 +1314,18 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @return true if the value changed
      */
     public boolean setInstrumentMode(final String mode) {
-        final ObservationSetting observation = getMainObservation();
+        return setInstrumentMode(getMainObservation(), mode);
+    }
+
+    /**
+     * Set the instrument mode for the current interferometer and instrument
+     * and refresh the internal FocalInstrumentMode reference
+     * Used by UVCoveragePanel.updateObservation()
+     *
+     * @param mode string representation of the instrument mode
+     * @return true if the value changed
+     */
+    private boolean setInstrumentMode(final ObservationSetting observation, final String mode) {
         final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
 
         // get the real instrument mode:

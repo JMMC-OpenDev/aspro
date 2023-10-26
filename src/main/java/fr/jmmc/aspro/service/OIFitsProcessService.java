@@ -7,11 +7,13 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.UserModel;
+import fr.jmmc.aspro.model.util.TargetRole;
 import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
+import fr.jmmc.jmcs.util.StatUtils.ComplexDistribution;
 import fr.jmmc.oitools.model.DataModel;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIData;
@@ -67,7 +69,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                                 final OIFitsProducerOptions options,
                                 final boolean doApodization, final double diameter) {
 
-        super(target, options);
+        super(target, TargetRole.SCI, options, null);
 
         this.oiFitsFile = oifitsFile;
 
@@ -224,7 +226,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
      */
     private boolean prepare(final OIWavelength oiWaveLength, final WarningContainer warningContainer) {
 
-        final String instrumentName = oiWaveLength.getInsName();
+        this.instrumentName = oiWaveLength.getInsName();
         if (logger.isDebugEnabled()) {
             logger.debug("instrumentName: {}", instrumentName);
         }
@@ -345,14 +347,14 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
         final int nBl = 0; // TODO: guess nBL
 
-        final UVFreqTable freqTable = new UVFreqTable(nBl, nRows, nWLen);
+        final UVFreqTable table = new UVFreqTable(nBl, nRows, nWLen);
 
         // Allocate data array for spatial frequencies:
-        final double[][] ufreq = freqTable.ufreq;
-        final double[][] vfreq = freqTable.vfreq;
+        final double[][] ufreq = table.ufreq;
+        final double[][] vfreq = table.vfreq;
 
         // index of the observation point (HA):
-        final int[] ptIdx = freqTable.ptIdx; // set to -1
+        final int[] ptIdx = table.ptIdx; // set to -1
 
         // new block to limit variable scope:
         // Inverse wavelength:
@@ -382,7 +384,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                 vRow[l] = v * invWaveLengths[l];
             }
         }
-        return freqTable;
+        return table;
     }
 
     /**
@@ -409,6 +411,10 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         final double[][] visPhiErr = vis.getVisPhiErr();
 
         final boolean[][] flags = vis.getFlag();
+
+        final Complex[][] visComplex = dataTable.visComplex;
+        final double[][] visAmpError = dataTable.visAmpError;
+        final ComplexDistribution[] visRndDist = dataTable.visRndDist;
 
         final int nWaveLengths = this.waveLengths.length;
 
@@ -543,7 +549,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
             /* Compute visAmp / visPhi as amber does */
             if (isAmber && false) {
                 // note: distributions are needed (disabled for now)
-                OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, this.visAmpError, nWaveLengths, this.visRndDist);
+                OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplex, visAmpError, nWaveLengths, visRndDist);
                 // TODO: generate noisy samples if doNoise
             } else if (!isAmber && useVisDiff) {
                 double vamp_sum;
@@ -597,6 +603,8 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
         final boolean[][] flags = vis2.getFlag();
 
+        final Complex[][] visComplex = dataTable.visComplex;
+
         // vars:
         double visRe, visIm;
         double v2Th, v2, v2Err;
@@ -626,8 +634,8 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                     // Iterate on wave lengths :
                     for (l = 0; l < nWaveLengths; l++) {
                         // pure complex visibility data :
-                        visRe = this.visComplex[k][l].getReal();
-                        visIm = this.visComplex[k][l].getImaginary();
+                        visRe = visComplex[k][l].getReal();
+                        visIm = visComplex[k][l].getImaginary();
 
                         // pure square visibility :
                         v2 = visRe * visRe + visIm * visIm;
@@ -688,6 +696,8 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
         final boolean[][] flags = t3.getFlag();
 
+        final Complex[][] visComplex = dataTable.visComplex;
+
         // The following code use some hypothesis on the OI_VIS table as defined in createOIVis()
         // 1 - the number of rows per HA point corresponds to the number of baselines.
         // 2 - OI_VIS rows have the same ordering than the list of baselines per HA points.
@@ -730,19 +740,19 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                 pos = relPos[0];
 
                 // pure complex visibility data :
-                visData12 = (this.hasModel) ? this.visComplex[vp + pos] : null;
+                visData12 = (this.hasModel) ? visComplex[vp + pos] : null;
 
                 // Find baseline BC = 23 :
                 pos = relPos[1];
 
                 // pure complex visibility data :
-                visData23 = (this.hasModel) ? this.visComplex[vp + pos] : null;
+                visData23 = (this.hasModel) ? visComplex[vp + pos] : null;
 
                 // Find baseline AC = 13 :
                 pos = relPos[2];
 
                 // pure complex visibility data :
-                visData13 = (this.hasModel) ? this.visComplex[vp + pos] : null;
+                visData13 = (this.hasModel) ? visComplex[vp + pos] : null;
 
                 // if target has models, then complex visibility are computed :
                 if (!this.hasModel) {

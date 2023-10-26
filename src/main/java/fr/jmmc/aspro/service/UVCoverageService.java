@@ -9,6 +9,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
+import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
@@ -19,14 +20,23 @@ import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.TargetGroup;
+import fr.jmmc.aspro.model.oi.TargetInformation;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.util.TargetRole;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.aspro.util.TestUtils;
+import fr.jmmc.jmal.model.ModelDefinition;
+import fr.jmmc.jmal.model.ModelManager;
+import fr.jmmc.jmal.model.targetmodel.Model;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import net.jafama.DoubleWrapper;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
@@ -58,7 +68,7 @@ public final class UVCoverageService {
     private final ObservationSetting observation;
     /** computed Observability Data (read-only) */
     private final ObservabilityData obsData;
-    /** target to use */
+    /** Science target to use */
     private final String targetName;
     /** maximum U or V coordinate in rad-1 (corrected by the minimal wavelength) */
     private double uvMaxFreq;
@@ -87,6 +97,8 @@ public final class UVCoverageService {
     private double lambdaMax;
     /** selected target */
     private Target target = null;
+    /** target mapping */
+    private Map<TargetRole, Target> targetMapping = null;
     /** selected instrument mode */
     private FocalInstrumentMode instrumentMode = null;
     /** observation sky calc instance */
@@ -101,6 +113,10 @@ public final class UVCoverageService {
     private List<BaseLine> baseLines = null;
     /** star data */
     private StarData starData = null;
+    /** flag indicating the role of this service (SCI or FT) */
+    private final TargetRole targetRole;
+    /** child UVCoverageService for FT target (other instrument) */
+    private UVCoverageService ftUVCoverageService = null;
 
     /**
      * Constructor.
@@ -118,18 +134,67 @@ public final class UVCoverageService {
     public UVCoverageService(final ObservationSetting observation, final ObservabilityData obsData, final String targetName,
                              final double uvMax, final boolean doUVSupport, final boolean useInstrumentBias, final boolean doDataNoise,
                              final OIFitsProducerOptions options) {
+        this(observation, obsData, targetName, uvMax, doUVSupport, useInstrumentBias, doDataNoise, options, null);
+    }
+
+    /**
+     * Constructor.
+     * Note : This service is statefull so it can not be reused by several calls.
+     *
+     * @param observation observation settings
+     * @param obsData computed observability data
+     * @param targetName target name
+     * @param uvMax U-V max in meter
+     * @param doUVSupport flag to compute the UV support
+     * @param useInstrumentBias true to use instrument bias; false to compute only theoretical error
+     * @param doDataNoise enable data noise
+     * @param options OIFits options
+     * @param targetMapping explicit mapping of target/role
+     */
+    public UVCoverageService(final ObservationSetting observation, final ObservabilityData obsData, final String targetName,
+                             final double uvMax, final boolean doUVSupport, final boolean useInstrumentBias, final boolean doDataNoise,
+                             final OIFitsProducerOptions options, Map<TargetRole, Target> targetMapping) {
+
+        final boolean isSCI = (targetMapping == null);
 
         this.observation = observation;
         this.obsData = obsData;
-        this.targetName = targetName;
+        this.targetName = targetName; // 
         this.uvMaxFreq = uvMax;
-        this.doUVSupport = doUVSupport;
-        this.useInstrumentBias = useInstrumentBias;
-        this.doDataNoise = doDataNoise;
+        this.doUVSupport = doUVSupport && isSCI; // not on FT
+        this.useInstrumentBias = useInstrumentBias && isSCI; // not on FT
+        this.doDataNoise = doDataNoise /* && isSCI */; // not on FT
+        this.targetRole = isSCI ? TargetRole.SCI : TargetRole.FT;
         this.options = options;
 
         // create the uv coverage data corresponding to the observation version :
         this.data = new UVCoverageData(observation.getVersion());
+
+        if (!isSCI) {
+            this.targetMapping = targetMapping;
+        }
+
+        // Get instrument and observability data :
+        final String ftMode = prepareObservation();
+
+        if (isSCI && (ftMode != null) && ftMode.startsWith(AsproConstants.FTMODE_GRAVITY_FT)) {
+            // this observation uses a Fringe tracker
+
+            if (this.targetMapping != null) {
+                // clone observation to ensure consistency (Swing can modify observation while the worker thread is running) :
+                final ObservationSetting newObservation = ObservationManager.getInstance().cloneObservationWithInstrument(observation,
+                        AsproConstants.INS_GRAVITY_FT, AsproConstants.INSMODE_GRAVITY_FT); // use default instrument mode = 'LOW'
+
+                // How to synchronize times (mjds) ?
+                // intersect SCI / FT observability ranges (both observable) ? 
+                // obsData (SCI / FT) should be combined (not HA => mjd ranges) 
+                // note: use Science target for observability & uv points as it should be very close to FT target (same time)
+                // TODO: fix coords & HA ranges first 
+                ftUVCoverageService = new UVCoverageService(newObservation, obsData, targetName,
+                        uvMax, doUVSupport, useInstrumentBias, doDataNoise, options, this.targetMapping);
+
+            }
+        }
     }
 
     /**
@@ -138,15 +203,18 @@ public final class UVCoverageService {
      * @return UVCoverageData container
      */
     public UVCoverageData compute() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("compute: {}", this.observation);
+        // TODO: adjust ftUVCoverageService to use proper mjd times
+        if (ftUVCoverageService != null) {
+            this.data.setFtUVCoverageData(ftUVCoverageService.compute());
         }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("compute: {} (role = {})", this.observation, targetRole);
+        }
+        logger.info("compute: {} (role = {})", this.observation, targetRole);
 
         // Start the computations :
         final long start = System.nanoTime();
-
-        // Get instrument and observability data :
-        prepareObservation();
 
         if (this.starData != null) {
             // Note : for Baseline limits, the starData is null
@@ -163,6 +231,7 @@ public final class UVCoverageService {
                 // define site :
                 this.sco.defineSite(this.sc);
 
+                // TODO: fix target (SCI or FT):
                 // get Target coordinates precessed to JD CENTER and define target to get later az/alt positions from JSkyCalc :
                 this.sco.defineTarget(this.obsData.jdCenter(), target.getRADeg(), target.getDECDeg(), target.getPMRA(), target.getPMDEC());
 
@@ -178,7 +247,8 @@ public final class UVCoverageService {
                 }
 
                 // prepare OIFits computation :
-                createOIFits();
+                // TODO: ensure proper FT/AO targets (override ?)
+                createOIFitsCreator();
 
                 // reset current target :
                 this.sco.reset();
@@ -353,7 +423,7 @@ public final class UVCoverageService {
 
                     // check HA start:
                     if ((obsRange = Range.find(obsRangesHA, ha, HA_PRECISION)) != null) {
-                        // check HA end:
+                        // check HA end in same interval (continuous):
                         if (obsRange.contains(ha + haObsTime, HA_PRECISION)) {
 
                             targetPointInfo = createTargetInfo(cosDec, sinDec, precRA, azEl, ha, jdOffset);
@@ -466,9 +536,10 @@ public final class UVCoverageService {
 
     /**
      * Define the baselines, star data and instrument mode's wavelengths
+     * @return fringe tracker mode or null if undefined
      * @throws IllegalStateException if the instrument mode is undefined
      */
-    private void prepareObservation() throws IllegalStateException {
+    private String prepareObservation() throws IllegalStateException {
         // Get AstroSkyCalc instance :
         this.sc = this.obsData.getDateCalc();
         // Get beams :
@@ -481,12 +552,57 @@ public final class UVCoverageService {
         // Get starData for the selected target name :
         this.starData = this.obsData.getStarData(this.targetName);
 
+        // TODO: fix target (SCI or FT):
         // get current target :
-        this.target = this.observation.getTarget(this.targetName);
+        this.target = this.observation.getTarget(this.targetName); // Science target
 
         if (logger.isDebugEnabled()) {
             logger.debug("starData: {}", this.starData);
-            logger.debug("target: {}", this.target);
+            logger.debug("target:   {}", this.target);
+        }
+
+        if ((targetRole == TargetRole.SCI) && (targetMapping == null)) {
+            Target ftTarget = null;
+            Target aoTarget = null;
+
+            final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
+
+            if (targetUserInfos != null) {
+                // Handle OB targets (AO / FT)
+                final TargetInformation targetInfo = targetUserInfos.getOrCreateTargetInformation(target); // SCIENCE
+
+                // FT
+                ftTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
+                // AO
+                aoTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+            }
+            if (ftTarget == null) {
+                ftTarget = target;
+            }
+            if (aoTarget == null) {
+                aoTarget = target;
+            }
+
+            if (ftTarget != target) {
+                // ensure ftTarget has a model:
+                if (!ftTarget.hasModel()) {
+                    addWarning("The FT Target[" + ftTarget.getName() + "] does not have a model: using a punct model (V=1) !");
+
+                    // TODO: define punct model as default (V=1)
+                    ftTarget = (Target) ftTarget.clone();
+
+                    final Model punctModel = ModelManager.getInstance().createModel(ModelDefinition.MODEL_PUNCT);
+                    ftTarget.getModels().add(punctModel);
+                }
+            }
+
+            // define target mapping:
+            targetMapping = new LinkedHashMap<>(4);
+            targetMapping.put(TargetRole.SCI, target);
+            targetMapping.put(TargetRole.FT, ftTarget);
+            targetMapping.put(TargetRole.AO, aoTarget);
+
+            logger.debug("targetMapping: {}", targetMapping);
         }
 
         // use lower wavelength of all instrument modes:
@@ -504,7 +620,10 @@ public final class UVCoverageService {
         boolean useWavelengthRangeRestriction = instrumentMode.isWavelengthRangeRestriction();
         double effBand = instrumentMode.getEffWaveLengthBandRef();
 
-        if (target != null) {
+        String ftMode = null;
+
+        // note: target is always science target:
+        if ((targetRole == TargetRole.SCI) && (target != null)) {
             final TargetConfiguration targetConf = target.getConfiguration();
 
             if ((targetConf != null) && (targetConf.getInstrumentWaveLengthRef() != null)) {
@@ -512,7 +631,7 @@ public final class UVCoverageService {
             }
 
             if ((targetConf != null) && (targetConf.getFringeTrackerMode() != null)) {
-                final String ftMode = targetConf.getFringeTrackerMode();
+                ftMode = targetConf.getFringeTrackerMode();
 
                 // TODO: handle FT modes properly: GroupTrack is hard coded !
                 // disable wavelength restrictions if FT enabled (basic GRA4MAT support, TODO: refine wavelength ranges for GRA4MAT)
@@ -564,19 +683,33 @@ public final class UVCoverageService {
             logger.debug("instrument configuration: {}; baseline max = {}", observation.getInstrumentConfiguration().getStations(), maxBaseLines);
             logger.debug("uvMaxFreq: {}", this.uvMaxFreq);
         }
+        return ftMode;
     }
 
     /**
-     * Create the OIFits structure (array, target, wave lengths and visibilities)
+     * Create the OIFits creator and structure (array, target, wave lengths and visibilities)
      */
-    private void createOIFits() {
+    private void createOIFitsCreator() {
         if (this.data.getTargetUVObservability() == null) {
             addWarning("OIFits data not available");
         } else {
             // thread safety : TODO: observation can change ... extract observation info in prepare ??
-            if (target != null) {
-                // Create the OIFitsCreatorService / NoiseService :
+            if (targetMapping != null) {
+                OIFitsCreatorService ftOiFitsCreator = null;
 
+                if (this.data.getFtUVCoverageData() != null) {
+                    final UVCoverageData ftUVCoverageData = this.data.getFtUVCoverageData();
+                    if (ftUVCoverageData != null) {
+                        final OIFitsCreatorService oiFitsCreator = ftUVCoverageData.getOiFitsCreator();
+
+                        // check if OIFits creator available:
+                        if (oiFitsCreator != null) {
+                            ftOiFitsCreator = oiFitsCreator;
+                        }
+                    }
+                }
+
+                // Create the OIFitsCreatorService / NoiseService :
                 // note: OIFitsCreatorService parameter dependencies:
                 // observation {target, instrumentMode}
                 // obsData {beams, baseLines, starData, sc (DateCalc)}
@@ -584,14 +717,17 @@ public final class UVCoverageService {
                 // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
                 // and warning container
                 try {
-                    final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
+                    // TODO: use same mjd times => same mapping table (uv point): for now: use science target (not correct)
+                    // SCI's OIFits creator uses directly FT's OIFits creator to get SNR information directly (after its computation):
+                    final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, targetMapping, targetRole,
                             this.beams, this.baseLines,
                             this.useInstrumentBias, this.doDataNoise,
                             this.options,
                             this.data.getTargetPointInfos(), this.data.getTargetUVObservability(),
-                            this.sc, this.data.getWarningContainer());
+                            this.sc, this.data.getWarningContainer(),
+                            ftOiFitsCreator);
 
-                    // TODO: create elsewhere the OIFitsCreatorService:
+                    // set OIFitsCreator for later computation:
                     this.data.setOiFitsCreator(oiFitsCreator);
 
                     // get noise service to compute noise on model image (if enabled):
