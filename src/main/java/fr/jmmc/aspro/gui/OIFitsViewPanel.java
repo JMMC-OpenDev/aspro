@@ -273,6 +273,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
             final SubsetDefinition subsetCopy = ocm.getCurrentSubsetDefinition();
 
             // display all targets:
+            // TODO: GRAVITY+: decide what to display ?
             if (false) {
                 // ensure having 1 empty filter:
                 subsetCopy.getFilter().setTargetUID(null);
@@ -290,15 +291,18 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
             // fire subset changed event (generates OIFitsSubset and then plot asynchronously):
             ocm.updateSubsetDefinition(this, subsetCopy);
 
-            // hack current plot definition to force color mapping in multi conf:
-            // TODO: get all conf to decide if really multi-config ?
-            if (oiFitsList.size() > 1) {
-                final PlotDefinition plotDefCopy = ocm.getCurrentPlotDefinition();
+            // TODO: GRAVITY+: decide how to fix multi-config check ?
+            if (false) {
+                // hack current plot definition to force color mapping in multi conf:
+                // TODO: get all conf to decide if really multi-config ?
+                if (oiFitsList.size() > 1) {
+                    final PlotDefinition plotDefCopy = ocm.getCurrentPlotDefinition();
 
-                // use configuration color mapping if useful then wavelength mapping:
-                plotDefCopy.setColorMapping(ColorMapping.CONFIGURATION);
+                    // use configuration color mapping if useful then wavelength mapping:
+                    plotDefCopy.setColorMapping(ColorMapping.CONFIGURATION);
 
-                ocm.updatePlotDefinition(this, plotDefCopy);
+                    ocm.updatePlotDefinition(this, plotDefCopy);
+                }
             }
         }
     }
