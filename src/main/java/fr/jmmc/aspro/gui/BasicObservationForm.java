@@ -1863,9 +1863,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     private BestPopsMode getBestPopsMode() {
         BestPopsMode popsMode = null;
-        
+
         if (jLabelPops.isVisible()) {
-            switch ((String)this.jComboBoxPopsMode.getSelectedItem()) {
+            switch ((String) this.jComboBoxPopsMode.getSelectedItem()) {
                 case POPS_MODE_ALL:
                     popsMode = BestPopsMode.ALL;
                     break;
@@ -2443,6 +2443,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 jLabelStatus.setToolTipText(null);
             }
         } else {
+            logger.debug("updateStatus: {}", warningContainer.getVersion());
+
             final Level level = warningContainer.getLevel();
 
             jLabelStatus.setIcon((level == Level.Warning) ? ResourceImage.WARNING_ICON.icon() : ResourceImage.INFO_ICON.icon());
@@ -2460,24 +2462,47 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 sb.append("(loaded obs. setup: ").append(loadedObsSetup).append(")<br>");
             }
 
-            for (WarningMessage message : warningContainer.getWarnings()) {
+            _warningLogger.info("-------------------");
+
+            if (level == Level.Information) {
+                _warningLogger.info("Observation status : " + level);
+            } else {
+                _warningLogger.warn("Observation status : " + level);
+            }
+
+            for (final WarningMessage message : warningContainer.getWarnings()) {
                 String msg = message.getMessage();
 
                 if (n < MAX_TOOLTIP_WARNINGS) {
-                    n++;
-                    sb.append(StringUtils.encodeTagContent(msg)).append("<br>");
+                    if (message.getLevel() == Level.Html) {
+                        sb.append(msg);
+                        n++;
+                    } else if (message.getLevel() != Level.Trace) {
+                        sb.append(StringUtils.encodeTagContent(msg)).append("<br>");
+                        n++;
+                    }
                     if (n == MAX_TOOLTIP_WARNINGS) {
                         sb.append("...");
                     }
                 }
 
-                msg = StringUtils.removeTags(msg);
+                if (message.isLogged()) {
+                    logger.debug("skipped warning: {}", message);
+                } else if (message.getLevel() != Level.Html) {
+                    message.setLogged(true);
+                    msg = StringUtils.removeTags(msg);
 
-                // add message to the warning log:
-                if (message.getLevel() == Level.Information) {
-                    _warningLogger.info(msg);
-                } else {
-                    _warningLogger.warn(msg);
+                    // add message to the warning log:
+                    switch (message.getLevel()) {
+                        case Trace:
+                        case Information:
+                            _warningLogger.info(msg);
+                            break;
+                        case Warning:
+                            _warningLogger.warn(msg);
+                            break;
+                        default:
+                    }
                 }
             }
             sb.append("</html>");
