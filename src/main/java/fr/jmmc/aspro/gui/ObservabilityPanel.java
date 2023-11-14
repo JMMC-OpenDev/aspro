@@ -1327,7 +1327,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
                 if (this.doBaseLineLimits) {
                     // merge warning container as the UV widget is ignored (interrupted pipeline):
-                    final WarningContainer mergedWarningContainer = new WarningContainer();
+                    final WarningContainer mergedWarningContainer = new WarningContainer(taskObsCollection.getVersion());
 
                     // ObservabilityService warnings:
                     for (int i = 0, len = obsDataList.size(); i < len; i++) {
@@ -1407,7 +1407,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
                 sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
                 sb.append(chartData.getDisplayConfigurations(" / "));
-                ChartUtils.addSubtitle(this.chart, sb.toString());
+                ChartUtils.addTitle(this.chart, sb.toString());
 
                 if (!doBaseLineLimits && (observation.getWhen().isNightRestriction()
                         || (TimeRef.LST != obsData.getTimeRef()))) {
@@ -1712,7 +1712,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                         colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
 
                                         // display differently orphan calibrators:
-                                        if (orphanCalibrators.contains(target)) {
+                                        if ((orphanCalibrators != null) && orphanCalibrators.contains(target)) {
                                             legendLabel = StarObservabilityData.LABEL_CALIBRATOR_ORPHAN;
                                             paint = Color.ORANGE;
                                         }
