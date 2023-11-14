@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="23.11 beta 1"/>
-    <compilation date="26/10/2023" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="23.11 beta 2"/>
+    <compilation date="14/11/2023" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -243,7 +243,12 @@
 
     <releasenotes>
         <release version="23.11">
-            <pubDate>Thu, 26 Oct 2023 16:00:00 GMT</pubDate>
+            <pubDate>Tue, 14 Nov 2023 12:00:00 GMT</pubDate>
+            <prerelease version="23.11 beta 2">
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented GRAVITY FT bootstrapping for baselines (triangles)</change>
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented visibility loss for off-axis fringe tracking (GRAVITY FT)</change>
+                <change type="FEATURE">Improved warning messages with computed stats (FT, SCI)</change>
+            </prerelease>
             <prerelease version="23.11 beta 1">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Major rewriting of the OIFits generator to handle two simulated OIFITS (FT + SCI)
                     for GRAVITY FT (compute SNR_FT &amp; variance on OPD) used to determine the visibility loss on the science detector (GRAVITY or MATISSE)</change>
