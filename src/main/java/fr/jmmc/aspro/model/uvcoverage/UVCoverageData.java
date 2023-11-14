@@ -36,7 +36,9 @@ public final class UVCoverageData {
     /** list of uv point couples corresponding to the target observability */
     private List<UVRangeBaseLineData> targetUVObservability;
     /** warning container */
-    private final WarningContainer warningContainer = new WarningContainer();
+    private final WarningContainer warningContainer;
+    /** warning container for compute phase*/
+    private final WarningContainer warningContainerCompute;
     /** optional NoiseService ready to use to compute noise on model images */
     private NoiseService noiseService = null;
     /** OIFitsCreatorService ready to compute later OIFits: TODO : move elsewhere / another task worker */
@@ -51,6 +53,8 @@ public final class UVCoverageData {
      */
     public UVCoverageData(final ObservationVersion version) {
         this.version = version;
+        this.warningContainer = new WarningContainer(version);
+        this.warningContainerCompute = new WarningContainer(version);
     }
 
     /* version */
@@ -199,6 +203,14 @@ public final class UVCoverageData {
     }
 
     /**
+     * Return the warning container for compute phase
+     * @return warning container for compute phase
+     */
+    public WarningContainer getWarningContainerCompute() {
+        return warningContainerCompute;
+    }
+
+    /**
      * Return the optional NoiseService ready to use to compute noise on model images
      * @return optional NoiseService ready to use to compute noise on model images
      */
@@ -237,6 +249,5 @@ public final class UVCoverageData {
     public void setFtUVCoverageData(UVCoverageData ftUVCoverageData) {
         this.ftUVCoverageData = ftUVCoverageData;
     }
-    
-    
+
 }

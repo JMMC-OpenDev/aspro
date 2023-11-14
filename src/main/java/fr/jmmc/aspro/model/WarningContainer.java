@@ -13,6 +13,8 @@ import java.util.List;
  */
 public final class WarningContainer {
 
+    /** observation version (read only) */
+    private final ObservationVersion version;
     /** warning messages */
     private List<WarningMessage> warningMessages = null;
     /** message level */
@@ -20,13 +22,21 @@ public final class WarningContainer {
 
     /**
      * Public constructor
+     * @param version observation version
      */
-    public WarningContainer() {
-        super();
+    public WarningContainer(final ObservationVersion version) {
+        this.version = version;
     }
 
     /**
-     * Add the given warning container to this warning container only if the new message does not already exist in this container
+     * @return observation version
+     */
+    public ObservationVersion getVersion() {
+        return version;
+    }
+
+    /**
+     * Add the given warning container to this warning container only if new message(s) do not already exist in this container
      * @param container messages to add
      */
     public void addWarnings(final WarningContainer container) {
@@ -38,32 +48,75 @@ public final class WarningContainer {
     }
 
     /**
-     * Add the given message to the warning messages
+     * Add the given warning message to the messages
      * @param msg message to add
      */
     public void addWarning(final String msg) {
-        addMessage(new WarningMessage(msg));
+        addMessage(msg, WarningMessage.Level.Warning);
     }
 
     /**
-     * Add the given message to the information messages
+     * Add the given information message to the messages
      * @param msg message to add
      */
     public void addInformation(final String msg) {
-        addMessage(new WarningMessage(msg, WarningMessage.Level.Information));
+        addMessage(msg, WarningMessage.Level.Information);
+    }
+
+    /**
+     * Add the given trace message to the messages
+     * @param msg message to add
+     */
+    public void addTrace(final String msg) {
+        addMessage(msg, WarningMessage.Level.Trace);
+    }
+
+    /**
+     * Add the given trace message to the messages
+     * @param msg message to add
+     * @param level message level
+     */
+    public void addMessage(final String msg, final Level level) {
+        addMessage(new WarningMessage(msg, level));
+    }
+
+    /**
+     * Add a separator to the messages
+     */
+    public void addSeparator() {
+        addMessage(WarningMessage.SEPARATOR, true);
     }
 
     /**
      * Add the given message to the warning messages (if not already present)
      * @param message WarningMessage to add
      */
-    private void addMessage(final WarningMessage message) {
+    public void addMessage(final WarningMessage message) {
+        addMessage(message, false);
+    }
+
+    /**
+     * Add the given message to the warning messages (if not already present)
+     * @param message WarningMessage to add
+     * @param skipPresent true to ignore contains check
+     */
+    private void addMessage(final WarningMessage message, final boolean skipPresent) {
         if (this.warningMessages == null) {
             this.warningMessages = new ArrayList<WarningMessage>(4);
         }
-        if (!this.warningMessages.contains(message)) {
+        if (skipPresent || !this.warningMessages.contains(message)) {
             this.warningMessages.add(message);
-            this.level = (this.level == Level.Warning || message.getLevel() == Level.Warning) ? Level.Warning : Level.Information;
+            this.level = ((this.level == Level.Warning) || (message.getLevel() == Level.Warning)) ? Level.Warning : Level.Information;
+        }
+    }
+
+    /**
+     * remove the given message
+     * @param message WarningMessage to remove
+     */
+    public void removeMessage(final WarningMessage message) {
+        if (this.warningMessages != null) {
+            this.warningMessages.remove(message);
         }
     }
 

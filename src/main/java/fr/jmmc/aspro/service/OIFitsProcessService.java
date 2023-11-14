@@ -256,7 +256,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         if (nWaveLengths > 1) {
             lastChannel = Double.toString(convertWL(lambdaMax));
         }
-        addInformation(warningContainer, instrumentName + " instrument mode: "
+        warningContainer.addInformation(instrumentName + " instrument mode: "
                 + nWaveLengths + " channels "
                 + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] "
                 + "(band: " + convertWL(waveBand) + " " + SpecialChars.UNIT_MICRO_METER + ')');
@@ -282,7 +282,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
             if (nWaveLengths > 1) {
                 lastChannel = Double.toString(convertWL(lambdaMax));
             }
-            addWarning(warningContainer, "Restricted instrument mode: "
+            warningContainer.addInformation("Restricted instrument mode: "
                     + nWaveLengths + " channels "
                     + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] ");
         }
@@ -353,7 +353,10 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         final double[][] ufreq = table.ufreq;
         final double[][] vfreq = table.vfreq;
 
-        // index of the observation point (HA):
+        // index of the baseline:
+        final int[] blIdx = table.blIdx; // set to -1
+
+        // index of the observation point (time):
         final int[] ptIdx = table.ptIdx; // set to -1
 
         // new block to limit variable scope:
@@ -365,8 +368,10 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
         // Iterate on rows :
         for (int k = 0, l; k < nRows; k++) {
+            // define baseline index:
+            blIdx[k] = -1;
 
-            // define point index:
+            // define observation point index:
             ptIdx[k] = -1;
 
             // UV coords (m) :

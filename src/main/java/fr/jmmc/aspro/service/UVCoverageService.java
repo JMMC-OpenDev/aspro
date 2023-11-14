@@ -153,9 +153,17 @@ public final class UVCoverageService {
      */
     public UVCoverageService(final ObservationSetting observation, final ObservabilityData obsData, final String targetName,
                              final double uvMax, final boolean doUVSupport, final boolean useInstrumentBias, final boolean doDataNoise,
-                             final OIFitsProducerOptions options, Map<TargetRole, Target> targetMapping) {
+                             final OIFitsProducerOptions options, final Map<TargetRole, Target> targetMapping) {
 
-        final boolean isSCI = (targetMapping == null);
+        final boolean isSCI;
+
+        if (targetMapping == null) {
+            isSCI = true;
+            this.targetMapping = null;
+        } else {
+            isSCI = false;
+            this.targetMapping = targetMapping;
+        }
 
         this.observation = observation;
         this.obsData = obsData;
@@ -170,30 +178,24 @@ public final class UVCoverageService {
         // create the uv coverage data corresponding to the observation version :
         this.data = new UVCoverageData(observation.getVersion());
 
-        if (!isSCI) {
-            this.targetMapping = targetMapping;
-        }
-
         // Get instrument and observability data :
+        // initialize targetMapping if needed:
         final String ftMode = prepareObservation();
 
         if (isSCI && (ftMode != null) && ftMode.startsWith(AsproConstants.FTMODE_GRAVITY_FT)) {
             // this observation uses a Fringe tracker
 
-            if (this.targetMapping != null) {
-                // clone observation to ensure consistency (Swing can modify observation while the worker thread is running) :
-                final ObservationSetting newObservation = ObservationManager.getInstance().cloneObservationWithInstrument(observation,
-                        AsproConstants.INS_GRAVITY_FT, AsproConstants.INSMODE_GRAVITY_FT); // use default instrument mode = 'LOW'
+            // clone observation to ensure consistency (Swing can modify observation while the worker thread is running) :
+            final ObservationSetting newObservation = ObservationManager.getInstance().cloneObservationWithInstrument(observation,
+                    AsproConstants.INS_GRAVITY_FT, AsproConstants.INSMODE_GRAVITY_FT); // use default instrument mode = 'LOW'
 
-                // How to synchronize times (mjds) ?
-                // intersect SCI / FT observability ranges (both observable) ? 
-                // obsData (SCI / FT) should be combined (not HA => mjd ranges) 
-                // note: use Science target for observability & uv points as it should be very close to FT target (same time)
-                // TODO: fix coords & HA ranges first 
-                ftUVCoverageService = new UVCoverageService(newObservation, obsData, targetName,
-                        uvMax, doUVSupport, useInstrumentBias, doDataNoise, options, this.targetMapping);
-
-            }
+            // How to synchronize times (mjds) ?
+            // intersect SCI / FT observability ranges (both observable) ? 
+            // obsData (SCI / FT) should be combined (not HA => mjd ranges) 
+            // note: use Science target for observability & uv points as it should be very close to FT target (same time)
+            // TODO: fix coords & HA ranges first 
+            ftUVCoverageService = new UVCoverageService(newObservation, obsData, targetName,
+                    uvMax, doUVSupport, useInstrumentBias, doDataNoise, options, this.targetMapping);
         }
     }
 
@@ -211,7 +213,6 @@ public final class UVCoverageService {
         if (logger.isDebugEnabled()) {
             logger.debug("compute: {} (role = {})", this.observation, targetRole);
         }
-        logger.info("compute: {} (role = {})", this.observation, targetRole);
 
         // Start the computations :
         final long start = System.nanoTime();
@@ -552,7 +553,6 @@ public final class UVCoverageService {
         // Get starData for the selected target name :
         this.starData = this.obsData.getStarData(this.targetName);
 
-        // TODO: fix target (SCI or FT):
         // get current target :
         this.target = this.observation.getTarget(this.targetName); // Science target
 
@@ -575,32 +575,34 @@ public final class UVCoverageService {
                 ftTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
                 // AO
                 aoTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+
+                if (ftTarget != null) {
+                    final boolean isTargetAO = (ftTarget == aoTarget);
+
+                    // ensure ftTarget has a model:
+                    if (!ftTarget.hasModel()) {
+                        addWarning("The FT Target[" + ftTarget.getName() + "] does not have a model: using a punct model (V=1) !");
+
+                        // clone target to add model (Target used from targetMapping in OIFitsCreatorService)
+                        ftTarget = (Target) ftTarget.clone();
+                        if (isTargetAO) {
+                            aoTarget = ftTarget;
+                        }
+                        // define punct model as default (V=1):
+                        final Model punctModel = ModelManager.getInstance().createModel(ModelDefinition.MODEL_PUNCT);
+                        ftTarget.getModels().add(punctModel);
+                    }
+                }
             }
             if (ftTarget == null) {
                 ftTarget = target;
             }
-            if (aoTarget == null) {
-                aoTarget = target;
-            }
 
-            if (ftTarget != target) {
-                // ensure ftTarget has a model:
-                if (!ftTarget.hasModel()) {
-                    addWarning("The FT Target[" + ftTarget.getName() + "] does not have a model: using a punct model (V=1) !");
-
-                    // TODO: define punct model as default (V=1)
-                    ftTarget = (Target) ftTarget.clone();
-
-                    final Model punctModel = ModelManager.getInstance().createModel(ModelDefinition.MODEL_PUNCT);
-                    ftTarget.getModels().add(punctModel);
-                }
-            }
-
-            // define target mapping:
+            // always initialize target mapping:
             targetMapping = new LinkedHashMap<>(4);
             targetMapping.put(TargetRole.SCI, target);
             targetMapping.put(TargetRole.FT, ftTarget);
-            targetMapping.put(TargetRole.AO, aoTarget);
+            targetMapping.put(TargetRole.AO, aoTarget); // may be null
 
             logger.debug("targetMapping: {}", targetMapping);
         }
@@ -724,7 +726,7 @@ public final class UVCoverageService {
                             this.useInstrumentBias, this.doDataNoise,
                             this.options,
                             this.data.getTargetPointInfos(), this.data.getTargetUVObservability(),
-                            this.sc, this.data.getWarningContainer(),
+                            this.sc, this.data.getWarningContainer(), this.data.getWarningContainerCompute(),
                             ftOiFitsCreator);
 
                     // set OIFitsCreator for later computation:

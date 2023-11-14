@@ -9,27 +9,36 @@ package fr.jmmc.aspro.model;
  */
 public final class WarningMessage {
 
+    final static WarningMessage SEPARATOR = new WarningMessage("<hr/>", Level.Html);
+
+    /** special warning when oifits disabled */
+    public final static WarningMessage WARN_OIFITS_DISABLED = new WarningMessage("OIFits data computation is disabled");
+
     /** message level */
     public enum Level {
-
+        /** html */
+        Html,
+        /** trace */
+        Trace,
         /** information */
         Information,
         /** warning */
         Warning
     }
     /* members */
-    /** message */
-    private final String message;
     /** message level */
     private final Level level;
+    /** logged flag */
+    private boolean logged = false;
+    /** message */
+    private final String message;
 
     /**
      * Protected Constructor
      * @param message message
      */
-    WarningMessage(final String message) {
-        this.message = message;
-        this.level = Level.Warning;
+    public WarningMessage(final String message) {
+        this(message, Level.Warning);
     }
 
     /**
@@ -37,9 +46,12 @@ public final class WarningMessage {
      * @param message message
      * @param level message level
      */
-    WarningMessage(final String message, final Level level) {
+    public WarningMessage(final String message, final Level level) {
         this.message = message;
         this.level = level;
+        if (level == Level.Html) {
+            setLogged(true);
+        }
     }
 
     /**
@@ -56,6 +68,14 @@ public final class WarningMessage {
      */
     public Level getLevel() {
         return level;
+    }
+
+    public boolean isLogged() {
+        return logged;
+    }
+
+    public void setLogged(boolean logged) {
+        this.logged = logged;
     }
 
     @Override
@@ -80,10 +100,7 @@ public final class WarningMessage {
         if ((this.message == null) ? (other.getMessage() != null) : !this.message.equals(other.getMessage())) {
             return false;
         }
-        if (this.level != other.getLevel()) {
-            return false;
-        }
-        return true;
+        return this.level == other.getLevel();
     }
 
     @Override

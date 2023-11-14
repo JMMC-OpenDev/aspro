@@ -24,6 +24,7 @@ import fr.jmmc.aspro.model.ObservationCollectionUVData;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.WarningContainer;
+import fr.jmmc.aspro.model.WarningMessage;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
@@ -2205,18 +2206,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             }
 
             // merged warning container:
-            final WarningContainer mergedWarningContainer = new WarningContainer();
+            final WarningContainer mergedWarningContainer = new WarningContainer(uvDataCollection.getVersion());
 
             // merge warning messages:
             if (uvDataCollection.isSingle()) {
                 // ObservabilityService warnings:
                 mergedWarningContainer.addWarnings(uvDataCollection.getFirstObsData().getWarningContainer());
+                mergedWarningContainer.addSeparator();
                 // UVCoverageService warnings:
                 if (uvDataFirst.getFtUVCoverageData() != null) {
                     mergedWarningContainer.addWarnings(uvDataFirst.getFtUVCoverageData().getWarningContainer());
                 }
                 mergedWarningContainer.addWarnings(uvDataFirst.getWarningContainer());
-
             } else {
                 if (uvDataCollection.getFirstObservation().getWhen().isNightRestriction()) {
                     mergedWarningContainer.addWarning("Multiple configurations cannot be done in one night"
@@ -2229,6 +2230,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     final ObservabilityData obsData = this.obsDataList.get(i);
                     mergedWarningContainer.addWarnings(obsData.getWarningContainer());
                 }
+                mergedWarningContainer.addSeparator();
 
                 // UVCoverageService warnings:
                 for (UVCoverageData uvData : uvDataList) {
@@ -2301,20 +2303,30 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             }
 
             // Start computing OIFits ...
-            final boolean resetOIFits = (doOIFits) ? !this.uvPanel.computeOIFits(uvDataCollection) : true;
-
             if (!doOIFits) {
                 // add warning to indicate that OIFits are disabled:
-                uvDataCollection.getWarningContainer().addWarning("OIFits data computation is disabled");
+                uvDataCollection.getWarningContainer().addMessage(WarningMessage.WARN_OIFITS_DISABLED);
             }
+
+            final int computing = (doOIFits) ? this.uvPanel.computeOIFits(uvDataCollection) : 0;
+            final boolean resetOIFits = (!doOIFits || (computing == 0));
+
+            _logger.debug("computing:   {}", computing);
+            _logger.debug("resetOIFits: {}", resetOIFits);
 
             // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
             if (resetOIFits) {
                 om.setOIFitsData(null);
             }
 
-            // Fire a warnings ready event :
-            om.fireWarningsReady(uvDataCollection.getWarningContainer());
+            if (computing == 1) {
+                // reuse cache:
+                // Fire a warnings ready event to use computed OIFits warnings:
+                om.fireWarningsReady(om.getOIFitsData().getOIFitsWarningContainer());
+            } else {
+                // Fire a warnings ready event to use UV warnings only:
+                om.fireWarningsReady(uvDataCollection.getWarningContainer());
+            }
 
             // Refresh the GUI using coherent data :
             this.uvPanel.updatePlot(uvDataCollection);
@@ -2359,15 +2371,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     /**
      * Start computing OIFits
      * @param uvDataCollection computed UV Coverage data
-     * @return true if computation started
+     * @return 0/1/2 meaning none/cache/computing
      */
-    private boolean computeOIFits(final ObservationCollectionUVData uvDataCollection) {
+    private int computeOIFits(final ObservationCollectionUVData uvDataCollection) {
         // check if OIFits computation already done ?
         if (uvDataCollection.isOIFitsDone()) {
-            return true;
+            // use current OIFits (data are correct):
+            return 1; // use cache
         }
-
-        boolean computing = false;
 
         // check if the OIFits data are still available:
         if (om.getOIFitsData() != null) {
@@ -2389,11 +2400,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // - check doNoise: noiseService.isDoNoise()
                 // - check useInstrumentBias: noiseService.isUseCalibrationBias()
                 if (currentUVData.isOIFitsValid(uvDataCollection)) {
-                    // means no reset and current OIFits data are correct:
-                    return true;
+                    // use current OIFits (data are correct):
+                    return 1; // use cache
                 }
             }
         }
+
+        int computing = 0;
 
         // Note : the main observation can have changed while computation
         final ObservationCollection taskObsCollection = uvDataCollection;
@@ -2433,7 +2446,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             }
 
             if (!oiFitsCreatorList.isEmpty()) {
-                computing = true;
+                computing = 2;
 
                 // update the status bar :
                 StatusBar.show(MSG_COMPUTING_OIFITS);
@@ -3649,17 +3662,46 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          */
         @Override
         public void refreshUI(final List<OIFitsFile> oiFitsList) {
+            // Note : the main observation can have changed while computation
+            final ObservationCollection taskObsCollection = uvDataCollection;
 
-            // update OIFits done flag on uv data collection:
-            this.uvDataCollection.setOIFitsDone(true);
+            // use the latest observation for computations to check versions :
+            final ObservationCollection lastObsCollection = om.getObservationCollection();
 
-            // update the OIFits structure in the current observation :
-            om.setOIFitsData(
-                    new OIFitsData(targetName, oiFitsList, this.uvDataCollection.getWarningContainer())
-            );
+            // avoid to mix inconsistent observation and uv coverage data :
+            // Next plot (uv coverage done event) will take into account UI widget changes.
+            if (!taskObsCollection.getVersion().isSameUVVersion(lastObsCollection.getVersion())) {
+                // Skip = ignore these results
+                // next iteration will see changes ...
+                logger.warn("skipped OIFITS result");
+            } else {
+                // update OIFits done flag on uv data collection:
+                this.uvDataCollection.setOIFitsDone(true);
 
-            // update the status bar:
-            StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits done.");
+                // add warning to indicate that OIFits are disabled:
+                this.uvDataCollection.getWarningContainer().removeMessage(WarningMessage.WARN_OIFITS_DISABLED);
+
+                // merged warning container:
+                final WarningContainer mergedWarningContainer = new WarningContainer(this.uvDataCollection.getVersion());
+
+                // Copy all previous warnings (obs, uv, oifits preparation):
+                mergedWarningContainer.addWarnings(this.uvDataCollection.getWarningContainer());
+                mergedWarningContainer.addSeparator();
+
+                // Collect OIFitsCreatorService compute warnings:
+                for (OIFitsCreatorService oiFitsCreator : this.oiFitsCreatorList) {
+                    mergedWarningContainer.addWarnings(oiFitsCreator.getWarningContainerCompute());
+                }
+
+                // update the OIFits structure in the current observation :
+                om.setOIFitsData(new OIFitsData(targetName, oiFitsList, mergedWarningContainer));
+
+                // Fire a warnings ready event :
+                om.fireWarningsReady(mergedWarningContainer);
+
+                // update the status bar:
+                StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits done.");
+            }
         }
 
         /**

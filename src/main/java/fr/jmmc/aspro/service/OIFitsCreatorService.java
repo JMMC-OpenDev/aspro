@@ -160,7 +160,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
      * @param targetPointInfos target information for each uv point couples
      * @param targetUVObservability list of UV coordinates per baseline
      * @param sc sky calc instance
-     * @param warningContainer container for warning messages
+     * @param warningContainer to store warning & information during initialization
+     * @param warningContainerCompute to store warning & information during computation
      * @param ftOiFitsCreator optional FT OIFits creator
      */
     protected OIFitsCreatorService(final ObservationSetting observation,
@@ -175,6 +176,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                                    final List<UVRangeBaseLineData> targetUVObservability,
                                    final AstroSkyCalc sc,
                                    final WarningContainer warningContainer,
+                                   final WarningContainer warningContainerCompute,
                                    final OIFitsCreatorService ftOiFitsCreator) throws IllegalArgumentException {
 
         super(targetMapping.get(targetRole), targetRole, options, ftOiFitsCreator);
@@ -196,6 +198,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // note: may adjust wavelengths:
         prepare(observation, warningContainer);
 
+        // after initialization to be sure:
+        this.warningContainerCompute = warningContainerCompute;
+
         this.useCalibrationBias = useCalibrationBias;
         boolean doBias = false;
         boolean doRandomCalBias = false;
@@ -210,7 +215,8 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             final DelayLineMode delayLineMode = this.beams.get(0).getDelayLineMode(); // all beams have the same mode
 
             final NoiseService ns = new NoiseService(observation, delayLineMode, targetMapping, targetRole, targetPointInfos,
-                    useCalibrationBias, warningContainer, this.waveLengths, this.waveBands, useWavelengthRangeRestriction);
+                    useCalibrationBias, warningContainer, warningContainerCompute,
+                    this.waveLengths, this.waveBands, useWavelengthRangeRestriction);
 
             if (ns.isValid()) {
                 this.noiseService = ns;
@@ -240,6 +246,9 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // Use interferometer name (VLTI, CHARA ...) and not 'VLTI Period 91':
         this.arrNameKeyword = this.interferometer.getName();
 
+        warningContainer.addInformation(arrNameKeyword + " observation on " + target.getName()
+                + " (RA: " + target.getRA() + ", DE:" + target.getDEC() + ")");
+
         final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
         // use alias or real instrument name:
@@ -264,7 +273,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
 
         if (isAmber || this.instrumentVis) {
-            addInformation(warningContainer, "OI_VIS: "
+            warningContainer.addInformation("OI_VIS: "
                     + ((isAmber || this.instrumentVisAmpDiff) ? "Differential" : "Absolute") + " VisAmp - "
                     + ((isAmber || this.instrumentVisPhiDiff) ? "Differential" : "Absolute") + " VisPhi");
         }
@@ -308,7 +317,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 }
 
                 if (!ModelManager.getInstance().checkModels(target.getModels(), maxDist)) {
-                    addWarning(warningContainer, "The model extension on target '" + target.getName()
+                    warningContainer.addWarning("The model extension on target '" + target.getName()
                             + "' is potentially partly outside the telescope FOV ("
                             + NumberUtils.trimTo1Digits(airyRadius) + " mas) !");
                 }
@@ -453,14 +462,14 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         }
 
         if (nWaveLengths == 0) {
-            addWarning(warningContainer, this.instrumentName + " instrument mode: 0 channels (matching WL Ref)");
+            warningContainer.addWarning(this.instrumentName + " instrument mode: 0 channels (matching WL Ref)");
             this.isModelWLValid = false;
         } else {
             // Initial Wavelength information:
             String firstChannel = Double.toString(convertWL(this.waveLengths[0]));
             String lastChannel = (nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[nWaveLengths - 1])) : null;
 
-            addInformation(warningContainer, this.instrumentName + " " + instrumentMode.getName() + " instrument mode: "
+            warningContainer.addInformation(this.instrumentName + " " + instrumentMode.getName() + " instrument mode: "
                     + nWaveLengths + " channels "
                     + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] "
                     + "(band: " + convertWL(waveBand) + " " + SpecialChars.UNIT_MICRO_METER + ')');
@@ -481,7 +490,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                 firstChannel = Double.toString(convertWL(this.waveLengths[0]));
                 lastChannel = (nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[nWaveLengths - 1])) : null;
 
-                addWarning(warningContainer, "Restricted instrument mode: "
+                warningContainer.addWarning("Restricted instrument mode: "
                         + this.waveLengths.length + " channels "
                         + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] ");
             }
@@ -562,6 +571,25 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         // Create beam and base line mappings :
         this.beamMapping = createBeamMapping(this.stationMapping, this.beams);
         this.baseLineMapping = createBaseLineMapping(this.beamMapping, this.baseLines);
+
+        if (this.nBeams >= 3) {
+            // number of triplets :
+            final List<int[]> iTriplets = CombUtils.generateCombinations(this.nBeams, 3);
+
+            final int nTriplets = iTriplets.size();
+            if (nTriplets != 0) {
+                this.triplets = new ArrayList<Triplet>(nTriplets);
+                final short[][] orderedbaseLineIndexes = baseLineMapping.values().toArray(new short[baseLineMapping.size()][2]);
+
+                for (int[] idx : iTriplets) {
+                    triplets.add(Triplet.create(idx, this.beams, this.stationMapping, orderedbaseLineIndexes));
+                }
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("triplets: {}", triplets);
+                }
+            }
+        }
 
         // OI_ARRAY :
         this.createOIArray();
@@ -791,7 +819,10 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final double[][] ufreq = table.ufreq;
         final double[][] vfreq = table.vfreq;
 
-        // index of the observation point (HA):
+        // index of the baseline:
+        final int[] blIdx = table.blIdx;
+
+        // index of the observation point (time):
         final int[] ptIdx = table.ptIdx;
 
         // new block to limit variable scope:
@@ -808,7 +839,11 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             // Iterate on observable UV points :
             for (i = 0; i < nObs; i++) {
                 k = nBl * i + j;
-                // define point index:
+
+                // define baseline index:
+                blIdx[k] = j;
+
+                // define observation point index:
                 ptIdx[k] = i;
 
                 // u/v freqs ...
@@ -1077,7 +1112,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
         final boolean doVisDiff = (doVisAmpDiff || doVisPhiDiff);
 
         if (this.hasModel && !isAmber && (ns != null)) {
-            logger.info("createOIVis: VisAmp/Phi errors computed using {} random complex visiblities", N_SAMPLES);
+            logger.debug("createOIVis: VisAmp/Phi errors computed using {} random complex visiblities", N_SAMPLES);
         }
 
         // vars:
@@ -2039,30 +2074,17 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
      * Create the OI_T3 table
      */
     private void createOIT3() {
-        if (this.nBeams < 3) {
+        if ((this.nBeams < 3) || (triplets == null)) {
             return;
         }
 
         final long start = System.nanoTime();
 
-        // number of triplets :
-        final List<int[]> iTriplets = CombUtils.generateCombinations(this.nBeams, 3);
-
-        final int nTriplets = iTriplets.size();
-        if (nTriplets == 0) {
-            return;
-        }
-
-        final List<Triplet> triplets = new ArrayList<Triplet>(nTriplets);
-        final short[][] orderedbaseLineIndexes = baseLineMapping.values().toArray(new short[baseLineMapping.size()][2]);
-
-        for (int[] idx : iTriplets) {
-            triplets.add(Triplet.create(idx, this.beams, this.stationMapping, orderedbaseLineIndexes));
-        }
-
         if (logger.isDebugEnabled()) {
             logger.debug("triplets: {}", triplets);
         }
+
+        final int nTriplets = triplets.size();
 
         // Get OI_VIS table :
         final OIVis vis = this.oiFitsFile.getOiVis()[0];
@@ -2600,5 +2622,13 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             return false;
         }
         return useCalibrationBias == other.useCalibrationBias;
+    }
+
+    /**
+     * Return the warning container for compute phase
+     * @return warning container for compute phase
+     */
+    public WarningContainer getWarningContainerCompute() {
+        return warningContainerCompute;
     }
 }

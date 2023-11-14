@@ -37,6 +37,7 @@ import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
+import fr.jmmc.jmcs.util.WelfordVariance;
 import fr.jmmc.oitools.image.FitsUnit;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -115,6 +116,8 @@ public final class NoiseService implements VisNoiseService {
     private double adaptiveOpticsLimit = Double.NaN;
     /** AO (multiplicative) Instrumental Visibility */
     private double aoInstrumentalVisibility = Double.NaN;
+    /** distance to AO star */
+    private double distAO = 0.0;
 
     /** AO band */
     private SpectralBand aoBand;
@@ -207,6 +210,8 @@ public final class NoiseService implements VisNoiseService {
     private final double[] waveBands;
 
     /* fringe tracker parameters */
+    /** distance to FT star */
+    private double distFT = 0.0;
     /** Fringe Tracker is Present */
     private boolean fringeTrackerPresent = false;
     /** Fringe Tracking Mode i.e. not group tracking (FINITO) */
@@ -237,9 +242,7 @@ public final class NoiseService implements VisNoiseService {
     private final int iMidPoint;
 
     /* internal */
-    /** container for warning messages */
-    private final WarningContainer warningContainer;
-    /* time formatter */
+ /* time formatter */
     private final DecimalFormat df = new DecimalFormat("##0.##");
     /** flag to indicate that a parameter is invalid in order the code to return errors as NaN values */
     private boolean invalidParameters = false;
@@ -269,6 +272,12 @@ public final class NoiseService implements VisNoiseService {
     /** mean(visibility scale) computed for the mid point and reference channel */
     private double visScaleMeanForMidRefPoint = 1.0;
 
+    /** warning container used during compute phase */
+    private final WarningContainer warningContainerCompute;
+    /* stats */
+    private final WelfordVariance strehlStats = new WelfordVariance();
+    private final WelfordVariance atmTransStats = new WelfordVariance();
+
     /**
      * Protected constructor
      * @param observation observation settings used (read-only copy of the modifiable observation)
@@ -277,7 +286,8 @@ public final class NoiseService implements VisNoiseService {
      * @param targetRole target role of this observation
      * @param targetPointInfos target information for each uv point couples
      * @param useCalibrationBias true to use calibration bias; false to compute only theoretical (optional systematic) error
-     * @param warningContainer container for warning messages
+     * @param warningContainer to store warning & information during initialization
+     * @param warningContainerCompute to store warning & information during computation
      * @param waveLengths concrete wavelength values (spectral channel central value) in meters
      * @param waveBands concrete spectral channel bandwidths in meters
      * @param useWavelengthRangeRestriction use wavelength restrictions
@@ -289,12 +299,12 @@ public final class NoiseService implements VisNoiseService {
                            final TargetPointInfo[] targetPointInfos,
                            final boolean useCalibrationBias,
                            final WarningContainer warningContainer,
+                           final WarningContainer warningContainerCompute,
                            final double[] waveLengths,
                            final double[] waveBands,
                            final boolean useWavelengthRangeRestriction) {
 
         this.useCalibrationBias = USE_BIAS && useCalibrationBias;
-        this.warningContainer = warningContainer;
 
         // Get spectral channels:
         this.nSpectralChannels = waveLengths.length;
@@ -340,10 +350,13 @@ public final class NoiseService implements VisNoiseService {
 
         // extract parameters in observation and configuration :
         prepareInterferometer(observation, targetMapping);
-        prepareInstrument(observation, useWavelengthRangeRestriction);
-        prepareFringeTracker(observation, targetMapping);
-        prepareTarget(observation, targetMapping, targetRole);
-        initParameters();
+        prepareInstrument(warningContainer, observation, useWavelengthRangeRestriction);
+        prepareFringeTracker(observation, targetMapping, targetRole);
+        prepareTarget(warningContainer, targetMapping, targetRole);
+        initParameters(warningContainer);
+
+        // after initialization to be sure:
+        this.warningContainerCompute = warningContainerCompute; // TODO: use for saturation checks
     }
 
     /**
@@ -418,10 +431,11 @@ public final class NoiseService implements VisNoiseService {
 
     /**
      * Prepare instrument and mode parameters
+     * @param warningContainer to store warning & information during initialization
      * @param observation observation settings
      * @param useWavelengthRangeRestriction use wavelength restrictions
      */
-    private void prepareInstrument(final ObservationSetting observation, final boolean useWavelengthRangeRestriction) {
+    private void prepareInstrument(final WarningContainer warningContainer, final ObservationSetting observation, final boolean useWavelengthRangeRestriction) {
 
         if (observation.getInstrumentConfiguration().getAcquisitionTime() != null) {
             this.totalObsTime = observation.getInstrumentConfiguration().getAcquisitionTime().doubleValue();
@@ -482,7 +496,7 @@ public final class NoiseService implements VisNoiseService {
         if (ratioTimeInterfero < 0.99) {
             final double seqTimeMin = (totalObsTime / ratioTimeInterfero); // s
 
-            addInformation("Min O.B. time: " + df.format(Math.round(seqTimeMin)) + " s ("
+            warningContainer.addInformation("Min O.B. time: " + df.format(Math.round(seqTimeMin)) + " s ("
                     + df.format(Math.round(seqTimeMin / 60.0)) + " min) on acquisition"
                     + " - Ratio Interferometry: " + df.format(100.0 * ratioTimeInterfero) + " %");
         }
@@ -648,7 +662,7 @@ public final class NoiseService implements VisNoiseService {
 
         // TODO: fix message if FT enabled (no restriction ...)
         if (useWavelengthRangeRestriction) {
-            addWarning("Detector can not be read completely within 1 DIT: the wavelength range is restricted to "
+            warningContainer.addWarning("Detector can not be read completely within 1 DIT: the wavelength range is restricted to "
                     + df.format(insMode.getEffWaveLengthBandRef()) + " " + SpecialChars.UNIT_MICRO_METER);
         }
 
@@ -778,46 +792,49 @@ public final class NoiseService implements VisNoiseService {
      * Prepare fringe tracker parameters
      * @param observation observation settings
      * @param targetMapping target mappings
+     * @param targetRole target role of this observation
      */
-    private void prepareFringeTracker(final ObservationSetting observation, final Map<TargetRole, Target> targetMapping) {
+    private void prepareFringeTracker(final ObservationSetting observation,
+                                      final Map<TargetRole, Target> targetMapping, final TargetRole targetRole) {
         // AtmosphereQuality is known:
         final AtmosphereQuality atmQual = observation.getWhen().getAtmosphereQuality();
 
-        final Target target = targetMapping.get(TargetRole.SCI);
-        logger.debug("prepareFringeTracker: science target = {}", target);
+        if (targetRole == TargetRole.SCI) {
+            final Target target = targetMapping.get(TargetRole.SCI);
+            logger.debug("prepareFringeTracker: science target = {}", target);
 
-        final TargetConfiguration targetConf = target.getConfiguration();
+            final TargetConfiguration targetConf = target.getConfiguration();
 
-        if ((targetConf != null) && (targetConf.getFringeTrackerMode() != null)) {
-            final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
+            if ((targetConf != null) && (targetConf.getFringeTrackerMode() != null)) {
+                final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
-            final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+                final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
 
-            final FringeTracker ft = instrument.getFringeTracker();
-            if (ft != null) {
-                final String ftMode = targetConf.getFringeTrackerMode();
-                this.fringeTrackerPresent = true;
-                // TODO: handle FT modes properly: GroupTrack is hard coded !
-                this.fringeTrackingMode = (ftMode != null && !ftMode.startsWith(AsproConstants.FT_GROUP_TRACK));
-                this.fringeTrackerInstrumentalVisibility = ft.getInstrumentVisibility();
+                final FringeTracker ft = instrument.getFringeTracker();
+                if (ft != null) {
+                    final String ftMode = targetConf.getFringeTrackerMode();
+                    this.fringeTrackerPresent = true;
+                    // TODO: handle FT modes properly: GroupTrack is hard coded !
+                    this.fringeTrackingMode = (ftMode != null && !ftMode.startsWith(AsproConstants.FT_GROUP_TRACK));
+                    this.fringeTrackerInstrumentalVisibility = ft.getInstrumentVisibility();
 
-                // Get the magnitude limit according to the atmosphere quality and telescope:
-                this.fringeTrackerLimit = ft.getMagLimit(atmQual, this.telescope);
+                    // Get the magnitude limit according to the atmosphere quality and telescope:
+                    this.fringeTrackerLimit = ft.getMagLimit(atmQual, this.telescope);
 
-                this.fringeTrackerMaxDit = ft.getMaxIntegration();
-                this.fringeTrackerMaxFrameTime = this.fringeTrackerMaxDit;
-                this.ftBand = ft.getBand();
+                    this.fringeTrackerMaxDit = ft.getMaxIntegration();
+                    this.fringeTrackerMaxFrameTime = this.fringeTrackerMaxDit;
+                    this.ftBand = ft.getBand();
 
-                // use specific FT DIT defined for this instrument mode:
-                if (insMode.getFtDit() != null) {
-                    this.fringeTrackerMaxDit = insMode.getFtDit();
-                }
-                if (insMode.getFtFrameTime() != null) {
-                    this.fringeTrackerMaxFrameTime = insMode.getFtFrameTime();
+                    // use specific FT DIT defined for this instrument mode:
+                    if (insMode.getFtDit() != null) {
+                        this.fringeTrackerMaxDit = insMode.getFtDit();
+                    }
+                    if (insMode.getFtFrameTime() != null) {
+                        this.fringeTrackerMaxFrameTime = insMode.getFtFrameTime();
+                    }
                 }
             }
         }
-
         if (logger.isDebugEnabled()) {
             logger.debug("atmQual                       : {}", atmQual);
             logger.debug("fringeTrackerPresent          : {}", fringeTrackerPresent);
@@ -836,11 +853,11 @@ public final class NoiseService implements VisNoiseService {
 
     /**
      * Prepare object parameters
-     * @param observation observation settings
+     * @param warningContainer to store warning & information during initialization
      * @param targetMapping target mappings
      * @param targetRole target role of this observation
      */
-    private void prepareTarget(final ObservationSetting observation,
+    private void prepareTarget(final WarningContainer warningContainer,
                                final Map<TargetRole, Target> targetMapping, final TargetRole targetRole) {
 
         // Get band from wavelength range:
@@ -961,8 +978,11 @@ public final class NoiseService implements VisNoiseService {
         }
 
         final Target ftTarget = (targetRole == TargetRole.SCI) ? targetMapping.get(TargetRole.FT) : target;
-        final Target aoTarget = targetMapping.get(TargetRole.AO);
 
+        Target aoTarget = targetMapping.get(TargetRole.AO);
+        if (aoTarget == null) {
+            aoTarget = target;
+        }
         logger.debug("ftTarget                      : {}", ftTarget);
         logger.debug("aoTarget                      : {}", aoTarget);
 
@@ -973,18 +993,18 @@ public final class NoiseService implements VisNoiseService {
                 if (ftTarget == target) {
                     missingMags.add(ftBand);
                 } else {
-                    addWarning(AsproConstants.WARN_MISSING_MAGS + " on FT target [" + ftTarget.getName() + "] "
+                    warningContainer.addWarning(AsproConstants.WARN_MISSING_MAGS + " on FT target [" + ftTarget.getName() + "] "
                             + "in band " + ftBand);
                 }
                 fringeTrackerMag = Double.NaN;
             } else {
                 fringeTrackerMag = flux.doubleValue();
                 if (ftTarget != target) {
-                    final double dist = TargetUtils.computeDistanceInDegrees(target, ftTarget);
-                    final FitsUnit axisUnit = FitsUnit.getAngleDegUnit(dist);
-                    addInformation("FT associated to target [" + ftTarget.getName() + "] ("
+                    this.distFT = TargetUtils.computeDistanceInDegrees(target, ftTarget);
+                    final FitsUnit axisUnit = FitsUnit.ANGLE_ARCSEC;
+                    warningContainer.addInformation("FT associated to target [" + ftTarget.getName() + "] ("
                             + ftBand + '=' + df.format(fringeTrackerMag) + " mag, "
-                            + "dist: " + NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(dist, axisUnit))
+                            + "dist: " + NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(distFT, axisUnit))
                             + " " + axisUnit.getStandardRepresentation() + ")");
                 }
             }
@@ -1012,7 +1032,7 @@ public final class NoiseService implements VisNoiseService {
             if (aoTarget == target) {
                 missingMags.add(aoBand);
             } else {
-                addWarning(AsproConstants.WARN_MISSING_MAGS + " on AO target [" + aoTarget.getName() + "] "
+                warningContainer.addWarning(AsproConstants.WARN_MISSING_MAGS + " on AO target [" + aoTarget.getName() + "] "
                         + "in band " + aoBand);
             }
             adaptiveOpticsMag = Double.NaN;
@@ -1022,18 +1042,18 @@ public final class NoiseService implements VisNoiseService {
             // check AO mag limits:
             if (!Double.isNaN(adaptiveOpticsLimit) && adaptiveOpticsMag > adaptiveOpticsLimit) {
                 this.invalidParameters = true;
-                addWarning("Observation can not use AO (magnitude limit = " + adaptiveOpticsLimit + ") in " + aoBand + " band");
+                warningContainer.addWarning("Observation can not use AO (magnitude limit = " + adaptiveOpticsLimit + ") in " + aoBand + " band");
             } else {
                 if (this.aoSetup != null) {
-                    addInformation("AO setup: " + aoSetup.getName() + " in " + aoBand + " band ("
+                    warningContainer.addInformation("AO setup: " + aoSetup.getName() + " in " + aoBand + " band ("
                             + fluxAOBand + '=' + df.format(adaptiveOpticsMag) + " mag)");
                 }
                 if (aoTarget != target) {
-                    final double dist = TargetUtils.computeDistanceInDegrees(target, aoTarget);
-                    final FitsUnit axisUnit = FitsUnit.getAngleDegUnit(dist);
-                    addInformation("AO associated to target [" + aoTarget.getName() + "] ("
+                    this.distAO = TargetUtils.computeDistanceInDegrees(target, aoTarget);
+                    final FitsUnit axisUnit = FitsUnit.ANGLE_ARCSEC;
+                    warningContainer.addInformation("AO associated to target [" + aoTarget.getName() + "] ("
                             + fluxAOBand + '=' + df.format(adaptiveOpticsMag) + " mag, "
-                            + "dist: " + NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(dist, axisUnit))
+                            + "dist: " + NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(distAO, axisUnit))
                             + " " + axisUnit.getStandardRepresentation() + ")");
                 }
             }
@@ -1050,20 +1070,23 @@ public final class NoiseService implements VisNoiseService {
             final ArrayList<SpectralBand> mags = new ArrayList<SpectralBand>(missingMags);
             Collections.sort(mags);
 
-            addWarning(AsproConstants.WARN_MISSING_MAGS + " on target [" + target.getName() + "] "
+            warningContainer.addWarning(AsproConstants.WARN_MISSING_MAGS + " on target [" + target.getName() + "] "
                     + "in following bands: " + mags.toString());
         }
     }
 
     /**
      * Initialise other parameters
+     * @param warningContainer to store warning & information during initialization
      */
-    void initParameters() {
+    void initParameters(final WarningContainer warningContainer) {
         // fast return if invalid configuration :
         if (invalidParameters) {
             return;
         }
         final int nObs = nPoints; // = targetPointInfos.length
+
+        final int nWLen = nSpectralChannels;
 
         // Pass 1: find maximum flux per channel taking into account the target elevation:
         // strehl is spectrally dependent:
@@ -1082,7 +1105,7 @@ public final class NoiseService implements VisNoiseService {
                 } else {
                     strehl = 0.1;
                 }
-                addInformation("Strehl (SPICA): " + NumberUtils.format(strehl));
+                warningContainer.addTrace("Strehl (SPICA): " + NumberUtils.format(strehl));
 
                 for (int n = 0; n < nObs; n++) {
                     strehlPerChannel[n] = new double[waveLengths.length];
@@ -1133,11 +1156,16 @@ public final class NoiseService implements VisNoiseService {
                     }
                 }
             }
+
+            // Stats:
+            for (int n = 0; n < nObs; n++) {
+                for (int l = 0; l < nWLen; l++) {
+                    strehlStats.add(strehlPerChannel[n][l]);
+                }
+            }
         } else {
             strehlPerChannel = null;
         }
-
-        final int nWLen = nSpectralChannels;
 
         // total number of thermal photons per spectral channel per second per telescope:
         if (this.nbPhotThermal == null) {
@@ -1155,6 +1183,11 @@ public final class NoiseService implements VisNoiseService {
         final double[] fluxSrcPerChannel = computeTargetFlux();
         // compute transmission on spectral channels:
         final double[] atmTrans = computeAtmosphereTransmission();
+
+        // Stats:
+        for (int l = 0; l < nWLen; l++) {
+            atmTransStats.add(atmTrans[l]);
+        }
 
         // total number of science photons per spectral channel per second per telescope:
         this.nbTotalObjPhot = new double[nObs][nWLen];
@@ -1222,7 +1255,7 @@ public final class NoiseService implements VisNoiseService {
             // the dit is too long
             obsDit *= detectorSaturation / peakFluxPix;
 
-            addWarning("DIT too long (saturation). Adjusting it to (possibly impossible): " + formatTime(obsDit));
+            warningContainer.addWarning("DIT too long (saturation). Adjusting it to (possibly impossible): " + formatTime(obsDit));
 
             nbFrameToSaturation = 1;
         } else {
@@ -1272,19 +1305,19 @@ public final class NoiseService implements VisNoiseService {
                         logger.debug("frameRatio (FT)               : {}", frameRatio);
                     }
 
-                    addInformation("Observation can take advantage of FT. Adjusting DIT to: " + formatTime(obsDit));
+                    warningContainer.addInformation("Observation can take advantage of FT. Adjusting DIT to: " + formatTime(obsDit));
                 } else {
-                    addInformation("Observation can take advantage of FT (Group track). DIT set to: " + formatTime(obsDit));
+                    warningContainer.addInformation("Observation can take advantage of FT (Group track). DIT set to: " + formatTime(obsDit));
                 }
             } else {
                 // invalid FT setup
-                this.invalidParameters = true;
+                this.invalidParameters = false; // TODO: fix true;
 
                 if (fringeTrackerMag > fringeTrackerLimit) {
-                    addWarning("Observation can not use FT (" + ftBand + " magnitude limit = " + fringeTrackerLimit + "). "
+                    warningContainer.addWarning("Observation can not use FT (" + ftBand + " magnitude limit = " + fringeTrackerLimit + "). "
                             + "DIT set to: " + formatTime(obsDit));
                 } else if (nbFrameToSaturation <= 1) {
-                    addWarning("Observation can not use FT (saturation). DIT set to: " + formatTime(obsDit));
+                    warningContainer.addWarning("Observation can not use FT (saturation). DIT set to: " + formatTime(obsDit));
                 }
 
                 if (logger.isDebugEnabled()) {
@@ -1293,7 +1326,7 @@ public final class NoiseService implements VisNoiseService {
                 }
             }
         } else {
-            addInformation("Observation without FT. DIT set to: " + formatTime(obsDit));
+            warningContainer.addInformation("Observation DIT set to: " + formatTime(obsDit));
         }
 
         // Allocate arrays and noise parameters:
@@ -1311,7 +1344,7 @@ public final class NoiseService implements VisNoiseService {
         initDetectorParameters(obsDit);
 
         // ensure prepare parameters (no correction) to finalize initialization (UVMap use case):
-        prepareParameters(null, null, null);
+        prepareParameters(null, null, null, false, null);
     }
 
     // TODO: use later obsDit to make GRAVITY FT dit varying => best DIT for 1 atm conditions + 1 VisAmp dataset
@@ -1409,12 +1442,26 @@ public final class NoiseService implements VisNoiseService {
      * @param insBands instrumental band per channel
      * @param modelFlux user model's flux per channel (interpolated)
      * @param bandFluxes user model's mean flux per band
+     * @param doWarnings do log warning messages
+     * @param prefix prefix for warning messages
      */
-    public void prepareParameters(final Band[] insBands, final double[] modelFlux, final Map<Band, Double> bandFluxes) {
+    public void prepareParameters(final Band[] insBands, final double[] modelFlux, final Map<Band, Double> bandFluxes,
+                                  final boolean doWarnings, final String prefix) {
+
         // fast return if invalid configuration :
         if (invalidParameters) {
             return;
         }
+
+        if (doWarnings) {
+            if (strehlStats.isSet()) {
+                warningContainerCompute.addTrace(prefix + ": Strehl " + strehlStats.toString(false));
+            }
+            if (atmTransStats.isSet() && logger.isDebugEnabled()) {
+                logger.debug("Atm. trans: {}", atmTransStats);
+            }
+        }
+
         final int nObs = nPoints;
 
         if ((insBands != null) && !bandFluxes.isEmpty()) {
@@ -2116,6 +2163,14 @@ public final class NoiseService implements VisNoiseService {
         return seeing;
     }
 
+    public double getDistAO() {
+        return distAO;
+    }
+
+    public double getDistFT() {
+        return distFT;
+    }
+
     public double getVisScaleMeanForMidRefPoint() {
         return visScaleMeanForMidRefPoint;
     }
@@ -2208,22 +2263,7 @@ public final class NoiseService implements VisNoiseService {
         }
     }
 
-    /**
-     * Add a warning message in the OIFits file
-     * @param msg message to add
-     */
-    private void addWarning(final String msg) {
-        this.warningContainer.addWarning(msg);
-    }
-
-    /**
-     * Add an information message in the OIFits file
-     * @param msg message to add
-     */
-    private void addInformation(final String msg) {
-        this.warningContainer.addInformation(msg);
-    }
-
+    /* --- utility methods --- */
     /**
      * Format time value for warning messages
      * @param value time (s)

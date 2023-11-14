@@ -7,12 +7,14 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.WarningContainer;
+import fr.jmmc.aspro.model.WarningMessage;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.util.TargetRole;
 import fr.jmmc.aspro.model.util.UserModelDataComparator;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
+import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmcs.util.StatUtils.ComplexDistribution;
@@ -54,6 +56,9 @@ public abstract class AbstractOIFitsProducer {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(AbstractOIFitsProducer.class.getName());
+
+    /** flag to enable FT SNR outputs */
+    public static final boolean TRACE_SNR_FT = "true".equalsIgnoreCase(System.getProperty("TRACE_SNR_FT", "false"));
 
     /** use sampled mean(sample) instead of theoretical value */
     protected final static boolean DO_USE_SAMPLED_MEAN = false;
@@ -106,9 +111,22 @@ public abstract class AbstractOIFitsProducer {
     protected UVFreqTable freqTable = null;
     /** internal computed complex visibility and error data [row][waveLength] */
     protected VisDataTable dataTable = null;
+    /** triplet mapping */
+    protected List<Triplet> triplets = null;
+
+    /** warning container used during compute phase */
+    protected WarningContainer warningContainerCompute = null;
 
     /** (optional) FT OIFits creator */
     private final AbstractOIFitsProducer ftOiFitsCreator;
+
+    static {
+        if (TRACE_SNR_FT) {
+            System.out.printf("[TRACE]\t%s\t%s\t%s\n",
+                    "K (mag)", "DIT (ms)", "SNR"
+            );
+        }
+    }
 
     /**
      * Protected constructor
@@ -159,7 +177,7 @@ public abstract class AbstractOIFitsProducer {
 
                 if (!isWL && nImages > 1) {
                     // Fits cube without wavelengths:
-                    addWarning(warningContainer, "User model (Fits cube) without wavelength information is discarded");
+                    warningContainer.addWarning("User model (Fits cube) without wavelength information is discarded");
                     return false;
                 }
 
@@ -177,7 +195,7 @@ public abstract class AbstractOIFitsProducer {
                     if (nImages == 1) {
                         // check image wavelength is in instrument range:
                         if (wlFirst < lambdaMin || wlFirst > lambdaMax) {
-                            addWarning(warningContainer, "User model (Fits image) wavelength ("
+                            warningContainer.addWarning("User model (Fits image) wavelength ("
                                     + convertWL(wlFirst) + " " + SpecialChars.UNIT_MICRO_METER
                                     + ") outside of instrumental wavelength range");
                             return false;
@@ -188,18 +206,18 @@ public abstract class AbstractOIFitsProducer {
                         final double wlLast = modelDataLast.getWaveLength();
                         final double wlIncMin = modelDataFirst.getWaveLengthIncrement(); // not constant in Fits cube (hertz)
 
-                        addInformation(warningContainer, "User model [" + userModel.getName() + "]: " + nImages + " images "
+                        warningContainer.addInformation("User model [" + userModel.getName() + "]: " + nImages + " images "
                                 + '[' + convertWL(wlFirst) + " - " + convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER + "] "
                                 + "(increment: " + convertWL(wlIncMin) + " " + SpecialChars.UNIT_MICRO_METER + ')');
 
                         // check image wavelengths are overlapping the instrument range:
                         if (modelDataFirst.getWaveLengthRange().getMin() > lambdaMax) {
-                            addWarning(warningContainer, "Incorrect model min wavelength [" + convertWL(wlFirst) + " " + SpecialChars.UNIT_MICRO_METER
+                            warningContainer.addWarning("Incorrect model min wavelength [" + convertWL(wlFirst) + " " + SpecialChars.UNIT_MICRO_METER
                                     + "] higher than max instrument wavelength [" + convertWL(lambdaMax) + " " + SpecialChars.UNIT_MICRO_METER + ']');
                             return false;
                         }
                         if (modelDataLast.getWaveLengthRange().getMax() < lambdaMin) {
-                            addWarning(warningContainer, "Incorrect model max wavelength [" + convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER
+                            warningContainer.addWarning("Incorrect model max wavelength [" + convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER
                                     + "] lower than min instrument wavelength [" + convertWL(lambdaMin) + " " + SpecialChars.UNIT_MICRO_METER + ']');
                             return false;
                         }
@@ -248,7 +266,7 @@ public abstract class AbstractOIFitsProducer {
                         }
 
                         if (uniqueModelDatas.isEmpty()) {
-                            addWarning(warningContainer, "Incorrect model wavelength range [" + convertWL(wlFirst) + " - " + convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER
+                            warningContainer.addWarning("Incorrect model wavelength range [" + convertWL(wlFirst) + " - " + convertWL(wlLast) + " " + SpecialChars.UNIT_MICRO_METER
                                     + "] smaller than the typical instrumental wavelength band [" + convertWL(StatUtils.mean(effBands)) + " " + SpecialChars.UNIT_MICRO_METER + ']');
                             return false;
                         }
@@ -282,7 +300,7 @@ public abstract class AbstractOIFitsProducer {
 
                         // Test sub sampling (less than 1 IMAGE PER CHANNEL)
                         if (nChannels > uniqueModelDatas.size()) {
-                            addWarning(warningContainer, "Sub sampling detected: " + nChannels + " channels for only "
+                            warningContainer.addWarning("Sub sampling detected: " + nChannels + " channels for only "
                                     + uniqueModelDatas.size() + " user model image(s) available");
                         }
 
@@ -304,7 +322,7 @@ public abstract class AbstractOIFitsProducer {
                                 }
                             } else {
                                 // Extrapolation on boundaries:
-                                addInformation(warningContainer, "Extrapolation applied on " + (firstChannel) + " lower "
+                                warningContainer.addInformation("Extrapolation applied on " + (firstChannel) + " lower "
                                         + " and " + (nWaves - 1 - lastChannel) + " upper channels");
                             }
                         }
@@ -396,8 +414,7 @@ public abstract class AbstractOIFitsProducer {
         if (logger.isDebugEnabled()) {
             logger.debug("computeModelVisibilities: nWLen = {} - nChannels = {}", nWLen, nChannels);
         }
-
-        // fast interrupt :
+        // fast interrupt:
         if (currentThread.isInterrupted()) {
             return false;
         }
@@ -606,7 +623,6 @@ public abstract class AbstractOIFitsProducer {
                         });
                     }
                 }
-
                 // fast interrupt :
                 if (currentThread.isInterrupted()) {
                     return false;
@@ -616,7 +632,9 @@ public abstract class AbstractOIFitsProducer {
             final int nJobs = jobList.size();
 
             // note: have jobs a multiple of nTh to maximize parallelism !
-            logger.debug("computeModelVisibilities: {} jobs", nJobs);
+            if (logger.isDebugEnabled()) {
+                logger.debug("computeModelVisibilities: {} jobs", nJobs);
+            }
 
             final Runnable[] jobs = jobList.toArray(new Runnable[nJobs]);
 
@@ -745,14 +763,19 @@ public abstract class AbstractOIFitsProducer {
                 }
             }
         }
-
         // fast interrupt :
         if (currentThread.isInterrupted()) {
             return false;
         }
 
         if (visAmpStats.isSet()) {
-            logger.info("VisAmp stats (all data points): {}", visAmpStats);
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}: VisAmp: {}", targetRole, visAmpStats);
+            }
+            if (warningContainerCompute != null) {
+                warningContainerCompute.addMessage(targetRole + ": VisAmp " + visAmpStats.toString(false),
+                        (targetRole == TargetRole.SCI) ? WarningMessage.Level.Information : WarningMessage.Level.Trace);
+            }
         }
 
         // Compute complex visibility errors:
@@ -765,13 +788,15 @@ public abstract class AbstractOIFitsProducer {
             final double[] sigmaOpdMean = new double[dits.length];
 
             int minIdx = -1;
-            double minSigmaOpdMean = Double.MAX_VALUE;
+            double minSigmaOpdMean = Double.MAX_VALUE; // nm
 
             for (int i = 0; i < dits.length; i++) {
-                logger.debug("Testing DIT: {} ms", dits[i]);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Testing DIT: {} ms", dits[i]);
+                }
 
                 // TODO: check saturation ?
-                sigmaOpdMean[i] = computeVisibilityErrors(dits[i] * 1e-3, insBands, modelFluxes, bandFluxes);
+                sigmaOpdMean[i] = computeVisibilityErrors(dits[i] * 1e-3, insBands, modelFluxes, bandFluxes, false);
 
                 // fast interrupt :
                 if (currentThread.isInterrupted()) {
@@ -783,19 +808,25 @@ public abstract class AbstractOIFitsProducer {
                 }
             }
 
-            logger.info("dits (ms):        {}", Arrays.toString(dits));
-            logger.info("sigmaOpdMean (m): {}", Arrays.toString(sigmaOpdMean));
+            if (logger.isDebugEnabled()) {
+                logger.debug("dits (ms)    :     {}", Arrays.toString(dits));
+                logger.debug("sigmaOPD mean (m): {}", Arrays.toString(sigmaOpdMean));
+            }
 
             final double bestDit = dits[minIdx];
-            logger.info("Using best DIT: {} ms", bestDit);
-            logger.info("minSigmaOpdMean: {} nm", minSigmaOpdMean * 1e9);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Using best DIT:     {} ms", bestDit);
+                logger.debug("min(sigmaOPD mean): {} nm", minSigmaOpdMean);
+            }
+            if (warningContainerCompute != null) {
+                warningContainerCompute.addInformation(targetRole + ": best DIT = " + bestDit + " ms - min(σOPD) = " + NumberUtils.format(minSigmaOpdMean) + " nm");
+            }
 
             // Compute again to initialize the noise service with selected DIT:
-            computeVisibilityErrors(bestDit * 1e-3, insBands, modelFluxes, bandFluxes);
+            computeVisibilityErrors(bestDit * 1e-3, insBands, modelFluxes, bandFluxes, true);
         } else {
-            computeVisibilityErrors(dit, insBands, modelFluxes, bandFluxes);
+            computeVisibilityErrors(dit, insBands, modelFluxes, bandFluxes, true);
         }
-
         // fast interrupt :
         if (currentThread.isInterrupted()) {
             return false;
@@ -805,12 +836,19 @@ public abstract class AbstractOIFitsProducer {
         return true;
     }
 
-    private double computeVisibilityErrors(final double dit, final Band[] insBands, final double[] modelFluxes, final Map<Band, Double> bandFluxes) {
+    private double computeVisibilityErrors(final double dit, final Band[] insBands,
+                                           final double[] modelFluxes, final Map<Band, Double> bandFluxes,
+                                           final boolean doWarnings) {
+
+        final long start = doWarnings ? System.nanoTime() : 0L;
 
         /** Get the current thread to check if the computation is interrupted */
         final Thread currentThread = Thread.currentThread();
 
-        // index of the observation point (HA):
+        // index of the baseline:
+        final int[] blIdx = freqTable.blIdx;
+
+        // index of the observation point (time):
         final int[] ptIdx = freqTable.ptIdx;
 
         final int nBl = freqTable.nBl;
@@ -825,22 +863,36 @@ public abstract class AbstractOIFitsProducer {
         final StatUtils stat;
 
         // ft sigmaOpd per row:
-        double[] sigmaOpdFT = null;
+        double[] sigmaFTOpd = null;
+
+        double sigmaFTDist = 0.0;
 
         if (ns == null) {
             stat = null;
         } else {
             if ((ftOiFitsCreator != null) && (ftOiFitsCreator.dataTable != null)) {
                 // Get already computed sigmaOpd for FT:
-                sigmaOpdFT = ftOiFitsCreator.dataTable.sigmaOpd;
+                sigmaFTOpd = ftOiFitsCreator.dataTable.sigmaOpd;
 
-                if (sigmaOpdFT == null) {
-                    logger.error("Invalid FT observation (sigmaOpd = null)");
-                } else if (sigmaOpdFT.length != nRows) {
-                    logger.error("Invalid FT observation: bad dimensions (sigmaOpd vs rows): ({} vs {})", sigmaOpdFT.length, nRows);
-                    sigmaOpdFT = null;
+                if (sigmaFTOpd == null) {
+                    logger.error("Invalid FT observation (sigmaFTOpd = null)");
+                } else if (sigmaFTOpd.length != nRows) {
+                    logger.error("Invalid FT observation: bad dimensions (sigmaFTOpd vs rows): ({} vs {})", sigmaFTOpd.length, nRows);
+                    sigmaFTOpd = null;
                 }
                 // TODO: add warning or set error as invalid !
+
+                if (sigmaFTOpd != null) {
+                    final double h_turb = 4300; // TODO: put in configuration
+
+                    final double distFT = ns.getDistFT();
+                    if (distFT > 0.0) {
+                        sigmaFTDist = getSigmaP(ns, h_turb, distFT * ALX.DEG_IN_ARCSEC);
+                    }
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("sigma_dist: {} m", sigmaFTDist);
+                    }
+                }
             }
 
             if (!Double.isNaN(dit)) {
@@ -849,7 +901,7 @@ public abstract class AbstractOIFitsProducer {
             }
 
             // prepare final parameters (after initDetectorParameters):
-            ns.prepareParameters(insBands, modelFluxes, bandFluxes); // could be used to make DIT varying (later) ?
+            ns.prepareParameters(insBands, modelFluxes, bandFluxes, doWarnings, targetRole.toString());
 
             stat = StatUtils.getInstance();
             // prepare enough distributions for all baselines:
@@ -883,8 +935,11 @@ public abstract class AbstractOIFitsProducer {
 
         // stats:
         final WelfordVariance snrVisAmpStats = new WelfordVariance();
-        final WelfordVariance visLossStats = (sigmaOpdFT != null) ? new WelfordVariance() : null;
-        final WelfordVariance visLossMidStats = (sigmaOpdFT != null) ? new WelfordVariance() : null;
+        // only for reference channel:
+        final WelfordVariance visLossStats = (sigmaFTOpd != null) ? new WelfordVariance() : null;
+        final WelfordVariance visLossPhiStats = (sigmaFTOpd != null) ? new WelfordVariance() : null;
+        final WelfordVariance visLossDistStats = (sigmaFTOpd != null) ? new WelfordVariance() : null;
+        final WelfordVariance visLossMidStats = (sigmaFTOpd != null) ? new WelfordVariance() : null;
 
         int pt, prevPt = -1;
 
@@ -928,28 +983,45 @@ public abstract class AbstractOIFitsProducer {
                     double visScale = 1.0;
 
                     // Handle FT residuals (sigmaOpd):
-                    if (sigmaOpdFT != null) {
+                    if (sigmaFTOpd != null) {
                         // per row (ie per obs point and baseline):
-                        final double sigma_phi = (sigmaOpdFT[k] * TWO_PI) / waveLengths[l];
+                        final double sigma_phi = (sigmaFTOpd[k] * TWO_PI) / waveLengths[l];
+                        double visLoss_phi = Math.exp(-sigma_phi * sigma_phi / 2.0);
+
+                        if (!Double.isFinite(visLoss_phi) || (visLoss_phi < 1e-6)) {
+                            visLoss_phi = 0.0;
+                        }
+
+                        final double sigma_p = (sigmaFTDist != 0.0) ? (sigmaFTDist * TWO_PI) / waveLengths[l] : 0.0;
+                        double visLoss_p = (sigma_p != 0.0) ? Math.exp(-sigma_p * sigma_p / 2.0) : 1.0;
+
+                        if (!Double.isFinite(visLoss_p) || (visLoss_p < 1e-6)) {
+                            visLoss_p = 0.0;
+                        }
 
                         // combined visibility loss:
-                        // TODO: add off-axis tracking loss:
-                        visScale = Math.exp(-sigma_phi * sigma_phi / 2.0);
+                        visScale = visLoss_phi * visLoss_p;
 
-                        if (!Double.isFinite(visScale)) {
+                        if (!Double.isFinite(visScale) || (visScale < 1e-6)) {
                             visScale = 0.0;
                         }
                         // keep stats at ref wavelength:
                         if (l == iRef) {
+                            visLossPhiStats.add(visLoss_phi);
+                            visLossDistStats.add(visLoss_p);
                             visLossStats.add(visScale);
+
                             if (pt == iMid) {
                                 visLossMidStats.add(visScale);
                             }
                         }
                         if (logger.isDebugEnabled()) {
-                            logger.debug("sigma_opd:   {} m", sigmaOpdFT[k]);
-                            logger.debug("waveLengths: {} m", waveLengths[l]);
-                            logger.debug("sigma_phi:   {} deg", Math.toDegrees(sigma_phi));
+                            logger.debug("waveLength:  {} m", waveLengths[l]);
+                            logger.debug("sigma_opd:   {} m", sigmaFTOpd[k]);
+                            logger.debug("sigma_phi:   {}", sigma_phi);
+                            logger.debug("sigma_p:     {}", sigma_p);
+                            logger.debug("visLoss_phi: {}", visLoss_phi);
+                            logger.debug("visLoss_p:   {}", visLoss_p);
                             logger.debug("visScale:    {}", visScale);
                         }
                     }
@@ -1042,8 +1114,7 @@ public abstract class AbstractOIFitsProducer {
                     visRndIdx[k] = visRndIdx[k - 1];
                 }
             }
-
-            // fast interrupt :
+            // fast interrupt:
             if (currentThread.isInterrupted()) {
                 return 0.0;
             }
@@ -1055,15 +1126,42 @@ public abstract class AbstractOIFitsProducer {
         }
 
         if (snrVisAmpStats.isSet()) {
-            logger.info("SNR(V) stats (all data points):  {}", snrVisAmpStats);
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}: SNR(V): {}", targetRole, snrVisAmpStats);
+            }
+            if (doWarnings && (warningContainerCompute != null)) {
+                warningContainerCompute.addMessage(targetRole + ": SNR(V) " + snrVisAmpStats.toString(false),
+                        (targetRole == TargetRole.SCI) ? WarningMessage.Level.Information : WarningMessage.Level.Trace);
+            }
         }
         if (ns != null) {
+            if ((visLossPhiStats != null) && visLossPhiStats.isSet()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("{}: VisLoss(Phi): {}", targetRole, visLossPhiStats);
+                }
+                if (doWarnings && (warningContainerCompute != null)) {
+                    warningContainerCompute.addTrace(targetRole + ": VisLoss(Phi) " + visLossPhiStats.toString(false));
+                }
+            }
+            if ((visLossDistStats != null) && visLossDistStats.isSet()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("{}: VisLoss(DistFT): {}", targetRole, visLossDistStats);
+                }
+                if (doWarnings && (warningContainerCompute != null)) {
+                    warningContainerCompute.addTrace(targetRole + ": VisLoss(DistFT) " + visLossDistStats.toString(false));
+                }
+            }
             if ((visLossStats != null) && visLossStats.isSet()) {
-                logger.info("Vis loss (ref data points):     {}", visLossStats);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("{}: VisLoss: {}", targetRole, visLossStats);
+                }
+                if (doWarnings && (warningContainerCompute != null)) {
+                    warningContainerCompute.addInformation(targetRole + ": VisLoss " + visLossStats.toString(false));
+                }
             }
             if (visLossMidStats != null) {
-                if (visLossMidStats.isSet()) {
-                    logger.debug("Vis loss (mid/ref data points): {}", visLossMidStats);
+                if (visLossMidStats.isSet() && logger.isDebugEnabled()) {
+                    logger.debug("VisLoss (mid/ref): {}", visLossMidStats);
                 }
                 // set VisScale (mean) to generate noisy images (later):
                 ns.setVisScaleMeanForMidRefPoint(visLossMidStats.mean());
@@ -1094,30 +1192,36 @@ public abstract class AbstractOIFitsProducer {
             final double lambdaFT = this.waveLengths[iRef]; // center of K band
             final double nbWaveFT = lambdaFT / TWO_PI;
 
+            // Compute sigmaOpd (fixed term):
+            final double varOpdLow = Math.pow(ftDit / (2.6 * t0), (5.0 / 3.0)) * Math.pow(nbWaveFT, 2.0) + Math.pow(sigma_vib, 2.0);
+
             if (logger.isDebugEnabled()) {
                 logger.debug("computeErrors() for {}", this.instrumentName);
-                logger.debug("sigma_vib: {} nm", sigma_vib);
-                logger.debug("seeing:    {} as", seeing);
-                logger.debug("t0:        {} ms", t0);
-                logger.debug("ftDit:     {} ms", ftDit);
-                logger.debug("lambdaFT:  {} m", lambdaFT);
-                logger.debug("SQRT(NDIT): {}", 1.0 / invSqrtNDIT);
+                logger.debug("sigma_vib:          {} nm", sigma_vib);
+                logger.debug("seeing:             {} as", seeing);
+                logger.debug("t0:                 {} ms", t0);
+                logger.debug("ftDit:              {} ms", ftDit);
+                logger.debug("lambdaFT:           {} m", lambdaFT);
+                logger.debug("SQRT(NDIT):         {}", 1.0 / invSqrtNDIT);
+                logger.debug("sigma_opd_lo(FT):   {} nm", 1e9 * Math.sqrt(varOpdLow));
             }
 
             // compute sigmaOpd(FT) for later use by the SCIENCE observation:
             final double[] sigmaOpd = dataTable.getSigmaOpd();
+
+            final double[] snrFTs = new double[nRows];
 
             final WelfordVariance snrFTStats = new WelfordVariance();
             final WelfordVariance sigmaOpdStats = new WelfordVariance();
 
             // Iterate on rows :
             // (baselines) x nObsPoints
-            for (int i, j, k = 0, l; k < nRows; k++) {
-                pt = i = ptIdx[k]; // obs point
-                j = k % nBl;
+            for (int j, k = 0, l; k < nRows; k++) {
+                pt = ptIdx[k]; // obs point
+                j = blIdx[k];
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Row: {} - Obs point: {} - Baseline({}): {}", k, i, j, baseLines.get(j));
+                    logger.debug("Row: {} - Obs point: {} - Baseline({}): {}", k, pt, j, baseLines.get(j));
                 }
 
                 final Complex[] visComplexRow = visComplex[k];
@@ -1140,7 +1244,7 @@ public abstract class AbstractOIFitsProducer {
 
                     // SNR(V) = 2 SNR(V2):
                     final double sigma_phi = 1.0 / snrVisAmp;
-                    double weight = Math.pow(nbPhotInterf, 2.0);
+                    final double weight = Math.pow(nbPhotInterf, 2.0);
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("waveLength: {}", this.waveLengths[l]);
@@ -1156,12 +1260,14 @@ public abstract class AbstractOIFitsProducer {
                     if (NoiseService.DO_DEBUG_GRAVITY) {
                         final double N = nbPhotInterf / 4.0;
 
-                        weight = Math.pow(N, 2.0);
+                        final double weight_g = Math.pow(N, 2.0);
 
-                        logger.debug("weight_g: {}", weight);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("weight_g: {}", weight_g);
+                        }
 
-                        sum_weight_mean_g += Math.pow(sigma_phi * weight, 2.0);
-                        sum_weight_g += weight;
+                        sum_weight_mean_g += Math.pow(sigma_phi * weight_g, 2.0);
+                        sum_weight_g += weight_g;
                     }
                 }
 
@@ -1169,7 +1275,7 @@ public abstract class AbstractOIFitsProducer {
                 snrFTStats.add(snrFT);
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("snrFT[{} - {}]:   {}", i, j, snrFT);
+                    logger.debug("snrFT[pt: {} - bl: {}] ({}): {}", pt, j, baseLines.get(j), snrFT);
                 }
 
                 if (NoiseService.DO_DEBUG_GRAVITY) {
@@ -1181,17 +1287,118 @@ public abstract class AbstractOIFitsProducer {
                     }
                 }
 
-                // TODO: adjust SNR(FT) on redundant baselines ie max(SNR(AB), min(SNR(AC), SNR(BC))) ?
-                // TODO: need baseline and station info
-                // Compute sigmaOpd:
-                final double varOpdLow = Math.pow(ftDit / (2.6 * t0), (5.0 / 3.0)) * Math.pow(nbWaveFT, 2.0) + Math.pow(sigma_vib, 2.0);
+                snrFTs[k] = snrFT;
+
+                // fast interrupt :
+                if (currentThread.isInterrupted()) {
+                    return 0.0;
+                }
+            } // rows
+
+            // Bootstrapping over triangles:
+            final int nIter = 4; // TODO: fix ntel ?
+
+            final int nObsPoints = nRows / nBl;
+            final int nTriplets = triplets.size();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("nIter:       {}", nIter);
+                logger.debug("nTriplets:   {}", nTriplets);
+                logger.debug("nObsPoints:  {}", nObsPoints);
+                logger.debug("nBaselines:  {}", nBl);
+                logger.debug("triplets:    {}", triplets);
+            }
+
+            final int[] idx = new int[3];
+
+            // Iterate on observable UV points :
+            for (int i = 0, j, n, m; i < nObsPoints; i++) {
+                // position in row group :
+                final int vp = nBl * i;
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Point: {}", i);
+                }
+
+                // Loop several time over triplet to also
+                // get the baseline tracked by quadruplets.
+                for (n = 0; n < nIter; n++) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Iteration: {}", n);
+                    }
+                    m = 0;
+
+                    // Iterate on baselines :
+                    for (j = 0; j < nTriplets; j++) {
+                        final Triplet triplet = triplets.get(j);
+
+                        // Use relative positions to get the 3 complex vectors (AB, BC, AC)
+                        final int[] relPos = triplet.getRelativePosition();
+
+                        // Find baseline AB = 12 :
+                        idx[0] = vp + relPos[0];
+
+                        // Find baseline BC = 23 :
+                        idx[1] = vp + relPos[1];
+
+                        // Find baseline AC = 13 :
+                        idx[2] = vp + relPos[2];
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Triplet:        {}", triplet);
+                            logger.debug("SNR(T):         {}", toString(idx, snrFTs));
+                        }
+
+                        // sort SNR in ascending order using indices:
+                        compareAndSwap(idx, snrFTs, 0, 1);
+                        compareAndSwap(idx, snrFTs, 0, 2);
+                        compareAndSwap(idx, snrFTs, 1, 2);
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Sorted SNR(T):  {}", toString(idx, snrFTs));
+                        }
+
+                        // Set SNR as the worst of the two best
+                        // ie set lower SNR value to the second one:
+                        if (snrFTs[idx[0]] != snrFTs[idx[1]]) {
+                            m++;
+                            snrFTs[idx[0]] = snrFTs[idx[1]];
+
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Fixed SNR(T):   {}", toString(idx, snrFTs));
+                            }
+                        }
+                    } // triplets
+
+                    if (m == 0) {
+                        break;
+                    }
+                    // fast interrupt :
+                    if (currentThread.isInterrupted()) {
+                        return 0.0;
+                    }
+                } // iters
+            } // obs points
+
+            final WelfordVariance snrFTBSStats = new WelfordVariance();
+
+            // Iterate on rows :
+            // (baselines) x nObsPoints
+            for (int i, j, k = 0; k < nRows; k++) {
+                i = ptIdx[k]; // obs point
+                j = k % nBl;
+
+                final double snrFT = snrFTs[k];
+                snrFTBSStats.add(snrFT);
+
+                // Compute sigmaOpd (variable term):
                 final double varOpdHigh = Math.pow((4.0 * nbWaveFT) / snrFT, 2.0);
 
                 sigmaOpd[k] = Math.sqrt(varOpdHigh + varOpdLow);
-                sigmaOpdStats.add(sigmaOpd[k]);
+                sigmaOpdStats.add(1e9 * sigmaOpd[k]); // nm
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("sigma_opd_lo(FT): {} nm", 1e9 * Math.sqrt(varOpdLow));
+                    logger.debug("snrFT[{} - {}]:   {}", i, j, snrFT);
                     logger.debug("sigma_opd_hi(FT): {} nm", 1e9 * Math.sqrt(varOpdHigh));
                     logger.debug("sigma_opd   (FT): {} nm", 1e9 * sigmaOpd[k]);
                 }
@@ -1200,27 +1407,94 @@ public abstract class AbstractOIFitsProducer {
                 if (currentThread.isInterrupted()) {
                     return 0.0;
                 }
-            } // rows
-
+            }
             // fast interrupt :
             if (currentThread.isInterrupted()) {
                 return 0.0;
             }
 
-            logger.info("ftDit: {} ms", ftDit);
-
             // Make stats per point (all baselines):
             if (snrFTStats.isSet()) {
-                logger.info("snrFT stats :       {}", snrFTStats);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("ftDit: {} ms", ftDit);
+                    logger.debug("SNR(FT):    {}", snrFTStats);
+                    logger.debug("BS SNR(FT): {}", snrFTBSStats);
+                }
+                if (doWarnings && (warningContainerCompute != null)) {
+                    warningContainerCompute.addInformation("FT: SNR(FT) " + snrFTBSStats.toString(false));
+                }
+                if (TRACE_SNR_FT && doWarnings) {
+                    System.out.printf("[TRACE]\t%.3f\t%.1f\t%.3f\n",
+                            target.getFLUXK(),
+                            ftDit,
+                            snrFTBSStats.min()
+                    );
+                }
             }
             if (sigmaOpdStats.isSet()) {
-                logger.info("sigmaOpd stats (m): {}", sigmaOpdStats); // depends on DIT(FT)
+                if (logger.isDebugEnabled()) {
+                    logger.debug("sigmaOpd (nm): {}", sigmaOpdStats); // depends on DIT(FT)
+                }
             }
 
             // overall mean sigmaOpd(FT):
-            sigmaOpdMean = sigmaOpdStats.mean();
+            sigmaOpdMean = sigmaOpdStats.mean(); // nm
+        } // FT
+
+        if (doWarnings) {
+            logger.info("computeVisibilityErrors: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
         return sigmaOpdMean;
+    }
+
+    private static double getSigmaP(final NoiseService ns, final double h_turb, final double dist) {
+
+        final double telDiam = ns.getTelDiam(); // m
+
+        final double seeing = ns.getSeeing(); // as
+
+        final double lambdaV = 0.5 * 1e-6; // seeing is given at 500 nm
+
+        // note: different from Band.strehl r0 (1.22 not 0.98):
+        final double r0 = 0.98 * lambdaV / as2rad(seeing); // m
+
+        final double theta0 = rad2as(0.31 * (r0 / h_turb)); // as
+
+        final double sig_p = 0.12 * Math.pow(Math.PI, (1.0 / 3.0)) * lambdaV
+                * Math.pow(telDiam / r0, -1.0 / 6.0) * (dist / theta0);
+        /*
+        lambda_500 = 500 * 1e-9
+
+        theta0 = 0.31 * (r0 / self.h_turb) / (0.48 * 1e-5)
+        sigma_p = 0.12 * np.pi ** (1 / 3) * lambda_500 * (diam / r0) ** (-1 / 6) * (self.ftsc_sep / theta0)
+        vis_loss = np.exp(-2 * (np.pi / self.gravi_wave) ** 2 * sigma_p ** 2)
+         */
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("telDiam: {} m", telDiam);
+            logger.debug("seeing:  {} as", seeing);
+            logger.debug("r0:      {} m", r0);
+            logger.debug("theta0:  {} as", theta0);
+            logger.debug("sig_p:   {} as", sig_p);
+        }
+
+        return sig_p;
+    }
+
+    private static void compareAndSwap(final int[] indices, final double[] values, final int i1, final int i2) {
+        if (values[indices[i1]] > values[indices[i2]]) {
+            final int tmp = indices[i1];
+            indices[i1] = indices[i2];
+            indices[i2] = tmp;
+        }
+    }
+
+    private static String toString(final int[] indices, final double[] values) {
+        final StringBuilder sb = new StringBuilder(32).append("[");
+        for (int i = 0; i < indices.length; i++) {
+            sb.append(values[indices[i]]).append(" ");
+        }
+        return sb.append("]").toString();
     }
 
     protected abstract UVFreqTable computeSpatialFreqTable(final double[] sampleWaveLengths);
@@ -1257,24 +1531,6 @@ public abstract class AbstractOIFitsProducer {
     }
 
     /* --- utility methods --- */
-    /**
-     * Add a warning message in the OIFits file
-     * @param warningContainer warning container to fill
-     * @param msg message to add
-     */
-    protected static void addWarning(final WarningContainer warningContainer, final String msg) {
-        warningContainer.addWarning(msg);
-    }
-
-    /**
-     * Add an information message in the OIFits file
-     * @param warningContainer warning container to fill
-     * @param msg message to add
-     */
-    protected static void addInformation(final WarningContainer warningContainer, final String msg) {
-        warningContainer.addInformation(msg);
-    }
-
     protected static double distanceAngle(final double a1, final double a2) {
         final double delta = a1 - a2;
         if (delta > Math.PI) {
@@ -1381,7 +1637,9 @@ public abstract class AbstractOIFitsProducer {
 
                 e.setValue(computeMeanFlux(wavelengthRange, modelLerp));
             }
-            logger.debug("bandFluxes: {}", bandFluxes);
+            if (logger.isDebugEnabled()) {
+                logger.debug("bandFluxes: {}", bandFluxes);
+            }
 
             // 1 - identify model left / right => weights on left / right sides:
             final int[] idxL = new int[nWLen];
@@ -1735,7 +1993,9 @@ public abstract class AbstractOIFitsProducer {
             stationMapping.put(s, Short.valueOf((short) i++));
         }
 
-        logger.debug("stationMapping: {}", stationMapping);
+        if (logger.isDebugEnabled()) {
+            logger.debug("stationMapping: {}", stationMapping);
+        }
         return stationMapping;
     }
 
@@ -1754,7 +2014,9 @@ public abstract class AbstractOIFitsProducer {
             beamMapping.put(b, stationMapping.get(b.getStation()));
         }
 
-        logger.debug("beamMapping: {}", beamMapping);
+        if (logger.isDebugEnabled()) {
+            logger.debug("beamMapping: {}", beamMapping);
+        }
         return beamMapping;
     }
 
@@ -1782,7 +2044,6 @@ public abstract class AbstractOIFitsProducer {
                 logger.debug("\t{} {}", idx[0], idx[1]);
             }
         }
-
         return baseLineIndexes;
     }
 
@@ -1864,7 +2125,9 @@ public abstract class AbstractOIFitsProducer {
         /** spatial frequency V */
         final double[][] vfreq;
 
-        /** index of the observation point (HA) */
+        /** index of the baseline */
+        final int[] blIdx;
+        /** index of the observation point (time) */
         final int[] ptIdx;
 
         protected UVFreqTable(final int nBl, final int nRows, final int nWLen) {
@@ -1873,6 +2136,7 @@ public abstract class AbstractOIFitsProducer {
             this.nWLen = nWLen;
             this.ufreq = new double[nRows][nWLen];
             this.vfreq = new double[nRows][nWLen];
+            this.blIdx = new int[nRows];
             this.ptIdx = new int[nRows];
         }
     }
@@ -1955,7 +2219,7 @@ public abstract class AbstractOIFitsProducer {
      */
     protected final static class Triplet {
 
-        /** station indexes (1 .. nBeams) */
+        /** station indexes (3) */
         private final short[] tripletIndexes;
         /** baseline indexes (3 couples) */
         private final short[][] baselineIndexes;
@@ -2236,4 +2500,13 @@ public abstract class AbstractOIFitsProducer {
             }
         }
     }
+
+    private static double rad2as(double angRad) {
+        return Math.toDegrees(angRad) * ALX.DEG_IN_ARCSEC;
+    }
+
+    private static double as2rad(double angAs) {
+        return Math.toRadians(angAs * ALX.ARCSEC_IN_DEGREES);
+    }
+
 }

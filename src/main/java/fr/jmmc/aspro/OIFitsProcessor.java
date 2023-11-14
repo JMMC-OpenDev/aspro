@@ -200,7 +200,7 @@ public final class OIFitsProcessor {
     }
 
     public void process() {
-        final WarningContainer warningContainer = new WarningContainer();
+        final WarningContainer warningContainer = new WarningContainer(null);
         try {
             // load OIFITS:
             final OIFitsFile oiFitsFile = OIFitsLoader.loadOIFits(inputFile);

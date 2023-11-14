@@ -74,7 +74,7 @@ public final class ObservabilityData {
     /** optional good PoPs combinations */
     private List<PopCombination> betterPopList;
     /** warning container */
-    private final WarningContainer warningContainer = new WarningContainer();
+    private final WarningContainer warningContainer;
 
     /* other useful data for UV coverage */
     /** AstroSkyCalc instance useful to convert HA in LST or UTC */
@@ -105,6 +105,7 @@ public final class ObservabilityData {
         this.doBaseLineLimits = doBaseLineLimits;
         this.doCenterMidnight = doCenterMidnight;
         this.twilightNightLimit = twilightNightLimit;
+        this.warningContainer = new WarningContainer(version);
     }
 
     /* version */
