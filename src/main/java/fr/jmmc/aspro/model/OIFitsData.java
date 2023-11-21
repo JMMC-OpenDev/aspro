@@ -28,6 +28,7 @@ public final class OIFitsData {
 
     /**
      * Public constructor
+     * @param targetName target name
      * @param oiFitsList OIFits structures
      * @param warningContainer warning container including the OIFits generation
      */
@@ -39,6 +40,9 @@ public final class OIFitsData {
         this.oiFitsWarningContainer = warningContainer;
     }
 
+    /**
+     * @return target name
+     */
     public String getTargetName() {
         return targetName;
     }
@@ -58,7 +62,7 @@ public final class OIFitsData {
     public List<OIFitsFile> checkAndGetOIFitsList() {
         if ((this.oiFitsList != null) && (this.oiFitsWarningContainer != null)) {
             // Show warning dialog if missing magnitudes:
-            final List<String> warnings = getWarningMessages();
+            final List<String> warnings = getWarningMissingMags();
             if (warnings != null) {
                 final StringBuilder sb = new StringBuilder(256);
                 sb.append("The OIFits computation reported an important warning:\n\n");
@@ -79,7 +83,7 @@ public final class OIFitsData {
      * Return the list of important warning messages
      * @return list of important warning messages or null if no match
      */
-    public List<String> getWarningMessages() {
+    public List<String> getWarningMissingMags() {
         if (this.oiFitsWarningContainer != null) {
             List<String> messages = null;
 

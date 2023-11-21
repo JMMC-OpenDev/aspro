@@ -2451,12 +2451,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // update the status bar :
                 StatusBar.show(MSG_COMPUTING_OIFITS);
 
-                /* get selected target name */
-                final String targetName = getSelectedTargetName();
-
                 // Create OIFits task worker :
                 // Cancel other tasks and execute this new task :
-                new OIFitsSwingWorker(targetName, uvDataCollection, oiFitsCreatorList).executeTask();
+                new OIFitsSwingWorker(uvDataCollection, oiFitsCreatorList).executeTask();
             }
         }
         return computing;
@@ -3591,9 +3588,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private final static class OIFitsSwingWorker extends TaskSwingWorker<List<OIFitsFile>> {
 
         /* members */
-        /** target name */
-        private final String targetName;
-
         /** uv coverage data collection */
         private final ObservationCollectionUVData uvDataCollection;
         /** list of oiFitsCreator services to execute */
@@ -3605,11 +3599,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param uvDataCollection uv coverage data collection
          * @param oiFitsCreatorList list of oiFitsCreator services to execute
          */
-        private OIFitsSwingWorker(final String targetName,
-                                  final ObservationCollectionUVData uvDataCollection,
+        private OIFitsSwingWorker(final ObservationCollectionUVData uvDataCollection,
                                   final List<OIFitsCreatorService> oiFitsCreatorList) {
             super(AsproTaskRegistry.TASK_OIFITS);
-            this.targetName = targetName;
             this.uvDataCollection = uvDataCollection;
             this.oiFitsCreatorList = oiFitsCreatorList;
         }
@@ -3692,6 +3684,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 for (OIFitsCreatorService oiFitsCreator : this.oiFitsCreatorList) {
                     mergedWarningContainer.addWarnings(oiFitsCreator.getWarningContainerCompute());
                 }
+
+                /* get target name from uv data */
+                final String targetName = uvDataCollection.getTargetName();
 
                 // update the OIFits structure in the current observation :
                 om.setOIFitsData(new OIFitsData(targetName, oiFitsList, mergedWarningContainer));

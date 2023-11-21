@@ -21,9 +21,12 @@ import fr.jmmc.oiexplorer.core.model.PlotDefinitionFactory;
 import fr.jmmc.oiexplorer.core.model.oi.SubsetDefinition;
 import fr.jmmc.oiexplorer.core.model.plot.ColorMapping;
 import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
+import fr.jmmc.oitools.model.OIDataListHelper;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.BorderLayout;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.jfree.chart.ChartColor;
 import org.jfree.chart.ui.Drawable;
 import org.slf4j.Logger;
@@ -51,9 +54,9 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
     }
     /* members */
     /** OIFitsCollectionManager singleton */
-    private final OIFitsCollectionManager ocm = OIFitsCollectionManager.getInstance();
+    private transient final OIFitsCollectionManager ocm = OIFitsCollectionManager.getInstance();
     /** chart data */
-    private OIFitsData oiFitsData = null;
+    private transient OIFitsData oiFitsData = null;
     /** Oifits explorer Plot view */
     private PlotView plotView;
     /** Oifits explorer Plot chart panel */
@@ -231,9 +234,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
         // memorize chart data (used by export PDF):
         setOIFitsData(oiFitsData);
 
-        final List<OIFitsFile> oiFitsList = (oiFitsData != null) ? oiFitsData.getOIFitsList() : null;
-
-        if (oiFitsList == null) {
+        if (oiFitsData == null) {
             this.jLabelMessage.setText("No OIFits data available: the target is not observable or has no model.");
 
             display(false, true);
@@ -242,12 +243,13 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
             ocm.reset();
 
         } else {
-            final List<String> warnings = (oiFitsData != null) ? oiFitsData.getWarningMessages() : null;
+            final List<OIFitsFile> oiFitsList = oiFitsData.getOIFitsList();
+            final List<String> warnMags = oiFitsData.getWarningMissingMags();
 
-            if (warnings != null) {
+            if (warnMags != null) {
                 final StringBuilder sb = new StringBuilder(256);
                 sb.append("<html>");
-                for (String msg : warnings) {
+                for (String msg : warnMags) {
                     sb.append(msg).append("<br>");
                 }
                 sb.append("</html>");
@@ -269,40 +271,33 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposa
             for (OIFitsFile oiFitsFile : oiFitsList) {
                 ocm.addOIFitsFile(oiFitsFile);
             }
+
             // get current subset definition (copy):
             final SubsetDefinition subsetCopy = ocm.getCurrentSubsetDefinition();
 
-            // display all targets:
-            // TODO: GRAVITY+: decide what to display ?
-            if (false) {
-                // ensure having 1 empty filter:
-                subsetCopy.getFilter().setTargetUID(null);
-            } else {
-                final String targetName = oiFitsData.getTargetName();
-                /*
-                // Extract the single target from any OIFitsFile:
-                final String target = oiFitsList.get(0).getOiTarget().getTarget()[0];
-                 */
-                subsetCopy.getFilter().setTargetUID(targetName);
-                // use all data files (default):
-                // subset.getTables().clear();
-            }
+            // display OIFITS data for the selected target (SCI):
+            subsetCopy.getFilter().setTargetUID(oiFitsData.getTargetName());
+            // use all data files (default):
+            subsetCopy.getFilter().getTables().clear();
 
             // fire subset changed event (generates OIFitsSubset and then plot asynchronously):
             ocm.updateSubsetDefinition(this, subsetCopy);
 
-            // TODO: GRAVITY+: decide how to fix multi-config check ?
-            if (false) {
-                // hack current plot definition to force color mapping in multi conf:
-                // TODO: get all conf to decide if really multi-config ?
-                if (oiFitsList.size() > 1) {
-                    final PlotDefinition plotDefCopy = ocm.getCurrentPlotDefinition();
+            // Get unique configurations:
+            final Set<String> distinctStaConfs = new LinkedHashSet<String>(4);
+            for (OIFitsFile oiFitsFile : oiFitsList) {
+                distinctStaConfs.addAll(OIDataListHelper.getDistinctStaConfs(oiFitsFile.getOiDataList())); // requires analysis
+            }
+            logger.debug("distinctStaConfs: {}", distinctStaConfs);
 
-                    // use configuration color mapping if useful then wavelength mapping:
-                    plotDefCopy.setColorMapping(ColorMapping.CONFIGURATION);
+            if (distinctStaConfs.size() > 1) {
+                // change the plot definition to force color mapping in multi conf:
+                final PlotDefinition plotDefCopy = ocm.getCurrentPlotDefinition();
 
-                    ocm.updatePlotDefinition(this, plotDefCopy);
-                }
+                // use configuration color mapping if useful then wavelength mapping:
+                plotDefCopy.setColorMapping(ColorMapping.CONFIGURATION);
+
+                ocm.updatePlotDefinition(this, plotDefCopy);
             }
         }
     }
