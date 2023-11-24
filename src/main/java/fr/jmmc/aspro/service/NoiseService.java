@@ -353,7 +353,7 @@ public final class NoiseService implements VisNoiseService {
         prepareInstrument(warningContainer, observation, useWavelengthRangeRestriction);
         prepareFringeTracker(observation, targetMapping, targetRole);
         prepareTarget(warningContainer, targetMapping, targetRole);
-        initParameters(warningContainer);
+        initParameters(warningContainer, targetRole);
 
         // after initialization to be sure:
         this.warningContainerCompute = warningContainerCompute; // TODO: use for saturation checks
@@ -1078,8 +1078,9 @@ public final class NoiseService implements VisNoiseService {
     /**
      * Initialise other parameters
      * @param warningContainer to store warning & information during initialization
+     * @param targetRole target role of this observation
      */
-    void initParameters(final WarningContainer warningContainer) {
+    void initParameters(final WarningContainer warningContainer, final TargetRole targetRole) {
         // fast return if invalid configuration :
         if (invalidParameters) {
             return;
@@ -1243,7 +1244,7 @@ public final class NoiseService implements VisNoiseService {
         final double maxTotalPhotPerPix = (nbTel * maxNbAllPhotInterfPerPixPerSec) * obsDit;
 
         // fraction of total interferometric flux in the peak pixel :
-        final double peakFluxPix = fracFluxInInterferometry * maxTotalPhotPerPix;
+        final double peakFluxPix = (targetRole == TargetRole.SCI) ? fracFluxInInterferometry * maxTotalPhotPerPix : 0.0;
 
         if (logger.isDebugEnabled()) {
             logger.debug("maxTotalPhotPerPix            : {}", maxTotalPhotPerPix);
@@ -1326,7 +1327,9 @@ public final class NoiseService implements VisNoiseService {
                 }
             }
         } else {
-            warningContainer.addInformation("Observation DIT set to: " + formatTime(obsDit));
+            if (targetRole == TargetRole.SCI) {
+                warningContainer.addInformation("DIT set to: " + formatTime(obsDit));
+            }
         }
 
         // Allocate arrays and noise parameters:
