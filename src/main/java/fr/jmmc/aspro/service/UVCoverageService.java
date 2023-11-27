@@ -554,7 +554,8 @@ public final class UVCoverageService {
         this.starData = this.obsData.getStarData(this.targetName);
 
         // get current target :
-        this.target = this.observation.getTarget(this.targetName); // Science target
+        // ensure target has a model:
+        this.target = getTargetWithModel(this.observation.getTarget(this.targetName)); // Science target
 
         if (logger.isDebugEnabled()) {
             logger.debug("starData: {}", this.starData);
@@ -580,17 +581,10 @@ public final class UVCoverageService {
                     final boolean isTargetAO = (ftTarget == aoTarget);
 
                     // ensure ftTarget has a model:
-                    if (!ftTarget.hasModel()) {
-                        addWarning("The FT Target[" + ftTarget.getName() + "] does not have a model: using a punct model (V=1) !");
+                    ftTarget = getTargetWithModel(ftTarget);
 
-                        // clone target to add model (Target used from targetMapping in OIFitsCreatorService)
-                        ftTarget = (Target) ftTarget.clone();
-                        if (isTargetAO) {
-                            aoTarget = ftTarget;
-                        }
-                        // define punct model as default (V=1):
-                        final Model punctModel = ModelManager.getInstance().createModel(ModelDefinition.MODEL_PUNCT);
-                        ftTarget.getModels().add(punctModel);
+                    if (isTargetAO) {
+                        aoTarget = ftTarget;
                     }
                 }
             }
@@ -686,6 +680,20 @@ public final class UVCoverageService {
             logger.debug("uvMaxFreq: {}", this.uvMaxFreq);
         }
         return ftMode;
+    }
+
+    private Target getTargetWithModel(Target target) {
+        // ensure target has a model:
+        if ((target != null) && !target.hasModel()) {
+            addWarning("The Target[" + target.getName() + "] does not have a model: using a punct model (V=1) !");
+
+            // clone target to add model (Target used from targetMapping in OIFitsCreatorService)
+            target = (Target) target.clone();
+            // define punct model as default (V=1):
+            final Model punctModel = ModelManager.getInstance().createModel(ModelDefinition.MODEL_PUNCT);
+            target.getModels().add(punctModel);
+        }
+        return target;
     }
 
     /**
