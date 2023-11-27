@@ -781,7 +781,7 @@ public abstract class AbstractOIFitsProducer {
         // Compute complex visibility errors:
         double dit = Double.NaN;
 
-        if ((ns != null) && (targetRole == TargetRole.FT) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
+        if ((ns != null) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
             // TODO: Get allowed dit values according to saturation ?
             // TODO: check detector saturation !
             final double[] dits = new double[]{1, 3, 10}; // TODO: GET from configuration !
@@ -1171,7 +1171,7 @@ public abstract class AbstractOIFitsProducer {
         double sigmaOpdMean = 0.0;
 
         // Post-process SNR_FT to compute sigmaOpd:
-        if ((ns != null) && (targetRole == TargetRole.FT) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
+        if ((ns != null) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
 
             // TODO: put in configuration VLTI telescope (UT/AT ?)
             /*

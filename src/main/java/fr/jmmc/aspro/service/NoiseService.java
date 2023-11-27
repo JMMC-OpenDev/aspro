@@ -1327,7 +1327,7 @@ public final class NoiseService implements VisNoiseService {
                 }
             }
         } else {
-            if (targetRole == TargetRole.SCI) {
+            if ((targetRole == TargetRole.SCI) && !AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
                 warningContainer.addInformation("DIT set to: " + formatTime(obsDit));
             }
         }
