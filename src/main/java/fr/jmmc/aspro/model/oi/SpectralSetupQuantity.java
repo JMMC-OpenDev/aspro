@@ -21,6 +21,8 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="visibility"/&gt;
  *     &lt;enumeration value="nb_pix_Interf"/&gt;
  *     &lt;enumeration value="nb_pix_Photo"/&gt;
+ *     &lt;enumeration value="A_bkg"/&gt;
+ *     &lt;enumeration value="B_bkg"/&gt;
  *   &lt;/restriction&gt;
  * &lt;/simpleType&gt;
  * </pre>
@@ -78,7 +80,21 @@ public enum SpectralSetupQuantity {
      * 
      */
     @XmlEnumValue("nb_pix_Photo")
-    NB_PIX_PHOTO("nb_pix_Photo");
+    NB_PIX_PHOTO("nb_pix_Photo"),
+
+    /**
+     * 'A_bkg' = A coefficient in GRAVITY's background noise model: sig_RN = A_bkg / SQRT(DIT) + B_bkg
+     * 
+     */
+    @XmlEnumValue("A_bkg")
+    A_BKG("A_bkg"),
+
+    /**
+     * 'B_bkg' = B coefficient in GRAVITY's background noise model: sig_RN = A_bkg / SQRT(DIT) + B_bkg
+     * 
+     */
+    @XmlEnumValue("B_bkg")
+    B_BKG("B_bkg");
     private final String value;
 
     SpectralSetupQuantity(String v) {

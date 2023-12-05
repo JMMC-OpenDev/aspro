@@ -3482,6 +3482,7 @@
                 - "visibility"
                 - "nb_pix_Interf"
                 - "nb_pix_Photo"
+                - "A_bkg" and "B_bkg" (gravity noise model)
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
@@ -3518,6 +3519,16 @@
             <xsd:enumeration value="nb_pix_Photo">
                 <xsd:annotation>
                     <xsd:documentation>'nb_pix_Photo' = number of pixels to code each photometric channel</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="A_bkg">
+                <xsd:annotation>
+                    <xsd:documentation>'A_bkg' = A coefficient in GRAVITY's background noise model: sig_RN = A_bkg / SQRT(DIT) + B_bkg</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="B_bkg">
+                <xsd:annotation>
+                    <xsd:documentation>'B_bkg' = B coefficient in GRAVITY's background noise model: sig_RN = A_bkg / SQRT(DIT) + B_bkg</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
         </xsd:restriction>

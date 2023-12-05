@@ -208,6 +208,15 @@ public final class Aspro2 extends App {
     }
 
     /**
+     * Optional hook to override in your App, to tell App to open last recent file at startup.
+     * @return true to open last recent file at startup.
+     */
+    @Override
+    protected boolean shouldOpenFirstFileAtStartup() {
+        return true;
+    }
+
+    /**
      * Return the application state when submitting a feedback report
      *
      * @return application state as String
