@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="23.11 beta 2"/>
-    <compilation date="24/11/2023" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="23.11 beta 3"/>
+    <compilation date="05/12/2023" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -243,7 +243,10 @@
 
     <releasenotes>
         <release version="23.11">
-            <pubDate>Fri, 24 Nov 2023 12:00:00 GMT</pubDate>
+            <pubDate>Tue, 05 Dec 2023 20:00:00 GMT</pubDate>
+            <prerelease version="23.11 beta 3">
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented GRAVITY's background noise &amp; transmission model</change>
+            </prerelease>
             <prerelease version="23.11 beta 2">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented the GRAVITY FT bootstrapping for baselines (triangle method)</change>
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented the visibility loss for off-axis fringe tracking (GRAVITY FT)</change>
