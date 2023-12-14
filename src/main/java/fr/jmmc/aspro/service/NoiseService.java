@@ -94,6 +94,9 @@ public final class NoiseService implements VisNoiseService {
     /** enable gravity estimations */
     public final static boolean DO_DEBUG_GRAVITY = false;
 
+    private final static double FIXED_STREHL = (false) ? 0.5 : Double.NaN;
+    private final static boolean USE_FIXED_STREHL = !Double.isNaN(FIXED_STREHL);
+
     /** minimum RON value if RON < 1.0 (GRAVITY issue at LOW resolution) */
     private final static double MIN_RON_GRAVITY_LOW = 3.5;
 
@@ -101,8 +104,14 @@ public final class NoiseService implements VisNoiseService {
         if (!DO_ATM_STREHL) {
             logger.warn("WARNING: DO_ATM_STREHL=false (dev) - DO NOT USE IN PRODUCTION !");
         }
+        if (USE_FIXED_STREHL) {
+            logger.warn("WARNING: FIXED_STREHL=" + FIXED_STREHL + " (dev) - DO NOT USE IN PRODUCTION !");
+        }
+        if (DO_DUMP_STREHL || DO_DUMP_ATM_TRANS) {
+            logger.warn("WARNING: DO_DUMP_xxx enabled (dev) - DO NOT USE IN PRODUCTION !");
+        }
     }
-    
+
     /* members */
     /** instrument name */
     private String instrumentName = null;
@@ -839,6 +848,11 @@ public final class NoiseService implements VisNoiseService {
                     // Get the magnitude limit according to the atmosphere quality and telescope:
                     this.fringeTrackerLimit = ft.getMagLimit(atmQual, this.telescope);
 
+                    // TODO: disable if GRAVITY_FT ?
+                    if ((ftMode != null) && ftMode.startsWith(AsproConstants.FTMODE_GRAVITY_FT)) {
+                        fringeTrackerLimit = 20.0;
+                    }
+
                     this.fringeTrackerMaxDit = ft.getMaxIntegration();
                     this.fringeTrackerMaxFrameTime = this.fringeTrackerMaxDit;
                     this.ftBand = ft.getBand();
@@ -1133,6 +1147,7 @@ public final class NoiseService implements VisNoiseService {
             } else {
                 Band band = Band.V;
                 int nbSubPupils = 1;
+                int nbActuators = 1;
                 double ao_td = 1.0;
                 double ao_ron = 1.0;
                 double ao_qe = 0.9;
@@ -1140,11 +1155,17 @@ public final class NoiseService implements VisNoiseService {
                 if (aoSetup != null) {
                     band = Band.valueOf(aoBand.name());
                     nbSubPupils = aoSetup.getNumberSubPupils();
+                    if (aoSetup.getNumberActuators() != null) {
+                        nbActuators = aoSetup.getNumberActuators();
+                    } else {
+                        nbActuators = nbSubPupils;
+                    }
                     ao_td = aoSetup.getDit();
                     ao_ron = aoSetup.getRon();
                     ao_qe = aoSetup.getQuantumEfficiency();
 
-                    if (aoSetup.getTransmission() != null) {
+                    // TODO:
+                    if (false && aoSetup.getTransmission() != null) {
                         ao_qe *= aoSetup.getTransmission();
                         // TODO: fix transmission loss != visibility loss
                         aoInstrumentalVisibility = 1.0 - aoSetup.getTransmission();
@@ -1158,12 +1179,18 @@ public final class NoiseService implements VisNoiseService {
                     final double elevation = targetPointInfos[n].getElevation();
 
                     strehlPerChannel[n] = Band.strehl(band, adaptiveOpticsMag, waveLengths, telDiam, seeing,
-                            nbSubPupils, ao_td, t0, ao_qe, ao_ron, elevation);
+                            nbSubPupils, nbActuators, ao_td, t0, ao_qe, ao_ron, elevation);
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("elevation                     : {}", elevation);
                         logger.debug("strehlPerChannel[iRefChannel] : {}", strehlPerChannel[n][iRefChannel]);
                         logger.debug("strehlPerChannel              : {}", Arrays.toString(strehlPerChannel[n]));
+                    }
+
+                    if (USE_FIXED_STREHL) {
+                        for (int l = 0; l < nWLen; l++) {
+                            strehlPerChannel[n][l] = FIXED_STREHL;
+                        }
                     }
 
                     if (DO_DUMP_STREHL) {
@@ -1194,7 +1221,7 @@ public final class NoiseService implements VisNoiseService {
 
             for (int i = 0; i < nWLen; i++) {
                 // Per beam Per second:
-                nbTotalPhotTherm[i] = this.nbPhotThermal[i] * quantumEfficiency;
+                nbTotalPhotTherm[i] = Math.max(0.0, this.nbPhotThermal[i] * quantumEfficiency);
             }
         }
 
@@ -1302,8 +1329,7 @@ public final class NoiseService implements VisNoiseService {
         }
 
         if (fringeTrackerPresent) {
-            // TODO: disable if GRAVITY_FT ?
-            if ((true || (fringeTrackerMag <= fringeTrackerLimit)) && (nbFrameToSaturation > 1)) {
+            if ((fringeTrackerMag <= fringeTrackerLimit) && (nbFrameToSaturation > 1)) {
                 // correct instrumental visibility due to FT flux loss:
                 // TODO: may be depend on the spectral band (H != K != N) ?
                 for (int i = 0; i < this.vinst.length; i++) {
@@ -1863,13 +1889,14 @@ public final class NoiseService implements VisNoiseService {
             // repeat OBS measurements to reach totalObsTime minutes:
             errVis2 *= totFrameCorrection;
 
-            if (DO_DEBUG_GRAVITY && this.instrumentName.equalsIgnoreCase(AsproConstants.INS_GRAVITY_FT)) {
-                final double snrV2 = (vis2 / errVis2);
+            if (false && DO_DEBUG_GRAVITY && this.instrumentName.equalsIgnoreCase(AsproConstants.INS_GRAVITY_FT)) {
+                // use SQRT(NDIT) to determine SNR for 1 DIT:
+                final double snrV2 = (vis2 / errVis2) * totFrameCorrection;
                 System.out.println("SNR(V2) aspro: " + snrV2);
 
                 final double N = param.nbPhotInterf[iChannel] / 4.0; // 4 pixels for fringes ?
 
-                final double V2 = Math.pow(vinst[iChannel], 2.0) * vis2Scale * vis2;
+                final double V2 = Math.pow(vinst[iChannel], 2.0) * vis2;
                 // test GRAVITY formula:
                 final double sqCorFlux_g = 1.0 * FastMath.pow2(N) * V2;
 
@@ -1878,10 +1905,6 @@ public final class NoiseService implements VisNoiseService {
 
                 final double snrV2_g = sqCorFlux_g / Math.sqrt(varSqCorFlux_g);
                 System.out.println("SNR(V2) gravity: " + snrV2_g + " ratio: " + (snrV2_g / snrV2));
-
-                // ratio ~ 1 for <nbPixInterferometry>4.0</nbPixInterferometry>
-                System.out.println("sqCorFlux ratio: " + (sqCorFlux / sqCorFlux_g));
-                System.out.println("errSqCorFlux ratio: " + (Math.sqrt(varSqCorFlux) / Math.sqrt(varSqCorFlux_g)));
             }
         }
         param.errSqCorrFlux[iChannel] *= totFrameCorrection;

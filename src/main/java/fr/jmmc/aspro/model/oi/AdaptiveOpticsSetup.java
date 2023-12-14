@@ -28,6 +28,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
  *         &lt;element name="numberSubPupils" type="{http://www.w3.org/2001/XMLSchema}int"/&gt;
+ *         &lt;element name="numberActuators" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/&gt;
  *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *         &lt;element name="ron" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *         &lt;element name="quantumEfficiency" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
@@ -44,6 +45,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "AdaptiveOpticsSetup", propOrder = {
     "name",
     "numberSubPupils",
+    "numberActuators",
     "dit",
     "ron",
     "quantumEfficiency",
@@ -59,6 +61,7 @@ public class AdaptiveOpticsSetup
     @XmlSchemaType(name = "ID")
     protected String name;
     protected int numberSubPupils;
+    protected Integer numberActuators;
     protected double dit;
     protected double ron;
     protected double quantumEfficiency;
@@ -102,6 +105,30 @@ public class AdaptiveOpticsSetup
      */
     public void setNumberSubPupils(int value) {
         this.numberSubPupils = value;
+    }
+
+    /**
+     * Gets the value of the numberActuators property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getNumberActuators() {
+        return numberActuators;
+    }
+
+    /**
+     * Sets the value of the numberActuators property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setNumberActuators(Integer value) {
+        this.numberActuators = value;
     }
 
     /**

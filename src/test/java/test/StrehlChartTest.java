@@ -28,6 +28,8 @@ public class StrehlChartTest {
 
     private static boolean USE_STREHL_OLD = false;
 
+    public static final double UT_DIAM = 8.0; // pupil size not mirror size
+    
     private static double ZENITH_ANGLE = 0.0;
 
     public static final double DEFAULT_TD_OVER_T0 = (1.0 / 5.0);
@@ -62,25 +64,26 @@ public class StrehlChartTest {
 
             @Override
             public void run() {
-                int nbSubPupils;
+                int nbSubPupils, nbActuators;
                 Band aoBand;
                 double td;
 
-                if (true) {
+                if (false) {
                     aoBand = Band.V;
 
                     USE_STREHL_OLD = true;
                     createChartFrame("CHARA - Strehl (OLD) vs mag" + aoBand.getName(),
-                            StrehlChartTest.createCHARAStrehlvsMagChart(aoBand, LAMBDA_K, 2, -1, -1, 0, 0)); // td, t0 not used
+                            StrehlChartTest.createCHARAStrehlvsMagChart(aoBand, LAMBDA_H, 2, 2, -1, -1, 0, 0)); // td, t0 not used
 
-                    // >100Hz ie max 10s
-                    td = 2.5;
+                    // >500Hz
+                    td = 2.0;
                     final double qe = 0.70;
-                    final double ron = 4.0;
+                    final double ron = 4 / 30.0; // 1.0 / 30;
+                    nbSubPupils = 36 * 2;
 
                     USE_STREHL_OLD = false;
                     createChartFrame("CHARA - Strehl (NEW) vs mag" + aoBand.getName(),
-                            StrehlChartTest.createCHARAStrehlvsMagChart(aoBand, LAMBDA_K, 4, td, -1, qe, ron));
+                            StrehlChartTest.createCHARAStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, nbSubPupils, td, -1, qe, ron));
                     return;
                 }
 
@@ -93,7 +96,7 @@ public class StrehlChartTest {
                                 StrehlChartTest.createUTMacaoStrehlvsSeeingChart(aoBand, LAMBDA_K));
                     }
 
-                    if (true) {
+                    if (false) {
                         // OK
                         // UT:
                         final double qe = 0.70;
@@ -104,16 +107,16 @@ public class StrehlChartTest {
                         if (false) {
                             USE_STREHL_OLD = true;
                             createChartFrame("UT (MACAO) - OLD - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                    StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 60, -1, -1, 0, 0)); // td, t0 not used
+                                    StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 60, 50, -1, -1, 0, 0)); // td, t0 not used
                             USE_STREHL_OLD = false;
                         }
 
                         td = 0.80; // 1050 Hz
                         createChartFrame("UT (MACAO) - NEW - Strehl " + b.getName() + " vs mag" + aoBand.getName() + " td: " + td,
-                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 60, td, -1, qe, ron)); // auto t0
+                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 60, 50, td, -1, qe, ron)); // auto t0
                     }
 
-                    if (true) {
+                    if (false) {
                         ZENITH_ANGLE = 30.0;
                         // OK
                         double qe = 0.70;
@@ -123,20 +126,20 @@ public class StrehlChartTest {
                         aoBand = Band.K;
                         td = 1.75; // 500Hz
                         createChartFrame("UT (CIAO Off-axis) - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 9 * 9, td, 4.0, qe, ron));
+                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 9 * 9, 50, td, 4.0, qe, ron));
 
                         qe *= 0.5; // half flux
                         ron = 5.0;
                         td = 1.5; // 500Hz
                         createChartFrame("UT (CIAO ON-axis) - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 9 * 9, td, 4.0, qe, ron));
+                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, LAMBDA_K, 9 * 9, 50, td, 4.0, qe, ron));
 
                         ZENITH_ANGLE = 0.0;
                     }
-                    if (false) {
+                    if (true) {
                         final Band b = Band.H;
                         // AT:
-                        if (true) {
+                        if (false) {
                             // STRAP
                             aoBand = Band.V;
                             nbSubPupils = 4;
@@ -147,41 +150,43 @@ public class StrehlChartTest {
 
                             USE_STREHL_OLD = true;
                             createChartFrame("AT (Tip tilt) - OLD - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                    StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, -1, -1, 0, 0)); // td, t0 not used
+                                    StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, 2, -1, -1, 0, 0)); // td, t0 not used
 
                             USE_STREHL_OLD = false;
                             createChartFrame("AT (Tip tilt) - NEW - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                    StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, td, -1, qe, ron)); // auto t0
+                                    StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, 2, td, -1, qe, ron)); // auto t0
                         }
 
                         /* NAOMI: seeing = 1.0" and t0 = 2.5ms */
                         aoBand = Band.R;
 
                         final double qe = 0.95;
-                        final double ron = 1.0;
+                        final double ron = 64.0;
                         double effRon, t0;
 
                         /* 14 modes */
-                        nbSubPupils = 9 * 9; // or 6 * 6;
+                        nbSubPupils = 16;
+                        nbActuators = 15;
                         // 500Hz ie max 2ms
                         td = 2.0;
-                        t0 = 2.5 * td;
-                        effRon = ron / 40.0; // gain = g * KI = 100 * 0.4 = 40
+                        t0 = 2.5;
+                        effRon = ron / 200.0; // gain = g * KI = 100 * 0.4 = 40
                         System.out.println("effRon: " + NumberUtils.trimTo3Digits(effRon));
 
                         createChartFrame("AT (NAOMI ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, td, t0, qe, effRon));
+                                StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, nbActuators, td, t0, qe, effRon));
 
                         /* transition R> 13 : 7 modes */
-                        nbSubPupils = 7 * 7; // or 5 * 5;
+                        nbSubPupils = 16;
+                        nbActuators = 7;
                         // 100Hz ie max 10s
                         td = 5.0;
-                        t0 = 1.3 * td;
+                        t0 = 2.5;
                         effRon = ron / 90.0; // gain = g * KI = 100 * 0.9 = 90
                         System.out.println("effRon: " + NumberUtils.trimTo3Digits(effRon));
 
                         createChartFrame("AT (NAOMI ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, td, t0, qe, effRon));
+                                StrehlChartTest.createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, nbActuators, td, t0, qe, effRon));
                     }
                     return;
                 }
@@ -191,7 +196,7 @@ public class StrehlChartTest {
                 for (Band b : EnumSet.of(Band.V, Band.H, Band.K, Band.L, Band.M, Band.N)) {
                     lambda[0] = b.getLambdaFluxZero() * 1E-6;
 
-                    if (true) {
+                    if (false) {
                         // OK
                         // UT:
                         final double qe = 0.70;
@@ -201,9 +206,9 @@ public class StrehlChartTest {
 
                         td = 0.80; // 1050 Hz
                         createChartFrame("UT (MACAO) - NEW - Strehl " + b.getName() + " vs mag" + aoBand.getName() + " td: " + td,
-                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, lambda, 60, td, -1, qe, ron)); // auto t0
+                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, lambda, 60, 50, td, -1, qe, ron)); // auto t0
                     }
-                    if (true && (b == Band.K)) {
+                    if (false && (b == Band.K)) {
                         // OK
                         double qe = 0.70;
                         double ron = 6.5;
@@ -211,17 +216,37 @@ public class StrehlChartTest {
                         aoBand = Band.K;
                         td = 1.75; // 500Hz
                         createChartFrame("UT (CIAO Off-axis) - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, lambda, 9 * 9, td, 4.0, qe, ron));
+                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, lambda, 9 * 9, 9 * 9, td, 4.0, qe, ron));
 
                         qe *= 0.5; // half flux
                         ron = 5.0;
                         td = 1.5; // 500Hz
                         createChartFrame("UT (CIAO ON-axis) - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, lambda, 9 * 9, td, 4.0, qe, ron));
+                                StrehlChartTest.createUTStrehlvsMagChart(aoBand, lambda, 9 * 9, 9 * 9, td, 4.0, qe, ron));
                     }
-                    if (true) {
+                    if (true && (b == Band.K)) {
+                        // GPAO_NGS_VIS
+                        aoBand = Band.R;
+
+                        final double qe = 0.25;
+                        final double ron = 180.0;
+                        double effRon, t0;
+
+                        /* 14 modes */
+                        nbSubPupils = 1200;
+                        nbActuators = 800;
+                        // 1kHz
+                        td = 1.0;
+                        t0 = 3.2;
+                        effRon = ron / 900.0; // 0.2
+                        System.out.println("GPAO_NGS_VIS: effRon: " + NumberUtils.trimTo3Digits(effRon));
+
+                        createChartFrame("UT (GPAO_NGS_VIS ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
+                                StrehlChartTest.createStrehlvsMagChart("GPAO", aoBand, lambda, UT_DIAM, nbSubPupils, nbActuators, td, t0, qe, effRon));
+                    }
+                    if (false) {
                         // AT:
-                        if (true) {
+                        if (false) {
                             // STRAP
                             aoBand = Band.V;
                             nbSubPupils = 4;
@@ -231,35 +256,42 @@ public class StrehlChartTest {
                             td = 1.5;
 
                             createChartFrame("AT (Tip tilt) - NEW - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                    StrehlChartTest.createATStrehlvsMagChart(aoBand, lambda, nbSubPupils, td, -1, qe, ron)); // auto t0
+                                    StrehlChartTest.createATStrehlvsMagChart(aoBand, lambda, nbSubPupils, nbActuators, td, -1, qe, ron)); // auto t0
                         }
+
 
                         /* NAOMI: seeing = 1.0" and t0 = 2.5ms */
                         aoBand = Band.R;
 
-                        final double qe = 0.95;
-                        final double ron = 1.0;
+                        final double qe = 0.10;
+                        final double ron = 64.0;
                         double effRon, t0;
 
                         /* 14 modes */
-                        nbSubPupils = 9 * 9; // or 6 * 6;
+                        nbSubPupils = 16;
+                        nbActuators = 15;
                         // 500Hz ie max 2ms
                         td = 2.0;
-                        t0 = 2.5 * td;
-                        effRon = ron / 40.0; // gain = g * KI = 100 * 0.4 = 40
+                        t0 = 3.2;
+                        effRon = ron / 200.0; // gain = g * KI = 100 * 0.4 = 40
+                        System.out.println("effRon: " + NumberUtils.trimTo3Digits(effRon));
 
                         createChartFrame("AT (NAOMI ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                StrehlChartTest.createATStrehlvsMagChart(aoBand, lambda, nbSubPupils, td, t0, qe, effRon));
+                                StrehlChartTest.createATStrehlvsMagChart(aoBand, lambda, nbSubPupils, nbActuators, td, t0, qe, effRon));
 
-                        /* transition R> 13 : 7 modes */
-                        nbSubPupils = 7 * 7; // or 5 * 5;
-                        // 100Hz ie max 10s
-                        td = 5.0;
-                        t0 = 1.3 * td;
-                        effRon = ron / 90.0; // gain = g * KI = 100 * 0.9 = 90
+                        if (false) {
+                            /* transition R> 13 : 7 modes */
+                            nbSubPupils = 16;
+                            nbActuators = 7;
+                            // 100Hz ie max 10s
+                            td = 5.0;
+                            t0 = 2.5;
+                            effRon = ron / 90.0; // gain = g * KI = 100 * 0.9 = 90
+                            System.out.println("effRon: " + NumberUtils.trimTo3Digits(effRon));
 
-                        createChartFrame("AT (NAOMI ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
-                                StrehlChartTest.createATStrehlvsMagChart(aoBand, lambda, nbSubPupils, td, t0, qe, effRon));
+                            createChartFrame("AT (NAOMI ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
+                                    StrehlChartTest.createATStrehlvsMagChart(aoBand, lambda, nbSubPupils, nbActuators, td, t0, qe, effRon));
+                        }
                     }
                 }
             }
@@ -277,30 +309,30 @@ public class StrehlChartTest {
     }
 
     static JPanel createUTStrehlvsMagChart(final Band aoBand, final double[] LAMBDA,
-                                           final int nbSubPupils,
+                                           final int nbSubPupils, final int nbActuators,
                                            final double td, final double t0,
                                            final double qe, final double ron) {
 
-        return createStrehlvsMagChart((aoBand == Band.V) ? "MACAO" : "CIAO", aoBand, LAMBDA, 8.2, nbSubPupils, td, t0, qe, ron);
+        return createStrehlvsMagChart((aoBand == Band.V) ? "MACAO" : "CIAO", aoBand, LAMBDA, UT_DIAM, nbSubPupils, nbActuators, td, t0, qe, ron);
     }
 
     static JPanel createATStrehlvsMagChart(final Band aoBand, final double[] LAMBDA,
-                                           final int nbSubPupils,
+                                           final int nbSubPupils, final int nbActuators,
                                            final double td, final double t0,
                                            final double qe, final double ron) {
-        return createStrehlvsMagChart((aoBand == Band.V) ? "STRAP" : "NAOMI", aoBand, LAMBDA, 1.8, nbSubPupils, td, t0, qe, ron);
+        return createStrehlvsMagChart((aoBand == Band.V) ? "STRAP" : "NAOMI", aoBand, LAMBDA, 1.8, nbSubPupils, nbActuators, td, t0, qe, ron);
     }
 
     static JPanel createCHARAStrehlvsMagChart(final Band aoBand, final double[] LAMBDA,
-                                              final int nbSubPupils,
+                                              final int nbSubPupils, final int nbActuators,
                                               final double td, final double t0,
                                               final double qe, final double ron) {
-        return createStrehlvsMagChart("TIP-TILT", aoBand, LAMBDA, 1.0, nbSubPupils, td, t0, qe, ron);
+        return createStrehlvsMagChart("TIP-TILT", aoBand, LAMBDA, 1.0, nbSubPupils, nbActuators, td, t0, qe, ron);
     }
 
     static JPanel createStrehlvsMagChart(final String aoName, final Band aoBand, final double[] LAMBDA,
                                          final double telDiameter,
-                                         final int nbSubPupils,
+                                         final int nbSubPupils, final int nbActuators,
                                          final double td, final double t0,
                                          final double qe, final double ron) {
 
@@ -313,8 +345,8 @@ public class StrehlChartTest {
             final XYSeries xySeries = new XYSeries("Seeing " + seeing, false, false);
 
             for (double mag : MAGS) {
-                final double strehl = (USE_STREHL_OLD) ? strehl(aoBand, mag, LAMBDA, telDiameter, seeing, nbSubPupils, td, (t0 > 0.0) ? t0 : t0(seeing))[0]
-                        : strehl(aoBand, mag, LAMBDA, telDiameter, seeing, nbSubPupils, td, (t0 > 0.0) ? t0 : t0(seeing),
+                final double strehl = (USE_STREHL_OLD) ? strehl(aoBand, mag, LAMBDA, telDiameter, seeing, nbSubPupils, nbActuators, td, (t0 > 0.0) ? t0 : t0(seeing))[0]
+                        : strehl(aoBand, mag, LAMBDA, telDiameter, seeing, nbSubPupils, nbActuators, td, (t0 > 0.0) ? t0 : t0(seeing),
                                 (qe > 0.0) ? qe : 0.9, (ron > 0.0) ? ron : 1.0)[0];
                 xySeries.add(mag, strehl);
             }
@@ -357,7 +389,7 @@ public class StrehlChartTest {
         System.out.println("Strehl(@" + lambdaObs + ") UT AO vs seeing");
 
         final double mag = 11;
-        final double telDiameter = 8.2;
+        final double telDiameter = UT_DIAM;
 
         // MACAO setup:
         final int nbSubPupils = 60;
@@ -369,7 +401,7 @@ public class StrehlChartTest {
         final XYSeries xySeries = new XYSeries("Strehl", false, false);
 
         for (double seeing = 0.4; seeing < 1.5; seeing += 0.1) {
-            final double strehl = strehl(aoBand, mag, LAMBDA, telDiameter, seeing, nbSubPupils, td, t0(seeing), qe, ron)[0];
+            final double strehl = strehl(aoBand, mag, LAMBDA, telDiameter, seeing, nbSubPupils, nbSubPupils, td, t0(seeing), qe, ron)[0];
 
             xySeries.add(seeing, strehl);
         }
@@ -398,16 +430,16 @@ public class StrehlChartTest {
     }
 
     static double[] strehl(final Band aoBand, final double magnitude, final double[] waveLengths,
-                           final double diameter, final double seeing, final int nbSubPupils,
+                           final double diameter, final double seeing, final int nbSubPupils, final int nbActuators,
                            final double td, final double t0) {
         if (USE_STREHL_OLD) {
             return Band.strehlOLD(magnitude, waveLengths, diameter, seeing, nbSubPupils, 90.0);
         }
-        return Band.strehl(aoBand, magnitude, waveLengths, diameter, seeing, nbSubPupils, td, t0, 0.9, 1.0, 90.0);
+        return Band.strehl(aoBand, magnitude, waveLengths, diameter, seeing, nbSubPupils, nbActuators, td, t0, 0.9, 1.0, 90.0);
     }
 
     static double[] strehl(final Band aoBand, final double magnitude, final double[] waveLengths,
-                           final double diameter, final double seeing, final int nbSubPupils,
+                           final double diameter, final double seeing, final int nbSubPupils, final int nbActuators,
                            final double td, final double t0, final double quantumEfficiency, final double ron) {
 
         System.out.println("setup: seeing: " + seeing
@@ -418,7 +450,7 @@ public class StrehlChartTest {
                 + " ron: " + ron
         );
 
-        return Band.strehl(aoBand, magnitude, waveLengths, diameter, seeing, nbSubPupils, td, t0, quantumEfficiency, ron, 90.0 - ZENITH_ANGLE);
+        return Band.strehl(aoBand, magnitude, waveLengths, diameter, seeing, nbSubPupils, nbActuators, td, t0, quantumEfficiency, ron, 90.0 - ZENITH_ANGLE);
     }
 
 }

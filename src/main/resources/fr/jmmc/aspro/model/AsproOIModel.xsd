@@ -1803,6 +1803,14 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="numberActuators" type="xsd:int" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Number of actuators (=number of corrected mode)
+                        (equals numberSubPupils if undefined)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="dit" type="xsd:double">
                 <xsd:annotation>
                     <xsd:documentation>

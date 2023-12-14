@@ -883,6 +883,7 @@ public abstract class AbstractOIFitsProducer {
                 // TODO: add warning or set error as invalid !
 
                 if (sigmaFTOpd != null) {
+                    // Good: 4300 Bad: 10000
                     final double h_turb = 4300; // TODO: put in configuration
 
                     final double distFT = ns.getDistFT();
@@ -1180,25 +1181,23 @@ public abstract class AbstractOIFitsProducer {
 
             // 200 nm residual vibration in GRAVITY+ simulator for UTs:
              */
-            final double sigma_vib = ((ns.getTelDiam() > 2.0) ? 200 : 150) * 1e-9; // nm
+            final double sigma_vib = ((ns.getTelDiam() > 7.0) ? 200.0 : 100.0) * 1e-9; // nm // TODO: put config
 
-            final double seeing = ns.getSeeing();
             final double t0 = ns.getT0(); // in ms
             final double ftDit = ns.getObsUsedDit() * 1000.0; // in ms
 
             // use SQRT(NDIT) to determine SNR for 1 DIT
             final double invSqrtNDIT = ns.getTotFrameCorrection();
 
-            final double lambdaFT = this.waveLengths[iRef]; // center of K band
+            final double lambdaFT = this.waveLengths[iRef]; // center of K band (=2.2 microns for gravity)
             final double nbWaveFT = lambdaFT / TWO_PI;
 
             // Compute sigmaOpd (fixed term):
-            final double varOpdLow = Math.pow(ftDit / (2.6 * t0), (5.0 / 3.0)) * Math.pow(nbWaveFT, 2.0) + Math.pow(sigma_vib, 2.0);
+            final double varOpdLow = Math.pow(Math.pow(ftDit / (2.6 * t0), (5.0 / 6.0)) * nbWaveFT, 2.0) + Math.pow(sigma_vib, 2.0);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("computeErrors() for {}", this.instrumentName);
                 logger.debug("sigma_vib:          {} nm", sigma_vib);
-                logger.debug("seeing:             {} as", seeing);
                 logger.debug("t0:                 {} ms", t0);
                 logger.debug("ftDit:              {} ms", ftDit);
                 logger.debug("lambdaFT:           {} m", lambdaFT);
@@ -1230,9 +1229,6 @@ public abstract class AbstractOIFitsProducer {
                 double sum_weight_mean = 0.0;
                 double sum_weight = 0.0;
 
-                double sum_weight_mean_g = 0.0;
-                double sum_weight_g = 0.0;
-
                 // Iterate on spectral channels (FT):
                 for (l = 0; l < nChannels; l++) {
                     final double visAmp = visComplexRow[l].abs();
@@ -1256,38 +1252,16 @@ public abstract class AbstractOIFitsProducer {
 
                     sum_weight_mean += Math.pow(sigma_phi * weight, 2.0);
                     sum_weight += Math.pow(weight, 2.0);
-
-                    if (NoiseService.DO_DEBUG_GRAVITY) {
-                        final double N = nbPhotInterf / 4.0;
-
-                        final double weight_g = Math.pow(N, 2.0);
-
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("weight_g: {}", weight_g);
-                        }
-
-                        sum_weight_mean_g += Math.pow(sigma_phi * weight_g, 2.0);
-                        sum_weight_g += weight_g;
-                    }
                 }
 
                 final double snrFT = Math.sqrt(sum_weight / sum_weight_mean);
-                snrFTStats.add(snrFT);
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("snrFT[pt: {} - bl: {}] ({}): {}", pt, j, baseLines.get(j), snrFT);
-                }
-
-                if (NoiseService.DO_DEBUG_GRAVITY) {
-                    final double snrFT_g = sum_weight_g / Math.sqrt(sum_weight_mean_g);
-
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("snrFT_g: {}", snrFT_g);
-                        logger.debug("ratio(snrFT_g / snrFT): {}", snrFT_g / snrFT);
-                    }
+                    logger.debug("snrFT[pt: {} - bl: {}] ({}): {}", pt, j, baseLines.get(j).getName(), snrFT);
                 }
 
                 snrFTs[k] = snrFT;
+                snrFTStats.add(snrFT);
 
                 // fast interrupt :
                 if (currentThread.isInterrupted()) {
@@ -1393,7 +1367,6 @@ public abstract class AbstractOIFitsProducer {
 
                 // Compute sigmaOpd (variable term):
                 final double varOpdHigh = Math.pow((4.0 * nbWaveFT) / snrFT, 2.0);
-
                 sigmaOpd[k] = Math.sqrt(varOpdHigh + varOpdLow);
                 sigmaOpdStats.add(1e9 * sigmaOpd[k]); // nm
 

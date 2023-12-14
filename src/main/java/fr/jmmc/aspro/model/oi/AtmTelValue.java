@@ -117,7 +117,7 @@ public class AtmTelValue
     public void setTelescope(Telescope value) {
         this.telescope = value;
     }
-
+    
 //--simple--preserve
     @Override
     public String toString() {
@@ -134,4 +134,5 @@ public class AtmTelValue
         return true;
     }
 //--simple--preserve
+
 }
