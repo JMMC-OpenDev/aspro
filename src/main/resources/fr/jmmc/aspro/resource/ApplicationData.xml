@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="23.11 beta 4"/>
-    <compilation date="14/12/2023" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="23.12 beta 5"/>
+    <compilation date="21/12/2023" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -242,20 +242,23 @@
     </menubar>
 
     <releasenotes>
-        <release version="23.11">
-            <pubDate>Thu, 14 Dec 2023 20:00:00 GMT</pubDate>
-            <prerelease version="23.11 beta 4">
+        <release version="23.12">
+            <pubDate>Thu, 21 Dec 2023 15:00:00 GMT</pubDate>
+            <prerelease version="23.12 beta 5">
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Rewritten saturation handling for both GRAVITY FT &amp; GRAVITY instruments to use discrete DIT values</change>
+            </prerelease>
+            <prerelease version="23.12 beta 4">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Fixed noise equations for GRAVITY_FT</change>
             </prerelease>
-            <prerelease version="23.11 beta 3">
+            <prerelease version="23.12 beta 3">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented GRAVITY's background noise &amp; transmission model</change>
             </prerelease>
-            <prerelease version="23.11 beta 2">
+            <prerelease version="23.12 beta 2">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented the GRAVITY FT bootstrapping for baselines (triangle method)</change>
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented the visibility loss for off-axis fringe tracking (GRAVITY FT)</change>
                 <change type="FEATURE">Improved warning messages with computed stats (FT, SCI)</change>
             </prerelease>
-            <prerelease version="23.11 beta 1">
+            <prerelease version="23.12 beta 1">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Major rewriting of the OIFits generator to handle two simulated OIFITS (FT + SCI)
                     for GRAVITY FT (compute SNR_FT &amp; variance on OPD) used to determine the visibility loss on the science detector (GRAVITY or MATISSE)
                     in collaboration with Dr. Taro Shimizu, MPE</change>
