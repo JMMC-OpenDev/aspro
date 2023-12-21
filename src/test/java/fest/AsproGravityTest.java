@@ -16,7 +16,6 @@ import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import java.awt.Dimension;
 import java.io.File;
-import java.util.Arrays;
 import javax.swing.JFormattedTextField;
 import org.apache.commons.lang.SystemUtils;
 import org.fest.swing.annotation.GUITest;
@@ -157,6 +156,9 @@ public final class AsproGravityTest extends JmcsFestSwingJUnitTestCase {
         // select preset 'V2_T3_SNR/EFF_WAVE':
         comboPlotDef.selectItem(plotDefNames.length - 1); // last corresponds to 'V2_T3_SNR/EFF_WAVE'
 
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
+
         // Capture plot screenshot :
         final JPanelFixture plot = window.panel("plotChartPanel");
 
@@ -166,7 +168,7 @@ public final class AsproGravityTest extends JmcsFestSwingJUnitTestCase {
             changeMagK(k);
 
             // let plot update:
-            pauseShort();
+            pauseMedium();
 
             saveScreenshot(plot, obsFileName + "-K_" + k + "-SNR.png");
         }

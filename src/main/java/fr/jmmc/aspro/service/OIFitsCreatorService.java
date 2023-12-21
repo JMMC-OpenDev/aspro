@@ -212,11 +212,15 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
             // observation {target}
             // parameter: warningContainer
 
+            // true if FT observation is valid at initial state:
+            final boolean isFTValid = (ftOiFitsCreator == null) || (ftOiFitsCreator.noiseService != null);
+
+            // Valid FT observation:
             final DelayLineMode delayLineMode = this.beams.get(0).getDelayLineMode(); // all beams have the same mode
 
             final NoiseService ns = new NoiseService(observation, delayLineMode, targetMapping, targetRole, targetPointInfos,
                     useCalibrationBias, warningContainer, warningContainerCompute,
-                    this.waveLengths, this.waveBands, useWavelengthRangeRestriction);
+                    this.waveLengths, this.waveBands, useWavelengthRangeRestriction, isFTValid);
 
             if (ns.isValid()) {
                 this.noiseService = ns;

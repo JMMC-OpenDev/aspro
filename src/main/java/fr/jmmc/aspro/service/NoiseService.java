@@ -131,6 +131,8 @@ public final class NoiseService implements VisNoiseService {
     private double seeing = Double.NaN;
     /** coherence time (ms) */
     private double t0 = Double.NaN;
+    /** turbulence height (m) */
+    private double h0 = Double.NaN;
     /** AO setup */
     private AdaptiveOpticsSetup aoSetup = null;
     /** AO Usage limit (mag) */
@@ -149,7 +151,7 @@ public final class NoiseService implements VisNoiseService {
     private double totalObsTime = Double.NaN;
     /** Detector individual integration time (s) */
     private double dit = Double.NaN;
-    /** Detector is non-linear above (to avoid saturation/n-on-linearity) */
+    /** Detector is non-linear above (to avoid saturation/non-linearity) */
     private double detectorSaturation = Double.NaN;
     /** Detector quantum efficiency (optional ie 1.0 by default) */
     private double quantumEfficiency = Double.NaN;
@@ -269,13 +271,17 @@ public final class NoiseService implements VisNoiseService {
     /* internal */
  /* time formatter */
     private final DecimalFormat df = new DecimalFormat("##0.##");
-    /** flag to indicate that a parameter is invalid in order the code to return errors as NaN values */
+    /** flag to indicate that parameter(s) are invalid */
+    private boolean invalidParametersInit = false;
+    /** flag to indicate that a parameter is invalid to return errors as NaN values */
     private boolean invalidParameters = false;
 
     /** (W) total instrumental visibility (with FT if any) */
     private double[] vinst;
 
     /* cached intermediate constants */
+    /** max dit before saturation (s) */
+    private double maxObsDit = 0.0;
     /** error correction = 1 / SQRT(total frame) */
     private double totFrameCorrection;
     /** error correction = 1 / SQRT(total frame photometry) */
@@ -316,6 +322,7 @@ public final class NoiseService implements VisNoiseService {
      * @param waveLengths concrete wavelength values (spectral channel central value) in meters
      * @param waveBands concrete spectral channel bandwidths in meters
      * @param useWavelengthRangeRestriction use wavelength restrictions
+     * @param isFTValid true if FT observation is valid at initial state; false otherwise
      */
     protected NoiseService(final ObservationSetting observation,
                            final DelayLineMode delayLineMode,
@@ -327,7 +334,8 @@ public final class NoiseService implements VisNoiseService {
                            final WarningContainer warningContainerCompute,
                            final double[] waveLengths,
                            final double[] waveBands,
-                           final boolean useWavelengthRangeRestriction) {
+                           final boolean useWavelengthRangeRestriction,
+                           final boolean isFTValid) {
 
         this.useCalibrationBias = USE_BIAS && useCalibrationBias;
 
@@ -378,10 +386,10 @@ public final class NoiseService implements VisNoiseService {
         prepareInstrument(warningContainer, observation, useWavelengthRangeRestriction);
         prepareFringeTracker(observation, targetMapping, targetRole);
         prepareTarget(warningContainer, targetMapping, targetRole);
-        initParameters(warningContainer, targetRole);
+        initParameters(warningContainer, targetRole, isFTValid);
 
         // after initialization to be sure:
-        this.warningContainerCompute = warningContainerCompute; // TODO: use for saturation checks
+        this.warningContainerCompute = warningContainerCompute;
     }
 
     /**
@@ -442,6 +450,7 @@ public final class NoiseService implements VisNoiseService {
         if (atmQual != null) {
             this.seeing = AtmosphereQualityUtils.getSeeing(atmQual);
             this.t0 = AtmosphereQualityUtils.getCoherenceTime(atmQual);
+            this.h0 = AtmosphereQualityUtils.getTurbulenceHeight(atmQual);
         }
 
         if (logger.isDebugEnabled()) {
@@ -1073,7 +1082,8 @@ public final class NoiseService implements VisNoiseService {
 
             // check AO mag limits:
             if (!Double.isNaN(adaptiveOpticsLimit) && adaptiveOpticsMag > adaptiveOpticsLimit) {
-                this.invalidParameters = true;
+                // invalid setup:
+                this.invalidParametersInit = true;
                 warningContainer.addWarning("Observation can not use AO (magnitude limit = " + adaptiveOpticsLimit + ") in " + aoBand + " band");
             } else {
                 if (this.aoSetup != null) {
@@ -1096,8 +1106,8 @@ public final class NoiseService implements VisNoiseService {
         }
 
         if (!missingMags.isEmpty()) {
-            // missing magnitude
-            this.invalidParameters = true;
+            // invalid setup:
+            this.invalidParametersInit = true;
 
             final ArrayList<SpectralBand> mags = new ArrayList<SpectralBand>(missingMags);
             Collections.sort(mags);
@@ -1111,14 +1121,18 @@ public final class NoiseService implements VisNoiseService {
      * Initialise other parameters
      * @param warningContainer to store warning & information during initialization
      * @param targetRole target role of this observation
+     * @param isFTValid true if FT observation is valid at initial state; false otherwise
      */
-    void initParameters(final WarningContainer warningContainer, final TargetRole targetRole) {
+    private void initParameters(final WarningContainer warningContainer, final TargetRole targetRole,
+                                final boolean isFTValid) {
+
+        // set invalid flag to initial state:
+        this.invalidParameters = invalidParametersInit;
         // fast return if invalid configuration :
         if (invalidParameters) {
             return;
         }
         final int nObs = nPoints; // = targetPointInfos.length
-
         final int nWLen = nSpectralChannels;
 
         // Pass 1: find maximum flux per channel taking into account the target elevation:
@@ -1164,7 +1178,7 @@ public final class NoiseService implements VisNoiseService {
                     ao_ron = aoSetup.getRon();
                     ao_qe = aoSetup.getQuantumEfficiency();
 
-                    // TODO:
+                    // TODO: fix transmission factors not visibility:
                     if (false && aoSetup.getTransmission() != null) {
                         ao_qe *= aoSetup.getTransmission();
                         // TODO: fix transmission loss != visibility loss
@@ -1243,15 +1257,15 @@ public final class NoiseService implements VisNoiseService {
 
         // maximum number of (science + thermal) photons per pixel in the interferometric channel and per second:
         double maxNbAllPhotInterfPerPixPerSec = 0.0;
-        double nbPhot;
 
         for (int n = 0; n < nObs; n++) {
 
             for (int i = 0; i < nWLen; i++) {
                 // Per second:
-                nbPhot = telSurface * fluxSrcPerChannel[i];
+                double nbPhot = telSurface * fluxSrcPerChannel[i];
                 nbTotalObjPhot[n][i] = nbPhot;
 
+                // TODO: include any transmission loss early:
                 nbPhot *= (quantumEfficiency * delayLineTransmission) * transmission[i];
 
                 if (DO_ATM_STREHL) {
@@ -1286,29 +1300,48 @@ public final class NoiseService implements VisNoiseService {
             logger.debug("maxNbAllPhotInterfPerPixPerSec: {}", maxNbAllPhotInterfPerPixPerSec);
         }
 
-        // set dit used by this observation to instrument's dit:
-        double obsDit = this.dit;
+        // maximum number of expected photoevents (for all telescopes) per pixel per second:
+        final double maxTotalPhotPerPixPerSec = (nbTel * maxNbAllPhotInterfPerPixPerSec); // include transmission losses ?
 
-        // maximum number of expected photoevents in dit (for all telescopes) per pixel:
-        final double maxTotalPhotPerPix = (nbTel * maxNbAllPhotInterfPerPixPerSec) * obsDit;
+        // fraction of total interferometric flux in the peak pixel per second:
+        final double peakFluxPixPerSec = fracFluxInInterferometry * maxTotalPhotPerPixPerSec;
 
-        // fraction of total interferometric flux in the peak pixel :
-        final double peakFluxPix = (targetRole == TargetRole.SCI) ? fracFluxInInterferometry * maxTotalPhotPerPix : 0.0;
+        // max dit before saturation (s):
+        this.maxObsDit = detectorSaturation / peakFluxPixPerSec;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("maxTotalPhotPerPix            : {}", maxTotalPhotPerPix);
-            logger.debug("peakfluxPix                   : {}", peakFluxPix);
+            logger.debug("maxTotalPhotPerPixPerSec        : {}", maxTotalPhotPerPixPerSec);
+            logger.debug("peakFluxPixPerSec               : {}", peakFluxPixPerSec);
+            logger.debug("maxObsDit                       : {}", maxObsDit);
         }
 
+        // Adjust obsDit if possible (classical automatical dit handling):
+        // set dit used by this observation to instrument's dit:
+        double obsDit = this.dit;
         final int nbFrameToSaturation;
-        if (detectorSaturation < peakFluxPix) {
-            // the dit is too long
-            obsDit *= detectorSaturation / peakFluxPix;
 
-            warningContainer.addWarning("DIT too long (saturation). Adjusting it to (possibly impossible): " + formatTime(obsDit));
+        if (obsDit > maxObsDit) {
+            final double badDit = obsDit;
 
-            nbFrameToSaturation = 1;
+            // the dit is too long, use max dit:
+            obsDit = maxObsDit;
+            nbFrameToSaturation = 0;
+
+            // if GRAVITY_FT or GRAVITY:
+            if (this.instrumentName.startsWith(AsproConstants.INS_GRAVITY)) {
+                // invalid setup:
+                this.invalidParametersInit = true;
+                warningContainer.addWarning("DIT too long (saturation): " + formatTime(badDit) + ". Impossible to use DIT = " + formatTime(obsDit) + " !");
+            } else {
+                warningContainer.addWarning("DIT too long (saturation). Adjusting it to (possibly impossible): " + formatTime(obsDit));
+            }
         } else {
+            // fraction of total interferometric flux in the peak pixel :
+            final double peakFluxPix = peakFluxPixPerSec * obsDit;
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("peakfluxPix                   : {}", peakFluxPix);
+            }
             nbFrameToSaturation = (int) Math.floor(detectorSaturation / peakFluxPix);
         }
 
@@ -1329,7 +1362,15 @@ public final class NoiseService implements VisNoiseService {
         }
 
         if (fringeTrackerPresent) {
-            if ((fringeTrackerMag <= fringeTrackerLimit) && (nbFrameToSaturation > 1)) {
+            // disable magnitude checks for GRAVITY:
+            final boolean useFTMagLimit = !this.instrumentName.equals(AsproConstants.INS_GRAVITY);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("useFTMagLimit                   : {}", useFTMagLimit);
+            }
+
+            if (isFTValid && (!useFTMagLimit || (fringeTrackerMag <= fringeTrackerLimit)) && (nbFrameToSaturation >= 1)) {
+
                 // correct instrumental visibility due to FT flux loss:
                 // TODO: may be depend on the spectral band (H != K != N) ?
                 for (int i = 0; i < this.vinst.length; i++) {
@@ -1343,30 +1384,54 @@ public final class NoiseService implements VisNoiseService {
 
                 if (fringeTrackingMode) {
                     // FT is asked, can work, and is useful (need to integrate longer)
-                    obsDit = Math.min(obsDit * nbFrameToSaturation, totalObsTime);
-                    obsDit = Math.min(obsDit, fringeTrackerMaxDit);
+
+                    if (this.instrumentName.equals(AsproConstants.INS_GRAVITY)) {
+                        double maxIdealDit = Math.min(maxObsDit, totalObsTime);
+                        maxIdealDit = Math.min(maxIdealDit, fringeTrackerMaxDit);
+
+                        // GRAVITY SCI: allowed DIT:
+                        // (300s) only offered in visitor mode: 300.0
+                        final double[] dits = new double[]{0.3, 1.0, 3.0, 10.0, 30.0, 100.0}; // TODO: GET from configuration !
+
+                        int pos = -1;
+                        for (int j = 0; j < dits.length; j++) {
+                            if (maxIdealDit > dits[j]) {
+                                pos = j;
+                            } else {
+                                break;
+                            }
+                        }
+                        if (pos != -1) {
+                            // Found a compatible dit:
+                            obsDit = dits[pos];
+                        }
+                    } else {
+                        obsDit = Math.min(obsDit * nbFrameToSaturation, totalObsTime);
+                        obsDit = Math.min(obsDit, fringeTrackerMaxDit);
+                    }
 
                     // Fix frame ratio:
                     this.frameRatio = fringeTrackerMaxFrameTime / fringeTrackerMaxDit;
 
                     if (logger.isDebugEnabled()) {
-                        logger.debug("dit (FT)                      : {}", obsDit);
-                        logger.debug("frameRatio (FT)               : {}", frameRatio);
+                        logger.debug("dit (SCI with FT)             : {}", obsDit);
+                        logger.debug("frameRatio                    : {}", frameRatio);
                     }
 
                     warningContainer.addInformation("Observation can take advantage of FT. Adjusting DIT to: " + formatTime(obsDit));
                 } else {
                     warningContainer.addInformation("Observation can take advantage of FT (Group track). DIT set to: " + formatTime(obsDit));
                 }
-            } else {
-                // invalid FT setup
-                this.invalidParameters = true;
+            } else if (!invalidParametersInit) {
+                // invalid setup:
+                this.invalidParametersInit = true;
 
-                if (fringeTrackerMag > fringeTrackerLimit) {
-                    warningContainer.addWarning("Observation can not use FT (" + ftBand + " magnitude limit = " + fringeTrackerLimit + "). "
-                            + "DIT set to: " + formatTime(obsDit));
-                } else if (nbFrameToSaturation <= 1) {
-                    warningContainer.addWarning("Observation can not use FT (saturation). DIT set to: " + formatTime(obsDit));
+                if (!isFTValid) {
+                    warningContainer.addWarning("Observation can not use FT !");
+                } else if (nbFrameToSaturation < 1) {
+                    warningContainer.addWarning("Observation can not use FT (saturation) !");
+                } else if (useFTMagLimit && (fringeTrackerMag > fringeTrackerLimit)) {
+                    warningContainer.addWarning("Observation can not use FT (" + ftBand + " magnitude limit = " + fringeTrackerLimit + ") !");
                 }
 
                 if (logger.isDebugEnabled()) {
@@ -1399,16 +1464,28 @@ public final class NoiseService implements VisNoiseService {
     }
 
     public void initDetectorParameters(final double obsDit) {
+        // set invalid flag to initial state:
+        this.invalidParameters = invalidParametersInit;
         // fast return if invalid configuration :
         if (invalidParameters) {
             return;
         }
-        final int nObs = nPoints; // = targetPointInfos.length
-        final int nWLen = nSpectralChannels;
-
         if (logger.isDebugEnabled()) {
             logger.debug("initDetectorParameters({}): obs dit = {} s", instrumentName, obsDit);
         }
+
+        // always check saturation:
+        if (obsDit > maxObsDit) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("DIT too long (saturation): {}. Impossible to use DIT = {} !", formatTime(obsDit), formatTime(maxObsDit));
+            }
+            // invalid setup:
+            this.invalidParameters = true;
+            return;
+        }
+
+        final int nObs = nPoints;
+        final int nWLen = nSpectralChannels;
 
         // Set final dit:
         this.obsUsedDit = obsDit;
@@ -2219,6 +2296,10 @@ public final class NoiseService implements VisNoiseService {
 
     public double getTelDiam() {
         return telDiam;
+    }
+
+    public double getH0() {
+        return h0;
     }
 
     public double getT0() {

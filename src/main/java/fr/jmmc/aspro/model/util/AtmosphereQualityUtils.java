@@ -119,6 +119,33 @@ public final class AtmosphereQualityUtils {
     }
 
     /**
+     * Return the corresponding turburlence layer's height (h0) in meters for the given atmosphere quality
+     * @param atmQuality atmosphere quality
+     * @return turburlence layer's height (h0) in meters
+     */
+    public static double getTurbulenceHeight(final AtmosphereQuality atmQuality) {
+        switch (atmQuality) {
+            case EXCELLENT:
+                /* "10%  (Seeing < 0.6  arcsec, t0 > 5.2 ms)" */
+                return 10000.0;
+            case GOOD:
+                /* "20%  (Seeing < 0.7  arcsec, t0 > 4.4 ms)" */
+                return 7000.0;
+            default:
+            case AVERAGE:
+                /* "50%  (Seeing < 1.0  arcsec, t0 > 3.2 ms)" */
+                return 4300.0;
+            case WORSE:
+                /* "70%  (Seeing < 1.15 arcsec, t0 > 2.2 ms)" */
+                return 3000.0;
+            case BAD:
+                return 2000.0;
+            case AWFUL:
+                return 1000.0;
+        }
+    }
+
+    /**
      * Return the tooltip corresponding to the given atmosphere quality
      * @param value atmosphere quality as string
      * @return tooltip 

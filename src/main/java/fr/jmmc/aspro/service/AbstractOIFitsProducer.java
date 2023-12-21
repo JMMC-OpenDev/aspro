@@ -782,8 +782,6 @@ public abstract class AbstractOIFitsProducer {
         double dit = Double.NaN;
 
         if ((ns != null) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
-            // TODO: Get allowed dit values according to saturation ?
-            // TODO: check detector saturation !
             final double[] dits = new double[]{1, 3, 10}; // TODO: GET from configuration !
             final double[] sigmaOpdMean = new double[dits.length];
 
@@ -794,8 +792,6 @@ public abstract class AbstractOIFitsProducer {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Testing DIT: {} ms", dits[i]);
                 }
-
-                // TODO: check saturation ?
                 sigmaOpdMean[i] = computeVisibilityErrors(dits[i] * 1e-3, insBands, modelFluxes, bandFluxes, false);
 
                 // fast interrupt :
@@ -813,7 +809,12 @@ public abstract class AbstractOIFitsProducer {
                 logger.debug("sigmaOPD mean (m): {}", Arrays.toString(sigmaOpdMean));
             }
 
+            if (minIdx == -1) {
+                // no solution:
+                return false;
+            }
             final double bestDit = dits[minIdx];
+
             if (logger.isDebugEnabled()) {
                 logger.debug("Using best DIT:     {} ms", bestDit);
                 logger.debug("min(sigmaOPD mean): {} nm", minSigmaOpdMean);
@@ -838,9 +839,9 @@ public abstract class AbstractOIFitsProducer {
 
     private double computeVisibilityErrors(final double dit, final Band[] insBands,
                                            final double[] modelFluxes, final Map<Band, Double> bandFluxes,
-                                           final boolean doWarnings) {
+                                           final boolean finalEstimate) {
 
-        final long start = doWarnings ? System.nanoTime() : 0L;
+        final long start = finalEstimate ? System.nanoTime() : 0L;
 
         /** Get the current thread to check if the computation is interrupted */
         final Thread currentThread = Thread.currentThread();
@@ -857,7 +858,7 @@ public abstract class AbstractOIFitsProducer {
         // Effective number of spectral channels on the detector:
         final int nChannels = this.waveLengths.length;
 
-        final NoiseService ns = this.noiseService;
+        NoiseService ns = this.noiseService;
 
         // Compute complex visibility errors:
         final StatUtils stat;
@@ -874,20 +875,23 @@ public abstract class AbstractOIFitsProducer {
                 // Get already computed sigmaOpd for FT:
                 sigmaFTOpd = ftOiFitsCreator.dataTable.sigmaOpd;
 
-                if (sigmaFTOpd == null) {
-                    logger.error("Invalid FT observation (sigmaFTOpd = null)");
-                } else if (sigmaFTOpd.length != nRows) {
-                    logger.error("Invalid FT observation: bad dimensions (sigmaFTOpd vs rows): ({} vs {})", sigmaFTOpd.length, nRows);
+                if ((sigmaFTOpd != null) && (sigmaFTOpd.length != nRows)) {
+                    logger.debug("Invalid FT observation: bad dimensions (sigmaFTOpd vs rows): ({} vs {})", sigmaFTOpd.length, nRows);
                     sigmaFTOpd = null;
                 }
-                // TODO: add warning or set error as invalid !
 
-                if (sigmaFTOpd != null) {
-                    // Good: 4300 Bad: 10000
-                    final double h_turb = 4300; // TODO: put in configuration
-
+                if (sigmaFTOpd == null) {
+                    logger.debug("Invalid FT observation (sigmaFTOpd = null)");
+                    // disable error estimation:
+                    ns = null;
+                    if (finalEstimate) {
+                        this.noiseService = null;
+                    }
+                } else {
                     final double distFT = ns.getDistFT();
+
                     if (distFT > 0.0) {
+                        final double h_turb = ns.getH0();
                         sigmaFTDist = getSigmaP(ns, h_turb, distFT * ALX.DEG_IN_ARCSEC);
                     }
                     if (logger.isDebugEnabled()) {
@@ -896,17 +900,30 @@ public abstract class AbstractOIFitsProducer {
                 }
             }
 
-            if (!Double.isNaN(dit)) {
+            if ((ns != null) && !Double.isNaN(dit)) {
                 // use given DIT:
                 ns.initDetectorParameters(dit);
+
+                // may become invalid
+                if (!ns.isValid()) {
+                    // disable error estimation:
+                    ns = null;
+                    if (finalEstimate) {
+                        this.noiseService = null;
+                    }
+                }
             }
 
-            // prepare final parameters (after initDetectorParameters):
-            ns.prepareParameters(insBands, modelFluxes, bandFluxes, doWarnings, targetRole.toString());
+            if (ns == null) {
+                stat = null;
+            } else {
+                // prepare final parameters (after initDetectorParameters):
+                ns.prepareParameters(insBands, modelFluxes, bandFluxes, finalEstimate, targetRole.toString());
 
-            stat = StatUtils.getInstance();
-            // prepare enough distributions for all baselines:
-            stat.prepare(nBl);
+                stat = StatUtils.getInstance();
+                // prepare enough distributions for all baselines:
+                stat.prepare(nBl);
+            }
         }
 
         final int iMid = (ns != null) ? ns.getIndexMidPoint() : -1;
@@ -1117,20 +1134,20 @@ public abstract class AbstractOIFitsProducer {
             }
             // fast interrupt:
             if (currentThread.isInterrupted()) {
-                return 0.0;
+                return Double.NaN;
             }
         } // rows
 
         // fast interrupt :
         if (currentThread.isInterrupted()) {
-            return 0.0;
+            return Double.NaN;
         }
 
         if (snrVisAmpStats.isSet()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("{}: SNR(V): {}", targetRole, snrVisAmpStats);
             }
-            if (doWarnings && (warningContainerCompute != null)) {
+            if (finalEstimate && (warningContainerCompute != null)) {
                 warningContainerCompute.addMessage(targetRole + ": SNR(V) " + snrVisAmpStats.toString(false),
                         (targetRole == TargetRole.SCI) ? WarningMessage.Level.Information : WarningMessage.Level.Trace);
             }
@@ -1140,7 +1157,7 @@ public abstract class AbstractOIFitsProducer {
                 if (logger.isDebugEnabled()) {
                     logger.debug("{}: VisLoss(Phi): {}", targetRole, visLossPhiStats);
                 }
-                if (doWarnings && (warningContainerCompute != null)) {
+                if (finalEstimate && (warningContainerCompute != null)) {
                     warningContainerCompute.addTrace(targetRole + ": VisLoss(Phi) " + visLossPhiStats.toString(false));
                 }
             }
@@ -1148,7 +1165,7 @@ public abstract class AbstractOIFitsProducer {
                 if (logger.isDebugEnabled()) {
                     logger.debug("{}: VisLoss(DistFT): {}", targetRole, visLossDistStats);
                 }
-                if (doWarnings && (warningContainerCompute != null)) {
+                if (finalEstimate && (warningContainerCompute != null)) {
                     warningContainerCompute.addTrace(targetRole + ": VisLoss(DistFT) " + visLossDistStats.toString(false));
                 }
             }
@@ -1156,7 +1173,7 @@ public abstract class AbstractOIFitsProducer {
                 if (logger.isDebugEnabled()) {
                     logger.debug("{}: VisLoss: {}", targetRole, visLossStats);
                 }
-                if (doWarnings && (warningContainerCompute != null)) {
+                if (finalEstimate && (warningContainerCompute != null)) {
                     warningContainerCompute.addInformation(targetRole + ": VisLoss " + visLossStats.toString(false));
                 }
             }
@@ -1169,7 +1186,7 @@ public abstract class AbstractOIFitsProducer {
             }
         }
 
-        double sigmaOpdMean = 0.0;
+        double sigmaOpdMean = Double.NaN;
 
         // Post-process SNR_FT to compute sigmaOpd:
         if ((ns != null) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
@@ -1265,7 +1282,7 @@ public abstract class AbstractOIFitsProducer {
 
                 // fast interrupt :
                 if (currentThread.isInterrupted()) {
-                    return 0.0;
+                    return Double.NaN;
                 }
             } // rows
 
@@ -1349,7 +1366,7 @@ public abstract class AbstractOIFitsProducer {
                     }
                     // fast interrupt :
                     if (currentThread.isInterrupted()) {
-                        return 0.0;
+                        return Double.NaN;
                     }
                 } // iters
             } // obs points
@@ -1378,12 +1395,12 @@ public abstract class AbstractOIFitsProducer {
 
                 // fast interrupt :
                 if (currentThread.isInterrupted()) {
-                    return 0.0;
+                    return Double.NaN;
                 }
             }
             // fast interrupt :
             if (currentThread.isInterrupted()) {
-                return 0.0;
+                return Double.NaN;
             }
 
             // Make stats per point (all baselines):
@@ -1393,10 +1410,10 @@ public abstract class AbstractOIFitsProducer {
                     logger.debug("SNR(FT):    {}", snrFTStats);
                     logger.debug("BS SNR(FT): {}", snrFTBSStats);
                 }
-                if (doWarnings && (warningContainerCompute != null)) {
+                if (finalEstimate && (warningContainerCompute != null)) {
                     warningContainerCompute.addInformation("FT: SNR(FT) " + snrFTBSStats.toString(false));
                 }
-                if (TRACE_SNR_FT && doWarnings) {
+                if (TRACE_SNR_FT && finalEstimate) {
                     System.out.printf("[TRACE]\t%.3f\t%.1f\t%.3f\n",
                             target.getFLUXK(),
                             ftDit,
@@ -1414,7 +1431,7 @@ public abstract class AbstractOIFitsProducer {
             sigmaOpdMean = sigmaOpdStats.mean(); // nm
         } // FT
 
-        if (doWarnings) {
+        if (finalEstimate) {
             logger.info("computeVisibilityErrors: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
         return sigmaOpdMean;

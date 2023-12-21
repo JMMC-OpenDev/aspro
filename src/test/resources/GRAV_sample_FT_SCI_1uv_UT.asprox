@@ -9,7 +9,7 @@
         <atmosphereQuality>Average</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 103</name>
+        <name>VLTI Period 113</name>
         <minElevation>45.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
@@ -32,16 +32,16 @@
         <IDS>2RXF J064508.6-164240,* alf CMa B,2E 1730,2RE J064509-164243,2RE J0645-164,8pc 379.21B,ADS 5423 B,BD-16 1591B,CCDM J06451-1643BC,CSI-16 1591 3,EGGR 49,GEN# +1.00048915B,GJ 244 B,H 0643-16,HD 48915B,IDS 06408-1635 B,RE J0645-16,RE J0645-164,RE J064509-164243,UBV 6710,WD 0642-163,WD 0643-16,WD 0642-16,WD 0642-166,Zkh 92,[BM83] X0642-166,1E 064255-1639.3,1ES 0642-16.6,2E 0642.9-1638,2EUVE J0645-16.7,EUVE J0645-16.7,WDS J06451-1643BC,** AGC 1BC,Gaia DR2 2947050466531873024,NAME Sirius C,NAME Sirius B,1RXS J064509.3-164241,1E 064255-1639.4,RX J0645.1-1642,NAME Sirius BC</IDS>
         <OBJTYP>*,WD*,UV,X,**</OBJTYP>
         <SPECTYP>DA1.9</SPECTYP>
-        <FLUX_B>5.0</FLUX_B>
-        <FLUX_V>5.0</FLUX_V>
-        <FLUX_G>5.0</FLUX_G>
-        <FLUX_R>8.0</FLUX_R>
-        <FLUX_I>5.0</FLUX_I>
-        <FLUX_J>5.0</FLUX_J>
-        <FLUX_H>5.0</FLUX_H>
-        <FLUX_K>5.0</FLUX_K>
-        <FLUX_L>5.0</FLUX_L>
-        <FLUX_M>5.0</FLUX_M>
+        <FLUX_B>10.0</FLUX_B>
+        <FLUX_V>10.0</FLUX_V>
+        <FLUX_G>10.0</FLUX_G>
+        <FLUX_R>10.0</FLUX_R>
+        <FLUX_I>10.0</FLUX_I>
+        <FLUX_J>10.0</FLUX_J>
+        <FLUX_H>10.0</FLUX_H>
+        <FLUX_K>15.0</FLUX_K>
+        <FLUX_L>10.0</FLUX_L>
+        <FLUX_M>10.0</FLUX_M>
         <tm:model name="punct1" type="punct">
             <desc>Returns the Fourier transform of a punctual object (Dirac function) at coordinates (X,Y) 
 (milliarcsecond). 
@@ -80,20 +80,20 @@ FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
         <IDS>PLX 1577,SBC9 416,* alf CMa A,8pc 379.21A,ADS 5423 A,CCDM J06451-1643A,CEL 1368,CSI-16 1591 1,Ci 20 396,FK5 257,GAT 474,GCRV 4392,GEN# +1.00048915A,GJ 244 A,HGAM 556,IDS 06408-1635 A,JP11 1425,LFT 486,LPM 243,LTT 2638,N30 1470,NAME Sirius A,NLTT 16953,PM 06430-1639A,PMC 90-93 186,PPM 217626,ROT 1088,SBC7 288,SKY# 11855,UBV M 12413,USNO 816,Zkh 91,uvby98 100048915 A,WDS J06451-1643A,TYC 5949-2777-1,Renson 13090,BD-16 1591A,HD 48915A,** AGC 1A</IDS>
         <OBJTYP>UV,**,SB*,*,PM*</OBJTYP>
         <SPECTYP>A1V</SPECTYP>
-        <FLUX_B>5.0</FLUX_B>
-        <FLUX_V>5.0</FLUX_V>
-        <FLUX_G>5.0</FLUX_G>
+        <FLUX_B>2.0</FLUX_B>
+        <FLUX_V>2.0</FLUX_V>
+        <FLUX_G>2.0</FLUX_G>
         <FLUX_R>2.0</FLUX_R>
-        <FLUX_I>5.0</FLUX_I>
-        <FLUX_J>5.0</FLUX_J>
-        <FLUX_H>5.0</FLUX_H>
+        <FLUX_I>2.0</FLUX_I>
+        <FLUX_J>2.0</FLUX_J>
+        <FLUX_H>2.0</FLUX_H>
         <FLUX_K>5.0</FLUX_K>
-        <FLUX_L>5.0</FLUX_L>
-        <FLUX_M>5.0</FLUX_M>
+        <FLUX_L>2.0</FLUX_L>
+        <FLUX_M>2.0</FLUX_M>
         <configuration>
             <HAMin>-2.0</HAMin>
             <HAMax>2.0</HAMax>
-            <aoSetup>NAOMI_BRIGHT</aoSetup>
+            <aoSetup>MACAO</aoSetup>
             <fringeTrackerMode>FringeTrack GRAVITY</fringeTrackerMode>
         </configuration>
     </target>
