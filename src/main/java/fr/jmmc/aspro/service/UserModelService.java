@@ -1425,7 +1425,7 @@ public final class UserModelService {
     }
 
     /**
-     * Get the airy disk FHWM ~ (lambdaMin / diameter) i.e smaller than radius = zero at 1.22 (lambdaMin / diameter)
+     * Get the airy disk FHWM ~ 1.029 (lambdaMin / diameter) i.e smaller than radius = zero at 1.22 (lambdaMin / diameter)
      * @param params apodization parameters
      * @return airy disk FHWM
      */
@@ -1440,7 +1440,7 @@ public final class UserModelService {
         }
 
         final double factor = (!Double.isNaN(params.scalingFactor) && (params.scalingFactor > 0.0))
-                ? params.scalingFactor : 1.0289939700094716812373007996939122676849365234375;
+                ? params.scalingFactor : ALX.AIRY_DISK_FWHM_FACTOR;
 
         // see https://en.wikipedia.org/wiki/Airy_disk
         // note: airy disk 1st zero at 1.22 x lambdaMin / diameter
