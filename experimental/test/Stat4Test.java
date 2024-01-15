@@ -33,7 +33,7 @@ public class Stat4Test {
 
     private final static int N = 1024 * SUPER_SAMPLING;
 
-    private final static boolean USE_PSEUDO_RANDOM = true;
+    private final static boolean USE_PSEUDO_RANDOM = false;
 
     private final static double mu = 0.1; // 0.1
 
@@ -311,7 +311,7 @@ SNR: 0.016 angle: 3.0 C2: ratio mean: 1.4961662325352802 sigma: 44.1808841926890
 
     private final static class PseudoRandomGenerator implements RandomVectorGenerator {
 
-        private final NormalDistribution norm = new NormalDistribution(0, 1.0);
+        private final NormalDistribution norm = null; // FIX new NormalDistribution(0, 1.0);
 
         // Create a Sobol sequence generator for n-dimensional vectors
         private final RandomVectorGenerator seqGenerator;
