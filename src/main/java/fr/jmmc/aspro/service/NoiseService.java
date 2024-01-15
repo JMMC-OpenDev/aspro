@@ -32,6 +32,7 @@ import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.model.util.TargetRole;
 import fr.jmmc.aspro.model.util.TargetUtils;
 import static fr.jmmc.aspro.service.AbstractOIFitsProducer.convertWL;
+import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.model.VisNoiseService;
@@ -139,7 +140,7 @@ public final class NoiseService implements VisNoiseService {
     private double adaptiveOpticsLimit = Double.NaN;
     /** AO (multiplicative) Instrumental Visibility */
     private double aoInstrumentalVisibility = Double.NaN;
-    /** distance to AO star */
+    /** distance to AO star (deg) */
     private double distAO = 0.0;
 
     /** AO band */
@@ -1201,12 +1202,6 @@ public final class NoiseService implements VisNoiseService {
                         logger.debug("strehlPerChannel              : {}", Arrays.toString(strehlPerChannel[n]));
                     }
 
-                    if (USE_FIXED_STREHL) {
-                        for (int l = 0; l < nWLen; l++) {
-                            strehlPerChannel[n][l] = FIXED_STREHL;
-                        }
-                    }
-
                     if (DO_DUMP_STREHL) {
                         System.out.println("strehl table for elevation=" + elevation + " seeing=" + seeing);
                         System.out.println("channel\twaveLength\tstrehl");
@@ -1214,9 +1209,29 @@ public final class NoiseService implements VisNoiseService {
                             System.out.println(i + "\t" + waveLengths[i] + "\t" + strehlPerChannel[n][i]);
                         }
                     }
+
+                    if (distAO > 0.0) {
+                        final double distAs = ALX.DEG_IN_ARCSEC * distAO;
+                        final double[] strehlIso = Band.strehl_iso(band, waveLengths, seeing, h0, elevation, distAs);
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("distAO                        : {} as", distAs);
+                            logger.debug("strehlIso                     : {} as", Arrays.toString(strehlIso));
+                        }
+
+                        if (strehlIso != null) {
+                            for (int l = 0; l < nWLen; l++) {
+                                strehlPerChannel[n][l] *= strehlIso[l];
+                            }
+                        }
+                    }
+                    if (USE_FIXED_STREHL) {
+                        for (int l = 0; l < nWLen; l++) {
+                            strehlPerChannel[n][l] = FIXED_STREHL;
+                        }
+                    }
                 }
             }
-
             // Stats:
             for (int n = 0; n < nObs; n++) {
                 for (int l = 0; l < nWLen; l++) {
