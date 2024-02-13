@@ -3,7 +3,7 @@
 # ASPRO2 (technical documentation)
 
 ## Strehl ratio plots
-- [VLTI](doc/strehl/index_VLTI.md)
-- [CHARA](doc/strehl/index_CHARA.md)
+- [VLTI](strehl/index_VLTI.md)
+- [CHARA](strehl/index_CHARA.md)
 
   
