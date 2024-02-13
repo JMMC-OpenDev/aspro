@@ -72,7 +72,6 @@ public class StrehlChartTest {
                     // strehl iso:
                     createChartFrame("Strehl ISO - Strehl vs distance",
                             createStrehlIsoChart());
-                    return;
                 }
 
                 int nbSubPupils, nbActuators;
@@ -168,7 +167,7 @@ public class StrehlChartTest {
                         effRon = ron / 200.0; // gain = g * KI = 100 * 0.4 = 40
                         System.out.println("effRon: " + NumberUtils.trimTo3Digits(effRon));
 
-                        createChartFrame("AT (NAOMI ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
+                        createChartFrame("AT (NAOMI_BRIGHT ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
                                 createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, nbActuators, td, t0, qe, effRon));
 
                         /* transition R> 13 : 7 modes */
@@ -180,7 +179,7 @@ public class StrehlChartTest {
                         effRon = ron / 90.0; // gain = g * KI = 100 * 0.9 = 90
                         System.out.println("effRon: " + NumberUtils.trimTo3Digits(effRon));
 
-                        createChartFrame("AT (NAOMI ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
+                        createChartFrame("AT (NAOMI_FAINT ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
                                 createATStrehlvsMagChart(aoBand, LAMBDA_H, nbSubPupils, nbActuators, td, t0, qe, effRon));
                     }
                     return;
