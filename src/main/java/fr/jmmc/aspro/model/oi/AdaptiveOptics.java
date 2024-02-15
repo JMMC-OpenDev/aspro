@@ -191,5 +191,18 @@ public class AdaptiveOptics
     public void setMagLimit(Double value) {
         this.magLimit = value;
     }
+    
+//--simple--preserve
+    
+    @Override
+    public String toString() {
+        return "AdaptiveOptics[" + ((this.name != null) ? this.name : "undefined") 
+                + " band: " + band
+                + ((this.instrumentBand != null) ? " instrumentBand: " + instrumentBand : "")
+                + " magLimit: " + magLimit
+                + " setups: " + setups
+                + "]";
+    }
+//--simple--preserve
 
 }

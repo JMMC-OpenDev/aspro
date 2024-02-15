@@ -218,7 +218,7 @@ public class AdaptiveOpticsSetup
 
     @Override
     public final String toString() {
-        return "AdaptiveOpticsSetup : " + ((this.name != null) ? this.name : "undefined");
+        return "AdaptiveOpticsSetup[" + ((this.name != null) ? this.name : "undefined") + "]";
     }
 //--simple--preserve
 

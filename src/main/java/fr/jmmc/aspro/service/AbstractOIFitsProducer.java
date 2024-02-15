@@ -122,8 +122,8 @@ public abstract class AbstractOIFitsProducer {
 
     static {
         if (TRACE_SNR_FT) {
-            System.out.printf("[TRACE]\t%s\t%s\t%s\n",
-                    "K (mag)", "DIT (ms)", "SNR"
+            System.out.printf("[TRACE]%s,%s,%s\n",
+                    "K_mag", "DIT_FT_ms", "SNR_FT"
             );
         }
     }
@@ -1414,7 +1414,7 @@ public abstract class AbstractOIFitsProducer {
                     warningContainerCompute.addInformation("FT: SNR(FT) " + snrFTBSStats.toString(false));
                 }
                 if (TRACE_SNR_FT && finalEstimate) {
-                    System.out.printf("[TRACE]\t%.3f\t%.1f\t%.3f\n",
+                    System.out.printf("[TRACE]%.3f,%.1f,%.3f\n",
                             target.getFLUXK(),
                             ftDit,
                             snrFTBSStats.min()
