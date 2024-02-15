@@ -1,10 +1,12 @@
-# Aspro2    ![JMMC logo](doc/JMMC-logo.jpg)
-
+# ![JMMC logo](https://github.com/JMMC-OpenDev/.github/blob/main/doc/JMMC-logo.jpg) OpenDev - ASPRO2
 This module contains the ASPRO2 java application developed by the JMMC technical team.
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
+## License
+See [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 
+## Links:
 - See [ASPRO2](https://www.jmmc.fr/aspro)
 - See [JMMC releases](https://www.jmmc.fr/releases/)
 - See [JMMC OpenDev @ github](https://github.com/JMMC-OpenDev/)
@@ -13,7 +15,6 @@ This module contains the ASPRO2 java application developed by the JMMC technical
 
 
 ## Documentation
-
 The ASPRO2 User Manual is available at: [aspro-doc.md](https://github.com/JMMC-OpenDev/aspro-doc/blob/main/aspro-doc.md).
 
 This module contains the source code of the JMMC ASPRO2 Graphical interface.
@@ -28,7 +29,6 @@ To be continued...
 
 
 ## Build
-
 This JMMC module uses java / maven to build the jar file, to build the ASPRO2 software.
 
 Requirements:
@@ -37,4 +37,3 @@ Requirements:
 
 See [JMMC Java Build](https://github.com/JMMC-OpenDev/jmmc-java-build)
 See [CI nightly builds](https://github.com/JMMC-OpenDev/jmmc-java-build/actions/workflows/build.yml)
-
