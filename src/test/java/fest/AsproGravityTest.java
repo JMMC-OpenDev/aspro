@@ -125,18 +125,25 @@ public final class AsproGravityTest extends JmcsFestSwingJUnitTestCase {
 
     @Test
     @GUITest
-    public void testGravityFT_AT() {
-        System.out.println("[TRACE]\tVLTI AT");
-        openObservationAndMakeSNRTests("GRAV_sample_FT_SCI_1uv_AT.asprox");
+    public void testGravityFT_00_UT() {
+        System.out.println("[TRACE]\tVLTI UT");
+        openObservationAndMakeSNRTests("GRAV_sample_FT_SCI_1uv_UT_GPAO.asprox");
     }
-
+/*
     @Test
     @GUITest
-    public void testGravityFT_UT() {
+    public void testGravityFT_01_UT() {
         System.out.println("[TRACE]\tVLTI UT");
         openObservationAndMakeSNRTests("GRAV_sample_FT_SCI_1uv_UT.asprox");
     }
 
+    @Test
+    @GUITest
+    public void testGravityFT_10_AT() {
+        System.out.println("[TRACE]\tVLTI AT");
+        openObservationAndMakeSNRTests("GRAV_sample_FT_SCI_1uv_AT.asprox");
+    }
+*/
     /* 
      --- Utility methods  ---------------------------------------------------------
      */

@@ -65,7 +65,7 @@ FLUX_WEIGHT is the intensity coefficient. FLUX_WEIGHT=1 means total energy is 1.
         <configuration>
             <HAMin>0.0</HAMin>
             <HAMax>1.0</HAMax>
-            <aoSetup>MACAO</aoSetup>
+            <aoSetup>GPAO_NGS_VIS</aoSetup>
             <fringeTrackerMode>FringeTrack GRAVITY</fringeTrackerMode>
         </configuration>
     </target>
