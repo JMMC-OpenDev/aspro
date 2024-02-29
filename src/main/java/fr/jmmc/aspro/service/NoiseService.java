@@ -92,9 +92,6 @@ public final class NoiseService implements VisNoiseService {
     /** enable DEBUG mode (t3) */
     public final static boolean DEBUG = false;
 
-    /** enable gravity estimations */
-    public final static boolean DO_DEBUG_GRAVITY = false;
-
     private final static double FIXED_STREHL = (false) ? 0.5 : Double.NaN;
     private final static boolean USE_FIXED_STREHL = !Double.isNaN(FIXED_STREHL);
 
@@ -138,8 +135,8 @@ public final class NoiseService implements VisNoiseService {
     private AdaptiveOpticsSetup aoSetup = null;
     /** AO Usage limit (mag) */
     private double adaptiveOpticsLimit = Double.NaN;
-    /** AO (multiplicative) Instrumental Visibility */
-    private double aoInstrumentalVisibility = Double.NaN;
+    /** AO (multiplicative) Instrumental transmission (0..1) */
+    private double aoInstrumentalTransmission = Double.NaN;
     /** distance to AO star (deg) */
     private double distAO = 0.0;
 
@@ -244,7 +241,7 @@ public final class NoiseService implements VisNoiseService {
     private boolean fringeTrackerPresent = false;
     /** Fringe Tracking Mode i.e. not group tracking (FINITO) */
     private boolean fringeTrackingMode = false;
-    /** Fringe Tracker (multiplicative) Instrumental Visibility */
+    /** Fringe Tracker (multiplicative) Instrumental Visibility (factor or loss) */
     private double fringeTrackerInstrumentalVisibility = Double.NaN;
     /** Fringe Tracker Usage limit (mag) */
     private double fringeTrackerLimit = Double.NaN;
@@ -858,11 +855,6 @@ public final class NoiseService implements VisNoiseService {
                     // Get the magnitude limit according to the atmosphere quality and telescope:
                     this.fringeTrackerLimit = ft.getMagLimit(atmQual, this.telescope);
 
-                    // TODO: disable if GRAVITY_FT ?
-                    if ((ftMode != null) && ftMode.startsWith(AsproConstants.FTMODE_GRAVITY_FT)) {
-                        fringeTrackerLimit = 20.0;
-                    }
-
                     this.fringeTrackerMaxDit = ft.getMaxIntegration();
                     this.fringeTrackerMaxFrameTime = this.fringeTrackerMaxDit;
                     this.ftBand = ft.getBand();
@@ -1056,11 +1048,10 @@ public final class NoiseService implements VisNoiseService {
         }
 
         SpectralBand fluxAOBand = aoBand;
-        flux = aoTarget.getFlux(fluxAOBand);
 
-        // handle special case for R band (NAOMI)
-        if ((flux == null) && (fluxAOBand == SpectralBand.R)) {
-            // use G then V (if no mag)
+        // handle special case for R band (NAOMI / GPAO)
+        if (fluxAOBand == SpectralBand.R) {
+            // use G then V then R (if no flux)
             fluxAOBand = SpectralBand.G;
             flux = aoTarget.getFlux(fluxAOBand);
 
@@ -1068,6 +1059,12 @@ public final class NoiseService implements VisNoiseService {
                 fluxAOBand = SpectralBand.V;
                 flux = aoTarget.getFlux(fluxAOBand);
             }
+            if (flux == null) {
+                fluxAOBand = SpectralBand.R;
+                flux = aoTarget.getFlux(fluxAOBand);
+            }
+        } else {
+            flux = aoTarget.getFlux(fluxAOBand);
         }
 
         if (flux == null) {
@@ -1179,13 +1176,17 @@ public final class NoiseService implements VisNoiseService {
                     ao_ron = aoSetup.getRon();
                     ao_qe = aoSetup.getQuantumEfficiency();
 
-                    // TODO: fix transmission factors not visibility:
-                    if (false && aoSetup.getTransmission() != null) {
+                    // fix transmission factors:
+                    if (aoSetup.getTransmission() != null) {
+                        // correct AO transmission through QE:
                         ao_qe *= aoSetup.getTransmission();
-                        // TODO: fix transmission loss != visibility loss
-                        aoInstrumentalVisibility = 1.0 - aoSetup.getTransmission();
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("aoInstrumentalVisibility      : {}", aoInstrumentalVisibility);
+
+                        if (usedInsBands.contains(band)) {
+                            // set the potential transmission loss on interferometric instrument:
+                            aoInstrumentalTransmission = 1.0 - aoSetup.getTransmission();
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("aoInstrumentalTransmission      : {}", aoInstrumentalTransmission);
+                            }
                         }
                     }
                 }
@@ -1264,6 +1265,19 @@ public final class NoiseService implements VisNoiseService {
             atmTransStats.add(atmTrans[l]);
         }
 
+        // Transmission factor:
+        double transmissionFactor = quantumEfficiency * delayLineTransmission;
+
+        // Include transmission losses by AO:
+        if (!Double.isNaN(aoInstrumentalTransmission)) {
+            // correct instrumental flux due to AO flux loss:
+            transmissionFactor *= aoInstrumentalTransmission;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("transmissionFactor: {}", transmissionFactor);
+        }
+
         // total number of science photons per spectral channel per second per telescope:
         this.nbTotalObjPhot = new double[nObs][nWLen];
         this.nbTotalPhot = new double[nObs][nWLen];
@@ -1280,8 +1294,8 @@ public final class NoiseService implements VisNoiseService {
                 double nbPhot = telSurface * fluxSrcPerChannel[i];
                 nbTotalObjPhot[n][i] = nbPhot;
 
-                // TODO: include any transmission loss early:
-                nbPhot *= (quantumEfficiency * delayLineTransmission) * transmission[i];
+                // include any transmission loss:
+                nbPhot *= transmission[i] * transmissionFactor;
 
                 if (DO_ATM_STREHL) {
                     nbPhot *= atmTrans[i];
@@ -1368,14 +1382,6 @@ public final class NoiseService implements VisNoiseService {
         // Adjust instrumental visibility:
         this.vinst = instrumentalVisibility;
 
-        if (!Double.isNaN(aoInstrumentalVisibility)) {
-            // correct instrumental visibility due to AO flux loss:
-            // TODO: may be depend on the spectral band (H != K != N) ?
-            for (int i = 0; i < this.vinst.length; i++) {
-                this.vinst[i] *= aoInstrumentalVisibility;
-            }
-        }
-
         if (fringeTrackerPresent) {
             // disable magnitude checks for GRAVITY:
             final boolean useFTMagLimit = !this.instrumentName.equals(AsproConstants.INS_GRAVITY);
@@ -1385,13 +1391,10 @@ public final class NoiseService implements VisNoiseService {
             }
 
             if (isFTValid && (!useFTMagLimit || (fringeTrackerMag <= fringeTrackerLimit)) && (nbFrameToSaturation >= 1)) {
-
                 // correct instrumental visibility due to FT flux loss:
-                // TODO: may be depend on the spectral band (H != K != N) ?
                 for (int i = 0; i < this.vinst.length; i++) {
-                    this.vinst[i] *= fringeTrackerInstrumentalVisibility;
+                    this.vinst[i] *= fringeTrackerInstrumentalVisibility; // FINITO only
                 }
-
                 if (logger.isDebugEnabled()) {
                     logger.debug("vinst[iRefChannel]            : {}", vinst[iRefChannel]);
                     logger.debug("vinst (FT)                    : {}", Arrays.toString(vinst));
@@ -1406,7 +1409,7 @@ public final class NoiseService implements VisNoiseService {
 
                         // GRAVITY SCI: allowed DIT:
                         // (300s) only offered in visitor mode: 300.0
-                        final double[] dits = new double[]{0.3, 1.0, 3.0, 10.0, 30.0, 100.0}; // TODO: GET from configuration !
+                        final double[] dits = new double[]{0.3, 1.0, 3.0, 10.0, 30.0, 100.0}; // TODO: put in configuration
 
                         int pos = -1;
                         for (int j = 0; j < dits.length; j++) {
@@ -1980,24 +1983,6 @@ public final class NoiseService implements VisNoiseService {
             errVis2 = vis2 * (param.errSqCorrFlux[iChannel] / param.sqCorrFlux[iChannel]);
             // repeat OBS measurements to reach totalObsTime minutes:
             errVis2 *= totFrameCorrection;
-
-            if (false && DO_DEBUG_GRAVITY && this.instrumentName.equalsIgnoreCase(AsproConstants.INS_GRAVITY_FT)) {
-                // use SQRT(NDIT) to determine SNR for 1 DIT:
-                final double snrV2 = (vis2 / errVis2) * totFrameCorrection;
-                System.out.println("SNR(V2) aspro: " + snrV2);
-
-                final double N = param.nbPhotInterf[iChannel] / 4.0; // 4 pixels for fringes ?
-
-                final double V2 = Math.pow(vinst[iChannel], 2.0) * vis2;
-                // test GRAVITY formula:
-                final double sqCorFlux_g = 1.0 * FastMath.pow2(N) * V2;
-
-                final double varSqCorFlux_g = 2.0 * FastMath.pow(N, 3.0) * V2 + FastMath.pow2(N)
-                        + FastMath.pow2(ron[iChannel]) * (2.0 * FastMath.pow2(N) * V2 + 2.0 * N + 0.25) + FastMath.pow(ron[iChannel], 4.0);
-
-                final double snrV2_g = sqCorFlux_g / Math.sqrt(varSqCorFlux_g);
-                System.out.println("SNR(V2) gravity: " + snrV2_g + " ratio: " + (snrV2_g / snrV2));
-            }
         }
         param.errSqCorrFlux[iChannel] *= totFrameCorrection;
 
@@ -2361,7 +2346,7 @@ public final class NoiseService implements VisNoiseService {
      */
     @Override
     public double computeVisComplexErrorValue(final double visAmp, final boolean forAmplitude) {
-        // TODO: noise service is called by UVMapSwingWorker that needs it ready as soon as UV coverage is computed (promptly):
+        // Note: noise service is called by UVMapSwingWorker that needs it ready as soon as UV coverage is computed (promptly):
         return computeVisComplexErrorValue(iMidPoint, iRefChannel, visAmp, visScaleMeanForMidRefPoint, forAmplitude);
     }
 
@@ -2415,7 +2400,7 @@ public final class NoiseService implements VisNoiseService {
             case V:
             case R:
             case I:
-                // always use V for VEGA / SPICA:
+                // always use V for Visible:
                 return Band.V;
             case Q:
                 // avoid 'band Q not supported'

@@ -76,9 +76,12 @@ public abstract class AbstractOIFitsProducer {
     protected final static int SUPER_SAMPLING_THRESHOLD = 100;
     /** 2 x PI */
     protected static final double TWO_PI = 2d * Math.PI;
+    /** threshold to report warning if SNR(FT) mean is below */
+    public static final double THRESHOLD_SNR_FT_WARN = 1.6;
+    /** threshold to report warning if VisLoss mean is below */
+    public static final double THRESHOLD_VIS_LOSS_WARN = 0.10;
 
-    /* members */
- /* input */
+    /* inputs */
     /** selected target */
     protected final Target target;
     /** flag indicating the role of this service (SCI or FT) */
@@ -782,7 +785,7 @@ public abstract class AbstractOIFitsProducer {
         double dit = Double.NaN;
 
         if ((ns != null) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
-            final double[] dits = new double[]{1, 3, 10}; // TODO: GET from configuration !
+            final double[] dits = new double[]{0.85, 3.0, 10.0}; // TODO: GET from configuration !
             final double[] sigmaOpdMean = new double[dits.length];
 
             int minIdx = -1;
@@ -1104,8 +1107,6 @@ public abstract class AbstractOIFitsProducer {
                             logger.debug("Low SNR[{}] (phi): {} < {}", this.waveLengths[l], snrVisPhi, snrThreshold);
                         }
                     }
-
-                    // TODO: make SNR(V2) stats per channel to add warning if no channel is below 3 !
                 }
 
                 if (NoiseService.DEBUG) {
@@ -1175,6 +1176,11 @@ public abstract class AbstractOIFitsProducer {
                 }
                 if (finalEstimate && (warningContainerCompute != null)) {
                     warningContainerCompute.addInformation(targetRole + ": VisLoss " + visLossStats.toString(false));
+
+                    if (visLossStats.mean() <= THRESHOLD_VIS_LOSS_WARN) {
+                        warningContainerCompute.addWarning(targetRole + ": mean VisLoss = " + NumberUtils.format(visLossStats.mean())
+                                + " below " + NumberUtils.format(THRESHOLD_VIS_LOSS_WARN) + " !");
+                    }
                 }
             }
             if (visLossMidStats != null) {
@@ -1191,14 +1197,14 @@ public abstract class AbstractOIFitsProducer {
         // Post-process SNR_FT to compute sigmaOpd:
         if ((ns != null) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
 
-            // TODO: put in configuration VLTI telescope (UT/AT ?)
             /*
             Lacour 2019: https://www.aanda.org/articles/aa/abs/2019/04/aa34981-18/aa34981-18.html
             The median fringe-tracking residuals are 150 nm on the ATs and 250 nm on the UTs.
 
             // 200 nm residual vibration in GRAVITY+ simulator for UTs:
              */
-            final double sigma_vib = ((ns.getTelDiam() > 7.0) ? 200.0 : 100.0) * 1e-9; // nm // TODO: put config
+            // TODO: put in configuration VLTI telescope (UT/AT ?)
+            final double sigma_vib = ((ns.getTelDiam() > 7.0) ? 200.0 : 100.0) * 1e-9; // nm // TODO: put in configuration
 
             final double t0 = ns.getT0(); // in ms
             final double ftDit = ns.getObsUsedDit() * 1000.0; // in ms
@@ -1410,15 +1416,22 @@ public abstract class AbstractOIFitsProducer {
                     logger.debug("SNR(FT):    {}", snrFTStats);
                     logger.debug("BS SNR(FT): {}", snrFTBSStats);
                 }
-                if (finalEstimate && (warningContainerCompute != null)) {
-                    warningContainerCompute.addInformation("FT: SNR(FT) " + snrFTBSStats.toString(false));
-                }
-                if (TRACE_SNR_FT && finalEstimate) {
-                    System.out.printf("[TRACE]%.3f,%.1f,%.3f\n",
-                            target.getFLUXK(),
-                            ftDit,
-                            snrFTBSStats.min()
-                    );
+                if (finalEstimate) {
+                    if (warningContainerCompute != null) {
+                        warningContainerCompute.addInformation("FT: SNR(FT) " + snrFTBSStats.toString(false));
+
+                        if (snrFTBSStats.mean() <= THRESHOLD_SNR_FT_WARN) {
+                            warningContainerCompute.addWarning("FT: mean SNR(FT) = " + NumberUtils.format(snrFTBSStats.mean())
+                                    + " below " + NumberUtils.format(THRESHOLD_SNR_FT_WARN) + " !");
+                        }
+                    }
+                    if (TRACE_SNR_FT) {
+                        System.out.printf("[TRACE]%.3f,%.1f,%.3f\n",
+                                target.getFLUXK(),
+                                ftDit,
+                                snrFTBSStats.min()
+                        );
+                    }
                 }
             }
             if (sigmaOpdStats.isSet()) {
