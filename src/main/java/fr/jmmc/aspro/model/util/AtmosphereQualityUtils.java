@@ -4,7 +4,15 @@
 package fr.jmmc.aspro.model.util;
 
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
+import static fr.jmmc.aspro.model.oi.AtmosphereQuality.AVERAGE;
+import static fr.jmmc.aspro.model.oi.AtmosphereQuality.AWFUL;
+import static fr.jmmc.aspro.model.oi.AtmosphereQuality.BAD;
+import static fr.jmmc.aspro.model.oi.AtmosphereQuality.EXCELLENT;
+import static fr.jmmc.aspro.model.oi.AtmosphereQuality.GOOD;
+import static fr.jmmc.aspro.model.oi.AtmosphereQuality.WORSE;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -12,6 +20,9 @@ import java.util.Vector;
  * @author bourgesl
  */
 public final class AtmosphereQualityUtils {
+
+    /** AtmosphereQuality set ordered by seeing ascending */
+    public static final List<AtmosphereQuality> ORDERED = Arrays.asList(new AtmosphereQuality[]{EXCELLENT, GOOD, AVERAGE, WORSE, BAD, AWFUL});
 
     /** computed AtmosphereQuality */
     private static Vector<String> atmosphereQualityList = null;

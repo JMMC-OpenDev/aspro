@@ -25,6 +25,7 @@ import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.concurrent.ThreadExecutors;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
+import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
 import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -41,6 +42,7 @@ import javax.swing.JFrame;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.util.ExportUtils;
 import org.jfree.data.function.Function2D;
@@ -69,7 +71,17 @@ public class AsproStrehlChartTest {
     public static final int MAG_MIN = 0;
     public static final int MAG_MAX = 20;
 
-    private static final double[] MAGS = new double[2 * (MAG_MAX - MAG_MIN) + 1];
+    private static final double[] MAGS;
+
+    static {
+        // Prepare mags:
+        MAGS = new double[4 * (MAG_MAX - MAG_MIN) + 1];
+
+        for (int i = 0; i <= 4 * (MAG_MAX - MAG_MIN); i++) {
+            MAGS[i] = MAG_MIN + 0.25 * i;
+        }
+        // System.out.println("Mags: " + Arrays.toString(MAGS));
+    }
 
     public static void main(String[] args) {
         // Start application without GUI:
@@ -94,9 +106,10 @@ public class AsproStrehlChartTest {
         // to define themes
         ChartUtils.createScientificTickUnits();
 
-        // Prepare mags:
-        for (int i = 0; i <= 2 * (MAG_MAX - MAG_MIN); i++) {
-            MAGS[i] = MAG_MIN + 0.5 * i;
+        if (true) {
+            // strehl iso:
+            createChartFrame(null, "Strehl ISO - Strehl vs distance",
+                    createStrehlIsoChart());
         }
 
         final ConfigurationManager cm = ConfigurationManager.getInstance();
@@ -152,6 +165,14 @@ public class AsproStrehlChartTest {
 
                     // use alias or real instrument name:
                     final String instrumentName = instrument.getAliasOrName();
+                    
+                    if ("GRAVITY_FT".equalsIgnoreCase(instrumentName)) {
+                        continue;
+                    }
+                    if (false && !"GRAVITY".equalsIgnoreCase(instrumentName)) {
+                        // shortcuts for GPAO tests
+                        continue;
+                    }
 
                     final double lambdaMid = 0.5 * (instrument.getWaveLengthMin() + instrument.getWaveLengthMax());
                     final Band insBand = Band.findBand(lambdaMid);
@@ -217,12 +238,6 @@ public class AsproStrehlChartTest {
             } catch (IOException ioe) {
                 logger.error("IO failure: ", ioe);
             }
-
-            if (false) {
-                // strehl iso:
-                createChartFrame(null, "Strehl ISO - Strehl vs distance",
-                        createStrehlIsoChart());
-            }
         }
     }
 
@@ -286,7 +301,7 @@ public class AsproStrehlChartTest {
 
         final XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
 
-        for (final AtmosphereQuality atmQual : AtmosphereQuality.values()) {
+        for (final AtmosphereQuality atmQual : AtmosphereQualityUtils.ORDERED) {
             final double seeing = AtmosphereQualityUtils.getSeeing(atmQual);
             final double t0 = AtmosphereQualityUtils.getCoherenceTime(atmQual);
             /*
@@ -309,20 +324,30 @@ public class AsproStrehlChartTest {
         );
 
         org.jfree.chart.ChartUtils.applyCurrentTheme(chart);
-        fixRenderer(chart);
+        fixRenderer(chart, MAG_MIN, MAG_MAX);
 
         return ChartUtils.createChartPanel(chart, true);
     }
 
-    static void fixRenderer(JFreeChart chart) {
+    static void fixRenderer(JFreeChart chart, double xMin, double xMax) {
         chart.getXYPlot().getRangeAxis().setRange(0.0, 1.0);
+        chart.getXYPlot().getDomainAxis().setRange(xMin, xMax);
 
         XYLineAndShapeRenderer rdr = ((XYLineAndShapeRenderer) chart.getXYPlot().getRenderer());
         rdr.setDefaultShapesVisible(true);
         rdr.setAutoPopulateSeriesStroke(false);
+        rdr.setAutoPopulateSeriesPaint(false);
         rdr.setAutoPopulateSeriesShape(false);
         rdr.setDefaultStroke(new BasicStroke(4f));
-        rdr.setDefaultShape(new Rectangle(-7, -7, 14, 14));
+        rdr.setDefaultShape(new Rectangle(-4, -4, 8, 8));
+
+        final ColorPalette palette = ColorPalette.getColorPalette("Armytage");
+
+        final XYPlot plot = (XYPlot) chart.getPlot();
+
+        for (int i = 0, len = plot.getDataset().getSeriesCount(); i < len; i++) {
+            rdr.setSeriesPaint(i, palette.getColor(i));
+        }
     }
 
     static double[] strehl(final Band aoBand, final double adaptiveOpticsMag, final double[] waveLengths,
@@ -346,18 +371,18 @@ public class AsproStrehlChartTest {
     static ChartPanel createStrehlIsoChart() {
 
         final Band band = Band.R;
-        final double seeing = 1.0;
         final double lambdaObs = 2.2e-6;
         final double elevation = 90.0;
 
         final XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
 
-        for (final AtmosphereQuality atmQual : AtmosphereQuality.values()) {
+        for (final AtmosphereQuality atmQual : AtmosphereQualityUtils.ORDERED) {
+            final double seeing = AtmosphereQualityUtils.getSeeing(atmQual);
             final double h0 = AtmosphereQualityUtils.getTurbulenceHeight(atmQual);
 
             final XYSeries xySeries = DatasetUtils.sampleFunction2DToSeries(
                     new StrehlIsoFunction(band, lambdaObs, seeing, h0, elevation),
-                    0.0, 60.0, 180, "SR_iso(h0 = " + NumberUtils.trimTo3Digits(h0) + ")"
+                    0.0, 30.0, 180, "SR_iso(seeing = " + NumberUtils.trimTo3Digits(seeing) + " - h0 = " + NumberUtils.trimTo3Digits(h0) + ")"
             );
             xySeriesCollection.addSeries(xySeries);
         }
@@ -365,7 +390,7 @@ public class AsproStrehlChartTest {
         final JFreeChart chart = ChartFactory.createXYLineChart("Strehl ISO", "dist (as)", "Strehl (%)", xySeriesCollection);
 
         org.jfree.chart.ChartUtils.applyCurrentTheme(chart);
-        fixRenderer(chart);
+        fixRenderer(chart, 0.0, 30.0);
 
         return ChartUtils.createChartPanel(chart, true);
     }

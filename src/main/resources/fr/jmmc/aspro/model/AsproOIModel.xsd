@@ -3308,7 +3308,7 @@
         <xsd:annotation>
             <xsd:documentation>
                 Possible values for the AtmosphereQuality :
-                - "Excellent" seeing = 0.40 arcsec
+                - "Excellent" seeing = 0.60 arcsec
                 - "Good"      seeing = 0.70 arcsec
                 - "Average"   seeing = 1.00 arcsec
                 - "Worse"     seeing = 1.15 arcsec
@@ -3319,17 +3319,17 @@
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="Average">
                 <xsd:annotation>
-                    <xsd:documentation>'Average' means seeing = 1.0 arcsec</xsd:documentation>
+                    <xsd:documentation>'Average' means seeing = 1.00 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Good">
                 <xsd:annotation>
-                    <xsd:documentation>'Good' means seeing = 0.7 arcsec</xsd:documentation>
+                    <xsd:documentation>'Good' means seeing = 0.70 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Excellent">
                 <xsd:annotation>
-                    <xsd:documentation>'Excellent' means seeing = 0.4 arcsec</xsd:documentation>
+                    <xsd:documentation>'Excellent' means seeing = 0.60 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Worse">
@@ -3339,12 +3339,12 @@
             </xsd:enumeration>
             <xsd:enumeration value="Bad">
                 <xsd:annotation>
-                    <xsd:documentation>'Bad' means seeing = 1.4 arcsec</xsd:documentation>
+                    <xsd:documentation>'Bad' means seeing = 1.40 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Awful">
                 <xsd:annotation>
-                    <xsd:documentation>'Awful' means seeing = 1.8 arcsec</xsd:documentation>
+                    <xsd:documentation>'Awful' means seeing = 1.80 arcsec</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
         </xsd:restriction>
