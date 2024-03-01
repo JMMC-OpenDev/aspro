@@ -1409,7 +1409,7 @@ public final class NoiseService implements VisNoiseService {
 
                         // GRAVITY SCI: allowed DIT:
                         // (300s) only offered in visitor mode: 300.0
-                        final double[] dits = new double[]{0.3, 1.0, 3.0, 10.0, 30.0, 100.0}; // TODO: put in configuration
+                        final double[] dits = new double[]{0.3, 1.0, 3.0, 10.0, 30.0, 100.0}; // TODO: put in configuration 24.3?
 
                         int pos = -1;
                         for (int j = 0; j < dits.length; j++) {

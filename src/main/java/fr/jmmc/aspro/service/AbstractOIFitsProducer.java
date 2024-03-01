@@ -785,7 +785,7 @@ public abstract class AbstractOIFitsProducer {
         double dit = Double.NaN;
 
         if ((ns != null) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
-            final double[] dits = new double[]{0.85, 3.0, 10.0}; // TODO: GET from configuration !
+            final double[] dits = new double[]{0.85, 3.0, 10.0}; // TODO: put in configuration 24.3?
             final double[] sigmaOpdMean = new double[dits.length];
 
             int minIdx = -1;
@@ -1201,10 +1201,10 @@ public abstract class AbstractOIFitsProducer {
             Lacour 2019: https://www.aanda.org/articles/aa/abs/2019/04/aa34981-18/aa34981-18.html
             The median fringe-tracking residuals are 150 nm on the ATs and 250 nm on the UTs.
 
-            // 200 nm residual vibration in GRAVITY+ simulator for UTs:
+            // Since 24.3, residuals = 100 nm (for both UT/AT) to be seen on site
              */
             // TODO: put in configuration VLTI telescope (UT/AT ?)
-            final double sigma_vib = ((ns.getTelDiam() > 7.0) ? 200.0 : 100.0) * 1e-9; // nm // TODO: put in configuration
+            final double sigma_vib = 100e-9; // nm
 
             final double t0 = ns.getT0(); // in ms
             final double ftDit = ns.getObsUsedDit() * 1000.0; // in ms
