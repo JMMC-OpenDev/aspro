@@ -46,7 +46,7 @@ public final class AsproGravityTest extends JmcsFestSwingJUnitTestCase {
      */
     public static void prepareAsproTest() {
         System.setProperty("TRACE_SNR_FT", "true");
-        
+
         // Hack to reset LAF & ui scale:
         CommonPreferences.getInstance().resetToDefaultPreferences();
         try {
@@ -125,25 +125,25 @@ public final class AsproGravityTest extends JmcsFestSwingJUnitTestCase {
 
     @Test
     @GUITest
-    public void testGravityFT_00_UT() {
-        System.out.println("[TRACE]\tVLTI UT");
-        openObservationAndMakeSNRTests("GRAV_sample_FT_SCI_1uv_UT_GPAO.asprox");
+    public void testGravityFT_01_AT() {
+        System.out.println("[TRACE]\tVLTI AT");
+        openObservationAndMakeSNRTests("GRAV_sample_FT_SCI_1uv_AT.asprox");
     }
-/*
+
     @Test
     @GUITest
-    public void testGravityFT_01_UT() {
+    public void testGravityFT_11_UT() {
         System.out.println("[TRACE]\tVLTI UT");
         openObservationAndMakeSNRTests("GRAV_sample_FT_SCI_1uv_UT.asprox");
     }
 
     @Test
     @GUITest
-    public void testGravityFT_10_AT() {
-        System.out.println("[TRACE]\tVLTI AT");
-        openObservationAndMakeSNRTests("GRAV_sample_FT_SCI_1uv_AT.asprox");
+    public void testGravityFT_12_UT_GPAO() {
+        System.out.println("[TRACE]\tVLTI UT");
+        openObservationAndMakeSNRTests("GRAV_sample_FT_SCI_1uv_UT_GPAO.asprox");
     }
-*/
+
     /* 
      --- Utility methods  ---------------------------------------------------------
      */
@@ -171,7 +171,7 @@ public final class AsproGravityTest extends JmcsFestSwingJUnitTestCase {
 
         final double step = 0.5;
 
-        for (double k = 0.0; k <= 13.0; k += step) {
+        for (double k = 0.0; k <= 15.0; k += step) {
             changeMagK(k);
 
             // let plot update:
