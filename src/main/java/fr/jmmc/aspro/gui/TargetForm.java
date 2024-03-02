@@ -184,7 +184,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         this.jRadioButtonFluxJy.addActionListener(this);
 
         // add document listener to target description :
-        this.jTextAreaTargetInfos.getDocument().addDocumentListener(new DocumentListener() {
+        this.jTextAreaTargetInfoDescription.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(final DocumentEvent e) {
                 targetInfosChanged();
@@ -307,8 +307,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         final DefaultMutableTreeNode currentNode = tree.getLastSelectedNode();
 
         if (currentNode != null) {
-            // Use invokeLater to selection change issues with editors :
-            SwingUtils.invokeLaterEDT(new Runnable() {
+            // Use invokeLater to avoid selection change issues with text editors:
+            SwingUtils.commitChangesAndInvokeLaterEDT(this, new Runnable() {
                 /**
                  * Update tree selection
                  */
@@ -320,7 +320,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
                         tree.selectFirstChildNode(rootNode);
                         return;
                     }
-
                     /* retrieve the node that was selected */
                     if (currentNode.getUserObject() instanceof Target) {
                         final Target target = (Target) currentNode.getUserObject();
@@ -363,8 +362,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             return;
         }
 
-        // Use invokeLater to selection change issues with editors :
-        SwingUtils.invokeLaterEDT(new Runnable() {
+        // Use invokeLater to avoid selection change issues with text editors:
+        SwingUtils.commitChangesAndInvokeLaterEDT(this, new Runnable() {
             /**
              * Update tree selection
              */
@@ -421,7 +420,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
      * @param target selected target
      */
     private void processTargetSelection(final Target target) {
-
         // update the current target :
         this.currentTarget = target;
 
@@ -467,7 +465,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             this.jTextAreaIds.setCaretPosition(0);
 
             // user description :
-            this.jTextAreaTargetInfos.setText(getTargetUserInformation(target).getDescription());
+            this.jTextAreaTargetInfoDescription.setText(getTargetUserInformation(target).getDescription());
 
             // update calibrator flag :
             final boolean calibrator = isCalibrator(target);
@@ -698,7 +696,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         // check if the automatic update flag is enabled :
         if (this.doAutoUpdateTarget) {
 
-            final String text = this.jTextAreaTargetInfos.getText();
+            final String text = this.jTextAreaTargetInfoDescription.getText();
 
             logger.debug("user infos: {}", text);
 
@@ -848,7 +846,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jButtonMagConv = new javax.swing.JButton();
         jPanelDescription = new javax.swing.JPanel();
         jScrollPaneTargetInfos = new javax.swing.JScrollPane();
-        jTextAreaTargetInfos = new javax.swing.JTextArea();
+        jTextAreaTargetInfoDescription = new javax.swing.JTextArea();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -898,6 +896,8 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelLeft.add(jPanelCalibrators, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.4;
@@ -1040,6 +1040,9 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelActions.add(jPanelRight, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         add(jPanelActions, gridBagConstraints);
 
@@ -1133,6 +1136,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         jFieldRA.setEditable(false);
         jFieldRA.setColumns(12);
+        jFieldRA.setName("RA"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -1152,6 +1156,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         jFieldDEC.setEditable(false);
         jFieldDEC.setColumns(12);
+        jFieldDEC.setName("DEC"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
@@ -1405,7 +1410,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelTarget.add(jFieldMagN, gridBagConstraints);
 
-        jLabelMagIRType.setText("flux unit:");
+        jLabelMagIRType.setText("Flux unit:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 11;
@@ -1510,6 +1515,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         jFieldSpecType.setEditable(false);
         jFieldSpecType.setColumns(10);
+        jFieldSpecType.setName("SPECTYPE"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 16;
@@ -1530,6 +1536,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         jFieldObjTypes.setEditable(false);
         jFieldObjTypes.setColumns(10);
+        jFieldObjTypes.setName("OBJTYPES"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 17;
@@ -1553,6 +1560,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jTextAreaIds.setRows(1);
         jTextAreaIds.setTabSize(2);
         jTextAreaIds.setWrapStyleWord(true);
+        jTextAreaIds.setName("IDS"); // NOI18N
         jScrollPaneIds.setViewportView(jTextAreaIds);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1580,6 +1588,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jTableCalibratorInfos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jTableCalibratorInfos.setCellSelectionEnabled(true);
         jTableCalibratorInfos.setMinimumSize(new java.awt.Dimension(50, 150));
+        jTableCalibratorInfos.setName("CAL_INFOS"); // NOI18N
         jTableCalibratorInfos.getTableHeader().setReorderingAllowed(false);
         jScrollPaneCalibratorInfos.setViewportView(jTableCalibratorInfos);
 
@@ -1622,9 +1631,10 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jPanelDescription.setPreferredSize(new java.awt.Dimension(50, 50));
         jPanelDescription.setLayout(new java.awt.GridBagLayout());
 
-        jTextAreaTargetInfos.setColumns(20);
-        jTextAreaTargetInfos.setRows(1);
-        jScrollPaneTargetInfos.setViewportView(jTextAreaTargetInfos);
+        jTextAreaTargetInfoDescription.setColumns(20);
+        jTextAreaTargetInfoDescription.setRows(1);
+        jTextAreaTargetInfoDescription.setName("TARGET_DESC"); // NOI18N
+        jScrollPaneTargetInfos.setViewportView(jTextAreaTargetInfoDescription);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -2035,7 +2045,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             this.jFieldMagN.setEnabled(enable);
 
             this.jTextAreaIds.setEnabled(enable);
-            this.jTextAreaTargetInfos.setEnabled(enable);
+            this.jTextAreaTargetInfoDescription.setEnabled(enable);
         }
     }
 
@@ -2251,7 +2261,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JSeparator jSeparator6;
     private javax.swing.JTable jTableCalibratorInfos;
     private javax.swing.JTextArea jTextAreaIds;
-    private javax.swing.JTextArea jTextAreaTargetInfos;
+    private javax.swing.JTextArea jTextAreaTargetInfoDescription;
     private javax.swing.JToggleButton jToggleButtonCalibrator;
     private javax.swing.JTree jTreeTargets;
     private javax.swing.JButton refreshButton;

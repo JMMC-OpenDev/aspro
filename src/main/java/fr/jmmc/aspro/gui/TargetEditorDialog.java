@@ -200,7 +200,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
                 refreshDialog();
             }
         });
-        
+
         this.jButtonGC.setVisible(SHOW_GC_BUTTON);
     }
 
@@ -234,7 +234,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         if (userModelFile != null) {
             selectTab(TAB_MODELS);
 
-            // Use invokeLater to selection change issues with form:
+            // Use invokeLater to avoid selection change issues with text editors:
             SwingUtils.invokeLaterEDT(new Runnable() {
                 /**
                  * Update tree selection
@@ -394,7 +394,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
         if (target != null) {
             this.targetEditCtx.setSelectedTarget(target);
         }
-        
+
         // update the validation flag :
         this.result = true;
 

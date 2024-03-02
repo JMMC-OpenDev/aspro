@@ -367,8 +367,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         final DefaultMutableTreeNode currentNode = tree.getLastSelectedNode();
 
         if (currentNode != null) {
-            // Use invokeLater to selection change issues with editors :
-            SwingUtils.invokeLaterEDT(new Runnable() {
+            // Use invokeLater to avoid selection change issues with text editors:
+            SwingUtils.commitChangesAndInvokeLaterEDT(this, new Runnable() {
                 /**
                  * Update tree selection
                  */

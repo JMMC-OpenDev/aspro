@@ -225,7 +225,8 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
         // cancel any pending event:
         deferedHandler.cancel();
 
-        SwingUtils.invokeLaterEDT(new Runnable() {
+        // Use invokeLater to avoid selection change issues with text editors:
+        SwingUtils.commitChangesAndInvokeLaterEDT(this, new Runnable() {
             @Override
             public void run() {
                 generateTreesAndSelectPaths(selectedTarget, selectedGroup, selectedChildTarget);
@@ -463,8 +464,9 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
                 }
             };
 
-            // Use invokeLater to selection change issues with editors:
+            // Use invokeLater to avoid selection change issues with text editors:
             if (async) {
+                SwingUtils.commitChanges(this);
                 this.deferedHandler.runLater(r);
             } else {
                 r.run();
