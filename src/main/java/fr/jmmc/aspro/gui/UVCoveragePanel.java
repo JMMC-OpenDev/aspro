@@ -75,6 +75,7 @@ import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.task.InterruptableThread;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.jmcs.gui.util.EDTDelayedEventHandler;
 import fr.jmmc.jmcs.gui.util.FieldSliderAdapter;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.CollectionUtils;
@@ -203,6 +204,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private final static ObservationManager om = ObservationManager.getInstance();
     /** default timeline refresh period = 1 minutes */
     private static final int REFRESH_PERIOD = 60 * 1000;
+
     /* members */
     /** preference singleton */
     private final Preferences myPreferences = Preferences.getInstance();
@@ -228,6 +230,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private final NumberFormat df1 = new DecimalFormat("0.0");
     /** timeline refresh Swing timer */
     private final Timer timerTimeRefresh;
+    /** defered event handler for OIFITS creator (250ms delay) */
+    private transient final EDTDelayedEventHandler deferedOIFITSHandler = new EDTDelayedEventHandler(250);
     /** flag to indicate that the plot is rendered for PDF output */
     private boolean renderingPDF = false;
 
@@ -1019,6 +1023,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         if (logger.isDebugEnabled()) {
             logger.debug("dispose: {}", ObjectUtils.getObjectInfo(this));
         }
+
+        this.deferedOIFITSHandler.cancel();
+
         // disable model animation:
         this.animatorPanel.dispose();
 
@@ -2451,9 +2458,21 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // update the status bar :
                 StatusBar.show(MSG_COMPUTING_OIFITS);
 
-                // Create OIFits task worker :
-                // Cancel other tasks and execute this new task :
-                new OIFitsSwingWorker(uvDataCollection, oiFitsCreatorList).executeTask();
+                // Cancel other tasks now:
+                TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_OIFITS);
+
+                logger.info("runLater...");
+
+                deferedOIFITSHandler.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        logger.info("run...");
+
+                        // Create OIFits task worker :
+                        // Cancel other tasks and execute this new task :
+                        new OIFitsSwingWorker(uvDataCollection, oiFitsCreatorList).executeTask();
+                    }
+                });
             }
         }
         return computing;
