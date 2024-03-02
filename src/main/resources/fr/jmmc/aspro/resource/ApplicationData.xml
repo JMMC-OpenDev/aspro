@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="24.03 beta 7"/>
-    <compilation date="01/03/2024" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="24.03 beta 8"/>
+    <compilation date="02/03/2024" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -243,9 +243,12 @@
 
     <releasenotes>
         <release version="24.03">
-            <pubDate>Fri, 01 Mar 2024 20:00:00 GMT</pubDate>
+            <pubDate>Sat, 02 Mar 2024 14:00:00 GMT</pubDate>
+            <prerelease version="24.03 beta 8">
+                <change type="FEATURE">Fixed lost text field edits in the Target Editor when changing selection (list or tree)</change>
+            </prerelease>
             <prerelease version="24.03 beta 7">
-                <change type="FEATURE">Updated noise parameters for VLTI AOs</change>
+                <change type="FEATURE">Updated noise parameters for VLTI Adaptive Optics systems</change>
             </prerelease>
             <prerelease version="24.01 beta 6">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented the Strehl Isoplanetism error (VLTI AO only) taking into account the turburlence layer's height (h0),
