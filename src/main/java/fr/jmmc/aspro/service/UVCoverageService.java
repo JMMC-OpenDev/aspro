@@ -601,6 +601,19 @@ public final class UVCoverageService {
             logger.debug("targetMapping: {}", targetMapping);
         }
 
+        // Handle GRAVITY single/dual field mode:
+        if (targetMapping != null) {
+            if (targetMapping.get(TargetRole.SCI) == targetMapping.get(TargetRole.FT)) {
+                final String instrumentName = observation.getInstrumentConfiguration().getName();
+
+                if (instrumentName.startsWith(AsproConstants.INS_GRAVITY)) {
+                    targetMapping.put(TargetRole.SINGLE_FIELD, target);
+
+                    logger.debug("{}: Single-field observation", instrumentName);
+                }
+            }
+        }
+
         // use lower wavelength of all instrument modes:
         final double instrumentMinWaveLength = AsproConstants.MICRO_METER
                 * this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
@@ -749,6 +762,14 @@ public final class UVCoverageService {
                 }
             }
         }
+    }
+
+    /**
+     * Add an information message in the OIFits file
+     * @param msg message to add
+     */
+    private void addInformation(final String msg) {
+        this.data.getWarningContainer().addInformation(msg);
     }
 
     /**

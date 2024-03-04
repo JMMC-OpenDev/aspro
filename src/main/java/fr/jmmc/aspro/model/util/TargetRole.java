@@ -8,5 +8,6 @@ package fr.jmmc.aspro.model.util;
  * @author bourgesl
  */
 public enum TargetRole {
-    AO, FT, SCI;
+    AO, FT, SCI, 
+    SINGLE_FIELD /* special flag */;
 }

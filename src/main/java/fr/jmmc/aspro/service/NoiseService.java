@@ -384,7 +384,7 @@ public final class NoiseService implements VisNoiseService {
         prepareInstrument(warningContainer, observation, useWavelengthRangeRestriction);
         prepareFringeTracker(observation, targetMapping, targetRole);
         prepareTarget(warningContainer, targetMapping, targetRole);
-        initParameters(warningContainer, targetRole, isFTValid);
+        initParameters(warningContainer, targetMapping, targetRole, isFTValid);
 
         // after initialization to be sure:
         this.warningContainerCompute = warningContainerCompute;
@@ -1118,10 +1118,12 @@ public final class NoiseService implements VisNoiseService {
     /**
      * Initialise other parameters
      * @param warningContainer to store warning & information during initialization
+     * @param targetMapping target mappings
      * @param targetRole target role of this observation
      * @param isFTValid true if FT observation is valid at initial state; false otherwise
      */
-    private void initParameters(final WarningContainer warningContainer, final TargetRole targetRole,
+    private void initParameters(final WarningContainer warningContainer,
+                                final Map<TargetRole, Target> targetMapping, final TargetRole targetRole,
                                 final boolean isFTValid) {
 
         // set invalid flag to initial state:
@@ -1267,6 +1269,15 @@ public final class NoiseService implements VisNoiseService {
 
         // Transmission factor:
         double transmissionFactor = quantumEfficiency * delayLineTransmission;
+
+        // Handle GRAVITY single/dual field mode:
+        if (targetMapping.get(TargetRole.SINGLE_FIELD) != null) {
+            // GRAVITY single-field: 50% / FT 50% SCI
+            transmissionFactor *= 0.5;
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} : SINGLE_FIELD", targetRole);
+            }
+        }
 
         // Include transmission losses by AO:
         if (!Double.isNaN(aoInstrumentalTransmission)) {
