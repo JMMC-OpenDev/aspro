@@ -66,6 +66,8 @@ public class AsproStrehlChartTest {
     /** absolute path to test folder to save outputs */
     protected final static String TEST_FOLDER = getProjectFolderPath() + "test/";
 
+    private static boolean TEST = false;
+
     private static double ZENITH_ANGLE = 0.0;
 
     public static final int MAG_MIN = 0;
@@ -165,17 +167,17 @@ public class AsproStrehlChartTest {
 
                     // use alias or real instrument name:
                     final String instrumentName = instrument.getAliasOrName();
-                    
+
                     if ("GRAVITY_FT".equalsIgnoreCase(instrumentName)) {
                         continue;
                     }
-                    if (false && !"GRAVITY".equalsIgnoreCase(instrumentName)) {
-                        // shortcuts for GPAO tests
+                    if (TEST && !"SPICA".equalsIgnoreCase(instrumentName)) {
+                        // shortcuts for focused tests
                         continue;
                     }
 
                     final double lambdaMid = 0.5 * (instrument.getWaveLengthMin() + instrument.getWaveLengthMax());
-                    final Band insBand = Band.findBand(lambdaMid);
+                    final Band insBand = findBand(lambdaMid);
                     final SpectralBand insSpecBand = SpectralBandUtils.findBand(insBand);
 
                     logger.info("insBand: {}", insBand);
@@ -212,6 +214,11 @@ public class AsproStrehlChartTest {
                             // Compatible: plot chart:
                             for (final AdaptiveOpticsSetup aoSetup : ao.getSetups()) {
                                 logger.info("Processing: [{} band={}] (tel={} ao={} setup={})", instrumentName, insSpecBand, telescope, ao, aoSetup);
+
+                                if (false && !"CIAO_ON_AXIS".equalsIgnoreCase(aoSetup.getName())) {
+                                    // shortcuts for GPAO tests
+                                    continue;
+                                }
 
                                 // define output wavelengths:
                                 lambda[0] = insBand.getLambdaFluxZero() * 1E-6;
@@ -393,6 +400,26 @@ public class AsproStrehlChartTest {
         fixRenderer(chart, 0.0, 30.0);
 
         return ChartUtils.createChartPanel(chart, true);
+    }
+
+    private static Band findBand(final double waveLength) {
+        final Band band = Band.findBand(waveLength);
+        // TODO: fix that logic to use all possible bands within the instrument bandwidth
+        switch (band) {
+            case U:
+            // avoid 'band U not supported'
+            case B:
+            case V:
+            case R:
+            case I:
+                // always use V for Visible:
+                return Band.V;
+            case Q:
+                // avoid 'band Q not supported'
+                return Band.N;
+            default:
+                return band;
+        }
     }
 
     protected final static class StrehlIsoFunction implements Function2D {
