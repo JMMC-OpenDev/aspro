@@ -236,8 +236,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private final NumberFormat df1 = new DecimalFormat("0.0");
     /** timeline refresh Swing timer */
     private final Timer timerTimeRefresh;
-    /** defered event handler for OIFITS creator (250ms delay) */
-    private transient final EDTDelayedEventHandler deferedOIFITSHandler = new EDTDelayedEventHandler(250);
+    /** defered event handler for OIFITS creator (100ms delay) */
+    private transient final EDTDelayedEventHandler deferedOIFITSHandler = new EDTDelayedEventHandler(100);
     /** flag to indicate that the plot is rendered for PDF output */
     private boolean renderingPDF = false;
 
@@ -1382,6 +1382,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // update AO target:
                 if (this.jComboBoxAOTarget.isVisible()) {
                     final String aoTargetId = targetConf.getAoTarget();
+                    
                     if (!StringUtils.isEmpty(aoTargetId)) {
                         if (Target.TARGET_ID_SCIENCE.equals(aoTargetId)) {
                             this.jComboBoxAOTarget.setSelectedIndex(this.jComboBoxAOTarget.getItemCount() - 1); // last item is SCIENCE
@@ -1404,6 +1405,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // Update FT target:
                 if (this.jComboBoxFTTarget.isVisible()) {
                     final String ftTargetId = targetConf.getFringeTrackerTarget();
+                    
                     if (!StringUtils.isEmpty(ftTargetId)) {
                         if (Target.TARGET_ID_SCIENCE.equals(ftTargetId)) {
                             this.jComboBoxFTTarget.setSelectedIndex(this.jComboBoxFTTarget.getItemCount() - 1); // last item is SCIENCE
@@ -1701,8 +1703,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             }
 
             // restore previous selected item :
-            if (oldValue != null) {
-                this.jComboBoxAOTarget.setSelectedItem(oldValue);
+            if (!aoTargets.isEmpty()) {
+                if ((aoTargets.size() > 1) && (oldValue != null)) {
+                    this.jComboBoxAOTarget.setSelectedItem(oldValue);
+                } else {
+                    this.jComboBoxAOTarget.setSelectedIndex(0);
+                }
             }
 
             boolean visible = (this.jComboBoxAOSetup.getModel().getSize() > 0) && !aoTargets.isEmpty();
@@ -1732,6 +1738,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             }
 
             // restore previous selected item :
+            if (!ftTargets.isEmpty()) {
+                if ((ftTargets.size() > 1) && (oldValue != null)) {
+                    this.jComboBoxFTTarget.setSelectedItem(oldValue);
+                } else {
+                    this.jComboBoxFTTarget.setSelectedIndex(0);
+                }
+            }
             if (oldValue != null) {
                 this.jComboBoxFTTarget.setSelectedItem(oldValue);
             }
@@ -2667,13 +2680,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // Cancel other tasks now:
                 TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_OIFITS);
 
-                logger.info("runLater...");
-
                 deferedOIFITSHandler.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        logger.info("run...");
-
                         // Create OIFits task worker :
                         // Cancel other tasks and execute this new task :
                         new OIFitsSwingWorker(uvDataCollection, oiFitsCreatorList).executeTask();
