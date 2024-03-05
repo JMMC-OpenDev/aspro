@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="24.03 beta 8"/>
-    <compilation date="02/03/2024" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="24.03 beta 9"/>
+    <compilation date="05/03/2024" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -244,8 +244,11 @@
     <releasenotes>
         <release version="24.03">
             <pubDate>Sat, 02 Mar 2024 14:00:00 GMT</pubDate>
+            <prerelease version="24.03 beta 9">
+                <change type="FEATURE">Added AO/FT target selectors in the UV Coverage panel to select among available ancillary stars or the science object</change>
+            </prerelease>
             <prerelease version="24.03 beta 8">
-                <change type="FEATURE">Fixed lost text field edits in the Target Editor when changing selection (list or tree)</change>
+                <change type="BUGFIX">Fixed lost text field edits in the Target Editor when changing selection (list or tree)</change>
             </prerelease>
             <prerelease version="24.03 beta 7">
                 <change type="FEATURE">Updated noise parameters for VLTI Adaptive Optics systems</change>

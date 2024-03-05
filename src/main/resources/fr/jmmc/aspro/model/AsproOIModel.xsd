@@ -1023,6 +1023,24 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <!-- AO mode -->
+            <xsd:element name="aoTarget" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The optional Adaptive Optics Target (among possible science's AO target associations)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- fringe tracker mode -->
+            <xsd:element name="fringeTrackerTarget" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The optional Fringe tracker Target (among possible science's FT target associations)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
         </xsd:sequence>
     </xsd:complexType>
 
