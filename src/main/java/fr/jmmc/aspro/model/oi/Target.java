@@ -913,6 +913,8 @@ public class Target
 //--simple--preserve
     /** empty Target instance */
     public static final Target EMPTY_TARGET = new Target();
+    /** Special Target ID = 'SCIENCE' for AO/FT target ids */
+    public final static String TARGET_ID_SCIENCE = "SCIENCE";
 
     /**
      * Fix coordinates RA and DEC (HMS / DMS formats)

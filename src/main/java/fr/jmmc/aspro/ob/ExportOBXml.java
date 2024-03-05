@@ -65,9 +65,6 @@ public class ExportOBXml {
     /** Class logger */
     protected static final Logger logger = LoggerFactory.getLogger(ExportOBXml.class.getName());
 
-    /** OB manager */
-    private final static OBManager obm = OBManager.getInstance();
-
     /** file prefix for science targets */
     public static final String OB_SCIENCE = "SCI";
     /** file prefix for calibrator targets */
@@ -116,9 +113,9 @@ public class ExportOBXml {
      * @throws IOException if an I/O exception occured while writing the observing block
      */
     public static void process(final File file,
-            final ObservationSetting observation,
-            final ObservabilityService os,
-            final Target target) throws IOException {
+                               final ObservationSetting observation,
+                               final ObservabilityService os,
+                               final Target target) throws IOException {
 
         if (logger.isDebugEnabled()) {
             logger.debug("process target {} to file: ", target.getName(), file);
@@ -144,9 +141,9 @@ public class ExportOBXml {
      * @throws IOException if an I/O exception occurred while writing the observing block
      */
     private static void fill(final ObservingBlockDefinition obd,
-            final ObservationSetting observation,
-            final ObservabilityService os,
-            final Target target) throws IllegalStateException, IOException {
+                             final ObservationSetting observation,
+                             final ObservabilityService os,
+                             final Target target) throws IllegalStateException, IOException {
 
         final TargetConfiguration targetConf = target.getConfiguration();
 
@@ -198,7 +195,7 @@ public class ExportOBXml {
     }
 
     private static InterferometerConfiguration getInterferometerConfiguration(final ObservationSetting observation,
-            final TargetConfiguration targetConf) {
+                                                                              final TargetConfiguration targetConf) {
 
         final InterferometerConfiguration intConf = new InterferometerConfiguration();
 
@@ -242,7 +239,7 @@ public class ExportOBXml {
     }
 
     private static InstrumentConfiguration getInstrumentConfiguration(final ObservationSetting observation,
-            final TargetConfiguration targetConf) {
+                                                                      final TargetConfiguration targetConf) {
 
         final InstrumentConfiguration insConf = new InstrumentConfiguration();
 
@@ -278,7 +275,7 @@ public class ExportOBXml {
             if (insMode.getFtDit() != null) {
                 dit = insMode.getFtDit();
             } else {
-                final FringeTracker ft = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getFringeTracker();;
+                final FringeTracker ft = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getFringeTracker();
                 if (ft != null) {
                     // TODO: handle FT modes properly: GroupTrack is hard coded !
                     if (!ftMode.startsWith(AsproConstants.FT_GROUP_TRACK)) {
@@ -295,8 +292,8 @@ public class ExportOBXml {
     }
 
     private static ObservationConfiguration getObservationConfiguration(final ObservationSetting observation,
-            final ObservabilityService os,
-            final Target target) {
+                                                                        final ObservabilityService os,
+                                                                        final Target target) {
 
         final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
         final boolean isCalibrator = (targetUserInfos != null && targetUserInfos.isCalibrator(target));
@@ -321,25 +318,40 @@ public class ExportOBXml {
 
         if (targetUserInfos != null) {
             // Handle OB targets (AO / FT / Guide)
-            final TargetInformation targetInfo = targetUserInfos.getOrCreateTargetInformation(target);
+            final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
+            if (targetInfo != null) {
+                final TargetConfiguration targetConf = target.getConfiguration();
 
-            // AO
-            final Target aoTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo,
-                    TargetGroup.GROUP_AO);
-            if (aoTarget != null) {
-                obsConf.setAOTarget(getTarget(aoTarget));
-            }
-            // FT
-            final Target ftTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo,
-                    TargetGroup.GROUP_FT);
-            if (ftTarget != null) {
-                obsConf.setFTTarget(getTarget(ftTarget));
-            }
-            // GUIDE
-            final Target gsTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo,
-                    TargetGroup.GROUP_GUIDE);
-            if (gsTarget != null) {
-                obsConf.setGSTarget(getTarget(gsTarget));
+                // AO
+                final String aoTargetId = (targetConf != null) ? targetConf.getAoTarget() : null;
+
+                if (!StringUtils.isEmpty(aoTargetId) && !Target.TARGET_ID_SCIENCE.equals(aoTargetId)) {
+                    final List<Target> aoTargets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+
+                    final Target aoTarget = Target.getTargetById(aoTargetId, aoTargets);
+
+                    if (aoTarget != null) {
+                        obsConf.setAOTarget(getTarget(aoTarget));
+                    }
+                }
+                // FT
+                final String ftTargetId = (targetConf != null) ? targetConf.getFringeTrackerTarget() : null;
+
+                if (!StringUtils.isEmpty(ftTargetId) && !Target.TARGET_ID_SCIENCE.equals(ftTargetId)) {
+                    final List<Target> ftTargets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
+
+                    final Target ftTarget = Target.getTargetById(ftTargetId, ftTargets);
+
+                    if (ftTarget != null) {
+                        obsConf.setFTTarget(getTarget(ftTarget));
+                    }
+                }
+                // GUIDE (never used ?)
+                final Target gsTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo,
+                        TargetGroup.GROUP_GUIDE);
+                if (gsTarget != null) {
+                    obsConf.setGSTarget(getTarget(gsTarget));
+                }
             }
         }
 
@@ -616,8 +628,8 @@ public class ExportOBXml {
      * @return standard file name
      */
     private static String generateFileName(final ObservationSetting observation, final String targetName,
-            final String prefix, final String suffix,
-            final String extension) {
+                                           final String prefix, final String suffix,
+                                           final String extension) {
 
         final StringBuilder sb = new StringBuilder(32);
         if (prefix != null) {

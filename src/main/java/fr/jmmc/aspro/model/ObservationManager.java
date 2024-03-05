@@ -638,8 +638,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @param listener which listener to call
      */
     public void fireTargetSelectionChanged(final ObservationListener listener) {
+        final ObservationSetting observation = getMainObservation();
         // retrieve the selected target:
-        fireEvent(new TargetSelectionEvent(getMainObservation().getSelectedTarget()), listener);
+        fireEvent(new TargetSelectionEvent(observation, observation.getSelectedTarget()), listener);
     }
 
     /**
@@ -696,7 +697,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         // update user model if needed (memory):
         validateSelectedTargetUserModel();
 
-        fireEvent(new TargetSelectionEvent(observation.getSelectedTarget()));
+        fireEvent(new TargetSelectionEvent(observation, observation.getSelectedTarget()));
 
         // do update (observability) if PoPs enabled, (Auto) and bestPopsMode = 'SELECTED':
         if (observation.getInterferometerConfiguration().isBestPopsModeSelected()
@@ -1828,6 +1829,58 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         return changed;
     }
 
+    /**
+     * Set the AO target for the given target name
+     * Used by UVCoveragePanel.updateObservation()
+     *
+     * @param name name of the target
+     * @param aoTarget AO target or null
+     * @return true if the value changed
+     */
+    public boolean setTargetAOTarget(final String name, final Target aoTarget) {
+        final TargetConfiguration targetConf = getTargetConfiguration(name);
+        if (targetConf == null) {
+            return false;
+        }
+        // special case : 'SCIENCE'
+        final String aoTargetId = ((aoTarget != null) && (getTarget(name) != aoTarget)) ? aoTarget.getIdentifier() : Target.TARGET_ID_SCIENCE;
+        // AoTarget can be null :
+        final boolean changed = isChanged(aoTargetId, targetConf.getAoTarget());
+        if (changed) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("setTargetAOTarget: {}", aoTargetId);
+            }
+            targetConf.setAoTarget(aoTargetId);
+        }
+        return changed;
+    }
+
+    /**
+     * Set the Fringe tracker target for the given target name
+     * Used by UVCoveragePanel.updateObservation()
+     *
+     * @param name name of the target
+     * @param ftTarget FT target or null
+     * @return true if the value changed
+     */
+    public boolean setTargetFTTarget(final String name, final Target ftTarget) {
+        final TargetConfiguration targetConf = getTargetConfiguration(name);
+        if (targetConf == null) {
+            return false;
+        }
+        // special case : 'SCIENCE'
+        final String ftTargetId = ((ftTarget != null) && (getTarget(name) != ftTarget)) ? ftTarget.getIdentifier() : Target.TARGET_ID_SCIENCE;
+        // FringeTrackerTarget can be null :
+        final boolean changed = isChanged(ftTargetId, targetConf.getFringeTrackerTarget());
+        if (changed) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("setTargetFTTarget: {}", ftTargetId);
+            }
+            targetConf.setFringeTrackerTarget(ftTargetId);
+        }
+        return changed;
+    }
+
     // --- COMPUTATION RESULTS ---------------------------------------------------
     /**
      * Defines the OIFits structures (SHARED) for later reuse (OIFits Explorer)
@@ -1838,7 +1891,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     public void setOIFitsData(final OIFitsData oiFitsData) {
         logger.debug("setOIFitsData: {}", oiFitsData);
 
-        // TODO: use a new class OIFitsData (version / File / Target) ...
         // Use OIFitsCollectionManager ?
         this.oiFitsData = (oiFitsData == null || oiFitsData.getOIFitsList().isEmpty()) ? null : oiFitsData;
 

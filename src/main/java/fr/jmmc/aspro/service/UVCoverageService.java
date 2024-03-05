@@ -32,6 +32,7 @@ import fr.jmmc.aspro.util.TestUtils;
 import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.targetmodel.Model;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -205,7 +206,7 @@ public final class UVCoverageService {
      * @return UVCoverageData container
      */
     public UVCoverageData compute() {
-        // TODO: adjust ftUVCoverageService to use proper mjd times
+        // TODO: adjust ftUVCoverageService to use proper mjd times:
         if (ftUVCoverageService != null) {
             this.data.setFtUVCoverageData(ftUVCoverageService.compute());
         }
@@ -248,7 +249,6 @@ public final class UVCoverageService {
                 }
 
                 // prepare OIFits computation :
-                // TODO: ensure proper FT/AO targets (override ?)
                 createOIFitsCreator();
 
                 // reset current target :
@@ -562,6 +562,8 @@ public final class UVCoverageService {
             logger.debug("target:   {}", this.target);
         }
 
+        final TargetConfiguration targetConf = target.getConfiguration();
+
         if ((targetRole == TargetRole.SCI) && (targetMapping == null)) {
             Target ftTarget = null;
             Target aoTarget = null;
@@ -570,21 +572,43 @@ public final class UVCoverageService {
 
             if (targetUserInfos != null) {
                 // Handle OB targets (AO / FT)
-                final TargetInformation targetInfo = targetUserInfos.getOrCreateTargetInformation(target); // SCIENCE
+                final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
+                if (targetInfo != null) {
+                    // FT
+                    final String ftTargetId = (targetConf != null) ? targetConf.getFringeTrackerTarget() : null;
 
-                // FT
-                ftTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
-                // AO
-                aoTarget = TargetUserInformations.getFirstTargetForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+                    if (!StringUtils.isEmpty(ftTargetId) && !Target.TARGET_ID_SCIENCE.equals(ftTargetId)) {
+                        final List<Target> ftTargets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
 
-                if (ftTarget != null) {
-                    final boolean isTargetAO = (ftTarget == aoTarget);
+                        ftTarget = Target.getTargetById(ftTargetId, ftTargets);
 
-                    // ensure ftTarget has a model:
-                    ftTarget = getTargetWithModel(ftTarget);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("FT target: {}", ftTarget);
+                        }
+                    }
 
-                    if (isTargetAO) {
-                        aoTarget = ftTarget;
+                    // AO
+                    final String aoTargetId = (targetConf != null) ? targetConf.getAoTarget() : null;
+
+                    if (!StringUtils.isEmpty(aoTargetId) && !Target.TARGET_ID_SCIENCE.equals(aoTargetId)) {
+                        final List<Target> aoTargets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+
+                        aoTarget = Target.getTargetById(aoTargetId, aoTargets);
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("AO target: {}", aoTarget);
+                        }
+                    }
+
+                    if (ftTarget != null) {
+                        final boolean isTargetAO = (ftTarget == aoTarget);
+
+                        // ensure ftTarget has a model:
+                        ftTarget = getTargetWithModel(ftTarget);
+
+                        if (isTargetAO) {
+                            aoTarget = ftTarget;
+                        }
                     }
                 }
             }
@@ -633,8 +657,6 @@ public final class UVCoverageService {
 
         // note: target is always science target:
         if ((targetRole == TargetRole.SCI) && (target != null)) {
-            final TargetConfiguration targetConf = target.getConfiguration();
-
             if ((targetConf != null) && (targetConf.getInstrumentWaveLengthRef() != null)) {
                 lambda = targetConf.getInstrumentWaveLengthRef();
             }
@@ -762,14 +784,6 @@ public final class UVCoverageService {
                 }
             }
         }
-    }
-
-    /**
-     * Add an information message in the OIFits file
-     * @param msg message to add
-     */
-    private void addInformation(final String msg) {
-        this.data.getWarningContainer().addInformation(msg);
     }
 
     /**

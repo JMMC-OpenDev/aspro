@@ -27,6 +27,8 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="aoSetup" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="fringeTrackerMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="instrumentWaveLengthRef" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="aoTarget" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="fringeTrackerTarget" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -41,7 +43,9 @@ import fr.jmmc.aspro.model.OIBase;
     "haMax",
     "aoSetup",
     "fringeTrackerMode",
-    "instrumentWaveLengthRef"
+    "instrumentWaveLengthRef",
+    "aoTarget",
+    "fringeTrackerTarget"
 })
 public class TargetConfiguration
     extends OIBase
@@ -54,6 +58,8 @@ public class TargetConfiguration
     protected String aoSetup;
     protected String fringeTrackerMode;
     protected Double instrumentWaveLengthRef;
+    protected String aoTarget;
+    protected String fringeTrackerTarget;
 
     /**
      * Gets the value of the haMin property.
@@ -174,6 +180,54 @@ public class TargetConfiguration
     public void setInstrumentWaveLengthRef(Double value) {
         this.instrumentWaveLengthRef = value;
     }
+
+    /**
+     * Gets the value of the aoTarget property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getAoTarget() {
+        return aoTarget;
+    }
+
+    /**
+     * Sets the value of the aoTarget property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setAoTarget(String value) {
+        this.aoTarget = value;
+    }
+
+    /**
+     * Gets the value of the fringeTrackerTarget property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getFringeTrackerTarget() {
+        return fringeTrackerTarget;
+    }
+
+    /**
+     * Sets the value of the fringeTrackerTarget property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setFringeTrackerTarget(String value) {
+        this.fringeTrackerTarget = value;
+    }
     
 //--simple--preserve
 
@@ -187,7 +241,9 @@ public class TargetConfiguration
                 && areEquals(this.haMax, other.getHAMax())
                 && areEquals(this.aoSetup, other.getAoSetup())
                 && areEquals(this.fringeTrackerMode, other.getFringeTrackerMode())
-                && areEquals(this.instrumentWaveLengthRef, other.getInstrumentWaveLengthRef()));
+                && areEquals(this.instrumentWaveLengthRef, other.getInstrumentWaveLengthRef()))
+                && areEquals(this.aoTarget, other.getAoTarget())
+                && areEquals(this.fringeTrackerTarget, other.getFringeTrackerTarget());
     }
     
 //--simple--preserve

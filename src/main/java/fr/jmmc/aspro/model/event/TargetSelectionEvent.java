@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model.event;
 
+import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 
 /**
@@ -15,10 +16,11 @@ public final class TargetSelectionEvent extends ObservationEvent {
 
   /**
    * Public constructor
+   * @param observation observation related to this event
    * @param target selected target
    */
-  public TargetSelectionEvent(final Target target) {
-    super(ObservationEventType.TARGET_SELECTION_CHANGED);
+  public TargetSelectionEvent(final ObservationSetting observation, final Target target) {
+    super(ObservationEventType.TARGET_SELECTION_CHANGED, observation);
     this.target = target;
   }
 
