@@ -31,21 +31,21 @@ public enum AtmosphereQuality {
 
 
     /**
-     * 'Average' means seeing = 1.0 arcsec
+     * 'Average' means seeing = 1.00 arcsec
      * 
      */
     @XmlEnumValue("Average")
     AVERAGE("Average"),
 
     /**
-     * 'Good' means seeing = 0.7 arcsec
+     * 'Good' means seeing = 0.70 arcsec
      * 
      */
     @XmlEnumValue("Good")
     GOOD("Good"),
 
     /**
-     * 'Excellent' means seeing = 0.4 arcsec
+     * 'Excellent' means seeing = 0.60 arcsec
      * 
      */
     @XmlEnumValue("Excellent")
@@ -59,14 +59,14 @@ public enum AtmosphereQuality {
     WORSE("Worse"),
 
     /**
-     * 'Bad' means seeing = 1.4 arcsec
+     * 'Bad' means seeing = 1.40 arcsec
      * 
      */
     @XmlEnumValue("Bad")
     BAD("Bad"),
 
     /**
-     * 'Awful' means seeing = 1.8 arcsec
+     * 'Awful' means seeing = 1.80 arcsec
      * 
      */
     @XmlEnumValue("Awful")
