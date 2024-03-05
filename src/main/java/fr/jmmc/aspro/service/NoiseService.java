@@ -1051,16 +1051,16 @@ public final class NoiseService implements VisNoiseService {
 
         // handle special case for R band (NAOMI / GPAO)
         if (fluxAOBand == SpectralBand.R) {
-            // use G then V then R (if no flux)
+            // use G then R then V (if no flux)
             fluxAOBand = SpectralBand.G;
             flux = aoTarget.getFlux(fluxAOBand);
 
             if (flux == null) {
-                fluxAOBand = SpectralBand.V;
+                fluxAOBand = SpectralBand.R;
                 flux = aoTarget.getFlux(fluxAOBand);
             }
             if (flux == null) {
-                fluxAOBand = SpectralBand.R;
+                fluxAOBand = SpectralBand.V;
                 flux = aoTarget.getFlux(fluxAOBand);
             }
         } else {
@@ -1447,9 +1447,9 @@ public final class NoiseService implements VisNoiseService {
                         logger.debug("frameRatio                    : {}", frameRatio);
                     }
 
-                    warningContainer.addInformation("Observation can take advantage of FT. Adjusting DIT to: " + formatTime(obsDit));
+                    warningContainer.addInformation("Observation can use FT. Adjusting DIT to: " + formatTime(obsDit));
                 } else {
-                    warningContainer.addInformation("Observation can take advantage of FT (Group track). DIT set to: " + formatTime(obsDit));
+                    warningContainer.addInformation("Observation can use FT (Group track). DIT set to: " + formatTime(obsDit));
                 }
             } else if (!invalidParametersInit) {
                 // invalid setup:
