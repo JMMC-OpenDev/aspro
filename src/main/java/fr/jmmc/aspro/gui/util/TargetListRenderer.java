@@ -22,13 +22,30 @@ public final class TargetListRenderer extends DefaultListCellRenderer {
     /* members */
     /** delegate */
     private final TargetRenderer delegate;
+    /** enable tooltip */
+    private final boolean doTooltips;
+    /* members */
+    /** tooltip buffer */
+    private final StringBuilder sbToolTip;
 
     /**
      * Public constructor
      * @param renderer target renderer
      */
     public TargetListRenderer(final TargetRenderer renderer) {
+        this(renderer, false);
+    }
+
+    /**
+     * Public constructor
+     * @param renderer target renderer
+     * @param doTooltips enable tooltip
+     */
+    public TargetListRenderer(final TargetRenderer renderer, final boolean doTooltips) {
+        super();
         this.delegate = renderer;
+        this.doTooltips = doTooltips;
+        this.sbToolTip = (doTooltips) ? new StringBuilder(512) : null;
     }
 
     /**
@@ -72,9 +89,12 @@ public final class TargetListRenderer extends DefaultListCellRenderer {
                 isSelected, cellHasFocus);
 
         if (value instanceof Target) {
-            delegate.setIcon(this, (Target) value);
+            final Target target = (Target) value;
+            delegate.setIcon(this, target);
+            if (doTooltips) {
+                setToolTipText(TargetList.getTooltip(sbToolTip, target, delegate.getTargetUserInfos()));
+            }
         }
-
         return this;
     }
 }

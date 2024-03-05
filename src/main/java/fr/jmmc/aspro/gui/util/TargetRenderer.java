@@ -35,6 +35,10 @@ public final class TargetRenderer {
         this.targetUserInfos = targetUserInfos;
     }
 
+    public TargetUserInformations getTargetUserInfos() {
+        return targetUserInfos;
+    }
+
     /**
      * Convert the target to string :
      * Return the display name of the given target using the format 'name' ( ' (cal)')
