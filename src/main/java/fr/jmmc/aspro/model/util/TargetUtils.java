@@ -182,8 +182,8 @@ public final class TargetUtils {
 
         // coordinates (HMS / DMS) (mandatory):
         newTarget.setCoords(
-                star.getPropertyAsString(Star.Property.RA).replace(' ', ':'),
-                star.getPropertyAsString(Star.Property.DEC).replace(' ', ':'),
+                star.getPropertyAsString(Star.Property.RA).replace(' ', ALX.SEPARATOR),
+                star.getPropertyAsString(Star.Property.DEC).replace(' ', ALX.SEPARATOR),
                 AsproConstants.EPOCH_J2000);
 
         // Proper motion (mas/yr) (optional) :
