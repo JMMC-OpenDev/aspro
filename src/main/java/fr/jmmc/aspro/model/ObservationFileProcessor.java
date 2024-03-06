@@ -7,6 +7,8 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.util.AsproModelVersion;
+import fr.jmmc.jmal.ALX;
+import fr.jmmc.jmcs.util.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +50,10 @@ public final class ObservationFileProcessor {
         if (revision != CURRENT_REVISION) {
             // model conversion is needed :
             convertModel(observation, revision);
+        }
+
+        if (observation.getName().contains("SearchFTT")) {
+            fixTargetCoordsInDegrees(observation);
         }
 
         // check and update target references in TargetUserInformations :
@@ -111,5 +117,24 @@ public final class ObservationFileProcessor {
         }
 
         logger.debug("convertModel done : {}", revision);
+    }
+
+    private static void fixTargetCoordsInDegrees(final ObservationSetting observation) {
+        for (Target t : observation.getTargets()) {
+            final String ra = t.getRA();
+            final String de = t.getDEC();
+
+            if (!ra.contains(ALX.STR_SEPARATOR) || !de.contains(ALX.STR_SEPARATOR)) {
+                // Fix deg to hours:
+                Double raDeg = NumberUtils.parseDouble(t.getRA());
+                if (raDeg != null) {
+                    t.setRA(Double.toString(raDeg * ALX.DEG_IN_HOUR));
+                }
+                t.fixCoords();
+
+                logger.info("Bad RA/DE coordinates (not in HMS/DMS format) for Target[{}][{}] (RA={} DE={}) => (RA={} DE={})",
+                        t.getIdentifier(), t.getName(), ra, de, t.getRA(), t.getDEC());
+            }
+        }
     }
 }
