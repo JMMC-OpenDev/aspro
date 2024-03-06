@@ -32,6 +32,8 @@ import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.TargetGroup;
+import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetRawObservation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
@@ -80,6 +82,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(ObservationManager.class.getName());
+    /** (dev) flag to trace any model update (as xml) */
+    public final static boolean TRACE_MODEL_UPDATES = false;
     /** minimum target version to force a simbad update */
     public final static float TARGET_VERSION_MUST_UPDATE = 2019.07f;
     /** flag to log a stack trace in method fireEvent() to debug events */
@@ -109,6 +113,12 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     private boolean lastUseFastUserModel;
     /** (cached) fast error (preference) */
     private double lastFastError;
+
+    static {
+        if (TRACE_MODEL_UPDATES) {
+            logger.warn("WARNING: TRACE_MODEL_UPDATES=true (dev) - DO NOT USE IN PRODUCTION !");
+        }
+    }
 
     /**
      * Return the ObservationManager singleton
@@ -219,6 +229,11 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         final ObservationSetting observation = getMainObservation();
         if (logger.isDebugEnabled()) {
             logger.debug("synchronizeObservations: {}", toString(observation));
+        }
+
+        if (TRACE_MODEL_UPDATES) {
+            // serialize main  observation to xml :
+            logger.info("Main Observation:\n{}", saveToString(observation));
         }
 
         // create a new observation collection :
@@ -541,10 +556,18 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * @throws IllegalStateException if an unexpected exception occured
      */
     public String saveToString() throws IllegalStateException {
+        return saveToString(getMainObservation());
+    }
+
+    /**
+     * Save the given observation into a String (xml)
+     * @param observation observation to save
+     * @return observation setting serialized into a String
+     * @throws IllegalStateException if an unexpected exception occured
+     */
+    public String saveToString(final ObservationSetting observation) throws IllegalStateException {
         // Create a 16K buffer for the complete observation setting :
         final StringWriter sw = new StringWriter(16384);
-
-        final ObservationSetting observation = getMainObservation();
 
         // pre save processing :
         ObservationFileProcessor.onSave(observation);
@@ -1842,9 +1865,25 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (targetConf == null) {
             return false;
         }
-        // special case : 'SCIENCE'
-        final String aoTargetId = ((aoTarget != null) && (getTarget(name) != aoTarget)) ? aoTarget.getIdentifier() : Target.TARGET_ID_SCIENCE;
-        // AoTarget can be null :
+
+        final Target target = getTarget(name);
+        final TargetUserInformations targetUserInfos = getTargetUserInfos();
+
+        final TargetInformation targetInfo = ((target != null) && (targetUserInfos != null))
+                ? targetUserInfos.getTargetInformation(target) : null;
+
+        final List<Target> aoTargets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
+
+        final boolean hasAOTargets = (aoTargets != null) && !aoTargets.isEmpty();
+        if (logger.isTraceEnabled()) {
+            logger.trace("hasAOTargets: {}", hasAOTargets);
+        }
+
+        // special case : 'NONE' or null
+        final String aoTargetId = (hasAOTargets)
+                ? (((aoTarget != null) && (target != aoTarget)) ? aoTarget.getIdentifier() : Target.TARGET_ID_NONE) : null;
+
+        // both can be null:
         final boolean changed = isChanged(aoTargetId, targetConf.getAoTarget());
         if (changed) {
             if (logger.isTraceEnabled()) {
@@ -1868,9 +1907,25 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         if (targetConf == null) {
             return false;
         }
-        // special case : 'SCIENCE'
-        final String ftTargetId = ((ftTarget != null) && (getTarget(name) != ftTarget)) ? ftTarget.getIdentifier() : Target.TARGET_ID_SCIENCE;
-        // FringeTrackerTarget can be null :
+
+        final Target target = getTarget(name);
+        final TargetUserInformations targetUserInfos = getTargetUserInfos();
+
+        final TargetInformation targetInfo = ((target != null) && (targetUserInfos != null))
+                ? targetUserInfos.getTargetInformation(target) : null;
+
+        final List<Target> ftTargets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
+
+        final boolean hasFTTargets = (ftTargets != null) && !ftTargets.isEmpty();
+        if (logger.isTraceEnabled()) {
+            logger.trace("hasFTTargets: {}", hasFTTargets);
+        }
+
+        // special case : 'NONE' or null
+        final String ftTargetId = (hasFTTargets)
+                ? (((ftTarget != null) && (target != ftTarget)) ? ftTarget.getIdentifier() : Target.TARGET_ID_NONE) : null;
+
+        // both can be null:
         final boolean changed = isChanged(ftTargetId, targetConf.getFringeTrackerTarget());
         if (changed) {
             if (logger.isTraceEnabled()) {

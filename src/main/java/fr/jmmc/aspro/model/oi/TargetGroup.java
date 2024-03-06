@@ -413,7 +413,7 @@ public class TargetGroup
      * @return group or null if the group was not found
      */
     public static TargetGroup getGroup(final String name, final java.util.List<TargetGroup> groups) {
-        if (name != null) {
+        if ((name != null) && (groups != null)) {
             for (TargetGroup g : groups) {
                 if (g.getName().equals(name)) {
                     return g;
@@ -430,7 +430,7 @@ public class TargetGroup
      * @return group or null if the group was not found
      */
     public static TargetGroup getGroupById(final String id, final java.util.List<TargetGroup> groups) {
-        if (id != null) {
+        if ((id != null) && (groups != null)) {
             for (TargetGroup g : groups) {
                 if (g.getIdentifier().equals(id)) {
                     return g;

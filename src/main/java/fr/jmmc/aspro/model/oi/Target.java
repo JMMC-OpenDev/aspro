@@ -913,8 +913,8 @@ public class Target
 //--simple--preserve
     /** empty Target instance */
     public static final Target EMPTY_TARGET = new Target();
-    /** Special Target ID = 'SCIENCE' for AO/FT target ids */
-    public final static String TARGET_ID_SCIENCE = "SCIENCE";
+    /** Special Target ID = 'NONE' for AO/FT target ids */
+    public final static String TARGET_ID_NONE = "NONE";
 
     /**
      * Fix coordinates RA and DEC (HMS / DMS formats)
@@ -1362,7 +1362,7 @@ public class Target
      * @return target or null if the target was not found
      */
     public static Target getTarget(final String name, final List<Target> targets) {
-        if (name != null) {
+        if ((name != null) && (targets != null)) {
             for (Target t : targets) {
                 if (t.getName().equals(name)) {
                     return t;
@@ -1379,7 +1379,7 @@ public class Target
      * @return target or null if the target was not found
      */
     public static Target getTargetById(final String id, final List<Target> targets) {
-        if (id != null) {
+        if ((id != null) && (targets != null)) {
             for (Target t : targets) {
                 if (t.getIdentifier().equals(id)) {
                     return t;

@@ -325,7 +325,7 @@ public class ExportOBXml {
                 // AO
                 final String aoTargetId = (targetConf != null) ? targetConf.getAoTarget() : null;
 
-                if (!StringUtils.isEmpty(aoTargetId) && !Target.TARGET_ID_SCIENCE.equals(aoTargetId)) {
+                if (!StringUtils.isEmpty(aoTargetId) && !Target.TARGET_ID_NONE.equals(aoTargetId)) {
                     final List<Target> aoTargets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_AO);
 
                     final Target aoTarget = Target.getTargetById(aoTargetId, aoTargets);
@@ -337,7 +337,7 @@ public class ExportOBXml {
                 // FT
                 final String ftTargetId = (targetConf != null) ? targetConf.getFringeTrackerTarget() : null;
 
-                if (!StringUtils.isEmpty(ftTargetId) && !Target.TARGET_ID_SCIENCE.equals(ftTargetId)) {
+                if (!StringUtils.isEmpty(ftTargetId) && !Target.TARGET_ID_NONE.equals(ftTargetId)) {
                     final List<Target> ftTargets = TargetUserInformations.getTargetsForGroup(targetUserInfos, targetInfo, TargetGroup.GROUP_FT);
 
                     final Target ftTarget = Target.getTargetById(ftTargetId, ftTargets);

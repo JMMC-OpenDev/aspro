@@ -1382,9 +1382,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // update AO target:
                 if (this.jComboBoxAOTarget.isVisible()) {
                     final String aoTargetId = targetConf.getAoTarget();
-                    
+
                     if (!StringUtils.isEmpty(aoTargetId)) {
-                        if (Target.TARGET_ID_SCIENCE.equals(aoTargetId)) {
+                        if (Target.TARGET_ID_NONE.equals(aoTargetId)) {
                             this.jComboBoxAOTarget.setSelectedIndex(this.jComboBoxAOTarget.getItemCount() - 1); // last item is SCIENCE
                         } else {
                             final Target aoTarget = observation.getTargetById(aoTargetId);
@@ -1405,9 +1405,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // Update FT target:
                 if (this.jComboBoxFTTarget.isVisible()) {
                     final String ftTargetId = targetConf.getFringeTrackerTarget();
-                    
+
                     if (!StringUtils.isEmpty(ftTargetId)) {
-                        if (Target.TARGET_ID_SCIENCE.equals(ftTargetId)) {
+                        if (Target.TARGET_ID_NONE.equals(ftTargetId)) {
                             this.jComboBoxFTTarget.setSelectedIndex(this.jComboBoxFTTarget.getItemCount() - 1); // last item is SCIENCE
                         } else {
                             final Target ftTarget = observation.getTargetById(ftTargetId);
@@ -1690,8 +1690,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                         aoTargets.addAll(targetsAO);
                     }
                 }
-                // add SCIENCE at last:
-                aoTargets.add(target);
+                if (!aoTargets.isEmpty()) {
+                    // add SCIENCE at last:
+                    aoTargets.add(target);
+                }
             }
 
             Object oldValue = this.jComboBoxAOTarget.getSelectedItem();
@@ -1725,8 +1727,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                         ftTargets.addAll(targetsFT);
                     }
                 }
-                // add SCIENCE at last:
-                ftTargets.add(target);
+                if (!ftTargets.isEmpty()) {
+                    // add SCIENCE at last:
+                    ftTargets.add(target);
+                }
             }
 
             oldValue = this.jComboBoxFTTarget.getSelectedItem();

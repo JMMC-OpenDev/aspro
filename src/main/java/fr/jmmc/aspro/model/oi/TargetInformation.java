@@ -385,10 +385,12 @@ public class TargetInformation
      */
     protected static final TargetInformation getTargetInformation(final Target target,
                                                                   final java.util.List<TargetInformation> targetInfos) {
-        for (int i = 0, len = targetInfos.size(); i < len; i++) {
-            TargetInformation targetInfo = targetInfos.get(i);
-            if (targetInfo.getTargetRef().equals(target)) {
-                return targetInfo;
+        if (target != null) {
+            for (int i = 0, len = targetInfos.size(); i < len; i++) {
+                TargetInformation targetInfo = targetInfos.get(i);
+                if (targetInfo.getTargetRef().equals(target)) {
+                    return targetInfo;
+                }
             }
         }
         return null;
