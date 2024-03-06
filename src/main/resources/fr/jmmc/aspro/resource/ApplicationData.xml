@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="24.03 beta 9"/>
-    <compilation date="05/03/2024" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="24.03 beta 10"/>
+    <compilation date="06/03/2024" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -244,6 +244,9 @@
     <releasenotes>
         <release version="24.03">
             <pubDate>Sat, 02 Mar 2024 14:00:00 GMT</pubDate>
+            <prerelease version="24.03 beta 10">
+                <change type="FEATURE">Only display AO/FT target selectors in the UV Coverage panel when the science object has associated ancillary stars</change>
+            </prerelease>
             <prerelease version="24.03 beta 9">
                 <change type="FEATURE">Added AO/FT target selectors in the UV Coverage panel to select among available ancillary stars or the science object</change>
             </prerelease>
@@ -257,21 +260,21 @@
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented the Strehl Isoplanetism error (VLTI AO only) taking into account the turburlence layer's height (h0),
                     atmospheric conditions (ESO seeing &amp; tau0 constraints) and distances between the AO target and interferometric targets (GRAVITY FT or SCI).
                     This implementation is  made in collaboration with Dr. Anthony Berdeu, LESIA, ObsPM, whose project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 101004719.</change>
-                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented preliminary support for GPAO NGS (Natural Guide Star) coming on sky in Summer 24</change>
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented preliminary support for GPAO NGS (Natural Guide Star) coming on sky during Summer 2024</change>
             </prerelease>
             <prerelease version="23.12 beta 5">
-                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Rewritten saturation handling for both GRAVITY FT &amp; GRAVITY instruments to use discrete DIT values</change>
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Rewritten detector saturation handling for both GRAVITY FT &amp; GRAVITY instruments to use discrete DIT values</change>
             </prerelease>
             <prerelease version="23.12 beta 4">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Fixed noise equations for GRAVITY_FT</change>
             </prerelease>
             <prerelease version="23.12 beta 3">
-                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented GRAVITY's background noise &amp; transmission model</change>
+                <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented GRAVITY's background noise &amp; transmission model (FT &amp; SCI detectors)</change>
             </prerelease>
             <prerelease version="23.12 beta 2">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented the GRAVITY FT bootstrapping for baselines (triangle method)</change>
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Implemented the visibility loss for off-axis fringe tracking (GRAVITY FT)</change>
-                <change type="FEATURE">Improved warning messages with computed stats (FT, SCI)</change>
+                <change type="FEATURE">Improved warning messages with computed stats on SNR (FT, SCI)</change>
             </prerelease>
             <prerelease version="23.12 beta 1">
                 <change type="FEATURE" url="https://github.com/JMMC-OpenDev/aspro/issues/10">Major rewriting of the OIFits generator to handle two simulated OIFITS (FT + SCI)
