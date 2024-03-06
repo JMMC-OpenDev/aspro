@@ -1424,7 +1424,7 @@ public final class NoiseService implements VisNoiseService {
 
                         int pos = -1;
                         for (int j = 0; j < dits.length; j++) {
-                            if (maxIdealDit > dits[j]) {
+                            if (NumberUtils.greaterThan(maxIdealDit, dits[j])) {
                                 pos = j;
                             } else {
                                 break;
