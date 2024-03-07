@@ -52,6 +52,7 @@ import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.rawobs.Observations;
 import fr.jmmc.aspro.model.rawobs.RawObservation;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
+import fr.jmmc.aspro.model.util.TargetRole;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
@@ -105,6 +106,7 @@ import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
 import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
 import fr.jmmc.oiexplorer.core.gui.chart.ZoomEventListener;
 import fr.jmmc.oiexplorer.core.gui.chart.dataset.SharedSeriesAttributes;
+import fr.jmmc.oiexplorer.core.util.Constants;
 import static fr.jmmc.oiexplorer.core.util.FitsImageUtils.checkBounds;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -186,6 +188,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private static final String MSG_COMPUTING_MAP = "computing uv map ...";
     /** message indicating computations */
     private static final String MSG_COMPUTING_OIFITS = "computing OIFits data ...";
+    /** flag to add FT OIFITS (TODO: use Preference) */
+    private final static boolean ADD_FT_OIFITS = false;
     /** flag to log a stack trace in method updateObservation() to detect multiple calls */
     private final static boolean DEBUG_UPDATE_EVENT = false;
     /** flag to log a stack trace in method plot() to detect multiple calls */
@@ -237,7 +241,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     /** timeline refresh Swing timer */
     private final Timer timerTimeRefresh;
     /** defered event handler for OIFITS creator (100ms delay) */
-    private transient final EDTDelayedEventHandler deferedOIFITSHandler = new EDTDelayedEventHandler(100);
+    private transient final EDTDelayedEventHandler deferedOIFITSHandler
+                                                   = new EDTDelayedEventHandler(Constants.ENABLE_DEFERED_COMPUTE ? 100 : 5);
     /** flag to indicate that the plot is rendered for PDF output */
     private boolean renderingPDF = false;
 
@@ -511,7 +516,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         gridBagConstraints.gridwidth = 2;
         jPanelLeft.add(jLabelSamplingPeriod, gridBagConstraints);
 
-        jFieldSamplingPeriod.setColumns(5);
+        jFieldSamplingPeriod.setColumns(8);
         jFieldSamplingPeriod.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
         jFieldSamplingPeriod.setMinimumSize(new java.awt.Dimension(40, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -529,8 +534,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         gridBagConstraints.gridwidth = 2;
         jPanelLeft.add(jLabelObsDuration, gridBagConstraints);
 
-        jFieldObsDuration.setColumns(5);
-        jFieldObsDuration.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        jFieldObsDuration.setColumns(8);
+        jFieldObsDuration.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.0###"))));
         jFieldObsDuration.setMinimumSize(new java.awt.Dimension(40, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -3865,7 +3870,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     final OIFitsFile oiFitsFile = oiFitsCreator.createOIFits();
 
                     if (oiFitsFile != null) {
-                        oiFitsList.add(oiFitsFile);
+                        boolean add = ADD_FT_OIFITS;
+
+                        if (!add && (oiFitsCreator.getTargetRole() == TargetRole.SCI)) {
+                            add = true;
+                        }
+                        if (add) {
+                            oiFitsList.add(oiFitsFile);
+                        }
                     }
 
                     // fast interrupt :
