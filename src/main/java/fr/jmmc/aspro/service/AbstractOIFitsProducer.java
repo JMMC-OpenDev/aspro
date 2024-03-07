@@ -155,6 +155,10 @@ public abstract class AbstractOIFitsProducer {
         logger.debug("options: {}", options);
     }
 
+    public TargetRole getTargetRole() {
+        return this.targetRole;
+    }
+
     /**
      * Prepare the user model vs the instrumental spectral configuration
      * @param warningContainer warning container to use if needed
@@ -785,6 +789,10 @@ public abstract class AbstractOIFitsProducer {
         double dit = Double.NaN;
 
         if ((ns != null) && AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
+            final double maxIdealDit = ns.getTotalObsTime() * 1000.0; // ms
+            if (logger.isDebugEnabled()) {
+                logger.debug("maxIdealDit: {}", maxIdealDit);
+            }
             final double[] dits = new double[]{0.85, 3.0, 10.0}; // TODO: put in configuration 24.3?
             final double[] sigmaOpdMean = new double[dits.length];
 
@@ -792,18 +800,22 @@ public abstract class AbstractOIFitsProducer {
             double minSigmaOpdMean = Double.MAX_VALUE; // nm
 
             for (int i = 0; i < dits.length; i++) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Testing DIT: {} ms", dits[i]);
-                }
-                sigmaOpdMean[i] = computeVisibilityErrors(dits[i] * 1e-3, insBands, modelFluxes, bandFluxes, false);
+                if (NumberUtils.greaterThan(maxIdealDit, dits[i])) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Testing DIT: {} ms", dits[i]);
+                    }
+                    sigmaOpdMean[i] = computeVisibilityErrors(dits[i] * 1e-3, insBands, modelFluxes, bandFluxes, false);
 
-                // fast interrupt :
-                if (currentThread.isInterrupted()) {
-                    return false;
-                }
-                if (sigmaOpdMean[i] < minSigmaOpdMean) {
-                    minIdx = i;
-                    minSigmaOpdMean = sigmaOpdMean[i];
+                    // fast interrupt :
+                    if (currentThread.isInterrupted()) {
+                        return false;
+                    }
+                    if (sigmaOpdMean[i] < minSigmaOpdMean) {
+                        minIdx = i;
+                        minSigmaOpdMean = sigmaOpdMean[i];
+                    }
+                } else {
+                    sigmaOpdMean[i] = Double.NaN;
                 }
             }
 
