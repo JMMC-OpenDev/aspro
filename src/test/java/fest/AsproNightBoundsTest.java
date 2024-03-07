@@ -38,6 +38,7 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
     @BeforeClass
     public static void intializeAndStartApplication() {
         
+        AsproDocJUnitTest.prepareTest();
         AsproDocJUnitTest.prepareAsproTest();
 
         // Start application:

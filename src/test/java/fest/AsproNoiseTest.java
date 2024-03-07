@@ -98,6 +98,7 @@ public final class AsproNoiseTest extends JmcsFestSwingJUnitTestCase {
     @BeforeClass
     public static void intializeAndStartApplication() {
 
+        AsproDocJUnitTest.prepareTest();
         AsproNoiseTest.prepareAsproTest();
 
         // Start application:

@@ -45,8 +45,6 @@ public final class AsproGravityTest extends JmcsFestSwingJUnitTestCase {
      * Initialize system properties & static variables
      */
     public static void prepareAsproTest() {
-        System.setProperty("TRACE_SNR_FT", "true");
-
         // Hack to reset LAF & ui scale:
         CommonPreferences.getInstance().resetToDefaultPreferences();
         try {
@@ -95,6 +93,9 @@ public final class AsproGravityTest extends JmcsFestSwingJUnitTestCase {
     @BeforeClass
     public static void intializeAndStartApplication() {
 
+        System.setProperty("TRACE_SNR_FT", "true");
+
+        AsproDocJUnitTest.prepareTest();
         AsproGravityTest.prepareAsproTest();
 
         // Start application:
@@ -171,7 +172,7 @@ public final class AsproGravityTest extends JmcsFestSwingJUnitTestCase {
 
         final double step = 0.5;
 
-        for (double k = 0.0; k <= 15.0; k += step) {
+        for (double k = 0.0; k <= 14.0; k += step) {
             changeMagK(k);
 
             // let plot update:
@@ -208,9 +209,6 @@ public final class AsproGravityTest extends JmcsFestSwingJUnitTestCase {
                 }
             });
         }
-        jFieldFixture = dialog.textBox("FLUXV"); // bug mag edit
-        jFieldFixture.click();
-
         // SCI target:
         dialog.tree().selectPath("Targets/Sirius B");
 

@@ -93,6 +93,7 @@ public final class AsproMatisseTest extends JmcsFestSwingJUnitTestCase {
     @BeforeClass
     public static void intializeAndStartApplication() {
 
+        AsproDocJUnitTest.prepareTest();
         AsproMatisseTest.prepareAsproTest();
 
         // Start application:

@@ -64,7 +64,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     private final static String FAKE_EMAIL = "FAKE_EMAIL";
     private static String CURRENT_EMAIL = "";
-    
+
     /** robot take screenshot (top offset for gnome3) */
     private static final int M_TOP = 28; // 28 (breeze), 14 (gnome3) at font scale = 1.0 */
 
@@ -84,8 +84,20 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      * Initialize system properties & static variables
      */
     public static void prepareAsproTest() {
+        prepareAsproTest(Double.valueOf(1.5));
+    }
+
+    /**
+     * Initialize system properties & static variables
+     */
+    public static void prepareAsproTest(Double uiScale) {
         // Hack to reset LAF & ui scale:
         CommonPreferences.getInstance().resetToDefaultPreferences();
+        try {
+            CommonPreferences.getInstance().setPreference(CommonPreferences.UI_SCALE, uiScale);
+        } catch (PreferencesException pe) {
+            logger.error("setPreference failed", pe);
+        }
 
         // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
@@ -104,6 +116,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         SessionSettingsPreferences.getInstance().resetToDefaultPreferences();
         try {
             Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_SIZE, NumberUtils.valueOf(1024));
+
+            // do add noise:
+            Preferences.getInstance().setPreference(Preferences.OIFITS_ADD_NOISE, Boolean.TRUE);
 
             CommonPreferences.getInstance().setPreference(CommonPreferences.SHOW_STARTUP_SPLASHSCREEN, Boolean.FALSE);
             CommonPreferences.getInstance().setPreference(CommonPreferences.FILECHOOSER_NATIVE, Boolean.FALSE);
@@ -126,18 +141,25 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     }
 
     /**
+     * Initialize FEST test
+     */
+    public static void prepareTest() {
+        // GNOME3: window issue:
+        setScreenshotTakerMargins(M_TOP, 0, 0, 0);
+        logger.warn("Using top margin = {} px", M_TOP);
+
+        System.setProperty("DISABLE_DEFERED_COMPUTE", "true");
+    }
+
+    /**
      * Initialize system properties & static variables and finally starts the application
      */
     @BeforeClass
     public static void intializeAndStartApplication() {
         logger.info("AsproDocJUnitTest.intializeAndStartApplication()");
 
-        // GNOME3: window issue:
-        setScreenshotTakerMargins(M_TOP, 0, 0, 0);
-        
-        logger.warn("Using top margin = {} px", M_TOP);
-
-        AsproDocJUnitTest.prepareAsproTest();
+        AsproDocJUnitTest.prepareTest();
+        AsproDocJUnitTest.prepareAsproTest(Double.valueOf(1.0));
 
         // Start application:
         JmcsFestSwingJUnitTestCase.startApplication(
@@ -492,7 +514,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             window.resizeTo(new Dimension(1200, 950));
 
             openObservation("Aspro2_sample.asprox");
-            
+
             // show observability plot :
             getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
@@ -505,7 +527,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
             // waits for computation to finish :
             AsproTestUtils.checkRunningTasks();
-            
+
             captureMainForm("Aspro2-main-chara.png");
 
             final int left = 5 + window.panel("jPanelTargets").component().getWidth();
@@ -544,22 +566,22 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
                     jTextPoPs.setValue(null);
                 }
             });
-            
+
             // select CHARA interferometer:
             form.comboBox("jComboBoxInstrument").selectItem("MIRCX-MYSTIC");
-            
+
             // waits for computation to finish :
             AsproTestUtils.checkRunningTasks();
 
             saveCroppedScreenshotOf("popsAuto-6T.png", left, 0, width, height);
-            
+
             window.button("jButtonPopsSet").click();
-            
+
             // change configuration:
             window.list("jListInstrumentConfigurations").selectItem(5);
 
             saveCroppedScreenshotOf("popsFixed-5T.png", left, 0, width, height);
-            
+
         } finally {
             // Restore size:
             window.resizeTo(oldSize);

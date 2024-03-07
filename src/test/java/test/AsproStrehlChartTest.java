@@ -180,11 +180,14 @@ public class AsproStrehlChartTest {
                     final Band insBand = findBand(lambdaMid);
                     final SpectralBand insSpecBand = SpectralBandUtils.findBand(insBand);
 
-                    logger.info("insBand: {}", insBand);
+                    logger.info("lambdaMid: {}", lambdaMid);
+                    logger.info("insBand:   {}", insBand);
 
                     w(pw, "## FocalInstrument: " + instrumentName);
                     wl(pw);
                     w(pw, "Instrument band: " + insBand);
+                    w(pw, "Instrument central wavelength : " + lambdaMid + " µm");
+                    
                     wl(pw);
 
                     for (final Map.Entry<Telescope, List<AdaptiveOptics>> entry : telAOs.entrySet()) {
@@ -221,7 +224,7 @@ public class AsproStrehlChartTest {
                                 }
 
                                 // define output wavelengths:
-                                lambda[0] = insBand.getLambdaFluxZero() * 1E-6;
+                                lambda[0] = ((true) ? lambdaMid : insBand.getLambdaFluxZero()) * 1E-6;
 
                                 w(pw, "- AO setup: " + aoSetup.getName());
                                 wl(pw);
@@ -407,15 +410,13 @@ public class AsproStrehlChartTest {
         // TODO: fix that logic to use all possible bands within the instrument bandwidth
         switch (band) {
             case U:
-            // avoid 'band U not supported'
+            // avoid 'band U not supported' => V
             case B:
             case V:
-            case R:
-            case I:
-                // always use V for Visible:
+                // always use V for Visible (UBV):
                 return Band.V;
             case Q:
-                // avoid 'band Q not supported'
+                // avoid 'band Q not supported' => N
                 return Band.N;
             default:
                 return band;
