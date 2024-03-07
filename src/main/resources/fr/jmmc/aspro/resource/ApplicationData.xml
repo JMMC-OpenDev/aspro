@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="24.03 beta 10"/>
-    <compilation date="06/03/2024" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="24.03 beta 11"/>
+    <compilation date="07/03/2024" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -243,7 +243,10 @@
 
     <releasenotes>
         <release version="24.03">
-            <pubDate>Sat, 02 Mar 2024 14:00:00 GMT</pubDate>
+            <pubDate>Thu, 07 Mar 2024 16:00:00 GMT</pubDate>
+            <prerelease version="24.03 beta 11">
+                <change type="FEATURE">Only export SCIENCE OIFITS (not GRAVITY_FT) to make OIFits viewer plots more readable</change>
+            </prerelease>
             <prerelease version="24.03 beta 10">
                 <change type="FEATURE">Only display AO/FT target selectors in the UV Coverage panel when the science object has associated ancillary stars</change>
             </prerelease>
