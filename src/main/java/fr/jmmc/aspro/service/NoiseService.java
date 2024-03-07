@@ -1996,7 +1996,7 @@ public final class NoiseService implements VisNoiseService {
             errVis2 *= totFrameCorrection;
         }
         param.errSqCorrFlux[iChannel] *= totFrameCorrection;
-
+        
         // Limit excessively large errors (very low transmission or strehl):
         errVis2 = Math.min(errVis2, MAX_ERR_V2);
 
@@ -2303,6 +2303,10 @@ public final class NoiseService implements VisNoiseService {
 
     public double getObsUsedDit() {
         return obsUsedDit;
+    }
+
+    public double getTotalObsTime() {
+        return totalObsTime;
     }
 
     public double getTelDiam() {
