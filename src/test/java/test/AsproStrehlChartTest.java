@@ -26,7 +26,7 @@ import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.concurrent.ThreadExecutors;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
-import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.File;
@@ -43,12 +43,15 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.DeviationRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.util.ExportUtils;
 import org.jfree.data.function.Function2D;
 import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.YIntervalSeries;
+import org.jfree.data.xy.YIntervalSeriesCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,7 +161,7 @@ public class AsproStrehlChartTest {
                 }
                 logger.info("telAOs: {}", telAOs);
 
-                final double[] lambda = new double[1];
+                final double[] lambda = new double[3]; // min / center / max
 
                 // Use only instrument available in latest InterferometerConfiguration:
                 for (final FocalInstrumentConfiguration insConf : interferometerConfiguration.getInstruments()) {
@@ -176,18 +179,25 @@ public class AsproStrehlChartTest {
                         continue;
                     }
 
-                    final double lambdaMid = 0.5 * (instrument.getWaveLengthMin() + instrument.getWaveLengthMax());
+                    final double lambdaMin = instrument.getWaveLengthMin();
+                    final double lambdaMax = instrument.getWaveLengthMax();
+                    final double lambdaMid = 0.5 * (lambdaMin + lambdaMax);
+
                     final Band insBand = findBand(lambdaMid);
                     final SpectralBand insSpecBand = SpectralBandUtils.findBand(insBand);
 
-                    logger.info("lambdaMid: {}", lambdaMid);
                     logger.info("insBand:   {}", insBand);
+
+                    // define output wavelengths:
+                    lambda[0] = lambdaMin * 1E-6;
+                    lambda[1] = lambdaMid * 1E-6;
+                    lambda[2] = lambdaMax * 1E-6;
 
                     w(pw, "## FocalInstrument: " + instrumentName);
                     wl(pw);
                     w(pw, "Instrument band: " + insBand);
                     w(pw, "Instrument central wavelength : " + lambdaMid + " µm");
-                    
+
                     wl(pw);
 
                     for (final Map.Entry<Telescope, List<AdaptiveOptics>> entry : telAOs.entrySet()) {
@@ -222,9 +232,6 @@ public class AsproStrehlChartTest {
                                     // shortcuts for GPAO tests
                                     continue;
                                 }
-
-                                // define output wavelengths:
-                                lambda[0] = ((true) ? lambdaMid : insBand.getLambdaFluxZero()) * 1E-6;
 
                                 w(pw, "- AO setup: " + aoSetup.getName());
                                 wl(pw);
@@ -287,7 +294,7 @@ public class AsproStrehlChartTest {
     static ChartPanel createChartStrehlRatioVsMag(final PrintWriter pw, final String aoName, final Band aoBand, final double[] LAMBDA,
                                                   final Telescope telescope, final AdaptiveOpticsSetup aoSetup) {
 
-        final double lambdaObs = LAMBDA[0] * 1e6;
+        final double lambdaObs = LAMBDA[1] * 1e6;
         System.out.println("Strehl " + aoName + " (@" + lambdaObs + ") AO vs mag(" + aoBand + ")");
 
         final int nbSubPupils = aoSetup.getNumberSubPupils();
@@ -309,7 +316,7 @@ public class AsproStrehlChartTest {
         w(pw, "  - AO qe: " + qe);
         wl(pw);
 
-        final XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
+        final YIntervalSeriesCollection xySeriesCollection = new YIntervalSeriesCollection();
 
         for (final AtmosphereQuality atmQual : AtmosphereQualityUtils.ORDERED) {
             final double seeing = AtmosphereQualityUtils.getSeeing(atmQual);
@@ -318,20 +325,28 @@ public class AsproStrehlChartTest {
             w(pw, "    - seeing: " + seeing);
             w(pw, "    - t0: " + t0);
              */
-            final XYSeries xySeries = new XYSeries("Seeing " + seeing, false, false);
+            final YIntervalSeries xySeries = new YIntervalSeries("Seeing " + seeing, false, false);
 
             for (double aoMag : MAGS) {
-                final double strehl = strehl(aoBand, aoMag, LAMBDA, telescope.getDiameter(), seeing, nbSubPupils, nbActuators, td, t0, qe, ron)[0];
-                xySeries.add(aoMag, strehl);
+                final double[] strehls = strehl(aoBand, aoMag, LAMBDA, telescope.getDiameter(), seeing, nbSubPupils, nbActuators, td, t0, qe, ron);
+
+                xySeries.add(aoMag, strehls[1], strehls[0], strehls[2]);
             }
 
             xySeriesCollection.addSeries(xySeries);
         }
 
-        JFreeChart chart = ChartFactory.createXYLineChart(
-                "Strehl " + aoName + " @ " + NumberUtils.trimTo3Digits(lambdaObs) + " microns",
+        final JFreeChart chart = ChartFactory.createXYLineChart(
+                "Strehl " + aoName + " @ " + NumberUtils.trimTo2Digits(lambdaObs)
+                + " [" + NumberUtils.trimTo2Digits(LAMBDA[0] * 1e6)
+                + " - " + NumberUtils.trimTo2Digits(LAMBDA[2] * 1e6) + "] µm",
                 "mag" + aoBand, "Strehl (%)", xySeriesCollection
         );
+
+        final XYPlot plot = (XYPlot) chart.getPlot();
+
+        final DeviationRenderer renderer = new DeviationRenderer(true, true);
+        plot.setRenderer(renderer);
 
         org.jfree.chart.ChartUtils.applyCurrentTheme(chart);
         fixRenderer(chart, MAG_MIN, MAG_MAX);
@@ -343,12 +358,12 @@ public class AsproStrehlChartTest {
         chart.getXYPlot().getRangeAxis().setRange(0.0, 1.0);
         chart.getXYPlot().getDomainAxis().setRange(xMin, xMax);
 
-        XYLineAndShapeRenderer rdr = ((XYLineAndShapeRenderer) chart.getXYPlot().getRenderer());
+        final XYLineAndShapeRenderer rdr = ((XYLineAndShapeRenderer) chart.getXYPlot().getRenderer());
         rdr.setDefaultShapesVisible(true);
         rdr.setAutoPopulateSeriesStroke(false);
         rdr.setAutoPopulateSeriesPaint(false);
         rdr.setAutoPopulateSeriesShape(false);
-        rdr.setDefaultStroke(new BasicStroke(4f));
+        rdr.setDefaultStroke(ChartUtils.VERY_LARGE_STROKE);
         rdr.setDefaultShape(new Rectangle(-4, -4, 8, 8));
 
         final ColorPalette palette = ColorPalette.getColorPalette("Armytage");
@@ -357,6 +372,11 @@ public class AsproStrehlChartTest {
 
         for (int i = 0, len = plot.getDataset().getSeriesCount(); i < len; i++) {
             rdr.setSeriesPaint(i, palette.getColor(i));
+
+            Color fill = palette.getColor(i).brighter();
+            fill = new Color(fill.getRed(), fill.getGreen(), fill.getBlue(), 32);
+
+            rdr.setSeriesFillPaint(i, fill);
         }
     }
 
@@ -392,7 +412,7 @@ public class AsproStrehlChartTest {
 
             final XYSeries xySeries = DatasetUtils.sampleFunction2DToSeries(
                     new StrehlIsoFunction(band, lambdaObs, seeing, h0, elevation),
-                    0.0, 30.0, 180, "SR_iso(seeing = " + NumberUtils.trimTo3Digits(seeing) + " - h0 = " + NumberUtils.trimTo3Digits(h0) + ")"
+                    0.0, 30.0, 180, "SR_iso(seeing = " + NumberUtils.trimTo2Digits(seeing) + " - h0 = " + NumberUtils.trimTo2Digits(h0) + ")"
             );
             xySeriesCollection.addSeries(xySeries);
         }
