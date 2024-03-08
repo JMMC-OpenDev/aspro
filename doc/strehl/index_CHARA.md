@@ -6,13 +6,14 @@
 
 # ASPRO 2 - Strehl ratios per instrument, telescope and Adaptive Optics (AO) systems
 
-Date: Mon Mar 04 10:52:10 GMT 2024
+Date: Fri Mar 08 14:53:41 GMT 2024
 
-InterferometerConfiguration: CHARA 2024A
+InterferometerConfiguration: CHARA 2024B
 
 ## FocalInstrument: CLASSIC
 
 Instrument band: H
+Instrument central wavelength : 1.7286000000000001 µm
 
 ### Telescope: T
 
@@ -37,6 +38,7 @@ AO band: V
 ## FocalInstrument: CLIMB
 
 Instrument band: H
+Instrument central wavelength : 1.7286000000000001 µm
 
 ### Telescope: T
 
@@ -61,6 +63,7 @@ AO band: V
 ## FocalInstrument: MIRCX-MYSTIC
 
 Instrument band: H
+Instrument central wavelength : 1.74025 µm
 
 ### Telescope: T
 
@@ -85,6 +88,7 @@ AO band: V
 ## FocalInstrument: PAVO
 
 Instrument band: I
+Instrument central wavelength : 0.79 µm
 
 ### Telescope: T
 
@@ -109,6 +113,7 @@ AO band: V
 ## FocalInstrument: SPICA
 
 Instrument band: I
+Instrument central wavelength : 0.7518 µm
 
 ### Telescope: T
 
