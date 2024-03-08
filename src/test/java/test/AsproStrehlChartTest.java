@@ -371,12 +371,9 @@ public class AsproStrehlChartTest {
         final XYPlot plot = (XYPlot) chart.getPlot();
 
         for (int i = 0, len = plot.getDataset().getSeriesCount(); i < len; i++) {
-            rdr.setSeriesPaint(i, palette.getColor(i));
-
-            Color fill = palette.getColor(i).brighter();
-            fill = new Color(fill.getRed(), fill.getGreen(), fill.getBlue(), 32);
-
-            rdr.setSeriesFillPaint(i, fill);
+            Color col = palette.getColor(i);
+            rdr.setSeriesPaint(i, col);
+            rdr.setSeriesFillPaint(i, new Color(col.getRed(), col.getGreen(), col.getBlue(), 48));
         }
     }
 
