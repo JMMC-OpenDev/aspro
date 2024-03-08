@@ -6,7 +6,7 @@
 
 # ASPRO 2 - Strehl ratios per instrument, telescope and Adaptive Optics (AO) systems
 
-Date: Fri Mar 08 14:53:41 GMT 2024
+Date: Fri Mar 08 15:02:47 GMT 2024
 
 InterferometerConfiguration: VLTI Period 114
 
