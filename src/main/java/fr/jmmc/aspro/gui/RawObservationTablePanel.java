@@ -297,7 +297,7 @@ public final class RawObservationTablePanel extends javax.swing.JPanel implement
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
-        jListInstruments.setToolTipText("Select 1 or more instruments to filter raw observations (use Ctrl + click)");
+        jListInstruments.setToolTipText("Select 1 or more instruments to filter raw observations");
         jListInstruments.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
         jListInstruments.setName("jListInstruments"); // NOI18N
         jListInstruments.setPrototypeCellValue("_MATISSE_");

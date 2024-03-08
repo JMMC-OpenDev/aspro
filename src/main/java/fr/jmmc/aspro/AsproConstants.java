@@ -130,8 +130,9 @@ public interface AsproConstants {
                 "MIDI",
                 "AMBER",
                 "PIONIER",
-                "GRAVITY",
-                "MATISSE"
+                "GRAVITY", /* "GRAVITY_FT", */
+                "MATISSE",
+                "SPICA"
             }));
 
     /** VLTI MATISSE matcher */

@@ -64,7 +64,7 @@
                     <StringItem index="0" value="_MATISSE_"/>
                   </StringArray>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value="Select 1 or more instruments to filter raw observations (use Ctrl + click)"/>
+                <Property name="toolTipText" type="java.lang.String" value="Select 1 or more instruments to filter raw observations"/>
                 <Property name="layoutOrientation" type="int" value="2"/>
                 <Property name="name" type="java.lang.String" value="jListInstruments" noResource="true"/>
                 <Property name="prototypeCellValue" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
