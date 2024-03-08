@@ -1890,20 +1890,24 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                             final double jdStart = sc.convertLstToJD(lstStart);
                                             final double jdEnd = sc.convertLstToJD(lstEnd);
 
-                                            rangesJD.clear();
-                                            rangesJD.add(new Range(jdStart, jdEnd)); // reuse Range ?
+                                            // Avoid whole 24h range case
+                                            if(lstStart < lstEnd){
+                                            
+                                                rangesJD.clear();
+                                                rangesJD.add(new Range(jdStart, jdEnd)); // reuse Range ?                                                
 
-                                            intervals.clear();
-                                            // Warning: concurrency issue (date conversion are not thread safe ! background threads // awt thread !)
-                                            obsData.convertRangesToDateIntervals(rangesJD, intervals);
+                                                intervals.clear();
+                                                // Warning: concurrency issue (date conversion are not thread safe ! background threads // awt thread !)
+                                                obsData.convertRangesToDateIntervals(rangesJD, intervals);
 
-                                            for (int d = 0, iLen = intervals.size(); d < iLen; d++) {
-                                                final DateTimeInterval interval = intervals.get(d);
-                                                addAnnotation(annotations, pos,
-                                                        new ClickableXYBoxAnnotation(obsGroup, n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
-                                                                ChartUtils.DEFAULT_STROKE, null, RAW_OBS_OVERLAY_COLOR, Layer.FOREGROUND,
-                                                                this.slidingXYPlotAdapter.generateToolTip(obsGroup.getObservations().size(), rawObsFirst, rawObsLast)
-                                                        ));
+                                                for (int d = 0, iLen = intervals.size(); d < iLen; d++) {
+                                                    final DateTimeInterval interval = intervals.get(d);
+                                                    addAnnotation(annotations, pos,
+                                                            new ClickableXYBoxAnnotation(obsGroup, n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
+                                                                    ChartUtils.DEFAULT_STROKE, null, RAW_OBS_OVERLAY_COLOR, Layer.FOREGROUND,
+                                                                    this.slidingXYPlotAdapter.generateToolTip(obsGroup.getObservations().size(), rawObsFirst, rawObsLast)
+                                                            ));
+                                                }
                                             }
                                         }
                                     }
