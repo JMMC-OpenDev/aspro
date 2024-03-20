@@ -26,6 +26,7 @@ import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.concurrent.ThreadExecutors;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
+import fr.jmmc.oitools.model.range.Range;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -33,8 +34,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +116,7 @@ public class AsproStrehlChartTest {
 
         if (true) {
             // strehl iso:
-            createChartFrame(null, "Strehl ISO - Strehl vs distance",
+            createChartFrame(null, "Strehl ISO vs distance",
                     createStrehlIsoChart());
         }
 
@@ -146,7 +149,7 @@ public class AsproStrehlChartTest {
                 final String configurationName = cm.getInterferometerConfigurationNames(interferometerName).get(0);
                 logger.info("configurationName: {}", configurationName);
 
-                w(pw, "InterferometerConfiguration: " + configurationName);
+                w(pw, "InterferometerConfiguration: '" + configurationName + "'");
                 wl(pw);
 
                 final InterferometerConfiguration interferometerConfiguration = cm.getInterferometerConfiguration(configurationName);
@@ -179,76 +182,119 @@ public class AsproStrehlChartTest {
                         continue;
                     }
 
-                    final double lambdaMin = instrument.getWaveLengthMin();
-                    final double lambdaMax = instrument.getWaveLengthMax();
-                    final double lambdaMid = 0.5 * (lambdaMin + lambdaMax);
+                    final HashMap<Range, Boolean> ranges = new LinkedHashMap<>(8);
+                    final HashMap<Range, List<FocalInstrumentMode>> modesPerRange = new LinkedHashMap<>(8);
 
-                    final Band insBand = findBand(lambdaMid);
-                    final SpectralBand insSpecBand = SpectralBandUtils.findBand(insBand);
+                    for (final FocalInstrumentMode mode : instrument.getModes()) {
+                        logger.info("FocalInstrumentMode: {}", mode);
 
-                    logger.info("insBand:   {}", insBand);
+                        final Range r = new Range(
+                                trimWavelength(mode.getWaveLengthMin()),
+                                trimWavelength(mode.getWaveLengthMax())
+                        );
+                        ranges.put(r, Boolean.FALSE);
 
-                    // define output wavelengths:
-                    lambda[0] = lambdaMin * 1E-6;
-                    lambda[1] = lambdaMid * 1E-6;
-                    lambda[2] = lambdaMax * 1E-6;
-
-                    w(pw, "## FocalInstrument: " + instrumentName);
-                    wl(pw);
-                    w(pw, "Instrument band: " + insBand);
-                    w(pw, "Instrument central wavelength : " + lambdaMid + " µm");
-
-                    wl(pw);
-
-                    for (final Map.Entry<Telescope, List<AdaptiveOptics>> entry : telAOs.entrySet()) {
-                        final Telescope telescope = entry.getKey();
-
-                        w(pw, "### Telescope: " + telescope.getName());
-                        wl(pw);
-                        w(pw, "Telescope diameter (m): " + telescope.getDiameter());
-                        wl(pw);
-
-                        for (final AdaptiveOptics ao : entry.getValue()) {
-                            if (ao.getInstrumentBand() != null) {
-                                // check wavelength range
-                                if (ao.getInstrumentBand() != insSpecBand) {
-                                    logger.info("skip {} band {} <> band {}", ao.getName(), ao.getInstrumentBand(), insSpecBand);
-                                    continue;
-                                }
-                            }
-
-                            final Band aoBand = Band.valueOf(ao.getBand().name());
-
-                            w(pw, "#### Adaptive Optics: " + ao.getName());
-                            wl(pw);
-                            w(pw, "AO band: " + aoBand);
-                            wl(pw);
-
-                            // Compatible: plot chart:
-                            for (final AdaptiveOpticsSetup aoSetup : ao.getSetups()) {
-                                logger.info("Processing: [{} band={}] (tel={} ao={} setup={})", instrumentName, insSpecBand, telescope, ao, aoSetup);
-
-                                if (false && !"CIAO_ON_AXIS".equalsIgnoreCase(aoSetup.getName())) {
-                                    // shortcuts for GPAO tests
-                                    continue;
-                                }
-
-                                w(pw, "- AO setup: " + aoSetup.getName());
-                                wl(pw);
-
-                                createChartFrame(pw,
-                                        instrumentName + " " + telescope.getName() + " (" + aoSetup.getName() + ")" + " Strehl ratio " + insBand.getName() + " vs mag" + ao.getBand(),
-                                        createChartStrehlRatioVsMag(pw, aoSetup.getName(), aoBand, lambda, telescope, aoSetup)
-                                );
-                            }
-
-                            wl(pw);
+                        List<FocalInstrumentMode> modes = modesPerRange.get(r);
+                        if (modes == null) {
+                            modes = new ArrayList<>(4);
+                            modesPerRange.put(r, modes);
                         }
+                        modes.add(mode);
                     }
 
-                    if (false) {
-                        for (final FocalInstrumentMode mode : instrument.getModes()) {
-                            logger.info("FocalInstrumentMode: {}", mode);
+                    logger.info("FocalInstrumentMode ranges: {}", ranges);
+                    logger.info("FocalInstrumentMode modesPerRange: {}", modesPerRange);
+
+                    for (final FocalInstrumentMode mode : instrument.getModes()) {
+                        logger.info("FocalInstrumentMode: {}", mode);
+
+                        final Range r = new Range(
+                                trimWavelength(mode.getWaveLengthMin()),
+                                trimWavelength(mode.getWaveLengthMax())
+                        );
+
+                        if (!Boolean.TRUE.equals(ranges.get(r))) {
+                            ranges.put(r, Boolean.TRUE);
+
+                            final StringBuilder sb = new StringBuilder(64).append("[");
+
+                            for (final FocalInstrumentMode m : modesPerRange.get(r)) {
+                                sb.append(m.getName()).append(' ');
+                            }
+                            sb.deleteCharAt(sb.length() - 1);
+                            final String modes = sb.append("]").toString();
+
+                            final double lambdaMin = mode.getWaveLengthMin();
+                            final double lambdaMax = mode.getWaveLengthMax();
+                            final double lambdaMid = mode.getEffWaveLengthRef();
+
+                            final Band insBand = findBand(lambdaMid);
+                            final SpectralBand insSpecBand = SpectralBandUtils.findBand(insBand);
+
+                            logger.info("insBand:   {}", insBand);
+
+                            // define output wavelengths:
+                            lambda[0] = lambdaMin * 1E-6;
+                            lambda[1] = lambdaMid * 1E-6;
+                            lambda[2] = lambdaMax * 1E-6;
+
+                            w(pw, "## FocalInstrument: " + instrumentName);
+                            wl(pw);
+                            w(pw, "Instrument modes: " + modes);
+                            w(pw, "Instrument band: " + insBand);
+                            w(pw, "Instrument ref. wavelength : " + NumberUtils.trimTo2Digits(lambdaMid) + " µm");
+                            w(pw, "Instrument min. wavelength : " + NumberUtils.trimTo2Digits(lambdaMin) + " µm");
+                            w(pw, "Instrument max. wavelength : " + NumberUtils.trimTo2Digits(lambdaMax) + " µm");
+
+                            wl(pw);
+
+                            for (final Map.Entry<Telescope, List<AdaptiveOptics>> entry : telAOs.entrySet()) {
+                                final Telescope telescope = entry.getKey();
+
+                                w(pw, "### Telescope: " + telescope.getName());
+                                wl(pw);
+                                w(pw, "Telescope diameter (m): " + telescope.getDiameter());
+                                wl(pw);
+
+                                for (final AdaptiveOptics ao : entry.getValue()) {
+                                    if (ao.getInstrumentBand() != null) {
+                                        // check wavelength range
+                                        if (ao.getInstrumentBand() != insSpecBand) {
+                                            logger.info("skip {} band {} <> band {}", ao.getName(), ao.getInstrumentBand(), insSpecBand);
+                                            continue;
+                                        }
+                                    }
+
+                                    final Band aoBand = Band.valueOf(ao.getBand().name());
+
+                                    w(pw, "#### Adaptive Optics: " + ao.getName());
+                                    wl(pw);
+                                    w(pw, "AO band: " + aoBand);
+                                    wl(pw);
+
+                                    // Compatible: plot chart:
+                                    for (final AdaptiveOpticsSetup aoSetup : ao.getSetups()) {
+                                        logger.info("Processing: [{} band={}] (tel={} ao={} setup={})", instrumentName, insSpecBand, telescope, ao, aoSetup);
+
+                                        if (false && !"CIAO_ON_AXIS".equalsIgnoreCase(aoSetup.getName())) {
+                                            // shortcuts for GPAO tests
+                                            continue;
+                                        }
+
+                                        w(pw, "- AO setup: " + aoSetup.getName());
+                                        wl(pw);
+
+                                        createChartFrame(pw,
+                                                instrumentName + " " + modes + " " + telescope.getName() + " (" + aoSetup.getName() + ")"
+                                                + " Strehl ratio " + insBand.getName() + " vs " + ao.getBand() + " mag",
+                                                createChartStrehlRatioVsMag(pw, aoSetup.getName(), aoBand, lambda, telescope, aoSetup,
+                                                        instrumentName + " " + modes + " " + telescope.getName())
+                                        );
+                                    }
+
+                                    wl(pw);
+                                }
+                            }
                         }
                     }
                 }
@@ -292,7 +338,8 @@ public class AsproStrehlChartTest {
     }
 
     static ChartPanel createChartStrehlRatioVsMag(final PrintWriter pw, final String aoName, final Band aoBand, final double[] LAMBDA,
-                                                  final Telescope telescope, final AdaptiveOpticsSetup aoSetup) {
+                                                  final Telescope telescope, final AdaptiveOpticsSetup aoSetup,
+                                                  final String setup) {
 
         final double lambdaObs = LAMBDA[1] * 1e6;
         System.out.println("Strehl " + aoName + " (@" + lambdaObs + ") AO vs mag(" + aoBand + ")");
@@ -311,9 +358,9 @@ public class AsproStrehlChartTest {
         w(pw, "  - AO band: " + aoBand);
         w(pw, "  - AO nbSubPupils: " + nbSubPupils);
         w(pw, "  - AO nbActuators: " + nbActuators);
-        w(pw, "  - AO td: " + td);
-        w(pw, "  - AO ron: " + ron);
-        w(pw, "  - AO qe: " + qe);
+        w(pw, "  - AO td (ms):     " + td);
+        w(pw, "  - AO ron (e-/s):  " + ron);
+        w(pw, "  - AO Q.E:         " + qe);
         wl(pw);
 
         final YIntervalSeriesCollection xySeriesCollection = new YIntervalSeriesCollection();
@@ -339,8 +386,9 @@ public class AsproStrehlChartTest {
         final JFreeChart chart = ChartFactory.createXYLineChart(
                 "Strehl " + aoName + " @ " + NumberUtils.trimTo2Digits(lambdaObs)
                 + " [" + NumberUtils.trimTo2Digits(LAMBDA[0] * 1e6)
-                + " - " + NumberUtils.trimTo2Digits(LAMBDA[2] * 1e6) + "] µm",
-                "mag" + aoBand, "Strehl (%)", xySeriesCollection
+                + " - " + NumberUtils.trimTo2Digits(LAMBDA[2] * 1e6) + "] µm"
+                + " - " + setup,
+                aoBand + " mag", "Strehl (%)", xySeriesCollection
         );
 
         final XYPlot plot = (XYPlot) chart.getPlot();
@@ -473,5 +521,9 @@ public class AsproStrehlChartTest {
 
             return (sr != null) ? sr[0] : Double.NaN;
         }
+    }
+
+    public static double trimWavelength(final double value) {
+        return ((long) Math.round(50.0 * value)) / 50.0;
     }
 }
