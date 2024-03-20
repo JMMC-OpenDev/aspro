@@ -7,7 +7,6 @@ import fr.jmmc.aspro.gui.PreferencePanel;
 import fr.jmmc.aspro.gui.SettingPanel;
 import fr.jmmc.aspro.gui.action.AsproExportAction;
 import fr.jmmc.aspro.gui.action.ConfigurationEditorAction;
-import fr.jmmc.aspro.gui.action.ExportAllOBAction;
 import fr.jmmc.aspro.gui.action.ExportOBAction;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.gui.action.ExportVOTableAction;
@@ -30,7 +29,6 @@ import fr.jmmc.aspro.interop.SendOBAction;
 import fr.jmmc.aspro.interop.SendOIFitsAction;
 import fr.jmmc.aspro.interop.SendObservationAction;
 import fr.jmmc.aspro.interop.SendVOTableAction;
-import fr.jmmc.aspro.interop.StarListSendAction;
 import fr.jmmc.aspro.interop.VotableSampMessageHandler;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
@@ -141,7 +139,6 @@ public final class Aspro2 extends App {
 
         // TODO: decide to shift colors for baselines (detailled observability):
 //        SharedSeriesAttributes.INSTANCE.setOffsetIdx(StarObservabilityData.TYPE_BASE_LINE);
-
         // Enable OI columns for OIFits datamodel
         DataModel.setOiModelColumnsSupport(true);
 
@@ -367,11 +364,9 @@ public final class Aspro2 extends App {
         // export VOTable:
         new ExportVOTableAction();
         // export OB :
-        new ExportOBAction(false);
-        new ExportOBAction(true);
+        new ExportOBAction();
         // export ALl OB :
-        new ExportAllOBAction(false);
-        new ExportAllOBAction(true);
+        // new ExportAllOBAction();
         // export actions:
         new AsproExportAction(MimeType.PDF);
         new AsproExportAction(MimeType.PNG);
@@ -398,9 +393,6 @@ public final class Aspro2 extends App {
         new BroadcastToModelFittingAction();
         // searchCal query (SAMP) :
         new SearchCalQueryAction();
-
-        // PIVOT starlist (SAMP) :
-        new StarListSendAction();
 
         // Send OIFits (SAMP) :
         new SendOIFitsAction();

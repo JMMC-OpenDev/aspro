@@ -28,17 +28,11 @@ public final class ExportAllOBAction extends RegisteredAction {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(className);
 
-    /* members */
-    /** flag enabling the new OB output */
-    private final boolean xml;
-
     /**
      * Public constructor that automatically register the action in RegisteredAction.
-     * @param xml true to use new OB output
      */
-    public ExportAllOBAction(final boolean xml) {
-        super(className, (xml) ? (actionName + "XML") : actionName);
-        this.xml = xml;
+    public ExportAllOBAction() {
+        super(className, actionName + "XML");
     }
 
     /**
@@ -53,7 +47,7 @@ public final class ExportAllOBAction extends RegisteredAction {
 
         // note : there is at least one target :
         if (uvCoveragePanel != null) {
-            uvCoveragePanel.performOBAction(evt, ExportOBMode.ALL, this.xml);
+            uvCoveragePanel.performOBAction(evt, ExportOBMode.ALL);
         } else {
             MessagePane.showMessage("Please enter first a target to export Observing block(s).");
         }

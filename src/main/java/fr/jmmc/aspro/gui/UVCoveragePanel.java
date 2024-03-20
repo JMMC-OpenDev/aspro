@@ -7,8 +7,6 @@ import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
-import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
-import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
 import fr.jmmc.aspro.gui.action.ExportOBXmlAction;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.EnhancedXYLineAnnotation;
@@ -74,7 +72,6 @@ import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.util.MathUtils;
-import fr.jmmc.jmcs.gui.component.DismissableMessagePane;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -752,61 +749,27 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * Export Observing Block(s) (OB)
      * @param evt action event
      * @param mode export OB mode
-     * @param xml true to use new OB output
      */
-    public void performOBAction(final ActionEvent evt, final ExportOBMode mode, final boolean xml) {
-
+    public void performOBAction(final ActionEvent evt, final ExportOBMode mode) {
         // Use main observation to check instrument :
         final ObservationSetting observation = om.getMainObservation();
 
         if (!observation.isSingle()) {
-            MessagePane.showMessage("Aspro 2 can not generate an Observing Block when multiple configurations are selected !");
+            MessagePane.showMessage("Aspro 2 can not generate Observing Blocks when multiple configurations are selected !");
             return;
         }
 
-        if (xml) {
-            switch (mode) {
-                case ALL:
-                    ExportOBXmlAction.getInstance().process(observation.getTargets());
-                    break;
-                case SINGLE:
-                    final Target target = getSelectedTarget();
-                    if (target != null) {
-                        ExportOBXmlAction.getInstance().process(Arrays.asList(new Target[]{target}));
-                    }
-                    break;
-                default:
-            }
-        } else {
-            // pop-up to indicate OBX export is deprecated:
-            DismissableMessagePane.show("Please consider using the a2p2 software instead"
-                    + "\nas this export feature is deprecated and will be removed soon (Fall 2019)\n\nSee https://github.com/JMMC-OpenDev/a2p2",
-                    Preferences.getInstance(), "DEPRECATED_OBX_WARNING");
-
-            final String insName = observation.getInstrumentConfiguration().getName();
-
-            if (AsproConstants.INS_AMBER.equals(insName)
-                    || AsproConstants.INS_MIDI.equals(insName)
-                    || insName.startsWith(AsproConstants.INS_PIONIER)
-                    || insName.startsWith(AsproConstants.INS_GRAVITY)) {
-
-                switch (mode) {
-                    case ALL:
-                        ExportOBVLTIAction.getInstance().process(observation.getTargets());
-                        break;
-                    case SINGLE:
-                        final Target target = getSelectedTarget();
-                        if (target != null) {
-                            ExportOBVLTIAction.getInstance().process(Arrays.asList(new Target[]{target}));
-                        }
-                        break;
-                    default:
+        switch (mode) {
+            case ALL:
+                ExportOBXmlAction.getInstance().process(observation.getTargets());
+                break;
+            case SINGLE:
+                final Target target = getSelectedTarget();
+                if (target != null) {
+                    ExportOBXmlAction.getInstance().process(Arrays.asList(new Target[]{target}));
                 }
-            } else if (insName.startsWith(AsproConstants.INS_VEGA)) {
-                ExportOBVegaAction.getInstance().process();
-            } else {
-                MessagePane.showMessage("Aspro 2 can not generate an Observing Block for this instrument [" + insName + "] !");
-            }
+                break;
+            default:
         }
     }
 
