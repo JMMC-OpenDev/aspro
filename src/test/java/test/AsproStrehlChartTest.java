@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.JFrame;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -72,6 +73,8 @@ public class AsproStrehlChartTest {
     /** absolute path to test folder to save outputs */
     protected final static String TEST_FOLDER = getProjectFolderPath() + "test/";
 
+    private static boolean SHOW = false;
+
     private static boolean TEST = false;
 
     private static double ZENITH_ANGLE = 0.0;
@@ -91,11 +94,30 @@ public class AsproStrehlChartTest {
         // System.out.println("Mags: " + Arrays.toString(MAGS));
     }
 
+    private static ThreadExecutors executor = null;
+    private static AtomicInteger jobCount = new AtomicInteger();
+
     public static void main(String[] args) {
         // Start application without GUI:
         Bootstrapper.launchApp(new Aspro2(args), true, true, false);
 
+        if (executor == null) {
+            executor = ThreadExecutors.getSingleExecutor("AsproStrehlChartTest");
+//            executor = ThreadExecutors.getRunnerExecutor();
+        }
         test();
+
+        if (executor != null) {
+            int n = 100;
+            do {
+                logger.info("job count: {}", jobCount.get());
+
+                ThreadExecutors.sleep(500l);
+            } while ((jobCount.get() != 0) && (--n >= 0));
+
+            logger.info("job count: {}", jobCount.get());
+            Bootstrapper.quitApp(null);
+        }
     }
 
     private static void wl(final PrintWriter pw) {
@@ -134,13 +156,13 @@ public class AsproStrehlChartTest {
                 w(pw, "[![JMMC logo](http://www.jmmc.fr/images/logo.png)](http://www.jmmc.fr)");
                 wl(pw);
                 wl(pw);
-                w(pw, "[![ASPRO 2 Logo](images/Aspro2.png)](http://www.jmmc.fr/aspro)");
+                w(pw, "[![ASPRO 2 Logo](https://github.com/JMMC-OpenDev/aspro-doc/blob/main/images/Aspro2.png?raw=true)](http://www.jmmc.fr/aspro)");
                 wl(pw);
                 wl(pw);
 
                 w(pw, "# ASPRO 2 - Strehl ratios per instrument, telescope and Adaptive Optics (AO) systems");
                 wl(pw);
-                w(pw, "Date: " + new Date());
+                w(pw, "- Date: " + new Date());
                 wl(pw);
                 // w(pw, "");
 
@@ -149,7 +171,7 @@ public class AsproStrehlChartTest {
                 final String configurationName = cm.getInterferometerConfigurationNames(interferometerName).get(0);
                 logger.info("configurationName: {}", configurationName);
 
-                w(pw, "InterferometerConfiguration: '" + configurationName + "'");
+                w(pw, "- InterferometerConfiguration: '" + configurationName + "'");
                 wl(pw);
 
                 final InterferometerConfiguration interferometerConfiguration = cm.getInterferometerConfiguration(configurationName);
@@ -182,11 +204,14 @@ public class AsproStrehlChartTest {
                         continue;
                     }
 
+                    w(pw, "## Instrument [" + instrumentName + "]");
+                    wl(pw);
+
                     final HashMap<Range, Boolean> ranges = new LinkedHashMap<>(8);
                     final HashMap<Range, List<FocalInstrumentMode>> modesPerRange = new LinkedHashMap<>(8);
 
                     for (final FocalInstrumentMode mode : instrument.getModes()) {
-                        logger.info("FocalInstrumentMode: {}", mode);
+                        logger.debug("FocalInstrumentMode: {}", mode);
 
                         final Range r = new Range(
                                 trimWavelength(mode.getWaveLengthMin()),
@@ -202,12 +227,10 @@ public class AsproStrehlChartTest {
                         modes.add(mode);
                     }
 
-                    logger.info("FocalInstrumentMode ranges: {}", ranges);
-                    logger.info("FocalInstrumentMode modesPerRange: {}", modesPerRange);
+                    logger.debug("FocalInstrumentMode ranges: {}", ranges);
+                    logger.debug("FocalInstrumentMode modesPerRange: {}", modesPerRange);
 
                     for (final FocalInstrumentMode mode : instrument.getModes()) {
-                        logger.info("FocalInstrumentMode: {}", mode);
-
                         final Range r = new Range(
                                 trimWavelength(mode.getWaveLengthMin()),
                                 trimWavelength(mode.getWaveLengthMax())
@@ -215,6 +238,8 @@ public class AsproStrehlChartTest {
 
                         if (!Boolean.TRUE.equals(ranges.get(r))) {
                             ranges.put(r, Boolean.TRUE);
+
+                            logger.info("FocalInstrumentMode: {}", mode);
 
                             final StringBuilder sb = new StringBuilder(64).append("[");
 
@@ -238,22 +263,21 @@ public class AsproStrehlChartTest {
                             lambda[1] = lambdaMid * 1E-6;
                             lambda[2] = lambdaMax * 1E-6;
 
-                            w(pw, "## FocalInstrument: " + instrumentName);
+                            w(pw, "### Instrument Modes " + modes);
                             wl(pw);
-                            w(pw, "Instrument modes: " + modes);
-                            w(pw, "Instrument band: " + insBand);
-                            w(pw, "Instrument ref. wavelength : " + NumberUtils.trimTo2Digits(lambdaMid) + " µm");
-                            w(pw, "Instrument min. wavelength : " + NumberUtils.trimTo2Digits(lambdaMin) + " µm");
-                            w(pw, "Instrument max. wavelength : " + NumberUtils.trimTo2Digits(lambdaMax) + " µm");
 
+                            w(pw, "- Instrument band: " + insBand);
+                            w(pw, "- Instrument ref. wavelength : " + NumberUtils.trimTo2Digits(lambdaMid) + " µm");
+                            w(pw, "- Instrument min. wavelength : " + NumberUtils.trimTo2Digits(lambdaMin) + " µm");
+                            w(pw, "- Instrument max. wavelength : " + NumberUtils.trimTo2Digits(lambdaMax) + " µm");
                             wl(pw);
 
                             for (final Map.Entry<Telescope, List<AdaptiveOptics>> entry : telAOs.entrySet()) {
                                 final Telescope telescope = entry.getKey();
 
-                                w(pw, "### Telescope: " + telescope.getName());
+                                w(pw, "#### Telescope [" + telescope.getName() + "]");
                                 wl(pw);
-                                w(pw, "Telescope diameter (m): " + telescope.getDiameter());
+                                w(pw, "- Telescope diameter (m): " + telescope.getDiameter());
                                 wl(pw);
 
                                 for (final AdaptiveOptics ao : entry.getValue()) {
@@ -267,9 +291,9 @@ public class AsproStrehlChartTest {
 
                                     final Band aoBand = Band.valueOf(ao.getBand().name());
 
-                                    w(pw, "#### Adaptive Optics: " + ao.getName());
+                                    w(pw, "##### Adaptive Optics [" + ao.getName() + "]");
                                     wl(pw);
-                                    w(pw, "AO band: " + aoBand);
+                                    w(pw, "- AO band: " + aoBand);
                                     wl(pw);
 
                                     // Compatible: plot chart:
@@ -281,7 +305,7 @@ public class AsproStrehlChartTest {
                                             continue;
                                         }
 
-                                        w(pw, "- AO setup: " + aoSetup.getName());
+                                        w(pw, "- AO setup: '" + aoSetup.getName() + "'");
                                         wl(pw);
 
                                         createChartFrame(pw,
@@ -312,8 +336,10 @@ public class AsproStrehlChartTest {
         w(pw, "  ![" + title + "](" + filePNG.getName() + ")");
         wl(pw);
 
+        jobCount.incrementAndGet();
+
         // auto-save as PNG / SVG (slow then run in background):
-        ThreadExecutors.getSingleExecutor("AsproStrehlChartTest").submit(new Runnable() {
+        executor.submit(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -321,18 +347,21 @@ public class AsproStrehlChartTest {
                 } catch (IOException ioe) {
                     logger.error("IO failure: ", ioe);
                 }
-                // Once done: show frame:
-                SwingUtils.invokeLaterEDT(new Runnable() {
-                    @Override
-                    public void run() {
-                        final JFrame frame = new JFrame(title);
-                        frame.setPreferredSize(new Dimension(2000, 1000));
-                        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                        frame.add(panel);
-                        frame.pack();
-                        frame.setVisible(true);
-                    }
-                });
+                if (SHOW) {
+                    // Once done: show frame:
+                    SwingUtils.invokeLaterEDT(new Runnable() {
+                        @Override
+                        public void run() {
+                            final JFrame frame = new JFrame(title);
+                            frame.setPreferredSize(new Dimension(2000, 1000));
+                            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                            frame.add(panel);
+                            frame.pack();
+                            frame.setVisible(true);
+                        }
+                    });
+                }
+                jobCount.decrementAndGet();
             }
         });
     }
@@ -355,12 +384,11 @@ public class AsproStrehlChartTest {
         final double ron = aoSetup.getRon();
         final double qe = aoSetup.getQuantumEfficiency();
 
-        w(pw, "  - AO band: " + aoBand);
-        w(pw, "  - AO nbSubPupils: " + nbSubPupils);
-        w(pw, "  - AO nbActuators: " + nbActuators);
-        w(pw, "  - AO td (ms):     " + td);
-        w(pw, "  - AO ron (e-/s):  " + ron);
-        w(pw, "  - AO Q.E:         " + qe);
+        w(pw, "- nbSubPupils: " + nbSubPupils);
+        w(pw, "- nbActuators: " + nbActuators);
+        w(pw, "- td (ms):     " + td);
+        w(pw, "- ron (e-/s):  " + ron);
+        w(pw, "- Q.E:         " + qe);
         wl(pw);
 
         final YIntervalSeriesCollection xySeriesCollection = new YIntervalSeriesCollection();
@@ -368,10 +396,7 @@ public class AsproStrehlChartTest {
         for (final AtmosphereQuality atmQual : AtmosphereQualityUtils.ORDERED) {
             final double seeing = AtmosphereQualityUtils.getSeeing(atmQual);
             final double t0 = AtmosphereQualityUtils.getCoherenceTime(atmQual);
-            /*
-            w(pw, "    - seeing: " + seeing);
-            w(pw, "    - t0: " + t0);
-             */
+
             final YIntervalSeries xySeries = new YIntervalSeries("Seeing " + seeing, false, false);
 
             for (double aoMag : MAGS) {
