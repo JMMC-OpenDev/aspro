@@ -50,6 +50,7 @@ import java.util.Map;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -210,6 +211,12 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         SwingUtils.adjustRowHeight(jTableCalibratorInfos);
 
         jTableCalibratorInfos.setDefaultRenderer(Double.class, RDR_NUM_INSTANCE);
+
+        // use small variant:
+        SwingUtils.adjustSize(this.jButtonMagConv, SwingUtils.ComponentSizeVariant.small);
+
+        // update button UI:
+        SwingUtilities.updateComponentTreeUI(this);
     }
 
     /**
