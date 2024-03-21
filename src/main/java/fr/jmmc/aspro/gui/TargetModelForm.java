@@ -927,6 +927,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelAnalytic.add(jButtonAdd, gridBagConstraints);
 
         jButtonRemove.setText("Remove");
