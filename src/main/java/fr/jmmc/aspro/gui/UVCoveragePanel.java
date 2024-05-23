@@ -67,6 +67,7 @@ import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.image.FloatArrayCache;
 import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmal.model.ImageMode;
+import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.VisNoiseService;
@@ -140,6 +141,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -211,7 +213,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private final static ObservationManager om = ObservationManager.getInstance();
     /** default timeline refresh period = 1 minutes */
     private static final int REFRESH_PERIOD = 60 * 1000;
-
+    /** label for U-axis (MLambda) on left side */
+    private static final String V_AXIS_MLAMBDA = "V (" + SpecialChars.UNIT_MEGA_LAMBDA + ")";
+    /** label for U-axis (MLambda) on left side + East */
+    private static final String V_AXIS_MLAMBDA_EAST = V_AXIS_MLAMBDA + " - [East]";
+    /** label for U-axis (meter) on right side */
+    private static final String V_AXIS_METER = "V (m)";
+    /** label for U-axis (meter) on right side + East */
+    private static final String V_AXIS_METER_EAST = V_AXIS_METER + " - [East]";
     /* members */
     /** preference singleton */
     private transient final Preferences myPreferences = Preferences.getInstance();
@@ -278,6 +287,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private transient FieldSliderAdapter haMaxAdapter = null;
     /** custom adapter for UV max fields */
     private transient FieldSliderAdapter uvMaxAdapter = null;
+    /** custom adapter for WL Chroma fields */
+    private transient FieldSliderAdapter wlChromaAdapter = null;
 
     /**
      * Constructor
@@ -337,6 +348,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jSliderWLRef = new javax.swing.JSlider();
         jTargetWLRef = new javax.swing.JLabel();
         jFieldWLRef = new javax.swing.JFormattedTextField();
+        jToggleButtonHALive = new javax.swing.JToggleButton();
         jLabelHAMin = new javax.swing.JLabel();
         jSliderHAMin = new javax.swing.JSlider();
         jTargetHAMin = new javax.swing.JLabel();
@@ -350,12 +362,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jCheckBoxModelImage = new javax.swing.JCheckBox();
         jLabelImageMode = new javax.swing.JLabel();
         jComboBoxImageMode = new javax.swing.JComboBox();
+        jLabelWLChroma = new javax.swing.JLabel();
+        jSliderWLChroma = new javax.swing.JSlider();
+        jInstrumentWLChroma = new javax.swing.JLabel();
+        jFieldWLChroma = new javax.swing.JFormattedTextField();
         animatorPanel = new AnimatorPanel(this, false);
         jSeparator1 = new javax.swing.JSeparator();
         jCheckBoxDoOIFits = new javax.swing.JCheckBox();
         jPanelSpacer = new javax.swing.JPanel();
         jCheckBoxAddNoise = new javax.swing.JCheckBox();
         jCheckBoxUseBias = new javax.swing.JCheckBox();
+        jButtonHAReset = new javax.swing.JButton();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -478,19 +495,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jLabelUVMax.setToolTipText("");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 26;
+        gridBagConstraints.gridy = 27;
         gridBagConstraints.gridwidth = 2;
         jPanelLeft.add(jLabelUVMax, gridBagConstraints);
 
-        jSliderUVMax.setMajorTickSpacing(100);
-        jSliderUVMax.setMaximum(1000);
+        jSliderUVMax.setMajorTickSpacing(10);
         jSliderUVMax.setPaintTicks(true);
-        jSliderUVMax.setValue(500);
         jSliderUVMax.setMaximumSize(new java.awt.Dimension(80, 32767));
         jSliderUVMax.setPreferredSize(new java.awt.Dimension(80, 30));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 27;
+        gridBagConstraints.gridy = 28;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jSliderUVMax, gridBagConstraints);
@@ -501,7 +516,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jFieldUVMax.setName("jFieldUVMax"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 27;
+        gridBagConstraints.gridy = 28;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jFieldUVMax, gridBagConstraints);
 
@@ -542,13 +557,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jPanelLeft.add(jFieldObsDuration, gridBagConstraints);
 
         jLabelWLRef.setText("WL Ref.");
+        jLabelWLRef.setToolTipText("Reference wavelength for restricted bandwith");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 18;
         jPanelLeft.add(jLabelWLRef, gridBagConstraints);
 
-        jSliderWLRef.setMajorTickSpacing(30);
-        jSliderWLRef.setMaximum(240);
+        jSliderWLRef.setMajorTickSpacing(10);
         jSliderWLRef.setPaintTicks(true);
         jSliderWLRef.setMaximumSize(new java.awt.Dimension(80, 32767));
         jSliderWLRef.setPreferredSize(new java.awt.Dimension(80, 30));
@@ -574,20 +589,31 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jFieldWLRef, gridBagConstraints);
 
+        jToggleButtonHALive.setForeground(new java.awt.Color(255, 0, 0));
+        jToggleButtonHALive.setText("now");
+        jToggleButtonHALive.setToolTipText("Enable 'Live now' to display only 1 data point at HA=now during night (live-observing session)");
+        jToggleButtonHALive.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 20;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
+        jPanelLeft.add(jToggleButtonHALive, gridBagConstraints);
+
         jLabelHAMin.setText("HA min");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridy = 21;
         jPanelLeft.add(jLabelHAMin, gridBagConstraints);
 
         jSliderHAMin.setMajorTickSpacing(30);
         jSliderHAMin.setMaximum(240);
         jSliderHAMin.setPaintTicks(true);
+        jSliderHAMin.setValue(0);
         jSliderHAMin.setMaximumSize(new java.awt.Dimension(80, 32767));
         jSliderHAMin.setPreferredSize(new java.awt.Dimension(80, 30));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 21;
+        gridBagConstraints.gridy = 22;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jSliderHAMin, gridBagConstraints);
@@ -595,7 +621,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jTargetHAMin.setText("targetHAMin");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridy = 21;
         jPanelLeft.add(jTargetHAMin, gridBagConstraints);
 
         jFieldHAMin.setColumns(6);
@@ -603,24 +629,25 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jFieldHAMin.setMinimumSize(new java.awt.Dimension(50, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 21;
+        gridBagConstraints.gridy = 22;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jFieldHAMin, gridBagConstraints);
 
         jLabelHAMax.setText("HA max");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 22;
+        gridBagConstraints.gridy = 23;
         jPanelLeft.add(jLabelHAMax, gridBagConstraints);
 
         jSliderHAMax.setMajorTickSpacing(30);
         jSliderHAMax.setMaximum(240);
         jSliderHAMax.setPaintTicks(true);
+        jSliderHAMax.setValue(240);
         jSliderHAMax.setMaximumSize(new java.awt.Dimension(80, 32767));
         jSliderHAMax.setPreferredSize(new java.awt.Dimension(80, 30));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 23;
+        gridBagConstraints.gridy = 24;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jSliderHAMax, gridBagConstraints);
@@ -628,7 +655,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jTargetHAMax.setText("targetHAMax");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 22;
+        gridBagConstraints.gridy = 23;
         jPanelLeft.add(jTargetHAMax, gridBagConstraints);
 
         jFieldHAMax.setColumns(6);
@@ -636,7 +663,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jFieldHAMax.setMinimumSize(new java.awt.Dimension(50, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 23;
+        gridBagConstraints.gridy = 24;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jFieldHAMax, gridBagConstraints);
 
@@ -644,13 +671,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jCheckBoxPlotUVSupport.setText("<html>Plot rise/set uv tracks</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 28;
+        gridBagConstraints.gridy = 29;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         jPanelLeft.add(jCheckBoxPlotUVSupport, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 25;
+        gridBagConstraints.gridy = 26;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weighty = 0.1;
@@ -661,7 +688,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jCheckBoxModelImage.setText("<html>Show the model</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 29;
+        gridBagConstraints.gridy = 30;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         jPanelLeft.add(jCheckBoxModelImage, gridBagConstraints);
@@ -670,7 +697,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jLabelImageMode.setText("axis:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 30;
+        gridBagConstraints.gridy = 31;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
         jPanelLeft.add(jLabelImageMode, gridBagConstraints);
@@ -678,19 +705,52 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jComboBoxImageMode.setModel(new DefaultComboBoxModel(ImageMode.values()));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 30;
+        gridBagConstraints.gridy = 31;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(1, 1, 0, 1);
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jComboBoxImageMode, gridBagConstraints);
+
+        jLabelWLChroma.setText("WL model");
+        jLabelWLChroma.setToolTipText("Wavelength used by model image computation");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 31;
+        gridBagConstraints.gridy = 32;
+        jPanelLeft.add(jLabelWLChroma, gridBagConstraints);
+
+        jSliderWLChroma.setMajorTickSpacing(10);
+        jSliderWLChroma.setPaintTicks(true);
+        jSliderWLChroma.setMaximumSize(new java.awt.Dimension(80, 32767));
+        jSliderWLChroma.setPreferredSize(new java.awt.Dimension(80, 30));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 33;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        jPanelLeft.add(jSliderWLChroma, gridBagConstraints);
+
+        jInstrumentWLChroma.setText("instrumentWLChroma");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 32;
+        jPanelLeft.add(jInstrumentWLChroma, gridBagConstraints);
+
+        jFieldWLChroma.setColumns(6);
+        jFieldWLChroma.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00#"))));
+        jFieldWLChroma.setMinimumSize(new java.awt.Dimension(50, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 33;
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        jPanelLeft.add(jFieldWLChroma, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 34;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.insets = new java.awt.Insets(0, 1, 0, 1);
         jPanelLeft.add(animatorPanel, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 33;
+        gridBagConstraints.gridy = 36;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weighty = 0.1;
@@ -702,7 +762,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jCheckBoxDoOIFits.setName("jCheckBoxDoOIFits"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 34;
+        gridBagConstraints.gridy = 37;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelLeft.add(jCheckBoxDoOIFits, gridBagConstraints);
@@ -711,7 +771,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jPanelSpacer.setPreferredSize(new java.awt.Dimension(1, 1));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 33;
+        gridBagConstraints.gridy = 36;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 0.1;
@@ -723,7 +783,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jCheckBoxAddNoise.setName("jCheckBoxAddNoise"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 35;
+        gridBagConstraints.gridy = 38;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelLeft.add(jCheckBoxAddNoise, gridBagConstraints);
@@ -733,10 +793,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         jCheckBoxUseBias.setName("jCheckBoxUseBias"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 36;
+        gridBagConstraints.gridy = 39;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelLeft.add(jCheckBoxUseBias, gridBagConstraints);
+
+        jButtonHAReset.setText("reset");
+        jButtonHAReset.setToolTipText("Reset HA limits to full range [-12; 12]");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 20;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
+        jPanelLeft.add(jButtonHAReset, gridBagConstraints);
 
         jScrollPaneForm.setViewportView(jPanelLeft);
 
@@ -853,7 +921,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     @SuppressWarnings("unchecked")
     private void postInit() {
 
-        this.chart = ChartUtils.createSquareXYLineChart("U (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", "V (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", true);
+        this.chart = ChartUtils.createSquareXYLineChart("U (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", V_AXIS_MLAMBDA, true);
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
 
         this.xyPlot.getDomainAxis().setPositiveArrowVisible(true);
@@ -898,12 +966,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.xyPlot.setBackgroundImageAlpha(1.0f);
 
         // add UV axes in meters:
-        final BoundedNumberAxis uAxisMeter = new BoundedNumberAxis("U (m) - North");
+        final BoundedNumberAxis uAxisMeter = new BoundedNumberAxis("U (m) - [North]");
         uAxisMeter.setAutoRangeIncludesZero(false);
         ChartUtils.defineAxisDefaults(uAxisMeter);
         this.xyPlot.setDomainAxis(1, uAxisMeter);
 
-        final BoundedNumberAxis vAxisMeter = new BoundedNumberAxis("V (m) - East");
+        final BoundedNumberAxis vAxisMeter = new BoundedNumberAxis(V_AXIS_METER_EAST);
         vAxisMeter.setAutoRangeIncludesZero(false);
         ChartUtils.defineAxisDefaults(vAxisMeter);
         this.xyPlot.setRangeAxis(1, vAxisMeter);
@@ -986,6 +1054,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // hide field to ignore default values (0)
         this.jFieldWLRef.setVisible(false);
 
+        this.wlChromaAdapter = new FieldSliderAdapter(jSliderWLChroma, jFieldWLChroma, 0d, 0d, 0d);
+        this.wlChromaAdapter.addChangeListener(this);
+        // hide field to ignore default values (0)
+        this.jFieldWLChroma.setVisible(true); // TODO: false
+
+        this.jToggleButtonHALive.setEnabled(false);
+        this.jToggleButtonHALive.addActionListener(this);
+        this.jButtonHAReset.addActionListener(this);
+
         this.haMinAdapter = new FieldSliderAdapter(jSliderHAMin, jFieldHAMin, AsproConstants.HA_MIN, AsproConstants.HA_MAX, AsproConstants.HA_MIN);
         this.haMinAdapter.addChangeListener(this);
 
@@ -995,6 +1072,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.jTargetWLRef.setText(null);
         this.jTargetHAMin.setText(null);
         this.jTargetHAMax.setText(null);
+        this.jInstrumentWLChroma.setText(null);
 
         this.jCheckBoxPlotUVSupport.addItemListener(new ItemListener() {
             @Override
@@ -1027,6 +1105,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         // register this instance as a Preference Observer :
         this.myPreferences.addObserver(this);
+
+        // use small variant:
+        SwingUtils.adjustSize(this.jButtonHAReset, SwingUtils.ComponentSizeVariant.small);
+        SwingUtils.adjustSize(this.jToggleButtonHALive, SwingUtils.ComponentSizeVariant.small);
+
+        // update button UI:
+        SwingUtilities.updateComponentTreeUI(this);
     }
 
     /**
@@ -1183,7 +1268,27 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // refresh the fringe tracker modes that depends on the instrument :
             this.updateComboFTModes(observation);
+
+            // adjust wave length range:
+            final double lambdaMin = instrument.getWaveLengthMin();
+            final double lambdaMax = instrument.getWaveLengthMax();
+            final double lambdaMid = 0.5 * (lambdaMin + lambdaMax);
+
+            this.wlChromaAdapter.reset(lambdaMin, lambdaMax, lambdaMid);
+
+            this.jInstrumentWLChroma.setText("[" + NumberUtils.trimTo3Digits(lambdaMin)
+                    + " - " + NumberUtils.trimTo3Digits(lambdaMax) + "]");
+
+            enableWLChroma();
         }
+    }
+
+    private void enableWLChroma() {
+        final boolean enabled = isChromaticModel(getSelectedTarget());
+        this.jLabelWLChroma.setVisible(enabled);
+        this.jInstrumentWLChroma.setVisible(enabled);
+        this.jSliderWLChroma.setVisible(enabled);
+        this.jFieldWLChroma.setVisible(enabled);
     }
 
     /**
@@ -1323,11 +1428,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
             try {
                 // update HA min / max:
-                final Double haMin = targetConf.getHAMin();
-                this.haMinAdapter.setValue((haMin != null) ? haMin.doubleValue() : AsproConstants.HA_MIN);
+                final double haMin = (targetConf.getHAMin() != null) ? targetConf.getHAMin().doubleValue() : AsproConstants.HA_MIN;
+                final double haMax = (targetConf.getHAMax() != null) ? targetConf.getHAMax().doubleValue() : AsproConstants.HA_MAX;
 
-                final Double haMax = targetConf.getHAMax();
-                this.haMaxAdapter.setValue((haMax != null) ? haMax.doubleValue() : AsproConstants.HA_MAX);
+                setTargetHA(haMin, haMax);
 
                 // update AO setup:
                 if (this.jComboBoxAOSetup.getModel().getSize() > 0) {
@@ -1396,6 +1500,24 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // restore the automatic update observation :
                 this.setAutoUpdateObservation(prevAutoUpdateObservation);
             }
+        }
+    }
+
+    private void resetTargetHA() {
+        setTargetHA(AsproConstants.HA_MIN, AsproConstants.HA_MAX);
+    }
+
+    private void setTargetHA(final double haMin, final double haMax) {
+        // disable the automatic update observation :
+        final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+        try {
+            this.haMinAdapter.reset(AsproConstants.HA_MIN, haMax, haMin);
+            this.haMinAdapter.setValue(haMin);
+            this.haMaxAdapter.reset(haMin, AsproConstants.HA_MAX, haMax);
+            this.haMaxAdapter.setValue(haMax);
+        } finally {
+            // restore the automatic update observation :
+            this.setAutoUpdateObservation(prevAutoUpdateObservation);
         }
     }
 
@@ -1501,6 +1623,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 logger.debug("UseBias: {}", this.jCheckBoxUseBias.isSelected());
             }
             refreshPlot();
+        } else if (e.getSource() == this.jToggleButtonHALive) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("HALive: {}", this.jToggleButtonHALive.isSelected());
+            }
+            // update the time annotations to disable it:
+            resetLastHA();
+            updateTimeAnnotations();
+        } else if (e.getSource() == this.jButtonHAReset) {
+            resetLastHA();
+            resetTargetHA();
+            fireObservationUpdateEvent();
         }
     }
 
@@ -1536,6 +1669,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 logger.debug("WL Ref changed: {}", source.getValue());
             }
             fireObservationUpdateEvent();
+        } else if (source == this.wlChromaAdapter) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("WL Chroma changed: {}", source.getValue());
+            }
+            refreshPlot();
         }
     }
 
@@ -1604,9 +1742,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 this.jComboBoxAtmQual.setSelectedItem(AtmosphereQuality.AVERAGE);
             }
 
-            // reset HA limits :
-            this.haMinAdapter.setValue(AsproConstants.HA_MIN);
-            this.haMaxAdapter.setValue(AsproConstants.HA_MAX);
+            // reset HA limits:
+            resetTargetHA();
 
             // reset to defaults :
             this.jCheckBoxPlotUVSupport.setSelected(true);
@@ -1739,6 +1876,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private void onTargetSelectionChange(final ObservationSetting observation, final Target target) {
         logger.debug("onTargetSelectionChange : {}", target);
 
+        // clear HALive limits:
+        if (getSelectedTargetName() != null) {
+            logger.debug("reset target HA on {}", getSelectedTargetName());
+            resetTargetHA();
+            fireObservationUpdateEvent();
+        }
+
         // disable the automatic update observation :
         final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
         // disable the automatic refresh :
@@ -1752,6 +1896,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             updateTargetConfiguration(observation);
             updateTargetHA();
+
+            enableWLChroma();
+
         } finally {
             // restore the automatic refresh :
             this.setAutoRefresh(prevAutoRefresh);
@@ -2043,6 +2190,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // model image options :
             final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
+            // get optional wavelength for chromatic models:
+            final double wavelengthChroma = this.wlChromaAdapter.getValue() * AsproConstants.MICRO_METER;
 
             // Use model image Preferences :
             final int imageSize = this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
@@ -2051,6 +2200,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     : ColorModels.getCyclicColorModel(modelImageLut);
             final ColorScale colorScale = this.myPreferences.getImageColorScale();
             final boolean doImageNoise = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_NOISE);
+            final boolean uAxisInverted = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_U_AXIS_TOWARDS_LEFT);
 
             // Use OIFits preferences:
             final OIFitsProducerOptions options = new OIFitsProducerOptions(
@@ -2072,7 +2222,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             new UVCoverageSwingWorker(this, obsCollection, this.getObservabilityData(), targetName, uvMax,
                     doUVSupport, doOIFits, useInstrumentBias, doDataNoise,
                     doModelImage, imageMode, imageSize, colorModel, colorScale, doImageNoise,
-                    this.imageIndex, options, currentUVMapData
+                    this.imageIndex, wavelengthChroma, uAxisInverted, options, currentUVMapData
             ).executeTask();
 
         } // observability data check
@@ -2091,7 +2241,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         /** target name */
         private final String targetName;
         /** maximum U or V coordinate */
-        private double uvMax;
+        private final double uvMax;
         /** flag to compute the UV support */
         private final boolean doUVSupport;
         /** flag to compute OIFits */
@@ -2116,8 +2266,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         private final UVMapData currentUVMapData;
         /** image index used (user model only) */
         private final int imageIndex;
+        /** wavelength to use for chromatic models or (0.0 for gray models) */
+        private final double wavelengthChroma;
         /** OIFits options */
         private final OIFitsProducerOptions options;
+        /** true to revert u-axis orientation (East towards left); false (East towards right) */
+        private final boolean uAxisInverted;
 
         /**
          * Hidden constructor
@@ -2138,17 +2292,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param colorScale color scaling method
          * @param doImageNoise enable image noise
          * @param imageIndex image index used (user model only)
+         * @param wavelengthChroma wavelength to use for chromatic models or (0.0 for gray models)
+         * @param uAxisInverted true to revert u-axis orientation (East towards left); false (East towards right)
          * @param options OIFits options
          * @param currentUVMapData previously computed UV Map Data
          */
-        private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationCollection obsCollection,
-                                      final List<ObservabilityData> obsDataList, final String targetName,
-                                      final double uvMax, final boolean doUVSupport, final boolean doOIFits,
-                                      final boolean useInstrumentBias, final boolean doDataNoise,
-                                      final boolean doModelImage, final ImageMode imageMode, final int imageSize,
-                                      final IndexColorModel colorModel, final ColorScale colorScale, final boolean doImageNoise,
-                                      final int imageIndex, final OIFitsProducerOptions options,
-                                      final UVMapData currentUVMapData) {
+        UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationCollection obsCollection,
+                              final List<ObservabilityData> obsDataList, final String targetName,
+                              final double uvMax, final boolean doUVSupport, final boolean doOIFits,
+                              final boolean useInstrumentBias, final boolean doDataNoise,
+                              final boolean doModelImage, final ImageMode imageMode, final int imageSize,
+                              final IndexColorModel colorModel, final ColorScale colorScale, final boolean doImageNoise,
+                              final int imageIndex, final double wavelengthChroma, final boolean uAxisInverted,
+                              final OIFitsProducerOptions options, final UVMapData currentUVMapData) {
 
             // get current observation version :
             super(AsproTaskRegistry.TASK_UV_COVERAGE, obsCollection);
@@ -2167,6 +2323,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.colorScale = colorScale;
             this.doImageNoise = doImageNoise;
             this.imageIndex = imageIndex;
+            this.wavelengthChroma = wavelengthChroma;
+            this.uAxisInverted = uAxisInverted;
             this.options = options;
             this.currentUVMapData = currentUVMapData;
         }
@@ -2274,8 +2432,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     // ie. gray model => only first image !!
                     // TODO: be consistent with OIFits logic rules
                     final int imageIdx = (modelDataList == null) ? -1 : (this.imageIndex < 0 || this.imageIndex >= modelDataList.size()) ? 0 : this.imageIndex;
-
                     logger.debug("imageIdx: {}", imageIdx);
+
+                    // if non-gray model, use instrument mode's central wavelength:
+                    final double wlChroma = isChromaticModel(target) ? this.wavelengthChroma : 0.0;
 
                     // get observation target version :
                     final int targetVersion = uvDataCollection.getVersion().getTargetVersion();
@@ -2284,7 +2444,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     if (this.currentUVMapData != null
                             && this.currentUVMapData.isValid(targetName, targetVersion, uvRect,
                                     this.imageMode, this.imageSize, this.colorModel, this.colorScale,
-                                    imageIdx, noiseService, airyRadius)) {
+                                    imageIdx, noiseService, airyRadius, wlChroma, this.uAxisInverted)) {
 
                         _logger.debug("Reuse model image.");
 
@@ -2306,24 +2466,24 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                 // Check if the previously computed visiblity Data is still valid :
                                 if (this.currentUVMapData != null
                                         && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize,
-                                                imageIdx, airyRadius)) {
+                                                imageIdx, airyRadius, wlChroma, this.uAxisInverted)) {
 
                                     _logger.debug("Reuse model complex visibility.");
 
                                     // Compute only image using existing complex visibility data :
                                     uvMapData = ModelUVMapService.computeUVMap(models,
                                             uvRect, null, null, this.currentUVMapData.getData(),
-                                            this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
+                                            this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService, wlChroma, this.uAxisInverted);
 
                                 } else {
                                     _logger.debug("Computing model image ...");
 
                                     // Compute Target Model for the UV coverage limits ONCE :
                                     uvMapData = ModelUVMapService.computeUVMap(models, uvRect,
-                                            this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
+                                            this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService, wlChroma, this.uAxisInverted);
                                 }
-                            } else // User Model:
-                            {
+                            } else {
+                                // User Model:
                                 if (modelDataList != null) {
                                     // Get preloaded and prepared fits image at given index:
                                     final FitsImage fitsImage = modelDataList.get(imageIdx).getFitsImage();
@@ -2332,7 +2492,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                         // Check if the previously computed visiblity Data is still valid :
                                         if (this.currentUVMapData != null
                                                 && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize,
-                                                        imageIdx, airyRadius)) {
+                                                        imageIdx, airyRadius, wlChroma, this.uAxisInverted)) {
 
                                             _logger.debug("Reuse model visiblity.");
 
@@ -2342,7 +2502,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                             // Compute only image using existing complex visibility data :
                                             uvMapData = UserModelService.computeUVMap(fitsImage,
                                                     uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService,
-                                                    null, null, this.currentUVMapData.getData());
+                                                    null, null, this.currentUVMapData.getData(), this.uAxisInverted);
 
                                         } else {
                                             _logger.debug("Computing model image ...");
@@ -2351,7 +2511,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                                 // Compute Target Model for the UV coverage limits ONCE :
                                                 // Note: throws IllegalArgumentException if the fits image is invalid:
                                                 uvMapData = UserModelService.computeUVMap(fitsImage,
-                                                        uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
+                                                        uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService, this.uAxisInverted);
 
                                             } catch (IllegalArgumentException iae) {
                                                 _logger.warn("Incorrect fits image in file [{}]", target.getUserModel().getFile(), iae);
@@ -2361,15 +2521,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                                 uvMapData = null;
                                             }
                                         }
-                                    }
-
-                                    if (uvMapData != null) {
-                                        // update image index and count:
-                                        uvMapData.setImageIndex(imageIdx);
-                                        uvMapData.setImageCount(modelDataList.size());
-                                        uvMapData.setWaveLength(fitsImage.getWaveLength());
-                                        uvMapData.setUserModel(target.getUserModel());
-                                        uvMapData.setAiryRadius(airyRadius);
+                                        if (uvMapData != null) {
+                                            // update image index and count:
+                                            uvMapData.setImageIndex(imageIdx);
+                                            uvMapData.setImageCount(modelDataList.size());
+                                            uvMapData.setWaveLength(fitsImage.getWaveLength());
+                                            uvMapData.setUserModel(target.getUserModel());
+                                            uvMapData.setAiryRadius(airyRadius);
+                                        }
                                     }
                                 }
                             }
@@ -2884,8 +3043,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                             fromUVPlotScale(ze.getDomainUpperBound()),
                             fromUVPlotScale(ze.getRangeUpperBound()));
 
+                    final boolean uAxisInverted = uvMapData.isUAxisInverted();
+
                     // compute an approximated uv map from the reference UV Map :
-                    if (computeSubUVMap(uvMapData, uvRect)) {
+                    if (computeSubUVMap(uvMapData, uvRect, uAxisInverted)) {
                         {
                             // adjust axis bounds to exact viewed rectangle (i.e. avoid rounding errors)
                             final UVCoverageData uvData = this.getChartData().getFirstUVData();
@@ -2905,44 +3066,32 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                             axis.setRange(uvRect.getMinY() * uvData.getLambda(), uvRect.getMaxY() * uvData.getLambda());
                         }
 
-                        // visibility reference extrema :
-                        final Float refMin = uvMapData.getMin();
-                        final Float refMax = uvMapData.getMax();
-
-                        // model image options :
-                        final ImageMode imageMode = uvMapData.getImageMode();
-                        final int imageSize = uvMapData.getImageSize();
-                        final IndexColorModel colorModel = uvMapData.getColorModel();
-                        final ColorScale colorScale = uvMapData.getColorScale();
-                        final VisNoiseService noiseService = uvMapData.getNoiseService();
-
                         // Compute a correct uv map for analytical models ONLY:
                         if (target.hasAnalyticalModel()) {
                             // update the status bar :
                             StatusBar.show(MSG_COMPUTING_MAP);
 
+                            // reuse previously used wavelength:
+                            final double wavelength = uvMapData.getWaveLengthOrZero();
+
+                            // visibility reference extrema :
+                            final Float refMin = uvMapData.getMin();
+                            final Float refMax = uvMapData.getMax();
+
+                            // model image options :
+                            final ImageMode imageMode = uvMapData.getImageMode();
+                            final int imageSize = uvMapData.getImageSize();
+                            final IndexColorModel colorModel = uvMapData.getColorModel();
+                            final ColorScale colorScale = uvMapData.getColorScale();
+                            final VisNoiseService noiseService = uvMapData.getNoiseService();
+
                             // Create uv map task worker :
                             // Cancel other tasks and execute this new task :
                             new UVMapSwingWorker(this, target.getModels(), uvRect, refMin, refMax,
-                                    imageMode, imageSize, colorModel, colorScale, noiseService).executeTask();
+                                    imageMode, imageSize, colorModel, colorScale, noiseService, wavelength, uAxisInverted).executeTask();
 
-                        } else if (false) {
-                            // not working: sub region (uvRect) not supported
-
-                            // Fix image index:
-                            final List<UserModelData> modelDataList = (target.hasAnalyticalModel()) ? null : target.getUserModel().getModelDataList();
-
-                            if (modelDataList != null) {
-                                final int imageIdx = uvMapData.getImageIndex();
-
-                                // Get preloaded and prepared fits image at given index:
-                                final FitsImage fitsImage = modelDataList.get(imageIdx).getFitsImage();
-
-                                if (fitsImage != null) {
-                                    new UVMapSwingWorker(this, fitsImage, uvRect, refMin, refMax,
-                                            imageMode, imageSize, colorModel, colorScale, noiseService).executeTask();
-                                }
-                            }
+                        } else {
+                            // sub region (uvRect) not supported by UserModelService
                         }
                     } else // cancel anyway currently running UVMapSwingWorker:
                     {
@@ -2966,8 +3115,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         private final UVCoveragePanel uvPanel;
         /** list of models to use */
         private final List<Model> models;
-        /** user-defined  model */
-        private final FitsImage fitsImage;
         /** UV frequency area in rad-1 */
         private final Rectangle2D.Double uvRect;
         /** minimum reference double value used only for sub images */
@@ -2984,6 +3131,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         private final ColorScale colorScale;
         /** optional Complex visibility Noise Service ready to use to compute noise on model images */
         private final VisNoiseService noiseService;
+        /** wavelength to use for chromatic models or (0.0 for gray models) */
+        private final double wavelengthChroma;
+        /** true to revert u-axis orientation (East towards left); false (East towards right) */
+        private final boolean uAxisInverted;
 
         /**
          * Hidden constructor
@@ -2998,17 +3149,20 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param colorModel color model to use
          * @param colorScale color scaling method
          * @param noiseService optional Complex visibility Noise Service ready to use to compute noise on model images
+         * @param wavelengthChroma wavelength to use for chromatic models or (0.0 for gray models)
+         * @param uAxisInverted true to revert u-axis orientation (East towards left); false (East towards right)
          */
         private UVMapSwingWorker(final UVCoveragePanel uvPanel, final List<Model> models,
                                  final Rectangle2D.Double uvRect,
                                  final Float refMin, final Float refMax,
                                  final ImageMode imageMode, final int imageSize,
                                  final IndexColorModel colorModel, final ColorScale colorScale,
-                                 final VisNoiseService noiseService) {
+                                 final VisNoiseService noiseService,
+                                 final double wavelengthChroma,
+                                 final boolean uAxisInverted) {
             super(AsproTaskRegistry.TASK_UV_MAP);
             this.uvPanel = uvPanel;
             this.models = models;
-            this.fitsImage = null;
             this.uvRect = uvRect;
             this.refMin = refMin;
             this.refMax = refMax;
@@ -3017,40 +3171,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.colorModel = colorModel;
             this.colorScale = colorScale;
             this.noiseService = noiseService;
-        }
-
-        /**
-         * Hidden constructor
-         *
-         * @param uvPanel observability panel
-         * @param fitsImage fits image to compute user-defined model
-         * @param uvRect expected UV frequency area in rad-1
-         * @param refMin minimum reference double value used only for sub images
-         * @param refMax maximum reference double value used only for sub images
-         * @param imageMode image mode (amplitude or phase)
-         * @param imageSize expected number of pixels for both width and height of the generated image
-         * @param colorModel color model to use
-         * @param colorScale color scaling method
-         * @param noiseService optional Complex visibility Noise Service ready to use to compute noise on model images
-         */
-        private UVMapSwingWorker(final UVCoveragePanel uvPanel, final FitsImage fitsImage,
-                                 final Rectangle2D.Double uvRect,
-                                 final Float refMin, final Float refMax,
-                                 final ImageMode imageMode, final int imageSize,
-                                 final IndexColorModel colorModel, final ColorScale colorScale,
-                                 final VisNoiseService noiseService) {
-            super(AsproTaskRegistry.TASK_UV_MAP);
-            this.uvPanel = uvPanel;
-            this.models = null;
-            this.fitsImage = fitsImage;
-            this.uvRect = uvRect;
-            this.refMin = refMin;
-            this.refMax = refMax;
-            this.imageMode = imageMode;
-            this.imageSize = imageSize;
-            this.colorModel = colorModel;
-            this.colorScale = colorScale;
-            this.noiseService = noiseService;
+            this.wavelengthChroma = wavelengthChroma;
+            this.uAxisInverted = uAxisInverted;
         }
 
         /**
@@ -3065,13 +3187,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 if (this.models != null) {
                     // compute anyway the uv map data :
                     return ModelUVMapService.computeUVMap(this.models, this.uvRect, this.refMin, this.refMax, null,
-                            this.imageMode, this.imageSize, this.colorModel, this.colorScale, this.noiseService);
-
-                } else if (fitsImage != null) {
-                    // NOT working: sub region (uvRect) not supported
-                    // Note: throws IllegalArgumentException if the fits image is invalid:
-                    return UserModelService.computeUVMap(this.fitsImage, this.uvRect, this.imageMode,
-                            this.imageSize, this.colorModel, this.colorScale, noiseService, this.refMin, this.refMax, null);
+                            this.imageMode, this.imageSize, this.colorModel, this.colorScale, this.noiseService,
+                            this.wavelengthChroma, this.uAxisInverted);
                 }
 
             } catch (InterruptedJobException ije) {
@@ -3090,16 +3207,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // check that rectangle area corresponds to the current UV area:
             // It may happen that GUI changed while the asynchronously computed image is ready !
             final Rectangle2D.Double uvRectCurrent = this.uvPanel.getCurrentUVRect();
-            if (this.uvRect.equals(uvRectCurrent)) {
+
+            // Use epsilon to compare rectangles due to precision issues (scale conversions):
+            if (areEquals(this.uvRect, uvRectCurrent)) {
 
                 // delegates to uv coverage panel :
                 this.uvPanel.updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax(), uvMapData.getColorScale());
-
-                // update the status bar:
-                StatusBar.showIfPrevious(MSG_COMPUTING_MAP, "uv map done.");
             } else {
                 logger.debug("Incompatible uv rectangles: {} vs {}", uvRect, uvRectCurrent);
             }
+            // update the status bar:
+            StatusBar.showIfPrevious(MSG_COMPUTING_MAP, "uv map done.");
         }
 
         /**
@@ -3138,8 +3256,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @param uvMapData UV Map data
      * @param uvRect uv area
      * @return true if the given uvRect is smaller than uvRect of the reference image
+     * @param uAxisInverted true to revert x-axis orientation (East towards left); false (East towards right)
      */
-    private boolean computeSubUVMap(final UVMapData uvMapData, final Rectangle2D.Double uvRect) {
+    private boolean computeSubUVMap(final UVMapData uvMapData, final Rectangle2D.Double uvRect, final boolean uAxisInverted) {
         final int imageSize = uvMapData.getUvMapSize();
 
         // uv area reference :
@@ -3159,11 +3278,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         int w = (int) Math.ceil(pixRatioX * uvRect.getWidth());
         int h = (int) Math.ceil(pixRatioY * uvRect.getHeight());
 
+        if (uAxisInverted) {
+            x = imageSize - (x + w); // invert axis (x <-> x+w)
+        }
+
+        // Ensure square area:
+        w = h = Math.min(w, h);
+
         // check bounds:
-        x = checkBounds(x, 0, imageSize - 1);
-        y = checkBounds(y, 0, imageSize - 1);
-        w = checkBounds(w, 1, imageSize - x);
-        h = checkBounds(h, 1, imageSize - y);
+        w = checkBounds(w, 1, imageSize);
+        h = checkBounds(h, 1, imageSize);
+        x = checkBounds(x, 0, imageSize - w);
+        y = checkBounds(y, 0, imageSize - h);
 
         final boolean doCrop = ((x != 0) || (y != 0) || (w != imageSize) || (h != imageSize));
 
@@ -3176,8 +3302,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // adjust rounded data coords:
             logger.debug("uv rect (IN) = {}", uvRect);
 
+            final int xo = (uAxisInverted) ? imageSize - (x + w) : x; // invert axis (x+w <-> x)
+
             uvRect.setRect(
-                    ((double) x) / pixRatioX + uvRectRef.getX(),
+                    ((double) xo) / pixRatioX + uvRectRef.getX(),
                     ((double) y) / pixRatioY + uvRectRef.getY(),
                     ((double) w) / pixRatioX,
                     ((double) h) / pixRatioY
@@ -3187,7 +3315,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
             // whereas it corresponds in UV to the lower U and Upper V coordinates => inverse the V axis
             // Inverse V axis issue :
-            y = imageSize - y - h;
+            y = imageSize - (y + h);
 
             // crop a small sub image displayed while the correct model image is computed:
             final Image subUVMap = uvMapData.getUvMap().getSubimage(x, y, w, h);
@@ -3398,6 +3526,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // uv in meters (megalambda to meter conversion):
         this.xyPlot.defineAxisBounds(1, uvMaxFreq * uvData.getLambda());
 
+        // Handle U-axis orientation:
+        final boolean uAxisInverted = (uvMapData != null) ? uvMapData.isUAxisInverted()
+                : this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_U_AXIS_TOWARDS_LEFT);
+        
+        if (uAxisInverted != this.xyPlot.getDomainAxis().isInverted()) {
+            this.xyPlot.getDomainAxis().setInverted(uAxisInverted); // U (Mlambda)
+            this.xyPlot.getRangeAxis().setLabel(uAxisInverted ? V_AXIS_MLAMBDA_EAST : V_AXIS_MLAMBDA); // V (Mlambda)
+            
+            this.xyPlot.getDomainAxis(1).setInverted(uAxisInverted); // U (meter)
+            this.xyPlot.getRangeAxis(1).setLabel(uAxisInverted ? V_AXIS_METER : V_AXIS_METER_EAST); // V (meter)
+        }
+
         // Reset Fixed legend items:
         this.xyPlot.setFixedLegendItems(null);
 
@@ -3443,8 +3583,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 xySeries = new XYSeries(label, false);
                 xySeries.setNotify(false);
 
-                dataset.addSeries(xySeries);
-
+                if (dataset.getSeriesIndex(xySeries.getKey()) == -1) {
+                    dataset.addSeries(xySeries);
+                }
             } else {
                 for (BaseLine bl : uvData.getBaseLines()) {
                     // 1 color per base line (i.e. per XYSeries) :
@@ -3929,6 +4070,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private fr.jmmc.aspro.gui.util.AnimatorPanel animatorPanel;
+    private javax.swing.JButton jButtonHAReset;
     private javax.swing.JCheckBox jCheckBoxAddNoise;
     private javax.swing.JCheckBox jCheckBoxDoOIFits;
     private javax.swing.JCheckBox jCheckBoxModelImage;
@@ -3946,7 +4088,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private javax.swing.JFormattedTextField jFieldObsDuration;
     private javax.swing.JFormattedTextField jFieldSamplingPeriod;
     private javax.swing.JFormattedTextField jFieldUVMax;
+    private javax.swing.JFormattedTextField jFieldWLChroma;
     private javax.swing.JFormattedTextField jFieldWLRef;
+    private javax.swing.JLabel jInstrumentWLChroma;
     private javax.swing.JLabel jLabelAOSetup;
     private javax.swing.JLabel jLabelAOTarget;
     private javax.swing.JLabel jLabelAtmQual;
@@ -3959,6 +4103,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private javax.swing.JLabel jLabelObsDuration;
     private javax.swing.JLabel jLabelSamplingPeriod;
     private javax.swing.JLabel jLabelUVMax;
+    private javax.swing.JLabel jLabelWLChroma;
     private javax.swing.JLabel jLabelWLRef;
     private javax.swing.JPanel jPanelLeft;
     private javax.swing.JPanel jPanelSpacer;
@@ -3969,11 +4114,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private javax.swing.JSlider jSliderHAMax;
     private javax.swing.JSlider jSliderHAMin;
     private javax.swing.JSlider jSliderUVMax;
+    private javax.swing.JSlider jSliderWLChroma;
     private javax.swing.JSlider jSliderWLRef;
     private javax.swing.JSplitPane jSplitPane;
     private javax.swing.JLabel jTargetHAMax;
     private javax.swing.JLabel jTargetHAMin;
     private javax.swing.JLabel jTargetWLRef;
+    private javax.swing.JToggleButton jToggleButtonHALive;
     // End of variables declaration//GEN-END:variables
     /** drawing started time value */
     private long chartDrawStartTime = 0l;
@@ -4267,6 +4414,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         return sb.toString();
     }
 
+    private final static double TH_HA_MIN = (REFRESH_PERIOD / 60000.0) / 60.0; // in hours
+
+    private double lastHa = Double.NEGATIVE_INFINITY;
+
+    private void resetLastHA() {
+        lastHa = Double.NEGATIVE_INFINITY;
+    }
+
     /**
      * Add UV Points at current time (timeline marker in red) as annotations
      */
@@ -4275,6 +4430,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.xyPlot.clearAnnotations();
 
         boolean enableTimer = false;
+        boolean targetObsAtHA = false;
 
         // do not export time marker in PDF output:
         if (!this.renderingPDF && getChartData() != null && getChartData().isSingle()) {
@@ -4300,41 +4456,71 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     logger.debug("current date/time is: {}", now);
                 }
 
-                // Compute UV Points:
                 // Get starData for the selected target name :
                 final StarData starData = obsData.getStarData(getSelectedTargetName());
 
                 final double ha = AstroSkyCalc.checkHA(sc.convertJDToHA(jd, starData.getPrecRA()));
 
-                final List<UVRangeBaseLineData> targetUVPoints
-                                                = UVCoverageService.computeUVPoints(getChartData().getFirstObservation(), obsData, starData, ha);
+                final List<Range> obsRangesHA = starData.getObsRangesHA();
 
-                if (targetUVPoints != null) {
-                    final String textNow = FormatterUtils.format(this.timeFormatter, now);
+                if ((obsRangesHA != null) && (Range.find(obsRangesHA, ha, UVCoverageService.HA_PRECISION) != null)) {
+                    targetObsAtHA = true;
+                }
 
-                    double u1, v1, u2, v2;
+                final double delta = Math.abs(ha - lastHa);
 
-                    for (UVRangeBaseLineData uvBL : targetUVPoints) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("delta: {} thresholdHA: {}", delta, TH_HA_MIN);
+                }
 
-                        u1 = toUVPlotScale(uvBL.getUWMax()[0]);
-                        v1 = toUVPlotScale(uvBL.getVWMax()[0]);
+                if (targetObsAtHA && (delta > TH_HA_MIN)) {
+                    lastHa = ha;
+                    logger.info("Set {} HA to {}", getSelectedTarget(), ha);
 
-                        u2 = toUVPlotScale(uvBL.getUWMin()[0]);
-                        v2 = toUVPlotScale(uvBL.getVWMin()[0]);
+                    if (this.jToggleButtonHALive.isSelected()) {
+                        final double obsDurationHours = ((Number) this.jFieldObsDuration.getValue()).doubleValue() / 3600.0; // h
+                        setTargetHA(ha, ha + obsDurationHours);
 
-                        // uv point:
-                        this.xyPlot.addAnnotation(new EnhancedXYLineAnnotation(u1, v1, u2, v2, ChartUtils.THIN_STROKE, Color.RED), false);
-                        this.xyPlot.addAnnotation(createTimeAnnotation(textNow, u2, v2), false);
+                        // Do update observation as target's configuration may have changed:
+                        fireObservationUpdateEvent();
+                    } else {
+                        // Compute UV Points:
+                        final List<UVRangeBaseLineData> targetUVPoints
+                                                        = UVCoverageService.computeUVPoints(getChartData().getFirstObservation(), obsData, starData, ha);
 
-                        // symetric uv point:
-                        this.xyPlot.addAnnotation(new EnhancedXYLineAnnotation(-u1, -v1, -u2, -v2, ChartUtils.THIN_STROKE, Color.RED), false);
-                        this.xyPlot.addAnnotation(createTimeAnnotation(textNow, -u2, -v2), false);
+                        if (targetUVPoints != null) {
+                            final String textNow = FormatterUtils.format(this.timeFormatter, now);
+
+                            double u1, v1, u2, v2;
+
+                            for (UVRangeBaseLineData uvBL : targetUVPoints) {
+
+                                u1 = toUVPlotScale(uvBL.getUWMax()[0]);
+                                v1 = toUVPlotScale(uvBL.getVWMax()[0]);
+
+                                u2 = toUVPlotScale(uvBL.getUWMin()[0]);
+                                v2 = toUVPlotScale(uvBL.getVWMin()[0]);
+
+                                // uv point:
+                                this.xyPlot.addAnnotation(new EnhancedXYLineAnnotation(u1, v1, u2, v2, ChartUtils.THIN_STROKE, Color.RED), false);
+                                this.xyPlot.addAnnotation(createTimeAnnotation(textNow, u2, v2), false);
+
+                                // symetric uv point:
+                                this.xyPlot.addAnnotation(new EnhancedXYLineAnnotation(-u1, -v1, -u2, -v2, ChartUtils.THIN_STROKE, Color.RED), false);
+                                this.xyPlot.addAnnotation(createTimeAnnotation(textNow, -u2, -v2), false);
+                            }
+                        }
                     }
                 }
             }
         }
         // anyway enable or disable timer:
         enableTimelineRefreshTimer(enableTimer);
+
+        this.jToggleButtonHALive.setVisible(enableTimer);
+        this.jToggleButtonHALive.setEnabled(targetObsAtHA);
+
+        this.jButtonHAReset.setEnabled(!enableTimer || !targetObsAtHA || !this.jToggleButtonHALive.isSelected());
     }
 
     /**
@@ -4403,5 +4589,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
     static int getPreferredWidth() {
         return Math.max(200, Math.min(300, SwingUtils.adjustUISize(200)));
+    }
+
+    static boolean isChromaticModel(final Target target) {
+        return ((target != null) && target.hasAnalyticalModel() && !ModelManager.getInstance().isGray(target.getModels()));
+    }
+
+    static boolean areEquals(final Rectangle2D.Double r1, final Rectangle2D.Double r2) {
+        if (r1 == r2) {
+            return true;
+        }
+        return (NumberUtils.equals(r1.getX(), r2.getX())
+                && NumberUtils.equals(r1.getY(), r2.getY())
+                && NumberUtils.equals(r1.getWidth(), r2.getWidth())
+                && NumberUtils.equals(r1.getHeight(), r2.getHeight()));
     }
 }
