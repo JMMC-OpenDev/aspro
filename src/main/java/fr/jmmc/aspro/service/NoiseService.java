@@ -1641,7 +1641,8 @@ public final class NoiseService implements VisNoiseService {
 
         if ((insBands != null) && !bandFluxes.isEmpty()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("modelFlux: {}", Arrays.toString(modelFlux));
+                logger.debug("modelFlux:  {}", Arrays.toString(modelFlux));
+                logger.debug("bandFluxes: {}", bandFluxes);
             }
 
             final int nWLen = nSpectralChannels;
@@ -1654,7 +1655,7 @@ public final class NoiseService implements VisNoiseService {
                 final Band band = insBands[l];
 
                 final Double totalFluxBand = bandFluxes.get(band);
-                if (totalFluxBand != null) {
+                if ((totalFluxBand != null) && (totalFluxBand > 0.0)) {
                     weights[l] = modelFlux[l] / totalFluxBand;
                 } else {
                     weights[l] = 1.0;
