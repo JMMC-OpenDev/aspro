@@ -158,6 +158,18 @@ public class ObservationCollection
     }
 
     /**
+     * Public constructor
+     * @param name name to use
+     * @param version version to use
+     */
+    public ObservationCollection(final String name, final fr.jmmc.aspro.model.ObservationVersion version) {
+        super();
+        this.name = name;
+        // transient :
+        this.version = new fr.jmmc.aspro.model.ObservationVersion(version); // clone
+    }
+    
+    /**
      * Public constructor which copies information from the given observation collection (by reference)
      * @param obsCollection observation collection to copy
      */
