@@ -31,6 +31,8 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
     public final static String MODEL_IMAGE_SIZE = "model.image.size";
     /** Preference : Enable noise modeling for the object model image in the UV Coverage plot */
     public final static String MODEL_IMAGE_NOISE = "model.image.noise";
+    /** Preference : Set U_axis towards left (inverted) or right for the object model image in the UV Coverage plot */
+    public final static String MODEL_IMAGE_U_AXIS_TOWARDS_LEFT = "model.image.uAxis.left";
     /** Preference : Enable fast user model (optimize FFT and direct FT i.e. skip useless data) */
     public final static String MODEL_USER_FAST = "model.user.fast";
     /** Preference : Fast mode threshold in percents */
@@ -125,6 +127,7 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
         // UV Coverage - image size and LUT:
         setDefaultPreference(MODEL_IMAGE_SIZE, AsproConstants.DEFAULT_IMAGE_SIZE);
         setDefaultPreference(MODEL_IMAGE_NOISE, Boolean.FALSE);
+        setDefaultPreference(MODEL_IMAGE_U_AXIS_TOWARDS_LEFT, Boolean.FALSE);
 
         // User model:
         setDefaultPreference(MODEL_USER_FAST, Boolean.TRUE);

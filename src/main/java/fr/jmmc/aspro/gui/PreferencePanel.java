@@ -159,6 +159,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         buttonGroupFastUserModel = new javax.swing.ButtonGroup();
         buttonGroupNightOnly = new javax.swing.ButtonGroup();
         buttonGroupAddNoise = new javax.swing.ButtonGroup();
+        buttonGroupImageUAxisLeft = new javax.swing.ButtonGroup();
         buttonGroupImageNoise = new javax.swing.ButtonGroup();
         buttonGroupGuiRestrictions = new javax.swing.ButtonGroup();
         buttonGroupApodization = new javax.swing.ButtonGroup();
@@ -200,11 +201,14 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jComboBoxImageSize = new javax.swing.JComboBox();
         jLabelColorScale = new javax.swing.JLabel();
         jComboBoxColorScale = new javax.swing.JComboBox();
+        jLabelInterpolation = new javax.swing.JLabel();
+        jComboBoxInterpolation = new javax.swing.JComboBox();
         jLabelImageNoise = new javax.swing.JLabel();
         jRadioButtonImageNoiseYes = new javax.swing.JRadioButton();
         jRadioButtonImageNoiseNo = new javax.swing.JRadioButton();
-        jLabelInterpolation = new javax.swing.JLabel();
-        jComboBoxInterpolation = new javax.swing.JComboBox();
+        jLabelImageUAxisLeft = new javax.swing.JLabel();
+        jRadioButtonImageUAxisLeftYes = new javax.swing.JRadioButton();
+        jRadioButtonImageUAxisLeftNo = new javax.swing.JRadioButton();
         jPanelUserModel = new javax.swing.JPanel();
         jLabelFastUserModel = new javax.swing.JLabel();
         jRadioButtonFastUserModelYes = new javax.swing.JRadioButton();
@@ -578,6 +582,28 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
         jPanelModelImage.add(jComboBoxColorScale, gridBagConstraints);
 
+        jLabelInterpolation.setText("Interpolation");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+        jPanelModelImage.add(jLabelInterpolation, gridBagConstraints);
+
+        jComboBoxInterpolation.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxInterpolationActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
+        jPanelModelImage.add(jComboBoxInterpolation, gridBagConstraints);
+
         jLabelImageNoise.setText("Add error noise to image");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -614,27 +640,41 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jRadioButtonImageNoiseNo, gridBagConstraints);
 
-        jLabelInterpolation.setText("Interpolation");
+        jLabelImageUAxisLeft.setText("U-axis orientation [East]");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
-        jPanelModelImage.add(jLabelInterpolation, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelModelImage.add(jLabelImageUAxisLeft, gridBagConstraints);
 
-        jComboBoxInterpolation.addActionListener(new java.awt.event.ActionListener() {
+        buttonGroupImageUAxisLeft.add(jRadioButtonImageUAxisLeftYes);
+        jRadioButtonImageUAxisLeftYes.setText("Left");
+        jRadioButtonImageUAxisLeftYes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBoxInterpolationActionPerformed(evt);
+                jRadioButtonImageUAxisLeftActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
-        jPanelModelImage.add(jComboBoxInterpolation, gridBagConstraints);
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelImage.add(jRadioButtonImageUAxisLeftYes, gridBagConstraints);
+
+        buttonGroupImageUAxisLeft.add(jRadioButtonImageUAxisLeftNo);
+        jRadioButtonImageUAxisLeftNo.setText("Right");
+        jRadioButtonImageUAxisLeftNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonImageUAxisLeftActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelImage.add(jRadioButtonImageUAxisLeftNo, gridBagConstraints);
 
         jPanelLayout.add(jPanelModelImage);
 
@@ -1214,6 +1254,15 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         }
     }//GEN-LAST:event_jRadioButtonCubeExtrapolationActionPerformed
 
+    private void jRadioButtonImageUAxisLeftActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonImageUAxisLeftActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_U_AXIS_TOWARDS_LEFT, Boolean.valueOf(this.jRadioButtonImageUAxisLeftYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonImageUAxisLeftActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupAddNoise;
@@ -1223,6 +1272,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.ButtonGroup buttonGroupFastUserModel;
     private javax.swing.ButtonGroup buttonGroupGuiRestrictions;
     private javax.swing.ButtonGroup buttonGroupImageNoise;
+    private javax.swing.ButtonGroup buttonGroupImageUAxisLeft;
     private javax.swing.ButtonGroup buttonGroupNightOnly;
     private javax.swing.ButtonGroup buttonGroupPositionStyle;
     private javax.swing.ButtonGroup buttonGroupTimeAxis;
@@ -1255,6 +1305,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JLabel jLabelGuiRestrictions;
     private javax.swing.JLabel jLabelImageNoise;
     private javax.swing.JLabel jLabelImageSize;
+    private javax.swing.JLabel jLabelImageUAxisLeft;
     private javax.swing.JLabel jLabelInterpolation;
     private javax.swing.JLabel jLabelLutTable;
     private javax.swing.JLabel jLabelMathMode;
@@ -1290,6 +1341,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JRadioButton jRadioButtonFastUserModelYes;
     private javax.swing.JRadioButton jRadioButtonImageNoiseNo;
     private javax.swing.JRadioButton jRadioButtonImageNoiseYes;
+    private javax.swing.JRadioButton jRadioButtonImageUAxisLeftNo;
+    private javax.swing.JRadioButton jRadioButtonImageUAxisLeftYes;
     private javax.swing.JRadioButton jRadioButtonNightOnlyNo;
     private javax.swing.JRadioButton jRadioButtonNightOnlyYes;
     private javax.swing.JRadioButton jRadioButtonSepPosAngle;
@@ -1353,10 +1406,12 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         this.jComboBoxLUT.setSelectedItem(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
         this.jComboBoxColorScale.setSelectedItem(this.myPreferences.getImageColorScale());
         this.jComboBoxInterpolation.setSelectedItem(this.myPreferences.getImageInterpolation());
-
         final boolean preferImageNoise = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_NOISE);
         this.jRadioButtonImageNoiseYes.setSelected(preferImageNoise);
         this.jRadioButtonImageNoiseNo.setSelected(!preferImageNoise);
+        final boolean uAxisLeft = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_U_AXIS_TOWARDS_LEFT);
+        this.jRadioButtonImageUAxisLeftYes.setSelected(uAxisLeft);
+        this.jRadioButtonImageUAxisLeftNo.setSelected(!uAxisLeft);
 
         // User model:
         final boolean useFastUserModel = this.myPreferences.isFastUserModel();
