@@ -366,7 +366,7 @@ public final class UserModelService {
                                          final int imageSize,
                                          final IndexColorModel colorModel,
                                          final ColorScale colorScale) {
-        return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, null, null, null, null);
+        return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, null, null, null, null, false);
     }
 
     /**
@@ -379,6 +379,7 @@ public final class UserModelService {
      * @param colorModel color model to use
      * @param colorScale color scaling method
      * @param noiseService optional noise service to compute noisy complex visibilities before computing amplitude or phase
+     * @param xInverted true to revert x-axis orientation (East towards left); false (East towards right)
      * @return UVMapData
      *
      * @throws InterruptedJobException if the current thread is interrupted (cancelled)
@@ -391,8 +392,9 @@ public final class UserModelService {
                                          final int imageSize,
                                          final IndexColorModel colorModel,
                                          final ColorScale colorScale,
-                                         final VisNoiseService noiseService) {
-        return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, noiseService, null, null, null);
+                                         final VisNoiseService noiseService,
+                                         final boolean xInverted) {
+        return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, noiseService, null, null, null, xInverted);
     }
 
     /**
@@ -404,10 +406,11 @@ public final class UserModelService {
      * @param imageSize expected number of pixels for both width and height of the generated image
      * @param colorModel color model to use
      * @param colorScale color scaling method
-     * @param refVisData reference complex visibility data (optional)
+     * @param noiseService optional noise service to compute noisy complex visibilities before computing amplitude or phase
      * @param refMin minimum reference value used only for sub images
      * @param refMax maximum reference value used only for sub images
-     * @param noiseService optional noise service to compute noisy complex visibilities before computing amplitude or phase
+     * @param refVisData reference complex visibility data (optional)
+     * @param xInverted true to revert x-axis orientation (East towards left); false (East towards right)
      * @return UVMapData
      *
      * @throws InterruptedJobException if the current thread is interrupted (cancelled)
@@ -422,7 +425,8 @@ public final class UserModelService {
                                          final ColorScale colorScale,
                                          final VisNoiseService noiseService,
                                          final Float refMin, final Float refMax,
-                                         final float[][] refVisData) {
+                                         final float[][] refVisData,
+                                         final boolean xInverted) {
 
         // Note: do not support sub region (uvRect)
         // Get uvMaxFreq from uv rectangle:
@@ -562,7 +566,7 @@ public final class UserModelService {
             uvMapRect.setFrameFromDiagonal(-mapUvMaxFreq, -mapUvMaxFreq, mapUvMaxFreq, mapUvMaxFreq);
 
             final UVMapData uvMapData = ModelUVMapService.computeImage(uvRect, refMin, refMax, mode, imageSize, colorModel, colorScale,
-                    dataSize, visData, imgData, uvMapRect, noiseService, rotationAngle, outputSize);
+                    dataSize, visData, imgData, uvMapRect, noiseService, rotationAngle, outputSize, xInverted);
 
             logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
