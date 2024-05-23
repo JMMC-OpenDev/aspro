@@ -48,7 +48,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     /** enable / disable Obs Plan */
     private static final boolean ENABLE_OBS_PLAN = ApplicationDescription.isBetaVersion();
     /** enable / disable Target table */
-    private static final boolean ENABLE_TARGET_TABLE = ApplicationDescription.isBetaVersion();
+    private static final boolean ENABLE_TARGET_TABLE = true;
     /** default mouse cursor refresh period = 100 ms */
     private static final int REFRESH_PERIOD = 100;
     /** shared tooltip manager */
