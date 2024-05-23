@@ -998,7 +998,7 @@ public final class OIFitsCreatorService extends AbstractOIFitsProducer {
                         fluxErr[k][l] = (objPhot[l] / phot[l]) * errPhot[l]; // scaling
 
                         // add error on flux data (normal distribution):
-                        if (this.doNoise) {
+                        if (this.doNoise && !Double.isNaN(fluxErr[k][l])) {
                             final int nSample = getNextRandomSampleIndex();
                             // just add gaussian noise (variance addition):
                             fluxData[k][l] += fluxErr[k][l] * beamRndDists[n][nSample];
