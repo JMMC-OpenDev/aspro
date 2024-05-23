@@ -1510,7 +1510,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           return;
       }
 
-      ModelManager.normalizeFluxes(this.currentTarget.getModels());
+      ModelManager.getInstance().normalizeFluxes(this.currentTarget.getModels());
 
       // refresh whole values
       getModelParameterTableModel().fireTableDataChanged();
