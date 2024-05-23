@@ -372,7 +372,9 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
                 xySeries = new XYSeries(label, false);
                 xySeries.setNotify(false);
 
-                dataset.addSeries(xySeries);
+                if (dataset.getSeriesIndex(xySeries.getKey()) == -1) {
+                    dataset.addSeries(xySeries);
+                }
             }
 
             for (int i = 0, len = blName.length; i < len; i++) {
