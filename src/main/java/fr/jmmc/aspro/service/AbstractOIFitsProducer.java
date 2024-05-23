@@ -20,10 +20,8 @@ import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmcs.util.StatUtils.ComplexDistribution;
 import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmal.complex.MutableComplex;
-import fr.jmmc.jmal.model.ModelComputeContext;
 import fr.jmmc.jmal.model.ModelFunctionComputeContext;
 import fr.jmmc.jmal.model.ModelManager;
-import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
@@ -410,7 +408,19 @@ public abstract class AbstractOIFitsProducer {
 
         // note: integration must be adjusted to use wavelengths in each spectral channel !
         // Only part of instrument spectral channels can be used (see prepare step):
-        final double[] sampleWaveLengths = (nSamples > 1) ? resampleWaveLengths(this.waveLengths, this.waveBands, nSamples) : this.waveLengths;
+        final double[] sampleWaveLengths;
+        final double[] sampleWaveBands;
+
+        if (nSamples > 1) {
+            final int newLen = this.waveLengths.length * nSamples;
+            sampleWaveLengths = new double[newLen];
+            sampleWaveBands = new double[newLen];
+            
+            resampleWaveLengths(this.waveLengths, this.waveBands, nSamples, sampleWaveLengths, sampleWaveBands);
+        } else {
+            sampleWaveLengths = this.waveLengths;
+            sampleWaveBands = this.waveBands;
+        }
 
         // Effective number of spectral channels on the detector:
         final int nChannels = this.waveLengths.length;
@@ -438,7 +448,7 @@ public abstract class AbstractOIFitsProducer {
         final int nRows = freqTable.nRows;
         final int nDataPoints = nRows * nWLen;
 
-        logger.info("computeModelVisibilities(): {} data points [{} rows - {} spectral channels - {} samples]({}) - please wait ...",
+        logger.info("computeModelVisibilities({}): {} data points [{} rows - {} spectral channels - {} samples]({}) - please wait ...",
                 instrumentName, nDataPoints, nRows, nChannels, nSamples, options.mathMode);
 
         // Allocate data array for complex visibility and error :
@@ -457,25 +467,34 @@ public abstract class AbstractOIFitsProducer {
         // Initialize flux array:
         final double[] mFluxes = new double[nWLen];
 
-        // Flux per used instrument band:
+        // Flux per used instrument band (mean):
         final Map<Band, Double> bandFluxes = new LinkedHashMap<>(4);
+
+        if (ns != null) {
+            // get used instrument bands:
+            insBands = ns.getInstrumentBands();
+
+            // Initialize used bands to get their flux from the user model:
+            final Set<Band> usedInsBands = ns.getDistinctInstrumentBands();
+
+            for (Band b : usedInsBands) {
+                bandFluxes.put(b, 0.0);
+            }
+        }
 
         // Compute complex visibility using the target model:
         if (useAnalyticalModel) {
-            // Clone models and normalize fluxes :
-            final List<Model> normModels = ModelManager.normalizeModels(this.target.getModels());
-
             // Analytical models: no parallelization:
-            final ModelManager modelManager = ModelManager.getInstance();
+            final ModelManager mm = ModelManager.getInstance();
 
-            // model computation context
-            final ModelComputeContext context = modelManager.prepareModels(normModels, nWLen);
-
+            // prepare the model computation context using sampleWaveLengths:
+            // it computes mFluxes, flux_weights and bandFluxes (used by noise modeling)
+            final ModelFunctionComputeContext context = mm.prepareModels(this.target.getModels(), nWLen, sampleWaveLengths, mFluxes, bandFluxes);
+            
             // Iterate on rows:
             for (int k = 0; k < nRows; k++) {
-
                 // Compute complex visibility using the target model:
-                copyArray(modelManager.computeModels((ModelFunctionComputeContext) context, ufreq[k], vfreq[k]), cmVis[k]);
+                copyArray(mm.computeModels(context, ufreq[k], vfreq[k]), cmVis[k]);
 
                 if (currentThread.isInterrupted()) {
                     // fast interrupt :
@@ -483,26 +502,11 @@ public abstract class AbstractOIFitsProducer {
                 }
             } // rows
 
-            // update flux vs wavelengths:
-            Arrays.fill(mFluxes, 1.0); // already normalized
-
         } else {
             // TODO: compare directFT vs FFT + interpolation
 
             if (logger.isDebugEnabled()) {
                 logger.debug("computeModelVisibilities: MathMode = {}.", options.mathMode);
-            }
-
-            if (ns != null) {
-                // get used instrument bands:
-                insBands = ns.getInstrumentBands();
-
-                // Initialize used bands to get their flux from the user model:
-                final Set<Band> usedInsBands = ns.getDistinctInstrumentBands();
-
-                for (Band b : usedInsBands) {
-                    bandFluxes.put(b, 0.0);
-                }
             }
 
             // Initialize interpolation weights:
@@ -653,7 +657,7 @@ public abstract class AbstractOIFitsProducer {
                     logger.info("Thread[{}] done: {} processed jobs", t, nTaskThreads[t][0]);
                 }
             }
-        }
+        } // model computation
 
         if (currentThread.isInterrupted()) {
             // fast interrupt :
@@ -661,7 +665,8 @@ public abstract class AbstractOIFitsProducer {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("mFluxes:  {}", Arrays.toString(mFluxes));
+            logger.debug("mFluxes:    {}", Arrays.toString(mFluxes));
+            logger.debug("bandFluxes: {}", bandFluxes);
         }
 
         // Sample integration on spectral channels:
@@ -1638,7 +1643,7 @@ public abstract class AbstractOIFitsProducer {
 
             final UserModelInterpolator modelLerp = new UserModelInterpolator(sortedModelData);
 
-            // 0 - compute total flux per used band:
+            // 0 - compute mean flux per used band:
             if (logger.isDebugEnabled()) {
                 logger.debug("used insBands: {}", bandFluxes.keySet());
             }
@@ -1951,9 +1956,12 @@ public abstract class AbstractOIFitsProducer {
      * @param waveLengths wavelengths (central)
      * @param waveBands bandwidths
      * @param nSamples number of samples to compute
-     * @return regularly sampled wavelengths
+     * @param sampleWaveLengths sampled wavelengths (nWlen * nSamples)
+     * @param sampleWaveBands sampled wavebands (nWlen * nSamples)
      */
-    protected static double[] resampleWaveLengths(final double[] waveLengths, final double[] waveBands, final int nSamples) {
+    protected static void resampleWaveLengths(final double[] waveLengths, final double[] waveBands, final int nSamples,
+                                              final double[] sampleWaveLengths, final double[] sampleWaveBands) {
+
         // compute interpolation coefficients between ]-0.5, 0.5[
         final double[] interp = new double[nSamples];
 
@@ -1962,9 +1970,8 @@ public abstract class AbstractOIFitsProducer {
         }
 
         final int nWLen = waveLengths.length;
-        final double[] wLen = new double[nWLen * nSamples];
 
-        double lambda, delta_lambda, dl = waveBands[0];
+        double lambda, band, delta_lambda, dl = waveBands[0];
         double sign = 1.0;
 
         for (int i = 0, k = 0; i < nWLen; i++) {
@@ -1980,17 +1987,24 @@ public abstract class AbstractOIFitsProducer {
                 }
             }
             // preserve sign (increasing or decreasing) and reduce bandwidth if larger than (lambda1 - lambda2)
-            delta_lambda = sign * Math.min(dl, waveBands[i]);
+            band = Math.min(dl, waveBands[i]);
+            delta_lambda = sign * band;
+
+            // sampled band:
+            band /= nSamples;
 
             for (int j = 0; j < nSamples; j++) {
-                wLen[k++] = lambda + interp[j] * delta_lambda;
+                sampleWaveLengths[k] = lambda + interp[j] * delta_lambda;
+                sampleWaveBands[k] = band;
+                k++;
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("waveLengths: {}", Arrays.toString(waveLengths));
-            logger.debug("resampleWaveLengths: {}", Arrays.toString(wLen));
+            logger.debug("waveLengths:       {}", Arrays.toString(waveLengths));
+            logger.debug("sampleWaveLengths: {}", Arrays.toString(sampleWaveLengths));
+            logger.debug("waveBands:       {}", Arrays.toString(waveBands));
+            logger.debug("sampleWaveBands:   {}", Arrays.toString(sampleWaveBands));
         }
-        return wLen;
     }
 
     /**
