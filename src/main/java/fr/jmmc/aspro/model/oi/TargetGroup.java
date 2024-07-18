@@ -326,7 +326,7 @@ public class TargetGroup
 
         final java.awt.Color color = getDecodedColor();
 
-        overDecColor = (fr.jmmc.oiexplorer.core.util.ColorUtils.luminance(color.getRGB()) > 128) ? java.awt.Color.BLACK : java.awt.Color.WHITE;
+        overDecColor = (fr.jmmc.jmcs.util.ColorUtils.luminance(color.getRGB()) > 128) ? java.awt.Color.BLACK : java.awt.Color.WHITE;
 
         return overDecColor;
     }
