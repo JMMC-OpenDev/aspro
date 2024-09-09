@@ -31,7 +31,7 @@ public final class ConfigurationEditorAction extends RegisteredAction {
     public ConfigurationEditorAction() {
         super(className, actionName);
 
-        setEnabled(ConfigurationManager.ENABLE_USER_CONFIG); // or expert mode
+        setEnabled(ConfigurationManager.ENABLE_USER_CONFIG);
     }
 
     /**
