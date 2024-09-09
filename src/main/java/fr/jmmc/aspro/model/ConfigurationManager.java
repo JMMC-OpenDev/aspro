@@ -72,8 +72,7 @@ public final class ConfigurationManager extends BaseOIManager {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class.getName());
     /** enable support for user configurations */
-    public static final boolean ENABLE_USER_CONFIG = (ApplicationDescription.isBetaVersion()
-            || "true".equalsIgnoreCase(System.getProperty("aspro.expertMode", "false")));
+    public static final boolean ENABLE_USER_CONFIG = true;
 
     /** debug configuration at startup */
     private static final boolean DEBUG_CONF = false;
@@ -314,10 +313,14 @@ public final class ConfigurationManager extends BaseOIManager {
             if (!conf.getInterferometerFiles().isEmpty()) {
                 final StringBuilder msg = new StringBuilder(128);
                 msg.append("Aspro2 user configuration files have been loaded for interferometers:\n");
+                boolean hasOneEnabled = false;
 
                 for (InterferometerFile fileRef : conf.getInterferometerFiles()) {
                     final boolean enabled = fileRef.isReallyEnabled();
-                    msg.append("[").append(enabled ? "X" : "-").append("] ");
+                    if (enabled) {
+                        hasOneEnabled = true;
+                    }
+                    msg.append("[").append(enabled ? "x" : "-").append("] ");
                     if (fileRef.isValid()) {
                         msg.append("[").append(fileRef.getInterferometerName()).append("] ");
                     }
@@ -326,10 +329,11 @@ public final class ConfigurationManager extends BaseOIManager {
 
                 msg.append("\nUSE THESE INTERFEROMETER CONFIGURATIONS AT YOUR OWN RISKS.");
 
-                MessagePane.showMessage(msg.toString(), "Configuration modified");
+                if (hasOneEnabled) {
+                    MessagePane.showMessage(msg.toString(), "Configuration modified");
+                }
             }
         }
-
         logger.debug("initializeUserConfiguration: userConfigurations: {}", getUserConfigurations());
     }
 
