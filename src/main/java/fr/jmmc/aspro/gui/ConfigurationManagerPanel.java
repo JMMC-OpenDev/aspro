@@ -12,6 +12,8 @@ import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.util.ResourceImage;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils.ComponentSizeVariant;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.StringUtils;
@@ -24,6 +26,7 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +39,8 @@ public final class ConfigurationManagerPanel extends javax.swing.JPanel {
     private static final long serialVersionUID = 1L;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationManagerPanel.class.getName());
+    /** link to aspro-conf repository */
+    private static final String ASPRO_CONF = "https://github.com/JMMC-OpenDev/aspro-conf";
     /** link to aspro-conf-contrib repository */
     private static final String ASPRO_CONF_CONTRIB = "https://github.com/JMMC-OpenDev/aspro-conf-contrib";
 
@@ -115,6 +120,13 @@ public final class ConfigurationManagerPanel extends javax.swing.JPanel {
 
     private void postInit() {
         this.jListUserConfig.setCellRenderer(InterferometerFileRenderer.INSTANCE);
+
+        // use small variant:
+        SwingUtils.adjustSize(this.jButtonOpenAsproConf, ComponentSizeVariant.small);
+        SwingUtils.adjustSize(this.jButtonOpenAsproConfContrib, ComponentSizeVariant.small);
+
+        // update button UI:
+        SwingUtilities.updateComponentTreeUI(this);
     }
 
     /**
@@ -218,7 +230,9 @@ public final class ConfigurationManagerPanel extends javax.swing.JPanel {
         jButtonLoad = new javax.swing.JButton();
         jButtonReload = new javax.swing.JButton();
         jButtonRemove = new javax.swing.JButton();
+        jButtonOpenAsproConf = new javax.swing.JButton();
         jButtonOpenAsproConfContrib = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
         jPanelBottom = new javax.swing.JPanel();
         jButtonOK = new javax.swing.JButton();
 
@@ -366,7 +380,23 @@ public final class ConfigurationManagerPanel extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         jPanelButtons.add(jButtonRemove, gridBagConstraints);
 
-        jButtonOpenAsproConfContrib.setText("<html>Open aspro-conf<br>contrib...</html>");
+        jButtonOpenAsproConf.setText("<html>Open <br>aspro-conf...</html>");
+        jButtonOpenAsproConf.setMargin(new java.awt.Insets(2, 20, 2, 20));
+        jButtonOpenAsproConf.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonOpenAsproConfActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
+        gridBagConstraints.weighty = 0.8;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
+        jPanelButtons.add(jButtonOpenAsproConf, gridBagConstraints);
+
+        jButtonOpenAsproConfContrib.setText("<html>Open aspro-conf<br>-contrib...</html>");
         jButtonOpenAsproConfContrib.setMargin(new java.awt.Insets(2, 20, 2, 20));
         jButtonOpenAsproConfContrib.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -375,11 +405,16 @@ public final class ConfigurationManagerPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
-        gridBagConstraints.weighty = 0.8;
         jPanelButtons.add(jButtonOpenAsproConfContrib, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 0.5;
+        jPanelButtons.add(jPanel1, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -494,6 +529,10 @@ public final class ConfigurationManagerPanel extends javax.swing.JPanel {
         BrowserLauncher.openURL(ASPRO_CONF_CONTRIB);
     }//GEN-LAST:event_jButtonOpenAsproConfContribActionPerformed
 
+    private void jButtonOpenAsproConfActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenAsproConfActionPerformed
+        BrowserLauncher.openURL(ASPRO_CONF);
+    }//GEN-LAST:event_jButtonOpenAsproConfActionPerformed
+
     private void changeState() {
         if (doAutoUpdate) {
             final InterferometerFile fileRef = getSelectedUserConfig();
@@ -510,6 +549,7 @@ public final class ConfigurationManagerPanel extends javax.swing.JPanel {
     private javax.swing.ButtonGroup buttonGroupState;
     private javax.swing.JButton jButtonLoad;
     private javax.swing.JButton jButtonOK;
+    private javax.swing.JButton jButtonOpenAsproConf;
     private javax.swing.JButton jButtonOpenAsproConfContrib;
     private javax.swing.JButton jButtonReload;
     private javax.swing.JButton jButtonRemove;
@@ -517,6 +557,7 @@ public final class ConfigurationManagerPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabelID;
     private javax.swing.JLabel jLabelValid;
     private javax.swing.JList<InterferometerFile> jListUserConfig;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelBottom;
     private javax.swing.JPanel jPanelButtons;
     private javax.swing.JPanel jPanelMain;
