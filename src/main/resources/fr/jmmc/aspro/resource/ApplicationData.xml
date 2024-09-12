@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="24.09 beta 3"/>
-    <compilation date="09/09/2024" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="24.09 beta 4"/>
+    <compilation date="12/09/2024" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -244,10 +244,12 @@
             <change type="FEATURE">Support analytical chromatic models (black-body variants)</change>
         -->
         <release version="24.09">
-            <pubDate>Mon, 09 Sep 2024 16:00:00 GMT</pubDate>
+            <pubDate>Thu, 12 Sep 2024 16:00:00 GMT</pubDate>
+            <prerelease version="24.09 beta 4">
+                <change type="FEATURE">Added link to the aspro-conf and aspro-conf-contrib repositories in the 'Configuration Manager'</change>
+            </prerelease>
             <prerelease version="24.09 beta 3">
                 <change type="FEATURE">Made the 'Configuration Manager' available in all ASPRO2 versions</change>
-                <change type="FEATURE">Added link to the aspro-conf-contrib repository in the 'Configuration Manager'</change>
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1405">Fixed the model description of ring models (external diameter)</change>
             </prerelease>
         </release>
