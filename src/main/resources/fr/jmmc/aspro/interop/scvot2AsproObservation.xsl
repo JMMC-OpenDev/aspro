@@ -40,6 +40,13 @@
 
     <xsl:template match="VOT:RESOURCE">
 
+        <!-- debug fields -->
+        <!--
+        <xsl:for-each select="$table/VOT:FIELD">
+            <xsl:message>ColumnIndex('<xsl:value-of select="@name"/>') = position = <xsl:value-of select="position()"/> </xsl:message>
+        </xsl:for-each>
+        -->
+
         <!-- Get column indexes used to build the target list -->
         <xsl:variable name="SIMBAD_index">
             <xsl:call-template name="getColumnIndex">
@@ -56,6 +63,21 @@
                 <xsl:with-param name="colName">HIP</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
+        <xsl:variable name="TYC1_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">TYC1</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="TYC2_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">TYC2</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="TYC3_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">TYC3</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
         <xsl:variable name="HD_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="colName">HD</xsl:with-param>
@@ -64,6 +86,11 @@
         <xsl:variable name="twoMASS_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="colName">2MASS</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="WISE_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">WISE</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
         <xsl:variable name="DM_index">
@@ -81,7 +108,6 @@
                 <xsl:with-param name="colName">WDS</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
-        <!-- TODO: use WISE -->
 
 
         <xsl:variable name="RA_index">
@@ -111,6 +137,11 @@
                 <xsl:with-param name="colName">B</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
+        <xsl:variable name="BP_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">Bp</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
         <xsl:variable name="V_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="colName">V</xsl:with-param>
@@ -124,6 +155,11 @@
         <xsl:variable name="R_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="colName">R</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="RP_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">Rp</xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
         <xsl:variable name="I_index">
@@ -329,7 +365,7 @@
                             </xsl:variable>
                             <xsl:variable name="ID_GAIA">
                                 <xsl:if test="VOT:TD[number($GAIA_index)]/text()">
-                                    <xsl:value-of select="concat('GAIA DR2 ',VOT:TD[number($GAIA_index)])"/>
+                                    <xsl:value-of select="concat('GAIA DR3 ',VOT:TD[number($GAIA_index)])"/>
                                 </xsl:if>
                             </xsl:variable>
                             <xsl:variable name="ID_HD">
@@ -342,9 +378,19 @@
                                     <xsl:value-of select="concat('HIP ',VOT:TD[number($HIP_index)])"/>
                                 </xsl:if>
                             </xsl:variable>
+                            <xsl:variable name="ID_TYCHO">
+                                <xsl:if test="VOT:TD[number($TYC1_index)]/text() and VOT:TD[number($TYC2_index)]/text() and VOT:TD[number($TYC3_index)]/text()">
+                                    <xsl:value-of select="concat('TYC ',VOT:TD[number($TYC1_index)],'-',VOT:TD[number($TYC2_index)],'-',VOT:TD[number($TYC3_index)])"/>
+                                </xsl:if>
+                            </xsl:variable>
                             <xsl:variable name="ID_twoMASS">
                                 <xsl:if test="VOT:TD[number($twoMASS_index)]/text()">
                                     <xsl:value-of select="concat('2MASS J',VOT:TD[number($twoMASS_index)])"/>
+                                </xsl:if>
+                            </xsl:variable>
+                            <xsl:variable name="ID_WISE">
+                                <xsl:if test="VOT:TD[number($WISE_index)]/text()">
+                                    <xsl:value-of select="concat('WISEA ',VOT:TD[number($WISE_index)])"/>
                                 </xsl:if>
                             </xsl:variable>
                             <xsl:variable name="ID_DM">
@@ -362,6 +408,7 @@
                                     <xsl:value-of select="concat('WDS J',VOT:TD[number($WDS_index)])"/>
                                 </xsl:if>
                             </xsl:variable>
+
                             <xsl:variable name="RA2000" select="VOT:TD[number($RA_index)]/text()"/>
                             <xsl:variable name="DE2000" select="VOT:TD[number($DEC_index)]/text()"/>
 
@@ -376,8 +423,14 @@
                                     <xsl:when test="$ID_HIP != ''">
                                         <xsl:value-of select="$ID_HIP"/>
                                     </xsl:when>
+                                    <xsl:when test="$ID_TYCHO != ''">
+                                        <xsl:value-of select="$ID_TYCHO"/>
+                                    </xsl:when>
                                     <xsl:when test="$ID_twoMASS != ''">
                                         <xsl:value-of select="$ID_twoMASS"/>
+                                    </xsl:when>
+                                    <xsl:when test="$ID_WISE != ''">
+                                        <xsl:value-of select="$ID_WISE"/>
                                     </xsl:when>
                                     <xsl:when test="$ID_DM != ''">
                                         <xsl:value-of select="$ID_DM"/>
@@ -401,10 +454,13 @@
                             <xsl:variable name="DEC"      select="translate($DE2000, ' ', ':')"/>
                             <xsl:variable name="PMRA"     select="VOT:TD[number($PMRA_index)]"/>
                             <xsl:variable name="PMDEC"    select="VOT:TD[number($PMDEC_index)]"/>
+
                             <xsl:variable name="FLUX_B"   select="VOT:TD[number($B_index)]"/>
+                            <xsl:variable name="FLUX_BP"  select="VOT:TD[number($BP_index)]"/>
                             <xsl:variable name="FLUX_V"   select="VOT:TD[number($V_index)]"/>
                             <xsl:variable name="FLUX_G"   select="VOT:TD[number($G_index)]"/>
                             <xsl:variable name="FLUX_R"   select="VOT:TD[number($R_index)]"/>
+                            <xsl:variable name="FLUX_RP"  select="VOT:TD[number($RP_index)]"/>
                             <xsl:variable name="FLUX_I"   select="VOT:TD[number($I_index)]"/>
                             <xsl:variable name="FLUX_J"   select="VOT:TD[number($J_index)]"/>
                             <xsl:variable name="FLUX_H"   select="VOT:TD[number($H_index)]"/>
@@ -412,13 +468,20 @@
                             <xsl:variable name="FLUX_L"   select="VOT:TD[number($L_index)]"/>
                             <xsl:variable name="FLUX_M"   select="VOT:TD[number($M_index)]"/>
                             <xsl:variable name="FLUX_N"   select="VOT:TD[number($N_index)]"/>
+
                             <xsl:variable name="OBJTYPES" select="VOT:TD[number($ObjTypes_index)]"/>
                             <xsl:variable name="SPECTYP"  select="VOT:TD[number($SpType_index)]"/>
-                            <!-- TODO: OBJTYP -->
+
                             <xsl:variable name="PARALLAX" select="VOT:TD[number($Parallax_index)]"/>
                             <xsl:variable name="PARA_ERR" select="VOT:TD[number($ParallaxErr_index)]"/>
                             <xsl:variable name="SYSVEL"   select="VOT:TD[number($RadVel_index)]"/>
 
+                            <!-- debug fields -->
+                            <!--
+                            <xsl:for-each select="VOT:TD">
+                                <xsl:message>TD[<xsl:value-of select="position()"/> (<xsl:value-of select="$table/VOT:FIELD[number(position())]/@name"/>) ] = '<xsl:value-of select="text()"/>'</xsl:message>
+                            </xsl:for-each>
+                            -->
 
                             <target>
                                 <!-- no id attribute : defined by Aspro2 -->
@@ -471,18 +534,22 @@
                                     </PARA_ERR>
                                 </xsl:if>
 
-                                <!-- identifiers (HD, HIP, 2MASS, DM, SBC9, WDS only) -->
+                                <!-- identifiers -->
                                 <IDS>
+                                    <xsl:if test="$ID_DM != ''">
+                                        <xsl:value-of select="$ID_DM"/>,</xsl:if>
                                     <xsl:if test="$ID_GAIA != ''">
                                         <xsl:value-of select="$ID_GAIA"/>,</xsl:if>
                                     <xsl:if test="$ID_HIP != ''">
                                         <xsl:value-of select="$ID_HIP"/>,</xsl:if>
+                                    <xsl:if test="$ID_TYCHO != ''">
+                                        <xsl:value-of select="$ID_TYCHO"/>,</xsl:if>
                                     <xsl:if test="$ID_HD != ''">
                                         <xsl:value-of select="$ID_HD"/>,</xsl:if>
                                     <xsl:if test="$ID_twoMASS != ''">
                                         <xsl:value-of select="$ID_twoMASS"/>,</xsl:if>
-                                    <xsl:if test="$ID_DM != ''">
-                                        <xsl:value-of select="$ID_DM"/>,</xsl:if>
+                                    <xsl:if test="$ID_WISE != ''">
+                                        <xsl:value-of select="$ID_WISE"/>,</xsl:if>
                                     <xsl:if test="$ID_SBC9 != ''">
                                         <xsl:value-of select="$ID_SBC9"/>,</xsl:if>
                                     <xsl:if test="$ID_WDS != ''">
@@ -509,20 +576,30 @@
                                         <xsl:value-of select="$FLUX_B"/>
                                     </FLUX_B>
                                 </xsl:if>
+                                <xsl:if test="$FLUX_BP/text()">
+                                    <FLUX_BP>
+                                        <xsl:value-of select="$FLUX_BP"/>
+                                    </FLUX_BP>
+                                </xsl:if>
                                 <xsl:if test="$FLUX_V/text()">
                                     <FLUX_V>
                                         <xsl:value-of select="$FLUX_V"/>
                                     </FLUX_V>
                                 </xsl:if>
                                 <xsl:if test="$FLUX_G/text()">
-                                    <FLUX_V>
+                                    <FLUX_G>
                                         <xsl:value-of select="$FLUX_G"/>
-                                    </FLUX_V>
+                                    </FLUX_G>
                                 </xsl:if>
                                 <xsl:if test="$FLUX_R/text()">
                                     <FLUX_R>
                                         <xsl:value-of select="$FLUX_R"/>
                                     </FLUX_R>
+                                </xsl:if>
+                                <xsl:if test="$FLUX_RP/text()">
+                                    <FLUX_RP>
+                                        <xsl:value-of select="$FLUX_RP"/>
+                                    </FLUX_RP>
                                 </xsl:if>
                                 <xsl:if test="$FLUX_I/text()">
                                     <FLUX_I>
@@ -665,6 +742,7 @@
         <xsl:for-each select="$table/VOT:FIELD">
             <xsl:if test="@name=$colName">
                 <xsl:value-of select="position()" />
+                <!-- <xsl:message>getColumnIndex('<xsl:value-of select="$colName"/>'): <xsl:value-of select="position()"/></xsl:message> -->
             </xsl:if>
         </xsl:for-each>
     </xsl:template>

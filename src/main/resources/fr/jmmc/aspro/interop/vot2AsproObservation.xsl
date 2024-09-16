@@ -596,8 +596,10 @@
                         <xsl:variable name="PMDEC"    select="./TD[$PMDEC_index != '' and position()=$PMDEC_index]/text()"/>
                         <xsl:variable name="PLX"      select="./TD[$PLX_index != '' and position()=$PLX_index]/text()"/>
                         <xsl:variable name="e_PLX"    select="./TD[$e_PLX_index != '' and position()=$e_PLX_index]/text()"/>
+
                         <xsl:variable name="OTYPES"   select="./TD[$OTYPES_index != '' and position()=$OTYPES_index]/text()"/>
                         <xsl:variable name="SP_TYPES" select="./TD[$SP_TYPES_index != '' and position()=$SP_TYPES_index]/text()"/>
+
                         <xsl:variable name="FLUX_B"   select="./TD[$FLUX_B_index != '' and position()=$FLUX_B_index]/text()"/>
                         <xsl:variable name="FLUX_V"   select="./TD[$FLUX_V_index != '' and position()=$FLUX_V_index]/text()"/>
                         <xsl:variable name="FLUX_G"   select="./TD[$FLUX_G_index != '' and position()=$FLUX_G_index]/text()"/>
@@ -609,6 +611,7 @@
                         <xsl:variable name="FLUX_L"   select="./TD[$FLUX_L_index != '' and position()=$FLUX_L_index]/text()"/>
                         <xsl:variable name="FLUX_M"   select="./TD[$FLUX_M_index != '' and position()=$FLUX_M_index]/text()"/>
                         <xsl:variable name="FLUX_N"   select="./TD[$FLUX_N_index != '' and position()=$FLUX_N_index]/text()"/>
+
                         <xsl:variable name="TARGET_MODEL"   select="./TD[$TARGET_MODEL_index != '' and position()=$TARGET_MODEL_index]/text()"/>
 
                         <target id="{$TARGET_ID}">
