@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="24.10 beta 1"/>
+    <program name="Aspro2" version="24.09.1 beta 1"/>
     <compilation date="16/09/2024" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -240,9 +240,9 @@
     </menubar>
 
     <releasenotes>
-        <release version="24.10">
+        <release version="24.09.1">
             <pubDate>Mon, 16 Sep 2024 14:00:00 GMT</pubDate>
-            <prerelease version="24.10 beta 1">
+            <prerelease version="24.09.1 beta 1">
                 <change type="FEATURE">Updated SearchCal / GetStar information retrieval (G flux, IDS)</change>
                 <!--
                 <change type="FEATURE">Support analytical chromatic models (black-body variants)</change>
