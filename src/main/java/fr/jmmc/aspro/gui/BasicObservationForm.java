@@ -10,6 +10,7 @@ import edu.dartmouth.Site;
 import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
+import fr.jmmc.aspro.gui.action.GetStarAction;
 import fr.jmmc.aspro.gui.util.PopListRenderer;
 import fr.jmmc.aspro.gui.util.TargetList;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
@@ -205,10 +206,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         starSearchField = new EditableStarResolverWidget(true);
         jScrollPaneTargets = new javax.swing.JScrollPane();
         jListTargets = new TargetList();
-        jButtonDeleteTarget = new javax.swing.JButton();
+        jButtonGetStar = new javax.swing.JButton();
         jButtonTargetEditor = new javax.swing.JButton();
-        jPanelTargetsRight = new javax.swing.JPanel();
+        jButtonDeleteTarget = new javax.swing.JButton();
         jButtonSkyCalc = new javax.swing.JButton();
+        jPanelTargetsRight = new javax.swing.JPanel();
         jPanelMain = new javax.swing.JPanel();
         jPanelObsLeft = new javax.swing.JPanel();
         jLabelInterferometer = new javax.swing.JLabel();
@@ -244,6 +246,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jFieldMinElev = new javax.swing.JFormattedTextField();
         jCheckBoxWind = new javax.swing.JCheckBox();
         jPanelOptBottom = new javax.swing.JPanel();
+        jPanelConsLeft = new javax.swing.JPanel();
         jPanelStatus = new javax.swing.JPanel();
         jLabelState = new javax.swing.JLabel();
         jLabelStatus = new javax.swing.JLabel();
@@ -263,7 +266,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weightx = 0.01;
         jPanelTargets.add(jPanelTargetsLeft, gridBagConstraints);
 
         starSearchField.setToolTipText("<html>\nEnter targets here :<br>\nTarget identifier (CDS Simbad service)<br>\nor RA / DEC coordinates (J2000) with an optional identifier:<br>\n'H:M:S [+/-]D:M:S [identifier]'<br>\n<b>Use the semicolon separator ';' for multiple targets</b>\n</html>");
@@ -271,10 +274,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.8;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 6);
         jPanelTargets.add(starSearchField, gridBagConstraints);
 
         jListTargets.setToolTipText("Target list : use the Simbad field to enter your targets\n");
@@ -294,12 +297,45 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.8;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 4);
         jPanelTargets.add(jScrollPaneTargets, gridBagConstraints);
+
+        jButtonGetStar.setText("GetStar");
+        jButtonGetStar.setToolTipText("Open JMMC GetStar web page for this target");
+        jButtonGetStar.setMargin(new java.awt.Insets(0, 4, 0, 4));
+        jButtonGetStar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonGetStarActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
+        jPanelTargets.add(jButtonGetStar, gridBagConstraints);
+
+        jButtonTargetEditor.setText("Editor");
+        jButtonTargetEditor.setToolTipText("Open the Target Editor");
+        jButtonTargetEditor.setMargin(new java.awt.Insets(0, 4, 0, 4));
+        jButtonTargetEditor.setName("jButtonTargetEditor"); // NOI18N
+        jButtonTargetEditor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonTargetEditorActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
+        jPanelTargets.add(jButtonTargetEditor, gridBagConstraints);
 
         jButtonDeleteTarget.setIcon(ImageUtils.loadResourceIcon("fr/jmmc/aspro/gui/icons/delete.png"));
         jButtonDeleteTarget.setToolTipText("delete the selected target(s)");
-        jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonDeleteTarget.setName("jButtonDeleteTarget"); // NOI18N
         jButtonDeleteTarget.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -313,35 +349,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         jPanelTargets.add(jButtonDeleteTarget, gridBagConstraints);
 
-        jButtonTargetEditor.setText("Editor");
-        jButtonTargetEditor.setToolTipText("Open the Target Editor");
-        jButtonTargetEditor.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        jButtonTargetEditor.setName("jButtonTargetEditor"); // NOI18N
-        jButtonTargetEditor.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonTargetEditorActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        jPanelTargets.add(jButtonTargetEditor, gridBagConstraints);
-
-        jPanelTargetsRight.setMinimumSize(new java.awt.Dimension(4, 4));
-        jPanelTargetsRight.setPreferredSize(new java.awt.Dimension(4, 4));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
-        jPanelTargets.add(jPanelTargetsRight, gridBagConstraints);
-
         jButtonSkyCalc.setText("Sky");
         jButtonSkyCalc.setToolTipText("Open the JSkyCalc Window");
-        jButtonSkyCalc.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonSkyCalc.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonSkyCalc.setName("jButtonSkyCalc"); // NOI18N
         jButtonSkyCalc.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -351,9 +361,20 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         jPanelTargets.add(jButtonSkyCalc, gridBagConstraints);
+
+        jPanelTargetsRight.setMinimumSize(new java.awt.Dimension(4, 4));
+        jPanelTargetsRight.setPreferredSize(new java.awt.Dimension(4, 4));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.01;
+        jPanelTargets.add(jPanelTargetsRight, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridheight = 2;
@@ -373,7 +394,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weightx = 0.01;
         jPanelMain.add(jPanelObsLeft, gridBagConstraints);
 
         jLabelInterferometer.setLabelFor(jComboBoxInterferometer);
@@ -436,7 +457,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 4);
         jPanelMain.add(jLabelPops, gridBagConstraints);
 
         jTextPoPs.setColumns(6);
@@ -504,6 +525,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
         jPanelFixedPops.add(jPanelFixedPopsGen, gridBagConstraints);
 
@@ -523,6 +545,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
         jPanelFixedPops.add(jTextFieldCurrentPops, gridBagConstraints);
 
@@ -533,7 +556,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weightx = 0.01;
         jPanelFixedPops.add(jPanelFixedPopsSpacer, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -541,6 +564,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         jPanelMain.add(jPanelFixedPops, gridBagConstraints);
 
         jPanelObsRight.setMinimumSize(new java.awt.Dimension(4, 4));
@@ -550,7 +575,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weightx = 0.01;
         jPanelMain.add(jPanelObsRight, gridBagConstraints);
 
         jPanelObsBottom.setPreferredSize(new java.awt.Dimension(1, 1));
@@ -559,7 +584,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 8;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 0.1;
+        gridBagConstraints.weighty = 0.01;
         jPanelMain.add(jPanelObsBottom, gridBagConstraints);
 
         jComboBoxPopsMode.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Sel" }));
@@ -614,7 +639,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weightx = 0.01;
         jPanelConfigurations.add(jPanelConfLeft, gridBagConstraints);
 
         jPanelConfRight.setMinimumSize(new java.awt.Dimension(6, 6));
@@ -623,7 +648,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weightx = 0.01;
         jPanelConfigurations.add(jPanelConfRight, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -631,7 +656,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.weightx = 0.3;
         gridBagConstraints.weighty = 0.5;
         add(jPanelConfigurations, gridBagConstraints);
 
@@ -644,11 +669,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jCheckBoxNightLimit.setIconTextGap(6);
         jCheckBoxNightLimit.setName("jCheckBoxNightLimit"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 4);
         jPanelOptions.add(jCheckBoxNightLimit, gridBagConstraints);
 
         jLabelDate.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -656,45 +682,46 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jLabelDate.setText("Date");
         jLabelDate.setToolTipText("<html>the given date is used to determine the <b>coming night</b>\n<br/>at the observatory in the [DD; DD+1] range.\n<br/>for example, '2014/4/4' corresponds to the night \n<br/>between April 4th and 5th.</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 4);
         jPanelOptions.add(jLabelDate, gridBagConstraints);
 
         jDateSpinner.setModel(new javax.swing.SpinnerDateModel());
         jDateSpinner.setEditor(new javax.swing.JSpinner.DateEditor(jDateSpinner, "yyyy/MM/dd"));
         jDateSpinner.setName("jDateSpinner"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
         jPanelOptions.add(jDateSpinner, gridBagConstraints);
 
         jLabelMinElev.setLabelFor(jFieldMinElev);
         jLabelMinElev.setText("Min. Elevation");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 4);
         jPanelOptions.add(jLabelMinElev, gridBagConstraints);
 
         jFieldMinElev.setColumns(2);
         jFieldMinElev.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
         jFieldMinElev.setName("jFieldMinElev"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         jPanelOptions.add(jFieldMinElev, gridBagConstraints);
 
         jCheckBoxWind.setText("Wind");
@@ -702,21 +729,32 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jCheckBoxWind.setIconTextGap(6);
         jCheckBoxWind.setName("jCheckBoxWind"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 4);
         jPanelOptions.add(jCheckBoxWind, gridBagConstraints);
 
         jPanelOptBottom.setMinimumSize(new java.awt.Dimension(1, 1));
         jPanelOptBottom.setPreferredSize(new java.awt.Dimension(1, 1));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 0.1;
+        gridBagConstraints.weighty = 0.01;
         jPanelOptions.add(jPanelOptBottom, gridBagConstraints);
+
+        jPanelConsLeft.setMinimumSize(new java.awt.Dimension(6, 6));
+        jPanelConsLeft.setPreferredSize(new java.awt.Dimension(4, 4));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.01;
+        jPanelOptions.add(jPanelConsLeft, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -734,7 +772,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 0);
         jPanelStatus.add(jLabelState, gridBagConstraints);
 
         jLabelStatus.setText("Ok");
@@ -752,6 +790,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         jPanelStatus.add(jLabelStatus, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -823,6 +862,31 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         // group multiple calls into a single observation update event :
         fireObservationUpdateEvent();
     }//GEN-LAST:event_jButtonPopsClearActionPerformed
+
+    private void jButtonGetStarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGetStarActionPerformed
+        String targetId = starSearchField.getRealText();
+
+        if (StringUtils.isEmpty(targetId)) {
+            targetId = null;
+
+            final Target target = this.currentTarget;
+            if (target != null) {
+                targetId = target.getName();
+
+                if (StringUtils.isEmpty(targetId)) {
+                    targetId = null;
+                }
+            }
+        } else {
+            // convert ';' separator (aspro2) by ',' (GetStar):
+            targetId = targetId.replace(';', ',');
+        }
+        if (targetId != null) {
+            logger.info("Querying GetStar for identifier '{}'...", targetId);
+
+            GetStarAction.openGetStarInBrowser(targetId);
+        }
+    }//GEN-LAST:event_jButtonGetStarActionPerformed
 
     /**
      * Process the remove target action
@@ -1035,12 +1099,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         windWidget = WindWidget.create();
 
         final GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 4; // 4 rows (including spacer)
         gridBagConstraints.fill = GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         jPanelOptions.add(windWidget, gridBagConstraints);
 
         windWidget.addPropertyChangeListener(WindWidget.PROPERTY_VALUE, new PropertyChangeListener() {
@@ -1309,7 +1374,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private void checkTargetSelection() {
         // check if the automatic configuration check flag is enabled :
         if (doAutoCheckTargets) {
-            checkListSelection(jListTargets, currentTarget);
+            checkListSelection(jListTargets, getSelectedTarget());
         }
     }
 
@@ -2561,6 +2626,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonDeleteTarget;
+    private javax.swing.JButton jButtonGetStar;
     private javax.swing.JButton jButtonPopsClear;
     private javax.swing.JButton jButtonPopsSet;
     private javax.swing.JButton jButtonSkyCalc;
@@ -2589,6 +2655,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private javax.swing.JPanel jPanelConfLeft;
     private javax.swing.JPanel jPanelConfRight;
     private javax.swing.JPanel jPanelConfigurations;
+    private javax.swing.JPanel jPanelConsLeft;
     private javax.swing.JPanel jPanelFixedPops;
     private javax.swing.JPanel jPanelFixedPopsGen;
     private javax.swing.JPanel jPanelFixedPopsSpacer;

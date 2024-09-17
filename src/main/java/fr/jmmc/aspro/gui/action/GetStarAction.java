@@ -74,41 +74,47 @@ public final class GetStarAction extends RegisteredAction {
         }
 
         final String url = buildQuery(ids);
-        logger.debug("GetStar url = {}", url);
 
-        final File voTableFile = FileUtils.getTempFile("getstar.vot");
+        if (url != null) {
+            logger.debug("GetStar url = {}", url);
 
-        try {
-            final URI uri = new URI(url);
+            final File voTableFile = FileUtils.getTempFile("getstar.vot");
 
-            logger.debug("downloading {} to {}", uri, voTableFile);
+            try {
+                final URI uri = new URI(url);
 
-            if (Http.download(uri, voTableFile, false)) {
-                try {
-                    final String votable = FileUtils.readFile(voTableFile);
+                logger.debug("downloading {} to {}", uri, voTableFile);
 
-                    StatusBar.show("file loaded : " + voTableFile.getName());
+                if (Http.download(uri, voTableFile, false)) {
+                    try {
+                        final String votable = FileUtils.readFile(voTableFile);
 
-                    logger.debug("votable :\n{}", votable);
+                        StatusBar.show("file loaded : " + voTableFile.getName());
 
-                    SearchCalVOTableHandler.processMessage(votable, "undefined");
+                        logger.debug("votable :\n{}", votable);
 
-                } catch (IOException ioe) {
-                    MessagePane.showErrorMessage("Could not load the file : " + voTableFile.getAbsolutePath(), ioe);
+                        SearchCalVOTableHandler.processMessage(votable, "undefined");
+
+                    } catch (IOException ioe) {
+                        MessagePane.showErrorMessage("Could not load the file : " + voTableFile.getAbsolutePath(), ioe);
+                    }
                 }
+            } catch (URISyntaxException use) {
+                logger.warn("Bad URI:", use);
+            } catch (IOException ioe) {
+                logger.info("IO failure (no network / internet access ?):", ioe);
             }
-        } catch (URISyntaxException use) {
-            logger.warn("Bad URI:", use);
-        } catch (IOException ioe) {
-            logger.info("IO failure (no network / internet access ?):", ioe);
         }
     }
 
     public static void openGetStarInBrowser(final String id) {
         final String url = buildQuery(id);
-        logger.debug("GetStar url = {}", url);
 
-        BrowserLauncher.openURL(url);
+        if (url != null) {
+            logger.debug("GetStar url = {}", url);
+
+            BrowserLauncher.openURL(url);
+        }
     }
 
     private static String buildQuery(final String... ids) {
