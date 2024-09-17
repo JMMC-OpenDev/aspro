@@ -1136,6 +1136,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         jTextFieldCurrentPops.setFont(FIXED_FONT_SMALLER);
 
         // use small variant:
+        SwingUtils.adjustSize(this.jButtonGetStar, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jButtonTargetEditor, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jButtonDeleteTarget, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jButtonSkyCalc, ComponentSizeVariant.small);
