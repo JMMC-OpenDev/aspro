@@ -134,6 +134,9 @@
             <Component class="javax.swing.JButton" name="jButtonAdd">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Add"/>
+                <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+                  <Insets value="[0, 4, 0, 4]"/>
+                </Property>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonAddActionPerformed"/>
@@ -148,6 +151,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Remove"/>
                 <Property name="enabled" type="boolean" value="false"/>
+                <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+                  <Insets value="[0, 4, 0, 4]"/>
+                </Property>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonRemoveActionPerformed"/>
@@ -162,6 +168,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Update"/>
                 <Property name="enabled" type="boolean" value="false"/>
+                <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+                  <Insets value="[0, 4, 0, 4]"/>
+                </Property>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonUpdateActionPerformed"/>
@@ -295,6 +304,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Open"/>
                 <Property name="toolTipText" type="java.lang.String" value="Open a FITS image ..."/>
+                <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+                  <Insets value="[0, 4, 0, 4]"/>
+                </Property>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonOpenFileActionPerformed"/>
@@ -358,6 +370,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="reset"/>
                 <Property name="toolTipText" type="java.lang.String" value="reset pixel size &amp; rotation to their original values"/>
+                <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+                  <Insets value="[0, 4, 0, 4]"/>
+                </Property>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonResetActionPerformed"/>
@@ -372,6 +387,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="AMHRA"/>
                 <Property name="toolTipText" type="java.lang.String" value="Open the AMHRA web portal to get a model image"/>
+                <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+                  <Insets value="[0, 4, 0, 4]"/>
+                </Property>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonAmhraActionPerformed"/>
@@ -557,6 +575,9 @@
         <Component class="javax.swing.JButton" name="jButtonNormalizeFluxes">
           <Properties>
             <Property name="text" type="java.lang.String" value="Normalize fluxes"/>
+            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+              <Insets value="[0, 4, 0, 4]"/>
+            </Property>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonNormalizeFluxesActionPerformed"/>

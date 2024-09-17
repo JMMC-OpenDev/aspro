@@ -919,6 +919,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jPanelModelAnalytic.setLayout(new java.awt.GridBagLayout());
 
         jButtonAdd.setText("Add");
+        jButtonAdd.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAddActionPerformed(evt);
@@ -932,6 +933,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         jButtonRemove.setText("Remove");
         jButtonRemove.setEnabled(false);
+        jButtonRemove.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonRemove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonRemoveActionPerformed(evt);
@@ -946,6 +948,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         jButtonUpdate.setText("Update");
         jButtonUpdate.setEnabled(false);
+        jButtonUpdate.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonUpdate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonUpdateActionPerformed(evt);
@@ -1062,6 +1065,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         jButtonOpenFile.setText("Open");
         jButtonOpenFile.setToolTipText("Open a FITS image ...");
+        jButtonOpenFile.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonOpenFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonOpenFileActionPerformed(evt);
@@ -1113,6 +1117,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         jButtonReset.setText("reset");
         jButtonReset.setToolTipText("reset pixel size & rotation to their original values");
+        jButtonReset.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonReset.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonResetActionPerformed(evt);
@@ -1128,6 +1133,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         jButtonAmhra.setText("AMHRA");
         jButtonAmhra.setToolTipText("Open the AMHRA web portal to get a model image");
+        jButtonAmhra.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonAmhra.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAmhraActionPerformed(evt);
@@ -1254,6 +1260,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jPanelParameters.add(jLabelOffsetEditMode, gridBagConstraints);
 
         jButtonNormalizeFluxes.setText("Normalize fluxes");
+        jButtonNormalizeFluxes.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonNormalizeFluxes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonNormalizeFluxesActionPerformed(evt);

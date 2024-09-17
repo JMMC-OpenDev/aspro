@@ -105,6 +105,9 @@
             <Property name="toolTipText" type="java.lang.String" value="Remove the selected target association"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
+            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+              <Insets value="[0, 4, 0, 4]"/>
+            </Property>
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
           <Events>
@@ -119,6 +122,9 @@
         <Component class="javax.swing.JButton" name="jButtonAddGroup">
           <Properties>
             <Property name="text" type="java.lang.String" value="Add group"/>
+            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+              <Insets value="[0, 4, 0, 4]"/>
+            </Property>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonAddGroupActionPerformed"/>
@@ -132,6 +138,9 @@
         <Component class="javax.swing.JButton" name="jButtonDeleteGroup">
           <Properties>
             <Property name="text" type="java.lang.String" value="Delete group"/>
+            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+              <Insets value="[0, 4, 0, 4]"/>
+            </Property>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonDeleteGroupActionPerformed"/>

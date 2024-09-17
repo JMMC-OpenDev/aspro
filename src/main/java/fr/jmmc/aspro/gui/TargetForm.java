@@ -774,14 +774,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         jScrollPaneCalibrators = new javax.swing.JScrollPane();
         jListCalibrators = new TargetList();
         jPanelActions = new javax.swing.JPanel();
+        jButtonGetStar = new javax.swing.JButton();
         jButtonBefore = new javax.swing.JButton();
         jButtonAfter = new javax.swing.JButton();
         jButtonDeleteTarget = new javax.swing.JButton();
-        jSeparator1 = new javax.swing.JToolBar.Separator();
         jLabelSort = new javax.swing.JLabel();
         jButtonSortRA = new javax.swing.JButton();
         jButtonSortDE = new javax.swing.JButton();
-        jSeparator2 = new javax.swing.JToolBar.Separator();
         jToggleButtonCalibrator = new javax.swing.JToggleButton();
         jButtonRemoveCalibrator = new javax.swing.JButton();
         jPanelRight = new javax.swing.JPanel();
@@ -793,7 +792,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         refreshButton = new javax.swing.JButton();
         jButtonSimbad = new javax.swing.JButton();
         jButtonSEDViewer = new javax.swing.JButton();
-        jButtonGetStar = new javax.swing.JButton();
         jButtonSearchFTT = new javax.swing.JButton();
         jLabelRA = new javax.swing.JLabel();
         jFieldRA = new javax.swing.JTextField();
@@ -913,11 +911,26 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         jPanelActions.setLayout(new java.awt.GridBagLayout());
 
+        jButtonGetStar.setText("GetStar");
+        jButtonGetStar.setToolTipText("Open JMMC GetStar web page for this target");
+        jButtonGetStar.setMargin(new java.awt.Insets(0, 4, 0, 4));
+        jButtonGetStar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonGetStarActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 10);
+        jPanelActions.add(jButtonGetStar, gridBagConstraints);
+
         jButtonBefore.setIcon(ResourceImage.UP_ARROW.icon());
         jButtonBefore.setToolTipText("");
         jButtonBefore.setFocusable(false);
         jButtonBefore.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButtonBefore.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonBefore.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonBefore.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jButtonBefore.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -925,14 +938,16 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
         jPanelActions.add(jButtonBefore, gridBagConstraints);
 
         jButtonAfter.setIcon(ResourceImage.DOWN_ARROW.icon());
         jButtonAfter.setFocusable(false);
         jButtonAfter.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButtonAfter.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonAfter.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonAfter.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jButtonAfter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -940,15 +955,17 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         jPanelActions.add(jButtonAfter, gridBagConstraints);
 
         jButtonDeleteTarget.setIcon(ImageUtils.loadResourceIcon("fr/jmmc/aspro/gui/icons/delete.png"));
         jButtonDeleteTarget.setToolTipText("delete the selected target");
         jButtonDeleteTarget.setFocusable(false);
         jButtonDeleteTarget.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonDeleteTarget.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jButtonDeleteTarget.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -956,16 +973,11 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelActions.add(jButtonDeleteTarget, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        jPanelActions.add(jSeparator1, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 10);
+        jPanelActions.add(jButtonDeleteTarget, gridBagConstraints);
 
         jLabelSort.setText("Sort by:");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -976,7 +988,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         jButtonSortRA.setText("RA");
         jButtonSortRA.setToolTipText("sort all targets (and calibrators) by their right ascension (ascending)");
-        jButtonSortRA.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonSortRA.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonSortRA.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSortRAActionPerformed(evt);
@@ -985,13 +997,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         jPanelActions.add(jButtonSortRA, gridBagConstraints);
 
         jButtonSortDE.setText("DEC");
         jButtonSortDE.setToolTipText("sort all targets (and calibrators) by their declination (ascending)");
-        jButtonSortDE.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButtonSortDE.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonSortDE.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSortDEActionPerformed(evt);
@@ -1000,33 +1012,30 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 10);
         jPanelActions.add(jButtonSortDE, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 7;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        jPanelActions.add(jSeparator2, gridBagConstraints);
 
         jToggleButtonCalibrator.setText("Flag calibrator");
         jToggleButtonCalibrator.setToolTipText("(un)flag the selected target as calibrator");
+        jToggleButtonCalibrator.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jToggleButtonCalibrator.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jToggleButtonCalibratorActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 8;
+        gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
         jPanelActions.add(jToggleButtonCalibrator, gridBagConstraints);
 
         jButtonRemoveCalibrator.setText("Remove calibrator");
         jButtonRemoveCalibrator.setToolTipText("Remove the selected calibrator from the target's calibrators");
         jButtonRemoveCalibrator.setFocusable(false);
         jButtonRemoveCalibrator.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonRemoveCalibrator.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonRemoveCalibrator.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jButtonRemoveCalibrator.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1034,13 +1043,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 9;
+        gridBagConstraints.gridx = 8;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         jPanelActions.add(jButtonRemoveCalibrator, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 10;
+        gridBagConstraints.gridx = 9;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
@@ -1088,7 +1097,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         jButtonSimbad.setText("Simbad");
         jButtonSimbad.setToolTipText("Open CDS Simbad web page for this target");
-        jButtonSimbad.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        jButtonSimbad.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonSimbad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSimbadActionPerformed(evt);
@@ -1098,7 +1107,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         jButtonSEDViewer.setText("SED");
         jButtonSEDViewer.setToolTipText("Open CDS VizieR Photometry viewer for this target");
-        jButtonSEDViewer.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        jButtonSEDViewer.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonSEDViewer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSEDViewerActionPerformed(evt);
@@ -1106,19 +1115,9 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         });
         jPanelTargetActions.add(jButtonSEDViewer);
 
-        jButtonGetStar.setText("GetStar");
-        jButtonGetStar.setToolTipText("Open JMMC GetStar web page for this target");
-        jButtonGetStar.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        jButtonGetStar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonGetStarActionPerformed(evt);
-            }
-        });
-        jPanelTargetActions.add(jButtonGetStar);
-
         jButtonSearchFTT.setText("SearchFTT");
         jButtonSearchFTT.setToolTipText("Open JMMC SearchFTT web page for this target (finding off-axis fringe tracking targets)");
-        jButtonSearchFTT.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        jButtonSearchFTT.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonSearchFTT.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSearchFTTActionPerformed(evt);
@@ -1610,6 +1609,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
 
         jButtonMagConv.setText("Mag calc.");
         jButtonMagConv.setToolTipText("Magnitude to Flux Density converters");
+        jButtonMagConv.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonMagConv.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonMagConvActionPerformed(evt);
@@ -1659,7 +1659,9 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }// </editor-fold>//GEN-END:initComponents
 
   private void jButtonSimbadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSimbadActionPerformed
-      TargetUtils.openSimbad(this.currentTarget.getName());
+      if (this.currentTarget != null) {
+          TargetUtils.openSimbad(this.currentTarget.getName());
+      }
   }//GEN-LAST:event_jButtonSimbadActionPerformed
 
     private void jButtonDeleteTargetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteTargetActionPerformed
@@ -1898,10 +1900,12 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }//GEN-LAST:event_jButtonBeforeActionPerformed
 
     private void jButtonSEDViewerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSEDViewerActionPerformed
-        final String url = VIZIER_SED_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
-        logger.debug("Vizier SED url = {}", url);
+        if (this.currentTarget != null) {
+            final String url = VIZIER_SED_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
+            logger.debug("Vizier SED url = {}", url);
 
-        BrowserLauncher.openURL(url);
+            BrowserLauncher.openURL(url);
+        }
     }//GEN-LAST:event_jButtonSEDViewerActionPerformed
 
     private void jButtonSortDEActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSortDEActionPerformed
@@ -1910,7 +1914,28 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }//GEN-LAST:event_jButtonSortDEActionPerformed
 
     private void jButtonGetStarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGetStarActionPerformed
-        GetStarAction.openGetStarInBrowser(this.currentTarget.getName());
+        String targetId = starSearchField.getRealText();
+
+        if (StringUtils.isEmpty(targetId)) {
+            targetId = null;
+
+            final Target target = this.currentTarget;
+            if (target != null) {
+                targetId = target.getName();
+
+                if (StringUtils.isEmpty(targetId)) {
+                    targetId = null;
+                }
+            }
+        } else {
+            // convert ';' separator (aspro2) by ',' (GetStar):
+            targetId = targetId.replace(';', ',');
+        }
+        if (targetId != null) {
+            logger.info("Querying GetStar for identifier '{}'...", targetId);
+
+            GetStarAction.openGetStarInBrowser(targetId);
+        }
     }//GEN-LAST:event_jButtonGetStarActionPerformed
 
     private void jButtonMagConvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonMagConvActionPerformed
@@ -1933,10 +1958,13 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     }//GEN-LAST:event_updateSimbad
 
     private void jButtonSearchFTTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSearchFTTActionPerformed
-        final String url = SEARCH_FTT_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
-        logger.debug("SearchFTT url = {}", url);
+        if (this.currentTarget != null) {
+            final String url = SEARCH_FTT_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
 
-        BrowserLauncher.openURL(url);
+            logger.debug("SearchFTT url = {}", url);
+
+            BrowserLauncher.openURL(url);
+        }
     }//GEN-LAST:event_jButtonSearchFTTActionPerformed
 
     /**
@@ -2260,8 +2288,6 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private javax.swing.JScrollPane jScrollPaneTarget;
     private javax.swing.JScrollPane jScrollPaneTargetInfos;
     private javax.swing.JScrollPane jScrollPaneTreeTargets;
-    private javax.swing.JToolBar.Separator jSeparator1;
-    private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;

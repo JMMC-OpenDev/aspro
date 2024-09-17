@@ -832,6 +832,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
         jButtonRemoveAssociation.setToolTipText("Remove the selected target association");
         jButtonRemoveAssociation.setFocusable(false);
         jButtonRemoveAssociation.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonRemoveAssociation.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonRemoveAssociation.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jButtonRemoveAssociation.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -846,6 +847,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
         jPanelActions.add(jButtonRemoveAssociation, gridBagConstraints);
 
         jButtonAddGroup.setText("Add group");
+        jButtonAddGroup.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonAddGroup.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAddGroupActionPerformed(evt);
@@ -858,6 +860,7 @@ public class TargetGroupForm extends javax.swing.JPanel implements PropertyChang
         jPanelActions.add(jButtonAddGroup, gridBagConstraints);
 
         jButtonDeleteGroup.setText("Delete group");
+        jButtonDeleteGroup.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonDeleteGroup.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDeleteGroupActionPerformed(evt);
