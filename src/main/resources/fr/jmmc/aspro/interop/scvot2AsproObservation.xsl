@@ -22,7 +22,7 @@
     <xsl:output omit-xml-declaration="yes" indent="yes" encoding="UTF-8"/>
 
     <!-- SearchCal VOTABLE PARAM elements to copy -->
-    <xsl:variable name="COPY_PARAMS" select="'band|baseMax|wlen|bright|SearchCalGuiVersion'"/>
+    <xsl:variable name="COPY_PARAMS" select="'band|baseMax|wlen|bright|SearchCalGuiVersion|'"/>
 
     <!-- TABLE proxy -->
     <xsl:variable name="table" select="/VOT:VOTABLE/VOT:RESOURCE/VOT:TABLE"/>
@@ -255,6 +255,9 @@
                     xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                     xsi:schemaLocation="http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd http://www.jmmc.fr/jmcs/models/0.1 targetModel.xsd">
+
+                    <schemaVersion>2018.04</schemaVersion>
+                    <targetVersion>2024.09</targetVersion>
 
                     <name>
                         <xsl:value-of select="$SCLSVR_CMD"/>
@@ -667,7 +670,7 @@
                                     <parameter xsi:type="a:StringValue" name="SearchCalServerVersion" value="{$SCLSVR_VERSION}"/>
 
                                     <!-- Build one parameter element per VOTable PARAM present in COPY_PARAMS -->
-                                    <xsl:for-each select="$table/VOT:PARAM[contains($COPY_PARAMS, @name) and @value]">
+                                    <xsl:for-each select="$table/VOT:PARAM[contains($COPY_PARAMS, concat(@name,'|')) and @value]">
                                         <parameter>
                                             <xsl:attribute name="xsi:type">
                                                 <xsl:choose>
@@ -698,7 +701,7 @@
                                         <xsl:variable name="cellValue" select="text()"/>
 
                                         <!-- skip blank values and unused columns (origin and confidence and many other data columns ...) -->
-                                        <xsl:if test="$cellValue != '-' and contains($field/@name, '.origin') = false and contains($field/@name, '.confidence') = false">
+                                        <xsl:if test="$cellValue and $cellValue != '-' and contains($field/@name, '.origin') = false and contains($field/@name, '.confidence') = false">
                                             <field>
                                                 <xsl:attribute name="xsi:type">
                                                     <xsl:choose>
