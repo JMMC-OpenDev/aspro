@@ -1877,7 +1877,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         logger.debug("onTargetSelectionChange : {}", target);
 
         // clear HALive limits:
-        if (getSelectedTargetName() != null) {
+        if (this.jToggleButtonHALive.isSelected() && getSelectedTargetName() != null) {
             logger.debug("reset target HA on {}", getSelectedTargetName());
             resetTargetHA();
             fireObservationUpdateEvent();
