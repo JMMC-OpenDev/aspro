@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="24.09.1 beta 1"/>
-    <compilation date="16/09/2024" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="24.09.1 beta 2"/>
+    <compilation date="23/09/2024" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -202,10 +202,9 @@
             <menu/>
             <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction" action="updateSimbad"
                   description="update all targets with the latest information from the CDS Simbad service"/>
-            <!--
-            <menu label="Get all Stars" classpath="fr.jmmc.aspro.gui.action.GetStarAction" action="getAllStars"
+
+            <menu label="GetStar all Targets" classpath="fr.jmmc.aspro.gui.action.GetStarAction" action="getAllStars"
                   description="update all targets using the JMMC GetStar service"/>
-            -->
             <menu/>
             <menu label="Get Observations (Selected)" classpath="fr.jmmc.aspro.gui.action.QueryOneRawObservationsAction" action="query"
                   description="query raw observations (from JMMC ObsPortal) corresponding to the selected target"/>
@@ -241,8 +240,12 @@
 
     <releasenotes>
         <release version="24.09.1">
-            <pubDate>Mon, 16 Sep 2024 14:00:00 GMT</pubDate>
+            <pubDate>Mon, 23 Sep 2024 14:00:00 GMT</pubDate>
+            <prerelease version="24.09.1 beta 2">
+                <change type="BUGFIX">Fixed annoying reset of target's H.A. constraints when the target editor is used.</change>
+            </prerelease>
             <prerelease version="24.09.1 beta 1">
+                <change type="FEATURE">Added GetStar action to the main panel and Edit menu</change>
                 <change type="FEATURE">Updated SearchCal / GetStar information retrieval (G flux, IDS)</change>
                 <!--
                 <change type="FEATURE">Support analytical chromatic models (black-body variants)</change>
