@@ -3,15 +3,14 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
+import fr.jmmc.jmcs.util.NumberUtils;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
-import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +150,7 @@ public abstract class WindWidget extends JPanel {
                         final double dy = (center.getY() - point.getY()) / (0.5d * bounds.getHeight());
 
                         // arctan gives angle in [-180; 180]:
-                        double angle = FastMath.toDegrees(FastMath.atan2(dx, dy));
+                        double angle = NumberUtils.getArgumentInDegrees(dy, dx);
 
                         // get azimuth in [0; 360]:
                         if (angle < 0d) {

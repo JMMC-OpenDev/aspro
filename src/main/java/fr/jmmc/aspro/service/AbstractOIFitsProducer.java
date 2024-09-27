@@ -27,6 +27,7 @@ import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import static fr.jmmc.jmcs.util.StatUtils.N_SAMPLES;
 import fr.jmmc.jmal.complex.Complex;
+import fr.jmmc.jmal.util.MathUtils;
 import fr.jmmc.jmcs.util.WelfordVariance;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.range.Range;
@@ -415,7 +416,7 @@ public abstract class AbstractOIFitsProducer {
             final int newLen = this.waveLengths.length * nSamples;
             sampleWaveLengths = new double[newLen];
             sampleWaveBands = new double[newLen];
-            
+
             resampleWaveLengths(this.waveLengths, this.waveBands, nSamples, sampleWaveLengths, sampleWaveBands);
         } else {
             sampleWaveLengths = this.waveLengths;
@@ -490,7 +491,7 @@ public abstract class AbstractOIFitsProducer {
             // prepare the model computation context using sampleWaveLengths:
             // it computes mFluxes, flux_weights and bandFluxes (used by noise modeling)
             final ModelFunctionComputeContext context = mm.prepareModels(this.target.getModels(), nWLen, sampleWaveLengths, mFluxes, bandFluxes);
-            
+
             // Iterate on rows:
             for (int k = 0; k < nRows; k++) {
                 // Compute complex visibility using the target model:
@@ -2132,7 +2133,7 @@ public abstract class AbstractOIFitsProducer {
     }
 
     protected static double toAngle(final double re, final double im) {
-        return (im == 0.0) ? 0.0 : FastMath.atan2(im, re);
+        return MathUtils.getArgument(re, im);
     }
 
     protected static double computeCumulativeError(final double err1, final double err2) {

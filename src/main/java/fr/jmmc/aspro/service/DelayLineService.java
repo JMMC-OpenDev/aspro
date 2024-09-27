@@ -8,6 +8,7 @@ import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.oitools.model.range.RangeFactory;
 import fr.jmmc.aspro.util.AngleUtils;
+import fr.jmmc.jmal.util.MathUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -358,8 +359,8 @@ public final class DelayLineService {
             // define solutions:
             final double two_a = 2d * a;
 
-            ha[0] = FastMath.atan2(-b - square, two_a);
-            ha[1] = FastMath.atan2(-b + square, two_a);
+            ha[0] = MathUtils.getArgument(two_a, -b - square);
+            ha[1] = MathUtils.getArgument(two_a, -b + square);
         }
 
         ha[0] *= 2d;

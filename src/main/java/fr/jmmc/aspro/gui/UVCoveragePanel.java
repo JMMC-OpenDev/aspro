@@ -4363,7 +4363,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         sb.append("<br><b>Radius</b>: ");
         FormatterUtils.format(this.df1, sb, MathUtils.carthesianNorm(u, v));
         sb.append(" m<br><b>Pos. angle</b>: ");
-        FormatterUtils.format(this.df1, sb, FastMath.toDegrees(FastMath.atan2(u, v)));
+        FormatterUtils.format(this.df1, sb, NumberUtils.getArgumentInDegrees(v, u));
         sb.append(" deg</html>");
 
         return sb.toString();
@@ -4395,7 +4395,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         sb.append("<br><b>Radius</b>: ");
         FormatterUtils.format(this.df1, sb, MathUtils.carthesianNorm(u_start, v_start));
         sb.append(" m<br><b>Pos. angle</b>: ");
-        FormatterUtils.format(this.df1, sb, FastMath.toDegrees(FastMath.atan2(u_start, v_start)));
+        FormatterUtils.format(this.df1, sb, NumberUtils.getArgumentInDegrees(v_start, u_start));
         sb.append(" deg");
 
         rawObs.timeToHtml(sb, 2); // show end
@@ -4404,7 +4404,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         sb.append("<br><b>Radius</b>: ");
         FormatterUtils.format(this.df1, sb, MathUtils.carthesianNorm(u_end, v_end));
         sb.append(" m<br><b>Pos. angle</b>: ");
-        FormatterUtils.format(this.df1, sb, FastMath.toDegrees(FastMath.atan2(u_end, v_end)));
+        FormatterUtils.format(this.df1, sb, NumberUtils.getArgumentInDegrees(v_end, u_end));
         sb.append(" deg");
 
         rawObs.weatherToHtml(sb);
