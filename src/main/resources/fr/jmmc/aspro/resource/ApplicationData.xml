@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="24.09.1 beta 3"/>
-    <compilation date="03/10/2024" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="24.10 beta 1"/>
+    <compilation date="10/10/2024" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -239,6 +239,13 @@
     </menubar>
 
     <releasenotes>
+
+        <release version="24.10">
+            <pubDate>Thu, 10 Oct 2024 13:00:00 GMT</pubDate>
+            <prerelease version="24.10 beta 1">
+                <change type="FEATURE">Updated GetStar 6 url to be used by Aspro2 beta</change>
+            </prerelease>
+        </release>
         <release version="24.09.1">
             <pubDate>Thu, 03 Oct 2024 12:00:00 GMT</pubDate>
             <prerelease version="24.09.1 beta 3">
