@@ -46,7 +46,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(SettingPanel.class.getName());
     /** enable / disable Obs Plan */
-    private static final boolean ENABLE_OBS_PLAN = ApplicationDescription.isBetaVersion();
+    private static final boolean ENABLE_OBS_PLAN = ApplicationDescription.isAlphaOrBetaVersion();
     /** enable / disable Target table */
     private static final boolean ENABLE_TARGET_TABLE = true;
     /** default mouse cursor refresh period = 100 ms */
