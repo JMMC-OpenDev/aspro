@@ -6,6 +6,7 @@ package fr.jmmc.aspro.gui.action;
 import fr.jmmc.aspro.interop.SearchCalVOTableHandler;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
@@ -37,7 +38,9 @@ public final class GetStarAction extends RegisteredAction {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(className);
     /** GetStar URL (query by identifier) */
-    public static final String GETSTAR_QUERY_ID = "http://apps.jmmc.fr/~sclws/getstar/sclwsGetStarProxy.php?star=";
+    public static final String GETSTAR_QUERY_ID = (ApplicationDescription.isAlphaOrBetaVersion())
+            ? "http://apps.jmmc.fr/~betaswmgr/getstar/sclwsGetStarProxy.php?star=" 
+            : "http://apps.jmmc.fr/~sclws/getstar/sclwsGetStarProxy.php?star=";
 
     /** GetStar separator (multiple identifier separator) */
     public static final String GETSTAR_SEPARATOR = ",";

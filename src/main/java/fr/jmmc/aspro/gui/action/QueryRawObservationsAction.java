@@ -73,7 +73,7 @@ public abstract class QueryRawObservationsAction extends RegisteredAction {
 
     static {
         OBS_SERVER = (USE_LOCAL) ? "http://localhost:6543/"
-                : ((ApplicationDescription.isBetaVersion()) ? "http://obs-preprod.jmmc.fr/" : "http://obs.jmmc.fr/");
+                : ((ApplicationDescription.isAlphaOrBetaVersion()) ? "http://obs-preprod.jmmc.fr/" : "http://obs.jmmc.fr/");
 
         OBS_SERVER_GET_OBS_URL = OBS_SERVER + "detail/exposure/";
         OBS_SERVER_SEARCH_URL = OBS_SERVER + "search.votable";
