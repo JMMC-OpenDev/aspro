@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="24.11 beta 2"/>
-    <compilation date="08/11/2024" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="24.12 beta 3"/>
+    <compilation date="17/12/2024" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -200,11 +200,17 @@
             <menu/>
             <menu label="Target Editor" classpath="fr.jmmc.aspro.gui.action.TargetEditorAction" action="showEditor" accelerator="T"/>
             <menu/>
-            <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction" action="updateSimbad"
-                  description="update all targets with the latest information from the CDS Simbad service"/>
-
+            <!-- new
+            <menu label="GetStar Selected" classpath="fr.jmmc.aspro.gui.action.GetStarAction" action="getStarAll"
+                  description="update all targets using the JMMC GetStar service"/>
+            <menu label="GetStar All" classpath="fr.jmmc.aspro.gui.action.GetStarAction" action="getStarOne"
+                  description="update the selected target using the JMMC GetStar service"/>
+            -->
             <menu label="GetStar all Targets" classpath="fr.jmmc.aspro.gui.action.GetStarAction" action="getAllStars"
                   description="update all targets using the JMMC GetStar service"/>
+
+            <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction" action="updateSimbad"
+                  description="update all targets with the latest information from the CDS Simbad service"/>
             <menu/>
             <menu label="Get Observations (Selected)" classpath="fr.jmmc.aspro.gui.action.QueryOneRawObservationsAction" action="query"
                   description="query raw observations (from JMMC ObsPortal) corresponding to the selected target"/>
@@ -239,8 +245,11 @@
     </menubar>
 
     <releasenotes>
-        <release version="24.11">
-            <pubDate>Fri, 08 Nov 2024 15:00:00 GMT</pubDate>
+        <release version="24.12">
+            <pubDate>Tue, 17 Dec 2024 16:00:00 GMT</pubDate>
+            <prerelease version="24.12 beta 3">
+                <change type="FEATURE">Fixed the flux normalization used by noise modelling for all analytical models</change>
+            </prerelease>
             <prerelease version="24.11 beta 2">
                 <change type="FEATURE">Support analytical chromatic models
                     i.e. black-body variants (_BB) for disk, ring and gaussian components</change>
