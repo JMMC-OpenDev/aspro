@@ -436,7 +436,7 @@ public class ObservationSetting
     public void setExtendedConfiguration(InterferometerConfiguration value) {
         this.extendedConfiguration = value;
     }
-    
+
 //--simple--preserve
     /**
      * Return the number of variants
@@ -651,9 +651,16 @@ public class ObservationSetting
     public void checkReferences() {
         checkReferences(getTargets(), this.selectedTargets, this.targetUserInfos, this.targetObservations);
 
+        final fr.jmmc.jmal.model.ModelManager mm = fr.jmmc.jmal.model.ModelManager.getInstance();
+
         // check targets:
         for (Target target : getTargets()) {
             target.checkValues();
+
+            if (target.hasModel() && target.hasAnalyticalModel()) {
+                // validate only analytical models for target using them:
+                mm.checkModelValues(target.getModels());
+            }
         }
 
         // check target user infos :
@@ -679,7 +686,7 @@ public class ObservationSetting
                                        final List<Target> selectedTargets,
                                        final TargetUserInformations targetUserInfos,
                                        final List<TargetRawObservation> targetObservations) {
-        
+
         java.util.Map<String, Target> mapIDTargets = null;
         final java.util.Set<String> usedIds = new java.util.HashSet<String>(16);
 
@@ -820,7 +827,7 @@ public class ObservationSetting
             orphans = (filtered) ? null : java.util.Collections.emptySet();
         } else {
             final int len = innerTargets.size();
-            
+
             displayTargets = new ArrayList<Target>(len);
             orphans = (filtered) ? null : new java.util.HashSet<Target>(4);
 

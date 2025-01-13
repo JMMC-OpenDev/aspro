@@ -1298,6 +1298,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * @return true only if the data are valid
      */
     boolean validateForm() {
+        final ModelManager mm = ModelManager.getInstance();
+
         StringBuilder report = null;
         // Validate models :
         for (Target target : this.editTargets) {
@@ -1305,12 +1307,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
                 if (target.hasAnalyticalModel()) {
                     // validate only analytical models for target using them:
                     final List<Model> models = target.getModels();
-                    ModelManager.getInstance().validateModels(models);
+                    mm.validateModels(models);
 
                     // convert max distance (= 20% fov) in mas:
                     final double maxDist = UserModelService.getAiryRadiusThreshold(airyRadius);
 
-                    if (!ModelManager.getInstance().checkModels(models, maxDist)) {
+                    if (!mm.checkModels(models, maxDist)) {
                         if (report == null) {
                             report = new StringBuilder(128);
                         }
