@@ -249,6 +249,10 @@
             <pubDate>Tue, 18 Mar 2025 17:00:00 GMT</pubDate>
             <prerelease version="25.03 beta 4">
                 <change type="FEATURE">Improved warning messages with statistics on computed flux weights per component (black-body variants)</change>
+        <release version="25.01">
+            <pubDate>Mon, 13 Jan 2025 16:00:00 GMT</pubDate>
+            <prerelease version="25.01 beta 4">
+                <change type="CHANGE">Fixed the config checksum to avoid configuration warning message on startup</change>
             </prerelease>
             <prerelease version="24.12 beta 3">
                 <change type="FEATURE">Fixed the flux normalization used by noise modelling for all analytical models</change>
