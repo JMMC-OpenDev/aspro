@@ -104,6 +104,7 @@ public final class BroadcastToModelFittingAction extends SampCapabilityAction {
 
         final Model targetModel = new Model();
         targetModel.setNameAndType("Container");
+        
         for (Model model : target.getModels()) {
             targetModel.getModels().add(model);
         }
