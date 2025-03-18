@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="25.03 beta 5"/>
+    <program name="Aspro2" version="25.03"/>
     <compilation date="18/03/2025" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -246,7 +246,7 @@
 
     <releasenotes>
         <release version="25.03">
-            <pubDate>Tue, 18 Mar 2025 17:00:00 GMT</pubDate>
+            <pubDate>Tue, 18 Mar 2025 21:00:00 GMT</pubDate>
             <prerelease version="25.03 beta 5">
                 <change type="FEATURE">Improved warning messages with statistics on computed flux weights per component (black-body variants)</change>
             </prerelease>
