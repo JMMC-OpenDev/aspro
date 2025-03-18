@@ -27,7 +27,7 @@ public final class ProjectedBaselineUtils {
     private final static String KEY_LENGTH = "length";
     private final static String KEY_START = "start";
     private final static String KEY_END = "end";
-    
+
     private final static double PREC_ANGLE = 0.01; // no better than 0.01 deg
     private final static double PREC_LENGTH = 0.001 / 2.0; // half 1 mm
 
@@ -61,11 +61,13 @@ public final class ProjectedBaselineUtils {
 
             result = new ArrayList<UVRangeBaseLineData>(jsObj.length());
 
-            for (final String baseline : jsObj.keySet()) {
-                logger.debug("baseline: {}", baseline);
+            final boolean isDebug = logger.isDebugEnabled();
 
+            for (final String baseline : jsObj.keySet()) {
                 final JSONObject blObj = jsObj.getJSONObject(baseline);
-                if (logger.isDebugEnabled()) {
+
+                if (isDebug) {
+                    logger.debug("baseline: {}", baseline);
                     logger.debug("blObj: {}", blObj.toMap());
                 }
 
@@ -94,21 +96,20 @@ public final class ProjectedBaselineUtils {
                             && !Double.isNaN(length_start) && !Double.isNaN(length_end)) {
                         // Ensure length > 0
                         if (length_start > 0.0 && length_end > 0.0) {
-                            result.add(convert(baseline, 
-                                    angle_start - PREC_ANGLE, 
-                                    length_start - PREC_LENGTH, 
-                                    angle_end + PREC_ANGLE, 
-                                    length_end + PREC_LENGTH, 
-                                    insMode));
+                            result.add(convert(baseline,
+                                    angle_start - PREC_ANGLE,
+                                    length_start - PREC_LENGTH,
+                                    angle_end + PREC_ANGLE,
+                                    length_end + PREC_LENGTH,
+                                    insMode, isDebug));
                         } else {
-                            if (logger.isDebugEnabled()) {
+                            if (isDebug) {
                                 logger.debug("Bad length values: {} or {} in '{}'", length_start, length_end, blObj.toMap());
                             }
                         }
                     }
-
                 } catch (JSONException je) {
-                    if (logger.isDebugEnabled()) {
+                    if (isDebug) {
                         logger.debug("JSON exception: {} in '{}'", je.getMessage(), blObj.toMap());
                     }
                 }
@@ -123,14 +124,15 @@ public final class ProjectedBaselineUtils {
     private static UVRangeBaseLineData convert(final String baseline,
                                                final double angle_start, final double length_start,
                                                final double angle_end, final double length_end,
-                                               final FocalInstrumentMode insMode) {
+                                               final FocalInstrumentMode insMode,
+                                               final boolean isDebug) {
 
         // See UVCoverageService.computeUVPoints()
         if (insMode == null) {
             throw new IllegalStateException("The instrumentMode is empty !");
         }
 
-        if (logger.isDebugEnabled()) {
+        if (isDebug) {
             logger.debug("instrumentMode: {}", insMode.getName());
         }
 
@@ -138,7 +140,7 @@ public final class ProjectedBaselineUtils {
         final double lambdaMin = AsproConstants.MICRO_METER * insMode.getWaveLengthMin();
         final double lambdaMax = AsproConstants.MICRO_METER * insMode.getWaveLengthMax();
 
-        if (logger.isDebugEnabled()) {
+        if (isDebug) {
             logger.debug("lambdaMin: {}", lambdaMin);
             logger.debug("lambdaMax: {}", lambdaMax);
         }
