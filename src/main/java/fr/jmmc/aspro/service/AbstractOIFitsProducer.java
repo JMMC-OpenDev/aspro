@@ -27,6 +27,7 @@ import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import static fr.jmmc.jmcs.util.StatUtils.N_SAMPLES;
 import fr.jmmc.jmal.complex.Complex;
+import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.util.MathUtils;
 import fr.jmmc.jmcs.util.WelfordVariance;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
@@ -485,12 +487,24 @@ public abstract class AbstractOIFitsProducer {
 
         // Compute complex visibility using the target model:
         if (useAnalyticalModel) {
+            final List<Model> models = this.target.getModels();
+
             // Analytical models: no parallelization:
             final ModelManager mm = ModelManager.getInstance();
 
             // prepare the model computation context using sampleWaveLengths:
             // it computes mFluxes, flux_weights and bandFluxes (used by noise modeling)
-            final ModelFunctionComputeContext context = mm.prepareModels(this.target.getModels(), nWLen, sampleWaveLengths, mFluxes, bandFluxes);
+            final ModelFunctionComputeContext context = mm.prepareModels(models, nWLen, sampleWaveLengths, mFluxes, bandFluxes);
+
+            if ((warningContainerCompute != null) && !mm.isGray(models)) {
+                final HashMap<String, WelfordVariance> statPerModel = mm.getStatsOnFluxWeights(context);
+                if (statPerModel != null) {
+                    for (Map.Entry<String, WelfordVariance> e : statPerModel.entrySet()) {
+                        warningContainerCompute.addMessage(targetRole + ": flux_weight(" + e.getKey() + ") " + e.getValue().toString(false),
+                                (targetRole == TargetRole.SCI) ? WarningMessage.Level.Information : WarningMessage.Level.Trace);
+                    }
+                }
+            }
 
             // Iterate on rows:
             for (int k = 0; k < nRows; k++) {
