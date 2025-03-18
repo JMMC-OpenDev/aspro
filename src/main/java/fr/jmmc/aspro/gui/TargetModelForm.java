@@ -1260,6 +1260,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jPanelParameters.add(jLabelOffsetEditMode, gridBagConstraints);
 
         jButtonNormalizeFluxes.setText("Normalize fluxes");
+        jButtonNormalizeFluxes.setToolTipText("Flux normalization is only applicable to gray components (not BB variants)");
         jButtonNormalizeFluxes.setMargin(new java.awt.Insets(0, 4, 0, 4));
         jButtonNormalizeFluxes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

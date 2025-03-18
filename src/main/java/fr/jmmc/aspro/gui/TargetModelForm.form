@@ -575,6 +575,7 @@
         <Component class="javax.swing.JButton" name="jButtonNormalizeFluxes">
           <Properties>
             <Property name="text" type="java.lang.String" value="Normalize fluxes"/>
+            <Property name="toolTipText" type="java.lang.String" value="Flux normalization is only applicable to gray components (not BB variants)"/>
             <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
               <Insets value="[0, 4, 0, 4]"/>
             </Property>
