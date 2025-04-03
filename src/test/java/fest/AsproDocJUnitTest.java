@@ -65,8 +65,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     private final static String FAKE_EMAIL = "FAKE_EMAIL";
     private static String CURRENT_EMAIL = "";
 
-    /** robot take screenshot (top offset for gnome3) */
-    private static final int M_TOP = 28; // 28 (breeze), 14 (gnome3) at font scale = 1.0 */
+    /** robot take screenshot (top offset for gnome3 on x11) */
+    private static final int M_TOP = 0; // 28 (breeze), 14 (gnome3), 0 now at font scale = 1.0 */
 
     private static void defineEmailPref(final String email) {
         try {
@@ -659,11 +659,54 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     }
 
     /**
+     * Test Open file "Aspro2_models_BB.asprox" (User model)
+     */
+    @Test
+    @GUITest
+    public void m023_shouldOpenSampleWithBlackBodyModel() {
+        openObservation("Aspro2_models_BB.asprox");
+
+        window.list("jListTargets").selectItem("ring_plus_star");
+
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
+
+        // target editor with calibrators :
+        window.button("jButtonTargetEditor").click();
+
+        final DialogFixture dialog = window.dialog(withTitle("Target Editor").andShowing());
+
+        dialog.requireVisible();
+        dialog.moveToFront();
+
+        dialog.tabbedPane().selectTab(TargetEditorDialog.TAB_MODELS);
+
+        dialog.tree().selectPath("Models/ring_plus_star");
+
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
+
+        saveScreenshot(dialog, "Aspro2-BB_Model.png");
+
+        // close dialog :
+        dialog.button(JButtonMatcher.withText("Cancel")).click();
+
+        // waits for computation to finish :
+        AsproTestUtils.checkRunningTasks();
+
+        // Capture OIFits viewer plot :
+        showPlotTab(SettingPanel.TAB_OIFITS_VIEWER, "Aspro2-vis2-bb.png");
+
+        // Export OIFits / OB :
+        exportOIFits();
+    }
+
+    /**
      * Test Open file "Aspro2_sample_spiral.asprox" (User model)
      */
     @Test
     @GUITest
-    public void m023_shouldOpenSampleWithUserModel() {
+    public void m024_shouldOpenSampleWithUserModel() {
         try {
             Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, ColorModels.COLOR_MODEL_HEAT);
 
@@ -730,7 +773,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m024_shouldOpenSampleWithAOTargetGroup() {
+    public void m025_shouldOpenSampleWithAOTargetGroup() {
         final Frame frame = window.target;
         final Point ref = frame.getLocation();
         final DisplayMode mode = frame.getGraphicsConfiguration().getDevice().getDisplayMode();
@@ -804,7 +847,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
      */
     @Test
     @GUITest
-    public void m025_shouldOpenSampleWithRawObs() {
+    public void m026_shouldOpenSampleWithRawObs() {
         final Dimension oldSize = window.target.getSize();
         try {
             Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, ColorModels.COLOR_MODEL_GRAY);
