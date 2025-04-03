@@ -31,6 +31,8 @@ public final class ProjectedBaselineUtils {
     private final static double PREC_ANGLE = 0.01; // no better than 0.01 deg
     private final static double PREC_LENGTH = 0.001 / 2.0; // half 1 mm
 
+    private final static double MAX_ANGLE_DIFF = 10.0; // 10 deg
+    
     private ProjectedBaselineUtils() {
         super(); // forbidden
     }
@@ -62,6 +64,8 @@ public final class ProjectedBaselineUtils {
             result = new ArrayList<UVRangeBaseLineData>(jsObj.length());
 
             final boolean isDebug = logger.isDebugEnabled();
+            
+            boolean invalid = false;
 
             for (final String baseline : jsObj.keySet()) {
                 final JSONObject blObj = jsObj.getJSONObject(baseline);
@@ -80,6 +84,18 @@ public final class ProjectedBaselineUtils {
 
                         angle_start = angObj.getDouble(KEY_START);
                         angle_end = angObj.getDouble(KEY_END);
+                        
+                        if (true) {
+                            final double delta = distanceAngle(angle_end, angle_start);
+                            
+                            // check angular difference (too high means bad/invalid UV coords)
+                            if (Math.abs(delta) > MAX_ANGLE_DIFF) {
+                                invalid = true;
+                                if (isDebug) {
+                                    logger.debug("Invalid angular difference (high): " + delta + " for BL: " + baseline);
+                                }
+                            }
+                        }
                     }
 
                     double length_start = Double.NaN;
@@ -114,7 +130,7 @@ public final class ProjectedBaselineUtils {
                     }
                 }
             }
-            if (result.isEmpty()) {
+            if (invalid || result.isEmpty()) {
                 result = null;
             }
         }
@@ -192,6 +208,17 @@ public final class ProjectedBaselineUtils {
         return new UVRangeBaseLineData(baseline, 2, u, v, uWMin, vWMin, uWMax, vWMax);
     }
 
+    /* --- utility methods --- */
+    private static double distanceAngle(final double a1, final double a2) {
+        final double delta = a1 - a2;
+        if (delta > 180.0) {
+            return delta - 360.0;
+        } else if (delta < -180.0) {
+            return delta + 360.0;
+        }
+        return delta;
+    }
+    
     public static void main(String[] unused) {
         final FocalInstrumentMode insMode = new FocalInstrumentMode();
         insMode.setWaveLengthMin(1.0);
