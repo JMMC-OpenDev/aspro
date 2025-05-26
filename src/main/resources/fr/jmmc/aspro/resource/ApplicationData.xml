@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="25.03"/>
-    <compilation date="18/03/2025" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="25.05 beta 1"/>
+    <compilation date="26/05/2025" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -245,6 +245,12 @@
     </menubar>
 
     <releasenotes>
+        <release version="25.05">
+            <pubDate>Mon, 26 May 2025 16:00:00 GMT</pubDate>
+            <prerelease version="25.05 beta 1">
+                <change type="FEATURE">CHARA: lowered max elevation to 85 deg as motors suffers rotating scope and report warning at 80 deg</change>
+            </prerelease>
+        </release>
         <release version="25.03">
             <pubDate>Tue, 18 Mar 2025 21:00:00 GMT</pubDate>
             <prerelease version="25.03 beta 5">
