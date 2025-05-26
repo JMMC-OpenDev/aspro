@@ -31,6 +31,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/&gt;
  *         &lt;element name="diameter" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *         &lt;element name="maxElevation" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
+ *         &lt;element name="safeElevation" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="adaptiveOptics" type="{http://www.jmmc.fr/aspro-oi/0.1}AdaptiveOptics" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="moonPointingRestriction" type="{http://www.jmmc.fr/aspro-oi/0.1}MoonPointingRestriction" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
@@ -46,6 +47,7 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "diameter",
     "maxElevation",
+    "safeElevation",
     "adaptiveOptics",
     "moonPointingRestriction"
 })
@@ -60,6 +62,7 @@ public class Telescope
     protected String name;
     protected double diameter;
     protected double maxElevation;
+    protected Double safeElevation;
     protected List<AdaptiveOptics> adaptiveOptics;
     protected MoonPointingRestriction moonPointingRestriction;
 
@@ -117,6 +120,30 @@ public class Telescope
      */
     public void setMaxElevation(double value) {
         this.maxElevation = value;
+    }
+
+    /**
+     * Gets the value of the safeElevation property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getSafeElevation() {
+        return safeElevation;
+    }
+
+    /**
+     * Sets the value of the safeElevation property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setSafeElevation(Double value) {
+        this.safeElevation = value;
     }
 
     /**

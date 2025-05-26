@@ -1728,6 +1728,14 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <xsd:element name="safeElevation" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Telescope elevation considered as safe (= no risk to point at) in degrees (80 deg for CHARA)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="adaptiveOptics" type="AdaptiveOptics" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>

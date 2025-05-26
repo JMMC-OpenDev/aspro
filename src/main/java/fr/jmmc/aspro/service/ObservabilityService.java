@@ -217,6 +217,8 @@ public final class ObservabilityService {
     private List<Range> azimuthRanges = null;
     /** optional moon pointing restrictions */
     private MoonPointingRestriction moonPointingRestriction = null;
+    /** safe max elevation (CHARA) */
+    private Double safeElevation = null;
 
     static {
         if (SHOW_TASK_STATS || SHOW_BEST_POPS_STATS) {
@@ -1109,12 +1111,14 @@ public final class ObservabilityService {
                     ? new ArrayList<List<List<Range>>>(nDLRestrictions) : null;
 
             if (this.hasPops) {
-                // High elevation check for CHARA (2021.08):
-                final double highElevTh = 85.0; // TODO: put threshold in aspro conf
-                final double haHighElev = (transitElev > highElevTh) ? this.sco.getHAForElevation(precDEC, highElevTh) : 0.0;
+                if ((safeElevation != null) && (transitElev > safeElevation)) {
+                    // High elevation check for CHARA (2021.08):
+                    final double haHighElev = this.sco.getHAForElevation(precDEC, safeElevation);
 
-                if (haHighElev > 0.0) {
-                    rangeHAHighElev = ctx.valueOf(-haHighElev, haHighElev);
+                    if (haHighElev > 0.0) {
+                        // valid range:
+                        rangeHAHighElev = ctx.valueOf(-haHighElev, haHighElev);
+                    }
                 }
 
                 // update pop estimator related to target:
@@ -2653,6 +2657,17 @@ public final class ObservabilityService {
         final MoonPointingRestriction mpr = tel.getMoonPointingRestriction();
         if (mpr != null) {
             this.moonPointingRestriction = mpr;
+        }
+        if (this.hasPops && (tel.getSafeElevation() != null)) {
+            // Get safe elevation for CHARA:
+            safeElevation = tel.getSafeElevation();
+            if ((safeElevation < 0.0) || (safeElevation >= tel.getMaxElevation())) {
+                // discard:
+                safeElevation = null;
+            }
+            if (isLogDebug) {
+                logger.debug("safeElevation: {}", this.safeElevation);
+            }
         }
 
         final int nBeams = stations.size();
