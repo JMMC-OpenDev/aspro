@@ -111,9 +111,7 @@ public interface AsproConstants {
     /** VLTI GRAVITY */
     public static final String INS_GRAVITY = "GRAVITY";
     /** VLTI MATISSE LM/N */
-    public static final String INS_MATISSE = "MATISSE_";
-    /** CHARA VEGA (2T/3T) */
-    public static final String INS_VEGA = "VEGA_";
+    public static final String INS_MATISSE = "MATISSE";
     /** CHARA SPICA (6T) */
     public static final String INS_SPICA = "SPICA";
 

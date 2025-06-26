@@ -25,6 +25,7 @@ import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.OIWavelength;
 import fr.nom.tam.fits.FitsException;
 import java.io.IOException;
+import java.util.Arrays;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,10 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
     private final double diameter;
     /** temporary OIDATA table */
     private OIData oiData = null;
+    /** index (subset for complex data) to original OIWaveLength indices */
+    private int[] wlIndex;
+    /** index of original OIWaveLength indices to be cleared */
+    private int[] wlClear;
 
     /**
      * Public constructor
@@ -127,6 +132,9 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                         if (Thread.currentThread().isInterrupted()) {
                             return false;
                         }
+                    } else if (this.oiData instanceof OIFlux) {
+                        // OI_FLUX :
+                        computeOIFlux((OIFlux) oiData);
                     }
                 }
             }
@@ -262,6 +270,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                 + "(band: " + convertWL(waveBand) + " " + SpecialChars.UNIT_MICRO_METER + ')');
 
         // keep number of channels:
+        final double[] waveLengthsInput = this.waveLengths;
         final int nChannels = nWaveLengths;
 
         // Keep only spectral channels where user model is defined:
@@ -270,6 +279,8 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
         // refresh:
         nWaveLengths = this.waveLengths.length;
+        wlIndex = new int[nWaveLengths];
+        wlClear = new int[nChannels - nWaveLengths];
 
         // adjust used spectral channels in information and log:
         if (nWaveLengths != nChannels) {
@@ -285,6 +296,52 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
             warningContainer.addInformation("Restricted instrument mode: "
                     + nWaveLengths + " channels "
                     + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + " " + SpecialChars.UNIT_MICRO_METER + "] ");
+
+            // Build wavelength index:
+            for (int l = 0, m; l < nWaveLengths; l++) {
+                int idx = -1;
+                final double wl = waveLengths[l];
+
+                for (m = 0; m < nChannels; m++) {
+                    if (waveLengthsInput[m] == wl) {
+                        idx = m;
+                        // exact, no rounding must have happen:
+                        break;
+                    }
+                }
+                if (idx == -1) {
+                    throw new IllegalStateException("Wavelength[" + wl + "] not found !");
+                }
+                wlIndex[l] = idx;
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("wlIndex: {}", Arrays.toString(wlIndex));
+            }
+
+            // Complementary:
+            int i = 0;
+            for (int m = 0, l; m < nChannels; m++) {
+                int idx = -1;
+
+                for (l = 0; l < nWaveLengths; l++) {
+                    if (wlIndex[l] == m) {
+                        idx = m;
+                        break;
+                    }
+                }
+                if (idx == -1) {
+                    wlClear[i++] = m;
+                }
+            }
+            if (i != wlClear.length) {
+                throw new IllegalStateException("wlClear index incorrect at " + i + "!");
+            }
+        } else {
+            // 1-1 index:
+            for (int l = 0; l < nWaveLengths; l++) {
+                wlIndex[l] = l;
+            }
+            // wlClear is zero-length
         }
         return isModelWLValid;
     }
@@ -453,7 +510,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         double chi2_phi_sum = 0.0;
 
         // Iterate on rows :
-        for (int k = 0, l; k < nRows; k++) {
+        for (int k = 0, l, m; k < nRows; k++) {
             // Next block makes easier comparison with OIFitsCreatorService (ref)
             {
                 // if target has a model, then complex visibility are computed :
@@ -462,14 +519,15 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
                     // Iterate on wave lengths :
                     for (l = 0; l < nWaveLengths; l++) {
-                        visAmp[k][l] = Double.NaN;
-                        visAmpErr[k][l] = Double.NaN;
+                        m = wlIndex[l];
+                        visAmp[k][m] = Double.NaN;
+                        visAmpErr[k][m] = Double.NaN;
 
-                        visPhi[k][l] = Double.NaN;
-                        visPhiErr[k][l] = Double.NaN;
+                        visPhi[k][m] = Double.NaN;
+                        visPhiErr[k][m] = Double.NaN;
 
                         // mark this value as invalid :
-                        flags[k][l] = true;
+                        flags[k][m] = true;
                     }
 
                 } else {
@@ -490,7 +548,8 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
                     // Iterate on wave lengths :
                     for (l = 0; l < nWaveLengths; l++) {
-                        doFlag = flags[k][l]; // real data flag
+                        m = wlIndex[l];
+                        doFlag = flags[k][m]; // real data flag
 
                         if (!isAmber) {
                             {
@@ -517,17 +576,17 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                                     errAmp = errPhi = Double.NaN;
                                 }
                                 // original data:
-                                vampTh = visAmp[k][l];
-                                vphiTh = FastMath.toRadians(visPhi[k][l]);
+                                vampTh = visAmp[k][m];
+                                vphiTh = FastMath.toRadians(visPhi[k][m]);
 
                                 if (!doFlag) {
                                     // chi2 = sum ( (x - x_th) / err ) ^2
-                                    diff = (vamp - vampTh) / visAmpErr[k][l];
+                                    diff = (vamp - vampTh) / visAmpErr[k][m];
                                     if (!Double.isNaN(diff)) {
                                         chi2_amp_nb++;
                                         chi2_amp_sum += diff * diff;
                                     }
-                                    diff = distanceAngle(vphi, vphiTh) / FastMath.toRadians(visPhiErr[k][l]);
+                                    diff = distanceAngle(vphi, vphiTh) / FastMath.toRadians(visPhiErr[k][m]);
                                     if (!Double.isNaN(diff)) {
                                         chi2_phi_nb++;
                                         chi2_phi_sum += diff * diff;
@@ -535,17 +594,29 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                                 }
 
                                 // Set values:
-                                visAmp[k][l] = vamp;
-                                visAmpErr[k][l] = errAmp;
+                                visAmp[k][m] = vamp;
+                                visAmpErr[k][m] = errAmp;
 
                                 // convert errPhi in degrees :
-                                visPhi[k][l] = toDegrees(vphi);
-                                visPhiErr[k][l] = toDegrees(errPhi);
+                                visPhi[k][m] = toDegrees(vphi);
+                                visPhiErr[k][m] = toDegrees(errPhi);
                             }
                         }
                         // Anyway: Disable flag (pure theoretical model):
-                        flags[k][l] = false;
+                        flags[k][m] = false;
                     }
+                }
+                // Clear:
+                for (l = 0; l < wlClear.length; l++) {
+                    m = wlClear[l];
+                    visAmp[k][m] = Double.NaN;
+                    visAmpErr[k][m] = Double.NaN;
+
+                    visPhi[k][m] = Double.NaN;
+                    visPhiErr[k][m] = Double.NaN;
+
+                    // mark this value as invalid :
+                    flags[k][m] = true;
                 }
             }
         }
@@ -559,17 +630,19 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
             } else if (!isAmber && useVisDiff) {
                 double vamp_sum;
                 /* Normalize differential visibilities to 1 */
-                for (int k = 0, l; k < visAmp.length; k++) {
+                for (int k = 0, l, m; k < visAmp.length; k++) {
                     vamp_sum = 0.0;
 
                     for (l = 0; l < nWaveLengths; l++) {
-                        vamp_sum += visAmp[k][l];
+                        m = wlIndex[l];
+                        vamp_sum += visAmp[k][m];
                     }
                     vamp_sum /= nWaveLengths; // mean
 
                     for (l = 0; l < nWaveLengths; l++) {
-                        visAmp[k][l] /= vamp_sum;
-                        visAmpErr[k][l] /= vamp_sum;
+                        m = wlIndex[l];
+                        visAmp[k][m] /= vamp_sum;
+                        visAmpErr[k][m] /= vamp_sum;
                     }
                 }
             }
@@ -588,7 +661,6 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         if (logger.isDebugEnabled()) {
             logger.debug("computeOIVis: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
-        logger.info("computeOIVis: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
     /**
@@ -596,8 +668,6 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
      * @param vis2 OI_VIS2 table to update
      */
     private void computeOIVis2(final OIVis2 vis2) {
-        logger.info("computeOIVis2: {}", oiData);
-
         final long start = System.nanoTime();
 
         final int nRows = vis2.getNbRows();
@@ -622,22 +692,24 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         double chi2_sum = 0.0;
 
         // Iterate on rows :
-        for (int k = 0, l; k < nRows; k++) {
+        for (int k = 0, l, m; k < nRows; k++) {
             // Next block makes easier comparison with OIFitsCreatorService (ref)
             {
                 // if target has models, then complex visibility are computed :
                 if (!this.hasModel) {
                     // Iterate on wave lengths :
                     for (l = 0; l < nWaveLengths; l++) {
-                        vis2Data[k][l] = Double.NaN;
-                        vis2Err[k][l] = Double.NaN;
+                        m = wlIndex[l];
+                        vis2Data[k][m] = Double.NaN;
+                        vis2Err[k][m] = Double.NaN;
 
                         // mark this value as invalid :
-                        flags[k][l] = true;
+                        flags[k][m] = true;
                     }
                 } else {
                     // Iterate on wave lengths :
                     for (l = 0; l < nWaveLengths; l++) {
+                        m = wlIndex[l];
                         // pure complex visibility data :
                         visRe = visComplex[k][l].getReal();
                         visIm = visComplex[k][l].getImaginary();
@@ -646,14 +718,14 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                         v2 = visRe * visRe + visIm * visIm;
                         v2Err = Double.NaN;
 
-                        doFlag = flags[k][l]; // real data flag
+                        doFlag = flags[k][m]; // real data flag
 
                         // original data:
-                        v2Th = vis2Data[k][l];
+                        v2Th = vis2Data[k][m];
 
                         if (!doFlag) {
                             // chi2 = sum ( (x - x_th) / err ) ^2
-                            diff = (v2 - v2Th) / vis2Err[k][l];
+                            diff = (v2 - v2Th) / vis2Err[k][m];
                             if (!Double.isNaN(diff)) {
                                 chi2_nb++;
                                 chi2_sum += diff * diff;
@@ -661,12 +733,21 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                         }
 
                         // Set values:
-                        vis2Data[k][l] = v2;
-                        vis2Err[k][l] = v2Err;
+                        vis2Data[k][m] = v2;
+                        vis2Err[k][m] = v2Err;
 
                         // Anyway: Disable flag (pure theoretical model):
-                        flags[k][l] = false;
+                        flags[k][m] = false;
                     }
+                }
+                // Clear:
+                for (l = 0; l < wlClear.length; l++) {
+                    m = wlClear[l];
+                    vis2Data[k][m] = Double.NaN;
+                    vis2Err[k][m] = Double.NaN;
+
+                    // mark this value as invalid :
+                    flags[k][m] = true;
                 }
             }
         }
@@ -680,7 +761,6 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         if (logger.isDebugEnabled()) {
             logger.debug("computeOIVis2: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
-        logger.info("computeOIVis2: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
     /**
@@ -731,7 +811,7 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         double chi2_phi_sum = 0.0;
 
         // Iterate on rows :
-        for (int k = 0, vp, l; k < nRows; k++) {
+        for (int k = 0, vp, l, m; k < nRows; k++) {
 
             // position in the row group :
             vp = 3 * k;
@@ -764,20 +844,21 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
 
                     // Iterate on wave lengths :
                     for (l = 0; l < nWaveLengths; l++) {
-                        t3Amp[k][l] = Double.NaN;
-                        t3AmpErr[k][l] = Double.NaN;
+                        m = wlIndex[l];
+                        t3Amp[k][m] = Double.NaN;
+                        t3AmpErr[k][m] = Double.NaN;
 
-                        t3Phi[k][l] = Double.NaN;
-                        t3PhiErr[k][l] = Double.NaN;
+                        t3Phi[k][m] = Double.NaN;
+                        t3PhiErr[k][m] = Double.NaN;
 
                         // mark this value as invalid :
-                        flags[k][l] = true;
+                        flags[k][m] = true;
                     }
 
                 } else {
                     // Iterate on wave lengths :
                     for (l = 0; l < nWaveLengths; l++) {
-
+                        m = wlIndex[l];
                         // baseline AB = 12 :
                         cvis12 = visData12[l];
                         visRe12 = cvis12.getReal();
@@ -804,22 +885,22 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                         // pure phase [-PI;PI] in degrees :
                         t3phi = toAngle(t3Re, t3Im);
 
-                        doFlag = flags[k][l]; // real data flag
+                        doFlag = flags[k][m]; // real data flag
 
                         errAmp = errPhi = Double.NaN;
 
                         // original data:
-                        t3ampTh = t3Amp[k][l];
-                        t3phiTh = FastMath.toRadians(t3Phi[k][l]);
+                        t3ampTh = t3Amp[k][m];
+                        t3phiTh = FastMath.toRadians(t3Phi[k][m]);
 
                         if (!doFlag) {
                             // chi2 = sum ( (x - x_th) / err ) ^2
-                            diff = (t3amp - t3ampTh) / t3AmpErr[k][l];
+                            diff = (t3amp - t3ampTh) / t3AmpErr[k][m];
                             if (!Double.isNaN(diff)) {
                                 chi2_amp_nb++;
                                 chi2_amp_sum += diff * diff;
                             }
-                            diff = distanceAngle(t3phi, t3phiTh) / FastMath.toRadians(t3PhiErr[k][l]);
+                            diff = distanceAngle(t3phi, t3phiTh) / FastMath.toRadians(t3PhiErr[k][m]);
                             if (!Double.isNaN(diff)) {
                                 chi2_phi_nb++;
                                 chi2_phi_sum += diff * diff;
@@ -827,16 +908,28 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
                         }
 
                         // Set values:
-                        t3Amp[k][l] = t3amp;
-                        t3AmpErr[k][l] = errAmp;
+                        t3Amp[k][m] = t3amp;
+                        t3AmpErr[k][m] = errAmp;
 
                         // convert errPhi in degrees :
-                        t3Phi[k][l] = toDegrees(t3phi);
-                        t3PhiErr[k][l] = toDegrees(errPhi);
+                        t3Phi[k][m] = toDegrees(t3phi);
+                        t3PhiErr[k][m] = toDegrees(errPhi);
 
                         // Anyway: Disable flag (pure theoretical model):
-                        flags[k][l] = false;
+                        flags[k][m] = false;
                     }
+                }
+                // Clear:
+                for (l = 0; l < wlClear.length; l++) {
+                    m = wlClear[l];
+                    t3Amp[k][m] = Double.NaN;
+                    t3AmpErr[k][m] = Double.NaN;
+
+                    t3Phi[k][m] = Double.NaN;
+                    t3PhiErr[k][m] = Double.NaN;
+
+                    // mark this value as invalid :
+                    flags[k][m] = true;
                 }
             }
         }
@@ -854,7 +947,57 @@ public class OIFitsProcessService extends AbstractOIFitsProducer {
         if (logger.isDebugEnabled()) {
             logger.debug("computeOIT3: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
-        logger.info("computeOIT3: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+    }
+
+    /**
+     * Update the OI_FLUX table using internal computed visComplex data
+     * @param flux OI_FLUX table to update
+     */
+    private void computeOIFlux(final OIFlux flux) {
+        final long start = System.nanoTime();
+
+        final int nRows = flux.getNbRows();
+
+        final int nWaveLengths = this.waveLengths.length;
+
+        // Columns :
+        final double[][] fluxData = flux.getFluxData();
+        final double[][] fluxErr = flux.getFluxErr();
+        final boolean[][] flags = flux.getFlag();
+
+        // Iterate on rows :
+        for (int k = 0, l, m; k < nRows; k++) {
+            // Next block makes easier comparison with OIFitsCreatorService (ref)
+            {
+                // Impossible to compute flux without any target:
+                {
+                    // Invalid => NaN value :
+
+                    // Iterate on wave lengths :
+                    for (l = 0; l < nWaveLengths; l++) {
+                        m = wlIndex[l];
+                        fluxData[k][m] = Double.NaN;
+                        fluxErr[k][m] = Double.NaN;
+
+                        // mark this value as invalid :
+                        flags[k][m] = true;
+                    }
+                }
+                // Clear:
+                for (l = 0; l < wlClear.length; l++) {
+                    m = wlClear[l];
+                    fluxData[k][m] = Double.NaN;
+                    fluxErr[k][m] = Double.NaN;
+
+                    // mark this value as invalid :
+                    flags[k][m] = true;
+                }
+            }
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("computeOIFlux: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        }
     }
 
 }
