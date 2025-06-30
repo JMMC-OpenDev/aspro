@@ -248,7 +248,7 @@
         <release version="25.07">
             <pubDate>Mon, 30 Jun 2025 10:00:00 GMT</pubDate>
             <prerelease version="25.07 beta 1">
-                <change type="BUG" url="http://trac.jmmc.fr/jmmc-sw/ticket/1451">Fixed the command line tool to compute interferometric observables
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1451">Fixed the command line tool to compute interferometric observables
                     from an OIFITS file (dataset) and an user model image cube (FITS) to handle correctly the model's wavelength range smaller than
                     the instrument's wavelength range given by OIWavelength tables (Restricted instrument mode / fits cube extrapolation disabled)</change>
                 <change type="FEATURE">Enhanced the command line tool to compute interferometric observables to support new arguments
