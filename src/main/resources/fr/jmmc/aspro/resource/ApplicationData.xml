@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="25.06"/>
-    <compilation date="02/06/2025" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="25.07 beta 1"/>
+    <compilation date="30/06/2025" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -245,6 +245,16 @@
     </menubar>
 
     <releasenotes>
+        <release version="25.07">
+            <pubDate>Mon, 30 Jun 2025 10:00:00 GMT</pubDate>
+            <prerelease version="25.07 beta 1">
+                <change type="BUG" url="http://trac.jmmc.fr/jmmc-sw/ticket/1451">Fixed the command line tool to compute interferometric observables
+                    from an OIFITS file (dataset) and an user model image cube (FITS) to handle correctly the model's wavelength range smaller than
+                    the instrument's wavelength range given by OIWavelength tables (Restricted instrument mode / fits cube extrapolation disabled)</change>
+                <change type="FEATURE">Enhanced the command line tool to compute interferometric observables to support new arguments
+                    (-modelInterpol and -modelExtrapol) concerning FITS cube interpolation and extrapolation</change>
+            </prerelease>
+        </release>
         <release version="25.06">
             <pubDate>Mon, 02 Jun 2025 14:00:00 GMT</pubDate>
             <prerelease version="25.06 beta 1">
