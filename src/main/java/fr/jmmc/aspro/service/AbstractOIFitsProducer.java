@@ -330,7 +330,7 @@ public abstract class AbstractOIFitsProducer {
                                 }
                             } else {
                                 // Extrapolation on boundaries:
-                                warningContainer.addInformation("Extrapolation applied on " + (firstChannel) + " lower "
+                                warningContainer.addInformation("Extrapolation applied on " + (firstChannel) + " lower"
                                         + " and " + (nWaves - 1 - lastChannel) + " upper channels");
                             }
                         }
