@@ -57,6 +57,10 @@ public final class OIFitsProcessor {
     public final static String ARG_APODIZE = "apodize";
     /** CLI arg - apodization diameter */
     public final static String ARG_DIAMETER = "diameter";
+    /** CLI arg - modelInterpol */
+    public final static String ARG_MODEL_INTERPOL = "modelInterpol";
+    /** CLI arg - modelExtrapol */
+    public final static String ARG_MODEL_EXTRAPOL = "modelExtrapol";
 
     public static void defineCommandLineArguments(final App app) {
         app.addCustomCommandLineArgument(ARG_IMAGE, true, "the input FITS model to process", App.ExecMode.TTY);
@@ -74,6 +78,9 @@ public final class OIFitsProcessor {
         // apodization arguments:
         app.addCustomCommandLineArgument(ARG_APODIZE, true, "[true] to perform image apodization; false to disable", App.ExecMode.TTY);
         app.addCustomCommandLineArgument(ARG_DIAMETER, true, "optional telescope diameter (meters) used by image apodization", App.ExecMode.TTY);
+        // fits cube interpolation/extrapolation arguments:
+        app.addCustomCommandLineArgument(ARG_MODEL_INTERPOL, true, "[true] to perform linear interpolation between FITS cube images; false to disable", App.ExecMode.TTY);
+        app.addCustomCommandLineArgument(ARG_MODEL_EXTRAPOL, true, "true to compute spectral channels out of the FITS cube wavelength range; [false] to disable", App.ExecMode.TTY);
     }
 
     public static void processCommandLine(final App app, final Map<String, String> argValues) {
@@ -120,11 +127,18 @@ public final class OIFitsProcessor {
             optArg = argValues.get(ARG_DIAMETER);
             final double diameter = (optArg != null) ? Double.parseDouble(optArg) : Double.NaN;
 
+            optArg = argValues.get(ARG_MODEL_INTERPOL);
+            final boolean userModelCubeInterpolation = (optArg != null) ? Boolean.parseBoolean(optArg) : true;
+
+            optArg = argValues.get(ARG_MODEL_EXTRAPOL);
+            final boolean userModelCubeExtrapolation = (optArg != null) ? Boolean.parseBoolean(optArg) : false;
+            
             // Process (in sync):
             new OIFitsProcessor(inputFile, modelFile, outputFile,
                     useFastMode, fastError, supersampling, mathMode,
                     doApodization, diameter,
-                    scale, rotate
+                    scale, rotate,
+                    userModelCubeInterpolation, userModelCubeExtrapolation
             ).process();
         }
     }
@@ -164,12 +178,16 @@ public final class OIFitsProcessor {
      * @param diameter optional telescope diameter (meters) used by image apodization (m)
      * @param scale scale / increment (mas)
      * @param rotate rotation angle (deg)
+     * @param userModelCubeInterpolation enable interpolation in FITS cube
+     * @param userModelCubeExtrapolation enable extrapolation in FITS cube
      */
     private OIFitsProcessor(final String inputFile, final String modelFile, final String outputFile,
                             final boolean useFastMode, final double fastError,
                             final int supersampling, final UserModelService.MathMode mathMode,
                             final boolean doApodization, final double diameter,
-                            final double scale, final double rotate) {
+                            final double scale, final double rotate,
+                            final boolean userModelCubeInterpolation,
+                            final boolean userModelCubeExtrapolation) {
 
         this.inputFile = inputFile;
         this.modelFile = modelFile;
@@ -182,7 +200,8 @@ public final class OIFitsProcessor {
         this.rotate = rotate;
 
         // TODO: provide new CLI opts for fits cube inter/extra polation:
-        this.options = new OIFitsProducerOptions(true, false, supersampling, mathMode, 3.0); // snrThreshold = 3
+        this.options = new OIFitsProducerOptions(userModelCubeInterpolation, userModelCubeExtrapolation, 
+                supersampling, mathMode, 3.0); // snrThreshold = 3
 
         logSeparator();
         logger.info("OIFitsProcessor arguments:");
@@ -196,7 +215,9 @@ public final class OIFitsProcessor {
         logger.info("doApodization: {}", doApodization);
         logger.info("diameter:      {}", diameter);
         logger.info("scale:         {}", scale);
-        logger.info("rotate:        {}", rotate);
+        logger.info("userModelCubeInterpolation: {}", userModelCubeInterpolation);
+        logger.info("userModelCubeExtrapolation: {}", userModelCubeExtrapolation);
+        logSeparator();
     }
 
     public void process() {
