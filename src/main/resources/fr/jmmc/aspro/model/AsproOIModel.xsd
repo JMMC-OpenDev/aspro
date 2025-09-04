@@ -3287,6 +3287,11 @@
                     <xsd:documentation>B band</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
+            <xsd:enumeration value="G_bp">
+                <xsd:annotation>
+                    <xsd:documentation>G_bp band (Gaia)</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
             <xsd:enumeration value="V">
                 <xsd:annotation>
                     <xsd:documentation>V band</xsd:documentation>
@@ -3300,6 +3305,11 @@
             <xsd:enumeration value="R">
                 <xsd:annotation>
                     <xsd:documentation>R band</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="G_rp">
+                <xsd:annotation>
+                    <xsd:documentation>G_rp band (Gaia)</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="I">

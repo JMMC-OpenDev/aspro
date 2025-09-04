@@ -2,6 +2,7 @@
 package fr.jmmc.aspro.model.oi;
 
 import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -14,9 +15,11 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;simpleType name="SpectralBand"&gt;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
  *     &lt;enumeration value="B"/&gt;
+ *     &lt;enumeration value="G_bp"/&gt;
  *     &lt;enumeration value="V"/&gt;
  *     &lt;enumeration value="G"/&gt;
  *     &lt;enumeration value="R"/&gt;
+ *     &lt;enumeration value="G_rp"/&gt;
  *     &lt;enumeration value="I"/&gt;
  *     &lt;enumeration value="J"/&gt;
  *     &lt;enumeration value="H"/&gt;
@@ -38,74 +41,98 @@ public enum SpectralBand {
      * B band
      * 
      */
-    B,
+    B("B"),
+
+    /**
+     * G_bp band (Gaia)
+     * 
+     */
+    @XmlEnumValue("G_bp")
+    G_BP("G_bp"),
 
     /**
      * V band
      * 
      */
-    V,
+    V("V"),
 
     /**
      * G band (Gaia)
      * 
      */
-    G,
+    G("G"),
 
     /**
      * R band
      * 
      */
-    R,
+    R("R"),
+
+    /**
+     * G_rp band (Gaia)
+     * 
+     */
+    @XmlEnumValue("G_rp")
+    G_RP("G_rp"),
 
     /**
      * I band
      * 
      */
-    I,
+    I("I"),
 
     /**
      * J band
      * 
      */
-    J,
+    J("J"),
 
     /**
      * H band
      * 
      */
-    H,
+    H("H"),
 
     /**
      * K band
      * 
      */
-    K,
+    K("K"),
 
     /**
      * L band
      * 
      */
-    L,
+    L("L"),
 
     /**
      * M band
      * 
      */
-    M,
+    M("M"),
 
     /**
      * N band
      * 
      */
-    N;
+    N("N");
+    private final String value;
+
+    SpectralBand(String v) {
+        value = v;
+    }
 
     public String value() {
-        return name();
+        return value;
     }
 
     public static SpectralBand fromValue(String v) {
-        return valueOf(v);
+        for (SpectralBand c: SpectralBand.values()) {
+            if (c.value.equals(v)) {
+                return c;
+            }
+        }
+        throw new IllegalArgumentException(v);
     }
 
 }

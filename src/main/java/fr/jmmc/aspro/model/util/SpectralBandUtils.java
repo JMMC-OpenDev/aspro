@@ -31,11 +31,16 @@ public final class SpectralBandUtils {
                 throw new IllegalArgumentException("Band " + band + " not supported !");
             case B:
                 return SpectralBand.B;
+            case G_BP:
+                return SpectralBand.G_BP;
             case V:
                 return SpectralBand.V;
-            // note: SpectralBand.G is not available in Band !
+            case G:
+                return SpectralBand.G;
             case R:
                 return SpectralBand.R;
+            case G_RP:
+                return SpectralBand.G_RP;
             case I:
                 return SpectralBand.I;
             case J:
@@ -67,13 +72,16 @@ public final class SpectralBandUtils {
         switch (band) {
             case B:
                 return Band.B;
+            case G_BP:
+                return Band.G_BP;
             case V:
                 return Band.V;
             case G:
-                // note: SpectralBand.G is not available in Band !
-                return Band.V;
+                return Band.G;
             case R:
                 return Band.R;
+            case G_RP:
+                return Band.G_RP;
             case I:
                 return Band.I;
             case J:

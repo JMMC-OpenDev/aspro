@@ -1049,16 +1049,29 @@ public final class NoiseService implements VisNoiseService {
 
         SpectralBand fluxAOBand = aoBand;
 
-        // handle special case for R band (NAOMI / GPAO)
-        if (fluxAOBand == SpectralBand.R) {
-
-            // TODO: handle Grp for GPAO VIS !
-            // use G then R then V (if no flux)
-            fluxAOBand = SpectralBand.G; // for NAOMI
+        // Handle missing target magnitudes:
+        if (fluxAOBand == SpectralBand.G) {
+            // handle special case for G band (NAOMI): use G then R then V (if no flux)
             flux = aoTarget.getFlux(fluxAOBand);
 
             if (flux == null) {
                 fluxAOBand = SpectralBand.R;
+                flux = aoTarget.getFlux(fluxAOBand);
+            }
+            if (flux == null) {
+                fluxAOBand = SpectralBand.V;
+                flux = aoTarget.getFlux(fluxAOBand);
+            }
+        } else if (fluxAOBand == SpectralBand.G_RP) {
+            // handle special case for G band (GPAO): use G_rp then R then G then V (if no flux)
+            flux = aoTarget.getFlux(fluxAOBand);
+
+            if (flux == null) {
+                fluxAOBand = SpectralBand.R;
+                flux = aoTarget.getFlux(fluxAOBand);
+            }
+            if (flux == null) {
+                fluxAOBand = SpectralBand.G;
                 flux = aoTarget.getFlux(fluxAOBand);
             }
             if (flux == null) {
@@ -2441,8 +2454,11 @@ public final class NoiseService implements VisNoiseService {
             case U:
             // avoid 'band U not supported'
             case B:
+            case G_BP:
             case V:
+            case G:
             case R:
+            case G_RP:
             case I:
                 // always use V for Visible:
                 return Band.V;

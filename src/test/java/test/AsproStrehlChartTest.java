@@ -135,14 +135,6 @@ public class AsproStrehlChartTest {
         // to define themes
         ChartUtils.createScientificTickUnits();
 
-        if (true) {
-            // strehl iso:
-            createChartFrame(null, "Strehl ISO GPAO_VIS - Strehl vs distance",
-                    createStrehlIsoChart(true));
-            createChartFrame(null, "Strehl ISO GPAO_IR  - Strehl vs distance",
-                    createStrehlIsoChart(false));
-        }
-
         final ConfigurationManager cm = ConfigurationManager.getInstance();
 
         for (String interferometerName : cm.getInterferometerNames()) {
@@ -324,6 +316,21 @@ public class AsproStrehlChartTest {
                         }
                     }
                 }
+
+                if ("VLTI".equals(interferometerName)) {
+                    w(pw, "## GPAO VIS:");
+                    wl(pw);
+
+                    createChartFrame(pw, "Strehl ISO GPAO_VIS - Strehl vs distance",
+                            createStrehlIsoChart(true));
+
+                    w(pw, "## GPAO IR:");
+                    wl(pw);
+
+                    createChartFrame(pw, "Strehl ISO GPAO_IR - Strehl vs distance",
+                            createStrehlIsoChart(false));
+                }
+
             } catch (IOException ioe) {
                 logger.error("IO failure: ", ioe);
             }
@@ -390,11 +397,11 @@ public class AsproStrehlChartTest {
 
         w(pw, "- nbSubPupils: " + nbSubPupils);
         w(pw, "- nbActuators: " + nbActuators);
-        w(pw, "- magOffset:   " + magOffset);
-        w(pw, "- strehlMax:   " + nbActuators);
         w(pw, "- td (ms):     " + td);
         w(pw, "- ron (e-/s):  " + ron);
         w(pw, "- Q.E:         " + qe);
+        w(pw, "- magOffset:   " + magOffset);
+        w(pw, "- strehlMax:   " + strehlMax);
         wl(pw);
 
         final YIntervalSeriesCollection xySeriesCollection = new YIntervalSeriesCollection();
