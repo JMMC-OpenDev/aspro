@@ -36,9 +36,11 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="OBJTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="SPECTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_B" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_G_BP" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_V" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_G" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_R" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="FLUX_G_RP" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_I" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_J" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *         &lt;element name="FLUX_H" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
@@ -75,9 +77,11 @@ import fr.jmmc.aspro.model.OIBase;
     "objtyp",
     "spectyp",
     "fluxb",
+    "fluxgbp",
     "fluxv",
     "fluxg",
     "fluxr",
+    "fluxgrp",
     "fluxi",
     "fluxj",
     "fluxh",
@@ -123,12 +127,16 @@ public class Target
     protected String spectyp;
     @XmlElement(name = "FLUX_B")
     protected Double fluxb;
+    @XmlElement(name = "FLUX_G_BP")
+    protected Double fluxgbp;
     @XmlElement(name = "FLUX_V")
     protected Double fluxv;
     @XmlElement(name = "FLUX_G")
     protected Double fluxg;
     @XmlElement(name = "FLUX_R")
     protected Double fluxr;
+    @XmlElement(name = "FLUX_G_RP")
+    protected Double fluxgrp;
     @XmlElement(name = "FLUX_I")
     protected Double fluxi;
     @XmlElement(name = "FLUX_J")
@@ -483,6 +491,30 @@ public class Target
     }
 
     /**
+     * Gets the value of the fluxgbp property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXGBP() {
+        return fluxgbp;
+    }
+
+    /**
+     * Sets the value of the fluxgbp property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXGBP(Double value) {
+        this.fluxgbp = value;
+    }
+
+    /**
      * Gets the value of the fluxv property.
      * 
      * @return
@@ -552,6 +584,30 @@ public class Target
      */
     public void setFLUXR(Double value) {
         this.fluxr = value;
+    }
+
+    /**
+     * Gets the value of the fluxgrp property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXGRP() {
+        return fluxgrp;
+    }
+
+    /**
+     * Sets the value of the fluxgrp property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXGRP(Double value) {
+        this.fluxgrp = value;
     }
 
     /**
