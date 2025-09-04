@@ -52,7 +52,6 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.util.ExportUtils;
 import org.jfree.data.function.Function2D;
 import org.jfree.data.general.DatasetUtils;
-import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.data.xy.YIntervalSeries;
 import org.jfree.data.xy.YIntervalSeriesCollection;
@@ -80,7 +79,7 @@ public class AsproStrehlChartTest {
     private static double ZENITH_ANGLE = 0.0;
 
     public static final int MAG_MIN = 0;
-    public static final int MAG_MAX = 20;
+    public static final int MAG_MAX = 22;
 
     private static final double[] MAGS;
 
@@ -138,8 +137,10 @@ public class AsproStrehlChartTest {
 
         if (true) {
             // strehl iso:
-            createChartFrame(null, "Strehl ISO vs distance",
-                    createStrehlIsoChart());
+            createChartFrame(null, "Strehl ISO GPAO_VIS - Strehl vs distance",
+                    createStrehlIsoChart(true));
+            createChartFrame(null, "Strehl ISO GPAO_IR  - Strehl vs distance",
+                    createStrehlIsoChart(false));
         }
 
         final ConfigurationManager cm = ConfigurationManager.getInstance();
@@ -289,6 +290,7 @@ public class AsproStrehlChartTest {
                                         }
                                     }
 
+                                    // Handle G_rp
                                     final Band aoBand = Band.valueOf(ao.getBand().name());
 
                                     w(pw, "##### Adaptive Optics [" + ao.getName() + "]");
@@ -383,9 +385,13 @@ public class AsproStrehlChartTest {
         final double td = aoSetup.getDit();
         final double ron = aoSetup.getRon();
         final double qe = aoSetup.getQuantumEfficiency();
+        final double magOffset = aoSetup.getMagOffsetOrZero();
+        final double strehlMax = aoSetup.getStrehlMaxOrZero();
 
         w(pw, "- nbSubPupils: " + nbSubPupils);
         w(pw, "- nbActuators: " + nbActuators);
+        w(pw, "- magOffset:   " + magOffset);
+        w(pw, "- strehlMax:   " + nbActuators);
         w(pw, "- td (ms):     " + td);
         w(pw, "- ron (e-/s):  " + ron);
         w(pw, "- Q.E:         " + qe);
@@ -400,7 +406,8 @@ public class AsproStrehlChartTest {
             final YIntervalSeries xySeries = new YIntervalSeries("Seeing " + seeing, false, false);
 
             for (double aoMag : MAGS) {
-                final double[] strehls = strehl(aoBand, aoMag, LAMBDA, telescope.getDiameter(), seeing, nbSubPupils, nbActuators, td, t0, qe, ron);
+                final double[] strehls = strehl(aoBand, (aoMag + magOffset), LAMBDA, telescope.getDiameter(),
+                        seeing, nbSubPupils, nbActuators, td, t0, qe, ron, strehlMax);
 
                 xySeries.add(aoMag, strehls[1], strehls[0], strehls[2]);
             }
@@ -452,7 +459,7 @@ public class AsproStrehlChartTest {
 
     static double[] strehl(final Band aoBand, final double adaptiveOpticsMag, final double[] waveLengths,
                            final double telDiam, final double seeing, final int nbSubPupils, final int nbActuators,
-                           final double td, final double t0, final double qe, final double ron) {
+                           final double td, final double t0, final double qe, final double ron, final double strehlMax) {
 
         if (false) {
             System.out.println("setup: seeing: " + seeing
@@ -465,12 +472,12 @@ public class AsproStrehlChartTest {
             );
         }
         return Band.strehl(aoBand, adaptiveOpticsMag, waveLengths, telDiam, seeing, nbSubPupils, nbActuators,
-                td, t0, qe, ron, 90.0 - ZENITH_ANGLE);
+                td, t0, qe, ron, 90.0 - ZENITH_ANGLE, strehlMax);
     }
 
-    static ChartPanel createStrehlIsoChart() {
+    static ChartPanel createStrehlIsoChart(final boolean visWFS) {
 
-        final Band band = Band.R;
+        final Band band = Band.G_RP;
         final double lambdaObs = 2.2e-6;
         final double elevation = 90.0;
 
@@ -480,14 +487,18 @@ public class AsproStrehlChartTest {
             final double seeing = AtmosphereQualityUtils.getSeeing(atmQual);
             final double h0 = AtmosphereQualityUtils.getTurbulenceHeight(atmQual);
 
-            final XYSeries xySeries = DatasetUtils.sampleFunction2DToSeries(
-                    new StrehlIsoFunction(band, lambdaObs, seeing, h0, elevation),
-                    0.0, 30.0, 180, "SR_iso(seeing = " + NumberUtils.trimTo2Digits(seeing) + " - h0 = " + NumberUtils.trimTo2Digits(h0) + ")"
-            );
-            xySeriesCollection.addSeries(xySeries);
+            xySeriesCollection.addSeries(DatasetUtils.sampleFunction2DToSeries(
+                    new StrehlIsoFunction(band, visWFS, lambdaObs, seeing, h0, elevation, Double.NaN),
+                    0.0, 40.0, 20, "SR_iso_NGS_" + (visWFS ? "VIS" : "IR") + " (seeing = " + NumberUtils.trimTo2Digits(seeing) + " - h0 = " + NumberUtils.trimTo2Digits(h0) + ")"
+            ));
+
+            xySeriesCollection.addSeries(DatasetUtils.sampleFunction2DToSeries(
+                    new StrehlIsoFunction(band, visWFS, lambdaObs, seeing, h0, elevation, 0.0),
+                    0.0, 40.0, 20, "SR_iso_LGS_" + (visWFS ? "VIS" : "IR") + " (seeing = " + NumberUtils.trimTo2Digits(seeing) + " - h0 = " + NumberUtils.trimTo2Digits(h0) + ")"
+            ));
         }
 
-        final JFreeChart chart = ChartFactory.createXYLineChart("Strehl ISO", "dist (as)", "Strehl (%)", xySeriesCollection);
+        final JFreeChart chart = ChartFactory.createXYLineChart("Strehl ISO GPAO_" + (visWFS ? "VIS" : "IR"), "dist (as)", "Strehl (%)", xySeriesCollection);
 
         org.jfree.chart.ChartUtils.applyCurrentTheme(chart);
         fixRenderer(chart, 0.0, 30.0);
@@ -516,19 +527,24 @@ public class AsproStrehlChartTest {
     protected final static class StrehlIsoFunction implements Function2D {
 
         private final Band aoBand;
+        private final boolean visWFS;
         private final double[] waveLengths;
         private final double seeing;
         private final double h0;
         private final double elevation;
+        private final double distAs_NGS;
 
-        protected StrehlIsoFunction(final Band band, final double wavelength,
-                                    final double seeing, final double h0, final double elevation) {
+        StrehlIsoFunction(final Band band, final boolean visWFS, final double wavelength,
+                          final double seeing, final double h0, final double elevation,
+                          final double distAs_NGS) {
 
             this.aoBand = band;
+            this.visWFS = visWFS;
             this.waveLengths = new double[]{wavelength};
             this.seeing = seeing;
             this.h0 = h0;
             this.elevation = elevation;
+            this.distAs_NGS = distAs_NGS;
         }
 
         /**
@@ -538,11 +554,13 @@ public class AsproStrehlChartTest {
          *
          * @return f(x).
          */
-        @Override
-        public double getValue(final double x) {
+        public double getValue(double x) {
             final double distAs = x;
 
-            final double[] sr = Band.strehl_iso(aoBand, waveLengths, seeing, h0, elevation, distAs);
+            final double[] sr
+                           = (distAs_NGS >= 0.0)
+                            ? Band.strehl_iso_LGS(aoBand, visWFS, waveLengths, seeing, h0, elevation, distAs, distAs_NGS)
+                            : Band.strehl_iso_NGS(aoBand, visWFS, waveLengths, seeing, h0, elevation, distAs);
 
             return (sr != null) ? sr[0] : Double.NaN;
         }
