@@ -757,6 +757,13 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element name="FLUX_G_BP" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band G_bp (gaia)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
 
             <xsd:element name="FLUX_V" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
@@ -765,7 +772,6 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-
             <xsd:element name="FLUX_G" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -778,6 +784,13 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         Flux magnitude in band R
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="FLUX_G_RP" type="xsd:double" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Flux magnitude in band G_rp (gaia)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -797,7 +810,6 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-
             <xsd:element name="FLUX_H" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -805,7 +817,6 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-
             <xsd:element name="FLUX_K" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -821,7 +832,6 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-
             <xsd:element name="FLUX_M" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -829,7 +839,6 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-
             <xsd:element name="FLUX_N" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>

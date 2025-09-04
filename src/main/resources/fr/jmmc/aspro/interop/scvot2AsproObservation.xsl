@@ -580,9 +580,9 @@
                                     </FLUX_B>
                                 </xsl:if>
                                 <xsl:if test="$FLUX_BP/text()">
-                                    <FLUX_BP>
+                                    <FLUX_G_BP>
                                         <xsl:value-of select="$FLUX_BP"/>
-                                    </FLUX_BP>
+                                    </FLUX_G_BP>
                                 </xsl:if>
                                 <xsl:if test="$FLUX_V/text()">
                                     <FLUX_V>
@@ -600,9 +600,9 @@
                                     </FLUX_R>
                                 </xsl:if>
                                 <xsl:if test="$FLUX_RP/text()">
-                                    <FLUX_RP>
+                                    <FLUX_G_RP>
                                         <xsl:value-of select="$FLUX_RP"/>
-                                    </FLUX_RP>
+                                    </FLUX_G_RP>
                                 </xsl:if>
                                 <xsl:if test="$FLUX_I/text()">
                                     <FLUX_I>

@@ -417,6 +417,9 @@ public class ExportOBXml {
         if (target.getFLUXB() != null) {
             t.setFLUXB(NumberUtils.trimTo3Digits(target.getFLUXB()));
         }
+        if (target.getFLUXGBP() != null) {
+            t.setFLUXB(NumberUtils.trimTo3Digits(target.getFLUXGBP()));
+        }
         if (target.getFLUXV() != null) {
             t.setFLUXV(NumberUtils.trimTo3Digits(target.getFLUXV()));
         }
@@ -426,6 +429,9 @@ public class ExportOBXml {
 
         if (target.getFLUXR() != null) {
             t.setFLUXR(NumberUtils.trimTo3Digits(target.getFLUXR()));
+        }
+        if (target.getFLUXGRP() != null) {
+            t.setFLUXB(NumberUtils.trimTo3Digits(target.getFLUXGRP()));
         }
         if (target.getFLUXI() != null) {
             t.setFLUXI(NumberUtils.trimTo3Digits(target.getFLUXI()));
