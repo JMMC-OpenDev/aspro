@@ -33,6 +33,8 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="ron" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *         &lt;element name="quantumEfficiency" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *         &lt;element name="transmission" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="magOffset" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="strehlMax" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -49,7 +51,9 @@ import fr.jmmc.aspro.model.OIBase;
     "dit",
     "ron",
     "quantumEfficiency",
-    "transmission"
+    "transmission",
+    "magOffset",
+    "strehlMax"
 })
 public class AdaptiveOpticsSetup
     extends OIBase
@@ -66,6 +70,8 @@ public class AdaptiveOpticsSetup
     protected double ron;
     protected double quantumEfficiency;
     protected Double transmission;
+    protected Double magOffset;
+    protected Double strehlMax;
 
     /**
      * Gets the value of the name property.
@@ -202,6 +208,54 @@ public class AdaptiveOpticsSetup
     public void setTransmission(Double value) {
         this.transmission = value;
     }
+
+    /**
+     * Gets the value of the magOffset property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getMagOffset() {
+        return magOffset;
+    }
+
+    /**
+     * Sets the value of the magOffset property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setMagOffset(Double value) {
+        this.magOffset = value;
+    }
+
+    /**
+     * Gets the value of the strehlMax property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getStrehlMax() {
+        return strehlMax;
+    }
+
+    /**
+     * Sets the value of the strehlMax property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setStrehlMax(Double value) {
+        this.strehlMax = value;
+    }
     
 //--simple--preserve
     /** parent AdaptiveOptics */
@@ -216,6 +270,14 @@ public class AdaptiveOpticsSetup
         this.ao = ao;
     }
 
+    public double getMagOffsetOrZero() {
+        return (magOffset != null) ? magOffset.doubleValue() : 0.0;
+    }
+
+    public double getStrehlMaxOrZero() {
+        return (strehlMax != null) ? strehlMax.doubleValue() : 0.0;
+    }
+    
     @Override
     public final String toString() {
         return "AdaptiveOpticsSetup[" + ((this.name != null) ? this.name : "undefined") + "]";
