@@ -122,6 +122,11 @@ public interface AsproConstants {
     /** FringeTrackerMode pattern for GRAVITY_FT */
     public static final String FTMODE_GRAVITY_FT = "FringeTrack GRA";
 
+    /** GPAO LGS */
+    public static final String GPAO_START = "GPAO_";
+    public static final String GPAO_LGS = "_LGS_";
+    public static final String GPAO_VIS_END = "_VIS";
+    
     /** instrument (obsportal) choices */
     public final static Vector<String> INS_OBS_LIST = new Vector<String>(Arrays.asList(
             new String[]{
