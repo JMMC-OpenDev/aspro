@@ -6,7 +6,7 @@
 
 # ASPRO 2 - Strehl ratios per instrument, telescope and Adaptive Optics (AO) systems
 
-- Date: Thu Sep 04 13:32:37 GMT 2025
+- Date: Thu Sep 04 14:02:36 GMT 2025
 
 - InterferometerConfiguration: 'VLTI Period 117'
 
@@ -1133,4 +1133,12 @@
 
   ![PIONIER [GRISM-H FREE-H] AT (NAOMI_FAINT) Strehl ratio H vs G mag](PIONIER_GRISM-H_FREE-H_AT_NAOMI_FAINT_Strehl_ratio_H_vs_G_mag.png)
 
+
+## GPAO VIS:
+
+  ![Strehl ISO GPAO_VIS - Strehl vs distance](Strehl_ISO_GPAO_VIS_-_Strehl_vs_distance.png)
+
+## GPAO IR:
+
+  ![Strehl ISO GPAO_IR - Strehl vs distance](Strehl_ISO_GPAO_IR_-_Strehl_vs_distance.png)
 
