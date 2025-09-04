@@ -137,7 +137,7 @@ public final class NoiseService implements VisNoiseService {
     private double adaptiveOpticsLimit = Double.NaN;
     /** AO (multiplicative) Instrumental transmission (0..1) */
     private double aoInstrumentalTransmission = Double.NaN;
-    /** distance to AO star (deg) */
+    /** distance between target and the AO star (deg) */
     private double distAO = 0.0;
 
     /** AO band */
@@ -235,8 +235,8 @@ public final class NoiseService implements VisNoiseService {
     private final double[] waveBands;
 
     /* fringe tracker parameters */
-    /** distance to FT star */
-    private double distFT = 0.0;
+    /** distance between SCI and FT stars */
+    private double distSCI_FT = 0.0;
     /** Fringe Tracker is Present */
     private boolean fringeTrackerPresent = false;
     /** Fringe Tracking Mode i.e. not group tracking (FINITO) */
@@ -1034,11 +1034,11 @@ public final class NoiseService implements VisNoiseService {
             } else {
                 fringeTrackerMag = flux.doubleValue();
                 if (ftTarget != target) {
-                    this.distFT = TargetUtils.computeDistanceInDegrees(target, ftTarget);
+                    this.distSCI_FT = TargetUtils.computeDistanceInDegrees(target, ftTarget);
                     final FitsUnit axisUnit = FitsUnit.ANGLE_ARCSEC;
                     warningContainer.addInformation("FT associated to target [" + ftTarget.getName() + "] ("
                             + ftBand + '=' + df.format(fringeTrackerMag) + " mag, "
-                            + "dist: " + NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(distFT, axisUnit))
+                            + "dist: " + NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(distSCI_FT, axisUnit))
                             + " " + axisUnit.getStandardRepresentation() + ")");
                 }
             }
@@ -1051,8 +1051,10 @@ public final class NoiseService implements VisNoiseService {
 
         // handle special case for R band (NAOMI / GPAO)
         if (fluxAOBand == SpectralBand.R) {
+
+            // TODO: handle Grp for GPAO VIS !
             // use G then R then V (if no flux)
-            fluxAOBand = SpectralBand.G;
+            fluxAOBand = SpectralBand.G; // for NAOMI
             flux = aoTarget.getFlux(fluxAOBand);
 
             if (flux == null) {
@@ -1079,7 +1081,7 @@ public final class NoiseService implements VisNoiseService {
             adaptiveOpticsMag = flux.doubleValue();
 
             // check AO mag limits:
-            if (!Double.isNaN(adaptiveOpticsLimit) && adaptiveOpticsMag > adaptiveOpticsLimit) {
+            if (!Double.isNaN(adaptiveOpticsLimit) && (adaptiveOpticsMag > adaptiveOpticsLimit)) {
                 // invalid setup:
                 this.invalidParametersInit = true;
                 warningContainer.addWarning("Observation can not use AO (magnitude limit = " + adaptiveOpticsLimit + ") in " + aoBand + " band");
@@ -1142,7 +1144,7 @@ public final class NoiseService implements VisNoiseService {
         if (useStrehlCorrection) {
             strehlPerChannel = new double[nObs][];
 
-            if (this.instrumentName.startsWith(AsproConstants.INS_SPICA)) {
+            if (this.instrumentName.equals(AsproConstants.INS_SPICA)) {
                 // SPICA case (waiting for CHARA AO):
                 final double strehl;
                 if (seeing <= 0.7) {
@@ -1165,6 +1167,11 @@ public final class NoiseService implements VisNoiseService {
                 double ao_td = 1.0;
                 double ao_ron = 1.0;
                 double ao_qe = 0.9;
+                double magOffset = 0.0;
+                double strehlMax = 0.0;
+                boolean isGPAO_VIS = false;
+                boolean isGPAO_LGS = false;
+                double distLGS = 0.0;
 
                 if (aoSetup != null) {
                     band = Band.valueOf(aoBand.name());
@@ -1177,6 +1184,8 @@ public final class NoiseService implements VisNoiseService {
                     ao_td = aoSetup.getDit();
                     ao_ron = aoSetup.getRon();
                     ao_qe = aoSetup.getQuantumEfficiency();
+                    magOffset = aoSetup.getMagOffsetOrZero();
+                    strehlMax = aoSetup.getStrehlMaxOrZero();
 
                     // fix transmission factors:
                     if (aoSetup.getTransmission() != null) {
@@ -1191,13 +1200,31 @@ public final class NoiseService implements VisNoiseService {
                             }
                         }
                     }
+
+                    isGPAO_VIS = targetMapping.get(TargetRole.GPAO_VIS) != null;
+
+                    final Target lgsTarget = targetMapping.get(TargetRole.GPAO_LGS);
+
+                    if (lgsTarget != null) {
+                        isGPAO_LGS = true;
+                        final Target target = targetMapping.get(targetRole);
+
+                        // add margin ~ 0.1 as ?
+                        distLGS = (lgsTarget != target) ? TargetUtils.computeDistanceInDegrees(target, lgsTarget) : 0.0;
+                        logger.debug("distLGS                         : {}", ALX.DEG_IN_ARCSEC * distLGS);
+
+                        final FitsUnit axisUnit = FitsUnit.ANGLE_ARCSEC;
+                        warningContainer.addInformation("AO LGS set close to target [" + lgsTarget.getName() + "] ("
+                                + "dist: " + NumberUtils.trimTo3Digits(FitsUnit.ANGLE_DEG.convert(distLGS, axisUnit))
+                                + " " + axisUnit.getStandardRepresentation() + ")");
+                    }
                 }
 
                 for (int n = 0; n < nObs; n++) {
                     final double elevation = targetPointInfos[n].getElevation();
 
-                    strehlPerChannel[n] = Band.strehl(band, adaptiveOpticsMag, waveLengths, telDiam, seeing,
-                            nbSubPupils, nbActuators, ao_td, t0, ao_qe, ao_ron, elevation);
+                    strehlPerChannel[n] = Band.strehl(band, (adaptiveOpticsMag + magOffset), waveLengths, telDiam,
+                            seeing, nbSubPupils, nbActuators, ao_td, t0, ao_qe, ao_ron, elevation, strehlMax);
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("elevation                     : {}", elevation);
@@ -1214,11 +1241,19 @@ public final class NoiseService implements VisNoiseService {
                     }
 
                     if (distAO > 0.0) {
-                        final double distAs = ALX.DEG_IN_ARCSEC * distAO;
-                        final double[] strehlIso = Band.strehl_iso(band, waveLengths, seeing, h0, elevation, distAs);
+                        final double distAs_LGS = ALX.DEG_IN_ARCSEC * distLGS;
+                        final double distAs_NGS = ALX.DEG_IN_ARCSEC * distAO;
+                        final double[] strehlIso;
+
+                        if (isGPAO_LGS) {
+                            strehlIso = Band.strehl_iso_LGS(band, isGPAO_VIS, waveLengths, seeing, h0, elevation, distAs_LGS, distAs_NGS);
+                        } else {
+                            strehlIso = Band.strehl_iso_NGS(band, isGPAO_VIS, waveLengths, seeing, h0, elevation, distAs_NGS);
+                        }
 
                         if (logger.isDebugEnabled()) {
-                            logger.debug("distAO                        : {} as", distAs);
+                            logger.debug("distLGS                       : {} as", distAs_LGS);
+                            logger.debug("distAO                        : {} as", distAs_NGS);
                             logger.debug("strehlIso                     : {} as", Arrays.toString(strehlIso));
                         }
 
@@ -1394,14 +1429,7 @@ public final class NoiseService implements VisNoiseService {
         this.vinst = instrumentalVisibility;
 
         if (fringeTrackerPresent) {
-            // disable magnitude checks for GRAVITY:
-            final boolean useFTMagLimit = !this.instrumentName.equals(AsproConstants.INS_GRAVITY);
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("useFTMagLimit                   : {}", useFTMagLimit);
-            }
-
-            if (isFTValid && (!useFTMagLimit || (fringeTrackerMag <= fringeTrackerLimit)) && (nbFrameToSaturation >= 1)) {
+            if (isFTValid && (fringeTrackerMag <= fringeTrackerLimit) && (nbFrameToSaturation >= 1)) {
                 // correct instrumental visibility due to FT flux loss:
                 for (int i = 0; i < this.vinst.length; i++) {
                     this.vinst[i] *= fringeTrackerInstrumentalVisibility; // FINITO only
@@ -1459,7 +1487,7 @@ public final class NoiseService implements VisNoiseService {
                     warningContainer.addWarning("Observation can not use FT !");
                 } else if (nbFrameToSaturation < 1) {
                     warningContainer.addWarning("Observation can not use FT (saturation) !");
-                } else if (useFTMagLimit && (fringeTrackerMag > fringeTrackerLimit)) {
+                } else if (fringeTrackerMag > fringeTrackerLimit) {
                     warningContainer.addWarning("Observation can not use FT (" + ftBand + " magnitude limit = " + fringeTrackerLimit + ") !");
                 }
 
@@ -1469,7 +1497,7 @@ public final class NoiseService implements VisNoiseService {
                 }
             }
         } else {
-            if ((targetRole == TargetRole.SCI) && !AsproConstants.INS_GRAVITY_FT.equalsIgnoreCase(this.instrumentName)) {
+            if ((targetRole == TargetRole.SCI) && !AsproConstants.INS_GRAVITY_FT.equals(this.instrumentName)) {
                 warningContainer.addInformation("DIT set to: " + formatTime(obsDit));
             }
         }
@@ -1997,7 +2025,7 @@ public final class NoiseService implements VisNoiseService {
             errVis2 *= totFrameCorrection;
         }
         param.errSqCorrFlux[iChannel] *= totFrameCorrection;
-        
+
         // Limit excessively large errors (very low transmission or strehl):
         errVis2 = Math.min(errVis2, MAX_ERR_V2);
 
@@ -2330,8 +2358,8 @@ public final class NoiseService implements VisNoiseService {
         return distAO;
     }
 
-    public double getDistFT() {
-        return distFT;
+    public double getDistSCI_FT() {
+        return distSCI_FT;
     }
 
     public double getVisScaleMeanForMidRefPoint() {

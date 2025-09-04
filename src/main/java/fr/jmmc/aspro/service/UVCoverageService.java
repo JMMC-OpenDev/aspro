@@ -14,15 +14,18 @@ import fr.jmmc.oitools.model.range.Range;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.observability.TargetPointInfo;
+import fr.jmmc.aspro.model.oi.AdaptiveOpticsSetup;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetGroup;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.util.TargetRole;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
@@ -553,6 +556,8 @@ public final class UVCoverageService {
         // Get starData for the selected target name :
         this.starData = this.obsData.getStarData(this.targetName);
 
+        final String instrumentName = observation.getInstrumentConfiguration().getName();
+
         // get current target :
         // ensure target has a model:
         this.target = getTargetWithModel(this.observation.getTarget(this.targetName)); // Science target
@@ -565,6 +570,23 @@ public final class UVCoverageService {
         final TargetConfiguration targetConf = target.getConfiguration();
 
         if ((targetRole == TargetRole.SCI) && (targetMapping == null)) {
+
+            // All telescopes use the same AO:
+            final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
+            final Telescope telescope = stations.get(0).getTelescope();
+
+            // AO is defined on SCI target:
+            AdaptiveOpticsSetup aoSetup = null;
+
+            if ((targetConf != null) && (targetConf.getAoSetup() != null)) {
+                aoSetup = telescope.findAOSetup(targetConf.getAoSetup());
+
+                if (aoSetup == null) {
+                    // TODO: support multi-config VLTI UT and AT confs:
+                    logger.info("Invalid AO[{}] for telescope {}", targetConf.getAoSetup(), telescope.getName());
+                }
+            }
+
             Target ftTarget = null;
             Target aoTarget = null;
 
@@ -601,7 +623,7 @@ public final class UVCoverageService {
                     }
 
                     if (ftTarget != null) {
-                        final boolean isTargetAO = (ftTarget == aoTarget);
+                        final boolean isTargetAO = (aoTarget == null) || (ftTarget == aoTarget);
 
                         // ensure ftTarget has a model:
                         ftTarget = getTargetWithModel(ftTarget);
@@ -618,20 +640,42 @@ public final class UVCoverageService {
 
             // always initialize target mapping:
             targetMapping = new LinkedHashMap<>(4);
-            targetMapping.put(TargetRole.SCI, target);
-            targetMapping.put(TargetRole.FT, ftTarget);
-            targetMapping.put(TargetRole.AO, aoTarget); // may be null
+            targetMapping.put(TargetRole.SCI, target);  // not null
+            targetMapping.put(TargetRole.FT, ftTarget); // not null
+            targetMapping.put(TargetRole.AO, aoTarget); // not null
 
+            if (aoSetup != null) {
+                if (aoSetup.getName().startsWith(AsproConstants.GPAO_START)) {
+                    if (aoSetup.getName().contains(AsproConstants.GPAO_LGS)) {
+                        /*
+                            Here is the list I would consider for the LGS positions:
+                            - LGS_IR: LGS is on science field
+                            - LGS_VIS & not (GRAVITY) wide: LGS is on science field
+                            - LGS_VIS & (GRAVITY) wide: LGS is most probably on FTS target, but could be shifted toward the science target.
+                         */
+                        final Target lgsTarget;
+                        if (instrumentName.equals(AsproConstants.INS_GRAVITY)) {
+                            lgsTarget = targetMapping.get(TargetRole.FT);
+                        } else {
+                            lgsTarget = targetMapping.get(TargetRole.SCI);
+                        }
+                        targetMapping.put(TargetRole.GPAO_LGS, lgsTarget); // not null
+                    }
+                    if (aoSetup.getName().endsWith(AsproConstants.GPAO_VIS_END)) {
+                        targetMapping.put(TargetRole.GPAO_VIS, target); // target is unused
+                    }
+                }
+            }
             logger.debug("targetMapping: {}", targetMapping);
+// TODO: kill
+            logger.warn("targetMapping: {}", targetMapping);
         }
 
         // Handle GRAVITY single/dual field mode:
         if (targetMapping != null) {
             if (targetMapping.get(TargetRole.SCI) == targetMapping.get(TargetRole.FT)) {
-                final String instrumentName = observation.getInstrumentConfiguration().getName();
-
                 if (instrumentName.startsWith(AsproConstants.INS_GRAVITY)) {
-                    targetMapping.put(TargetRole.SINGLE_FIELD, target);
+                    targetMapping.put(TargetRole.SINGLE_FIELD, target); // target is unused
 
                     logger.debug("{}: Single-field observation", instrumentName);
                 }

@@ -923,7 +923,7 @@ public abstract class AbstractOIFitsProducer {
                         this.noiseService = null;
                     }
                 } else {
-                    final double distFT = ns.getDistFT();
+                    final double distFT = ns.getDistSCI_FT();
 
                     if (distFT > 0.0) {
                         final double h_turb = ns.getH0();
