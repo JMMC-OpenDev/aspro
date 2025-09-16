@@ -71,7 +71,7 @@ public class StrehlChartTest {
             @Override
             public void run() {
 
-                if (true) {
+                if (false) {
                     // strehl iso:
                     createChartFrame("Strehl ISO GPAO_VIS - Strehl vs distance",
                             createStrehlIsoChart(true));
@@ -237,12 +237,12 @@ public class StrehlChartTest {
                         final double ron = 180.0;
 
                         /* 1200 modes (3/4) (40*40) */
-                        nbSubPupils = 1600;
-                        nbActuators = 1200;
-                        strehlMax = 0.90; // 0.93 by default
+                        nbSubPupils = 1200;
+                        nbActuators = 800;
+                        strehlMax = 0.73; // 0.93 by default
 
                         // 1kHz
-                        td = 1.0 * 0.7; // adjusted to get high strehl ~ 0.85
+                        td = 1.0; // adjusted to get high strehl ~ 0.85
                         System.out.println("GPAO_NGS_VIS: td: " + td);
 
                         effRon = ron / 900.0; // 0.2
@@ -261,17 +261,17 @@ public class StrehlChartTest {
                             /* 900 modes (3/4) (30*30) */
                             nbSubPupils = 900;
                             nbActuators = 600;
-                            strehlMax = 0.75; // 0.93 by default
+                            strehlMax = 0.85; // 0.93 by default
 
                             for (double dit : DIT_LGS) {
                                 // 500 Hz by default?
-                                td = dit * 0.8; // adjusted to get high strehl ~ 0.6
+                                td = dit; // adjusted to get high strehl ~ 0.6
                                 System.out.println("GPAO_LGS_VIS: real td: " + td);
                                 effRon = ron / 900.0 * 2; // 0.4
                                 System.out.println("GPAO_LGS_VIS: effRon: " + NumberUtils.trimTo3Digits(effRon));
 
-                                magOffset = -(17.75 - 12.5);
-                        System.out.println("magOffset: " + magOffset);
+                                magOffset = -(15.75 - 12.5);
+                                System.out.println("magOffset: " + magOffset);
 
                                 createChartFrame("UT (GPAO_LGS_VIS ns=" + nbSubPupils + " dit = " + dit + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
                                         createStrehlvsMagChart("GPAO_LGS_VIS_" + dit, aoBand, lambda, UT_DIAM, nbSubPupils, nbActuators, td, qe, effRon, magOffset, strehlMax));
@@ -286,17 +286,17 @@ public class StrehlChartTest {
                             /* 900 modes (3/4) (30*30) */
                             nbSubPupils = 900;
                             nbActuators = 600;
-                            strehlMax = 0.72; // 0.93 by default
+                            strehlMax = 0.85; // 0.93 by default
 
                             for (double dit : DIT_LGS) {
                                 // 500 Hz by default?
-                                td = dit * 0.8; // adjusted to get high strehl ~ 0.6
+                                td = dit; // adjusted to get high strehl ~ 0.6
                                 System.out.println("GPAO_LGS_IR: real td: " + td);
                                 effRon = ron / 900.0 * 2; // 0.4
                                 System.out.println("GPAO_LGS_IR: effRon: " + NumberUtils.trimTo3Digits(effRon));
 
-                                magOffset = -(14.0 - 10.75);
-                        System.out.println("magOffset: " + magOffset);
+                                magOffset = -(10.25 - 10.75);
+                                System.out.println("magOffset: " + magOffset);
 
                                 createChartFrame("UT (GPAO_LGS_IR ns=" + nbSubPupils + " dit = " + dit + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
                                         createStrehlvsMagChart("GPAO_LGS_IR_" + dit, aoBand, lambda, UT_DIAM, nbSubPupils, nbActuators, td, qe, effRon, magOffset, strehlMax));
