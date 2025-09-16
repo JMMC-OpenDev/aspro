@@ -19,7 +19,7 @@ import fr.jmmc.aspro.gui.action.QueryAllRawObservationsAction;
 import fr.jmmc.aspro.gui.action.QueryOneRawObservationsAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.TargetEditorAction;
-import fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction;
+import fr.jmmc.aspro.gui.action.TargetUpdateStarResolverAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
 import fr.jmmc.aspro.interop.ImageSampMessageHandler;
@@ -32,6 +32,7 @@ import fr.jmmc.aspro.interop.SendVOTableAction;
 import fr.jmmc.aspro.interop.VotableSampMessageHandler;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.MimeType;
@@ -117,6 +118,8 @@ public final class Aspro2 extends App {
     @Override
     protected void initServices() throws IllegalStateException, IllegalArgumentException {
         logger.debug("Aspro2.initServices: handler enter");
+        
+        StarResolver.enableGetStar(true);
 
         // Preload configurations :
         ConfigurationManager.getInstance();
@@ -379,8 +382,8 @@ public final class Aspro2 extends App {
         // Configuration editor
         new ConfigurationEditorAction();
         // update simbad:
-        new TargetUpdateSimbadAction();
-        // get star:
+        new TargetUpdateStarResolverAction();
+        // Get star(s):
         new GetStarAction();
         // query observations:
         new QueryOneRawObservationsAction();

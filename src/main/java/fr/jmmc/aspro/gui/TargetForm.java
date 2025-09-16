@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author bourgesl
  */
-public final class TargetForm extends javax.swing.JPanel implements StarResolverListener, PropertyChangeListener,
+public final class TargetForm extends javax.swing.JPanel implements StarResolverListener<StarResolverResult>, PropertyChangeListener,
                                                                     TreeSelectionListener, ListSelectionListener,
                                                                     ActionListener {
 
@@ -136,8 +136,10 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
      */
     private void postInit() {
 
-        // register the StarResolverListener:
-        starSearchField.setListener(this);
+        // register the StarResolverListener for Simbad:
+        starSearchField.setListener(StarResolverResult.class, this);
+        // register the StarResolverListener for GetStar:
+        starSearchField.setListener(String.class, GetStarAction.GETSTAR_LISTENER);
 
         final TargetRenderer renderer = new TargetRenderer(this.editTargetUserInfos);
 
@@ -1980,11 +1982,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
         if (targetId != null) {
             logger.info("Querying GetStar for identifier '{}'...", targetId);
 
-            if (true) {
-                GetStarAction.openGetStarInBrowser(targetId);
-            } else {
-                GetStarAction.performGetStarResolver(targetId);
-            }
+            GetStarAction.openGetStarInBrowser(targetId);
         }
     }//GEN-LAST:event_jButtonGetStarActionPerformed
 

@@ -5,19 +5,17 @@ package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.interop.SearchCalVOTableHandler;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.jmal.star.GetStarResolveJob;
+import static fr.jmmc.jmal.star.StarResolver.GETSTAR_QUERY_ID;
+import fr.jmmc.jmal.star.StarResolverListener;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.component.MessagePane;
-import fr.jmmc.jmcs.gui.component.StatusBar;
-import fr.jmmc.jmcs.network.http.Http;
 import fr.jmmc.jmcs.service.BrowserLauncher;
-import fr.jmmc.jmcs.util.FileUtils;
-import fr.jmmc.jmcs.util.UrlUtils;
 import java.awt.event.ActionEvent;
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,22 +30,32 @@ public final class GetStarAction extends RegisteredAction {
     private static final long serialVersionUID = 1;
     /** Class name. This name is used to register to the ActionRegistrar */
     public final static String className = GetStarAction.class.getName();
-    /** Action name. This name is used to register to the ActionRegistrar */
-    public final static String actionName = "getAllStars";
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(className);
-    /** GetStar URL (query by identifier) */
-    public static final String GETSTAR_QUERY_ID =
-        "http://sclws.jmmc.fr/sclwsGetStarProxy.php?star=";
 
-    /** GetStar separator (multiple identifier separator) */
-    public static final String GETSTAR_SEPARATOR = ",";
+    public static final StarResolverListener<String> GETSTAR_LISTENER = new StarResolverListener<String>() {
+        /**
+         * Handle the star resolver result as String (raw http response) or StarResolverResult instance (status, error messages, stars) ...
+         * @param result star resolver result
+         */
+        @Override
+        public void handleResult(final String votable) {
+            try {
+                logger.debug("votable :\n{}", votable);
+
+                SearchCalVOTableHandler.processMessage(votable, "undefined");
+
+            } catch (IOException ioe) {
+                MessagePane.showErrorMessage("Could not process GetStar VOTable", ioe);
+            }
+        }
+    };
 
     /**
      * Public constructor that automatically register the action in RegisteredAction.
      */
     public GetStarAction() {
-        super(className, actionName);
+        super(className, "getStar");
     }
 
     /** 
@@ -58,7 +66,15 @@ public final class GetStarAction extends RegisteredAction {
     public void actionPerformed(final ActionEvent evt) {
         logger.debug("actionPerformed");
 
-        final List<Target> editTargets = ObservationManager.getInstance().getTargets();
+        // Use main observation to get (selected) targets :
+        final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+
+        // retrieve the selected target from its name:
+        final Target target = observation.getSelectedTarget();
+        if (target == null) {
+            return;
+        }
+        final List<Target> editTargets = Arrays.asList(new Target[]{target});
 
         if (editTargets.isEmpty()) {
             return;
@@ -66,7 +82,6 @@ public final class GetStarAction extends RegisteredAction {
 
         // later use async HttpSwingWorker ...
         final int len = editTargets.size();
-        // TODO: check len ?
 
         final String[] ids = new String[len];
         for (int i = 0; i < len; i++) {
@@ -75,63 +90,24 @@ public final class GetStarAction extends RegisteredAction {
         }
 
         final String url = buildQuery(ids);
-
         if (url != null) {
             logger.debug("GetStar url = {}", url);
-
-            final File voTableFile = FileUtils.getTempFile("getstar.vot");
-
-            try {
-                final URI uri = new URI(url);
-
-                logger.debug("downloading {} to {}", uri, voTableFile);
-
-                if (Http.download(uri, voTableFile, false)) {
-                    try {
-                        final String votable = FileUtils.readFile(voTableFile);
-
-                        StatusBar.show("file loaded : " + voTableFile.getName());
-
-                        logger.debug("votable :\n{}", votable);
-
-                        SearchCalVOTableHandler.processMessage(votable, "undefined");
-
-                    } catch (IOException ioe) {
-                        MessagePane.showErrorMessage("Could not load the file : " + voTableFile.getAbsolutePath(), ioe);
-                    }
-                }
-            } catch (URISyntaxException use) {
-                logger.warn("Bad URI:", use);
-            } catch (IOException ioe) {
-                logger.info("IO failure (no network / internet access ?):", ioe);
-            }
+            BrowserLauncher.openURL(url);
         }
     }
 
     public static void openGetStarInBrowser(final String id) {
         final String url = buildQuery(id);
-
-            if (url != null) {
-                logger.debug("GetStar url = {}", url);
-
-                BrowserLauncher.openURL(url);
-            }
+        if (url != null) {
+            logger.debug("GetStar url = {}", url);
+            BrowserLauncher.openURL(url);
         }
+    }
 
     private static String buildQuery(final String... ids) {
-        if (ids != null && ids.length != 0) {
-            final String starValue;
-            if (ids.length == 1) {
-                starValue = ids[0];
-            } else {
-                final StringBuilder sb = new StringBuilder(ids.length * 20);
-                for (String id : ids) {
-                    sb.append(id).append(GETSTAR_SEPARATOR);
-                }
-                sb.deleteCharAt(sb.length() - 1);
-                starValue = sb.toString();
-            }
-            return GetStarAction.GETSTAR_QUERY_ID + UrlUtils.encode(starValue);
+        final String queryString = GetStarResolveJob.buildQueryString(ids);
+        if (queryString != null) {
+            return GETSTAR_QUERY_ID + queryString;
         }
         return null;
     }

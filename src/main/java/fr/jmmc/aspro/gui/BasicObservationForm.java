@@ -109,7 +109,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener,
-                                                                              StarResolverListener, ObservationListener {
+                                                                              StarResolverListener<StarResolverResult>, ObservationListener {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -1021,8 +1021,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         // Search Panel
         _searchPanel = new SearchPanel(new TargetListSearchPanelDelegate(jListTargets));
 
-        // register the StarResolverListener:
-        starSearchField.setListener(this);
+        // register the StarResolverListener for Simbad:
+        starSearchField.setListener(StarResolverResult.class, this);
+        // register the StarResolverListener for GetStar:
+        starSearchField.setListener(String.class, GetStarAction.GETSTAR_LISTENER);
 
         // update component models :
         final DateEditor de = (DateEditor) jDateSpinner.getEditor();
@@ -2251,7 +2253,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         SwingUtils.invokeLaterEDT(new Runnable() {
             @Override
             public void run() {
-                updateSimbad(true);
+                updateWithStarResolver(true);
             }
         });
     }
@@ -2544,7 +2546,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                         sb.append(msg);
                         n++;
                     } else if (message.getLevel() != Level.Trace) {
-                        sb.append(StringUtils.encodeTagContent(msg)).append("<br>");
+                        if (message.getLevel() == Level.Warning) {
+                            sb.append("<b>");
+                        }
+                        sb.append(StringUtils.encodeTagContent(msg));
+                        if (message.getLevel() == Level.Warning) {
+                            sb.append("</b>");
+                        }
+                        sb.append("<br>");
                         n++;
                     }
                     if (n == MAX_TOOLTIP_WARNINGS) {
@@ -2577,11 +2586,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         }
     }
 
-    public void updateSimbad() {
-        updateSimbad(false);
+    public void updateWithStarResolver() {
+        updateWithStarResolver(false);
     }
 
-    private void updateSimbad(final boolean onLoad) {
+    private void updateWithStarResolver(final boolean onLoad) {
         final List<Target> editTargets = om.getTargets();
 
         if (editTargets.isEmpty()) {
@@ -2595,7 +2604,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                     return;
                 }
 
-                if (!MessagePane.showConfirmMessage(this, "Do you want to update targets with the latest CDS Simbad information (coordinates ...) ?")) {
+                if (!MessagePane.showConfirmMessage(this, "Do you want to update targets with the latest star resolver information (coordinates ...) ?")) {
                     return;
                 }
             }

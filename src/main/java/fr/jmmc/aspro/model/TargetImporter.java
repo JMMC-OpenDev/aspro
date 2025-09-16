@@ -285,12 +285,12 @@ public final class TargetImporter {
 
         if (!nameList.isEmpty()) {
             // Wait for StarResolver task done:
-            final StarResolverResult result = StarResolver.waitFor(new StarResolver().multipleResolve(nameList));
-            if (result == null) {
+            final Object rawResult = StarResolver.waitFor(new StarResolver().multipleResolve(nameList));
+            if ((rawResult == null) || !(rawResult instanceof StarResolverResult)) {
                 MessagePane.showErrorMessage("Unable to resolve target identifiers: " + nameList, "Star resolver problem");
                 return false;
             }
-
+            final StarResolverResult result = (StarResolverResult) rawResult;
             // Report errors:
             StarResolverWidget.showResultMessage(result);
 
