@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="25.09 beta 3"/>
-    <compilation date="04/09/2025" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="25.09 beta 4"/>
+    <compilation date="16/09/2025" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -200,17 +200,8 @@
             <menu/>
             <menu label="Target Editor" classpath="fr.jmmc.aspro.gui.action.TargetEditorAction" action="showEditor" accelerator="T"/>
             <menu/>
-            <!-- new
-            <menu label="GetStar Selected" classpath="fr.jmmc.aspro.gui.action.GetStarAction" action="getStarAll"
-                  description="update all targets using the JMMC GetStar service"/>
-            <menu label="GetStar All" classpath="fr.jmmc.aspro.gui.action.GetStarAction" action="getStarOne"
-                  description="update the selected target using the JMMC GetStar service"/>
-            -->
-            <menu label="GetStar all Targets" classpath="fr.jmmc.aspro.gui.action.GetStarAction" action="getAllStars"
-                  description="update all targets using the JMMC GetStar service"/>
-
-            <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateSimbadAction" action="updateSimbad"
-                  description="update all targets with the latest information from the CDS Simbad service"/>
+            <menu label="Update all Targets" classpath="fr.jmmc.aspro.gui.action.TargetUpdateStarResolverAction" action="updateWithStarResolver"
+                  description="update all targets with the latest information from the Star Resolver service"/>
             <menu/>
             <menu label="Get Observations (Selected)" classpath="fr.jmmc.aspro.gui.action.QueryOneRawObservationsAction" action="query"
                   description="query raw observations (from JMMC ObsPortal) corresponding to the selected target"/>
@@ -246,7 +237,10 @@
 
     <releasenotes>
         <release version="25.09">
-            <pubDate>Thu, 04 Sep 2025 10:00:00 GMT</pubDate>
+            <pubDate>Tue, 16 Sep 2025 17:00:00 GMT</pubDate>
+            <prerelease version="25.09 beta 4">
+                <change type="FEATURE">Updated Star resolver to query JMMC GetStar 6 (Simbad still available) to get more information</change>
+            </prerelease>
             <prerelease version="25.09 beta 3">
                 <change type="FEATURE">VLTI: Added preliminary support for GPAO_LGS_VIS / IR offered in ESO P117</change>
             </prerelease>
