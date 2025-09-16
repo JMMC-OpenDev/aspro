@@ -6,9 +6,9 @@
 
 # ASPRO 2 - Strehl ratios per instrument, telescope and Adaptive Optics (AO) systems
 
-- Date: Thu Sep 04 13:32:37 GMT 2025
+- Date: Tue Sep 16 20:33:02 GMT 2025
 
-- InterferometerConfiguration: 'CHARA 2025B'
+- InterferometerConfiguration: 'CHARA 2026A'
 
 ## Instrument [MIRCX-MYSTIC]
 
@@ -156,7 +156,7 @@
 
 ### Instrument Modes [LR]
 
-- Instrument band: I
+- Instrument band: G_RP
 - Instrument ref. wavelength : 0.75 µm
 - Instrument min. wavelength : 0.61 µm
 - Instrument max. wavelength : 0.9 µm
@@ -179,12 +179,12 @@
 - magOffset:   0.0
 - strehlMax:   0.0
 
-  ![SPICA [LR] T (AO) Strehl ratio I vs V mag](SPICA_LR_T_AO_Strehl_ratio_I_vs_V_mag.png)
+  ![SPICA [LR] T (AO) Strehl ratio G_rp vs V mag](SPICA_LR_T_AO_Strehl_ratio_G_rp_vs_V_mag.png)
 
 
 ### Instrument Modes [MR640]
 
-- Instrument band: G_RP
+- Instrument band: R
 - Instrument ref. wavelength : 0.64 µm
 - Instrument min. wavelength : 0.59 µm
 - Instrument max. wavelength : 0.68 µm
@@ -207,12 +207,12 @@
 - magOffset:   0.0
 - strehlMax:   0.0
 
-  ![SPICA [MR640] T (AO) Strehl ratio G_rp vs V mag](SPICA_MR640_T_AO_Strehl_ratio_G_rp_vs_V_mag.png)
+  ![SPICA [MR640] T (AO) Strehl ratio R vs V mag](SPICA_MR640_T_AO_Strehl_ratio_R_vs_V_mag.png)
 
 
 ### Instrument Modes [MR685]
 
-- Instrument band: G_RP
+- Instrument band: R
 - Instrument ref. wavelength : 0.68 µm
 - Instrument min. wavelength : 0.63 µm
 - Instrument max. wavelength : 0.72 µm
@@ -235,12 +235,12 @@
 - magOffset:   0.0
 - strehlMax:   0.0
 
-  ![SPICA [MR685] T (AO) Strehl ratio G_rp vs V mag](SPICA_MR685_T_AO_Strehl_ratio_G_rp_vs_V_mag.png)
+  ![SPICA [MR685] T (AO) Strehl ratio R vs V mag](SPICA_MR685_T_AO_Strehl_ratio_R_vs_V_mag.png)
 
 
 ### Instrument Modes [MR720]
 
-- Instrument band: I
+- Instrument band: G_RP
 - Instrument ref. wavelength : 0.72 µm
 - Instrument min. wavelength : 0.67 µm
 - Instrument max. wavelength : 0.76 µm
@@ -263,12 +263,12 @@
 - magOffset:   0.0
 - strehlMax:   0.0
 
-  ![SPICA [MR720] T (AO) Strehl ratio I vs V mag](SPICA_MR720_T_AO_Strehl_ratio_I_vs_V_mag.png)
+  ![SPICA [MR720] T (AO) Strehl ratio G_rp vs V mag](SPICA_MR720_T_AO_Strehl_ratio_G_rp_vs_V_mag.png)
 
 
 ### Instrument Modes [MR800]
 
-- Instrument band: I
+- Instrument band: G_RP
 - Instrument ref. wavelength : 0.8 µm
 - Instrument min. wavelength : 0.75 µm
 - Instrument max. wavelength : 0.84 µm
@@ -291,7 +291,7 @@
 - magOffset:   0.0
 - strehlMax:   0.0
 
-  ![SPICA [MR800] T (AO) Strehl ratio I vs V mag](SPICA_MR800_T_AO_Strehl_ratio_I_vs_V_mag.png)
+  ![SPICA [MR800] T (AO) Strehl ratio G_rp vs V mag](SPICA_MR800_T_AO_Strehl_ratio_G_rp_vs_V_mag.png)
 
 
 ### Instrument Modes [MR850]
@@ -324,7 +324,7 @@
 
 ### Instrument Modes [HR]
 
-- Instrument band: I
+- Instrument band: G_RP
 - Instrument ref. wavelength : 0.72 µm
 - Instrument min. wavelength : 0.6 µm
 - Instrument max. wavelength : 0.9 µm
@@ -347,14 +347,14 @@
 - magOffset:   0.0
 - strehlMax:   0.0
 
-  ![SPICA [HR] T (AO) Strehl ratio I vs V mag](SPICA_HR_T_AO_Strehl_ratio_I_vs_V_mag.png)
+  ![SPICA [HR] T (AO) Strehl ratio G_rp vs V mag](SPICA_HR_T_AO_Strehl_ratio_G_rp_vs_V_mag.png)
 
 
 ## Instrument [PAVO]
 
 ### Instrument Modes [R]
 
-- Instrument band: I
+- Instrument band: G_RP
 - Instrument ref. wavelength : 0.79 µm
 - Instrument min. wavelength : 0.63 µm
 - Instrument max. wavelength : 0.95 µm
@@ -377,7 +377,7 @@
 - magOffset:   0.0
 - strehlMax:   0.0
 
-  ![PAVO [R] T (AO) Strehl ratio I vs V mag](PAVO_R_T_AO_Strehl_ratio_I_vs_V_mag.png)
+  ![PAVO [R] T (AO) Strehl ratio G_rp vs V mag](PAVO_R_T_AO_Strehl_ratio_G_rp_vs_V_mag.png)
 
 
 ## Instrument [CLIMB]

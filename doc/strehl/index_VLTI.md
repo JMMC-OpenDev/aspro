@@ -6,7 +6,7 @@
 
 # ASPRO 2 - Strehl ratios per instrument, telescope and Adaptive Optics (AO) systems
 
-- Date: Thu Sep 04 14:02:36 GMT 2025
+- Date: Tue Sep 16 20:33:02 GMT 2025
 
 - InterferometerConfiguration: 'VLTI Period 117'
 
@@ -29,13 +29,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![GRAVITY [LOW-COMBINED LOW-SPLIT] UT (GPAO_NGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_LOW-COMBINED_LOW-SPLIT_UT_GPAO_NGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -48,11 +48,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![GRAVITY [LOW-COMBINED LOW-SPLIT] UT (GPAO_LGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_LOW-COMBINED_LOW-SPLIT_UT_GPAO_LGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -82,11 +82,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.7
-- magOffset:   -3.25
-- strehlMax:   0.72
+- magOffset:   0.5
+- strehlMax:   0.85
 
   ![GRAVITY [LOW-COMBINED LOW-SPLIT] UT (GPAO_LGS_IR) Strehl ratio K vs K mag](GRAVITY_LOW-COMBINED_LOW-SPLIT_UT_GPAO_LGS_IR_Strehl_ratio_K_vs_K_mag.png)
 
@@ -141,13 +141,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![GRAVITY [MEDIUM-COMBINED MEDIUM-SPLIT] UT (GPAO_NGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_MEDIUM-COMBINED_MEDIUM-SPLIT_UT_GPAO_NGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -160,11 +160,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![GRAVITY [MEDIUM-COMBINED MEDIUM-SPLIT] UT (GPAO_LGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_MEDIUM-COMBINED_MEDIUM-SPLIT_UT_GPAO_LGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -194,11 +194,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.7
-- magOffset:   -3.25
-- strehlMax:   0.72
+- magOffset:   0.5
+- strehlMax:   0.85
 
   ![GRAVITY [MEDIUM-COMBINED MEDIUM-SPLIT] UT (GPAO_LGS_IR) Strehl ratio K vs K mag](GRAVITY_MEDIUM-COMBINED_MEDIUM-SPLIT_UT_GPAO_LGS_IR_Strehl_ratio_K_vs_K_mag.png)
 
@@ -253,13 +253,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![GRAVITY [HIGH-COMBINED HIGH-SPLIT] UT (GPAO_NGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_HIGH-COMBINED_HIGH-SPLIT_UT_GPAO_NGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -272,11 +272,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![GRAVITY [HIGH-COMBINED HIGH-SPLIT] UT (GPAO_LGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_HIGH-COMBINED_HIGH-SPLIT_UT_GPAO_LGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -306,11 +306,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.7
-- magOffset:   -3.25
-- strehlMax:   0.72
+- magOffset:   0.5
+- strehlMax:   0.85
 
   ![GRAVITY [HIGH-COMBINED HIGH-SPLIT] UT (GPAO_LGS_IR) Strehl ratio K vs K mag](GRAVITY_HIGH-COMBINED_HIGH-SPLIT_UT_GPAO_LGS_IR_Strehl_ratio_K_vs_K_mag.png)
 
@@ -367,13 +367,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![MATISSE_LM [SI_PHOT_L_LOW] UT (GPAO_NGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_LOW_UT_GPAO_NGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -386,11 +386,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![MATISSE_LM [SI_PHOT_L_LOW] UT (GPAO_LGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_LOW_UT_GPAO_LGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -445,13 +445,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![MATISSE_LM [SI_PHOT_LM_LOW] UT (GPAO_NGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_LM_LOW_UT_GPAO_NGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -464,11 +464,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![MATISSE_LM [SI_PHOT_LM_LOW] UT (GPAO_LGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_LM_LOW_UT_GPAO_LGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -523,13 +523,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![MATISSE_LM [SI_PHOT_M_LOW] UT (GPAO_NGS_VIS) Strehl ratio M vs G_RP mag](MATISSE_LM_SI_PHOT_M_LOW_UT_GPAO_NGS_VIS_Strehl_ratio_M_vs_G_RP_mag.png)
 
@@ -542,11 +542,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![MATISSE_LM [SI_PHOT_M_LOW] UT (GPAO_LGS_VIS) Strehl ratio M vs G_RP mag](MATISSE_LM_SI_PHOT_M_LOW_UT_GPAO_LGS_VIS_Strehl_ratio_M_vs_G_RP_mag.png)
 
@@ -601,13 +601,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![MATISSE_LM [SI_PHOT_LM_MEDIUM] UT (GPAO_NGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_LM_MEDIUM_UT_GPAO_NGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -620,11 +620,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![MATISSE_LM [SI_PHOT_LM_MEDIUM] UT (GPAO_LGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_LM_MEDIUM_UT_GPAO_LGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -679,13 +679,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![MATISSE_LM [SI_PHOT_L_HIGH] UT (GPAO_NGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_HIGH_UT_GPAO_NGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -698,11 +698,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![MATISSE_LM [SI_PHOT_L_HIGH] UT (GPAO_LGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_HIGH_UT_GPAO_LGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -757,13 +757,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![MATISSE_LM [SI_PHOT_L_VERY_HIGH] UT (GPAO_NGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_VERY_HIGH_UT_GPAO_NGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -776,11 +776,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![MATISSE_LM [SI_PHOT_L_VERY_HIGH] UT (GPAO_LGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_VERY_HIGH_UT_GPAO_LGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -835,13 +835,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![MATISSE_LM [SI_PHOT_M_VERY_HIGH] UT (GPAO_NGS_VIS) Strehl ratio M vs G_RP mag](MATISSE_LM_SI_PHOT_M_VERY_HIGH_UT_GPAO_NGS_VIS_Strehl_ratio_M_vs_G_RP_mag.png)
 
@@ -854,11 +854,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![MATISSE_LM [SI_PHOT_M_VERY_HIGH] UT (GPAO_LGS_VIS) Strehl ratio M vs G_RP mag](MATISSE_LM_SI_PHOT_M_VERY_HIGH_UT_GPAO_LGS_VIS_Strehl_ratio_M_vs_G_RP_mag.png)
 
@@ -915,13 +915,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![MATISSE_N [HIGH_SENS_N_LOW] UT (GPAO_NGS_VIS) Strehl ratio N vs G_RP mag](MATISSE_N_HIGH_SENS_N_LOW_UT_GPAO_NGS_VIS_Strehl_ratio_N_vs_G_RP_mag.png)
 
@@ -934,11 +934,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![MATISSE_N [HIGH_SENS_N_LOW] UT (GPAO_LGS_VIS) Strehl ratio N vs G_RP mag](MATISSE_N_HIGH_SENS_N_LOW_UT_GPAO_LGS_VIS_Strehl_ratio_N_vs_G_RP_mag.png)
 
@@ -993,13 +993,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![MATISSE_N [HIGH_SENS_N_HIGH] UT (GPAO_NGS_VIS) Strehl ratio N vs G_RP mag](MATISSE_N_HIGH_SENS_N_HIGH_UT_GPAO_NGS_VIS_Strehl_ratio_N_vs_G_RP_mag.png)
 
@@ -1012,11 +1012,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![MATISSE_N [HIGH_SENS_N_HIGH] UT (GPAO_LGS_VIS) Strehl ratio N vs G_RP mag](MATISSE_N_HIGH_SENS_N_HIGH_UT_GPAO_LGS_VIS_Strehl_ratio_N_vs_G_RP_mag.png)
 
@@ -1073,13 +1073,13 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1600
-- nbActuators: 1200
-- td (ms):     0.7
+- nbSubPupils: 1200
+- nbActuators: 800
+- td (ms):     1.0
 - ron (e-/s):  0.2
 - Q.E:         0.25
 - magOffset:   -1.0
-- strehlMax:   0.9
+- strehlMax:   0.73
 
   ![PIONIER [GRISM-H FREE-H] UT (GPAO_NGS_VIS) Strehl ratio H vs G_RP mag](PIONIER_GRISM-H_FREE-H_UT_GPAO_NGS_VIS_Strehl_ratio_H_vs_G_RP_mag.png)
 
@@ -1092,11 +1092,11 @@
 
 - nbSubPupils: 900
 - nbActuators: 600
-- td (ms):     1.6
+- td (ms):     2.0
 - ron (e-/s):  0.4
 - Q.E:         0.25
-- magOffset:   -5.25
-- strehlMax:   0.75
+- magOffset:   -3.25
+- strehlMax:   0.85
 
   ![PIONIER [GRISM-H FREE-H] UT (GPAO_LGS_VIS) Strehl ratio H vs G_RP mag](PIONIER_GRISM-H_FREE-H_UT_GPAO_LGS_VIS_Strehl_ratio_H_vs_G_RP_mag.png)
 
