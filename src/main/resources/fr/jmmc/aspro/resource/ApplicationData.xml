@@ -239,7 +239,8 @@
         <release version="25.09">
             <pubDate>Tue, 16 Sep 2025 17:00:00 GMT</pubDate>
             <prerelease version="25.09 beta 4">
-                <change type="FEATURE">Updated Star resolver to query JMMC GetStar 6 (Simbad still available) to get more information</change>
+                <change type="FEATURE">Updated the Star resolver to provide JMMC GetStar 6 as new resolver (Simbad still the default)
+                    to get more information (Gaia mags...); click on the arrow to show all resolvers</change>
             </prerelease>
             <prerelease version="25.09 beta 3">
                 <change type="FEATURE">VLTI: Added preliminary support for GPAO_LGS_VIS / IR offered in ESO P117</change>
