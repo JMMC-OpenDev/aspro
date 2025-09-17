@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="25.09 beta 4"/>
+    <program name="Aspro2" version="25.09"/>
     <compilation date="17/09/2025" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -237,7 +237,7 @@
 
     <releasenotes>
         <release version="25.09">
-            <pubDate>Tue, 16 Sep 2025 17:00:00 GMT</pubDate>
+            <pubDate>Wed, 17 Sep 2025 21:00:00 GMT</pubDate>
             <prerelease version="25.09 beta 4">
                 <change type="FEATURE">Updated the Star resolver to query the JMMC's GetStar service (new default) as new resolver (CDS's Simbad still available)
                     to get lot more information (AllWise &amp; Gaia mags...); click on the small arrow on the left side to show available star resolvers (pop-up menu)</change>
