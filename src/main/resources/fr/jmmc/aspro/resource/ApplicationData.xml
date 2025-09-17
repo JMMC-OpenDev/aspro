@@ -19,7 +19,7 @@
     </company>
 
     <program name="Aspro2" version="25.09 beta 4"/>
-    <compilation date="16/09/2025" compiler="JDK 1.8.0"/>
+    <compilation date="17/09/2025" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -239,11 +239,14 @@
         <release version="25.09">
             <pubDate>Tue, 16 Sep 2025 17:00:00 GMT</pubDate>
             <prerelease version="25.09 beta 4">
-                <change type="FEATURE">Updated the Star resolver to provide JMMC GetStar 6 as new resolver (Simbad still the default)
-                    to get more information (Gaia mags...); click on the arrow to show all resolvers</change>
+                <change type="FEATURE">Updated the Star resolver to query the JMMC's GetStar service (new default) as new resolver (CDS's Simbad still available)
+                    to get lot more information (AllWise &amp; Gaia mags...); click on the small arrow on the left side to show available star resolvers (pop-up menu)</change>
+                    <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1472">Added GAIA G_bp &amp; G_rp magnitudes in the Target Editor and the target importer
+                        (SearchCal/GetStar VOTable handling)</change>
             </prerelease>
             <prerelease version="25.09 beta 3">
-                <change type="FEATURE">VLTI: Added preliminary support for GPAO_LGS_VIS / IR offered in ESO P117</change>
+                <change type="FEATURE">VLTI: Added support for GPAO Laser Guide Star (LGS) VIS / IR offered in ESO P117 (commissioning in progress);
+                    see the Aspro2's user manual to see strehl plots per instrument mode</change>
             </prerelease>
             <prerelease version="25.07 beta 2">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1451">Fixed the command line tool to compute interferometric observables
