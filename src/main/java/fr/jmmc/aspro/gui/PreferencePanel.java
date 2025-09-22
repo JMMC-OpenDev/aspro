@@ -13,16 +13,20 @@ import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.image.ImageUtils.ImageInterpolation;
+import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.oiexplorer.core.gui.IconComboBoxRenderer;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +62,18 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
      */
     private void postInit() {
 
+        StarResolver.setResolverServiceMirrorListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    // will fire triggerObserversNotification so update() will be called
+                    myPreferences.setPreference(Preferences.STAR_RESOLVER_MIRROR, StarResolver.getResolverServiceMirror());
+                } catch (PreferencesException pe) {
+                    logger.error("property failure : ", pe);
+                }
+            }
+        });
+
         // define custom models :
         this.jComboBoxImageSize.setModel(new DefaultComboBoxModel(AsproConstants.IMAGE_SIZES));
         this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
@@ -72,6 +88,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
 
         this.jComboBoxMathMode.setModel(new DefaultComboBoxModel(MathMode.values()));
         this.jComboBoxSuperSampling.setModel(new DefaultComboBoxModel(AsproConstants.SUPER_SAMPLING));
+
+        this.jComboBoxResolverMirror.setModel(new DefaultComboBoxModel(new Vector<String>(StarResolver.getResolverServiceMirrors())));
 
         // Custom renderer for LUT:
         this.jComboBoxLUT.setRenderer(new IconComboBoxRenderer() {
@@ -238,6 +256,8 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         jLabelGuiRestrictions = new javax.swing.JLabel();
         jRadioButtonBypassGuiRestrictionsYes = new javax.swing.JRadioButton();
         jRadioButtonBypassGuiRestrictionsNo = new javax.swing.JRadioButton();
+        jComboBoxResolverMirror = new javax.swing.JComboBox();
+        jLabelStarResolverMirror = new javax.swing.JLabel();
         chartPreferencesView = new fr.jmmc.oiexplorer.core.gui.ChartPreferencesView();
         jPanelCommonPreferencesView = new fr.jmmc.jmcs.gui.component.CommonPreferencesView();
 
@@ -954,11 +974,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
 
         jLabelGuiRestrictions.setText("Bypass GUI restrictions");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 0.2;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         jPanelGui.add(jLabelGuiRestrictions, gridBagConstraints);
 
         buttonGroupGuiRestrictions.add(jRadioButtonBypassGuiRestrictionsYes);
@@ -990,6 +1006,27 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelGui.add(jRadioButtonBypassGuiRestrictionsNo, gridBagConstraints);
+
+        jComboBoxResolverMirror.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxResolverMirrorActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 4);
+        jPanelGui.add(jComboBoxResolverMirror, gridBagConstraints);
+
+        jLabelStarResolverMirror.setText("Star Resolver mirror");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        jPanelGui.add(jLabelStarResolverMirror, gridBagConstraints);
 
         jPanelLayout.add(jPanelGui);
         jPanelLayout.add(chartPreferencesView);
@@ -1263,6 +1300,14 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         }
     }//GEN-LAST:event_jRadioButtonImageUAxisLeftActionPerformed
 
+    private void jComboBoxResolverMirrorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxResolverMirrorActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.STAR_RESOLVER_MIRROR, this.jComboBoxResolverMirror.getSelectedItem());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxResolverMirrorActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupAddNoise;
@@ -1287,6 +1332,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JComboBox jComboBoxInterpolation;
     private javax.swing.JComboBox jComboBoxLUT;
     private javax.swing.JComboBox jComboBoxMathMode;
+    private javax.swing.JComboBox jComboBoxResolverMirror;
     private javax.swing.JComboBox jComboBoxSuperSampling;
     private javax.swing.JComboBox jComboBoxTwilight;
     private javax.swing.JFormattedTextField jFieldMinElev;
@@ -1313,6 +1359,7 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
     private javax.swing.JLabel jLabelNightOnly;
     private javax.swing.JLabel jLabelPositionStyle;
     private javax.swing.JLabel jLabelSNRTh;
+    private javax.swing.JLabel jLabelStarResolverMirror;
     private javax.swing.JLabel jLabelSuperSampling;
     private javax.swing.JLabel jLabelTimeRef;
     private javax.swing.JLabel jLabelTwilight;
@@ -1445,6 +1492,10 @@ public final class PreferencePanel extends javax.swing.JPanel implements Observe
         final boolean bypassGuiRestrictions = !this.myPreferences.getPreferenceAsBoolean(Preferences.GUI_RESTRICTIONS);
         this.jRadioButtonBypassGuiRestrictionsYes.setSelected(bypassGuiRestrictions);
         this.jRadioButtonBypassGuiRestrictionsNo.setSelected(!bypassGuiRestrictions);
+
+        final String mirrorName = this.myPreferences.getPreference(Preferences.STAR_RESOLVER_MIRROR);
+        this.jComboBoxResolverMirror.setSelectedItem(mirrorName);
+        StarResolver.setResolverServiceMirror(mirrorName);
     }
 
     /**

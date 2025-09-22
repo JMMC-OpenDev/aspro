@@ -8,6 +8,7 @@ import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
+import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import java.util.List;
 import org.slf4j.Logger;
@@ -23,6 +24,8 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(Preferences.class.getName());
     /* Preferences */
+    /** Preference : star resolver mirror */
+    public final static String STAR_RESOLVER_MIRROR = "resolver.mirror";
     /** Preference : enable/disable GUI restrictions */
     public final static String GUI_RESTRICTIONS = "gui.restrictions";
     /** Preference : edit positions in XY (true) or rho/theta (false) in the model editor */
@@ -118,6 +121,9 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
 
         logger.debug("Preferences.setDefaultPreferences()");
 
+        // Star Resolver mirror:
+        setDefaultPreference(STAR_RESOLVER_MIRROR, StarResolver.getResolverServiceMirror());
+        
         // Gui restrictions:
         setDefaultPreference(GUI_RESTRICTIONS, Boolean.TRUE);
 
