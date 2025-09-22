@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="25.09"/>
-    <compilation date="17/09/2025" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="25.09.1 beta 1"/>
+    <compilation date="22/09/2025" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -236,12 +236,19 @@
     </menubar>
 
     <releasenotes>
+        <release version="25.09.1">
+            <pubDate>Mon, 22 Sep 2025 09:00:00 GMT</pubDate>
+            <prerelease version="25.09.1 beta 1">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1481">Fixed rendering of the Star resolver's search field on MacOS
+                    to select the star resolver among GetStar &amp; Simbad services</change>
+            </prerelease>
+        </release>
         <release version="25.09">
             <pubDate>Wed, 17 Sep 2025 21:00:00 GMT</pubDate>
             <prerelease version="25.09 beta 4">
                 <change type="FEATURE">Updated the Star resolver to query the JMMC's GetStar service (new default) as new resolver (CDS's Simbad still available)
                     to get lot more information (AllWise &amp; Gaia mags...); click on the small arrow on the left side to show available star resolvers (pop-up menu)</change>
-                    <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1472">Added GAIA G_bp &amp; G_rp magnitudes in the Target Editor and the target importer
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1472">Added GAIA G_bp &amp; G_rp magnitudes in the Target Editor and the target importer
                         (SearchCal/GetStar VOTable handling)</change>
             </prerelease>
             <prerelease version="25.09 beta 3">
