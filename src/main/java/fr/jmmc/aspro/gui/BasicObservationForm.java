@@ -269,7 +269,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.weightx = 0.01;
         jPanelTargets.add(jPanelTargetsLeft, gridBagConstraints);
 
-        starSearchField.setToolTipText("<html>\nEnter targets here :<br>\nTarget identifier (CDS Simbad service)<br>\nor RA / DEC coordinates (J2000) with an optional identifier:<br>\n'H:M:S [+/-]D:M:S [identifier]'<br>\n<b>Use the semicolon separator ';' for multiple targets</b>\n</html>");
+        starSearchField.setToolTipText("<html>\nEnter targets here :<br>\nTarget identifier (CDS Simbad or JMMC GetStar service)<br>\nor RA / DEC coordinates (J2000) with an optional identifier:<br>\n'H:M:S [+/-]D:M:S [identifier]'<br>\n<b>Use the semicolon separator ';' for multiple targets</b>\n</html>");
         starSearchField.setName("starSearchField"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
