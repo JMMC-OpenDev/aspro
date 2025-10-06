@@ -45,9 +45,10 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmal.star.EditableStarResolverWidget;
+import fr.jmmc.jmal.star.GetStarResolverResult;
 import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmal.star.StarResolverListener;
-import fr.jmmc.jmal.star.StarResolverResult;
+import fr.jmmc.jmal.star.StarListResolverResult;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.SearchPanel;
@@ -109,7 +110,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener,
-                                                                              StarResolverListener<StarResolverResult>, ObservationListener {
+                                                                              StarResolverListener<StarListResolverResult>, ObservationListener {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -1022,9 +1023,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         _searchPanel = new SearchPanel(new TargetListSearchPanelDelegate(jListTargets));
 
         // register the StarResolverListener for Simbad:
-        starSearchField.setListener(StarResolverResult.class, this);
+        starSearchField.setListener(StarListResolverResult.class, this);
         // register the StarResolverListener for GetStar:
-        starSearchField.setListener(String.class, GetStarAction.GETSTAR_LISTENER);
+        starSearchField.setListener(GetStarResolverResult.class, GetStarAction.GETSTAR_LISTENER);
 
         // update component models :
         final DateEditor de = (DateEditor) jDateSpinner.getEditor();
@@ -1972,7 +1973,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * @param result star resolver result
      */
     @Override
-    public void handleResult(final StarResolverResult result) {
+    public void handleResult(final StarListResolverResult result) {
         logger.debug("star resolver result:\n{}", result);
         if (!result.isEmpty()) {
             // get names (read only):

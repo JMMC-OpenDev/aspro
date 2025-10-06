@@ -8,6 +8,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jmal.star.GetStarResolveJob;
+import fr.jmmc.jmal.star.GetStarResolverResult;
 import static fr.jmmc.jmal.star.StarResolver.GETSTAR_ALLOW_SCENARIO;
 import static fr.jmmc.jmal.star.StarResolver.GETSTAR_QUERY_ID;
 import fr.jmmc.jmal.star.StarResolverListener;
@@ -34,20 +35,23 @@ public final class GetStarAction extends RegisteredAction {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(className);
 
-    public static final StarResolverListener<String> GETSTAR_LISTENER = new StarResolverListener<String>() {
+    public static final StarResolverListener<GetStarResolverResult> GETSTAR_LISTENER = new StarResolverListener<GetStarResolverResult>() {
         /**
          * Handle the star resolver result as String (raw http response) or StarResolverResult instance (status, error messages, stars) ...
          * @param result star resolver result
          */
         @Override
-        public void handleResult(final String votable) {
-            try {
-                logger.debug("votable :\n{}", votable);
+        public void handleResult(final GetStarResolverResult result) {
+            if (!result.isErrorStatus()) {
+                final String votable = result.getXml();
+                try {
+                    logger.debug("votable :\n{}", votable);
 
-                SearchCalVOTableHandler.processMessage(votable, "undefined");
+                    SearchCalVOTableHandler.processMessage(votable, "undefined");
 
-            } catch (IOException ioe) {
-                MessagePane.showErrorMessage("Could not process GetStar VOTable", ioe);
+                } catch (IOException ioe) {
+                    MessagePane.showErrorMessage("Could not process GetStar VOTable", ioe);
+                }
             }
         }
     };

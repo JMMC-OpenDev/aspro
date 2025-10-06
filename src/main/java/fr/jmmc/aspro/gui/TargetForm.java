@@ -21,9 +21,10 @@ import fr.jmmc.aspro.model.util.TargetDEComparator;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
 import fr.jmmc.aspro.model.util.TargetUtils;
 import fr.jmmc.jmal.Band;
+import fr.jmmc.jmal.star.GetStarResolverResult;
 import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmal.star.StarResolverListener;
-import fr.jmmc.jmal.star.StarResolverResult;
+import fr.jmmc.jmal.star.StarListResolverResult;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.component.GenericJTree;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
@@ -72,7 +73,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author bourgesl
  */
-public final class TargetForm extends javax.swing.JPanel implements StarResolverListener<StarResolverResult>, PropertyChangeListener,
+public final class TargetForm extends javax.swing.JPanel implements StarResolverListener<StarListResolverResult>, PropertyChangeListener,
                                                                     TreeSelectionListener, ListSelectionListener,
                                                                     ActionListener {
 
@@ -137,9 +138,9 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
     private void postInit() {
 
         // register the StarResolverListener for Simbad:
-        starSearchField.setListener(StarResolverResult.class, this);
+        starSearchField.setListener(StarListResolverResult.class, this);
         // register the StarResolverListener for GetStar:
-        starSearchField.setListener(String.class, GetStarAction.GETSTAR_LISTENER);
+        starSearchField.setListener(GetStarResolverResult.class, GetStarAction.GETSTAR_LISTENER);
 
         final TargetRenderer renderer = new TargetRenderer(this.editTargetUserInfos);
 
@@ -728,7 +729,7 @@ public final class TargetForm extends javax.swing.JPanel implements StarResolver
      * @param result star resolver result
      */
     @Override
-    public void handleResult(final StarResolverResult result) {
+    public void handleResult(final StarListResolverResult result) {
         logger.debug("star resolver result:\n{}", result);
         if (!result.isEmpty()) {
             // get names (read only):
