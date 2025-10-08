@@ -49,7 +49,7 @@ public class StrehlChartTest {
 //     private final static double[] SEEING = new double[]{1.4, 1.1, 1.0, 0.85, 0.7, 0.5};
     private final static double[] SEEING = new double[]{/*0.6, 0.7, 0.85, */0.6, 1.0, 1.15};
 
-    private final static double[] DIT_LGS = new double[]{2.0 /*, 1.0, 4.0, 10.0 */};
+    private final static double[] DIT_LGS = new double[]{1.0 /*, 1.0, 4.0, 10.0 */};
 
     // h0 tests:
     private final static double[] H0 = new double[]{1500.0, /*3000.0, 3500.0, 4300.0, 6000.0, 8000.0, 10000.0 */};
@@ -227,8 +227,6 @@ public class StrehlChartTest {
                     }
                     // GPAO:
                     if (true && (b == Band.K)) {
-                        // GPAO_NGS_VIS
-                        aoBand = Band.G_RP;
 
                         double effRon, magOffset;
                         double strehlMax;
@@ -236,22 +234,25 @@ public class StrehlChartTest {
                         double qe = 0.25;
                         final double ron = 180.0;
 
-                        /* 1200 modes (3/4) (40*40) */
-                        nbSubPupils = 1200;
-                        nbActuators = 800;
-                        strehlMax = 0.73; // 0.93 by default
-
-                        // 1kHz
-                        td = 1.0; // adjusted to get high strehl ~ 0.85
-                        System.out.println("GPAO_NGS_VIS: td: " + td);
-
-                        effRon = ron / 900.0; // 0.2
-                        System.out.println("GPAO_NGS_VIS: effRon: " + NumberUtils.trimTo3Digits(effRon));
-
-                        magOffset = -1.0; // adjusted to have 0.4 / 0.5 at mag=12
-                        System.out.println("magOffset: " + magOffset);
+                        // GPAO_NGS_VIS
+                        aoBand = Band.G_RP;
 
                         if (true) {
+                            /* 1200 modes (3/4) (40*40) */
+                        nbSubPupils = 1200;
+                            nbActuators = 800;
+                            strehlMax = 0.85; // 0.93 by default
+
+                            // 1kHz
+                            td = 1.0; // adjusted to get high strehl ~ 0.85
+                            System.out.println("GPAO_NGS_VIS: td: " + td);
+
+                            effRon = ron / 900.0; // 0.2
+                            System.out.println("GPAO_NGS_VIS: effRon: " + NumberUtils.trimTo3Digits(effRon));
+
+                            magOffset = -1.0; // adjusted to have 0.4 / 0.5 at mag=12
+                            System.out.println("magOffset: " + magOffset);
+
                             createChartFrame("UT (GPAO_NGS_VIS ns=" + nbSubPupils + ") - Strehl " + b.getName() + " vs mag" + aoBand.getName(),
                                     createStrehlvsMagChart("GPAO_NGS_VIS", aoBand, lambda, UT_DIAM, nbSubPupils, nbActuators, td, qe, effRon, magOffset, strehlMax));
                         }
@@ -259,9 +260,9 @@ public class StrehlChartTest {
                         // FAKE GPAO_LGS_VIS
                         if (true) {
                             /* 900 modes (3/4) (30*30) */
-                            nbSubPupils = 900;
-                            nbActuators = 600;
-                            strehlMax = 0.85; // 0.93 by default
+                            nbSubPupils = 704;
+                            nbActuators = 500;
+                            strehlMax = 0.70; // 0.93 by default
 
                             for (double dit : DIT_LGS) {
                                 // 500 Hz by default?
@@ -284,9 +285,9 @@ public class StrehlChartTest {
                             aoBand = Band.K;
                             qe = 0.70;
                             /* 900 modes (3/4) (30*30) */
-                            nbSubPupils = 900;
-                            nbActuators = 600;
-                            strehlMax = 0.85; // 0.93 by default
+                            nbSubPupils = 704;
+                            nbActuators = 500;
+                            strehlMax = 0.70; // 0.93 by default
 
                             for (double dit : DIT_LGS) {
                                 // 500 Hz by default?
