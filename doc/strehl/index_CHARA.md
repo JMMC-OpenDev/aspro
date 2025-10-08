@@ -6,7 +6,7 @@
 
 # ASPRO 2 - Strehl ratios per instrument, telescope and Adaptive Optics (AO) systems
 
-- Date: Tue Sep 16 20:33:02 GMT 2025
+- Date: Wed Oct 08 07:35:31 GMT 2025
 
 - InterferometerConfiguration: 'CHARA 2026A'
 
