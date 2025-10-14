@@ -4019,7 +4019,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             if (!taskObsCollection.getVersion().isSameUVVersion(lastObsCollection.getVersion())) {
                 // Skip = ignore these results
                 // next iteration will see changes ...
-                logger.warn("skipped OIFITS result");
+                logger.debug("skipped OIFITS result");
             } else {
                 // update OIFits done flag on uv data collection:
                 this.uvDataCollection.setOIFitsDone(true);
