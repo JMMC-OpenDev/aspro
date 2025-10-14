@@ -2534,9 +2534,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             _warningLogger.info("-------------------");
 
             if (level == Level.Information) {
-                _warningLogger.info("Observation status : " + level);
+                _warningLogger.info("Observation status: {}", level);
             } else {
-                _warningLogger.warn("Observation status : " + level);
+                _warningLogger.warn("Observation status: {}", level);
             }
 
             for (final WarningMessage message : warningContainer.getWarnings()) {
