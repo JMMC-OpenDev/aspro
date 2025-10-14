@@ -211,7 +211,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     void initialize(final String targetName) {
         this.currentComponent = jTabbedPane.getSelectedComponent();
 
-        logger.warn("initialize: {}", targetName);
+        logger.debug("initialize: {}", targetName);
 
         // Generate trees and select the target:
         if (currentComponent == targetModelForm) {
