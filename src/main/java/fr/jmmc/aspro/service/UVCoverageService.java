@@ -667,8 +667,6 @@ public final class UVCoverageService {
                 }
             }
             logger.debug("targetMapping: {}", targetMapping);
-// TODO: kill
-            logger.warn("targetMapping: {}", targetMapping);
         }
 
         // Handle GRAVITY single/dual field mode:
