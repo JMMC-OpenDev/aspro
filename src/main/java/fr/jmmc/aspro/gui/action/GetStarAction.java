@@ -47,7 +47,8 @@ public final class GetStarAction extends RegisteredAction {
                 try {
                     logger.debug("votable :\n{}", votable);
 
-                    SearchCalVOTableHandler.processMessage(votable, "undefined");
+                    // TODO: handle missing objects compared to queried names !
+                    SearchCalVOTableHandler.processMessage(votable, "undefined", result.getNames());
 
                 } catch (IOException ioe) {
                     MessagePane.showErrorMessage("Could not process GetStar VOTable", ioe);

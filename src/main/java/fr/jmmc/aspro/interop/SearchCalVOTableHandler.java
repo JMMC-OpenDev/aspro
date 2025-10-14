@@ -15,11 +15,14 @@ import fr.jmmc.aspro.model.oi.StringValue;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmal.ALX;
+import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.service.XslTransform;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import org.slf4j.Logger;
@@ -59,6 +62,22 @@ public final class SearchCalVOTableHandler {
      * @throws IllegalArgumentException if the file is not an Observation
      */
     public static boolean processMessage(final String votable, final String searchCalVersion) throws IOException {
+        return processMessage(votable, searchCalVersion, null);
+    }
+
+    /**
+     * Process the given votable
+     *
+     * @param votable votable to process
+     * @param searchCalVersion SearchCal GUI version
+     * @param getStarNames (optional) list of names resolved by GetStar
+     * @return true if the votable was processed i.e. contains proper SearchCal data
+     * 
+     * @throws IOException if an I/O exception occured
+     * @throws IllegalArgumentException if the file is not an Observation
+     */
+    public static boolean processMessage(final String votable, final String searchCalVersion,
+                                         final List<String> getStarNames) throws IOException {
 
         // use an XSLT to transform the SearchCal votable document to an Aspro 2 Observation:
         final long start = System.nanoTime();
@@ -69,13 +88,11 @@ public final class SearchCalVOTableHandler {
 
         if (document.length() == 0) {
             logger.debug("document is empty (probably not a SearchCal VOTable)");
-
             return false;
         }
         logger.debug("document:\n{}", document);
 
         final ObservationManager om = ObservationManager.getInstance();
-
         try {
             final ObservationSetting searchCalObservation = om.load(new StringReader(document));
 
@@ -225,6 +242,20 @@ public final class SearchCalVOTableHandler {
                     }
                 }
 
+                final List<String> missingNames;
+                if (getStarNames != null) {
+                    missingNames = new ArrayList<String>(getStarNames);
+                    logger.debug("getStarNames: {}", getStarNames);
+
+                    for (Target t : targets) {
+                        // name (= target_id ie input identifier):
+                        missingNames.remove(t.getName());
+                    }
+                    logger.debug("missingNames: {}", missingNames);
+                } else {
+                    missingNames = Collections.emptyList();
+                }
+
                 // Use invokeLater to avoid concurrency and ensure that 
                 // data model is modified and fire events using Swing EDT:
                 SwingUtils.invokeEDT(new Runnable() {
@@ -260,7 +291,18 @@ public final class SearchCalVOTableHandler {
                             }
                         }
 
-                        final String report = mergeTargets(editTargets, targets);
+                        String report = mergeTargets(editTargets, targets);
+
+                        if (!missingNames.isEmpty()) {
+                            final StringBuilder sb = new StringBuilder(256);
+                            sb.append("\nMissing identifiers: ");
+                            for (String id : missingNames) {
+                                sb.append(id).append(StarResolver.SEPARATOR_SEMI_COLON);
+                            }
+                            sb.setLength(sb.length() - 1);
+                            // report message:
+                            report += sb.toString();
+                        }
 
                         if (logger.isDebugEnabled()) {
                             logger.debug("updated targets:");

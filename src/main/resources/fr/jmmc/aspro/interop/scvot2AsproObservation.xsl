@@ -48,6 +48,11 @@
         -->
 
         <!-- Get column indexes used to build the target list -->
+        <xsl:variable name="TARGET_ID_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">TARGET_ID</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
         <xsl:variable name="SIMBAD_index">
             <xsl:call-template name="getColumnIndex">
                 <xsl:with-param name="colName">SIMBAD</xsl:with-param>
@@ -361,6 +366,11 @@
                         <!-- Note: topcat convert boolean to 'F' instead of 'false' -->
                         <xsl:if test="not($deletedFlag) or $deletedFlag = '0' or $deletedFlag = 'false' or $deletedFlag = 'F'">
 
+                            <xsl:variable name="ID_TARGET">
+                                <xsl:if test="VOT:TD[number($TARGET_ID_index)]/text()">
+                                    <xsl:value-of select="VOT:TD[number($TARGET_ID_index)]"/>
+                                </xsl:if>
+                            </xsl:variable>
                             <xsl:variable name="ID_SIMBAD">
                                 <xsl:if test="VOT:TD[number($SIMBAD_index)]/text()">
                                     <xsl:value-of select="VOT:TD[number($SIMBAD_index)]"/>
@@ -393,7 +403,7 @@
                             </xsl:variable>
                             <xsl:variable name="ID_WISE">
                                 <xsl:if test="VOT:TD[number($WISE_index)]/text()">
-                                    <xsl:value-of select="concat('WISEA ',VOT:TD[number($WISE_index)])"/>
+                                    <xsl:value-of select="concat('WISE ',VOT:TD[number($WISE_index)])"/>
                                 </xsl:if>
                             </xsl:variable>
                             <xsl:variable name="ID_DM">
@@ -417,6 +427,9 @@
 
                             <xsl:variable name="name">
                                 <xsl:choose>
+                                    <xsl:when test="$ID_TARGET != ''">
+                                        <xsl:value-of select="$ID_TARGET"/>
+                                    </xsl:when>
                                     <xsl:when test="$ID_SIMBAD != ''">
                                         <xsl:value-of select="$ID_SIMBAD"/>
                                     </xsl:when>
