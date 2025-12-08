@@ -111,6 +111,65 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
     }
 
     /**
+     * Return the preference filename.
+     *
+     * @return preference filename.
+     */
+    @Override
+    protected String getPreferenceFilename() {
+        return "fr.jmmc.aspro.properties";
+    }
+
+    /**
+     *  Return preference version number.
+     *
+     * @return preference version number.
+     */
+    @Override
+    protected int getPreferencesVersionNumber() {
+        return 2;
+    }
+
+    /**
+     * Hook to handle updates of older preference file version.
+     *
+     * @param loadedVersionNumber the version of the loaded preference file.
+     *
+     * @return should return true if the update went fine and new values should
+     * be saved, false otherwise to automatically trigger default values load.
+     */
+    @Override
+    protected boolean updatePreferencesVersion(int loadedVersionNumber) {
+        logger.info("Upgrading preference file '{}' from version '{}' to version '{}'.",
+                getPreferenceFilename(), loadedVersionNumber, loadedVersionNumber + 1);
+
+        switch (loadedVersionNumber) {
+            case 1:
+                return updateFromVersion1ToVersion2();
+
+            // By default, triggers default values load.
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Correction : restore Star Resolver mirror (simbad by default) (2025.12.08):
+     *
+     * @return true if fine and should write to file, false otherwise.
+     */
+    private boolean updateFromVersion1ToVersion2() {
+        try {
+            setPreference(STAR_RESOLVER_MIRROR, StarResolver.SERVICE_SIMBAD_PUBLIC);
+        } catch (PreferencesException pe) {
+            logger.warn("Could not store preference '{}': ", STAR_RESOLVER_MIRROR, pe);
+            return false;
+        }
+        // Commit change to file
+        return true;
+    }
+
+    /**
      * Define the default properties used to reset default preferences.
      *
      * @throws PreferencesException if any preference value has a unsupported class type
@@ -121,9 +180,9 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
 
         logger.debug("Preferences.setDefaultPreferences()");
 
-        // Star Resolver mirror:
-        setDefaultPreference(STAR_RESOLVER_MIRROR, StarResolver.getResolverServiceMirror());
-        
+        // Star Resolver mirror (simbad by default) (2025.12.08):
+        setDefaultPreference(STAR_RESOLVER_MIRROR, StarResolver.SERVICE_SIMBAD_PUBLIC);
+
         // Gui restrictions:
         setDefaultPreference(GUI_RESTRICTIONS, Boolean.TRUE);
 
@@ -173,26 +232,6 @@ public final class Preferences extends fr.jmmc.oiexplorer.core.Preferences {
 
         setDefaultPreference(OBS_TABLE_COLUMNS_VISIBLE, "");
         setDefaultPreference(RAWOBS_TABLE_COLUMNS_VISIBLE, "");
-    }
-
-    /**
-     * Return the preference filename.
-     *
-     * @return preference filename.
-     */
-    @Override
-    protected String getPreferenceFilename() {
-        return "fr.jmmc.aspro.properties";
-    }
-
-    /**
-     *  Return preference version number.
-     *
-     * @return preference version number.
-     */
-    @Override
-    protected int getPreferencesVersionNumber() {
-        return 1;
     }
 
     /**
