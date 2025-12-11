@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="25.12 beta 2"/>
+    <program name="Aspro2" version="25.12"/>
     <compilation date="11/12/2025" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -237,7 +237,7 @@
 
     <releasenotes>
         <release version="25.12">
-            <pubDate>Thu, 11 Dec 2025 15:00:00 GMT</pubDate>
+            <pubDate>Thu, 11 Dec 2025 16:00:00 GMT</pubDate>
             <prerelease version="25.12 beta 2">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1490">Fixed GetStar integration to run scenario (single object) or not (multiple ids)</change>
             </prerelease>
