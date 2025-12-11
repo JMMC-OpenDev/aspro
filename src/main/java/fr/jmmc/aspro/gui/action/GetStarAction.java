@@ -9,8 +9,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jmal.star.GetStarResolveJob;
 import fr.jmmc.jmal.star.GetStarResolverResult;
-import static fr.jmmc.jmal.star.StarResolver.GETSTAR_ALLOW_SCENARIO;
-import static fr.jmmc.jmal.star.StarResolver.GETSTAR_QUERY_ID;
+import fr.jmmc.jmal.star.StarResolver;
 import fr.jmmc.jmal.star.StarResolverListener;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -111,10 +110,9 @@ public final class GetStarAction extends RegisteredAction {
     }
 
     private static String buildQuery(final String... ids) {
-        final String queryParameters = (((ids != null) && (ids.length == 1)) ? GETSTAR_ALLOW_SCENARIO : null);
-        final String queryString = GetStarResolveJob.buildQueryString(queryParameters, ids);
+        final String queryString = GetStarResolveJob.buildQueryString(ids);
         if (queryString != null) {
-            return GETSTAR_QUERY_ID + queryString;
+            return StarResolver.getGetStarUrl() + queryString;
         }
         return null;
     }
