@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="25.12 beta 1"/>
-    <compilation date="08/12/2025" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="25.12 beta 2"/>
+    <compilation date="11/12/2025" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -237,9 +237,12 @@
 
     <releasenotes>
         <release version="25.12">
-            <pubDate>Mon, 08 Dec 2025 17:00:00 GMT</pubDate>
+            <pubDate>Thu, 11 Dec 2025 15:00:00 GMT</pubDate>
+            <prerelease version="25.12 beta 2">
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1490">Fixed GetStar integration to run scenario (single object) or not (multiple ids)</change>
+            </prerelease>
             <prerelease version="25.12 beta 1">
-                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1490">Restored the default star resolver mirror to Simbad</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/1490">Restored the default star resolver mirror to Simbad</change>
             </prerelease>
         </release>
         <release version="25.10">
