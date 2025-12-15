@@ -21,8 +21,8 @@
 
     <xsl:output omit-xml-declaration="yes" indent="yes" encoding="UTF-8"/>
 
-    <!-- SearchCal VOTABLE PARAM elements to copy -->
-    <xsl:variable name="COPY_PARAMS" select="'band|baseMax|wlen|bright|SearchCalGuiVersion|'"/>
+    <!-- SearchCal VOTABLE PARAM elements to copy (must be terminated by '|' -->
+    <xsl:variable name="COPY_PARAMS" select="'SearchCalGuiVersion|ServerDate|band|bright|baseMax|wlen|'"/>
 
     <!-- TABLE proxy -->
     <xsl:variable name="table" select="/VOT:VOTABLE/VOT:RESOURCE/VOT:TABLE"/>
@@ -680,6 +680,7 @@
                                 </tm:model>
 
                                 <calibratorInfos>
+                                    <parameter xsi:type="a:StringValue" name="ServerCommand" value="{$SCLSVR_CMD}"/>
                                     <parameter xsi:type="a:StringValue" name="SearchCalServerVersion" value="{$SCLSVR_VERSION}"/>
 
                                     <!-- Build one parameter element per VOTable PARAM present in COPY_PARAMS -->
