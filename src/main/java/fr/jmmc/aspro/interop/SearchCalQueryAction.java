@@ -158,6 +158,10 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
         // Get band for SearchCal scenario:
         final SpectralBand insBand = getSearchCalBand(band);
 
+        if (insBand == null) {
+            throw new IllegalStateException("The band " + band + " is not supported by SearchCal !");
+        }
+
         if (logger.isDebugEnabled()) {
             logger.debug("band: {}", band);
             logger.debug("insBand: {}", insBand);
@@ -232,12 +236,14 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
      */
     public static SpectralBand getSearchCalBand(final Band band) {
         switch (band) {
-            case U:
-                // band U not supported by SearchCal:
+            case U: // band U not supported by SearchCal:
                 return null;
             case B:
+            case G_BP:
             case V:
+            case G:
             case R:
+            case G_RP:
             case I:
                 // BVRI: use band V:
                 return SpectralBand.V;
@@ -253,8 +259,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
                 return SpectralBand.M;
             case N:
                 return SpectralBand.N;
-            case Q:
-                // band Q not supported by SearchCal:
+            case Q: // band Q not supported by SearchCal:
                 return null;
             default:
                 return null;

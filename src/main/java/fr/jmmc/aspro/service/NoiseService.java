@@ -2451,8 +2451,7 @@ public final class NoiseService implements VisNoiseService {
         final Band band = Band.findBand(waveLength);
         // TODO: fix that logic to use all possible bands within the instrument bandwidth
         switch (band) {
-            case U:
-            // avoid 'band U not supported'
+            case U: // avoid 'band U not supported'
             case B:
             case G_BP:
             case V:

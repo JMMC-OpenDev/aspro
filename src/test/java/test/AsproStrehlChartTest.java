@@ -517,14 +517,18 @@ public class AsproStrehlChartTest {
         final Band band = Band.findBand(waveLength);
         // TODO: fix that logic to use all possible bands within the instrument bandwidth
         switch (band) {
-            case U:
-            // avoid 'band U not supported' => V
+            case U: // avoid 'band U not supported'
             case B:
+            case G_BP:
             case V:
-                // always use V for Visible (UBV):
+            case G:
+            case R:
+            case G_RP:
+            case I:
+                // always use V for Visible:
                 return Band.V;
             case Q:
-                // avoid 'band Q not supported' => N
+                // avoid 'band Q not supported'
                 return Band.N;
             default:
                 return band;

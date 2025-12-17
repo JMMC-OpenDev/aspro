@@ -26,8 +26,7 @@ public final class SpectralBandUtils {
      */
     public static SpectralBand findBand(final Band band) {
         switch (band) {
-            case U:
-                // band U not supported
+            case U: // band U not supported
                 throw new IllegalArgumentException("Band " + band + " not supported !");
             case B:
                 return SpectralBand.B;
