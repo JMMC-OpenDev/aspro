@@ -18,7 +18,7 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="25.12 beta 3"/>
+    <program name="Aspro2" version="25.12.1"/>
     <compilation date="17/12/2025" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
@@ -236,12 +236,15 @@
     </menubar>
 
     <releasenotes>
-        <release version="25.12">
+        <release version="25.12.1">
             <pubDate>Wed, 17 Dec 2025 16:00:00 GMT</pubDate>
             <prerelease version="25.12 beta 3">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1494">Fixed the SearchCal integration for CHARA PAVO and SPICA instruments (missing new G_BP, G and G_RP band cases)
                     to use SearchCal's instrument band 'V' scenario (as before)</change>
             </prerelease>
+        </release>
+        <release version="25.12">
+            <pubDate>Thu, 11 Dec 2025 16:00:00 GMT</pubDate>
             <prerelease version="25.12 beta 2">
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/1490">Fixed GetStar integration to run scenario (single object) or not (multiple ids)</change>
             </prerelease>
