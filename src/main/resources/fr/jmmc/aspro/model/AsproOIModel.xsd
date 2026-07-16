@@ -2032,7 +2032,7 @@
             <xsd:element name="delayLineFixedOffset" type="xsd:double" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Delay Line fixed offset for this station
+                        Optional fixed offset in m between this station and delay lines
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2249,7 +2249,7 @@
             <xsd:element name="delayLineThrow" type="DelayLineRestrictionThrow" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Optional maximum throw in m (optical round drip i.e. 2 times the delay line position)
+                        Optional maximum throw in m (optical round trip i.e. 2 times the delay line range)
                         corresponding to a delay line restriction for this channel link (VCM on VLTI)
                     </xsd:documentation>
                 </xsd:annotation>
@@ -2326,7 +2326,7 @@
             <xsd:element name="maximumThrow" type="xsd:double">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Maximum throw in m (optical round drip i.e. 2 times the delay line position)
+                        Maximum throw in m (optical round trip i.e. 2 times the delay line range)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2354,7 +2354,7 @@
             <xsd:element name="maximumThrow" type="xsd:double">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Maximum throw in m (optical round drip i.e. 2 times the delay line position)
+                        Maximum throw in m (optical round trip i.e. 2 times the delay line range)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -2415,7 +2415,7 @@
             <xsd:extension base="xsd:double">
                 <xsd:annotation>
                     <xsd:documentation>
-                        Maximum throw in m (optical round drip i.e. 2 times the delay line position)
+                        Maximum throw in m (optical round trip i.e. 2 times the delay line range)
                     </xsd:documentation>
                 </xsd:annotation>
                 <xsd:attribute name="restriction" use="required" type="xsd:IDREF">
