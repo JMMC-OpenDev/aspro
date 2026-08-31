@@ -22,6 +22,7 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
  *         &lt;element name="fli" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="aoSetupName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="flux" type="{http://www.jmmc.fr/aspro-oi/0.1}FluxCondition" minOccurs="0"/&gt;
  *         &lt;element name="separation" type="{http://www.w3.org/2001/XMLSchema}double"/&gt;
  *       &lt;/sequence&gt;
@@ -35,6 +36,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "MoonRestriction", propOrder = {
     "fli",
+    "aoSetupName",
     "flux",
     "separation"
 })
@@ -43,6 +45,7 @@ public class MoonRestriction
 {
 
     protected Double fli;
+    protected String aoSetupName;
     protected FluxCondition flux;
     protected double separation;
 
@@ -68,6 +71,30 @@ public class MoonRestriction
      */
     public void setFli(Double value) {
         this.fli = value;
+    }
+
+    /**
+     * Gets the value of the aoSetupName property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getAoSetupName() {
+        return aoSetupName;
+    }
+
+    /**
+     * Sets the value of the aoSetupName property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setAoSetupName(String value) {
+        this.aoSetupName = value;
     }
 
     /**

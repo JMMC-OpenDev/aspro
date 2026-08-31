@@ -2362,6 +2362,16 @@ public final class ObservabilityService {
         }
 
         if (doCheck) {
+            String aoSetup = null;
+            final TargetConfiguration targetConf = target.getConfiguration();
+
+            if ((targetConf != null) && (targetConf.getAoSetup() != null)) {
+                aoSetup = targetConf.getAoSetup();
+                if (isLogDebug) {
+                    logger.debug("AO[{}]", aoSetup);
+                }
+            }
+
             // keep only the applicable rule: test fli (global) then flux (target related)
             MoonRestriction appliedRule = null;
 
@@ -2382,9 +2392,20 @@ public final class ObservabilityService {
                         continue;
                     }
                 }
+                final String ruleAoSetupName = restriction.getAoSetupName();
+                if (ruleAoSetupName != null) {
+                    // inverse condition:
+                    if ((aoSetup == null) || !aoSetup.contains(ruleAoSetupName)) {
+                        if (isLogDebug) {
+                            logger.debug("skip rule (aoSetup = {} mismatch {})", aoSetup, ruleAoSetupName);
+                        }
+                        // skip rule
+                        continue;
+                    }
+                }
                 final FluxCondition fluxCond = restriction.getFlux();
                 if (fluxCond != null) {
-                    final Double flux = target.getFlux(fluxCond.getBand());
+                    final Double flux = target.getFluxOrRelated(fluxCond.getBand());
 
                     final double fluxValue = (flux == null) ? Double.POSITIVE_INFINITY : flux; // consider FAINT target if undefined
 

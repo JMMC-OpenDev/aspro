@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;simpleType name="AtmosphereQuality"&gt;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
  *     &lt;enumeration value="Average"/&gt;
+ *     &lt;enumeration value="Better"/&gt;
  *     &lt;enumeration value="Good"/&gt;
  *     &lt;enumeration value="Excellent"/&gt;
  *     &lt;enumeration value="Worse"/&gt;
@@ -31,42 +32,49 @@ public enum AtmosphereQuality {
 
 
     /**
-     * 'Average' means seeing = 1.00 arcsec
+     * 'Average' means (T < 50%, corresponding to seeing < 1.00\u201c and \u03c40 > 3.2ms)
      * 
      */
     @XmlEnumValue("Average")
     AVERAGE("Average"),
 
     /**
-     * 'Good' means seeing = 0.70 arcsec
+     * 'Better' means (T < 30%, corresponding to seeing < 0.80\u201c and \u03c40 > 4.1ms)
+     * 
+     */
+    @XmlEnumValue("Better")
+    BETTER("Better"),
+
+    /**
+     * 'Good' means (T < 20%, corresponding to seeing < 0.70\u201c and \u03c40 > 4.4ms)
      * 
      */
     @XmlEnumValue("Good")
     GOOD("Good"),
 
     /**
-     * 'Excellent' means seeing = 0.60 arcsec
+     * 'Excellent' means (T < 10%, corresponding to seeing < 0.60\u201c and \u03c40 > 5.2ms)
      * 
      */
     @XmlEnumValue("Excellent")
     EXCELLENT("Excellent"),
 
     /**
-     * 'Worse' means seeing = 1.15 arcsec
+     * 'Worse' means (T < 70%, corresponding to seeing < 1.15\u201c and \u03c40 > 2.2ms)
      * 
      */
     @XmlEnumValue("Worse")
     WORSE("Worse"),
 
     /**
-     * 'Bad' means seeing = 1.40 arcsec
+     * 'Bad' means (T < 85%, corresponding to seeing < 1.40\u201c and \u03c40 > 1.6ms)
      * 
      */
     @XmlEnumValue("Bad")
     BAD("Bad"),
 
     /**
-     * 'Awful' means seeing = 1.80 arcsec
+     * 'Awful' means (T > 85%, corresponding to seeing < 1.80\u201c and \u03c40 > 1.0ms)
      * 
      */
     @XmlEnumValue("Awful")

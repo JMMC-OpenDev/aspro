@@ -7,6 +7,7 @@ import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import static fr.jmmc.aspro.model.oi.AtmosphereQuality.AVERAGE;
 import static fr.jmmc.aspro.model.oi.AtmosphereQuality.AWFUL;
 import static fr.jmmc.aspro.model.oi.AtmosphereQuality.BAD;
+import static fr.jmmc.aspro.model.oi.AtmosphereQuality.BETTER;
 import static fr.jmmc.aspro.model.oi.AtmosphereQuality.EXCELLENT;
 import static fr.jmmc.aspro.model.oi.AtmosphereQuality.GOOD;
 import static fr.jmmc.aspro.model.oi.AtmosphereQuality.WORSE;
@@ -22,7 +23,7 @@ import java.util.Vector;
 public final class AtmosphereQualityUtils {
 
     /** AtmosphereQuality set ordered by seeing ascending */
-    public static final List<AtmosphereQuality> ORDERED = Arrays.asList(new AtmosphereQuality[]{EXCELLENT, GOOD, AVERAGE, WORSE, BAD, AWFUL});
+    public static final List<AtmosphereQuality> ORDERED = Arrays.asList(new AtmosphereQuality[]{EXCELLENT, GOOD, BETTER, AVERAGE, WORSE, BAD, AWFUL});
 
     /** computed AtmosphereQuality */
     private static Vector<String> atmosphereQualityList = null;
@@ -122,7 +123,9 @@ public final class AtmosphereQualityUtils {
             case GOOD:
                 /* T < 20%, corresponding to seeing ≤ 0.70“ and τ0 > 4.4ms */
                 return 0.70;
-            /* missing: T < 30%, corresponding to seeing ≤ 0.80“ and τ0 > 4.1ms */
+            case BETTER:
+                /* T < 30%, corresponding to seeing ≤ 0.80“ and τ0 > 4.1ms */
+                return 0.80;
             default:
             case AVERAGE:
                 /* T < 50%, corresponding to seeing ≤ 1.00“ and τ0 > 3.2ms */
@@ -151,7 +154,9 @@ public final class AtmosphereQualityUtils {
             case GOOD:
                 /* T < 20%, corresponding to seeing ≤ 0.70“ and τ0 > 4.4ms */
                 return 4.4;
-            /* missing: T < 30%, corresponding to seeing ≤ 0.80“ and τ0 > 4.1ms */
+            case BETTER:
+                /* T < 30%, corresponding to seeing ≤ 0.80“ and τ0 > 4.1ms */
+                return 4.1;
             default:
             case AVERAGE:
                 /* T < 50%, corresponding to seeing ≤ 1.00“ and τ0 > 3.2ms */
@@ -188,7 +193,9 @@ public final class AtmosphereQualityUtils {
             case GOOD:
                 /* T < 20%, corresponding to seeing ≤ 0.70“ and τ0 > 4.4ms */
                 return 5250.0;
-            /* missing: T < 30%, corresponding to seeing ≤ 0.80“ and τ0 > 4.1ms */
+            case BETTER:
+                /* T < 30%, corresponding to seeing ≤ 0.80“ and τ0 > 4.1ms */
+                return 4650.0;
             default:
             case AVERAGE:
                 /* T < 50%, corresponding to seeing ≤ 1.00“ and τ0 > 3.2ms */

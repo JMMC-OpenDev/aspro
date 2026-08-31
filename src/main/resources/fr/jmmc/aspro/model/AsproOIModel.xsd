@@ -1806,7 +1806,7 @@
                 </xsd:annotation>
             </xsd:element>
 
-            <xsd:element name="magLimit" type="xsd:double" minOccurs="0">
+            <xsd:element name="magLimit" type="AtmTelValue" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
                         The magnitude limit (mag) for this Adaptive Optics system
@@ -1935,6 +1935,13 @@
                 <xsd:annotation>
                     <xsd:documentation>
                         The optional upper Moon illumination (fraction of lunar illumination) threshold (percents) to apply this rule
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="aoSetupName" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The optional (partial) name of the AO setup(s) to apply this rule
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -3366,44 +3373,50 @@
     <xsd:simpleType name="AtmosphereQuality">
         <xsd:annotation>
             <xsd:documentation>
-                Possible values for the AtmosphereQuality :
-                - "Excellent" seeing = 0.60 arcsec
-                - "Good"      seeing = 0.70 arcsec
-                - "Average"   seeing = 1.00 arcsec
-                - "Worse"     seeing = 1.15 arcsec
-                - "Bad"       seeing = 1.40 arcsec
-                - "Awful"     seeing = 1.80 arcsec
+                Possible values for the AtmosphereQuality (ESO convention):
+                - "Excellent" (T &lt; 10%, corresponding to seeing &lt; 0.60“ and τ0 &gt; 5.2ms)
+                - "Good"      (T &lt; 20%, corresponding to seeing &lt; 0.70“ and τ0 &gt; 4.4ms)
+                - "Better"    (T &lt; 30%, corresponding to seeing &lt; 0.80“ and τ0 &gt; 4.1ms)
+                - "Average"   (T &lt; 50%, corresponding to seeing &lt; 1.00“ and τ0 &gt; 3.2ms)
+                - "Worse"     (T &lt; 70%, corresponding to seeing &lt; 1.15“ and τ0 &gt; 2.2ms)
+                - "Bad"       (T &lt; 85%, corresponding to seeing &lt; 1.40“ and τ0 &gt; 1.6ms)
+                - "Awful"     (T &gt; 85%, corresponding to seeing &lt; 1.80“ and τ0 &gt; 1.0ms)
             </xsd:documentation>
         </xsd:annotation>
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="Average">
                 <xsd:annotation>
-                    <xsd:documentation>'Average' means seeing = 1.00 arcsec</xsd:documentation>
+                    <xsd:documentation>'Average' means (T &lt; 50%, corresponding to seeing &lt; 1.00“ and τ0 &gt; 3.2ms)</xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="Better">
+                <xsd:annotation>
+                    <xsd:documentation>'Better' means (T &lt; 30%, corresponding to seeing &lt; 0.80“ and τ0 &gt; 4.1ms)</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Good">
                 <xsd:annotation>
-                    <xsd:documentation>'Good' means seeing = 0.70 arcsec</xsd:documentation>
+                    <xsd:documentation>'Good' means (T &lt; 20%, corresponding to seeing &lt; 0.70“ and τ0 &gt; 4.4ms)</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Excellent">
                 <xsd:annotation>
-                    <xsd:documentation>'Excellent' means seeing = 0.60 arcsec</xsd:documentation>
+                    <xsd:documentation>'Excellent' means (T &lt; 10%, corresponding to seeing &lt; 0.60“ and τ0 &gt; 5.2ms)</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Worse">
                 <xsd:annotation>
-                    <xsd:documentation>'Worse' means seeing = 1.15 arcsec</xsd:documentation>
+                    <xsd:documentation>'Worse' means (T &lt; 70%, corresponding to seeing &lt; 1.15“ and τ0 &gt; 2.2ms)</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Bad">
                 <xsd:annotation>
-                    <xsd:documentation>'Bad' means seeing = 1.40 arcsec</xsd:documentation>
+                    <xsd:documentation>'Bad' means (T &lt; 85%, corresponding to seeing &lt; 1.40“ and τ0 &gt; 1.6ms)</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
             <xsd:enumeration value="Awful">
                 <xsd:annotation>
-                    <xsd:documentation>'Awful' means seeing = 1.80 arcsec</xsd:documentation>
+                    <xsd:documentation>'Awful' means (T &gt; 85%, corresponding to seeing &lt; 1.80“ and τ0 &gt; 1.0ms)</xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
         </xsd:restriction>

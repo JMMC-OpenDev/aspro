@@ -1993,7 +1993,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 }
 
                 // update AO :
-                changed |= om.setTargetAOSetup(targetName, (String) this.jComboBoxAOSetup.getSelectedItem());
+                boolean changedAO = om.setTargetAOSetup(targetName, (String) this.jComboBoxAOSetup.getSelectedItem());
+                if (changedAO) {
+                    // Special case to force computing observability (Moon restrictions may depend on AO setup):
+                    changed = true;
+                    changeType = ChangeType.MAIN;
+                }
 
                 // update ft mode :
                 changed |= om.setTargetFTMode(targetName, (String) this.jComboBoxFTMode.getSelectedItem());

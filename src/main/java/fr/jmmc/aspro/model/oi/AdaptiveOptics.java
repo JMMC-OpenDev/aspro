@@ -32,7 +32,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/&gt;
  *         &lt;element name="instrumentBand" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand" minOccurs="0"/&gt;
  *         &lt;element name="setup" type="{http://www.jmmc.fr/aspro-oi/0.1}AdaptiveOpticsSetup" maxOccurs="unbounded"/&gt;
- *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/&gt;
+ *         &lt;element name="magLimit" type="{http://www.jmmc.fr/aspro-oi/0.1}AtmTelValue" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -47,7 +47,7 @@ import fr.jmmc.aspro.model.OIBase;
     "band",
     "instrumentBand",
     "setups",
-    "magLimit"
+    "magLimits"
 })
 public class AdaptiveOptics
     extends OIBase
@@ -65,7 +65,8 @@ public class AdaptiveOptics
     protected SpectralBand instrumentBand;
     @XmlElement(name = "setup", required = true)
     protected List<AdaptiveOpticsSetup> setups;
-    protected Double magLimit;
+    @XmlElement(name = "magLimit")
+    protected List<AtmTelValue> magLimits;
 
     /**
      * Gets the value of the name property.
@@ -169,37 +170,55 @@ public class AdaptiveOptics
     }
 
     /**
-     * Gets the value of the magLimit property.
+     * Gets the value of the magLimits property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Double }
-     *     
-     */
-    public Double getMagLimit() {
-        return magLimit;
-    }
-
-    /**
-     * Sets the value of the magLimit property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the magLimits property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link Double }
-     *     
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getMagLimits().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link AtmTelValue }
+     * 
+     * 
      */
-    public void setMagLimit(Double value) {
-        this.magLimit = value;
+    public List<AtmTelValue> getMagLimits() {
+        if (magLimits == null) {
+            magLimits = new ArrayList<AtmTelValue>();
+        }
+        return this.magLimits;
     }
     
 //--simple--preserve
+    
+    /**
+    * @param atmQual optional atmosphere quality
+    * @return magnitude limit associated to the given atmosphere quality and telescope (or default)
+    */
+    public double getMagLimit(final AtmosphereQuality atmQual) {
+        for (AtmTelValue val : getMagLimits()) {
+            if (val.match(atmQual, null)) {
+                return val.getValue(); // first, so take care of ordering values
+            }
+        }
+        return Double.NaN;
+    }    
     
     @Override
     public String toString() {
         return "AdaptiveOptics[" + ((this.name != null) ? this.name : "undefined") 
                 + " band: " + band
                 + ((this.instrumentBand != null) ? " instrumentBand: " + instrumentBand : "")
-                + " magLimit: " + magLimit
+                + " magLimits: " + getMagLimits()
                 + " setups: " + setups
                 + "]";
     }

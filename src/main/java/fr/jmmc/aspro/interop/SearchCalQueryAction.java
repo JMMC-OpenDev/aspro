@@ -167,8 +167,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
             logger.debug("insBand: {}", insBand);
         }
 
-        // If a flux / magnitude is missing => user message
-        // and it is impossible to compute any error
+        // If a flux / magnitude is missing => use default range:
         final Double flux = target.getFlux(insBand);
 
         final double objectMag;

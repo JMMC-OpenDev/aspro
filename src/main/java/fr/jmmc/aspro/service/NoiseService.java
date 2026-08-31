@@ -406,6 +406,14 @@ public final class NoiseService implements VisNoiseService {
 
         this.telDiam = telescope.getDiameter();
 
+        // Seeing :
+        final AtmosphereQuality atmQual = observation.getWhen().getAtmosphereQuality();
+        if (atmQual != null) {
+            this.seeing = AtmosphereQualityUtils.getSeeing(atmQual);
+            this.t0 = AtmosphereQualityUtils.getCoherenceTime(atmQual);
+            this.h0 = AtmosphereQualityUtils.getTurbulenceHeight(atmQual);
+        }
+
         // AO handling
         AdaptiveOptics ao = null;
 
@@ -437,18 +445,10 @@ public final class NoiseService implements VisNoiseService {
 
         if (ao != null) {
             this.aoBand = ao.getBand();
-            this.adaptiveOpticsLimit = (ao.getMagLimit() != null) ? ao.getMagLimit().doubleValue() : Double.NaN;
+            this.adaptiveOpticsLimit = ao.getMagLimit(atmQual);
         } else {
             // by default: compute strehl ratio on V band with only 1 actuator ?
             this.aoBand = SpectralBand.V;
-        }
-
-        // Seeing :
-        final AtmosphereQuality atmQual = observation.getWhen().getAtmosphereQuality();
-        if (atmQual != null) {
-            this.seeing = AtmosphereQualityUtils.getSeeing(atmQual);
-            this.t0 = AtmosphereQualityUtils.getCoherenceTime(atmQual);
-            this.h0 = AtmosphereQualityUtils.getTurbulenceHeight(atmQual);
         }
 
         if (logger.isDebugEnabled()) {

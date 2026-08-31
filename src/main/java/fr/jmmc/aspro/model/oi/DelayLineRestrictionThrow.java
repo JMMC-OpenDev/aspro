@@ -17,7 +17,7 @@ import fr.jmmc.aspro.model.OIBase;
  *             
  * 
  * 
- *                         Maximum throw in m (optical round drip i.e. 2 times the delay line position)
+ *                         Maximum throw in m (optical round trip i.e. 2 times the delay line range)
  *                     
  * 
  * <p>Java class for DelayLineRestrictionThrow complex type.

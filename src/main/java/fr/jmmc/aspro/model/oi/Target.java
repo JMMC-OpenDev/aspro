@@ -1255,6 +1255,50 @@ public class Target
     }
 
     /**
+     * Return the flux in the given band or close bands (visible or gaia)
+     * @param band spectral band
+     * @return flux in the given band or null if undefined
+     */
+    public final Double getFluxOrRelated(final SpectralBand band) {
+        Double flux = null;
+        SpectralBand fluxBand = band;
+        // Handle missing target magnitudes:
+        if (fluxBand == SpectralBand.G) {
+            // handle special case for G band (NAOMI): use G then R then V (if no flux)
+            flux = getFlux(fluxBand);
+
+            if (flux == null) {
+                fluxBand = SpectralBand.R;
+                flux = getFlux(fluxBand);
+            }
+            if (flux == null) {
+                fluxBand = SpectralBand.V;
+                flux = getFlux(fluxBand);
+            }
+        } else if (fluxBand == SpectralBand.G_RP) {
+            // handle special case for G_rp band (GPAO): use R then G then V (if no flux)
+            flux = getFlux(fluxBand);
+
+            if (flux == null) {
+                fluxBand = SpectralBand.R;
+                flux = getFlux(fluxBand);
+            }
+            if (flux == null) {
+                fluxBand = SpectralBand.G;
+                flux = getFlux(fluxBand);
+            }
+            if (flux == null) {
+                fluxBand = SpectralBand.V;
+                flux = getFlux(fluxBand);
+            }
+        } else {
+            flux = getFlux(fluxBand);
+        }
+        logger.info("getFluxOrRelated({}) = {}", fluxBand, flux);
+        return flux;
+    }
+
+    /**
      * Return the uniform disk diameter from calibrator informations (SearchCal):
      * use first UD_<band>, then alternate diameters UD, LD, UDDK, DIA12 (in order of priority)
      * @param band instrumental band
