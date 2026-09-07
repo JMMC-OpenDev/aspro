@@ -71,7 +71,8 @@ public final class AsproGenConfig {
         /** MROI (future) */
         MROI,
         /* 1T sites */
-        SINGLE_DISH
+        SINGLE_DISH,
+        XUYI
     };
 
     /**
@@ -1258,6 +1259,73 @@ ARRAYZ  =   -2642728.201444249
         logger.info("Generated MROI position:\n" + sb.toString());
     }
 
+    private static double[] XUYIposition(final StringBuilder sb) {
+        
+        final double lonDeg = 118.464062666667;
+        logger.info("XUYI longitude (deg) : " + lonDeg);
+
+        final double latDeg = 32.73668333333334;
+        logger.info("XUYI latitude (deg) : " + latDeg);
+
+        final double alt = 178.0;
+        computeInterferometerPosition(lonDeg, latDeg, alt, sb);
+
+        logger.info("Generated XUYI position:\n" + sb.toString());
+
+        return new double[]{lonDeg, latDeg};
+    }
+    
+    private static void convertXUJIStations(final StringBuilder sb) {
+
+        sb.append("<a:interferometerSetting>\n\n");
+        sb.append("  <description>\n\n    <name>XUYI</name>\n\n");
+
+        /*  32.736786 118.464223 178 */
+        final double[] t1 = new double[]{15.0284, 13.0496}; // XY horizontal
+	    /*  32.736918 118.463593 178 */
+        final double[] t2 = new double[]{-44.0229, 27.6889}; // XY horizontal
+	    /*  32.736301 118.464372 178 */
+        final double[] t3 = new double[]{28.9947, -40.7383}; // XY horizontal
+
+        final double[] lonlat = XUYIposition(sb);
+
+        final double lat = Math.toRadians(lonlat[1]);
+
+        int n = 1;
+        double x, y, z, offset;
+
+        String station;
+        
+        for (double[] t : new double[][]{t1, t2, t3}) {
+            station = "T" + (n++);
+            sb.append("    <station>\n");
+            sb.append("      <name>").append(station).append("</name>\n");
+            sb.append("      <telescope>T</telescope>\n");
+
+            x = t[0];
+            y = t[1];
+            z = 0.0;
+
+            convertHorizToEquatorial(station, lat, 1e6 * x, 1e6 * y, 1e6 * z, sb);
+
+            // norm of baseline vector:
+            offset = Math.sqrt(x * x + y * y + z * z);
+
+            if (station.startsWith("N")) {
+                offset -= 2.5;
+            } else {
+                offset += 2.5;
+            }
+
+            sb.append("      <delayLineFixedOffset>").append((int) Math.round(10.0 * offset) / 10.0).append("</delayLineFixedOffset>\n");
+            sb.append("    </station>\n\n");
+        }
+
+        sb.append("  </description>\n\n</a:interferometerSetting>\n");
+
+        logger.info("Generated XUYI Configuration : " + sb.length() + "\n" + sb.toString());
+    }
+    
     /**
      * Convert geodetic long/lat/alt to geocentric coordinates
      *
@@ -1806,7 +1874,7 @@ ARRAYZ  =   -2642728.201444249
         final String asproTestPath = userHome + "/dev/aspro/src/test/resources/";
 
         // Active case:
-        final INTERFEROMETER selected = INTERFEROMETER.VLTI;
+        final INTERFEROMETER selected = INTERFEROMETER.XUYI;
 
         switch (selected) {
             case VLTI:
@@ -1867,6 +1935,9 @@ ARRAYZ  =   -2642728.201444249
                 break;
             case SINGLE_DISH:
                 SingleDishes();
+                break;
+            case XUYI:
+                convertXUJIStations(sb);
                 break;
 
             default:
