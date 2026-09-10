@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="26.09 beta 1"/>
-    <compilation date="07/09/2026" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="26.09"/>
+    <compilation date="10/09/2026" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -233,8 +233,9 @@
 
     <releasenotes>
         <release version="26.09">
-            <pubDate>Mon, 07 Sep 2026 12:00:00 GMT</pubDate>
+            <pubDate>Tue, 10 Sep 2026 08:00:00 GMT</pubDate>
             <prerelease version="26.09 beta 1">
+                <change type="FEATURE">Updated for VLTI period 118</change>
                 <change type="FEATURE">OIFits viewer: Improved selection / cross hairs to use sibling data (same target, instrument mode, MJD +/- 30s, (sorted) baseline) to show related data among data tables (VIS2, VIS, T3)</change>
                 <change type="FEATURE">OIFits viewer: Improved the selection tooltip to be selectable (copy/paste) and show information about the selection, followed by sibling data with (VIS2, VIS, T3) main values</change>
             </prerelease>
