@@ -32,6 +32,7 @@ import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.model.util.TargetRole;
 import fr.jmmc.aspro.model.util.TargetUtils;
 import static fr.jmmc.aspro.service.AbstractOIFitsProducer.convertWL;
+import fr.jmmc.aspro.util.StrehlUtils;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmcs.util.StatUtils;
 import fr.jmmc.jmal.Band;
@@ -1185,8 +1186,13 @@ public final class NoiseService implements VisNoiseService {
                 boolean isGPAO_VIS = false;
                 boolean isGPAO_LGS = false;
                 double distLGS = 0.0;
+                String aoName = null;
+
+                final double instrumentDit = !Double.isNaN(this.fringeTrackerMaxDit) ? Math.max(this.dit, this.fringeTrackerMaxDit) : this.dit;
+                logger.info("instrumentDit: {}", instrumentDit);
 
                 if (aoSetup != null) {
+                    aoName = aoSetup.getName();
                     band = Band.valueOf(aoBand.name());
                     nbSubPupils = aoSetup.getNumberSubPupils();
                     if (aoSetup.getNumberActuators() != null) {
@@ -1236,8 +1242,8 @@ public final class NoiseService implements VisNoiseService {
                 for (int n = 0; n < nObs; n++) {
                     final double elevation = targetPointInfos[n].getElevation();
 
-                    strehlPerChannel[n] = Band.strehl(band, (adaptiveOpticsMag + magOffset), waveLengths, telDiam,
-                            seeing, nbSubPupils, nbActuators, ao_td, t0, ao_qe, ao_ron, elevation, strehlMax);
+                    strehlPerChannel[n] = StrehlUtils.strehl(aoName, band, adaptiveOpticsMag, waveLengths, telDiam,
+                            seeing, nbSubPupils, nbActuators, ao_td, t0, ao_qe, ao_ron, h0, elevation, strehlMax, 1e3 * instrumentDit, magOffset);
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("elevation                     : {}", elevation);

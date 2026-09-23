@@ -30,7 +30,7 @@ public class StrehlChartTest {
 
     public static final double UT_DIAM = 8.0; // pupil size not mirror size
 
-    private static double ZENITH_ANGLE_DEF = 15.0;
+    private static double ZENITH_ANGLE_DEF = 0.0;
     private static double ZENITH_ANGLE = ZENITH_ANGLE_DEF;
 
     public static final int MAG_MIN = 6;
@@ -239,9 +239,17 @@ public class StrehlChartTest {
 
                         if (true) {
                             /* 1200 modes (3/4) (40*40) */
-                        nbSubPupils = 1200;
+                            nbSubPupils = 1200;
                             nbActuators = 800;
-                            strehlMax = 0.85; // 0.93 by default
+
+                            if (false) {
+                                strehlMax = 0.85; // 0.93 by default
+                            } else {
+                                // strehlMax = Band.K.getStrehlMax();
+                                // no scaling (like python code):
+                                strehlMax = 1.0;
+                            }
+                            System.out.println("GPAO_NGS_VIS: using strehlMax: " + strehlMax);
 
                             // 1kHz
                             td = 1.0; // adjusted to get high strehl ~ 0.85
@@ -262,7 +270,15 @@ public class StrehlChartTest {
                             /* 900 modes (3/4) (30*30) */
                             nbSubPupils = 704;
                             nbActuators = 500;
-                            strehlMax = 0.70; // 0.93 by default
+
+                            if (false) {
+                                strehlMax = 0.70; // 0.93 by default
+                            } else {
+                                // strehlMax = Band.K.getStrehlMax();
+                                // no scaling (like python code):
+                                strehlMax = 1.0;
+                            }
+                            System.out.println("GPAO_LGS_VIS: using strehlMax: " + strehlMax);
 
                             for (double dit : DIT_LGS) {
                                 // 500 Hz by default?
@@ -281,7 +297,7 @@ public class StrehlChartTest {
                         }
 
                         // FAKE GPAO_LGS_IR
-                        if (true) {
+                        if (false) {
                             aoBand = Band.K;
                             qe = 0.70;
                             /* 900 modes (3/4) (30*30) */
