@@ -6,9 +6,9 @@
 
 # ASPRO 2 - Strehl ratios per instrument, telescope and Adaptive Optics (AO) systems
 
-- Date: Wed Oct 08 07:35:31 GMT 2025
+- Date: Wed Sep 23 17:24:24 GMT 2026
 
-- InterferometerConfiguration: 'VLTI Period 117'
+- InterferometerConfiguration: 'VLTI Period 118'
 
 ## Instrument [GRAVITY]
 
@@ -18,6 +18,7 @@
 - Instrument ref. wavelength : 2.2 µm
 - Instrument min. wavelength : 1.96 µm
 - Instrument max. wavelength : 2.52 µm
+- DIT (ms): 100000.0 ms
 
 #### Telescope [UT]
 
@@ -29,13 +30,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 100.0
 
   ![GRAVITY [LOW-COMBINED LOW-SPLIT] UT (GPAO_NGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_LOW-COMBINED_LOW-SPLIT_UT_GPAO_NGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -46,13 +48,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 100.0
 
   ![GRAVITY [LOW-COMBINED LOW-SPLIT] UT (GPAO_LGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_LOW-COMBINED_LOW-SPLIT_UT_GPAO_LGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -63,13 +66,14 @@
 
 - AO setup: 'GPAO_NGS_IR'
 
-- nbSubPupils: 81
-- nbActuators: 60
-- td (ms):     2.0
-- ron (e-/s):  60.0
-- Q.E:         0.7
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   81
+- nbActuators:   60
+- td (ms):       2.0
+- ron (e-/s):    60.0
+- Q.E:           0.7
+- magOffset:     1.0
+- strehlMax:     0.72
+- instrumentDit: 100.0
 
   ![GRAVITY [LOW-COMBINED LOW-SPLIT] UT (GPAO_NGS_IR) Strehl ratio K vs K mag](GRAVITY_LOW-COMBINED_LOW-SPLIT_UT_GPAO_NGS_IR_Strehl_ratio_K_vs_K_mag.png)
 
@@ -80,13 +84,14 @@
 
 - AO setup: 'GPAO_LGS_IR'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.7
-- magOffset:   0.5
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.7
+- magOffset:     2.0
+- strehlMax:     1.0
+- instrumentDit: 100.0
 
   ![GRAVITY [LOW-COMBINED LOW-SPLIT] UT (GPAO_LGS_IR) Strehl ratio K vs K mag](GRAVITY_LOW-COMBINED_LOW-SPLIT_UT_GPAO_LGS_IR_Strehl_ratio_K_vs_K_mag.png)
 
@@ -101,25 +106,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 100.0
 
   ![GRAVITY [LOW-COMBINED LOW-SPLIT] AT (NAOMI_BRIGHT) Strehl ratio K vs G mag](GRAVITY_LOW-COMBINED_LOW-SPLIT_AT_NAOMI_BRIGHT_Strehl_ratio_K_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 100.0
 
   ![GRAVITY [LOW-COMBINED LOW-SPLIT] AT (NAOMI_FAINT) Strehl ratio K vs G mag](GRAVITY_LOW-COMBINED_LOW-SPLIT_AT_NAOMI_FAINT_Strehl_ratio_K_vs_G_mag.png)
 
@@ -130,6 +137,7 @@
 - Instrument ref. wavelength : 2.2 µm
 - Instrument min. wavelength : 1.96 µm
 - Instrument max. wavelength : 2.48 µm
+- DIT (ms): 100000.0 ms
 
 #### Telescope [UT]
 
@@ -141,13 +149,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 100.0
 
   ![GRAVITY [MEDIUM-COMBINED MEDIUM-SPLIT] UT (GPAO_NGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_MEDIUM-COMBINED_MEDIUM-SPLIT_UT_GPAO_NGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -158,13 +167,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 100.0
 
   ![GRAVITY [MEDIUM-COMBINED MEDIUM-SPLIT] UT (GPAO_LGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_MEDIUM-COMBINED_MEDIUM-SPLIT_UT_GPAO_LGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -175,13 +185,14 @@
 
 - AO setup: 'GPAO_NGS_IR'
 
-- nbSubPupils: 81
-- nbActuators: 60
-- td (ms):     2.0
-- ron (e-/s):  60.0
-- Q.E:         0.7
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   81
+- nbActuators:   60
+- td (ms):       2.0
+- ron (e-/s):    60.0
+- Q.E:           0.7
+- magOffset:     1.0
+- strehlMax:     0.72
+- instrumentDit: 100.0
 
   ![GRAVITY [MEDIUM-COMBINED MEDIUM-SPLIT] UT (GPAO_NGS_IR) Strehl ratio K vs K mag](GRAVITY_MEDIUM-COMBINED_MEDIUM-SPLIT_UT_GPAO_NGS_IR_Strehl_ratio_K_vs_K_mag.png)
 
@@ -192,13 +203,14 @@
 
 - AO setup: 'GPAO_LGS_IR'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.7
-- magOffset:   0.5
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.7
+- magOffset:     2.0
+- strehlMax:     1.0
+- instrumentDit: 100.0
 
   ![GRAVITY [MEDIUM-COMBINED MEDIUM-SPLIT] UT (GPAO_LGS_IR) Strehl ratio K vs K mag](GRAVITY_MEDIUM-COMBINED_MEDIUM-SPLIT_UT_GPAO_LGS_IR_Strehl_ratio_K_vs_K_mag.png)
 
@@ -213,25 +225,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 100.0
 
   ![GRAVITY [MEDIUM-COMBINED MEDIUM-SPLIT] AT (NAOMI_BRIGHT) Strehl ratio K vs G mag](GRAVITY_MEDIUM-COMBINED_MEDIUM-SPLIT_AT_NAOMI_BRIGHT_Strehl_ratio_K_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 100.0
 
   ![GRAVITY [MEDIUM-COMBINED MEDIUM-SPLIT] AT (NAOMI_FAINT) Strehl ratio K vs G mag](GRAVITY_MEDIUM-COMBINED_MEDIUM-SPLIT_AT_NAOMI_FAINT_Strehl_ratio_K_vs_G_mag.png)
 
@@ -242,6 +256,7 @@
 - Instrument ref. wavelength : 2.2 µm
 - Instrument min. wavelength : 1.96 µm
 - Instrument max. wavelength : 2.4 µm
+- DIT (ms): 100000.0 ms
 
 #### Telescope [UT]
 
@@ -253,13 +268,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 100.0
 
   ![GRAVITY [HIGH-COMBINED HIGH-SPLIT] UT (GPAO_NGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_HIGH-COMBINED_HIGH-SPLIT_UT_GPAO_NGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -270,13 +286,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 100.0
 
   ![GRAVITY [HIGH-COMBINED HIGH-SPLIT] UT (GPAO_LGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_HIGH-COMBINED_HIGH-SPLIT_UT_GPAO_LGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
 
@@ -287,13 +304,14 @@
 
 - AO setup: 'GPAO_NGS_IR'
 
-- nbSubPupils: 81
-- nbActuators: 60
-- td (ms):     2.0
-- ron (e-/s):  60.0
-- Q.E:         0.7
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   81
+- nbActuators:   60
+- td (ms):       2.0
+- ron (e-/s):    60.0
+- Q.E:           0.7
+- magOffset:     1.0
+- strehlMax:     0.72
+- instrumentDit: 100.0
 
   ![GRAVITY [HIGH-COMBINED HIGH-SPLIT] UT (GPAO_NGS_IR) Strehl ratio K vs K mag](GRAVITY_HIGH-COMBINED_HIGH-SPLIT_UT_GPAO_NGS_IR_Strehl_ratio_K_vs_K_mag.png)
 
@@ -304,13 +322,14 @@
 
 - AO setup: 'GPAO_LGS_IR'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.7
-- magOffset:   0.5
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.7
+- magOffset:     2.0
+- strehlMax:     1.0
+- instrumentDit: 100.0
 
   ![GRAVITY [HIGH-COMBINED HIGH-SPLIT] UT (GPAO_LGS_IR) Strehl ratio K vs K mag](GRAVITY_HIGH-COMBINED_HIGH-SPLIT_UT_GPAO_LGS_IR_Strehl_ratio_K_vs_K_mag.png)
 
@@ -325,37 +344,40 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 100.0
 
   ![GRAVITY [HIGH-COMBINED HIGH-SPLIT] AT (NAOMI_BRIGHT) Strehl ratio K vs G mag](GRAVITY_HIGH-COMBINED_HIGH-SPLIT_AT_NAOMI_BRIGHT_Strehl_ratio_K_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 100.0
 
   ![GRAVITY [HIGH-COMBINED HIGH-SPLIT] AT (NAOMI_FAINT) Strehl ratio K vs G mag](GRAVITY_HIGH-COMBINED_HIGH-SPLIT_AT_NAOMI_FAINT_Strehl_ratio_K_vs_G_mag.png)
 
 
-## Instrument [MATISSE_LM]
+## Instrument [GRAVITY_FT]
 
-### Instrument Modes [SI_PHOT_L_LOW]
+### Instrument Modes [LOW]
 
-- Instrument band: L
-- Instrument ref. wavelength : 3.5 µm
-- Instrument min. wavelength : 2.85 µm
-- Instrument max. wavelength : 4.19 µm
+- Instrument band: K
+- Instrument ref. wavelength : 2.2 µm
+- Instrument min. wavelength : 1.97 µm
+- Instrument max. wavelength : 2.4 µm
+- DIT (ms): 1.0 ms
 
 #### Telescope [UT]
 
@@ -367,13 +389,135 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 0.001
+
+  ![GRAVITY_FT [LOW] UT (GPAO_NGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_FT_LOW_UT_GPAO_NGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
+
+
+##### Adaptive Optics [AO_GPAO_LGS_VIS]
+
+- AO band: G_RP
+
+- AO setup: 'GPAO_LGS_VIS'
+
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 0.001
+
+  ![GRAVITY_FT [LOW] UT (GPAO_LGS_VIS) Strehl ratio K vs G_RP mag](GRAVITY_FT_LOW_UT_GPAO_LGS_VIS_Strehl_ratio_K_vs_G_RP_mag.png)
+
+
+##### Adaptive Optics [AO_GPAO_NGS_IR]
+
+- AO band: K
+
+- AO setup: 'GPAO_NGS_IR'
+
+- nbSubPupils:   81
+- nbActuators:   60
+- td (ms):       2.0
+- ron (e-/s):    60.0
+- Q.E:           0.7
+- magOffset:     1.0
+- strehlMax:     0.72
+- instrumentDit: 0.001
+
+  ![GRAVITY_FT [LOW] UT (GPAO_NGS_IR) Strehl ratio K vs K mag](GRAVITY_FT_LOW_UT_GPAO_NGS_IR_Strehl_ratio_K_vs_K_mag.png)
+
+
+##### Adaptive Optics [AO_GPAO_LGS_IR]
+
+- AO band: K
+
+- AO setup: 'GPAO_LGS_IR'
+
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.7
+- magOffset:     2.0
+- strehlMax:     1.0
+- instrumentDit: 0.001
+
+  ![GRAVITY_FT [LOW] UT (GPAO_LGS_IR) Strehl ratio K vs K mag](GRAVITY_FT_LOW_UT_GPAO_LGS_IR_Strehl_ratio_K_vs_K_mag.png)
+
+
+#### Telescope [AT]
+
+- Telescope diameter (m): 1.8
+
+##### Adaptive Optics [AO_NAOMI]
+
+- AO band: G
+
+- AO setup: 'NAOMI_BRIGHT'
+
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.001
+
+  ![GRAVITY_FT [LOW] AT (NAOMI_BRIGHT) Strehl ratio K vs G mag](GRAVITY_FT_LOW_AT_NAOMI_BRIGHT_Strehl_ratio_K_vs_G_mag.png)
+
+- AO setup: 'NAOMI_FAINT'
+
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.001
+
+  ![GRAVITY_FT [LOW] AT (NAOMI_FAINT) Strehl ratio K vs G mag](GRAVITY_FT_LOW_AT_NAOMI_FAINT_Strehl_ratio_K_vs_G_mag.png)
+
+
+## Instrument [MATISSE_LM]
+
+### Instrument Modes [SI_PHOT_L_LOW]
+
+- Instrument band: L
+- Instrument ref. wavelength : 3.5 µm
+- Instrument min. wavelength : 2.85 µm
+- Instrument max. wavelength : 4.19 µm
+- DIT (ms): 600.0 ms
+
+#### Telescope [UT]
+
+- Telescope diameter (m): 8.0
+
+##### Adaptive Optics [AO_GPAO_NGS_VIS]
+
+- AO band: G_RP
+
+- AO setup: 'GPAO_NGS_VIS'
+
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_L_LOW] UT (GPAO_NGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_LOW_UT_GPAO_NGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -384,13 +528,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_L_LOW] UT (GPAO_LGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_LOW_UT_GPAO_LGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -405,25 +550,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_L_LOW] AT (NAOMI_BRIGHT) Strehl ratio L vs G mag](MATISSE_LM_SI_PHOT_L_LOW_AT_NAOMI_BRIGHT_Strehl_ratio_L_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_L_LOW] AT (NAOMI_FAINT) Strehl ratio L vs G mag](MATISSE_LM_SI_PHOT_L_LOW_AT_NAOMI_FAINT_Strehl_ratio_L_vs_G_mag.png)
 
@@ -434,6 +581,7 @@
 - Instrument ref. wavelength : 3.5 µm
 - Instrument min. wavelength : 2.85 µm
 - Instrument max. wavelength : 4.9 µm
+- DIT (ms): 600.0 ms
 
 #### Telescope [UT]
 
@@ -445,13 +593,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_LM_LOW] UT (GPAO_NGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_LM_LOW_UT_GPAO_NGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -462,13 +611,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_LM_LOW] UT (GPAO_LGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_LM_LOW_UT_GPAO_LGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -483,25 +633,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_LM_LOW] AT (NAOMI_BRIGHT) Strehl ratio L vs G mag](MATISSE_LM_SI_PHOT_LM_LOW_AT_NAOMI_BRIGHT_Strehl_ratio_L_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_LM_LOW] AT (NAOMI_FAINT) Strehl ratio L vs G mag](MATISSE_LM_SI_PHOT_LM_LOW_AT_NAOMI_FAINT_Strehl_ratio_L_vs_G_mag.png)
 
@@ -512,6 +664,7 @@
 - Instrument ref. wavelength : 4.75 µm
 - Instrument min. wavelength : 4.48 µm
 - Instrument max. wavelength : 5.0 µm
+- DIT (ms): 600.0 ms
 
 #### Telescope [UT]
 
@@ -523,13 +676,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_M_LOW] UT (GPAO_NGS_VIS) Strehl ratio M vs G_RP mag](MATISSE_LM_SI_PHOT_M_LOW_UT_GPAO_NGS_VIS_Strehl_ratio_M_vs_G_RP_mag.png)
 
@@ -540,13 +694,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_M_LOW] UT (GPAO_LGS_VIS) Strehl ratio M vs G_RP mag](MATISSE_LM_SI_PHOT_M_LOW_UT_GPAO_LGS_VIS_Strehl_ratio_M_vs_G_RP_mag.png)
 
@@ -561,25 +716,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_M_LOW] AT (NAOMI_BRIGHT) Strehl ratio M vs G mag](MATISSE_LM_SI_PHOT_M_LOW_AT_NAOMI_BRIGHT_Strehl_ratio_M_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.6
 
   ![MATISSE_LM [SI_PHOT_M_LOW] AT (NAOMI_FAINT) Strehl ratio M vs G mag](MATISSE_LM_SI_PHOT_M_LOW_AT_NAOMI_FAINT_Strehl_ratio_M_vs_G_mag.png)
 
@@ -590,6 +747,7 @@
 - Instrument ref. wavelength : 3.5 µm
 - Instrument min. wavelength : 2.79 µm
 - Instrument max. wavelength : 4.99 µm
+- DIT (ms): 3000.0 ms
 
 #### Telescope [UT]
 
@@ -601,13 +759,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 3.0
 
   ![MATISSE_LM [SI_PHOT_LM_MEDIUM] UT (GPAO_NGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_LM_MEDIUM_UT_GPAO_NGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -618,13 +777,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 3.0
 
   ![MATISSE_LM [SI_PHOT_LM_MEDIUM] UT (GPAO_LGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_LM_MEDIUM_UT_GPAO_LGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -639,25 +799,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 3.0
 
   ![MATISSE_LM [SI_PHOT_LM_MEDIUM] AT (NAOMI_BRIGHT) Strehl ratio L vs G mag](MATISSE_LM_SI_PHOT_LM_MEDIUM_AT_NAOMI_BRIGHT_Strehl_ratio_L_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 3.0
 
   ![MATISSE_LM [SI_PHOT_LM_MEDIUM] AT (NAOMI_FAINT) Strehl ratio L vs G mag](MATISSE_LM_SI_PHOT_LM_MEDIUM_AT_NAOMI_FAINT_Strehl_ratio_L_vs_G_mag.png)
 
@@ -668,6 +830,7 @@
 - Instrument ref. wavelength : 3.5 µm
 - Instrument min. wavelength : 2.81 µm
 - Instrument max. wavelength : 4.2 µm
+- DIT (ms): 5000.0 ms
 
 #### Telescope [UT]
 
@@ -679,13 +842,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 5.0
 
   ![MATISSE_LM [SI_PHOT_L_HIGH] UT (GPAO_NGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_HIGH_UT_GPAO_NGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -696,13 +860,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 5.0
 
   ![MATISSE_LM [SI_PHOT_L_HIGH] UT (GPAO_LGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_HIGH_UT_GPAO_LGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -717,25 +882,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 5.0
 
   ![MATISSE_LM [SI_PHOT_L_HIGH] AT (NAOMI_BRIGHT) Strehl ratio L vs G mag](MATISSE_LM_SI_PHOT_L_HIGH_AT_NAOMI_BRIGHT_Strehl_ratio_L_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 5.0
 
   ![MATISSE_LM [SI_PHOT_L_HIGH] AT (NAOMI_FAINT) Strehl ratio L vs G mag](MATISSE_LM_SI_PHOT_L_HIGH_AT_NAOMI_FAINT_Strehl_ratio_L_vs_G_mag.png)
 
@@ -746,6 +913,7 @@
 - Instrument ref. wavelength : 3.9 µm
 - Instrument min. wavelength : 3.68 µm
 - Instrument max. wavelength : 4.13 µm
+- DIT (ms): 10000.0 ms
 
 #### Telescope [UT]
 
@@ -757,13 +925,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 10.0
 
   ![MATISSE_LM [SI_PHOT_L_VERY_HIGH] UT (GPAO_NGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_VERY_HIGH_UT_GPAO_NGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -774,13 +943,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 10.0
 
   ![MATISSE_LM [SI_PHOT_L_VERY_HIGH] UT (GPAO_LGS_VIS) Strehl ratio L vs G_RP mag](MATISSE_LM_SI_PHOT_L_VERY_HIGH_UT_GPAO_LGS_VIS_Strehl_ratio_L_vs_G_RP_mag.png)
 
@@ -795,25 +965,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 10.0
 
   ![MATISSE_LM [SI_PHOT_L_VERY_HIGH] AT (NAOMI_BRIGHT) Strehl ratio L vs G mag](MATISSE_LM_SI_PHOT_L_VERY_HIGH_AT_NAOMI_BRIGHT_Strehl_ratio_L_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 10.0
 
   ![MATISSE_LM [SI_PHOT_L_VERY_HIGH] AT (NAOMI_FAINT) Strehl ratio L vs G mag](MATISSE_LM_SI_PHOT_L_VERY_HIGH_AT_NAOMI_FAINT_Strehl_ratio_L_vs_G_mag.png)
 
@@ -824,6 +996,7 @@
 - Instrument ref. wavelength : 4.75 µm
 - Instrument min. wavelength : 4.57 µm
 - Instrument max. wavelength : 5.0 µm
+- DIT (ms): 10000.0 ms
 
 #### Telescope [UT]
 
@@ -835,13 +1008,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 10.0
 
   ![MATISSE_LM [SI_PHOT_M_VERY_HIGH] UT (GPAO_NGS_VIS) Strehl ratio M vs G_RP mag](MATISSE_LM_SI_PHOT_M_VERY_HIGH_UT_GPAO_NGS_VIS_Strehl_ratio_M_vs_G_RP_mag.png)
 
@@ -852,13 +1026,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 10.0
 
   ![MATISSE_LM [SI_PHOT_M_VERY_HIGH] UT (GPAO_LGS_VIS) Strehl ratio M vs G_RP mag](MATISSE_LM_SI_PHOT_M_VERY_HIGH_UT_GPAO_LGS_VIS_Strehl_ratio_M_vs_G_RP_mag.png)
 
@@ -873,25 +1048,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 10.0
 
   ![MATISSE_LM [SI_PHOT_M_VERY_HIGH] AT (NAOMI_BRIGHT) Strehl ratio M vs G mag](MATISSE_LM_SI_PHOT_M_VERY_HIGH_AT_NAOMI_BRIGHT_Strehl_ratio_M_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 10.0
 
   ![MATISSE_LM [SI_PHOT_M_VERY_HIGH] AT (NAOMI_FAINT) Strehl ratio M vs G mag](MATISSE_LM_SI_PHOT_M_VERY_HIGH_AT_NAOMI_FAINT_Strehl_ratio_M_vs_G_mag.png)
 
@@ -904,6 +1081,7 @@
 - Instrument ref. wavelength : 10.5 µm
 - Instrument min. wavelength : 7.91 µm
 - Instrument max. wavelength : 13.03 µm
+- DIT (ms): 20.0 ms
 
 #### Telescope [UT]
 
@@ -915,13 +1093,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 0.02
 
   ![MATISSE_N [HIGH_SENS_N_LOW] UT (GPAO_NGS_VIS) Strehl ratio N vs G_RP mag](MATISSE_N_HIGH_SENS_N_LOW_UT_GPAO_NGS_VIS_Strehl_ratio_N_vs_G_RP_mag.png)
 
@@ -932,13 +1111,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 0.02
 
   ![MATISSE_N [HIGH_SENS_N_LOW] UT (GPAO_LGS_VIS) Strehl ratio N vs G_RP mag](MATISSE_N_HIGH_SENS_N_LOW_UT_GPAO_LGS_VIS_Strehl_ratio_N_vs_G_RP_mag.png)
 
@@ -953,25 +1133,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.02
 
   ![MATISSE_N [HIGH_SENS_N_LOW] AT (NAOMI_BRIGHT) Strehl ratio N vs G mag](MATISSE_N_HIGH_SENS_N_LOW_AT_NAOMI_BRIGHT_Strehl_ratio_N_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.02
 
   ![MATISSE_N [HIGH_SENS_N_LOW] AT (NAOMI_FAINT) Strehl ratio N vs G mag](MATISSE_N_HIGH_SENS_N_LOW_AT_NAOMI_FAINT_Strehl_ratio_N_vs_G_mag.png)
 
@@ -982,6 +1164,7 @@
 - Instrument ref. wavelength : 10.5 µm
 - Instrument min. wavelength : 7.9 µm
 - Instrument max. wavelength : 13.0 µm
+- DIT (ms): 75.0 ms
 
 #### Telescope [UT]
 
@@ -993,13 +1176,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 0.075
 
   ![MATISSE_N [HIGH_SENS_N_HIGH] UT (GPAO_NGS_VIS) Strehl ratio N vs G_RP mag](MATISSE_N_HIGH_SENS_N_HIGH_UT_GPAO_NGS_VIS_Strehl_ratio_N_vs_G_RP_mag.png)
 
@@ -1010,13 +1194,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 0.075
 
   ![MATISSE_N [HIGH_SENS_N_HIGH] UT (GPAO_LGS_VIS) Strehl ratio N vs G_RP mag](MATISSE_N_HIGH_SENS_N_HIGH_UT_GPAO_LGS_VIS_Strehl_ratio_N_vs_G_RP_mag.png)
 
@@ -1031,25 +1216,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.075
 
   ![MATISSE_N [HIGH_SENS_N_HIGH] AT (NAOMI_BRIGHT) Strehl ratio N vs G mag](MATISSE_N_HIGH_SENS_N_HIGH_AT_NAOMI_BRIGHT_Strehl_ratio_N_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.075
 
   ![MATISSE_N [HIGH_SENS_N_HIGH] AT (NAOMI_FAINT) Strehl ratio N vs G mag](MATISSE_N_HIGH_SENS_N_HIGH_AT_NAOMI_FAINT_Strehl_ratio_N_vs_G_mag.png)
 
@@ -1062,6 +1249,7 @@
 - Instrument ref. wavelength : 1.65 µm
 - Instrument min. wavelength : 1.5 µm
 - Instrument max. wavelength : 1.79 µm
+- DIT (ms): 10.0 ms
 
 #### Telescope [UT]
 
@@ -1073,13 +1261,14 @@
 
 - AO setup: 'GPAO_NGS_VIS'
 
-- nbSubPupils: 1200
-- nbActuators: 800
-- td (ms):     1.0
-- ron (e-/s):  0.2
-- Q.E:         0.25
-- magOffset:   -1.0
-- strehlMax:   0.85
+- nbSubPupils:   1200
+- nbActuators:   800
+- td (ms):       1.0
+- ron (e-/s):    0.2
+- Q.E:           0.25
+- magOffset:     0.5
+- strehlMax:     0.9
+- instrumentDit: 0.01
 
   ![PIONIER [GRISM-H FREE-H] UT (GPAO_NGS_VIS) Strehl ratio H vs G_RP mag](PIONIER_GRISM-H_FREE-H_UT_GPAO_NGS_VIS_Strehl_ratio_H_vs_G_RP_mag.png)
 
@@ -1090,13 +1279,14 @@
 
 - AO setup: 'GPAO_LGS_VIS'
 
-- nbSubPupils: 704
-- nbActuators: 500
-- td (ms):     1.0
-- ron (e-/s):  0.4
-- Q.E:         0.25
-- magOffset:   -3.25
-- strehlMax:   0.7
+- nbSubPupils:   704
+- nbActuators:   500
+- td (ms):       1.0
+- ron (e-/s):    0.4
+- Q.E:           0.25
+- magOffset:     1.0
+- strehlMax:     1.0
+- instrumentDit: 0.01
 
   ![PIONIER [GRISM-H FREE-H] UT (GPAO_LGS_VIS) Strehl ratio H vs G_RP mag](PIONIER_GRISM-H_FREE-H_UT_GPAO_LGS_VIS_Strehl_ratio_H_vs_G_RP_mag.png)
 
@@ -1111,25 +1301,27 @@
 
 - AO setup: 'NAOMI_BRIGHT'
 
-- nbSubPupils: 16
-- nbActuators: 15
-- td (ms):     2.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   15
+- td (ms):       2.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.01
 
   ![PIONIER [GRISM-H FREE-H] AT (NAOMI_BRIGHT) Strehl ratio H vs G mag](PIONIER_GRISM-H_FREE-H_AT_NAOMI_BRIGHT_Strehl_ratio_H_vs_G_mag.png)
 
 - AO setup: 'NAOMI_FAINT'
 
-- nbSubPupils: 16
-- nbActuators: 7
-- td (ms):     5.0
-- ron (e-/s):  0.32
-- Q.E:         0.1
-- magOffset:   0.0
-- strehlMax:   0.0
+- nbSubPupils:   16
+- nbActuators:   7
+- td (ms):       5.0
+- ron (e-/s):    0.32
+- Q.E:           0.1
+- magOffset:     0.0
+- strehlMax:     0.0
+- instrumentDit: 0.01
 
   ![PIONIER [GRISM-H FREE-H] AT (NAOMI_FAINT) Strehl ratio H vs G mag](PIONIER_GRISM-H_FREE-H_AT_NAOMI_FAINT_Strehl_ratio_H_vs_G_mag.png)
 
