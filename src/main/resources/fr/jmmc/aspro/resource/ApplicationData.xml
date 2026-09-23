@@ -18,8 +18,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="26.09"/>
-    <compilation date="10/09/2026" compiler="JDK 1.8.0"/>
+    <program name="Aspro2" version="26.10 beta 1"/>
+    <compilation date="23/09/2026" compiler="JDK 1.8.0"/>
 
     <text>ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -232,6 +232,12 @@
     </menubar>
 
     <releasenotes>
+        <release version="26.10">
+            <pubDate>Wed, 23 Sep 2026 20:00:00 GMT</pubDate>
+            <prerelease version="26.10 beta 1">
+                <change type="FEATURE">Updated GPAO model for VLTI period 118</change>
+            </prerelease>
+        </release>
         <release version="26.09">
             <pubDate>Tue, 10 Sep 2026 08:00:00 GMT</pubDate>
             <prerelease version="26.09 beta 1">
