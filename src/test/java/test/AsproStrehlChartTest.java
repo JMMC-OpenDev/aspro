@@ -29,6 +29,8 @@ import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.util.StrehlUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmcs.Bootstrapper;
+import fr.jmmc.jmcs.data.preference.CommonPreferences;
+import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
@@ -73,10 +75,6 @@ import org.slf4j.LoggerFactory;
  */
 public class AsproStrehlChartTest {
 
-    static {
-        System.setProperty("sun.java2d.uiScale", "1.0");
-    }
-
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(AsproStrehlChartTest.class.getName());
 
@@ -115,6 +113,14 @@ public class AsproStrehlChartTest {
     private static AtomicInteger jobCount = new AtomicInteger();
 
     public static void main(String[] args) {
+          // Hack to reset LAF & ui scale:
+        CommonPreferences.getInstance().resetToDefaultPreferences();
+        try {
+            CommonPreferences.getInstance().setPreference(CommonPreferences.UI_SCALE, Double.valueOf(1.0));
+        } catch (PreferencesException pe) {
+            logger.error("setPreference failed", pe);
+        }
+
         // Start application without GUI:
         Bootstrapper.launchApp(new Aspro2(args), true, true, false);
 
