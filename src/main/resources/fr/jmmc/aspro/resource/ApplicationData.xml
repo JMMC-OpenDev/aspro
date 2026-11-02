@@ -66,9 +66,11 @@
         <!-- Aspro2 dependencies -->
 
         <package name="JSkyCalc"
+                 link="https://github.com/jrthorstensen/JSkyCalc"
                  description="Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
-                 link="http://www.dartmouth.edu/~physics/labs/skycalc/flyer.html"
                  license="redistribution allowed including this acknowledgment 'Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College'" />
+               <!-- http://www.dartmouth.edu/~physics/labs/skycalc/flyer.html -->
+               <!-- https://digitalcommons.dartmouth.edu/faculty_other/22 -->
 
         <!-- OIFitsExplorer dependencies -->
 
